@@ -6,3 +6,10 @@
     <link rel="stylesheet" href="{{ asset('assets/css/fullcalendar.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/fullcalendar.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.8/css/dataTables.dataTables.min.css" />
+    <style>
+        .text-right{
+            text-align: end;
+        }
+    </style>
+    @yield('css')

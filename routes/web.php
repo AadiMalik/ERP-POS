@@ -21,3 +21,11 @@ Route::get('/', function () {
 Auth::routes(['register' => false]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::group(['middleware' => ['auth']], function () {
+    Route::group(['prefix' => 'admin'], function () {
+        Route::resource('permissions', App\Http\Controllers\Admin\PermissionController::class);
+        Route::post('permissions-data', [App\Http\Controllers\Admin\PermissionController::class, 'getData'])->name('permissions-data');
+        Route::resource('roles', App\Http\Controllers\Admin\RoleController::class);
+    });
+});
