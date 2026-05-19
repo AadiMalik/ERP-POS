@@ -1,24 +1,14 @@
-<!-- ========== footer start =========== -->
-      <footer class="footer">
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-md-6 order-last order-md-first">
-              <div class="copyright text-center text-md-start">
-                <p class="text-sm">
-                  Developed by Admin
-                </p>
-              </div>
-            </div>
-            <!-- end col-->
-            <div class="col-md-6">
-              <div class="terms d-flex justify-content-center justify-content-md-end">
-                <a href="#0" class="text-sm">Term & Conditions</a>
-                <a href="#0" class="text-sm ml-15">Privacy & Policy</a>
-              </div>
-            </div>
-          </div>
-          <!-- end row -->
-        </div>
-        <!-- end container -->
-      </footer>
-      <!-- ========== footer end =========== -->
+<!-- Footer -->
+<footer class="content-footer footer bg-footer-theme">
+  <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+    <div class="mb-2 mb-md-0">
+      ©
+      <script>
+        document.write(new Date().getFullYear());
+      </script>
+      , made with ❤️ by
+      Adnan Junaid
+    </div>
+  </div>
+</footer>
+<!-- / Footer -->

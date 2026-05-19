@@ -109,7 +109,7 @@ function editRecord({
     url,
     onSuccess,
 }) {
-    $("body").on("click", buttonClass, function (e) {
+    $("body").off("click", buttonClass).on("click", buttonClass, function (e) {
         e.preventDefault();
 
         let id = $(this).data("id");
@@ -141,7 +141,9 @@ function saveRecord({
     beforeSubmit = null,
     onSuccess = null,
 }) {
-    $(formId).submit(function (e) {
+
+    $(formId).off("submit").on("submit", function (e) {
+
         e.preventDefault();
 
         if (typeof beforeSubmit === "function") {
@@ -201,7 +203,7 @@ function deleteRecord({
     tableCallback = null,
     text = "You won't be able to revert this!",
 }) {
-    $("body").on("click", buttonClass, function () {
+    $("body").off("click", buttonClass).on("click", buttonClass, function () {
 
         let id = $(this).data("id");
 
@@ -245,7 +247,7 @@ function updateStatus({
     tableCallback = null,
 }) {
 
-    $("body").on("click", buttonClass, function () {
+    $("body").off("click", buttonClass).on("click", buttonClass, function () {
 
         let id = $(this).data("id");
 
