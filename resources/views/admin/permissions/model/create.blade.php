@@ -12,13 +12,13 @@
                         <div class="col-md-12">
                             <div class="input-style-1">
                                 <label for="name">Permission Name:<span style="color:red;">*</span></label>
-                                <input type="text" class="form-control" id="name" name="name"
+                                <input type="text" id="name" name="name"
                                     placeholder="Enter Permission Name" value="" maxlength="40" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-check form-switch toggle-switch">
-                                <input class="form-check-input" type="checkbox" id="toggleSwitch2">
+                                <input class="form-check-input" type="checkbox" id="toggleSwitch2" name="is_system_only">
                                 <label class="form-check-label" for="toggleSwitch2">Is System Only</label>
                             </div>
                         </div>
