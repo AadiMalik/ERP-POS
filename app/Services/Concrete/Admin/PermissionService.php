@@ -36,8 +36,8 @@ class PermissionService
             })
             ->addColumn('action', function ($item) {
                 $action_column = '';
-                $edit_column    = "<a class='text-success mr-2' id='editPermission' href='javascript:void(0)' data-toggle='tooltip'  data-id='" . $item->id . "' data-original-title='Edit'><i title='Edit' class='lni lni-brush-alt mr-5'></i></a>";
-                $delete_column    = "<a class='text-danger mr-2'  id='deletePermission' href='javascript:void(0)' data-toggle='tooltip'  data-id='" . $item->id . "' data-original-title='delete'><i title='Delete' class='lni lni-trash-can mr-5'></i></a>";
+                $edit_column    = "<a class='btn btn-icon btn-outline-primary mr-2' id='editPermission' href='javascript:void(0)' data-toggle='tooltip'  data-id='" . $item->id . "' data-original-title='Edit'><i title='Edit' class='icon-base bx bx-edit'></i></a>";
+                $delete_column    = "<a class='btn btn-icon btn-outline-danger mr-2'  id='deletePermission' href='javascript:void(0)' data-toggle='tooltip'  data-id='" . $item->id . "' data-original-title='delete'><i title='Delete' class='icon-base bx bx-trash'></i></a>";
 
 
                 // if (isset($menu_permission) && $menu_permission['can_edit'] == 1) {
