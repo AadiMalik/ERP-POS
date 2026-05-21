@@ -24,8 +24,11 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 Route::group(['middleware' => ['auth'],['prefix' => 'admin']], function () {
     Route::group(['prefix' => 'admin'], function () {
+        //permissions
         Route::resource('permissions', App\Http\Controllers\Admin\PermissionController::class);
         Route::post('permissions-data', [App\Http\Controllers\Admin\PermissionController::class, 'getData'])->name('permissions-data');
+        //roles
         Route::resource('roles', App\Http\Controllers\Admin\RoleController::class);
+        Route::post('roles-data', [App\Http\Controllers\Admin\RoleController::class, 'getData'])->name('roles-data');
     });
 });

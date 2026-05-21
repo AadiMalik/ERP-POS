@@ -1,8 +1,10 @@
 <?php
 
+use App\Enums\RoleNames;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 
 function generateUuid()
 {
@@ -11,7 +13,105 @@ function generateUuid()
 
 function getRoleName()
 {
-    return Auth::user()->roles[0]->name;
+    return Auth::user()?->getRoleNames()->first();
+}
+
+function applyRoleScope(
+    Builder $query,
+    array $allowed_roles = [],
+    string $business_column = 'business_id',
+    string $branch_column = 'branch_id'
+) {
+
+    $user = Auth::user();
+    $role = getRoleName();
+    if ($role == RoleNames::SUPERADMIN) {
+        return $query; // no filters applied
+    }
+    /*
+        |--------------------------------------------------------------------------
+        | Role Validation
+        |--------------------------------------------------------------------------
+        */
+
+    if (!empty($allowed_roles) && !in_array($role, $allowed_roles)) {
+
+        abort(403, 'Unauthorized access.');
+    }
+
+    /*
+        |--------------------------------------------------------------------------
+        | Business Level Roles
+        |--------------------------------------------------------------------------
+        */
+
+    $business_roles = [
+        RoleNames::BUSINESSADMIN,
+        RoleNames::GENERALMANAGER,
+        RoleNames::FINANCEMANAGER,
+        RoleNames::HRMANAGER,
+        RoleNames::REPORTINGANALYST,
+        RoleNames::MARKITINGMANAGER,
+        RoleNames::INVENTORYMANAGER,
+        RoleNames::PURCHASEMANAGER,
+    ];
+
+    /*
+        |--------------------------------------------------------------------------
+        | Branch Level Roles
+        |--------------------------------------------------------------------------
+        */
+
+    $branch_roles = [
+        RoleNames::BRANCHADMIN,
+        RoleNames::POSMANAGER,
+        RoleNames::ORDERTAKER,
+        RoleNames::STAFF,
+    ];
+
+    /*
+        |--------------------------------------------------------------------------
+        | Mixed Roles
+        |--------------------------------------------------------------------------
+        */
+
+    $mixed_roles = [
+        RoleNames::SALEMANAGER,
+        RoleNames::ACCOUNTANT,
+        RoleNames::OPERATIONMANAGER,
+    ];
+
+    /*
+        |--------------------------------------------------------------------------
+        | Apply Filters
+        |--------------------------------------------------------------------------
+        */
+
+    // Business Level Access
+    if (in_array($role, $business_roles)) {
+
+        $query->where($business_column, $user->business_id);
+    }
+
+    // Branch Level Access
+    elseif (in_array($role, $branch_roles)) {
+
+        $query->where($business_column, $user->business_id)
+            ->where($branch_column, $user->branch_id);
+    }
+
+    // Mixed Access
+    elseif (in_array($role, $mixed_roles)) {
+
+        $query->where($business_column, $user->business_id);
+
+        if (!empty($user->branch_id)) {
+
+            $query->where($branch_column, $user->branch_id);
+        }
+    }
+
+    return $query;
 }
 
 function numberToWord($num = '')

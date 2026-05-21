@@ -10,7 +10,7 @@
                     <input type="hidden" name="id" id="id">
                     <div class="row">
                         <div class="col-md-12">
-                            <label for="name" class="form-label">Permission Name:<span style="color:red;">*</span></label>
+                            <label for="name" class="form-label">Permission Name<span style="color:red;">*</span>:</label>
                             <input type="text" id="name" name="name" class="form-control"
                                 placeholder="Enter Permission Name" value="" maxlength="40" required>
                         </div>

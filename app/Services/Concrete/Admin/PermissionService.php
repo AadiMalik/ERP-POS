@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Yajra\DataTables\DataTables;
 use App\Enums\CUDOperations;
+use App\Enums\RoleNames;
 use Spatie\Permission\Models\Permission;
 
 class PermissionService
@@ -78,5 +79,15 @@ class PermissionService
     public function delete($id)
     {
         return $this->model_permission->delete($id);
+    }
+
+    // get all
+    public function getAll()
+    {
+        $permissions = $this->model_permission->all();
+        if (getRoleName() == RoleNames::BUSINESSADMIN) {
+            $permissions = $permissions->where('is_system_only', 0);
+        }
+        return $permissions;
     }
 }
