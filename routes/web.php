@@ -30,5 +30,6 @@ Route::group(['middleware' => ['auth'],['prefix' => 'admin']], function () {
         //roles
         Route::resource('roles', App\Http\Controllers\Admin\RoleController::class);
         Route::post('roles-data', [App\Http\Controllers\Admin\RoleController::class, 'getData'])->name('roles-data');
+        Route::post('roles-reset', [App\Http\Controllers\Admin\RoleController::class, 'reset'])->name('roles-reset');
     });
 });

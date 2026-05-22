@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use App\Enums\RoleNames;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Str;
 
 class RoleService
 {
@@ -58,7 +60,7 @@ class RoleService
             'phone_num',
             'created_at'
         ];
-        $with = [];
+        $with = ['permissions'];
 
 
         $allow_roles = [
@@ -71,6 +73,29 @@ class RoleService
             ->orderBy('created_at', $orderBy);
         $datatable = applyRoleScope($datatable, $allow_roles);
         $data = DataTables::of($datatable)
+            ->addColumn('permissions', function ($item) {
+
+                if ($item->permissions->isEmpty()) {
+                    return '-';
+                }
+
+                $badges = '';
+
+                foreach ($item->permissions as $permission) {
+
+                    $badges .= '
+                    <span class="badge bg-label-primary me-1 mb-1">
+                        ' . $permission->name . '
+                    </span>
+                ';
+                }
+
+                return $badges;
+            })
+            ->editColumn('description', function ($item) {
+
+                return Str::limit($item->description, 50, '...');
+            })
             ->addColumn('action', function ($item) {
                 $action_column = '';
                 $edit_column    = "<a class='btn btn-icon btn-outline-primary mr-2' href='" . route('roles.edit', $item->id) . "' data-toggle='tooltip' data-original-title='Edit'><i title='Edit' class='icon-base bx bx-edit'></i></a>";
@@ -87,7 +112,7 @@ class RoleService
 
                 return $action_column;
             })
-            ->rawColumns(['action'])
+            ->rawColumns(['permissions','description', 'action'])
             ->make(true);
         return $data;
     }
@@ -96,102 +121,128 @@ class RoleService
     {
         return $this->model_role->find($id);
     }
+    public function save($obj)
+    {
+        if (isset($obj['id']) && $obj['id'] > 0) {
+            $this->model_role->update($obj, $obj['id']);
+            $saved_obj = $this->model_role->find($obj['id']);
+        } else {
+            $saved_obj = $this->model_role->create($obj);
+        }
 
-    public function resetBusinessRoles($businessId)
+        if (!$saved_obj)
+            return false;
+
+        return $saved_obj;
+    }
+    public function resetBusinessRoles()
     {
         try {
+            if (getRoleName() == RoleNames::SUPERADMIN) {
 
-            $roles = [
+                $business_id = null;
+                $roles = [
+                    [
+                        'name' => RoleNames::SUPERADMIN,
+                        'description' => 'Full access to all businesses.',
+                    ],
+                    [
+                        'name' => RoleNames::BUSINESSADMIN,
+                        'description' => 'Full access to all business operations and all branch data including employees, inventory, finance, sales, purchases, reports, and settings.',
+                    ],
+                ];
+            } else {
 
-                [
-                    'name' => RoleNames::BUSINESSADMIN,
-                    'description' => 'Full access to all business operations and all branch data including employees, inventory, finance, sales, purchases, reports, and settings.',
-                ],
+                $business_id = Auth::user()->business_id;
+                $roles = [
 
-                [
-                    'name' => RoleNames::BRANCHADMIN,
-                    'description' => 'Can manage only assigned branch data including staff, sales, inventory, and branch operations.',
-                ],
+                    [
+                        'name' => RoleNames::BRANCHADMIN,
+                        'description' => 'Can manage only assigned branch data including staff, sales, inventory, and branch operations.',
+                    ],
 
-                [
-                    'name' => RoleNames::GENERALMANAGER,
-                    'description' => 'Can monitor and manage complete business performance and data of all branches.',
-                ],
+                    [
+                        'name' => RoleNames::GENERALMANAGER,
+                        'description' => 'Can monitor and manage complete business performance and data of all branches.',
+                    ],
 
-                [
-                    'name' => RoleNames::OPERATIONMANAGER,
-                    'description' => 'Can manage operational activities and monitor operations across the entire business.',
-                ],
+                    [
+                        'name' => RoleNames::OPERATIONMANAGER,
+                        'description' => 'Can manage operational activities and monitor operations across the entire business.',
+                    ],
 
-                [
-                    'name' => RoleNames::INVENTORYMANAGER,
-                    'description' => 'Can manage inventory, warehouses, stock transfers, and product availability for the complete business and all branches.',
-                ],
+                    [
+                        'name' => RoleNames::INVENTORYMANAGER,
+                        'description' => 'Can manage inventory, warehouses, stock transfers, and product availability for the complete business and all branches.',
+                    ],
 
-                [
-                    'name' => RoleNames::FINANCEMANAGER,
-                    'description' => 'Can access and manage complete business financial records, expenses, payments, and accounting data of all branches.',
-                ],
+                    [
+                        'name' => RoleNames::FINANCEMANAGER,
+                        'description' => 'Can access and manage complete business financial records, expenses, payments, and accounting data of all branches.',
+                    ],
 
-                [
-                    'name' => RoleNames::SALEMANAGER,
-                    'description' => 'Can monitor sales performance, customer orders, and sales reports for assigned branch or complete business based on access rights.',
-                ],
+                    [
+                        'name' => RoleNames::SALEMANAGER,
+                        'description' => 'Can monitor sales performance, customer orders, and sales reports for assigned branch or complete business based on access rights.',
+                    ],
 
-                [
-                    'name' => RoleNames::PURCHASEMANAGER,
-                    'description' => 'Can manage suppliers, purchases, purchase orders, and procurement data for the complete business and all branches.',
-                ],
+                    [
+                        'name' => RoleNames::PURCHASEMANAGER,
+                        'description' => 'Can manage suppliers, purchases, purchase orders, and procurement data for the complete business and all branches.',
+                    ],
 
-                [
-                    'name' => RoleNames::MARKITINGMANAGER,
-                    'description' => 'Can manage marketing campaigns, promotions, and customer engagement data for the complete business.',
-                ],
+                    [
+                        'name' => RoleNames::MARKITINGMANAGER,
+                        'description' => 'Can manage marketing campaigns, promotions, and customer engagement data for the complete business.',
+                    ],
 
-                [
-                    'name' => RoleNames::ACCOUNTANT,
-                    'description' => 'Can manage accounts, vouchers, invoices, and transaction records for assigned branch or complete business based on access rights.',
-                ],
+                    [
+                        'name' => RoleNames::ACCOUNTANT,
+                        'description' => 'Can manage accounts, vouchers, invoices, and transaction records for assigned branch or complete business based on access rights.',
+                    ],
 
-                [
-                    'name' => RoleNames::HRMANAGER,
-                    'description' => 'Can manage employees, attendance, payroll, leaves, and HR operations for the complete business.',
-                ],
+                    [
+                        'name' => RoleNames::HRMANAGER,
+                        'description' => 'Can manage employees, attendance, payroll, leaves, and HR operations for the complete business.',
+                    ],
 
-                [
-                    'name' => RoleNames::REPORTINGANALYST,
-                    'description' => 'Can view analytics, dashboards, KPIs, and reports of the complete business without modification rights.',
-                ],
+                    [
+                        'name' => RoleNames::REPORTINGANALYST,
+                        'description' => 'Can view analytics, dashboards, KPIs, and reports of the complete business without modification rights.',
+                    ],
 
-                [
-                    'name' => RoleNames::STAFF,
-                    'description' => 'Limited access to assigned branch operations and daily tasks only.',
-                ],
+                    [
+                        'name' => RoleNames::STAFF,
+                        'description' => 'Limited access to assigned branch operations and daily tasks only.',
+                    ],
 
-                [
-                    'name' => RoleNames::POSMANAGER,
-                    'description' => 'Can manage POS counters, billing operations, and POS reports for assigned branch only.',
-                ],
+                    [
+                        'name' => RoleNames::POSMANAGER,
+                        'description' => 'Can manage POS counters, billing operations, and POS reports for assigned branch only.',
+                    ],
 
-                [
-                    'name' => RoleNames::ORDERTAKER,
-                    'description' => 'Can create customer orders and process POS billing for assigned branch only.',
-                ],
+                    [
+                        'name' => RoleNames::ORDERTAKER,
+                        'description' => 'Can create customer orders and process POS billing for assigned branch only.',
+                    ],
 
-            ];
+                ];
+            }
 
             foreach ($roles as $role) {
 
                 $this->model_role->getModel()::updateOrCreate(
 
                     [
-                        'business_id' => $businessId,
+                        'business_id' => $business_id,
                         'name' => $role['name'],
                     ],
 
                     [
                         'description' => $role['description'],
                         'guard_name' => 'web',
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ]
                 );
             }

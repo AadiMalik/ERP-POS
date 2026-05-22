@@ -70,38 +70,52 @@
         <div data-i18n="Analytics">Dashboard</div>
       </a>
     </li>
-
-    <!-- Layouts -->
+    <!-- Business -->
     <li class="menu-item">
       <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon tf-icons bx bx-layout"></i>
-        <div data-i18n="Layouts">Layouts</div>
+        <i class="menu-icon tf-icons bx bx-store"></i>
+        <div data-i18n="Business Manage.">Business Manage.</div>
       </a>
 
       <ul class="menu-sub">
         <li class="menu-item">
-          <a href="layouts-without-menu.html" class="menu-link">
-            <div data-i18n="Without menu">Without menu</div>
+          <a href="{{url('/admin/business')}}" class="menu-link">
+            <div data-i18n="Business">Business</div>
           </a>
         </li>
         <li class="menu-item">
-          <a href="layouts-without-navbar.html" class="menu-link">
-            <div data-i18n="Without navbar">Without navbar</div>
+          <a href="{{url('/admin/branch')}}" class="menu-link">
+            <div data-i18n="Branch">Branch</div>
           </a>
         </li>
         <li class="menu-item">
-          <a href="layouts-container.html" class="menu-link">
-            <div data-i18n="Container">Container</div>
+          <a href="{{url('/admin/business-setting')}}" class="menu-link">
+            <div data-i18n="Business Setting">Business Setting</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <!-- Users -->
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-group"></i>
+        <div data-i18n="Users Management">Users Management</div>
+      </a>
+
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="{{url('/admin/permissions')}}" class="menu-link">
+            <div data-i18n="Permissions">Permissions</div>
           </a>
         </li>
         <li class="menu-item">
-          <a href="layouts-fluid.html" class="menu-link">
-            <div data-i18n="Fluid">Fluid</div>
+          <a href="{{url('/admin/roles')}}" class="menu-link">
+            <div data-i18n="Roles">Roles</div>
           </a>
         </li>
         <li class="menu-item">
-          <a href="layouts-blank.html" class="menu-link">
-            <div data-i18n="Blank">Blank</div>
+          <a href="{{url('/admin/users')}}" class="menu-link">
+            <div data-i18n="Admin Users">Admin Users</div>
           </a>
         </li>
       </ul>
