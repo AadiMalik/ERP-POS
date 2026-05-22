@@ -88,7 +88,7 @@ use App\Enums\RoleNames;
                 successMessage(response.Message || "Roles reset successfully!");
 
                 if (typeof role_table !== "undefined") {
-                    initDataTablerole_table;
+                    initDataTablerole_table();
                 }
 
                 btn.prop("disabled", false);

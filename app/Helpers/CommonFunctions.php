@@ -114,6 +114,131 @@ function applyRoleScope(
     return $query;
 }
 
+function checkPackageLimit($type, $count = null, $returnMessage = false)
+{
+    try {
+
+        $user = Auth::user();
+
+        // Super Admin Skip
+        if (getRoleName() == RoleNames::SUPERADMIN) {
+
+            return $returnMessage
+                ? [
+                    'status' => true,
+                    'message' => 'Super admin bypass'
+                ]
+                : true;
+        }
+
+        if (!$user->business) {
+
+            return $returnMessage
+                ? [
+                    'status' => false,
+                    'message' => 'Business not found'
+                ]
+                : false;
+        }
+
+        $business = $user->business;
+
+        if (!$business->package) {
+
+            return $returnMessage
+                ? [
+                    'status' => false,
+                    'message' => 'Package not found'
+                ]
+                : false;
+        }
+
+        $package = $business->package;
+
+        // Allowed fields
+        $allowedLimits = [
+
+            'branches'          => 'max_branches',
+            'users'             => 'max_users',
+            'customers'         => 'max_customers',
+            'warehouses'        => 'max_warehouses',
+            'categories'        => 'max_categories',
+            'products'          => 'max_products',
+            'suppliers'         => 'max_suppliers',
+            'purchase_orders'   => 'max_purchase_orders',
+            'purchases'         => 'max_purchases',
+            'sales'             => 'max_sales',
+            'transfers'         => 'max_transfers',
+            'expenses'          => 'max_expenses',
+            'vouchers'          => 'max_vouchers',
+
+        ];
+
+        // Invalid type
+        if (!isset($allowedLimits[$type])) {
+
+            return $returnMessage
+                ? [
+                    'status' => false,
+                    'message' => 'Invalid limit type'
+                ]
+                : false;
+        }
+
+        $column = $allowedLimits[$type];
+
+        $limit = (int) $package->$column;
+
+        // Unlimited
+        if ($limit == -1) {
+
+            return $returnMessage
+                ? [
+                    'status' => true,
+                    'message' => 'Unlimited access'
+                ]
+                : true;
+        }
+
+        // If count not passed
+        if ($count === null) {
+
+            return $returnMessage
+                ? [
+                    'status' => false,
+                    'message' => 'Count is required'
+                ]
+                : false;
+        }
+
+        // Limit exceeded
+        if ($count >= $limit) {
+
+            return $returnMessage
+                ? [
+                    'status' => false,
+                    'message' => ucfirst($type) . ' limit exceeded'
+                ]
+                : false;
+        }
+
+        return $returnMessage
+            ? [
+                'status' => true,
+                'message' => ucfirst($type) . ' limit available'
+            ]
+            : true;
+    } catch (\Exception $e) {
+
+        return $returnMessage
+            ? [
+                'status' => false,
+                'message' => $e->getMessage()
+            ]
+            : false;
+    }
+}
+
 function numberToWord($num = '')
 {
     $num    = (string) ((int) $num);
