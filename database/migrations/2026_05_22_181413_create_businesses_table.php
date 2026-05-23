@@ -28,10 +28,6 @@ return new class extends Migration
             $table->string('state')->nullable();
             $table->string('country')->nullable();
             $table->string('logo')->nullable();
-            $table->string('ntn')->nullable();
-            $table->string('timezone')->nullable();
-            $table->string('currency')->nullable();
-            $table->string('currency_symbol')->nullable();
             $table->enum('status', ['active', 'suspended', 'expired'])->default('active');
             $table->text('description')->nullable();
             $table->timestamp('subscription_start')->nullable();

@@ -5,34 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BusinessSubscription extends Model
+class SmsSetting extends Model
 {
     use HasFactory;
     public $timestamps = false;
     protected $fillable = [
         'business_id',
-        'package_id',
-        'start_at',
-        'end_at',
-        'subtotal',
-        'discount',
-        'discount_type',
-        'discount_amount',
-        'tax',
-        'tax_amount',
-        'total',
-        'payment_status',
-        'payment_method',
-        'payment_reference',
-        'status',
+        'enable_sms',
+        'provider',
+        'api_key',
+        'sender_id',
+        'username',
+        'password',
+        'send_invoice_sms',
+        'send_due_sms',
 
-        'is_deleted',
         'createdby_id',
         'updatedby_id',
-        'deletedby_id',
+
         'date_created',
         'date_updated',
-        'date_deleted',
     ];
 
     public function business()
@@ -40,13 +32,14 @@ class BusinessSubscription extends Model
         return $this->belongsTo(Business::class, 'business_id');
     }
 
-    public function package()
+    public function updatedby()
     {
-        return $this->belongsTo(Package::class, 'package_id');
+        return $this->belongsTo(User::class, 'updatedby_id');
     }
 
     public function createdby()
     {
         return $this->belongsTo(User::class, 'createdby_id');
     }
+
 }

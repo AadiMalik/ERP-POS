@@ -5,44 +5,28 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BusinessSubscription extends Model
+class CustomerSetting extends Model
 {
     use HasFactory;
     public $timestamps = false;
     protected $fillable = [
         'business_id',
-        'package_id',
-        'start_at',
-        'end_at',
-        'subtotal',
-        'discount',
-        'discount_type',
-        'discount_amount',
-        'tax',
-        'tax_amount',
-        'total',
-        'payment_status',
-        'payment_method',
-        'payment_reference',
-        'status',
-
-        'is_deleted',
+        'customer_code_prefix',
+        'enable_credit_limit',
+        'credit_limit',
+        'loyalty_program',
+        'loyalty_every_amount',
+        'loyalty_point_rate',
+        'loyalty_min_order_amount',
         'createdby_id',
         'updatedby_id',
-        'deletedby_id',
         'date_created',
         'date_updated',
-        'date_deleted',
     ];
 
     public function business()
     {
         return $this->belongsTo(Business::class, 'business_id');
-    }
-
-    public function package()
-    {
-        return $this->belongsTo(Package::class, 'package_id');
     }
 
     public function createdby()

@@ -8,4 +8,35 @@ use Illuminate\Database\Eloquent\Model;
 class Branch extends Model
 {
     use HasFactory;
+    public $timestamps = false;
+    protected $fillable = [
+        'business_id',
+        'code',
+        'name',
+        'email',
+        'phone',
+        'address',
+        'city',
+        'state',
+        'country',
+        'logo',
+        'status',
+        'is_deleted',
+        'createdby_id',
+        'updatedby_id',
+        'deletedby_id',
+        'date_created',
+        'date_updated',
+        'date_deleted',
+    ];
+
+    public function business()
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
+    public function createdby()
+    {
+        return $this->belongsTo(User::class, 'createdby_id');
+    }
 }
