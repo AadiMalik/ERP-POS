@@ -8,9 +8,10 @@
 
         <!-- Basic Bootstrap Table -->
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between">
+                <h5></h5>
                 <a href="javascript:void(0)" id="createNewPermission" class="btn rounded-pill btn-primary">
-                    <i class="icon-base bx bx-plus mr-5"></i>Add New</a>
+                    <i class="icon-base fa fa-plus mr-5"></i>Add New</a>
             </div>
             <div class="table-responsive text-nowrap p-4">
                 <table id="permission_table" class="table display" style="width:100%">
