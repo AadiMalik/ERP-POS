@@ -49,66 +49,52 @@ class BusinessController extends Controller
     {
         $rules = [
             'name' => 'required|unique:businesses,name,' . $request->id,
-            'price' => 'required|numeric',
-            'duration_days' => 'required|integer',
-            'duration_type' => 'required|string',
+            'owner_name' => 'required',
+            'owner_email' => 'required|email',
         ];
 
-        $validate = Validator::make($request->all(), $rules);
+        if (empty($request->id)) {
+            $rules['package_id'] = 'required|exists:packages,id';
+        }
 
+        $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
             return redirect()->back()->withErrors($validate)->withInput();
         }
 
-        try {
 
-            $obj = $request->only([
-                'id',
-                'name',
-                'description',
-                'price',
-                'order',
-                'duration_type',
-                'duration_days',
-                'max_branches',
-                'max_users',
-                'max_customers',
-                'max_warehouses',
-                'max_categories',
-                'max_products',
-                'max_suppliers',
-                'max_purchase_orders',
-                'max_purchases',
-                'max_sales',
-                'max_transfers',
-                'max_expenses',
-                'max_vouchers'
-            ]);
+        $obj = $request->only([
+            'id',
+            'package_id',
+            'owner_name',
+            'owner_email',
+            'owner_phone',
+            'code',
+            'name',
+            'email',
+            'phone',
+            'address',
+            'city',
+            'state',
+            'country',
+            'description',
+        ]);
+        if ($request->hasFile('logo')) {
 
-            $obj['status'] = $request->status ?? 1;
+            $file = $request->file('logo');
 
-            $obj['is_pos_enabled'] =
-                $request->is_pos_enabled ? 1 : 0;
+            $fileName = time() . '_' . $file->getClientOriginalName();
 
-            $obj['is_inventory_enabled'] =
-                $request->is_inventory_enabled ? 1 : 0;
+            $file->move(public_path('uploads/business'), $fileName);
 
-            $obj['is_accounting_enabled'] =
-                $request->is_accounting_enabled ? 1 : 0;
-
-            $obj['is_hrm_enabled'] =
-                $request->is_hrm_enabled ? 1 : 0;
-
-            $obj['is_payroll_enabled'] =
-                $request->is_payroll_enabled ? 1 : 0;
-
-            $package = $this->business_service->save($obj);
-
-            return redirect('admin/business')->with('success', Message::SAVE);
-        } catch (Exception $e) {
-
-            return redirect()->back()->withInput()->with('error', $e->getMessage());
+            $obj['logo'] = $fileName;
         }
+        $obj['status'] = $request->status ?? 'active';
+
+        // create/update business
+        $business = $this->business_service->save($obj);
+        return redirect('admin/business')
+            ->with('success', empty($request->id) ? Message::SAVE : Message::UPDATE);
     }
 
     public function destroy($id)

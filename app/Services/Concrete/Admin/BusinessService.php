@@ -3,6 +3,8 @@
 namespace App\Services\Concrete\Admin;
 
 use App\Models\Business;
+use App\Models\BusinessSubscription;
+use App\Models\Package;
 use App\Repository\Repository;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
@@ -10,11 +12,14 @@ use Yajra\DataTables\DataTables;
 class BusinessService
 {
     protected $model_business;
+    protected $model_package;
+    protected $model_business_subscription;
 
     public function __construct()
     {
-        $this->model_business =
-            new Repository(new Business());
+        $this->model_business = new Repository(new Business());
+        $this->model_package = new Repository(new Package());
+        $this->model_business_subscription = new Repository(new BusinessSubscription());
     }
 
     public function getData($data)
@@ -74,7 +79,43 @@ class BusinessService
         }
         $obj['createdby_id'] = Auth::user()->id;
         $obj['date_created'] = now();
-        return $this->model_business->create($obj);
+        $saved_obj = $this->model_business->create($obj);
+        $this->subscription($obj['package_id'], $saved_obj);
+        return $saved_obj;
+    }
+
+    private function subscription($package_id, $business)
+    {
+        $package = $this->model_package->getModel()::findOrFail($package_id);
+
+        $startDate = now();
+        $endDate = now()->addDays($package->duration_days);
+
+        $business->update([
+            'package_id' => $package->id,
+            'subscription_start' => $startDate,
+            'subscription_end' => $endDate,
+        ]);
+
+        $package_subscription = $this->model_business_subscription->getModel()::create([
+            'business_id' => $business->id,
+            'package_id' => $package->id,
+            'start_at' => $startDate,
+            'end_at' => $endDate,
+            'subtotal' => $package->price,
+            'discount' => 0,
+            'discount_amount' => 0,
+            'tax' => 0,
+            'tax_amount' => 0,
+            'total' => $package->price,
+            'payment_method' =>'cash',
+            'payment_status' => 'paid',
+            'payment_reference'=>'admin created',
+            'status' => 'active',
+            'createdby_id' => Auth::id(),
+            'date_created' => now(),
+        ]);
+        return $package_subscription;
     }
 
     public function edit($id)
