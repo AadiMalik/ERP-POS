@@ -29,7 +29,11 @@ class PackageController extends Controller
 
     public function getData(Request $request)
     {
-        return $this->package_service->getData($request->all());
+        try {
+            return $this->package_service->getData($request->all());
+        } catch (Exception $e) {
+            return redirect()->back()->with('error',$e->getMessage());
+        }
     }
     public function create()
     {
@@ -55,7 +59,7 @@ class PackageController extends Controller
                             $request->duration_type
                         )->where('is_deleted', 0);
                     })
-                    ->ignore($request->id)
+                    ->ignore($request->package_id, 'package_id')
             ],
             'price' => 'required|numeric',
             'duration_days' => 'required|integer',
@@ -71,7 +75,7 @@ class PackageController extends Controller
         try {
 
             $obj = $request->only([
-                'id',
+                'package_id',
                 'name',
                 'description',
                 'price',

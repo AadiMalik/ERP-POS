@@ -1,6 +1,8 @@
 <?php
 
 use App\Enums\RoleNames;
+use App\Models\Branch;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -114,7 +116,7 @@ function applyRoleScope(
     return $query;
 }
 
-function checkPackageLimit($type, $count = null, $returnMessage = false)
+function checkPackageLimit($type)
 {
     try {
 
@@ -122,44 +124,43 @@ function checkPackageLimit($type, $count = null, $returnMessage = false)
 
         // Super Admin Skip
         if (getRoleName() == RoleNames::SUPERADMIN) {
-
-            return $returnMessage
-                ? [
-                    'status' => true,
-                    'message' => 'Super admin bypass'
-                ]
-                : true;
+            return [
+                'status' => true,
+                'message' => 'Super admin bypass'
+            ];
         }
 
         if (!$user->business) {
 
-            return $returnMessage
-                ? [
-                    'status' => false,
-                    'message' => 'Business not found'
-                ]
-                : false;
+            return [
+                'status' => false,
+                'message' => 'Business not found'
+            ];
         }
 
         $business = $user->business;
 
         if (!$business->package) {
 
-            return $returnMessage
-                ? [
-                    'status' => false,
-                    'message' => 'Package not found'
-                ]
-                : false;
+            return [
+                'status' => false,
+                'message' => 'Package not found'
+            ];
         }
 
         $package = $business->package;
 
         // Allowed fields
-        $allowedLimits = [
+        $limits = [
 
-            'branches'          => 'max_branches',
-            'users'             => 'max_users',
+            'branches'          => [
+                'column' => 'max_branches',
+                'count' => Branch::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            ],
+            'users'             => [
+                'column' => 'max_users',
+                'count' => User::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            ],
             'customers'         => 'max_customers',
             'warehouses'        => 'max_warehouses',
             'categories'        => 'max_categories',
@@ -175,67 +176,42 @@ function checkPackageLimit($type, $count = null, $returnMessage = false)
         ];
 
         // Invalid type
-        if (!isset($allowedLimits[$type])) {
+        if (!isset($limits[$type])) {
 
-            return $returnMessage
-                ? [
-                    'status' => false,
-                    'message' => 'Invalid limit type'
-                ]
-                : false;
+            return [
+                'status' => false,
+                'message' => 'Invalid limit type'
+            ];
         }
 
-        $column = $allowedLimits[$type];
-
-        $limit = (int) $package->$column;
+        $limit = (int) $package->{$limits[$type]['column']};
+        $count = $limits[$type]['count'];
 
         // Unlimited
         if ($limit == -1) {
-
-            return $returnMessage
-                ? [
-                    'status' => true,
-                    'message' => 'Unlimited access'
-                ]
-                : true;
-        }
-
-        // If count not passed
-        if ($count === null) {
-
-            return $returnMessage
-                ? [
-                    'status' => false,
-                    'message' => 'Count is required'
-                ]
-                : false;
-        }
-
-        // Limit exceeded
-        if ($count >= $limit) {
-
-            return $returnMessage
-                ? [
-                    'status' => false,
-                    'message' => ucfirst($type) . ' limit exceeded'
-                ]
-                : false;
-        }
-
-        return $returnMessage
-            ? [
+            return [
                 'status' => true,
-                'message' => ucfirst($type) . ' limit available'
-            ]
-            : true;
-    } catch (\Exception $e) {
+                'message' => 'Unlimited access'
+            ];
+        }
 
-        return $returnMessage
-            ? [
+        if ($count >= $limit) {
+            return [
                 'status' => false,
-                'message' => $e->getMessage()
-            ]
-            : false;
+                'message' => ucfirst($type) . ' limit exceeded'
+            ];
+        }
+
+        return [
+            'status' => true,
+            'message' => ucfirst($type) . ' limit available'
+        ];
+    } catch (Exception $e) {
+
+        return [
+            'status' => false,
+            'message' => $e->getMessage()
+        ];
     }
 }
 

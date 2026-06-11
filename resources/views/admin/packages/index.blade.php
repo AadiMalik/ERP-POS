@@ -35,6 +35,13 @@
 @endsection
 
 @section('js')
+    @if (session('error'))
+        <script>
+            errorMessage(
+                "{{ session('error') }}"
+            );
+        </script>
+    @endif
     @include('admin.partials.datatable', [
         'columns' => "
                             {data:'name',name:'name'},

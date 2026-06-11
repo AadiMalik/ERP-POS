@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('email_settings', function (Blueprint $table) {
             $table->id();
-            $table->integer('business_id')->nullable();
+            $table->string('business_id')->nullable();
             $table->boolean('enable_email_notifications')->default(false);
             $table->enum('mail_mailer',['smtp', 'mailgun','sendmail'])->default('smtp');
             $table->string('mail_host')->nullable();

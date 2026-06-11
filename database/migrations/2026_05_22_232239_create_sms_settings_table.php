@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('sms_settings', function (Blueprint $table) {
             $table->id();
-            $table->integer('business_id')->nullable();
+            $table->string('business_id')->nullable();
             $table->boolean('enable_sms')->default(false);
             $table->enum('provider', ['twilio','jazz','brandsms','msg91'])->default('twilio');
             $table->text('api_key')->nullable();

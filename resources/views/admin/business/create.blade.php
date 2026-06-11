@@ -13,7 +13,7 @@
                 <form action="{{ url('admin/business') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
-                    <input type="hidden" name="id" value="{{ isset($business)? $business->id : '' }}">
+                    <input type="hidden" name="business_id" value="{{ isset($business)? $business->business_id : '' }}">
 
                     <div class="row g-4">
                         <!-- Left Column - Form Fields -->
@@ -27,15 +27,15 @@
                                     <label class="fw-semibold mb-2">
                                         Select Package <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select" name="package_id" id="packageSelect" required>
+                                    <select class="form-select" name="package_id" id="packageSelect" {{ !isset($business) ? 'required' : '' }}>
                                         <option value="">-- Select Package --</option>
                                         @foreach ($packages as $item)
-                                            <option value="{{ $item->id }}" data-name="{{ $item->name }}"
+                                            <option value="{{ $item->package_id }}" data-name="{{ $item->name }}"
                                                 data-price="{{ $item->price }}"
                                                 data-duration_type="{{ $item->duration_type }}"
                                                 data-duration_days="{{ $item->duration_days }}"
                                                 data-description="{{ $item->description }}"
-                                                {{ old('package_id', $business->package_id ?? '') == $item->id ? 'selected' : '' }}>
+                                                {{ old('package_id', $business->package_id ?? '') == $item->package_id ? 'selected' : '' }}>
                                                 {{ $item->name }}
                                             </option>
                                         @endforeach
@@ -141,7 +141,7 @@
                                             </label>
                                             <div class="border rounded-3 p-3 text-center bg-light">
                                                 <img id="logoPreview"
-                                                    src="{{ isset($business) && $business->logo ? asset($business->logo) : asset('assets/img/no-image.png') }}"
+                                                    src="{{ isset($business) && $business->logo ? asset('uploads/business/'.$business->logo) : asset('assets/img/no-image.png') }}"
                                                     class="img-fluid rounded-3 mb-2"
                                                     style="max-height: 120px; object-fit: contain;">
                                                 @if (isset($business) && $business->logo)

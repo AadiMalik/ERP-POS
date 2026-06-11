@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('whatsapp_settings', function (Blueprint $table) {
             $table->id();
-            $table->integer('business_id')->nullable();
+            $table->string('business_id')->nullable();
             $table->boolean('enable_whatsapp')->default(false);
             $table->enum('provider', ['meta','twilio','ultramsg','greenapi'])->default('meta');
             $table->text('api_key')->nullable();

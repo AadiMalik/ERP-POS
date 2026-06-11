@@ -10,8 +10,12 @@ class Package extends Model
     use HasFactory;
 
     public $timestamps = false;
+    protected $primaryKey = 'package_id';
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = [
+        'package_id',
         'name',
         'description',
         'price',

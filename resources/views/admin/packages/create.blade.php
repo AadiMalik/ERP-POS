@@ -24,7 +24,7 @@
 
                     @csrf
 
-                    <input type="hidden" name="id" value="{{ $package->id ?? '' }}">
+                    <input type="hidden" name="package_id" value="{{ $package->package_id ?? '' }}">
 
                     <div class="row">
 

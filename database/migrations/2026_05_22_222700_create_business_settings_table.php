@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('business_settings', function (Blueprint $table) {
             $table->id();
-            $table->integer('business_id')->nullable();
+            $table->string('business_id')->nullable();
             $table->string('timezone')->default('Asia/Karachi');
             $table->enum('tax_type',['inclusive', 'exclusive'])->default('exclusive');
             $table->decimal('tax_rate', 8, 2)->default(18.00);

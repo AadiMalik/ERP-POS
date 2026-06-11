@@ -14,9 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('business_subscriptions', function (Blueprint $table) {
-            $table->id();
-            $table->integer('business_id')->nullable();
-            $table->integer('package_id')->nullable();
+            $table->uuid('business_subscription_id')->primary();
+            $table->string('business_id')->nullable();
+            $table->string('package_id')->nullable();
             $table->timestamp('start_at')->nullable();
             $table->timestamp('end_at')->nullable();
             $table->decimal('subtotal', 18, 2)->default(0.00);

@@ -38,4 +38,8 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
     //business
     Route::resource('business', App\Http\Controllers\Admin\BusinessController::class);
     Route::post('business-data', [App\Http\Controllers\Admin\BusinessController::class, 'getData'])->name('business-data');
+
+    //branch
+    Route::resource('branch', App\Http\Controllers\Admin\BranchController::class);
+    Route::post('branch-data', [App\Http\Controllers\Admin\BranchController::class, 'getData'])->name('branch-data');
 });

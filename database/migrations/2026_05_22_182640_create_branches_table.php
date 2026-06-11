@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::create('branches', function (Blueprint $table) {
-            $table->id();
-            $table->integer('business_id')->nullable();
+            $table->uuid('branch_id')->primary();
+            $table->string('business_id')->nullable();
             $table->string('code')->nullable();
             $table->string('name')->nullable();
             $table->string('email')->nullable();

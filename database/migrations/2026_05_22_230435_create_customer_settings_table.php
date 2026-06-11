@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('customer_settings', function (Blueprint $table) {
             $table->id();
-            $table->integer('business_id')->nullable();
+            $table->string('business_id')->nullable();
             $table->string('customer_code_prefix')->default('CUS-');
             $table->boolean('enable_credit_limit')->default(false);
             $table->decimal('credit_limit', 18, 2)->default(5000.00);

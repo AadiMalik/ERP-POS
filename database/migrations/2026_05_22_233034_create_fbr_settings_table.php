@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('fbr_settings', function (Blueprint $table) {
             $table->id();
-            $table->integer('business_id')->nullable();
+            $table->string('business_id')->nullable();
             $table->boolean('enable_fbr')->default(false);
             $table->enum('fbr_environment', ['sandbox', 'production'])->default('sandbox');
             $table->string('fbr_pos_id')->nullable();

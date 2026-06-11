@@ -9,7 +9,11 @@ class Business extends Model
 {
     use HasFactory;
     public $timestamps = false;
+    protected $primaryKey = 'business_id';
+    protected $keyType = 'string';
+    public $incrementing = false;
     protected $fillable = [
+        'business_id',
         'package_id',
         'owner_name',
         'owner_email',

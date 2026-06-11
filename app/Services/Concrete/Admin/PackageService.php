@@ -38,20 +38,20 @@ class PackageService
 
                 return "
                     <a class='btn btn-icon btn-outline-primary mr-2'
-                     href='" . route('packages.edit', $item->id) . "'
+                     href='" . route('packages.edit', $item->package_id) . "'
                     id='editPackage'>
                     <i class='fa fa-pencil'></i>
                     </a>
 
                     <a class='btn btn-icon btn-outline-warning mr-2'
                      id='viewPackage' href='javascript:void(0)'
-                    data-id='{$item->id}'>
+                    data-id='{$item->package_id}'>
                     <i class='fa fa-eye'></i>
                     </a>
 
                     <a class='btn btn-icon btn-outline-danger'
                     id='deletePackage' href='javascript:void(0)'
-                    data-id='{$item->id}'>
+                    data-id='{$item->package_id}'>
                     <i class='fa fa-trash'></i>
                     </a>
                 ";
@@ -62,29 +62,30 @@ class PackageService
 
     public function save($obj)
     {
-        if (!empty($obj['id'])) {
+        if (!empty($obj['package_id'])) {
             $obj['updatedby_id'] = Auth::user()->id;
             $obj['date_updated'] = now();
-            $this->model_package->update($obj, $obj['id']);
-            return $this->model_package->find($obj['id']);
+            $this->model_package->update($obj, $obj['package_id']);
+            return $this->model_package->find($obj['package_id']);
         }
+        $obj['package_id'] = generateUuid();
         $obj['createdby_id'] = Auth::user()->id;
         $obj['date_created'] = now();
         return $this->model_package->create($obj);
     }
 
-    public function getById($id)
+    public function getById($package_id)
     {
-        return $this->model_package->find($id);
+        return $this->model_package->find($package_id);
     }
 
-    public function delete($id)
+    public function delete($package_id)
     {
         return $this->model_package->update([
             'is_deleted' => 1,
             'deletedby_id' => Auth::id(),
             'date_deleted' => now()
-        ], $id);
+        ], $package_id);
     }
 
     public function getAll()

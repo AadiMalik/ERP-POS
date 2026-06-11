@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('supplier_settings', function (Blueprint $table) {
             $table->id();
-            $table->integer('business_id')->nullable();
+            $table->string('business_id')->nullable();
             $table->string('supplier_code_prefix')->default('SUP-');
             $table->boolean('enable_credit_limit')->default(true);
             $table->decimal('credit_limit', 18, 2)->default(5000.00);

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('inventory_settings', function (Blueprint $table) {
             $table->id();
-            $table->integer('business_id')->nullable();
+            $table->string('business_id')->nullable();
             $table->boolean('stock_tracking')->default(true);
             $table->boolean('negative_stock')->default(false);
             $table->boolean('low_stock_alert')->default(true);

@@ -45,13 +45,25 @@
         {data:'phone',name:'phone'},
         {data:'subscription_start',name:'subscription_start'},
         {data:'subscription_end',name:'subscription_end'},
+        {data:'remaining_days',name:'remaining_days', searchable:false, orderable:false},
         {data:'status',name:'status'},
-        {data:'action',name:'action',sortable:false}
-        ",
+        {data:'action',name:'action',sortable:false}",
         'route' => 'business-data',
         'buttons' => false,
         'pageLength' => 10,
         'class' => 'business_table',
         'variable' => 'business_table',
     ])
+
+    <script>
+        //delete
+        deleteRecord({
+            buttonClass: "#deleteBusiness",
+            url: url_local + "/admin/business",
+
+            tableCallback: function() {
+                initDataTablebusiness_table();
+            }
+        });
+    </script>
 @endsection

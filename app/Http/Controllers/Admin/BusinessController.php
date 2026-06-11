@@ -9,7 +9,9 @@ use App\Services\Concrete\Admin\PackageService;
 use App\Traits\ResponseAPI;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class BusinessController extends Controller
 {
@@ -38,23 +40,25 @@ class BusinessController extends Controller
         $packages = $this->package_service->getAll();
         return view('admin.business.create', compact('packages'));
     }
-    public function edit($id)
-    {
-        $business = $this->business_service->edit($id);
-        $packages = $this->package_service->getAll();
-        return view('admin.business.create', compact('business', 'packages'));
-    }
+
 
     public function store(Request $request)
     {
         $rules = [
-            'name' => 'required|unique:businesses,name,' . $request->id,
+            'name' => [
+                'required',
+                Rule::unique('businesses', 'name')
+                    ->where(function ($query) use ($request) {
+                        return $query->where('is_deleted', 0);
+                    })
+                    ->ignore($request->business_id, 'business_id')
+            ],
             'owner_name' => 'required',
             'owner_email' => 'required|email',
         ];
 
-        if (empty($request->id)) {
-            $rules['package_id'] = 'required|exists:packages,id';
+        if (empty($request->business_id)) {
+            $rules['package_id'] = 'required|exists:packages,package_id';
         }
 
         $validate = Validator::make($request->all(), $rules);
@@ -64,7 +68,7 @@ class BusinessController extends Controller
 
 
         $obj = $request->only([
-            'id',
+            'business_id',
             'package_id',
             'owner_name',
             'owner_email',
@@ -85,7 +89,13 @@ class BusinessController extends Controller
 
             $fileName = time() . '_' . $file->getClientOriginalName();
 
-            $file->move(public_path('uploads/business'), $fileName);
+            $path = public_path('uploads/business');
+
+            if (!File::exists($path)) {
+                File::makeDirectory($path, 0755, true);
+            }
+
+            $file->move($path, $fileName);
 
             $obj['logo'] = $fileName;
         }
@@ -94,7 +104,13 @@ class BusinessController extends Controller
         // create/update business
         $business = $this->business_service->save($obj);
         return redirect('admin/business')
-            ->with('success', empty($request->id) ? Message::SAVE : Message::UPDATE);
+            ->with('success', empty($request->business_id) ? Message::SAVE : Message::UPDATE);
+    }
+    public function edit($business_id)
+    {
+        $business = $this->business_service->getById($business_id);
+        $packages = $this->package_service->getAll();
+        return view('admin.business.create', compact('business', 'packages'));
     }
 
     public function destroy($id)

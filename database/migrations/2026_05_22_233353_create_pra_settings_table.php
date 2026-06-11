@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('pra_settings', function (Blueprint $table) {
             $table->id();
-            $table->integer('business_id')->nullable();
+            $table->string('business_id')->nullable();
             $table->boolean('enable_pra')->default(false);
             $table->string('pra_code_prefix')->default('PRA-');
             $table->string('pra_registration_no')->nullable();

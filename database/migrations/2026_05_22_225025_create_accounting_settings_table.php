@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('accounting_settings', function (Blueprint $table) {
             $table->id();
-            $table->integer('business_id')->nullable();
+            $table->string('business_id')->nullable();
             $table->boolean('enable_accounting')->default(true);
             $table->integer('default_cash_account_id')->nullable();
             $table->integer('default_bank_account_id')->nullable();

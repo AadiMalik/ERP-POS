@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('pos_settings', function (Blueprint $table) {
             $table->id();
-            $table->integer('business_id')->nullable();
+            $table->string('business_id')->nullable();
             $table->string('invoice_prefix')->default('INV-01012026-01');
             $table->integer('invoice_start')->default(1);
             $table->text('invoice_footer')->nullable();
