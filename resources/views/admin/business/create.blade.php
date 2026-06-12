@@ -141,7 +141,7 @@
                                             </label>
                                             <div class="border rounded-3 p-3 text-center bg-light">
                                                 <img id="logoPreview"
-                                                    src="{{ isset($business) && $business->logo ? asset('uploads/business/'.$business->logo) : asset('assets/img/no-image.png') }}"
+                                                    src="{{ isset($business) && $business->logo ? asset('public/uploads/business/'.$business->logo) : asset('public/assets/img/no-image.png') }}"
                                                     class="img-fluid rounded-3 mb-2"
                                                     style="max-height: 120px; object-fit: contain;">
                                                 @if (isset($business) && $business->logo)

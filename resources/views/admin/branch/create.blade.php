@@ -115,7 +115,7 @@
                                             </label>
                                             <div class="border rounded-3 p-3 text-center bg-light">
                                                 <img id="logoPreview"
-                                                    src="{{ isset($branch) && $branch->logo ? asset('uploads/branch/' . $branch->logo) : asset('assets/img/no-image.png') }}"
+                                                    src="{{ isset($branch) && $branch->logo ? asset('public/uploads/branch/' . $branch->logo) : asset('public/assets/img/no-image.png') }}"
                                                     class="img-fluid rounded-3 mb-2"
                                                     style="max-height: 120px; object-fit: contain;">
                                                 @if (isset($branch) && $branch->logo)
