@@ -250,10 +250,12 @@ function updateStatus({
     $("body").off("click", buttonClass).on("click", buttonClass, function () {
 
         let id = $(this).data("id");
-
         ajaxRequest({
             url: `${url}/${id}`,
-            method: "GET",
+            method: "POST",
+            data: {
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
         })
             .then((response) => {
 

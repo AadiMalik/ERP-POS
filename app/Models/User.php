@@ -22,6 +22,17 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'status',
+        'business_id',
+        'branch_id',
+        'last_login_at',
+        'is_deleted',
+        'createdby_id',
+        'updatedby_id',
+        'deletedby_id',
+        'date_created',
+        'date_updated',
+        'date_deleted'
     ];
 
     /**
@@ -42,4 +53,19 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function business()
+    {
+        return $this->belongsTo(Business::class,'business_id');
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class,'branch_id');
+    }
+
+    public function createdby()
+    {
+        return $this->belongsTo(User::class,'createdby_id');
+    }
 }

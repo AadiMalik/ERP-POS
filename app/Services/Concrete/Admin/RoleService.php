@@ -7,9 +7,9 @@ use App\Repository\Repository;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use App\Enums\RoleNames;
+use App\Models\Role;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-use Spatie\Permission\Models\Role;
 use Illuminate\Support\Str;
 
 class RoleService
@@ -19,7 +19,7 @@ class RoleService
     public function __construct()
     {
         // set the model
-        $this->model_role = new Repository(new Role);
+        $this->model_role = new Repository(new Role());
     }
 
     public function getData($obj)
@@ -134,6 +134,13 @@ class RoleService
             return false;
 
         return $saved_obj;
+    }
+
+    public function getAll(){
+        if(getRoleName() != RoleNames::SUPERADMIN){
+            return $this->model_role->getModel()::with('business')->where('business_id', Auth::user()->business_id)->get();
+        }
+        return $this->model_role->getModel()::with('business')->get();
     }
     public function resetBusinessRoles()
     {

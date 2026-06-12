@@ -42,4 +42,10 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
     //branch
     Route::resource('branch', App\Http\Controllers\Admin\BranchController::class);
     Route::post('branch-data', [App\Http\Controllers\Admin\BranchController::class, 'getData'])->name('branch-data');
+
+    //users
+    Route::resource('users', App\Http\Controllers\Admin\UserController::class);
+    Route::post('users-data', [App\Http\Controllers\Admin\UserController::class, 'getData'])->name('users-data');
+    Route::post('users/change-status/{id}', [App\Http\Controllers\Admin\UserController::class, 'status'])->name('users-status');
+    Route::post('users/change-password', [App\Http\Controllers\Admin\UserController::class, 'changePassword'])->name('users-password');
 });
