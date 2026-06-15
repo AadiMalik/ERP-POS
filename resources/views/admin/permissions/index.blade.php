@@ -34,7 +34,7 @@
     <!-- ========== table components end ========== -->
 @endsection
 @section('js')
-    <script src="{{ asset('assets/js/admin/permission.js') }}"></script>
+    <script src="{{ asset('public/assets/js/admin/permission.js') }}"></script>
     @include('admin.partials.datatable', [
         'columns' => "
                                                         {data: 'name' , name: 'name'},

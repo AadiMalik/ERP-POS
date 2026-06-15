@@ -45,7 +45,10 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
 
     //users
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
-    Route::post('users-data', [App\Http\Controllers\Admin\UserController::class, 'getData'])->name('users-data');
-    Route::post('users/change-status/{id}', [App\Http\Controllers\Admin\UserController::class, 'status'])->name('users-status');
-    Route::post('users/change-password', [App\Http\Controllers\Admin\UserController::class, 'changePassword'])->name('users-password');
+    Route::group(['prefix' => 'users'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\UserController::class, 'getData'])->name('users-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\UserController::class, 'status']);
+        Route::get('change-password/{id}', [App\Http\Controllers\Admin\UserController::class, 'changePassword']);
+        Route::post('change-password', [App\Http\Controllers\Admin\UserController::class, 'updatePassword']);
+    });
 });

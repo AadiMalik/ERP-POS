@@ -70,7 +70,7 @@ class UserService
                 </a>
 
                 <a class='btn btn-icon btn-outline-warning'
-                    href='" . route('users-password', $item->id) . "'>
+                    href='" . url('admin/users/change-password') . "/". $item->id."'>
                     <i class='fa fa-key'></i>
                 </a>
 

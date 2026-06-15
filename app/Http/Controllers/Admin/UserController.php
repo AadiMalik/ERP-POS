@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
 use App\Http\Controllers\Controller;
+use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\RoleService;
 use App\Services\Concrete\Admin\UserService;
 use App\Traits\ResponseAPI;
@@ -18,11 +19,16 @@ class UserController extends Controller
 
     protected $user_service;
     protected $role_service;
+    protected $business_service;
 
-    public function __construct(UserService $user_service, RoleService $role_service)
-    {
+    public function __construct(
+        UserService $user_service,
+        RoleService $role_service,
+        BusinessService $business_service
+    ) {
         $this->user_service = $user_service;
         $this->role_service = $role_service;
+        $this->business_service = $business_service;
     }
 
     public function index()
@@ -38,7 +44,8 @@ class UserController extends Controller
     public function create()
     {
         $roles = $this->role_service->getAll();
-        return view('admin.users.create', compact('roles'));
+        $business = $this->business_service->getAll();
+        return view('admin.users.create', compact('roles','business'));
     }
 
 

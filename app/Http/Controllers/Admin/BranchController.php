@@ -119,4 +119,22 @@ class BranchController extends Controller
             );
         }
     }
+
+    public function byBusiness($business_id)
+    {
+        try {
+
+            $this->branch_service->delete($branch_id);
+
+            return $this->success(
+                Message::DELETE,
+                []
+            );
+        } catch (Exception $e) {
+
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
 }

@@ -44,7 +44,7 @@
             {data:'status',name:'status'},
             {data:'last_login_at',name:'last_login_at'},
             {data:'action',name:'action',sortable:false}",
-        'route' => 'users-data',
+        'route' => 'users/data',
         'buttons' => false,
         'pageLength' => 10,
         'class' => 'users_table',

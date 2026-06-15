@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
 use App\Http\Controllers\Controller;
+use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\PermissionService;
 use App\Services\Concrete\Admin\RoleService;
 use App\Traits\ResponseAPI;
@@ -18,10 +19,15 @@ class RoleController extends Controller
     use ResponseAPI;
     protected $role_service;
     protected $permission_service;
-    public function __construct(RoleService  $role_service, PermissionService $permission_service)
-    {
+    protected $business_service;
+    public function __construct(
+        RoleService  $role_service,
+        PermissionService $permission_service,
+        BusinessService $business_service
+    ) {
         $this->role_service = $role_service;
         $this->permission_service = $permission_service;
+        $this->business_service = $business_service;
     }
     public function index()
     {
@@ -36,7 +42,8 @@ class RoleController extends Controller
     public function create()
     {
         $permissions = $this->permission_service->getAll();
-        return view('admin.roles.create', compact('permissions'));
+        $business = $this->business_service->getAll();
+        return view('admin.roles.create', compact('permissions','business'));
     }
 
     public function store(Request $request)
