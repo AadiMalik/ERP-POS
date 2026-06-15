@@ -3,6 +3,7 @@
 use App\Enums\RoleNames;
 use App\Models\Branch;
 use App\Models\User;
+use App\Models\Warehouse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -162,7 +163,10 @@ function checkPackageLimit($type)
                 'count' => User::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
             ],
             'customers'         => 'max_customers',
-            'warehouses'        => 'max_warehouses',
+            'warehouses'        => [
+                'column' => 'max_warehouses',
+                'count' => Warehouse::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            ],
             'categories'        => 'max_categories',
             'products'          => 'max_products',
             'suppliers'         => 'max_suppliers',

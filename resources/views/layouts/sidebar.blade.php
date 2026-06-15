@@ -47,7 +47,7 @@
                     </g>
                 </svg>
             </span>
-            <span class="app-brand-text demo menu-text fw-bolder ms-2">Sneat</span>
+            <span class="app-brand-text demo menu-text fw-bolder ms-2">{{env('APP_NAME')}}</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -116,6 +116,32 @@
                 <li class="menu-item">
                     <a href="{{ url('/admin/users') }}" class="menu-link">
                         <div data-i18n="Admin Users">Admin Users</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Inventory -->
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons fa fa-box"></i>
+                <div data-i18n="Inventory">Inventory</div>
+            </a>
+
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ url('/admin/warehouse') }}" class="menu-link">
+                        <div data-i18n="Warehouse">Warehouse</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/category') }}" class="menu-link">
+                        <div data-i18n="Categories">Categories</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/sub-category') }}" class="menu-link">
+                        <div data-i18n="Sub Categories">Sub Categories</div>
                     </a>
                 </li>
             </ul>

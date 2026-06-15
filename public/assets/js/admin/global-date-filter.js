@@ -98,16 +98,16 @@ function calculateDateRange(type) {
             break;
 
         case 'this_financial_year':
-
-            filterStartDate = '{{ date("Y") }}-07-01';
-            filterEndDate = '{{ date("Y")+1 }}-06-30';
+            
+            filterStartDate = CURRENT_YEAR + '-07-01';
+            filterEndDate = (CURRENT_YEAR + 1) + '-06-30';
 
             break;
 
         case 'previous_financial_year':
 
-            filterStartDate = '{{ date("Y")-1 }}-07-01';
-            filterEndDate = '{{ date("Y") }}-06-30';
+            filterStartDate = (CURRENT_YEAR - 1) + '-07-01';
+            filterEndDate = CURRENT_YEAR + '-06-30';
 
             break;
 

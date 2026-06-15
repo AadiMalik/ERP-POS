@@ -53,7 +53,7 @@ class UserController extends Controller
     {
         $roles = $this->role_service->getAll();
         $business = $this->business_service->getAll();
-        $branches = $this->branch_service->getAll();
+        $branches = $this->branch_service->getAllActive();
         return view('admin.users.create', compact('roles', 'business', 'branches'));
     }
 
@@ -119,7 +119,7 @@ class UserController extends Controller
         $user = $this->user_service->getById($id);
         $roles = $this->role_service->getAll();
         $business = $this->business_service->getAll();
-        $branches = $this->business_service->getAll();
+        $branches = $this->business_service->getAllActive();
         return view('admin.users.create', compact('user', 'roles','business', 'branches'));
     }
     public function changePassword($id)

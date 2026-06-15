@@ -49,6 +49,7 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
     Route::resource('branch', App\Http\Controllers\Admin\BranchController::class);
     Route::group(['prefix' => 'branch'], function () {
         Route::post('data', [App\Http\Controllers\Admin\BranchController::class, 'getData'])->name('branch-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\BranchController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\BranchController::class, 'byBusiness'])->name('branch-by-business');
     });
     //users
@@ -58,5 +59,15 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\UserController::class, 'status']);
         Route::get('change-password/{id}', [App\Http\Controllers\Admin\UserController::class, 'changePassword']);
         Route::post('change-password', [App\Http\Controllers\Admin\UserController::class, 'updatePassword']);
+    });
+
+    ////////////////////// Inventory ///////////////////////////
+    //warehouse
+    Route::resource('warehouse', App\Http\Controllers\Admin\WarehouseController::class);
+    Route::group(['prefix' => 'warehouse'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\WarehouseController::class, 'getData'])->name('warehouse-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\WarehouseController::class, 'status']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\WarehouseController::class, 'byBusiness'])->name('warehouse-by-business');
+        Route::get('by-branch/{branch_id}', [App\Http\Controllers\Admin\WarehouseController::class, 'byBranch'])->name('warehouse-by-branch');
     });
 });

@@ -7,6 +7,7 @@ use App\Enums\RoleNames;
 use App\Models\Branch;
 use App\Models\Package;
 use App\Repository\Repository;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
@@ -33,11 +34,12 @@ class BranchService
         if (isset($obj['business_id']) && $obj['business_id'] != 0 && $obj['business_id'] != "") {
             $wh[] = ['business_id', $obj['business_id']];
         }
-        if (isset($obj['start_date']) && $obj['start_date'] != 0 && $obj['start_date'] != "") {
-            $wh[] = ['date_created', '>=', $obj['start_date']];
+        if (!empty($obj['start_date'])) {
+            $wh[] = ['date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
         }
-        if (isset($obj['end_date']) && $obj['end_date'] != 0 && $obj['end_date'] != "") {
-            $wh[] = ['date_created', '<=', $obj['end_date']];
+
+        if (!empty($obj['end_date'])) {
+            $wh[] = ['date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
         }
         $with = ['business'];
         $allow_roles = [
@@ -50,19 +52,18 @@ class BranchService
         $datatable = applyRoleScope($datatable, $allow_roles);
         return DataTables::of($datatable)
             ->addColumn('status', function ($item) {
-                if ($item->status == 'active') {
-                    return '
-                    <span class="badge bg-label-success me-1 mb-1">
-                        Active
-                    </span>
-                ';
-                } else {
-                    return '
-                    <span class="badge bg-label-danger me-1 mb-1">
-                        Inactive
-                    </span>
-                ';
-                }
+
+                $checked = $item->status == 'active' ? 'checked' : '';
+
+                return '
+                <div class="form-check form-switch mb-0">
+                    <input
+                        class="form-check-input statusBranch"
+                        type="checkbox"
+                        data-id="' . $item->branch_id . '"
+                        ' . $checked . '>
+                </div>
+            ';
             })
             ->addColumn('action', function ($item) {
 
@@ -113,6 +114,14 @@ class BranchService
     {
         return $this->model_branch->find($branch_id);
     }
+    public function status($branch_id)
+    {
+        return $this->model_branch->update([
+            'status' => ($this->model_branch->find($branch_id)->status == 'active' ? 'inactive' : 'active'),
+            'updatedby_id' => Auth::id(),
+            'date_updated' => now()
+        ], $branch_id);
+    }
 
     public function delete($branch_id)
     {
@@ -127,6 +136,15 @@ class BranchService
     {
         return $this->model_branch->getModel()::with('business')
             ->where('business_id', Auth::user()->business_id)
+            ->where('is_deleted', 0)
+            ->get();
+    }
+    public function getAllActive()
+    {
+        return $this->model_branch->getModel()::with('business')
+            ->where('business_id', Auth::user()->business_id)
+            ->where('status', 'active')
+            ->where('is_deleted', 0)
             ->get();
     }
 

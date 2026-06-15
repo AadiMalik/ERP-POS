@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use App\Enums\RoleNames;
 use App\Models\Role;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -35,11 +36,11 @@ class RoleService
             $wh[] = ['business_id', $obj['business_id']];
         }
 
-        if (isset($obj['start_date']) && $obj['start_date'] != 0 && $obj['start_date'] != "") {
-            $wh[] = ['created_at', '>=', $obj['start_date']];
+        if (!empty($obj['start_date'])) {
+            $wh[] = ['date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
         }
-        if (isset($obj['end_date']) && $obj['end_date'] != 0 && $obj['end_date'] != "") {
-            $wh[] = ['created_at', '<=', $obj['end_date']];
+        if (!empty($obj['end_date'])) {
+            $wh[] = ['date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
         }
         $with = ['permissions'];
 

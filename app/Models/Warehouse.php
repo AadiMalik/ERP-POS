@@ -5,42 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Package extends Model
+class Warehouse extends Model
 {
     use HasFactory;
-
     public $timestamps = false;
-    protected $primaryKey = 'package_id';
+    protected $primaryKey = 'warehouse_id';
     protected $keyType = 'string';
     public $incrementing = false;
 
     protected $fillable = [
-        'package_id',
+        'warehouse_id',
         'name',
-        'description',
-        'price',
-        'order',
-        'duration_type',
-        'duration_days',
+        'code',
+        'phone',
+        'address',
+        'business_id',
+        'branch_id',
         'status',
-        'max_branches',
-        'max_users',
-        'max_customers',
-        'max_warehouses',
-        'max_categories',
-        'max_products',
-        'max_suppliers',
-        'max_purchase_orders',
-        'max_purchases',
-        'max_sales',
-        'max_transfers',
-        'max_expenses',
-        'max_vouchers',
-        'is_pos_enabled',
-        'is_inventory_enabled',
-        'is_accounting_enabled',
-        'is_hrm_enabled',
-        'is_payroll_enabled',
         'is_deleted',
         'createdby_id',
         'updatedby_id',
@@ -50,10 +31,21 @@ class Package extends Model
         'date_deleted',
     ];
 
+    public function business()
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
     public function createdby()
     {
         return $this->belongsTo(User::class, 'createdby_id');
     }
+
     public function updatedby()
     {
         return $this->belongsTo(User::class, 'updatedby_id');

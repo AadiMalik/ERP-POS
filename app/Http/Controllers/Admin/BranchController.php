@@ -103,6 +103,21 @@ class BranchController extends Controller
         return view('admin.branch.create', compact('branch', 'business'));
     }
 
+    public function status($branch_id)
+    {
+        try {
+            $this->branch_service->status($branch_id);
+            return $this->success(
+                Message::STATUS,
+                []
+            );
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
+
     public function destroy($branch_id)
     {
         try {

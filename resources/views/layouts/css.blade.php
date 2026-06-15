@@ -26,6 +26,15 @@
 <style>
     .select2-container {
         width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .select2-dropdown {
+        max-width: 100% !important;
+    }
+
+    body {
+        overflow-x: hidden;
     }
 
     .select2-container .select2-selection--single {

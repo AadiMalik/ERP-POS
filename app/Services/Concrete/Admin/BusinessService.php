@@ -150,4 +150,9 @@ class BusinessService
     {
         return $this->model_business->getModel()::where('is_deleted', 0)->get();
     }
+
+    public function getAllActive()
+    {
+        return $this->model_business->getModel()::where('status', 'active')->where('is_deleted', 0)->get();
+    }
 }

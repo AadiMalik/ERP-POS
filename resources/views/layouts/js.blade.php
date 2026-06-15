@@ -31,6 +31,7 @@
     });
 
     var url_local = "{{ url('/') }}";
+    const CURRENT_YEAR = {{ date('Y') }};
     $('#toggleFilter').on('click', function() {
 
         $('#filterSection').slideToggle(300);

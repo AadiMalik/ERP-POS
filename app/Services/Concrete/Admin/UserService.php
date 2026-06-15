@@ -9,6 +9,7 @@ use Yajra\DataTables\DataTables;
 use App\Enums\RoleNames;
 use App\Models\Role;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -35,11 +36,12 @@ class UserService
         if (isset($obj['branch_id']) && $obj['branch_id'] != 0 && $obj['branch_id'] != "") {
             $wh[] = ['branch_id', $obj['branch_id']];
         }
-        if (isset($obj['start_date']) && $obj['start_date'] != 0 && $obj['start_date'] != "") {
-            $wh[] = ['date_created', '>=', $obj['start_date']];
+        if (!empty($obj['start_date'])) {
+            $wh[] = ['date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
         }
-        if (isset($obj['end_date']) && $obj['end_date'] != 0 && $obj['end_date'] != "") {
-            $wh[] = ['date_created', '<=', $obj['end_date']];
+
+        if (!empty($obj['end_date'])) {
+            $wh[] = ['date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
         }
         if (isset($obj['role_id']) && $obj['role_id'] != 0 && $obj['role_id'] != "") {
             $role_id = $obj['role_id'];

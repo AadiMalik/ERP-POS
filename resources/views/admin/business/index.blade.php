@@ -56,6 +56,7 @@
     ])
 
     <script>
+        
         //delete
         deleteRecord({
             buttonClass: "#deleteBusiness",
