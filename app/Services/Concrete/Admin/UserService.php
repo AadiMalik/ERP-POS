@@ -7,6 +7,7 @@ use App\Repository\Repository;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use App\Enums\RoleNames;
+use App\Models\Role;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -24,12 +25,37 @@ class UserService
         $this->model_user = new Repository(new User());
     }
 
-    public function getData($data)
+    public function getData($obj)
     {
+        $wh = [];
+        $role_id = null;
+        if (isset($obj['business_id']) && $obj['business_id'] != 0 && $obj['business_id'] != "") {
+            $wh[] = ['business_id', $obj['business_id']];
+        }
+        if (isset($obj['branch_id']) && $obj['branch_id'] != 0 && $obj['branch_id'] != "") {
+            $wh[] = ['branch_id', $obj['branch_id']];
+        }
+        if (isset($obj['start_date']) && $obj['start_date'] != 0 && $obj['start_date'] != "") {
+            $wh[] = ['date_created', '>=', $obj['start_date']];
+        }
+        if (isset($obj['end_date']) && $obj['end_date'] != 0 && $obj['end_date'] != "") {
+            $wh[] = ['date_created', '<=', $obj['end_date']];
+        }
+        if (isset($obj['role_id']) && $obj['role_id'] != 0 && $obj['role_id'] != "") {
+            $role_id = $obj['role_id'];
+        }
         $datatable = $this->model_user->getModel()::with([
             'business',
-            'branch'
-        ])->where('is_deleted', 0);
+            'branch',
+            'roles'
+        ])->where($wh)
+            ->where('is_deleted', 0);
+        if ($role_id) {
+            $datatable->whereHas('roles', function ($q) use ($role_id) {
+                $q->where('roles.id', $role_id);
+            });
+        }
+        $datatable = applyRoleScope($datatable);
 
         return DataTables::of($datatable)
 
@@ -70,7 +96,7 @@ class UserService
                 </a>
 
                 <a class='btn btn-icon btn-outline-warning'
-                    href='" . url('admin/users/change-password') . "/". $item->id."'>
+                    href='" . url('admin/users/change-password') . "/" . $item->id . "'>
                     <i class='fa fa-key'></i>
                 </a>
 
@@ -98,18 +124,48 @@ class UserService
     }
     public function save($obj)
     {
-        if (isset($obj['id']) && $obj['id'] > 0) {
-            $this->model_user->update($obj, $obj['id']);
-            $saved_obj = $this->model_user->find($obj['id']);
-        } else {
-            $obj['password'] = Hash::make($obj['password']);
-            $saved_obj = $this->model_user->create($obj);
+        DB::beginTransaction();
+
+        try {
+
+            if (!empty($obj['id'])) {
+                $obj['updatedby_id'] = Auth::id();
+                $obj['date_updated'] = now();
+                $this->model_user->update($obj, $obj['id']);
+                $saved_obj = $this->model_user->find($obj['id']);
+            } else {
+
+                $obj['password'] = Hash::make($obj['password']);
+                $obj['createdby_id'] = Auth::id();
+                $obj['date_created'] = now();
+                $saved_obj = $this->model_user->create($obj);
+            }
+
+            if (!$saved_obj) {
+                DB::rollBack();
+                return false;
+            }
+
+            // Assign Role
+            if (!empty($obj['role_id'])) {
+
+                $role = Role::find($obj['role_id']);
+
+                if ($role) {
+
+                    // Old role remove + new assign
+                    $saved_obj->syncRoles([$role->name]);
+                }
+            }
+
+            DB::commit();
+
+            return $saved_obj;
+        } catch (Exception $e) {
+
+            DB::rollBack();
+            throw $e;
         }
-
-        if (!$saved_obj)
-            return false;
-
-        return $saved_obj;
     }
     public function changePassword($obj)
     {

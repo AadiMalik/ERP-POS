@@ -48,7 +48,7 @@
         {data:'remaining_days',name:'remaining_days', searchable:false, orderable:false},
         {data:'status',name:'status'},
         {data:'action',name:'action',sortable:false}",
-        'route' => 'business-data',
+        'route' => 'business/data',
         'buttons' => false,
         'pageLength' => 10,
         'class' => 'business_table',

@@ -40,7 +40,7 @@
                                                         {data: 'name' , name: 'name'},
                                                         {data: 'is_system_only' , name: 'is_system_only', 'sortable': false , searchable: false},
                                                         {data: 'action' , name: 'action' , 'sortable': false , searchable: false},",
-        'route' => 'permissions-data',
+        'route' => 'permissions/data',
         'buttons' => false,
         'pageLength' => 10,
         'class' => 'permission_table',

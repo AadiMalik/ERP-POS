@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
+use App\Enums\RoleNames;
 use App\Http\Controllers\Controller;
+use App\Models\Role;
+use App\Services\Concrete\Admin\BranchService;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\RoleService;
 use App\Services\Concrete\Admin\UserService;
@@ -20,21 +23,26 @@ class UserController extends Controller
     protected $user_service;
     protected $role_service;
     protected $business_service;
+    protected $branch_service;
 
     public function __construct(
         UserService $user_service,
         RoleService $role_service,
-        BusinessService $business_service
+        BusinessService $business_service,
+        BranchService $branch_service
     ) {
         $this->user_service = $user_service;
         $this->role_service = $role_service;
         $this->business_service = $business_service;
+        $this->branch_service = $branch_service;
     }
 
     public function index()
     {
         $roles = $this->role_service->getAll();
-        return view('admin.users.index', compact('roles'));
+        $business = $this->business_service->getAll();
+        $branches = $this->branch_service->getAll();
+        return view('admin.users.index', compact('roles','business','branches'));
     }
 
     public function getData(Request $request)
@@ -45,7 +53,8 @@ class UserController extends Controller
     {
         $roles = $this->role_service->getAll();
         $business = $this->business_service->getAll();
-        return view('admin.users.create', compact('roles','business'));
+        $branches = $this->branch_service->getAll();
+        return view('admin.users.create', compact('roles', 'business', 'branches'));
     }
 
 
@@ -60,13 +69,24 @@ class UserController extends Controller
                 Rule::unique('users', 'email')
                     ->where('is_deleted', 0)
                     ->ignore($request->id)
-            ]
+            ],
+            'role_id' => 'required|exists:roles,id',
         ];
 
         if (empty($request->id)) {
             $rules['password'] = 'required|min:6|confirmed';
         }
+        $role = Role::find($request->role_id);
 
+        if ($role->name == RoleNames::BUSINESSADMIN) {
+
+            $rules['business_id'] = 'required|exists:businesses,business_id';
+        }
+
+        if (in_array($role->name, RoleNames::branchLevelRoles())) {
+
+            $rules['branch_id'] = 'required|exists:branches,branch_id';
+        }
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
             return redirect()->back()->withErrors($validate)->withInput();
@@ -77,8 +97,10 @@ class UserController extends Controller
             'id',
             'name',
             'email',
+            'phone',
             'business_id',
-            'branch_id'
+            'branch_id',
+            'role_id'
         ]);
 
         if (empty($request->id)) {
@@ -96,10 +118,17 @@ class UserController extends Controller
     {
         $user = $this->user_service->getById($id);
         $roles = $this->role_service->getAll();
-        return view('admin.users.create', compact('user', 'roles'));
+        $business = $this->business_service->getAll();
+        $branches = $this->business_service->getAll();
+        return view('admin.users.create', compact('user', 'roles','business', 'branches'));
+    }
+    public function changePassword($id)
+    {
+        $user = $this->user_service->getById($id);
+        return view('admin.users.change_password', compact('user'));
     }
 
-    public function changePassword(Request $request)
+    public function updatePassword(Request $request)
     {
         $rules = [
             'id' => 'required|exists:users,id',

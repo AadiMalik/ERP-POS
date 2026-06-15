@@ -13,7 +13,7 @@
                 <form action="{{ url('admin/business') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
-                    <input type="hidden" name="business_id" value="{{ isset($business)? $business->business_id : '' }}">
+                    <input type="hidden" name="business_id" value="{{ isset($business) ? $business->business_id : '' }}">
 
                     <div class="row g-4">
                         <!-- Left Column - Form Fields -->
@@ -27,7 +27,8 @@
                                     <label class="fw-semibold mb-2">
                                         Select Package <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select" name="package_id" id="packageSelect" {{ !isset($business) ? 'required' : '' }}>
+                                    <select class="form-select" name="package_id" id="packageSelect"
+                                        {{ !isset($business) ? 'required' : '' }}>
                                         <option value="">-- Select Package --</option>
                                         @foreach ($packages as $item)
                                             <option value="{{ $item->package_id }}" data-name="{{ $item->name }}"
@@ -141,7 +142,7 @@
                                             </label>
                                             <div class="border rounded-3 p-3 text-center bg-light">
                                                 <img id="logoPreview"
-                                                    src="{{ isset($business) && $business->logo ? asset('public/uploads/business/'.$business->logo) : asset('public/assets/img/no-image.png') }}"
+                                                    src="{{ isset($business) && $business->logo ? asset('public/uploads/business/' . $business->logo) : asset('public/assets/img/no-image.png') }}"
                                                     class="img-fluid rounded-3 mb-2"
                                                     style="max-height: 120px; object-fit: contain;">
                                                 @if (isset($business) && $business->logo)
@@ -260,104 +261,108 @@
                 );
     </script>
     @endif
-    (function() {
-    const pkgSelect = document.getElementById('packageSelect');
-    const noPackageMsg = document.getElementById('noPackageMsg');
-    const packageDetails = document.getElementById('packageDetails');
-    const logoInput = document.getElementById('logoInput');
-    const logoPreview = document.getElementById('logoPreview');
+    <script>
+        $(ducument).ready(function() {
+            $('#packageSelect').select2();
+        })
+        (function() {
+            const pkgSelect = document.getElementById('packageSelect');
+            const noPackageMsg = document.getElementById('noPackageMsg');
+            const packageDetails = document.getElementById('packageDetails');
+            const logoInput = document.getElementById('logoInput');
+            const logoPreview = document.getElementById('logoPreview');
 
-    // Detail spans
-    const detailName = document.getElementById('detailName');
-    const detailPrice = document.getElementById('detailPrice');
-    const detailDurationType = document.getElementById('detailDurationType');
-    const detailDurationDays = document.getElementById('detailDurationDays');
-    const detailDescription = document.getElementById('detailDescription');
-    const expiryDateText = document.getElementById('expiryDateText');
+            // Detail spans
+            const detailName = document.getElementById('detailName');
+            const detailPrice = document.getElementById('detailPrice');
+            const detailDurationType = document.getElementById('detailDurationType');
+            const detailDurationDays = document.getElementById('detailDurationDays');
+            const detailDescription = document.getElementById('detailDescription');
+            const expiryDateText = document.getElementById('expiryDateText');
 
-    // Function to format price
-    function formatPrice(price) {
-    let num = parseFloat(price);
-    if (isNaN(num)) return '0.00';
-    return num.toFixed(2);
-    }
+            // Function to format price
+            function formatPrice(price) {
+                let num = parseFloat(price);
+                if (isNaN(num)) return '0.00';
+                return num.toFixed(2);
+            }
 
-    // Function to format date
-    function formatDate(date) {
-    return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-    });
-    }
+            // Function to format date
+            function formatDate(date) {
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
 
-    // Function to update package details and expiry
-    function updatePackageInfo() {
-    const selectedOption = pkgSelect.options[pkgSelect.selectedIndex];
+            // Function to update package details and expiry
+            function updatePackageInfo() {
+                const selectedOption = pkgSelect.options[pkgSelect.selectedIndex];
 
-    if (!selectedOption || !selectedOption.value) {
-    // No package selected - show message, hide details
-    noPackageMsg.classList.remove('d-none');
-    packageDetails.classList.add('d-none');
-    return;
-    }
+                if (!selectedOption || !selectedOption.value) {
+                    // No package selected - show message, hide details
+                    noPackageMsg.classList.remove('d-none');
+                    packageDetails.classList.add('d-none');
+                    return;
+                }
 
-    // Hide no package message and show details
-    noPackageMsg.classList.add('d-none');
-    packageDetails.classList.remove('d-none');
+                // Hide no package message and show details
+                noPackageMsg.classList.add('d-none');
+                packageDetails.classList.remove('d-none');
 
-    // Get package data from data attributes
-    const name = selectedOption.dataset.name || 'N/A';
-    const price = formatPrice(selectedOption.dataset.price);
-    const durationType = selectedOption.dataset.duration_type || 'N/A';
-    const durationDays = selectedOption.dataset.duration_days || '0';
-    const description = selectedOption.dataset.description || 'No description available';
+                // Get package data from data attributes
+                const name = selectedOption.dataset.name || 'N/A';
+                const price = formatPrice(selectedOption.dataset.price);
+                const durationType = selectedOption.dataset.duration_type || 'N/A';
+                const durationDays = selectedOption.dataset.duration_days || '0';
+                const description = selectedOption.dataset.description || 'No description available';
 
-    // Update detail fields
-    detailName.textContent = name;
-    detailPrice.textContent = `${price}`;
-    detailDurationType.textContent = durationType.charAt(0).toUpperCase() + durationType.slice(1);
-    detailDurationDays.textContent = durationDays;
-    detailDescription.textContent = description;
+                // Update detail fields
+                detailName.textContent = name;
+                detailPrice.textContent = `${price}`;
+                detailDurationType.textContent = durationType.charAt(0).toUpperCase() + durationType.slice(1);
+                detailDurationDays.textContent = durationDays;
+                detailDescription.textContent = description;
 
-    // Calculate and update next expiry date
-    let expiryDate = new Date();
+                // Calculate and update next expiry date
+                let expiryDate = new Date();
 
-    if (durationType.toLowerCase() === 'monthly') {
-    expiryDate.setMonth(expiryDate.getMonth() + parseInt(durationDays));
-    } else if (durationType.toLowerCase() === 'yearly') {
-    expiryDate.setFullYear(expiryDate.getFullYear() + parseInt(durationDays));
-    } else {
-    expiryDate.setDate(expiryDate.getDate() + parseInt(durationDays));
-    }
+                if (durationType.toLowerCase() === 'monthly') {
+                    expiryDate.setMonth(expiryDate.getMonth() + parseInt(durationDays));
+                } else if (durationType.toLowerCase() === 'yearly') {
+                    expiryDate.setFullYear(expiryDate.getFullYear() + parseInt(durationDays));
+                } else {
+                    expiryDate.setDate(expiryDate.getDate() + parseInt(durationDays));
+                }
 
-    expiryDateText.textContent = formatDate(expiryDate);
-    }
+                expiryDateText.textContent = formatDate(expiryDate);
+            }
 
-    // Logo preview handler
-    if (logoInput && logoPreview) {
-    logoInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-    const reader = new FileReader();
-    reader.onload = function(event) {
-    logoPreview.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-    } else if (file) {
-    alert('Please select a valid image file (JPG, PNG)');
-    logoInput.value = '';
-    }
-    });
-    }
+            // Logo preview handler
+            if (logoInput && logoPreview) {
+                logoInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            logoPreview.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    } else if (file) {
+                        alert('Please select a valid image file (JPG, PNG)');
+                        logoInput.value = '';
+                    }
+                });
+            }
 
-    // Package select change event
-    if (pkgSelect) {
-    pkgSelect.addEventListener('change', updatePackageInfo);
-    // Initial update for edit mode (if package is pre-selected)
-    updatePackageInfo();
-    }
-    })();
+            // Package select change event
+            if (pkgSelect) {
+                pkgSelect.addEventListener('change', updatePackageInfo);
+                // Initial update for edit mode (if package is pre-selected)
+                updatePackageInfo();
+            }
+        })();
     </script>
 @endsection
 

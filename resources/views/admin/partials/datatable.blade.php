@@ -51,8 +51,8 @@
                     {!!$params!!},
                     @endisset
                     @isset($datefilter)
-                    "start_date": $('#start_date').val(),
-                    "end_date": $('#end_date').val(),
+                    "start_date": filterStartDate,
+                    "end_date": filterEndDate,
                     @endisset
                 }
             },

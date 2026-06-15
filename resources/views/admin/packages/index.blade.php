@@ -52,7 +52,7 @@
                             {data:'status',name:'status',sortable:false},
                             {data:'action',name:'action',sortable:false,searchable:false}
                         ",
-        'route' => 'packages-data',
+        'route' => 'packages/data',
         'buttons' => false,
         'pageLength' => 10,
         'class' => 'package_table',

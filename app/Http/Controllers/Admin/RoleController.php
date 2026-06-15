@@ -43,7 +43,7 @@ class RoleController extends Controller
     {
         $permissions = $this->permission_service->getAll();
         $business = $this->business_service->getAll();
-        return view('admin.roles.create', compact('permissions','business'));
+        return view('admin.roles.create', compact('permissions', 'business'));
     }
 
     public function store(Request $request)
@@ -91,7 +91,6 @@ class RoleController extends Controller
     public function reset()
     {
         try {
-
             $roles = $this->role_service->resetBusinessRoles();
             return $this->success(
                 Message::SUCCESS,
@@ -99,6 +98,20 @@ class RoleController extends Controller
             );
         } catch (Exception $e) {
             return $this->error(Message::ERROR);
+        }
+    }
+    public function byBusiness($business_id)
+    {
+        try {
+            $roles = $this->role_service->getByBusiness($business_id);
+            return $this->success(
+                Message::SUCCESS,
+                $roles
+            );
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
         }
     }
 }

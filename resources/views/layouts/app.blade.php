@@ -10,7 +10,7 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{asset('assets/img/favicon/favicon.ico')}}" />
+    <link rel="icon" type="image/x-icon" href="{{ asset('public/assets/img/favicon/favicon.ico') }}" />
     @include('layouts/css')
     @yield('css')
 
@@ -40,7 +40,7 @@
             </div>
             <!-- / Layout page -->
         </div>
-
+        @include('admin.partials.custom_date_modal')
         <!-- Overlay -->
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>

@@ -26,40 +26,21 @@ class RoleService
     {
         $wh = [];
         $orderBy = Filter::ORDERBY;
-        $limit = Filter::LIMIT;
-        $search = null;
 
         if (isset($obj['orderBy']) && $obj['orderBy'] != 0 && $obj['orderBy'] != "") {
             $orderBy = $obj['orderBy'];
-        }
-        if (isset($obj['limit']) && $obj['limit'] != 0 && $obj['limit'] != "") {
-            $limit = $obj['limit'];
         }
         // for super admin
         if (isset($obj['business_id']) && $obj['business_id'] != 0 && $obj['business_id'] != "") {
             $wh[] = ['business_id', $obj['business_id']];
         }
-        // for business roles or super admin
-        if (isset($obj['branch_id']) && $obj['branch_id'] != 0 && $obj['branch_id'] != "") {
-            $wh[] = ['branch_id', $obj['branch_id']];
-        }
 
-        if (isset($obj['from']) && $obj['from'] != 0 && $obj['from'] != "") {
-            $wh[] = ['created_at', '>=', $obj['from'] . " 23:59:59"];
+        if (isset($obj['start_date']) && $obj['start_date'] != 0 && $obj['start_date'] != "") {
+            $wh[] = ['created_at', '>=', $obj['start_date']];
         }
-        if (isset($obj['to']) && $obj['to'] != 0 && $obj['to'] != "") {
-            $wh[] = ['created_at', '<=', $obj['to'] . " 23:59:59"];
+        if (isset($obj['end_date']) && $obj['end_date'] != 0 && $obj['end_date'] != "") {
+            $wh[] = ['created_at', '<=', $obj['end_date']];
         }
-        if (isset($obj['search']) && $obj['search'] != '' && $obj['search'] != null && $obj['search'] != 'null') {
-            $search = $obj['search'];
-        }
-
-        $request_data = [
-            'first_name',
-            'last_name',
-            'phone_num',
-            'created_at'
-        ];
         $with = ['permissions'];
 
 
@@ -112,7 +93,7 @@ class RoleService
 
                 return $action_column;
             })
-            ->rawColumns(['permissions','description', 'action'])
+            ->rawColumns(['permissions', 'description', 'action'])
             ->make(true);
         return $data;
     }
@@ -136,11 +117,16 @@ class RoleService
         return $saved_obj;
     }
 
-    public function getAll(){
-        if(getRoleName() != RoleNames::SUPERADMIN){
+    public function getAll()
+    {
+        if (getRoleName() != RoleNames::SUPERADMIN) {
             return $this->model_role->getModel()::with('business')->where('business_id', Auth::user()->business_id)->get();
         }
-        return $this->model_role->getModel()::with('business')->get();
+        return $this->model_role->getModel()::with('business')->whereNull('business_id')->get();
+    }
+    public function getByBusiness($business_id)
+    {
+        return $this->model_role->getModel()::with('business')->where('business_id', $business_id)->get();
     }
     public function resetBusinessRoles()
     {
@@ -159,7 +145,6 @@ class RoleService
                     ],
                 ];
             } else {
-
                 $business_id = Auth::user()->business_id;
                 $roles = [
 

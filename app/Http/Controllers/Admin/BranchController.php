@@ -29,7 +29,8 @@ class BranchController extends Controller
 
     public function index()
     {
-        return view('admin.branch.index');
+        $business =  $this->business_service->getAll();
+        return view('admin.branch.index',compact('business'));
     }
 
     public function getData(Request $request)
@@ -51,7 +52,7 @@ class BranchController extends Controller
                 Rule::unique('branches', 'name')
                     ->where(function ($query) use ($request) {
                         return $query->where('business_id', $request->business_id ?? Auth::user()->business_id)
-                        ->where('is_deleted', 0);
+                            ->where('is_deleted', 0);
                     })
                     ->ignore($request->branch_id, 'branch_id')
             ],
@@ -123,15 +124,12 @@ class BranchController extends Controller
     public function byBusiness($business_id)
     {
         try {
-
-            $this->branch_service->delete($branch_id);
-
+            $branches = $this->branch_service->getByBusiness($business_id);
             return $this->success(
-                Message::DELETE,
-                []
+                Message::SUCCESS,
+                $branches
             );
         } catch (Exception $e) {
-
             return $this->error(
                 Message::ERROR
             );

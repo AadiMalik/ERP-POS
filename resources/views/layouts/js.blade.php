@@ -1,33 +1,44 @@
 <!-- ========= All Javascript files linkup ======== -->
 <!-- Core JS -->
-    <!-- build:js public/assets/vendor/js/core.js -->
-    <script src="{{ asset('public/assets/vendor/libs/jquery/jquery.js') }}"></script>
-    <script src="{{ asset('public/assets/vendor/libs/popper/popper.js') }}"></script>
-    <script src="{{ asset('public/assets/vendor/js/bootstrap.js') }}"></script>
-    <script src="{{ asset('public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/js/all.min.js"></script>
+<!-- build:js public/assets/vendor/js/core.js -->
+<script src="{{ asset('public/assets/vendor/libs/jquery/jquery.js') }}"></script>
+<script src="{{ asset('public/assets/vendor/libs/popper/popper.js') }}"></script>
+<script src="{{ asset('public/assets/vendor/js/bootstrap.js') }}"></script>
+<script src="{{ asset('public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/js/all.min.js"></script>
 
-    <script src="{{ asset('public/assets/vendor/js/menu.js') }}"></script>
-    <!-- endbuild -->
+<script src="{{ asset('public/assets/vendor/js/menu.js') }}"></script>
+<!-- endbuild -->
 
-    <!-- Vendors JS -->
-    <script src="{{ asset('public/assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
-    <!-- Main JS -->
-    <script src="{{ asset('public/assets/js/main.js') }}"></script>
+<!-- Vendors JS -->
+<script src="{{ asset('public/assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
+<!-- Main JS -->
+<script src="{{ asset('public/assets/js/main.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
 
-    <!-- Place this tag in your head or just before your close body tag. -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
+<!-- Place this tag in your head or just before your close body tag. -->
+<script async defer src="https://buttons.github.io/buttons.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('public/assets/js/universal.js') }}"></script>
+<script src="{{ asset('public/assets/js/admin/global-date-filter.js') }}"></script>
 <script src="https://cdn.datatables.net/2.3.8/js/dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
     $(document).ready(function() {
         $('.table').DataTable();
+        initGlobalDateFilter();
     });
 
     var url_local = "{{ url('/') }}";
+    $('#toggleFilter').on('click', function() {
+
+        $('#filterSection').slideToggle(300);
+
+        $(this).find('i').toggleClass(
+            'fa-filter fa-times'
+        );
+    });
 </script>
 
 @yield('js')

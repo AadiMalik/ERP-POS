@@ -31,12 +31,12 @@
                                                 <label class="fw-semibold">
                                                     Business <span class="text-danger">*</span>
                                                 </label>
-                                                <select class="form-select" name="business_id" required>
+                                                <select class="form-select" name="business_id" id="business_id" required>
                                                     <option value="">-- Select Business --</option>
                                                     @foreach ($business as $item)
                                                         <option value="{{ $item->business_id }}"
                                                             {{ old('business_id', $branch->business_id ?? '') == $item->business_id ? 'selected' : '' }}>
-                                                           {{ $item->code }} {{ $item->name }}
+                                                            {{ $item->code }} {{ $item->name }}
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -158,25 +158,29 @@
                 );
     </script>
     @endif
-    (function() {
+    <script>
+        $(document).ready(function() {
+            $('#business_id').select2();
+        });
+        (function() {
 
-    // Logo preview handler
-    if (logoInput && logoPreview) {
-    logoInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-    const reader = new FileReader();
-    reader.onload = function(event) {
-    logoPreview.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-    } else if (file) {
-    alert('Please select a valid image file (JPG, PNG)');
-    logoInput.value = '';
-    }
-    });
-    }
-    })();
+            // Logo preview handler
+            if (logoInput && logoPreview) {
+                logoInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            logoPreview.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    } else if (file) {
+                        alert('Please select a valid image file (JPG, PNG)');
+                        logoInput.value = '';
+                    }
+                });
+            }
+        })();
     </script>
 @endsection
 

@@ -25,6 +25,7 @@ class PermissionService
 
     public function getData($data)
     {
+        
         $datatable = $this->model_permission->getModel()::query();
 
         $data = DataTables::of($datatable)

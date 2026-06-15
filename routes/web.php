@@ -25,24 +25,32 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin'], function () {
     //permissions
     Route::resource('permissions', App\Http\Controllers\Admin\PermissionController::class);
-    Route::post('permissions-data', [App\Http\Controllers\Admin\PermissionController::class, 'getData'])->name('permissions-data');
+    Route::group(['prefix' => 'permissions'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\PermissionController::class, 'getData'])->name('permissions-data');
+    });
     //roles
     Route::resource('roles', App\Http\Controllers\Admin\RoleController::class);
-    Route::post('roles-data', [App\Http\Controllers\Admin\RoleController::class, 'getData'])->name('roles-data');
-    Route::post('roles-reset', [App\Http\Controllers\Admin\RoleController::class, 'reset'])->name('roles-reset');
-
+    Route::group(['prefix' => 'roles'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\RoleController::class, 'getData'])->name('roles-data');
+        Route::post('reset', [App\Http\Controllers\Admin\RoleController::class, 'reset'])->name('roles-reset');
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\RoleController::class, 'byBusiness'])->name('roles-by-business');
+    });
     //packages
     Route::resource('packages', App\Http\Controllers\Admin\PackageController::class);
-    Route::post('packages-data', [App\Http\Controllers\Admin\PackageController::class, 'getData'])->name('packages-data');
-
+    Route::group(['prefix' => 'packages'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\PackageController::class, 'getData'])->name('packages-data');
+    });
     //business
     Route::resource('business', App\Http\Controllers\Admin\BusinessController::class);
-    Route::post('business-data', [App\Http\Controllers\Admin\BusinessController::class, 'getData'])->name('business-data');
-
+    Route::group(['prefix' => 'business'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\BusinessController::class, 'getData'])->name('business-data');
+    });
     //branch
     Route::resource('branch', App\Http\Controllers\Admin\BranchController::class);
-    Route::post('branch-data', [App\Http\Controllers\Admin\BranchController::class, 'getData'])->name('branch-data');
-
+    Route::group(['prefix' => 'branch'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\BranchController::class, 'getData'])->name('branch-data');
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\BranchController::class, 'byBusiness'])->name('branch-by-business');
+    });
     //users
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
     Route::group(['prefix' => 'users'], function () {

@@ -50,7 +50,7 @@
     {data: 'description' , name: 'description'},
     {data: 'permissions' , name: 'permissions' , 'sortable': false , searchable: false},
     {data: 'action' , name: 'action' , 'sortable': false , searchable: false},",
-        'route' => 'roles-data',
+        'route' => 'roles/data',
         'buttons' => false,
         'pageLength' => 10,
         'class' => 'role_table',
@@ -72,7 +72,7 @@
             btn.prop("disabled", true);
 
             $.ajax({
-                url: "{{ route('roles-reset') }}",
+                url: "{{ url('admin/roles/reset') }}",
                 type: "POST",
 
                 headers: {
