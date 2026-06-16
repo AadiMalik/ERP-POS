@@ -72,6 +72,7 @@ use App\Enums\RoleNames;
                             <th>Logo</th>
                             <th>Category</th>
                             <th>Business</th>
+                            <th>Status</th>
                             <th>Action</th>
                         </tr>
                         <!-- end table row-->
@@ -95,6 +96,7 @@ use App\Enums\RoleNames;
 {data: 'logo' , name: 'logo', 'sortable': false , searchable: false},
 {data: 'category' , name: 'category', 'sortable': false , searchable: false},
 {data: 'business' , name: 'business', 'sortable': false , searchable: false},
+{data: 'status' , name: 'status', 'sortable': false , searchable: false},
 {data: 'action' , name: 'action' , 'sortable': false , searchable: false},",
 'route' => 'sub-category/data',
 'buttons' => false,

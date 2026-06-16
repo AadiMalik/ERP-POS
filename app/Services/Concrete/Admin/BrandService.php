@@ -61,7 +61,7 @@ class BrandService
                         return '
                 <div class="form-check form-switch mb-0">
                     <input
-                        class="form-check-input statusBranch"
+                        class="form-check-input statusBrand"
                         type="checkbox"
                         data-id="' . $item->brand_id . '"
                         ' . $checked . '>

@@ -98,5 +98,6 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
     Route::resource('unit', App\Http\Controllers\Admin\UnitController::class);
     Route::group(['prefix' => 'unit'], function () {
         Route::post('data', [App\Http\Controllers\Admin\UnitController::class, 'getData'])->name('unit-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\UnitController::class, 'status']);
     });
 });

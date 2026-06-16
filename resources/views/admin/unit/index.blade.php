@@ -41,6 +41,7 @@
                     <thead>
                         <tr>
                             <th>Name</th>
+                            <th>Status</th>
                             <th>Action</th>
                         </tr>
                         <!-- end table row-->
@@ -61,6 +62,7 @@
 @include('admin.partials.datatable', [
 'columns' => "
 {data: 'name' , name: 'name'},
+{data: 'status' , name: 'status' , 'sortable': false , searchable: false},
 {data: 'action' , name: 'action' , 'sortable': false , searchable: false},",
 'route' => 'unit/data',
 'buttons' => false,
