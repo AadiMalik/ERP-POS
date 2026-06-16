@@ -4,6 +4,7 @@ namespace App\Services\Concrete\Admin;
 
 use App\Enums\Filter;
 use App\Enums\RoleNames;
+use App\Enums\Status;
 use App\Models\Branch;
 use App\Models\Package;
 use App\Repository\Repository;
@@ -15,8 +16,6 @@ use Yajra\DataTables\DataTables;
 class BranchService
 {
     protected $model_branch;
-    protected $model_package;
-    protected $model_branch_subscription;
 
     public function __construct()
     {
@@ -53,7 +52,7 @@ class BranchService
         return DataTables::of($datatable)
             ->addColumn('status', function ($item) {
 
-                $checked = $item->status == 'active' ? 'checked' : '';
+                $checked = $item->status == Status::ACTIVE ? 'checked' : '';
 
                 return '
                 <div class="form-check form-switch mb-0">
@@ -117,7 +116,7 @@ class BranchService
     public function status($branch_id)
     {
         return $this->model_branch->update([
-            'status' => ($this->model_branch->find($branch_id)->status == 'active' ? 'inactive' : 'active'),
+            'status' => ($this->model_branch->find($branch_id)->status == Status::ACTIVE ? Status::INACTIVE : Status::ACTIVE),
             'updatedby_id' => Auth::id(),
             'date_updated' => now()
         ], $branch_id);
@@ -143,7 +142,7 @@ class BranchService
     {
         return $this->model_branch->getModel()::with('business')
             ->where('business_id', Auth::user()->business_id)
-            ->where('status', 'active')
+            ->where('status', Status::ACTIVE)
             ->where('is_deleted', 0)
             ->get();
     }

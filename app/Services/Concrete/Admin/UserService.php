@@ -7,6 +7,7 @@ use App\Repository\Repository;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use App\Enums\RoleNames;
+use App\Enums\Status;
 use App\Models\Role;
 use App\Models\User;
 use Carbon\Carbon;
@@ -75,7 +76,7 @@ class UserService
 
             ->addColumn('status', function ($item) {
 
-                $checked = $item->status == 'active' ? 'checked' : '';
+                $checked = $item->status == Status::ACTIVE ? 'checked' : '';
 
                 return '
                     <div class="form-check form-switch mb-0">
@@ -180,7 +181,7 @@ class UserService
     public function status($id)
     {
         return $this->model_user->update([
-            'status' => ($this->model_user->find($id)->status == 'active' ? 'inactive' : 'active'),
+            'status' => ($this->model_user->find($id)->status == Status::ACTIVE ? Status::INACTIVE : Status::ACTIVE),
             'updatedby_id' => Auth::id(),
             'date_updated' => now()
         ], $id);

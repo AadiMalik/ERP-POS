@@ -129,6 +129,34 @@ function editRecord({
 }
 
 // ==============================
+// UNIVERSAL VIEW FUNCTION
+// ==============================
+
+function viewRecord({
+    buttonClass,
+    url,
+    onSuccess,
+}) {
+    $("body").off("click", buttonClass).on("click", buttonClass, function (e) {
+        e.preventDefault();
+
+        let id = $(this).data("id");
+
+        ajaxRequest({
+            url: `${url}/${id}/show`,
+        })
+            .then((response) => {
+                if (typeof onSuccess === "function") {
+                    onSuccess(response);
+                }
+            })
+            .catch((err) => {
+                errorMessage(err.Message || "View failed");
+            });
+    });
+}
+
+// ==============================
 // UNIVERSAL SAVE / UPDATE
 // ==============================
 

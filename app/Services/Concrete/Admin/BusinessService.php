@@ -2,6 +2,7 @@
 
 namespace App\Services\Concrete\Admin;
 
+use App\Enums\Status;
 use App\Models\Business;
 use App\Models\BusinessSubscription;
 use App\Models\Package;
@@ -37,7 +38,7 @@ class BusinessService
                 return now()->diffInDays($item->subscription_end, false);
             })
             ->addColumn('status', function ($item) {
-                if ($item->status == 'active') {
+                if ($item->status == Status::ACTIVE) {
                     return '
                     <span class="badge bg-label-success me-1 mb-1">
                         Active
@@ -125,7 +126,7 @@ class BusinessService
             'payment_method' => 'cash',
             'payment_status' => 'paid',
             'payment_reference' => 'admin created',
-            'status' => 'active',
+            'status' => Status::ACTIVE,
             'createdby_id' => Auth::id(),
             'date_created' => now(),
         ]);
@@ -153,6 +154,6 @@ class BusinessService
 
     public function getAllActive()
     {
-        return $this->model_business->getModel()::where('status', 'active')->where('is_deleted', 0)->get();
+        return $this->model_business->getModel()::where('status', Status::ACTIVE)->where('is_deleted', 0)->get();
     }
 }

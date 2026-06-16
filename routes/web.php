@@ -70,4 +70,33 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\WarehouseController::class, 'byBusiness'])->name('warehouse-by-business');
         Route::get('by-branch/{branch_id}', [App\Http\Controllers\Admin\WarehouseController::class, 'byBranch'])->name('warehouse-by-branch');
     });
+
+    //brand
+    Route::resource('brands', App\Http\Controllers\Admin\BrandController::class);
+    Route::group(['prefix' => 'brands'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\BrandController::class, 'getData'])->name('brands-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\BrandController::class, 'status']);
+    });
+
+    //category
+    Route::resource('category', App\Http\Controllers\Admin\CategoryController::class);
+    Route::group(['prefix' => 'category'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\CategoryController::class, 'getData'])->name('category-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\CategoryController::class, 'status']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\CategoryController::class, 'byBusiness'])->name('category-by-business');
+    });
+
+    //sub-category
+    Route::resource('sub-category', App\Http\Controllers\Admin\SubCategoryController::class);
+    Route::group(['prefix' => 'sub-category'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\SubCategoryController::class, 'getData'])->name('sub_category-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\SubCategoryController::class, 'status']);
+        Route::get('by-category/{category_id}', [App\Http\Controllers\Admin\SubCategoryController::class, 'byCategory'])->name('sub-category-by-category');
+    });
+
+    //unit
+    Route::resource('unit', App\Http\Controllers\Admin\UnitController::class);
+    Route::group(['prefix' => 'unit'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\UnitController::class, 'getData'])->name('unit-data');
+    });
 });

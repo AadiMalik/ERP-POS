@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Brand extends Model
+{
+    use HasFactory;
+    public $timestamps = false;
+    protected $primaryKey = 'brand_id';
+    protected $keyType = 'string';
+    public $incrementing = false;
+    protected $fillable = [
+        'brand_id',
+        'business_id',
+        'name',
+        'logo',
+        'status',
+        'is_deleted',
+        'createdby_id',
+        'updatedby_id',
+        'deletedby_id',
+        'date_created',
+        'date_updated',
+        'date_deleted',
+    ];
+
+    protected $appends = ['logo_url'];
+
+    public function getLogoUrlAttribute()
+    {
+        return !empty($this->logo)
+            ? asset('public/uploads/brand/' . $this->logo)
+            : asset('public/assets/img/no-image.png'); // optional default image
+    }
+
+    public function business()
+    {
+        return $this->belongsTo(Business::class, 'business_id');
+    }
+
+    public function createdby()
+    {
+        return $this->belongsTo(User::class, 'createdby_id');
+    }
+    public function updatedby()
+    {
+        return $this->belongsTo(User::class, 'updatedby_id');
+    }
+
+    public function deletedby()
+    {
+        return $this->belongsTo(User::class, 'deletedby_id');
+    }
+}

@@ -130,8 +130,18 @@
 
             <ul class="menu-sub">
                 <li class="menu-item">
+                    <a href="{{ url('/admin/unit') }}" class="menu-link">
+                        <div data-i18n="Unit">Units</div>
+                    </a>
+                </li>
+                <li class="menu-item">
                     <a href="{{ url('/admin/warehouse') }}" class="menu-link">
                         <div data-i18n="Warehouse">Warehouse</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/brands') }}" class="menu-link">
+                        <div data-i18n="Brands">Brands</div>
                     </a>
                 </li>
                 <li class="menu-item">
