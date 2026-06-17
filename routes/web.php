@@ -100,4 +100,11 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
         Route::post('data', [App\Http\Controllers\Admin\UnitController::class, 'getData'])->name('unit-data');
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\UnitController::class, 'status']);
     });
+
+    //product
+    Route::resource('product', App\Http\Controllers\Admin\ProductController::class);
+    Route::group(['prefix' => 'product'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\ProductController::class, 'getData'])->name('product-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\ProductController::class, 'status']);
+    });
 });
