@@ -52,7 +52,7 @@ use App\Enums\RoleNames;
                 </div>
             </div>
             <div class="table-responsive p-4">
-                <table id="branch_table" class="table">
+                <table id="branch_table" class="table datatables">
                     <thead>
                         <tr>
                             <th>Code</th>

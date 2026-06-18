@@ -26,7 +26,7 @@
 
 <script>
     $(document).ready(function() {
-        $('.table').DataTable();
+        $('.datatables').DataTable();
         initGlobalDateFilter();
     });
 

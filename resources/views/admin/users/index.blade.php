@@ -74,7 +74,7 @@
                     </div>
                 </div>
                 <div class="table-responsive p-4">
-                    <table id="users_table" class="table">
+                    <table id="users_table" class="table datatables">
                         <thead>
                             <tr>
                                 <th>Name</th>

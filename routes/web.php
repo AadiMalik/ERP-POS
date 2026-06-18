@@ -76,6 +76,7 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
     Route::group(['prefix' => 'brands'], function () {
         Route::post('data', [App\Http\Controllers\Admin\BrandController::class, 'getData'])->name('brands-data');
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\BrandController::class, 'status']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\BrandController::class, 'byBusiness'])->name('brand-by-business');
     });
 
     //category

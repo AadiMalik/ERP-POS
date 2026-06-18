@@ -29,11 +29,13 @@ use App\Enums\RoleNames;
                             <label class="form-label">Category <span class="text-danger">*</span></label>
                             <select id="category_id" name="category_id" class="form-select" required>
                                 <option value="">--Select Category--</option>
+                                @if (RoleNames::SUPERADMIN != getRoleName())
                                 @foreach ($categories as $item)
                                 <option value="{{ $item->category_id }}">
                                     {{ $item->name ?? '' }}
                                 </option>
                                 @endforeach
+                                @endif
                             </select>
                         </div>
                         <div class="col-md-12 mb-3">

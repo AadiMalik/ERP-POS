@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div class="table-responsive text-nowrap p-4">
-                <table id="role_table" class="table display" style="width:100%">
+                <table id="role_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
                             <th>Role</th>

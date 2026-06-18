@@ -26,7 +26,6 @@ return new class extends Migration
             $table->decimal('minimum_stock', 18, 4)->default(0.0000);
             $table->boolean('track_batch')->default(false);
             $table->boolean('track_expiry')->default(false);
-            $table->boolean('is_deleted')->default(false);
             $table->enum('status', ['active', 'inactive'])->default('active');
 
             $table->boolean('is_deleted')->default(false);

@@ -13,7 +13,7 @@
                         class="icon-base fa fa-plus"></i>Add New</a>
             </div>
             <div class="table-responsive text-nowrap p-4">
-                <table id="package_table" class="table display" style="width:100%">
+                <table id="package_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
                             <th>Name</th>

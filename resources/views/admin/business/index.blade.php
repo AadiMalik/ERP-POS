@@ -13,7 +13,7 @@
                 </a>
             </div>
             <div class="table-responsive p-4">
-                <table id="business_table" class="table">
+                <table id="business_table" class="table datatables">
                     <thead>
                         <tr>
                             <th>Code</th>

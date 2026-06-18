@@ -87,65 +87,118 @@ class ProductController extends Controller
             'sub_category_id' => 'nullable|exists:sub_categories,sub_category_id',
             'type' => 'required|in:single,variable,service',
             'usage_type' => 'required|in:saleable,consumable,asset,service',
-            'images' => 'required|array|min:1',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'variations' => 'required|array|min:1',
-            'variations.*.name' => 'required',
-            'variations.*.price' => 'required',
-            'variations.*.sku' => 'required',
-            'variations.*.barcode' => 'required',
-            'variations.*.base_unit_id' => 'required|exists:units,unit_id',
-            'variations.*.purchase_price' => 'required|min:0',
-            'variations.*.sale_price' => 'required|min:0',
-            'variations.*.minimum_stock' => 'required|min:0',
+            'images' => empty($request->product_id)
+                ? 'required|array|min:1'
+                : 'nullable|array',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'variations_data' => 'required|array|min:1',
+            'variations_data.*.name' => 'required',
+            'variations_data.*.sku' => 'required',
+            'variations_data.*.barcode' => 'nullable',
+            'variations_data.*.base_unit_id' => 'required|exists:units,unit_id',
+            'variations_data.*.purchase_price' => 'nullable|min:0',
+            'variations_data.*.sale_price' => 'required|min:0',
+            'variations_data.*.minimum_stock' => 'nullable|min:0',
+            'features_data' => 'nullable|array',
+            'features_data.*.name' => 'required_with:features_data',
+            'features_data.*.value' => 'required_with:features_data',
         ];
-
-        if (!empty($request->is_featured) && $request->is_featured == 'on') {
-            $rules['features'] = 'required|array|min:1';
-            $rules['features.*.name'] = 'required';
-            $rules['features.*.value'] = 'required';
-        }
 
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
             return redirect()->back()->withErrors($validate)->withInput();
         }
 
-
-        $obj = $request->only([
-            'product_id',
-            'name',
-            'slug',
-            'category_id',
-            'brand_id',
-            'sub_category_id',
-            'type',
-            'usage_type',
-            'is_track_stock',
-            'is_pos_visible',
-            'is_website_visible',
-            'is_app_visible',
-            'is_featured',
-            'short_description',
-            'description',
-            'features',
-            'variations'
-        ]);
-        if ($request->hasFile('logo')) {
-
-            $file = $request->file('logo');
-
-            $fileName = time() . '_' . $file->getClientOriginalName();
-
-            $file->move(public_path('uploads/product'), $fileName);
-
-            $obj['logo'] = $fileName;
+        // Parse variations data from JSON
+        $variations = [];
+        if ($request->has('variations_data')) {
+            foreach ($request->variations_data as $variationJson) {
+                $variations[] = json_decode($variationJson, true);
+            }
         }
-        $obj['business_id'] = $request->business_id ??  Auth::user()->business_id;
-        $obj['status'] = $request->status ?? 'active';
 
-        // create/update product
+        // Parse features data from JSON
+        $features = [];
+        if ($request->has('features_data')) {
+            foreach ($request->features_data as $featureJson) {
+                $features[] = json_decode($featureJson, true);
+            }
+        }
+
+        // Parse images data from JSON (for reference/metadata)
+        $imagesData = [];
+        if ($request->has('images_data')) {
+            foreach ($request->images_data as $imageJson) {
+                $imagesData[] = json_decode($imageJson, true);
+            }
+        }
+
+        // Handle image uploads
+        $product_images = [];
+
+        // Get existing images from images_data
+        $existingImages = [];
+        $removedImageIds = [];
+
+        foreach ($imagesData as $imgData) {
+            if (!$imgData['is_new'] && !empty($imgData['id']) && !($imgData['is_removed'] ?? false)) {
+                $existingImages[] = $imgData['id'];
+            }
+            if (($imgData['is_removed'] ?? false) && !empty($imgData['id'])) {
+                $removedImageIds[] = $imgData['id'];
+            }
+        }
+
+        // Handle new file uploads
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $fileName = uniqid() . '_' . time() . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('uploads/product'), $fileName);
+
+                $product_images[] = [
+                    'image' => $fileName,
+                    'is_default' => 0
+                ];
+            }
+        }
+
+        // Set default image (first new image or existing default)
+        if (!empty($product_images)) {
+            $product_images[0]['is_default'] = 1;
+        } elseif (!empty($existingImages)) {
+            // Set first existing image as default if no new images
+            $product_images = array_merge($product_images, $existingImages);
+        }
+
+        // Build product data
+        $obj = [
+            'product_id' => $request->product_id,
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'category_id' => $request->category_id,
+            'brand_id' => $request->brand_id,
+            'sub_category_id' => $request->sub_category_id,
+            'type' => $request->type,
+            'usage_type' => $request->usage_type,
+            'is_track_stock' => $request->has('is_track_stock') ? 1 : 0,
+            'is_pos_visible' => $request->has('is_pos_visible') ? 1 : 0,
+            'is_website_visible' => $request->has('is_website_visible') ? 1 : 0,
+            'is_app_visible' => $request->has('is_app_visible') ? 1 : 0,
+            'is_featured' => $request->has('is_featured') ? 1 : 0,
+            'short_description' => $request->short_description,
+            'description' => $request->description,
+            'features' => $features,
+            'variations' => $variations,
+            'images' => $product_images,
+            'existing_images' => $existingImages,
+            'removed_images' => $removedImageIds,
+            'business_id' => $request->business_id ?? Auth::user()->business_id,
+            'status' => $request->status ?? 'active',
+        ];
+
+        // Create/update product
         $product = $this->product_service->save($obj);
+
         return redirect('admin/product')
             ->with('success', empty($request->product_id) ? Message::SAVE : Message::UPDATE);
     }

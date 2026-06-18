@@ -65,7 +65,7 @@ use App\Enums\RoleNames;
                 </div>
             </div>
             <div class="table-responsive text-nowrap p-4">
-                <table id="sub_category_table" class="table display" style="width:100%">
+                <table id="sub_category_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
                             <th>Name</th>
