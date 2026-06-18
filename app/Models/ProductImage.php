@@ -22,7 +22,14 @@ class ProductImage extends Model
         'createdby_id',
         'date_created',
     ];
+    protected $appends = ['image_url'];
 
+    public function getImageUrlAttribute()
+    {
+        return !empty($this->image)
+            ? asset('public/uploads/product/' . $this->image)
+            : asset('public/assets/img/no-image.png'); // optional default image
+    }
     public function product() {
         return $this->belongsTo(Product::class, 'product_id', 'product_id');
     }

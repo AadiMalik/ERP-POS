@@ -39,6 +39,18 @@ class Product extends Model
         'date_deleted',
     ];
 
+    public function productVariations() {
+        return $this->hasMany(ProductVariation::class, 'product_id', 'product_id');
+    }
+
+    public function productImages() {
+        return $this->hasMany(ProductImage::class, 'product_id', 'product_id');
+    }
+
+    public function productFeatures() {
+        return $this->hasMany(ProductFeature::class, 'product_id', 'product_id');
+    }
+
     public function business() {
         return $this->belongsTo(Business::class, 'business_id', 'business_id');
     }
