@@ -135,12 +135,9 @@ use App\Enums\RoleNames;
         </div>
 
         <form id="productForm"
-            action="{{ isset($product) ? url('admin/product/' . $product->product_id) : url('admin/product') }}"
+            action="{{url('admin/product') }}"
             method="POST" enctype="multipart/form-data">
             @csrf
-            @if (isset($product))
-            @method('PUT')
-            @endif
             <input type="hidden" name="product_id" value="{{ $product->product_id ?? '' }}">
 
             <div class="card-body">
@@ -197,14 +194,7 @@ use App\Enums\RoleNames;
                                         <label class="fw-semibold">Sub Category</label>
                                         <select class="form-select" name="sub_category_id" id="sub_category_id">
                                             <option value="">--Select Sub Category--</option>
-                                            @if (isset($product) && $product->sub_category_id)
-                                            @foreach ($subCategories as $item)
-                                            <option value="{{ $item->sub_category_id }}"
-                                                {{ $product->sub_category_id == $item->sub_category_id ? 'selected' : '' }}>
-                                                {{ $item->name }}
-                                            </option>
-                                            @endforeach
-                                            @endif
+                                            
                                         </select>
                                     </div>
                                     <div class="col-md-6">
@@ -382,7 +372,7 @@ use App\Enums\RoleNames;
             <div class="card-footer border-top sticky-footer">
                 <div class="d-flex justify-content-end gap-2">
                     <button type="button" class="btn btn-outline-secondary"
-                        onclick="window.history.back()">Cancel</button>
+                        onclick="history.back()">Cancel</button>
                     <button type="submit" class="btn btn-primary px-4" id="saveProductBtn">
                         <i class="fa fa-save me-1"></i> {{ isset($product) ? 'Update' : 'Save' }} Product
                     </button>
@@ -501,14 +491,22 @@ use App\Enums\RoleNames;
 @endif
 
 <script>
-    const units = @json($units);
-    const isEditMode = {{isset($product) ? 'true' : 'false'}};
+    @if(isset($product))
+    var selectedCategoryId = "{{ $product->category_id }}";
+    var selectedBrandId = "{{ $product->brand_id }}";
+    var selectedSubCategoryId = "{{ $product->sub_category_id }}";
+    $('#business_id').trigger('change');
+    @else
+    var selectedCategoryId = "";
+    var selectedSubCategoryId = "";
+    var selectedBrandId = "";
+    @endif
 
     // ======================================================
     // DATA STORES
     // ======================================================
-    let features = [];
-    let variations = [];
+    var features = [];
+    var variations = [];
 
     // ======================================================
     // INITIALIZE DATA FROM EXISTING PRODUCT
@@ -523,17 +521,19 @@ use App\Enums\RoleNames;
     @endforeach
     @foreach($product->productVariations as $index => $var)
     variations.push({
-        product_variation_id: {{$var->product_variation_id}},
+        product_variation_id: "{{$var->product_variation_id}}",
         name: "{{ $var->name }}",
         sku: '{{ $var->sku }}',
         barcode: "{{ $var->barcode ?? '' }}",
         purchase_price: {{$var->purchase_price ?? 0}},
         sale_price: {{$var->sale_price ?? 0}},
         minimum_stock: {{$var->minimum_stock ?? 0}},
-        base_unit_id: {{$var->base_unit_id ?? 0}},
+        base_unit_id: "{{$var->base_unit_id ?? 0}}",
         track_batch: {{$var->track_batch ? 'true' : 'false'}},
         track_expiry: {{$var->track_expiry ? 'true' : 'false'}},
-        attributes: {!!json_encode($var->attributes ?? []) !!}
+        attributes: @json(
+        $var->attributes->pluck('value', 'name')
+    )
     });
     @endforeach
     console.log(variations);
@@ -1007,13 +1007,15 @@ use App\Enums\RoleNames;
             let data = response.Data;
             let options = '<option value="">--Select Category--</option>';
             $.each(data, function(index, item) {
-                options += `<option value="${item.category_id}">${item.name}</option>`;
+                options += `<option value="${item.category_id}" ${item.category_id == selectedCategoryId ? 'selected' : ''}>${item.name}</option>`;
             });
-            $('#category_id').html(options);
+            $('#category_id').html(options).val(selectedCategoryId);
+            if (selectedCategoryId) {
+                $('#category_id').trigger('change');
+            }
         }).catch((err) => {
             errorMessage(err.Message);
         });
-
         ajaxRequest({
             url: url_local + '/admin/brands/by-business/' + business_id,
             data: {}
@@ -1021,9 +1023,12 @@ use App\Enums\RoleNames;
             let data = response.Data;
             let options = '<option value="">--Select Brand--</option>';
             $.each(data, function(index, item) {
-                options += `<option value="${item.brand_id}">${item.name}</option>`;
+                options += `<option value="${item.brand_id}" ${item.brand_id == selectedBrandId ? 'selected' : ''}>${item.name}</option>`;
             });
-            $('#brand_id').html(options);
+            $('#brand_id').html(options).val(selectedBrandId);
+            if (selectedBrandId) {
+                $('#brand_id').trigger('change');
+            }
         }).catch((err) => {
             errorMessage(err.Message);
         });
@@ -1042,20 +1047,16 @@ use App\Enums\RoleNames;
             let data = response.Data;
             let options = '<option value="">--Select Sub Category--</option>';
             $.each(data, function(index, item) {
-                options += `<option value="${item.sub_category_id}">${item.name}</option>`;
+                options += `<option value="${item.sub_category_id}" ${item.sub_category_id == selectedSubCategoryId ? 'selected' : ''}>${item.name}</option>`;
             });
-            $('#sub_category_id').html(options);
+            $('#sub_category_id').html(options).val(selectedSubCategoryId);
+            if (selectedSubCategoryId) {
+                $('#sub_category_id').trigger('change');
+            }
         }).catch((err) => {
             errorMessage(err.Message);
         });
     });
 
-    @if(isset($product) && $product->business_id)
-    $('#business_id').trigger('change');
-    @endif
-
-    @if(isset($product) && $product->category_id)
-    $('#category_id').trigger('change');
-    @endif
 </script>
 @endsection

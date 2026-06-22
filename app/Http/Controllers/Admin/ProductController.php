@@ -44,8 +44,7 @@ class ProductController extends Controller
         $businesses = $this->business_service->getAllActive();
         $categories = $this->category_service->getAllActive();
         $brands = $this->brand_service->getAllActive();
-        $units = $this->unit_service->getAllActive();
-        return view('admin.product.index', compact('businesses', 'categories', 'brands', 'units'));
+        return view('admin.product.index', compact('businesses', 'categories', 'brands'));
     }
     public function getData(Request $request)
     {
@@ -277,6 +276,78 @@ class ProductController extends Controller
     {
         try {
             $this->product_service->variationDelete($product_variation_id);
+            return $this->success(
+                Message::DELETE,
+                []
+            );
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
+
+    // product images
+    public function getImages($product_id)
+    {
+        $images = $this->product_service->getImages($product_id);
+
+        $html = view('admin.product.partials.images', compact('images'))->render();
+
+        return $this->success(Message::SUCCESS, $html);
+    }
+    public function uploadImages(Request $request)
+    {
+        $rules = [
+            'product_id' => 'required|exists:products,product_id',
+            'images'      => 'required|array|min:1',
+            'images.*'    => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'set_default' => 'nullable|boolean',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+        try {
+            $this->product_service->uploadImages(
+                $request->product_id,
+                $request->file('images'),
+                $request->set_default
+            );
+            return $this->success(
+                Message::SAVE,
+                []
+            );
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
+    public function setDefaultImage(string $id)
+    {
+        $this->product_service->setDefault($id);
+        return $this->success(
+            Message::SAVE,
+            []
+        );
+    }
+
+    public function saveImageSorting(Request $request)
+    {
+        $request->validate(['order' => 'required|array']);
+        $this->product_service->saveSorting($request->order);
+        return $this->success(
+            Message::SAVE,
+            []
+        );
+    }
+
+    public function deleteImage($product_image_id)
+    {
+        try {
+            $this->product_service->deleteImage($product_image_id);
             return $this->success(
                 Message::DELETE,
                 []

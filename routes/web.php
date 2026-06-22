@@ -107,8 +107,15 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
     Route::group(['prefix' => 'product'], function () {
         Route::post('data', [App\Http\Controllers\Admin\ProductController::class, 'getData'])->name('product-data');
         Route::post('change-status/{product_id}', [App\Http\Controllers\Admin\ProductController::class, 'status']);
+        // variations
         Route::get('variations/{product_id}', [App\Http\Controllers\Admin\ProductController::class, 'variations'])->name('product-variations');
         Route::post('variation/status/{variation_id}', [App\Http\Controllers\Admin\ProductController::class, 'variationStatus']);
-        Route::post('variation/delete/{variation_id}', [App\Http\Controllers\Admin\ProductController::class, 'variationDestroy']);
+        Route::delete('variation/delete/{variation_id}', [App\Http\Controllers\Admin\ProductController::class, 'variationDestroy']);
+        // images
+        Route::get('images/{productId}', [App\Http\Controllers\Admin\ProductController::class, 'getImages']);
+        Route::post('image/upload', [App\Http\Controllers\Admin\ProductController::class, 'uploadImages']);
+        Route::delete('image/delete/{id}', [App\Http\Controllers\Admin\ProductController::class, 'deleteImage']);
+        Route::post('image/set-default/{id}', [App\Http\Controllers\Admin\ProductController::class, 'setDefaultImage']);
+        Route::post('image/sorting', [App\Http\Controllers\Admin\ProductController::class, 'saveImageSorting']);
     });
 });

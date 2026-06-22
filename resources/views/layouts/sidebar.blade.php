@@ -154,6 +154,11 @@
                         <div data-i18n="Sub Categories">Sub Categories</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/product') }}" class="menu-link">
+                        <div data-i18n="Products">Products</div>
+                    </a>
+                </li>
             </ul>
         </li>
         <li class="menu-header small text-uppercase">

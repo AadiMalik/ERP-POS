@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Yajra\DataTables\DataTables;
 
 class ProductService
@@ -31,6 +32,7 @@ class ProductService
         'brand',
         'productImages',
         'productVariations',
+        'productVariations.attributes:product_variation_attribute_id,product_variation_id,name,value',
         'productFeatures'
     ];
 
@@ -89,23 +91,24 @@ class ProductService
                 return $item->brand->name ?? '';
             })
             ->addColumn('images', function ($item) {
-                return view('admin.product.partials.images', compact('item'))->render();
+                $images = $item->productImages->sortBy('sorting');
+                return view('admin.product.partials.images', compact('images'))->render();
             })
             ->addColumn('variations', function ($item) {
                 $count = $item->productVariations->count();
 
                 return '
-                    <button class="btn btn-sm btn-primary view-variations"
+                    <a href="javascript:void(0)" class="badge bg-success me-1 view-variations"
                         data-id="' . $item->product_id . '">
                         Variations <span class="badge bg-light text-dark">' . $count . '</span>
-                    </button>
+                    </a>
                 ';
             })
 
             ->addColumn('features', function ($item) {
-                return '<button class="btn btn-sm btn-secondary view-features" data-id="' . $item->product_id . '">
+                return '<span class="badge bg-primary me-1">
                         Features (' . count($item->productFeatures) . ')
-                    </button>';
+                    </span>';
             })
             ->addColumn('status', function ($item) {
 
@@ -223,7 +226,7 @@ class ProductService
                             'purchase_price' => $variation['purchase_price'],
                             'sale_price' => $variation['sale_price'],
                             'minimum_stock' => $variation['minimum_stock'],
-                            'business_unit_id' => $obj['business_id'],
+                            'business_id' => $obj['business_id'],
                             'updatedby_id' => Auth::id(),
                             'date_updated' => now(),
                         ]);
@@ -354,7 +357,7 @@ class ProductService
                     'purchase_price' => $variation['purchase_price'],
                     'sale_price' => $variation['sale_price'],
                     'minimum_stock' => $variation['minimum_stock'],
-                    'business_unit_id' => $obj['business_id'],
+                    'business_id' => $obj['business_id'],
                     'createdby_id' => Auth::id(),
                     'date_created' => now(),
                 ]);
@@ -385,7 +388,7 @@ class ProductService
 
     public function getById($product_id)
     {
-        return $this->model_product->find($product_id);
+        return $this->model_product->getModel()::with($this->with)->find($product_id);
     }
     public function status($product_id)
     {
@@ -469,5 +472,101 @@ class ProductService
             'deletedby_id' => Auth::id(),
             'date_deleted' => now()
         ], $product_variation_id);
+    }
+
+    /**
+     * Upload multiple images for a product.
+     */
+    public function uploadImages($product_id, array $files, bool $setFirstAsDefault = false)
+    {
+        $uploaded  = [];
+        $is_first   = true;
+
+        // Current max sorting
+        $max_sort = $this->model_product_image->getModel()::where('product_id', $product_id)->max('sorting') ?? 0;
+
+        foreach ($files as $file) {
+            $filename = generateUuid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/product'), $filename);
+
+            $isDefault = ($setFirstAsDefault && $is_first);
+
+            // If setting as default, unset previous default
+            if ($isDefault) {
+                $this->clearDefault($product_id);
+            }
+
+            $image = $this->model_product_image->getModel()::create([
+                'product_image_id' => generateUuid(),
+                'product_id'       => $product_id,
+                'image'            => $filename,
+                'sorting'          => ++$max_sort,
+                'is_default'       => $isDefault ? 1 : 0,
+                'status'           => 1,
+                'createdby_id'     => Auth::id(),
+                'date_created'     => Carbon::now(),
+            ]);
+
+            $uploaded[] = $image;
+            $is_first    = false;
+        }
+
+        return $uploaded;
+    }
+
+    /**
+     * Delete a single product image.
+     */
+    public function deleteImage(string $imageId): bool
+    {
+        $image = ProductImage::findOrFail($imageId);
+
+        $filePath = public_path('uploads/product/' . $image->image);
+        if (File::exists($filePath)) {
+            File::delete($filePath);
+        }
+
+        return $image->delete();
+    }
+
+    /**
+     * Set a specific image as default (clears others first).
+     */
+    public function setDefault(string $imageId): bool
+    {
+        $image = $this->model_product_image->getModel()::findOrFail($imageId);
+
+        $this->clearDefault($image->product_id);
+
+        $image->is_default = 1;
+        return $image->save();
+    }
+
+    /**
+     * Save new sort order. $order = [['id' => uuid, 'sorting' => int], ...]
+     */
+    public function saveSorting(array $order): void
+    {
+        foreach ($order as $item) {
+            $this->model_product_image->getModel()::where('product_image_id', $item['id'])
+                ->update(['sorting' => $item['sorting']]);
+        }
+    }
+
+    /**
+     * Get all images for a product ordered by sorting.
+     */
+    public function getImages(string $productId)
+    {
+        return $this->model_product_image->getModel()::where('product_id', $productId)
+            ->orderBy('sorting')
+            ->get();
+    }
+
+    // ─────────────────────────────────────────────
+    private function clearDefault(string $productId)
+    {
+        $this->model_product_image->getModel()::where('product_id', $productId)
+            ->update(['is_default' => 0]);
     }
 }
