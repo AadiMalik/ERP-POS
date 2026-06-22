@@ -37,27 +37,38 @@ class ProductVariation extends Model
         'date_deleted',
     ];
 
-    public function business() {
+    public function attributes()
+    {
+        return $this->hasMany(ProductVariationAttribute::class, 'product_variation_id', 'product_variation_id');
+    }
+
+    public function business()
+    {
         return $this->belongsTo(Business::class, 'business_id', 'business_id');
     }
 
-    public function base_unit() {
+    public function unit()
+    {
         return $this->belongsTo(Unit::class, 'base_unit_id', 'unit_id');
     }
 
-    public function product() {
+    public function product()
+    {
         return $this->belongsTo(Product::class, 'product_id', 'product_id');
     }
 
-    public function createdby() {
+    public function createdby()
+    {
         return $this->belongsTo(User::class, 'createdby_id', 'user_id');
     }
 
-    public function updatedby() {
+    public function updatedby()
+    {
         return $this->belongsTo(User::class, 'updatedby_id', 'user_id');
     }
 
-    public function deletedby() {
+    public function deletedby()
+    {
         return $this->belongsTo(User::class, 'deletedby_id', 'user_id');
     }
 }

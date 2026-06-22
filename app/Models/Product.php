@@ -40,7 +40,8 @@ class Product extends Model
     ];
 
     public function productVariations() {
-        return $this->hasMany(ProductVariation::class, 'product_id', 'product_id');
+        return $this->hasMany(ProductVariation::class, 'product_id', 'product_id')
+        ->with('attributes');
     }
 
     public function productImages() {

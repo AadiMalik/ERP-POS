@@ -106,6 +106,9 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
     Route::resource('product', App\Http\Controllers\Admin\ProductController::class);
     Route::group(['prefix' => 'product'], function () {
         Route::post('data', [App\Http\Controllers\Admin\ProductController::class, 'getData'])->name('product-data');
-        Route::post('change-status/{id}', [App\Http\Controllers\Admin\ProductController::class, 'status']);
+        Route::post('change-status/{product_id}', [App\Http\Controllers\Admin\ProductController::class, 'status']);
+        Route::get('variations/{product_id}', [App\Http\Controllers\Admin\ProductController::class, 'variations'])->name('product-variations');
+        Route::post('variation/status/{variation_id}', [App\Http\Controllers\Admin\ProductController::class, 'variationStatus']);
+        Route::post('variation/delete/{variation_id}', [App\Http\Controllers\Admin\ProductController::class, 'variationDestroy']);
     });
 });

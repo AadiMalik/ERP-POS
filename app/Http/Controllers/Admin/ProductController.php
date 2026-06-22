@@ -62,7 +62,28 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all());
+
+        $variations = collect($request->variations ?? [])
+            ->map(function ($item) {
+                return is_string($item)
+                    ? json_decode($item, true)
+                    : $item;
+            })
+            ->toArray();
+
+        $features = collect($request->features ?? [])
+            ->map(function ($item) {
+                return is_string($item)
+                    ? json_decode($item, true)
+                    : $item;
+            })
+            ->toArray();
+
+        $request->merge([
+            'variations' => $variations,
+            'features' => $features
+        ]);
+
         $rules = [
             'name' => [
                 'required',
@@ -87,87 +108,23 @@ class ProductController extends Controller
             'sub_category_id' => 'nullable|exists:sub_categories,sub_category_id',
             'type' => 'required|in:single,variable,service',
             'usage_type' => 'required|in:saleable,consumable,asset,service',
-            'images' => empty($request->product_id)
-                ? 'required|array|min:1'
-                : 'nullable|array',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'variations_data' => 'required|array|min:1',
-            'variations_data.*.name' => 'required',
-            'variations_data.*.sku' => 'required',
-            'variations_data.*.barcode' => 'nullable',
-            'variations_data.*.base_unit_id' => 'required|exists:units,unit_id',
-            'variations_data.*.purchase_price' => 'nullable|min:0',
-            'variations_data.*.sale_price' => 'required|min:0',
-            'variations_data.*.minimum_stock' => 'nullable|min:0',
-            'features_data' => 'nullable|array',
-            'features_data.*.name' => 'required_with:features_data',
-            'features_data.*.value' => 'required_with:features_data',
+            'variations' => 'required|array|min:1',
+            'variations.*.name' => 'required',
+            'variations.*.sku' => 'required',
+            'variations.*.barcode' => 'nullable',
+            'variations.*.base_unit_id' => 'required|exists:units,unit_id',
+            'variations.*.purchase_price' => 'nullable|min:0',
+            'variations.*.sale_price' => 'required|min:0',
+            'variations.*.minimum_stock' => 'nullable|min:0',
+            'features' => 'nullable|array',
+            'features.*.name' => 'required_with:features',
+            'features.*.description' => 'required_with:features',
         ];
 
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
             return redirect()->back()->withErrors($validate)->withInput();
-        }
-
-        // Parse variations data from JSON
-        $variations = [];
-        if ($request->has('variations_data')) {
-            foreach ($request->variations_data as $variationJson) {
-                $variations[] = json_decode($variationJson, true);
-            }
-        }
-
-        // Parse features data from JSON
-        $features = [];
-        if ($request->has('features_data')) {
-            foreach ($request->features_data as $featureJson) {
-                $features[] = json_decode($featureJson, true);
-            }
-        }
-
-        // Parse images data from JSON (for reference/metadata)
-        $imagesData = [];
-        if ($request->has('images_data')) {
-            foreach ($request->images_data as $imageJson) {
-                $imagesData[] = json_decode($imageJson, true);
-            }
-        }
-
-        // Handle image uploads
-        $product_images = [];
-
-        // Get existing images from images_data
-        $existingImages = [];
-        $removedImageIds = [];
-
-        foreach ($imagesData as $imgData) {
-            if (!$imgData['is_new'] && !empty($imgData['id']) && !($imgData['is_removed'] ?? false)) {
-                $existingImages[] = $imgData['id'];
-            }
-            if (($imgData['is_removed'] ?? false) && !empty($imgData['id'])) {
-                $removedImageIds[] = $imgData['id'];
-            }
-        }
-
-        // Handle new file uploads
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $fileName = uniqid() . '_' . time() . '.' . $image->getClientOriginalExtension();
-                $image->move(public_path('uploads/product'), $fileName);
-
-                $product_images[] = [
-                    'image' => $fileName,
-                    'is_default' => 0
-                ];
-            }
-        }
-
-        // Set default image (first new image or existing default)
-        if (!empty($product_images)) {
-            $product_images[0]['is_default'] = 1;
-        } elseif (!empty($existingImages)) {
-            // Set first existing image as default if no new images
-            $product_images = array_merge($product_images, $existingImages);
         }
 
         // Build product data
@@ -189,9 +146,6 @@ class ProductController extends Controller
             'description' => $request->description,
             'features' => $features,
             'variations' => $variations,
-            'images' => $product_images,
-            'existing_images' => $existingImages,
-            'removed_images' => $removedImageIds,
             'business_id' => $request->business_id ?? Auth::user()->business_id,
             'status' => $request->status ?? 'active',
         ];
@@ -282,6 +236,50 @@ class ProductController extends Controller
             return $this->success(
                 Message::SUCCESS,
                 $products
+            );
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
+
+    public function variations($product_id)
+    {
+        try {
+            $variations = $this->product_service->getVariations($product_id);
+            $html = view('admin.product.partials.variations', compact('variations'))->render();
+
+            return $this->success(Message::SUCCESS, $html);
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
+
+    public function variationStatus($product_variation_id)
+    {
+        try {
+            $this->product_service->getVariations($product_variation_id);
+            return $this->success(
+                Message::STATUS,
+                []
+            );
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
+
+    public function variationDestroy($product_variation_id)
+    {
+        try {
+            $this->product_service->variationDelete($product_variation_id);
+            return $this->success(
+                Message::DELETE,
+                []
             );
         } catch (Exception $e) {
             return $this->error(

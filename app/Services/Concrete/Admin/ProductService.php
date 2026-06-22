@@ -24,7 +24,15 @@ class ProductService
     protected $model_product_feature;
     protected $model_product_variation;
     protected $model_product_variation_attribute;
-    protected $with = ['business', 'category', 'sub_category', 'brand'];
+    protected $with = [
+        'business',
+        'category',
+        'subCategory',
+        'brand',
+        'productImages',
+        'productVariations',
+        'productFeatures'
+    ];
 
     public function __construct()
     {
@@ -46,6 +54,15 @@ class ProductService
         if (isset($obj['business_id']) && $obj['business_id'] != 0 && $obj['business_id'] != "") {
             $wh[] = ['business_id', $obj['business_id']];
         }
+        if (isset($obj['brand_id']) && $obj['brand_id'] != 0 && $obj['brand_id'] != "") {
+            $wh[] = ['brand_id', $obj['brand_id']];
+        }
+        if (isset($obj['category_id']) && $obj['category_id'] != 0 && $obj['category_id'] != "") {
+            $wh[] = ['category_id', $obj['category_id']];
+        }
+        if (isset($obj['sub_category_id']) && $obj['sub_category_id'] != 0 && $obj['sub_category_id'] != "") {
+            $wh[] = ['sub_category_id', $obj['sub_category_id']];
+        }
         if (!empty($obj['start_date'])) {
             $wh[] = ['date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
         }
@@ -62,6 +79,34 @@ class ProductService
             ->orderBy('name', $orderBy);
         $datatable = applyRoleScope($datatable, $allow_roles);
         return DataTables::of($datatable)
+            ->addColumn('business', function ($item) {
+                return $item->business->name ?? '';
+            })
+            ->addColumn('category', function ($item) {
+                return $item->category->name ?? '';
+            })
+            ->addColumn('brand', function ($item) {
+                return $item->brand->name ?? '';
+            })
+            ->addColumn('images', function ($item) {
+                return view('admin.product.partials.images', compact('item'))->render();
+            })
+            ->addColumn('variations', function ($item) {
+                $count = $item->productVariations->count();
+
+                return '
+                    <button class="btn btn-sm btn-primary view-variations"
+                        data-id="' . $item->product_id . '">
+                        Variations <span class="badge bg-light text-dark">' . $count . '</span>
+                    </button>
+                ';
+            })
+
+            ->addColumn('features', function ($item) {
+                return '<button class="btn btn-sm btn-secondary view-features" data-id="' . $item->product_id . '">
+                        Features (' . count($item->productFeatures) . ')
+                    </button>';
+            })
             ->addColumn('status', function ($item) {
 
                 $checked = $item->status == Status::ACTIVE ? 'checked' : '';
@@ -69,9 +114,9 @@ class ProductService
                 return '
                 <div class="form-check form-switch mb-0">
                     <input
-                        class="form-check-input statusBranch"
+                        class="form-check-input statusProduct"
                         type="checkbox"
-                        data-id="' . $item->branch_id . '"
+                        data-id="' . $item->product_id . '"
                         ' . $checked . '>
                 </div>
             ';
@@ -80,21 +125,21 @@ class ProductService
 
                 return "
                     <a class='btn btn-icon btn-outline-primary mr-2'
-                     href='" . route('branch.edit', $item->branch_id) . "'
-                    id='editBranch'>
+                     href='" . route('product.edit', $item->product_id) . "'
+                    id='editProduct'>
 
                     <i class='fa fa-pencil'></i>
                     </a>
 
                     <a class='btn btn-icon btn-outline-danger'
-                    id='deleteBranch'
-                    data-id='{$item->branch_id}'>
+                    id='deleteProdct'
+                    data-id='{$item->product_id}'>
 
                     <i class='fa fa-trash'></i>
                     </a>
                 ";
             })
-            ->rawColumns(['status', 'action'])
+            ->rawColumns(['category', 'brand', 'images', 'variations', 'features', 'status', 'action'])
             ->make(true);
     }
 
@@ -118,35 +163,14 @@ class ProductService
                 $obj['updatedby_id'] = Auth::id();
                 $obj['date_updated'] = now();
 
-                $images = $obj['images'] ?? [];
+
                 $features = $obj['features'] ?? [];
                 $variations = $obj['variations'] ?? [];
 
-                unset($obj['images']);
                 unset($obj['features']);
                 unset($obj['variations']);
 
                 $this->model_product->update($obj, $obj['product_id']);
-
-                // =========================
-                // PRODUCT IMAGES
-                // =========================
-                if (!empty($images)) {
-
-                    $this->model_product_image->getModel()::where('product_id', $product->product_id)->delete();
-
-                    foreach ($images as $image) {
-
-                        $this->model_product_image->getModel()::create([
-                            'product_image_id' => generateUuid(),
-                            'product_id' => $product->product_id,
-                            'image' => $image['image'],
-                            'is_default' => $image['is_default'] ?? 0,
-                            'createdby_id' => Auth::id(),
-                            'date_created' => now(),
-                        ]);
-                    }
-                }
 
                 // =========================
                 // FEATURES
@@ -159,7 +183,7 @@ class ProductService
                         'product_feature_id' => generateUuid(),
                         'product_id' => $product->product_id,
                         'name' => $feature['name'],
-                        'value' => $feature['value'],
+                        'description' => $feature['description'],
                         'createdby_id' => Auth::id(),
                         'date_created' => now(),
                     ]);
@@ -199,11 +223,12 @@ class ProductService
                             'purchase_price' => $variation['purchase_price'],
                             'sale_price' => $variation['sale_price'],
                             'minimum_stock' => $variation['minimum_stock'],
+                            'business_unit_id' => $obj['business_id'],
                             'updatedby_id' => Auth::id(),
                             'date_updated' => now(),
                         ]);
 
-                        $variationId = $variation['product_variation_id'];
+                        $product_variation_id = $variation['product_variation_id'];
                     }
 
                     // =========================
@@ -211,10 +236,10 @@ class ProductService
                     // =========================
                     else {
 
-                        $variationId = generateUuid();
+                        $product_variation_id = generateUuid();
 
                         $this->model_product_variation->getModel()::create([
-                            'product_variation_id' => $variationId,
+                            'product_variation_id' => $product_variation_id,
                             'product_id' => $product->product_id,
                             'name' => $variation['name'],
                             'sku' => $variation['sku'],
@@ -227,7 +252,7 @@ class ProductService
                             'date_created' => now(),
                         ]);
 
-                        $requestVariationIds[] = $variationId;
+                        $requestVariationIds[] = $product_variation_id;
                     }
 
                     // =========================
@@ -236,16 +261,16 @@ class ProductService
 
                     $this->model_product_variation_attribute->getModel()::where(
                         'product_variation_id',
-                        $variationId
+                        $product_variation_id
                     )->delete();
 
-                    foreach ($variation['attributes'] ?? [] as $attribute) {
+                    foreach (($variation['attributes'] ?? []) as $name => $value) {
 
                         $this->model_product_variation_attribute->getModel()::create([
                             'product_variation_attribute_id' => generateUuid(),
-                            'product_variation_id' => $variationId,
-                            'name' => $attribute['name'],
-                            'value' => $attribute['value'],
+                            'product_variation_id' => $product_variation_id,
+                            'name' => $name,
+                            'value' => $value,
                             'createdby_id' => Auth::id(),
                             'date_created' => now(),
                         ]);
@@ -290,11 +315,9 @@ class ProductService
             // CREATE
             // =========================
 
-            $images = $obj['images'] ?? [];
             $features = $obj['features'] ?? [];
             $variations = $obj['variations'] ?? [];
 
-            unset($obj['images']);
             unset($obj['features']);
             unset($obj['variations']);
 
@@ -304,19 +327,6 @@ class ProductService
 
             $product = $this->model_product->create($obj);
 
-            // Images
-            foreach ($images as $image) {
-
-                $this->model_product_image->getModel()::create([
-                    'product_image_id' => generateUuid(),
-                    'product_id' => $product->product_id,
-                    'image' => $image['image'],
-                    'is_default' => $image['is_default'] ?? 0,
-                    'createdby_id' => Auth::id(),
-                    'date_created' => now(),
-                ]);
-            }
-
             // Features
             foreach ($features as $feature) {
 
@@ -324,7 +334,7 @@ class ProductService
                     'product_feature_id' => generateUuid(),
                     'product_id' => $product->product_id,
                     'name' => $feature['name'],
-                    'value' => $feature['value'],
+                    'description' => $feature['description'],
                     'createdby_id' => Auth::id(),
                     'date_created' => now(),
                 ]);
@@ -344,16 +354,18 @@ class ProductService
                     'purchase_price' => $variation['purchase_price'],
                     'sale_price' => $variation['sale_price'],
                     'minimum_stock' => $variation['minimum_stock'],
+                    'business_unit_id' => $obj['business_id'],
                     'createdby_id' => Auth::id(),
                     'date_created' => now(),
                 ]);
 
-                foreach ($variation['attributes'] as $attribute) {
+                foreach (($variation['attributes'] ?? []) as $name => $value) {
+
                     $this->model_product_variation_attribute->getModel()::create([
                         'product_variation_attribute_id' => generateUuid(),
                         'product_variation_id' => $product_variation_id,
-                        'name' => $attribute['name'],
-                        'value' => $attribute['value'],
+                        'name' => $name,
+                        'value' => $value,
                         'createdby_id' => Auth::id(),
                         'date_created' => now(),
                     ]);
@@ -431,5 +443,31 @@ class ProductService
             ->where('category_id', $category_id)
             ->where('is_deleted', 0)
             ->get();
+    }
+
+    public function getVariations($product_id)
+    {
+        return $this->model_product_variation->getModel()::with('attributes')
+            ->where('product_id', $product_id)
+            ->where('is_deleted', 0)
+            ->get();
+    }
+
+    public function variationStatus($product_variation_id)
+    {
+        return $this->model_product_variation->update([
+            'status' => ($this->model_product->find($product_variation_id)->status == Status::ACTIVE ? Status::INACTIVE : Status::ACTIVE),
+            'updatedby_id' => Auth::id(),
+            'date_updated' => now()
+        ], $product_variation_id);
+    }
+
+    public function variationDelete($product_variation_id)
+    {
+        return $this->model_product_variation->update([
+            'is_deleted' => 1,
+            'deletedby_id' => Auth::id(),
+            'date_deleted' => now()
+        ], $product_variation_id);
     }
 }
