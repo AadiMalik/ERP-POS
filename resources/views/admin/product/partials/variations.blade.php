@@ -1,10 +1,29 @@
 <table class="table table-bordered table-sm">
       <thead>
             <tr>
+                  <th colspan="3" class="text-center">
+                        <b>Information</b>
+                  </th>
+                  <th colspan="3" class="text-center">
+                        <b>Unit Info.</b>
+                  </th>
+                  <th colspan="2" class="text-center">
+                        <b>Price Info.</b>
+                  </th>
+                  <th colspan="3" class="text-center">
+                        <b>Stock Info.</b>
+                  </th>
+                  <th colspan="3" class="text-center">
+                        <b>Other</b>
+                  </th>
+            </tr>
+            <tr>
                   <th>Name</th>
                   <th>SKU</th>
                   <th>Barcode</th>
-                  <th>Unit</th>
+                  <th>Basic</th>
+                  <th>Purchase</th>
+                  <th>Sale</th>
                   <th>Purchase</th>
                   <th>Sale</th>
                   <th>Min Stock</th>
@@ -23,6 +42,8 @@
                   <td>{{ $var->sku }}</td>
                   <td>{{ $var->barcode }}</td>
                   <td>{{ $var->unit->name??'' }}</td>
+                  <td>{{ $var->purchaseUnit->name??'' }}</td>
+                  <td>{{ $var->saleUnit->name??'' }}</td>
                   <td>{{ $var->purchase_price }}</td>
                   <td>{{ $var->sale_price }}</td>
                   <td>{{ $var->minimum_stock }}</td>

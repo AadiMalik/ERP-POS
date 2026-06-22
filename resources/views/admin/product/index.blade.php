@@ -371,7 +371,7 @@
         });
 
         // ── Upload preview ──────────────────────────────────────────────
-        $('#product_images_input').on('change', function() {
+        $('#product_images_input').off('change').on('change', function () {
             let container = $('#upload_preview');
             container.html('');
             Array.from(this.files).forEach(file => {

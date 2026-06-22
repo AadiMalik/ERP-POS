@@ -35,7 +35,7 @@
 
     {{-- + Manage images --}}
     <button class="btn btn-sm btn-outline-primary add-image d-flex align-items-center justify-content-center"
-            data-id="{{ $images[0]->product_id ?? '' }}"
+            data-id="{{ $product_id ?? '' }}"
             style="width:40px; height:40px; font-size:18px; flex-shrink:0; border-radius:6px;">
         <i class="fa fa-plus" style="pointer-events:none;"></i>
     </button>

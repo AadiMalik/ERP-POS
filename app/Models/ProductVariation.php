@@ -20,6 +20,8 @@ class ProductVariation extends Model
         'barcode',
         'name',
         'base_unit_id',
+        'purchase_unit_id',
+        'sale_unit_id',
         'purchase_price',
         'sale_price',
         'minimum_stock',
@@ -50,6 +52,16 @@ class ProductVariation extends Model
     public function unit()
     {
         return $this->belongsTo(Unit::class, 'base_unit_id', 'unit_id');
+    }
+
+    public function purchaseUnit()
+    {
+        return $this->belongsTo(Unit::class, 'purchase_unit_id', 'unit_id');
+    }
+
+    public function saleUnit()
+    {
+        return $this->belongsTo(Unit::class, 'sale_unit_id', 'unit_id');
     }
 
     public function product()

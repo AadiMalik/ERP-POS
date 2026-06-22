@@ -32,6 +32,9 @@ class ProductService
         'brand',
         'productImages',
         'productVariations',
+        'productVariations.unit:unit_id,name',
+        'productVariations.purchaseUnit:unit_id,name',
+        'productVariations.saleUnit:unit_id,name',
         'productVariations.attributes:product_variation_attribute_id,product_variation_id,name,value',
         'productFeatures'
     ];
@@ -92,7 +95,8 @@ class ProductService
             })
             ->addColumn('images', function ($item) {
                 $images = $item->productImages->sortBy('sorting');
-                return view('admin.product.partials.images', compact('images'))->render();
+                $product_id = $item->product_id;
+                return view('admin.product.partials.images', compact('images', 'product_id'))->render();
             })
             ->addColumn('variations', function ($item) {
                 $count = $item->productVariations->count();
@@ -223,6 +227,8 @@ class ProductService
                             'sku' => $variation['sku'],
                             'barcode' => $variation['barcode'],
                             'base_unit_id' => $variation['base_unit_id'],
+                            'purchase_unit_id' => $variation['purchase_unit_id'],
+                            'sale_unit_id' => $variation['sale_unit_id'],
                             'purchase_price' => $variation['purchase_price'],
                             'sale_price' => $variation['sale_price'],
                             'minimum_stock' => $variation['minimum_stock'],
@@ -248,6 +254,8 @@ class ProductService
                             'sku' => $variation['sku'],
                             'barcode' => $variation['barcode'],
                             'base_unit_id' => $variation['base_unit_id'],
+                            'purchase_unit_id' => $variation['purchase_unit_id'],
+                            'sale_unit_id' => $variation['sale_unit_id'],
                             'purchase_price' => $variation['purchase_price'],
                             'sale_price' => $variation['sale_price'],
                             'minimum_stock' => $variation['minimum_stock'],
@@ -354,6 +362,8 @@ class ProductService
                     'sku' => $variation['sku'],
                     'barcode' => $variation['barcode'],
                     'base_unit_id' => $variation['base_unit_id'],
+                    'purchase_unit_id' => $variation['purchase_unit_id'],
+                    'sale_unit_id' => $variation['sale_unit_id'],
                     'purchase_price' => $variation['purchase_price'],
                     'sale_price' => $variation['sale_price'],
                     'minimum_stock' => $variation['minimum_stock'],
@@ -442,7 +452,7 @@ class ProductService
 
     public function getByCategory($category_id)
     {
-        return $this->model_product->getModel()::with('business')
+        return $this->model_product->getModel()::with($this->with)
             ->where('category_id', $category_id)
             ->where('is_deleted', 0)
             ->get();
@@ -450,7 +460,7 @@ class ProductService
 
     public function getVariations($product_id)
     {
-        return $this->model_product_variation->getModel()::with('attributes')
+        return $this->model_product_variation->getModel()::with('unit:unit_id,name', 'purchaseUnit:unit_id,name', 'saleUnit:unit_id,name', 'attributes')
             ->where('product_id', $product_id)
             ->where('is_deleted', 0)
             ->get();
@@ -477,10 +487,9 @@ class ProductService
     /**
      * Upload multiple images for a product.
      */
-    public function uploadImages($product_id, array $files, bool $setFirstAsDefault = false)
+    public function uploadImages($product_id, array $files)
     {
         $uploaded  = [];
-        $is_first   = true;
 
         // Current max sorting
         $max_sort = $this->model_product_image->getModel()::where('product_id', $product_id)->max('sorting') ?? 0;
@@ -489,19 +498,12 @@ class ProductService
             $filename = generateUuid() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('uploads/product'), $filename);
 
-            $isDefault = ($setFirstAsDefault && $is_first);
-
-            // If setting as default, unset previous default
-            if ($isDefault) {
-                $this->clearDefault($product_id);
-            }
-
             $image = $this->model_product_image->getModel()::create([
                 'product_image_id' => generateUuid(),
                 'product_id'       => $product_id,
                 'image'            => $filename,
                 'sorting'          => ++$max_sort,
-                'is_default'       => $isDefault ? 1 : 0,
+                'is_default'       => 0,
                 'status'           => 1,
                 'createdby_id'     => Auth::id(),
                 'date_created'     => Carbon::now(),
@@ -517,9 +519,9 @@ class ProductService
     /**
      * Delete a single product image.
      */
-    public function deleteImage(string $imageId): bool
+    public function deleteImage($product_image_id)
     {
-        $image = ProductImage::findOrFail($imageId);
+        $image = ProductImage::findOrFail($product_image_id);
 
         $filePath = public_path('uploads/product/' . $image->image);
         if (File::exists($filePath)) {
@@ -532,12 +534,10 @@ class ProductService
     /**
      * Set a specific image as default (clears others first).
      */
-    public function setDefault(string $imageId): bool
+    public function setDefault($product_image_id)
     {
-        $image = $this->model_product_image->getModel()::findOrFail($imageId);
-
+        $image = $this->model_product_image->getModel()::findOrFail($product_image_id);
         $this->clearDefault($image->product_id);
-
         $image->is_default = 1;
         return $image->save();
     }
@@ -545,7 +545,7 @@ class ProductService
     /**
      * Save new sort order. $order = [['id' => uuid, 'sorting' => int], ...]
      */
-    public function saveSorting(array $order): void
+    public function saveSorting($order)
     {
         foreach ($order as $item) {
             $this->model_product_image->getModel()::where('product_image_id', $item['id'])
@@ -556,17 +556,17 @@ class ProductService
     /**
      * Get all images for a product ordered by sorting.
      */
-    public function getImages(string $productId)
+    public function getImages($product_id)
     {
-        return $this->model_product_image->getModel()::where('product_id', $productId)
+        return $this->model_product_image->getModel()::where('product_id', $product_id)
             ->orderBy('sorting')
             ->get();
     }
 
     // ─────────────────────────────────────────────
-    private function clearDefault(string $productId)
+    private function clearDefault($product_id)
     {
-        $this->model_product_image->getModel()::where('product_id', $productId)
+        $this->model_product_image->getModel()::where('product_id', $product_id)
             ->update(['is_default' => 0]);
     }
 }

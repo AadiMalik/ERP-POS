@@ -113,6 +113,8 @@ class ProductController extends Controller
             'variations.*.sku' => 'required',
             'variations.*.barcode' => 'nullable',
             'variations.*.base_unit_id' => 'required|exists:units,unit_id',
+            'variations.*.purchase_unit_id' => 'required|exists:units,unit_id',
+            'variations.*.sale_unit_id' => 'required|exists:units,unit_id',
             'variations.*.purchase_price' => 'nullable|min:0',
             'variations.*.sale_price' => 'required|min:0',
             'variations.*.minimum_stock' => 'nullable|min:0',
@@ -247,7 +249,7 @@ class ProductController extends Controller
     {
         try {
             $variations = $this->product_service->getVariations($product_id);
-            $html = view('admin.product.partials.variations', compact('variations'))->render();
+            $html = view('admin.product.partials.variations', compact('variations', 'product_id'))->render();
 
             return $this->success(Message::SUCCESS, $html);
         } catch (Exception $e) {
@@ -325,23 +327,35 @@ class ProductController extends Controller
             );
         }
     }
-    public function setDefaultImage(string $id)
+    public function setDefaultImage($id)
     {
-        $this->product_service->setDefault($id);
-        return $this->success(
-            Message::SAVE,
-            []
-        );
+        try {
+            $this->product_service->setDefault($id);
+            return $this->success(
+                Message::SAVE,
+                []
+            );
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
     }
 
     public function saveImageSorting(Request $request)
     {
-        $request->validate(['order' => 'required|array']);
-        $this->product_service->saveSorting($request->order);
-        return $this->success(
-            Message::SAVE,
-            []
-        );
+        try {
+            $request->validate(['order' => 'required|array']);
+            $this->product_service->saveSorting($request->order);
+            return $this->success(
+                Message::SAVE,
+                []
+            );
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
     }
 
     public function deleteImage($product_image_id)
