@@ -259,6 +259,18 @@ class ProductController extends Controller
         }
     }
 
+    public function byProduct($product_id)
+    {
+        try {
+            $variations = $this->product_service->getVariations($product_id);
+            return $this->success(Message::SUCCESS, $variations);
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
+
     public function variationStatus($product_variation_id)
     {
         try {

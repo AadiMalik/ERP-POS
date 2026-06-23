@@ -159,6 +159,11 @@
                         <div data-i18n="Products">Products</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/product-variation-unit-conversion') }}" class="menu-link">
+                        <div data-i18n="Unit Conversion">Unit Conversion</div>
+                    </a>
+                </li>
             </ul>
         </li>
         <li class="menu-header small text-uppercase">

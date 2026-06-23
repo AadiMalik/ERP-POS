@@ -175,6 +175,7 @@ class CategoryService
       {
             return $this->model_category->getModel()::with('business')
                   ->where('business_id', $business_id)
+                  ->where('status', Status::ACTIVE)
                   ->where('is_deleted', 0)
                   ->get();
       }
