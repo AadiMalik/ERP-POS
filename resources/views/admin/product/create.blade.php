@@ -383,14 +383,14 @@ use App\Enums\RoleNames;
 </div>
 
 <!-- VARIATION MODAL -->
-<div class="modal fade" id="variationModal" tabindex="-1" data-bs-backdrop="static">
+<div class="modal fade" id="variationModal">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-light">
                 <h5 class="modal-title" id="variationModalTitle">
                     <i class="fa fa-plus-circle me-1"></i> Add Variation
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="variationForm" class="variation-form">
@@ -398,24 +398,42 @@ use App\Enums\RoleNames;
                     <input type="hidden" id="editVariationId" value="">
 
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label">Variation Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="modalVariationName"
                                 placeholder="e.g. Small" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label">SKU <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="modalVariationSku" placeholder="SKU001"
                                 required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label">Barcode</label>
                             <input type="text" class="form-control" id="modalVariationBarcode"
                                 placeholder="1234567890">
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Unit <span class="text-danger">*</span></label>
+                        <div class="col-md-4">
+                            <label class="form-label">Base Unit <span class="text-danger">*</span></label>
                             <select class="form-select" id="modalVariationUnit" required>
+                                <option value="">--Select Unit--</option>
+                                @foreach ($units as $unit)
+                                <option value="{{ $unit->unit_id }}">{{ $unit->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Purchase Unit <span class="text-danger">*</span></label>
+                            <select class="form-select" id="modalVariationPurchaseUnit" required>
+                                <option value="">--Select Unit--</option>
+                                @foreach ($units as $unit)
+                                <option value="{{ $unit->unit_id }}">{{ $unit->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Sale Unit <span class="text-danger">*</span></label>
+                            <select class="form-select" id="modalVariationSaleUnit" required>
                                 <option value="">--Select Unit--</option>
                                 @foreach ($units as $unit)
                                 <option value="{{ $unit->unit_id }}">{{ $unit->name }}</option>
@@ -529,6 +547,8 @@ use App\Enums\RoleNames;
         sale_price: {{$var->sale_price ?? 0}},
         minimum_stock: {{$var->minimum_stock ?? 0}},
         base_unit_id: "{{$var->base_unit_id ?? 0}}",
+        purchase_unit_id: "{{$var->purchase_unit_id ?? 0}}",
+        sale_unit_id: "{{$var->sale_unit_id ?? 0}}",
         track_batch: {{$var->track_batch ? 'true' : 'false'}},
         track_expiry: {{$var->track_expiry ? 'true' : 'false'}},
         attributes: @json(
@@ -609,6 +629,9 @@ use App\Enums\RoleNames;
     // ======================================================
     // VARIATION FUNCTIONS
     // ======================================================
+    const variationModalEl = document.getElementById('variationModal');
+    const variationModal = bootstrap.Modal.getOrCreateInstance(variationModalEl);
+
 
     function renderVariations() {
         const tbody = document.getElementById('variationTableBody');
@@ -637,7 +660,7 @@ use App\Enums\RoleNames;
             tr.innerHTML = `
                     <td><span class="fw-semibold">${escapeHtml(variation.name)}</span></td>
                     <td><code>${escapeHtml(variation.sku)}</code></td>
-                    <td>$${parseFloat(variation.sale_price || 0).toFixed(2)}</td>
+                    <td>${parseFloat(variation.sale_price || 0).toFixed(2)}</td>
                     <td>${attrDisplay ? `<span class="text-muted small">${escapeHtml(attrDisplay)}</span>` : '<span class="text-muted small">No attributes</span>'}</td>
                     <td>
                         <div class="btn-group btn-group-sm" role="group">
@@ -682,6 +705,8 @@ use App\Enums\RoleNames;
         const sku = document.getElementById('modalVariationSku').value.trim();
         const barcode = document.getElementById('modalVariationBarcode').value.trim();
         const unit = document.getElementById('modalVariationUnit').value;
+        const purchaseUnit = document.getElementById('modalVariationPurchaseUnit').value;
+        const saleUnit = document.getElementById('modalVariationSaleUnit').value;
         const purchasePrice = parseFloat(document.getElementById('modalVariationPurchasePrice').value) || 0;
         const salePrice = parseFloat(document.getElementById('modalVariationSalePrice').value) || 0;
         const minStock = parseInt(document.getElementById('modalVariationMinStock').value) || 0;
@@ -726,6 +751,8 @@ use App\Enums\RoleNames;
             sale_price: salePrice,
             minimum_stock: minStock,
             base_unit_id: unit,
+            purchase_unit_id: purchaseUnit,
+            sale_unit_id: saleUnit,
             track_batch: trackBatch,
             track_expiry: trackExpiry,
             attributes: attributes
@@ -743,10 +770,14 @@ use App\Enums\RoleNames;
 
         renderVariations();
         resetVariationModal();
-        const modal = bootstrap.Modal.getInstance(document.getElementById('variationModal'));
-        modal.hide();
+        variationModal.hide();
     }
 
+    document.getElementById('variationModal').addEventListener('hide.bs.modal', function () {
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+});
     function openEditVariationModal(index) {
         const variation = variations[index];
         if (!variation) return;
@@ -758,6 +789,8 @@ use App\Enums\RoleNames;
         document.getElementById('modalVariationSku').value = variation.sku || '';
         document.getElementById('modalVariationBarcode').value = variation.barcode || '';
         document.getElementById('modalVariationUnit').value = variation.base_unit_id || '';
+        document.getElementById('modalVariationPurchaseUnit').value = variation.purchase_unit_id || '';
+        document.getElementById('modalVariationSaleUnit').value = variation.sale_unit_id || '';
         document.getElementById('modalVariationPurchasePrice').value = variation.purchase_price || 0;
         document.getElementById('modalVariationSalePrice').value = variation.sale_price || 0;
         document.getElementById('modalVariationMinStock').value = variation.minimum_stock || 0;
@@ -774,8 +807,7 @@ use App\Enums\RoleNames;
         document.getElementById('variationModalTitle').innerHTML = `<i class="fa fa-pencil me-1"></i> Edit Variation`;
         document.getElementById('saveVariationBtn').innerHTML = `<i class="fa fa-save me-1"></i> Update Variation`;
 
-        const modal = new bootstrap.Modal(document.getElementById('variationModal'));
-        modal.show();
+        variationModal.show();
     }
 
     function deleteVariation(index) {
@@ -791,6 +823,8 @@ use App\Enums\RoleNames;
         document.getElementById('modalVariationSku').value = '';
         document.getElementById('modalVariationBarcode').value = '';
         document.getElementById('modalVariationUnit').value = '';
+        document.getElementById('modalVariationPurchaseUnit').value = '';
+        document.getElementById('modalVariationSaleUnit').value = '';
         document.getElementById('modalVariationPurchasePrice').value = '0.00';
         document.getElementById('modalVariationSalePrice').value = '0.00';
         document.getElementById('modalVariationMinStock').value = '0';
@@ -899,8 +933,7 @@ use App\Enums\RoleNames;
 
         resetVariationModal();
 
-        const modal = new bootstrap.Modal(document.getElementById('variationModal'));
-        modal.show();
+        variationModal.show();
         });
 
     document.getElementById('modalAddAttrBtn').addEventListener('click', function() {
@@ -987,6 +1020,12 @@ use App\Enums\RoleNames;
     renderVariations();
     toggleFeaturesSection();
     toggleVariationSection();
+
+    document.getElementById('variationModal').addEventListener('hidden.bs.modal', function () {
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style = '';
+});
 
     // ======================================================
     // BUSINESS/CATEGORY DYNAMIC LOADING
