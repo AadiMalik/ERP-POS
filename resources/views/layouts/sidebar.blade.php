@@ -164,6 +164,11 @@
                         <div data-i18n="Unit Conversion">Unit Conversion</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/product-variation-batch') }}" class="menu-link">
+                        <div data-i18n="Batches">Batches</div>
+                    </a>
+                </li>
             </ul>
         </li>
         <li class="menu-header small text-uppercase">

@@ -5,6 +5,7 @@ namespace App\Services\Concrete\Admin;
 use App\Enums\Filter;
 use App\Enums\RoleNames;
 use App\Enums\Status;
+use App\Models\ProductVariationBatch;
 use App\Models\ProductVariationUnitConversion;
 use App\Repository\Repository;
 use Carbon\Carbon;
@@ -12,14 +13,14 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
-class ProductVariationUnitConversionService
+class ProductVariationBatchService
 {
-    protected $model_product_variation_unit_conversion;
-    protected $with = ['business','product', 'productVariation', 'fromUnit', 'toUnit', 'createdBy', 'updatedBy', 'deletedBy'];
+    protected $model_product_variation_batch;
+    protected $with = ['business','product', 'productVariation', 'warehouse', 'createdBy', 'updatedBy', 'deletedBy'];
 
     public function __construct()
     {
-        $this->model_product_variation_unit_conversion = new Repository(new ProductVariationUnitConversion());
+        $this->model_product_variation_batch = new Repository(new ProductVariationBatch());
     }
 
     public function getData($obj)
@@ -39,11 +40,8 @@ class ProductVariationUnitConversionService
         if (isset($obj['product_variation_id']) && $obj['product_variation_id'] != 0 && $obj['product_variation_id'] != "") {
             $wh[] = ['product_variation_id', $obj['product_variation_id']];
         }
-        if (isset($obj['from_unit_id']) && $obj['from_unit_id'] != 0 && $obj['from_unit_id'] != "") {
-            $wh[] = ['from_unit_id', $obj['from_unit_id']];
-        }
-        if (isset($obj['to_unit_id']) && $obj['to_unit_id'] != 0 && $obj['to_unit_id'] != "") {
-            $wh[] = ['to_unit_id', $obj['to_unit_id']];
+        if (isset($obj['warehouse_id']) && $obj['warehouse_id'] != 0 && $obj['warehouse_id'] != "") {
+            $wh[] = ['warehouse_id', $obj['warehouse_id']];
         }
         if (!empty($obj['start_date'])) {
             $wh[] = ['date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
@@ -56,7 +54,7 @@ class ProductVariationUnitConversionService
             RoleNames::SUPERADMIN,
             RoleNames::BUSINESSADMIN
         ];
-        $datatable = $this->model_product_variation_unit_conversion->getModel()::where($wh)
+        $datatable = $this->model_product_variation_batch->getModel()::where($wh)
             ->with($this->with)
             ->where('is_deleted', 0)
             ->orderBy('date_created', $orderBy);
@@ -74,13 +72,9 @@ class ProductVariationUnitConversionService
 
                 return $item->productVariation?->name ?? '-';
             })
-            ->addColumn('fromUnit', function ($item) {
+            ->addColumn('warehouse', function ($item) {
 
-                return $item->fromUnit?->name ?? '-';
-            })
-            ->addColumn('toUnit', function ($item) {
-
-                return $item->toUnit?->name ?? '-';
+                return $item->warehouse?->name ?? '-';
             })
             ->addColumn('status', function ($item) {
 
@@ -89,9 +83,9 @@ class ProductVariationUnitConversionService
                 return '
                 <div class="form-check form-switch mb-0">
                     <input
-                        class="form-check-input statusProductVariationUnitConversion"
+                        class="form-check-input statusProductVariationBatch"
                         type="checkbox"
-                        data-id="' . $item->product_variation_unit_conversion_id . '"
+                        data-id="' . $item->product_variation_batch_id . '"
                         ' . $checked . '>
                 </div>
             ';
@@ -100,70 +94,70 @@ class ProductVariationUnitConversionService
 
                 return "
                     <a class='btn btn-icon btn-outline-primary mr-2'
-                     id='editProductVariationUnitConversion' href='javascript:void(0)'
-                      data-toggle='tooltip'  data-id='" . $item->product_variation_unit_conversion_id . "' data-original-title='Edit'><i title='Edit' class='icon-base fa fa-pencil'></i></a>
+                     id='editProductVariationBatch' href='javascript:void(0)'
+                      data-toggle='tooltip'  data-id='" . $item->product_variation_batch_id . "' data-original-title='Edit'><i title='Edit' class='icon-base fa fa-pencil'></i></a>
 
                     <a class='btn btn-icon btn-outline-danger'
-                    id='deleteProductVariationUnitConversion'
-                    data-id='{$item->product_variation_unit_conversion_id}'>
+                    id='deleteProductVariationBatch'
+                    data-id='{$item->product_variation_batch_id}'>
 
                     <i class='fa fa-trash'></i>
                     </a>
                 ";
             })
-            ->rawColumns(['business','product', 'productVariation', 'fromUnit', 'toUnit', 'status', 'action'])
+            ->rawColumns(['business','product', 'productVariation', 'warehouse', 'status', 'action'])
             ->make(true);
     }
 
     public function save($obj)
     {
 
-        if (!empty($obj['product_variation_unit_conversion_id'])) {
+        if (!empty($obj['product_variation_batch_id'])) {
             $obj['updatedby_id'] = Auth::user()->id;
             $obj['date_updated'] = now();
-            $this->model_product_variation_unit_conversion->update($obj, $obj['product_variation_unit_conversion_id']);
-            return $this->model_product_variation_unit_conversion->find($obj['product_variation_unit_conversion_id']);
+            $this->model_product_variation_batch->update($obj, $obj['product_variation_batch_id']);
+            return $this->model_product_variation_batch->find($obj['product_variation_batch_id']);
         }
 
-        $obj['product_variation_unit_conversion_id'] = generateUuid();
+        $obj['product_variation_batch_id'] = generateUuid();
         $obj['createdby_id'] = Auth::user()->id;
         $obj['date_created'] = now();
-        $saved_obj = $this->model_product_variation_unit_conversion->create($obj);
+        $saved_obj = $this->model_product_variation_batch->create($obj);
         return $saved_obj;
     }
 
-    public function getById($product_variation_unit_conversion_id)
+    public function getById($product_variation_batch_id)
     {
-        return $this->model_product_variation_unit_conversion->find($product_variation_unit_conversion_id);
+        return $this->model_product_variation_batch->find($product_variation_batch_id);
     }
-    public function status($product_variation_unit_conversion_id)
+    public function status($product_variation_batch_id)
     {
-        return $this->model_product_variation_unit_conversion->update([
-            'status' => ($this->model_product_variation_unit_conversion->find($product_variation_unit_conversion_id)->status == Status::ACTIVE ? Status::INACTIVE : Status::ACTIVE),
+        return $this->model_product_variation_batch->update([
+            'status' => ($this->model_product_variation_batch->find($product_variation_batch_id)->status == Status::ACTIVE ? Status::INACTIVE : Status::ACTIVE),
             'updatedby_id' => Auth::id(),
             'date_updated' => now()
-        ], $product_variation_unit_conversion_id);
+        ], $product_variation_batch_id);
     }
 
-    public function delete($product_variation_unit_conversion_id)
+    public function delete($product_variation_batch_id)
     {
-        return $this->model_product_variation_unit_conversion->update([
+        return $this->model_product_variation_batch->update([
             'is_deleted' => 1,
             'deletedby_id' => Auth::id(),
             'date_deleted' => now()
-        ], $product_variation_unit_conversion_id);
+        ], $product_variation_batch_id);
     }
 
     public function getAll()
     {
-        return $this->model_product_variation_unit_conversion->getModel()::with($this->with)
+        return $this->model_product_variation_batch->getModel()::with($this->with)
             ->where('business_id', Auth::user()->business_id)
             ->where('is_deleted', 0)
             ->get();
     }
     public function getAllActive()
     {
-        return $this->model_product_variation_unit_conversion->getModel()::with($this->with)
+        return $this->model_product_variation_batch->getModel()::with($this->with)
             ->where('business_id', Auth::user()->business_id)
             ->where('status', Status::ACTIVE)
             ->where('is_deleted', 0)
@@ -172,7 +166,7 @@ class ProductVariationUnitConversionService
 
     public function getByProduct($product_id)
     {
-        return $this->model_product_variation_unit_conversion->getModel()::with($this->with)
+        return $this->model_product_variation_batch->getModel()::with($this->with)
             ->where('product_id', $product_id)
             ->where('status', Status::ACTIVE)
             ->where('is_deleted', 0)
@@ -180,15 +174,23 @@ class ProductVariationUnitConversionService
     }
     public function getByProductVariation($product_variation_id)
     {
-        return $this->model_product_variation_unit_conversion->getModel()::with($this->with)
+        return $this->model_product_variation_batch->getModel()::with($this->with)
             ->where('product_variation_id', $product_variation_id)
+            ->where('status', Status::ACTIVE)
+            ->where('is_deleted', 0)
+            ->get();
+    }
+    public function getByWarehouse($warehouse_id)
+    {
+        return $this->model_product_variation_batch->getModel()::with($this->with)
+            ->where('warehouse_id', $warehouse_id)
             ->where('status', Status::ACTIVE)
             ->where('is_deleted', 0)
             ->get();
     }
     public function getByBusiness($business_id)
     {
-        return $this->model_product_variation_unit_conversion->getModel()::with($this->with)
+        return $this->model_product_variation_batch->getModel()::with($this->with)
             ->where('business_id', $business_id)
             ->where('status', Status::ACTIVE)
             ->where('is_deleted', 0)
