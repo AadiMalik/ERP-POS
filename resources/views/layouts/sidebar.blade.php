@@ -169,6 +169,16 @@
                         <div data-i18n="Batches">Batches</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/product-variation-stock') }}" class="menu-link">
+                        <div data-i18n="Stock">Stock</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/product-variation-stock-transaction') }}" class="menu-link">
+                        <div data-i18n="Transactions">Transactions</div>
+                    </a>
+                </li>
             </ul>
         </li>
         <li class="menu-header small text-uppercase">
