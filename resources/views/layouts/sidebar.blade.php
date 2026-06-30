@@ -47,7 +47,7 @@
                     </g>
                 </svg>
             </span>
-            <span class="app-brand-text demo menu-text fw-bolder ms-2">{{env('APP_NAME')}}</span>
+            <span class="app-brand-text demo menu-text fw-bolder ms-2">{{ env('APP_NAME') }}</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -181,6 +181,24 @@
                 </li>
             </ul>
         </li>
+
+        {{-- Accounting --}}
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons fa fa-box"></i>
+                <div data-i18n="Accounting">Accounting</div>
+            </a>
+
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ url('/admin/account-type') }}" class="menu-link">
+                        <div data-i18n="Account Types">Account Types</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Pages</span>
         </li>

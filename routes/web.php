@@ -159,4 +159,12 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
         Route::get('by-product/{product_id}', [App\Http\Controllers\Admin\ProductVariationStockTransactionController::class, 'byProduct']);
         Route::get('by-variation/{product_variation_id}', [App\Http\Controllers\Admin\ProductVariationStockTransactionController::class, 'byVariation']);
     });
+
+    //Account Types
+    Route::resource('account-type', App\Http\Controllers\Admin\AccountTypeController::class);
+    Route::group(['prefix' => 'account-type'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\AccountTypeController::class, 'getData']);
+        Route::post('reset', [App\Http\Controllers\Admin\AccountTypeController::class, 'reset']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\AccountTypeController::class, 'byBusiness']);
+    });
 });
