@@ -195,6 +195,11 @@
                         <div data-i18n="Account Types">Account Types</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/account-sub-type') }}" class="menu-link">
+                        <div data-i18n="Account Sub Types">Account Sub Types</div>
+                    </a>
+                </li>
             </ul>
         </li>
 

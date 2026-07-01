@@ -30,7 +30,7 @@ class AccountSubType extends Model
 
     public function accountType()
     {
-        return $this->belongsTo(AccountType::class);
+        return $this->belongsTo(AccountType::class, 'account_type_id');
     }
     
     // public function accounts()
@@ -40,7 +40,7 @@ class AccountSubType extends Model
 
     public function business()
     {
-        return $this->belongsTo(Business::class);
+        return $this->belongsTo(Business::class, 'business_id');
     }
 
     public function createdBy()

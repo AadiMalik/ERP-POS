@@ -110,13 +110,22 @@ class AccountTypeService
     public function getAll()
     {
         if (getRoleName() != RoleNames::SUPERADMIN) {
-            return $this->model_account_type->getModel()::with($this->with)->where('business_id', Auth::user()->business_id)->get();
+            return $this->model_account_type->getModel()::with($this->with)
+                ->where('business_id', Auth::user()->business_id)
+                ->where('is_deleted', 0)
+                ->get();
         }
-        return $this->model_account_type->getModel()::with($this->with)->whereNull('business_id')->get();
+        return $this->model_account_type->getModel()::with($this->with)
+            ->whereNull('business_id')
+            ->where('is_deleted', 0)
+            ->get();
     }
     public function getByBusiness($business_id)
     {
-        return $this->model_account_type->getModel()::with($this->with)->where('business_id', $business_id)->get();
+        return $this->model_account_type->getModel()::with($this->with)
+            ->where('business_id', $business_id)
+            ->where('is_deleted', 0)
+            ->get();
     }
     public function resetBusinessAccountType()
     {
@@ -124,7 +133,7 @@ class AccountTypeService
 
             $business_id = Auth::user()->business_id;
 
-            $accountTypes = [
+            $account_types = [
                 [
                     'name' => AccountTypes::ASSETS,
                     'code' => '1000',
@@ -152,36 +161,37 @@ class AccountTypeService
                 ],
             ];
 
-            foreach ($accountTypes as $item) {
+            foreach ($account_types as $item) {
 
-                $accountType = $this->model_account_type->getModel()::firstOrNew([
+                $account_type = $this->model_account_type->getModel()::firstOrNew([
                     'business_id' => $business_id,
                     'name' => $item['name'],
                 ]);
 
                 // Code sirf tab set hoga jab empty ho
-                if (empty($accountType->code)) {
-                    $accountType->code = $item['code'];
+                if (empty($account_type->code)) {
+                    $account_type->code = $item['code'];
                 }
-                if (!$accountType->exists && empty($accountType->account_type_id)) {
-                    $accountType->account_type_id = generateUuid();
+                if (!$account_type->exists && empty($account_type->account_type_id)) {
+                    $account_type->account_type_id = generateUuid();
                 }
 
                 // Description hamesha latest rahe
-                $accountType->description = $item['description'];
+                $account_type->description = $item['description'];
 
-                $accountType->business_id = $business_id;
-                $accountType->name = $item['name'];
-                $accountType->date_created = $accountType->exists ? $accountType->date_created : now();
-                $accountType->date_updated = now();
+                $account_type->business_id = $business_id;
+                $account_type->name = $item['name'];
+                $account_type->is_deleted = 0;
+                $account_type->date_created = $account_type->exists ? $account_type->date_created : now();
+                $account_type->date_updated = now();
 
-                $accountType->save();
+                $account_type->save();
             }
 
             return true;
         } catch (Exception $e) {
 
-            return false;
+           return throw $e;
         }
     }
 }

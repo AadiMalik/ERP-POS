@@ -167,4 +167,13 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
         Route::post('reset', [App\Http\Controllers\Admin\AccountTypeController::class, 'reset']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\AccountTypeController::class, 'byBusiness']);
     });
+
+    //Account Sub Types
+    Route::resource('account-sub-type', App\Http\Controllers\Admin\AccountSubTypeController::class);
+    Route::group(['prefix' => 'account-sub-type'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\AccountSubTypeController::class, 'getData']);
+        Route::post('reset', [App\Http\Controllers\Admin\AccountSubTypeController::class, 'reset']);
+        Route::get('by-account-type/{account_type_id}', [App\Http\Controllers\Admin\AccountSubTypeController::class, 'byAccountType']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\AccountSubTypeController::class, 'byBusiness']);
+    });
 });
