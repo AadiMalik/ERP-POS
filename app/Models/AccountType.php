@@ -34,13 +34,13 @@ class AccountType extends Model
 
     public function accountSubTypes()
     {
-        return $this->hasMany(AccountSubType::class);
+        return $this->hasMany(AccountSubType::class, 'account_type_id', 'account_type_id');
     }
 
-    // public function accounts()
-    // {
-    //     return $this->hasMany(Account::class);
-    // }
+    public function accounts()
+    {
+        return $this->hasMany(Account::class, 'account_type_id', 'account_type_id');
+    }
 
     public function createdBy()
     {

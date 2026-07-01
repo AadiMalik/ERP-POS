@@ -176,4 +176,9 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
         Route::get('by-account-type/{account_type_id}', [App\Http\Controllers\Admin\AccountSubTypeController::class, 'byAccountType']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\AccountSubTypeController::class, 'byBusiness']);
     });
+
+    //account
+    Route::group(['prefix' => 'account'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\AccountController::class, 'index']);
+    });
 });

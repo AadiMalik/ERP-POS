@@ -5,20 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class AccountSubType extends Model
+class Account extends Model
 {
     use HasFactory;
     public $timestamps = false;
-    protected $primaryKey = 'account_sub_type_id';
+    protected $primaryKey = 'account_id';
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [
-        'account_sub_type_id',
+        'account_id',
         'account_type_id',
+        'account_sub_type_id',
+        'business_id',
         'name',
         'code',
         'description',
-        'business_id',
+        'parent_account_id',
+        'status',
         'is_deleted',
         'createdby_id',
         'updatedby_id',
@@ -30,17 +33,35 @@ class AccountSubType extends Model
 
     public function accountType()
     {
-        return $this->belongsTo(AccountType::class, 'account_type_id');
+        return $this->belongsTo(AccountType::class, 'account_type_id', 'account_type_id');
     }
-    
-    public function accounts()
+
+    public function accountSubType()
     {
-        return $this->hasMany(Account::class, 'account_sub_type_id', 'account_sub_type_id');
+        return $this->belongsTo(AccountSubType::class, 'account_sub_type_id', 'account_sub_type_id');
     }
 
     public function business()
     {
         return $this->belongsTo(Business::class, 'business_id');
+    }
+
+    public function parentAccount()
+    {
+        return $this->belongsTo(Account::class, 'parent_account_id');
+    }
+
+    public function childAccounts()
+    {
+        return $this->hasMany(Account::class, 'parent_account_id')
+            ->with('childAccounts')
+            ->where('is_deleted', 0)
+            ->orderBy('code');
+    }
+
+    public function scopeChildren($query)
+    {
+        return $query->whereNotNull('parent_account_id');
     }
 
     public function createdBy()
