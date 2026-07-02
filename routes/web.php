@@ -190,4 +190,10 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
 
         Route::get('parent-by-sub-type/{account_sub_type_id}', [App\Http\Controllers\Admin\AccountController::class, 'parentByAccountSubType']);
     });
+
+    //journal
+    Route::resource('journal', App\Http\Controllers\Admin\JournalController::class);
+    Route::group(['prefix' => 'journal'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\JournalController::class, 'getData'])->name('journal-data');
+    });
 });

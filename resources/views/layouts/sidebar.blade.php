@@ -200,6 +200,11 @@
                         <div data-i18n="Account Sub Types">Account Sub Types</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/journal') }}" class="menu-link">
+                        <div data-i18n="Journals">Journals</div>
+                    </a>
+                </li>
             </ul>
         </li>
 
