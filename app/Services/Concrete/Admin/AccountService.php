@@ -7,6 +7,7 @@ use App\Repository\Repository;
 use Yajra\DataTables\DataTables;
 use App\Enums\RoleNames;
 use App\Enums\AccountTypes;
+use App\Enums\Status;
 use App\Models\Account;
 use App\Models\AccountType;
 use Carbon\Carbon;
@@ -39,7 +40,8 @@ class AccountService
                     ->where('is_deleted', 0)
                     ->with('childAccounts');
             }
-        ])->where('is_deleted', 0);
+        ])->where('is_deleted', 0)
+            ->orderBy('code', 'asc');
         $account_types = applyRoleScope($data, $allow_roles);
         return $account_types->get();
     }
@@ -50,22 +52,52 @@ class AccountService
     }
     public function save($obj)
     {
-        if (isset($obj['account_id']) && $obj['account_id'] > 0) {
+
+        if (!empty($obj['account_id'])) {
+            $obj['updatedby_id'] = Auth::user()->id;
+            $obj['date_updated'] = now();
             $this->model_account->update($obj, $obj['account_id']);
-            $saved_obj = $this->model_account->find($obj['account_id']);
+            return $this->model_account->find($obj['account_id']);
         }
 
-        if (!$saved_obj)
-            return false;
-
+        $obj['account_id'] = generateUuid();
+        $obj['createdby_id'] = Auth::user()->id;
+        $obj['date_created'] = now();
+        $saved_obj = $this->model_account->create($obj);
         return $saved_obj;
+    }
+
+    public function status($account_id)
+    {
+        return $this->model_account->update([
+            'status' => ($this->model_account->find($account_id)->status == Status::ACTIVE ? Status::INACTIVE : Status::ACTIVE),
+            'updatedby_id' => Auth::id(),
+            'date_updated' => now()
+        ], $account_id);
     }
     public function delete($account_id)
     {
+        $account = $this->model_account->find($account_id);
+
+        if (!$account) {
+            throw new Exception('Account not found.');
+        }
+
+        // Check Child Accounts
+        $childCount = $this->model_account->getModel()::where('parent_account_id', $account_id)
+            ->where('is_deleted', 0)
+            ->count();
+
+        if ($childCount > 0) {
+            throw new Exception(
+                'This account cannot be deleted because it has child account(s). Please delete the child account(s) first.'
+            );
+        }
+
         return $this->model_account->update([
-            'is_deleted' => 1,
+            'is_deleted'   => 1,
             'deletedby_id' => Auth::id(),
-            'date_deleted' => now()
+            'date_deleted' => now(),
         ], $account_id);
     }
 

@@ -180,6 +180,13 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
     //account
     Route::group(['prefix' => 'account'], function () {
         Route::get('/', [App\Http\Controllers\Admin\AccountController::class, 'index']);
+        Route::get('edit/{account_id}', [App\Http\Controllers\Admin\AccountController::class, 'edit']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\AccountController::class, 'status']);
+        Route::delete('delete/{id}', [App\Http\Controllers\Admin\AccountController::class, 'destroy']);
+        //parent
+        Route::post('save-parent', [App\Http\Controllers\Admin\AccountController::class, 'storeParent']);
+        //child
+        Route::post('save-child', [App\Http\Controllers\Admin\AccountController::class, 'storeChild']);
 
         Route::get('parent-by-sub-type/{account_sub_type_id}', [App\Http\Controllers\Admin\AccountController::class, 'parentByAccountSubType']);
     });

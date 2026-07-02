@@ -119,12 +119,6 @@ class BrandService
                   $this->model_brand->update($obj, $obj['brand_id']);
                   return $this->model_brand->find($obj['brand_id']);
             }
-            //check limit
-            $limit = checkPackageLimit('branches');
-
-            if (!$limit['status']) {
-                  throw new Exception($limit['message']);
-            }
 
             $obj['brand_id'] = generateUuid();
             $obj['createdby_id'] = Auth::user()->id;
