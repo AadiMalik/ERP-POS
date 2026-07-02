@@ -180,5 +180,7 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
     //account
     Route::group(['prefix' => 'account'], function () {
         Route::get('/', [App\Http\Controllers\Admin\AccountController::class, 'index']);
+
+        Route::get('parent-by-sub-type/{account_sub_type_id}', [App\Http\Controllers\Admin\AccountController::class, 'parentByAccountSubType']);
     });
 });

@@ -49,7 +49,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Parent Account <span class="text-danger">*</span></label>
-                            <select id="child_account_id" name="child_account_id" class="form-select" required>
+                            <select id="child_parent_account_id" name="child_parent_account_id" class="form-select" required>
                                 <option value="">--Select Parent Account--</option>
                                 
                             </select>

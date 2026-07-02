@@ -36,4 +36,34 @@ class AccountController extends Controller
         $data = $this->account_service->getData();
         return view('admin.account.index', compact('business','data','account_types'));
     }
+
+    public function parentByAccountType($account_type_id)
+    {
+        try {
+            $accounts = $this->account_service->getParentByAccountType($account_type_id);
+            return $this->success(
+                Message::SUCCESS,
+                $accounts
+            );
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
+
+    public function parentByAccountSubType($account_sub_type_id)
+    {
+        try {
+            $accounts = $this->account_service->getParentByAccountSubType($account_sub_type_id);
+            return $this->success(
+                Message::SUCCESS,
+                $accounts
+            );
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
 }

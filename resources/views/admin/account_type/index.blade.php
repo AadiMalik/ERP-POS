@@ -149,7 +149,7 @@
             }
         });
 
-        $("#resetAccountType").on("click", function() {
+        $("#resetAccountType").off('click').on("click", function() {
             let btn = $(this);
             btn.prop("disabled", true);
             $.ajax({

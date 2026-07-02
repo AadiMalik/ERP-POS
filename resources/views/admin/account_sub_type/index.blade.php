@@ -223,7 +223,7 @@
                 });
         });
 
-        $("#resetAccountSubType").on("click", function() {
+        $("#resetAccountSubType").off('click').on("click", function() {
             let btn = $(this);
             btn.prop("disabled", true);
             $.ajax({
