@@ -196,4 +196,10 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
     Route::group(['prefix' => 'journal'], function () {
         Route::post('data', [App\Http\Controllers\Admin\JournalController::class, 'getData'])->name('journal-data');
     });
+
+    //journal entry
+    Route::resource('journal-entry', App\Http\Controllers\Admin\JournalEntryController::class);
+    Route::group(['prefix' => 'journal-entry'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\JournalEntryController::class, 'getData'])->name('journal-entry-data');
+    });
 });
