@@ -198,8 +198,10 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
     });
 
     //journal entry
-    Route::resource('journal-entry', App\Http\Controllers\Admin\JournalEntryController::class);
     Route::group(['prefix' => 'journal-entry'], function () {
         Route::post('data', [App\Http\Controllers\Admin\JournalEntryController::class, 'getData'])->name('journal-entry-data');
+        Route::get('entry-no', [App\Http\Controllers\Admin\JournalEntryController::class, 'getEntryNo'])->name('journal-entry.entry-no');
+        Route::get('detail', [App\Http\Controllers\Admin\JournalEntryController::class, 'detail'])->name('journal-entry.detail');
     });
+    Route::resource('journal-entry', App\Http\Controllers\Admin\JournalEntryController::class);
 });

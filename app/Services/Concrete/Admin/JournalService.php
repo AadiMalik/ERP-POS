@@ -5,7 +5,7 @@ namespace App\Services\Concrete\Admin;
 use App\Enums\Filter;
 use App\Enums\RoleNames;
 use App\Enums\Status;
-use App\Models\JournalEntry;
+use App\Models\Journal;
 use App\Repository\Repository;
 use Carbon\Carbon;
 use Exception;
@@ -14,11 +14,11 @@ use Yajra\DataTables\DataTables;
 
 class JournalService
 {
-      protected $model_journal_entry;
+      protected $model_journal;
 
       public function __construct()
       {
-            $this->model_journal_entry = new Repository(new JournalEntry());
+            $this->model_journal = new Repository(new Journal());
       }
 
       public function getData($obj)
@@ -36,7 +36,7 @@ class JournalService
             if (!empty($obj['end_date'])) {
                   $wh[] = ['date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
             }
-            $datatable = $this->model_journal_entry->getModel()::where($wh)
+            $datatable = $this->model_journal->getModel()::where($wh)
                   ->where('is_deleted', 0)
                   ->orderBy('name', $orderBy);
             return DataTables::of($datatable)
@@ -65,25 +65,25 @@ class JournalService
             if (!empty($obj['journal_id'])) {
                   $obj['updatedby_id'] = Auth::user()->id;
                   $obj['date_updated'] = now();
-                  $this->model_journal_entry->update($obj, $obj['journal_id']);
-                  return $this->model_journal_entry->find($obj['journal_id']);
+                  $this->model_journal->update($obj, $obj['journal_id']);
+                  return $this->model_journal->find($obj['journal_id']);
             }
 
             $obj['journal_id'] = generateUuid();
             $obj['createdby_id'] = Auth::user()->id;
             $obj['date_created'] = now();
-            $saved_obj = $this->model_journal_entry->create($obj);
+            $saved_obj = $this->model_journal->create($obj);
             return $saved_obj;
       }
 
       public function getById($journal_id)
       {
-            return $this->model_journal_entry->find($journal_id);
+            return $this->model_journal->find($journal_id);
       }
 
       public function delete($journal_id)
       {
-            return $this->model_journal_entry->update([
+            return $this->model_journal->update([
                   'is_deleted' => 1,
                   'deletedby_id' => Auth::id(),
                   'date_deleted' => now()
@@ -92,7 +92,7 @@ class JournalService
 
       public function getAll()
       {
-            return $this->model_journal_entry->getModel()::where('is_deleted', 0)
+            return $this->model_journal->getModel()::where('is_deleted', 0)
                   ->get();
       }
 }

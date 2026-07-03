@@ -1,8 +1,6 @@
 
 $(document).ready(function () {
-      if (journal_entry_id == null) {
-            Clear();
-      }
+
       $("#debit").on("change", function () {
             $("#credit").val("0.000"); //Credit will be 0 keypress on Debit;
       });
@@ -25,7 +23,6 @@ $(document).ready(function () {
       });
       $("#jsGrid").show("2000");
 
-      var journal_entry_id = "";
       var obj = "";
       var items = [];
 
@@ -143,47 +140,47 @@ $(document).ready(function () {
                   },
                   controller: {
                         loadData: function (filter) {
+
+                              var journal_entry_id = $("#journal_entry_id").val();
+
                               return $.ajax({
                                     type: "GET",
-                                    url:
-                                          url_local +
-                                          "/journal-entry/detail/" +
-                                          journal_entry_id,
-                                    data: filter,
-                                    dataType: "JSON",
-                                    success: function (response) {
-                                          items = response;
-                                          var total_debit = 0;
-                                          var total_credit = 0;
-                                          var i = 0;
-                                          for (i = 0; i < response.length; i++) {
-                                                var debit = response[i].debit;
-                                                var credit = response[i].credit;
-                                                if (!isNaN(debit)) {
-                                                      total_debit += parseFloat(debit);
-                                                }
-                                                if (!isNaN(credit)) {
-                                                      total_credit += parseFloat(credit);
-                                                }
-                                          }
-                                          $("#total_debit").val(total_debit);
-                                          $("#total_credit").val(total_credit);
+                                    url: url_local + "/admin/journal-entry/detail",
+                                    data: {
+                                          journal_entry_id: journal_entry_id
+                                    }
+                              }).then(function (response) {
 
-                                          var bal = total_debit * 1 - total_credit * 1;
-                                          $("#difference").empty();
-                                          var bal_value = "";
-                                          if (bal > 0) {
-                                                bal_value = bal + " Dr";
-                                                $("#difference").val(bal_value);
-                                          } else if (bal < 0) {
-                                                bal_value = bal * -1 + " Cr";
-                                                $("#difference").val(bal_value);
-                                          } else {
-                                                $("#difference").val(0);
-                                          }
-                                    },
+                                    console.log(response);
+
+                                    var items = response.Data || [];
+
+                                    var total_debit = 0;
+                                    var total_credit = 0;
+
+                                    $.each(items, function (i, item) {
+
+                                          total_debit += parseFloat(item.debit) || 0;
+                                          total_credit += parseFloat(item.credit) || 0;
+
+                                    });
+
+                                    $("#total_debit").val(total_debit);
+                                    $("#total_credit").val(total_credit);
+
+                                    var bal = total_debit - total_credit;
+
+                                    if (bal > 0)
+                                          $("#difference").val(bal + " Dr");
+                                    else if (bal < 0)
+                                          $("#difference").val(Math.abs(bal) + " Cr");
+                                    else
+                                          $("#difference").val(0);
+
+                                    // IMPORTANT
+                                    return items;
                               });
-                        },
+                        }
                   },
                   fields: [
                         {
@@ -241,10 +238,9 @@ $(document).ready(function () {
                         }
                   ]
             });
-            $("#btnSave").click(function () {
+            $("#btnSave").off("click").on("click", function () {
                   obj = {};
-                  obj.item = [];
-                  obj.item = $("#jsGrid").jsGrid("option", "data");
+                  obj = $("#jsGrid").jsGrid("option", "data");
                   updateTotals();
                   let total_debit = parseFloat($("#total_debit").val());
                   let total_credit = parseFloat($("#total_credit").val());
@@ -284,41 +280,51 @@ $(document).ready(function () {
                         errorMessage("Undifference Debit & Credit");
                         return;
                   }
-                  journal_entry_id = $("#journal_entry_id").val();
+                  var journal_entry_id = $("#journal_entry_id").val();
                   var journal_id = $("#journal_id").find(':selected').val();
+                  var business_id = $("#business_id").find(':selected').val();
+                  var branch_id = $("#branch_id").find(':selected').val();
                   var entry_no = $("#entry_no").val();
                   var entry_date = $("#entry_date").val();
                   var reference_no = $("#reference_no").val();
                   var description = $("#description").val();
-                  if (obj.item.length > 0) {
+                  if (obj.length > 0) {
+
                         obj = JSON.stringify(obj);
+
+                        $("#btnSave").prop("disabled", true);
+
                         $.ajax({
+                              url: url_local + "/admin/journal-entry",
+                              type: "POST",
+                              headers: {
+                                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                              },
                               data: {
                                     journal_entry_id: journal_entry_id,
                                     journal_id: journal_id,
+                                    business_id: business_id,
+                                    branch_id: branch_id,
                                     entry_no: entry_no,
                                     entry_date: entry_date,
                                     reference_no: reference_no,
                                     description: description,
-                                    items: obj,
+                                    details: obj,
                               },
-                              headers: {
-                                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
-                                          "content"
-                                    ),
+                              success: function (response) {
+                                    successMessage("Journal Entry Saved Successfully!");
+                                    setTimeout(function () {
+                                          window.location.href = url_local + "/admin/journal-entry";
+                                    }, 1000);
                               },
-                              type: "post",
-                              url: url_local + "/journal-entry/store",
-                              success: function (data) {
-                                    if (data != null) {
-                                          successMessage("Journal Entry Save Successfully!");
-                                          window.location.href =
-                                                url_local + "/journal-entry";
-                                          setTimeout(function () {
-                                                $("#deleted_div").hide("fade");
-                                          }, 1000);
+                              error: function (xhr) {
+                                    $("#btnSave").prop("disabled", false);
+                                    if (xhr.responseJSON && xhr.responseJSON.Message) {
+                                          errorMessage(xhr.responseJSON.Message);
+                                    } else {
+                                          errorMessage("Something went wrong.");
                                     }
-                              },
+                              }
                         });
                   }
             });
@@ -347,3 +353,20 @@ $(document).ready(function () {
       }
 
 });
+
+$("#journal_id").on("change", function () {
+      let journal_id = $(this).val();
+      $.ajax({
+            url: url_local + '/admin/journal-entry/entry-no',
+            type: "GET",
+            data: { journal_id: journal_id },
+            success: function (response) {
+                  $('#entry_no').val(response.Data);
+            },
+            error: function (xhr) {
+                  $('#entry_no').val('');
+                  console.log(xhr.responseText);
+            }
+      });
+});
+

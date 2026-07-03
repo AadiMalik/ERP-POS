@@ -3,6 +3,8 @@
 use App\Enums\RoleNames;
 use App\Models\Branch;
 use App\Models\Category;
+use App\Models\Journal;
+use App\Models\JournalEntry;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -19,6 +21,32 @@ function generateUuid()
 function getRoleName()
 {
     return Auth::user()?->getRoleNames()->first();
+}
+
+function generateJVNum($journal_id)
+{
+    $business_id = Auth::user()->business_id;
+
+    $journal = Journal::findOrFail($journal_id);
+
+    $journal_entry = JournalEntry::where('business_id', $business_id)
+        ->where('journal_id', $journal_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($journal_entry) {
+        $next_number = (int) substr($journal_entry->entry_no, strrpos($journal_entry->entry_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        '%s-%s-%04d',
+        $journal->short,
+        now()->format('dmY'),
+        $next_number
+    );
 }
 
 function applyRoleScope(
