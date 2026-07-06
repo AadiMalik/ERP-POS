@@ -208,6 +208,26 @@
             </ul>
         </li>
 
+        {{-- Procurement --}}
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons fa fa-shopping-cart"></i>
+                <div data-i18n="Procurement">Procurement</div>
+            </a>
+
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ url('/admin/supplier') }}" class="menu-link">
+                        <div data-i18n="Suppliers">Suppliers</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/purchase-order') }}" class="menu-link">
+                        <div data-i18n="Purchase Orders">Purchase Orders</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
 
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Pages</span>

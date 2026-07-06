@@ -6,6 +6,9 @@ use App\Models\Category;
 use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\PurchaseOrder;
+use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Support\Facades\Auth;
@@ -45,6 +48,47 @@ function generateJVNum($journal_id)
         '%s-%s-%04d',
         $journal->short,
         now()->format('dmY'),
+        $next_number
+    );
+}
+
+function generatePONo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $purchase_order = PurchaseOrder::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($purchase_order) {
+        $next_number = (int) substr($purchase_order->purchase_order_no, strrpos($purchase_order->purchase_order_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'PO-%04d',
+        $next_number
+    );
+}
+
+function generateSupplierCode($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $last_supplier = Supplier::where('business_id', $business_id)
+        ->orderByDesc('code')
+        ->first();
+
+    $next_number = 1;
+
+    if ($last_supplier && $last_supplier->code) {
+        $next_number = (int) substr($last_supplier->code, strrpos($last_supplier->code, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'SUP-%04d',
         $next_number
     );
 }
@@ -205,9 +249,18 @@ function checkPackageLimit($type)
                 'column' => 'max_products',
                 'count' => Product::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
             ],
-            'suppliers'         => 'max_suppliers',
-            'purchase_orders'   => 'max_purchase_orders',
-            'purchases'         => 'max_purchases',
+            'suppliers'         => [
+                'column' => 'max_suppliers',
+                'count' => Supplier::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            ],
+            'purchase_orders'   => [
+                'column' => 'max_purchase_orders',
+                'count' => PurchaseOrder::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            ],
+            'purchases'         => [
+                'column' => 'max_purchases',
+                'count' => Purchase::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            ],
             'sales'             => 'max_sales',
             'transfers'         => 'max_transfers',
             'expenses'          => 'max_expenses',

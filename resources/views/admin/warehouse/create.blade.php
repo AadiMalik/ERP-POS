@@ -1,3 +1,6 @@
+@php
+    use App\Enums\RoleNames;
+@endphp
 @extends('layouts.app')
 @section('css')
 @endsection
@@ -32,7 +35,7 @@
                         <input type="text" class="form-control" name="phone"
                             value="{{ $warehouse->phone ?? '' }}">
                     </div>
-                    @if (!empty($business))
+                    @if (!empty($business) && RoleNames::SUPERADMIN == getRoleName())
                     <div class="col-md-6">
                         <label class="fw-semibold">
                             Business <span class="text-danger">*</span>

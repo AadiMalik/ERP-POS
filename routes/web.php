@@ -126,6 +126,9 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
     Route::group(['prefix' => 'product-variation-unit-conversion'], function () {
         Route::post('data', [App\Http\Controllers\Admin\ProductVariationUnitConversionController::class, 'getData']);
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\ProductVariationUnitConversionController::class, 'status']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\ProductVariationUnitConversionController::class, 'byBusiness']);
+        Route::get('by-product/{product_id}', [App\Http\Controllers\Admin\ProductVariationUnitConversionController::class, 'byProduct']);
+        Route::get('by-variation/{product_variation_id}', [App\Http\Controllers\Admin\ProductVariationUnitConversionController::class, 'byVariation']);
     });
 
     //product variation batch
@@ -204,4 +207,20 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
         Route::get('detail', [App\Http\Controllers\Admin\JournalEntryController::class, 'detail'])->name('journal-entry.detail');
     });
     Route::resource('journal-entry', App\Http\Controllers\Admin\JournalEntryController::class);
+
+    //supplier
+    Route::resource('supplier', App\Http\Controllers\Admin\SupplierController::class);
+    Route::group(['prefix' => 'supplier'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\SupplierController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\SupplierController::class, 'status']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\SupplierController::class, 'byBusiness']);
+    });
+
+    //purchase order
+    Route::resource('purchase-order', App\Http\Controllers\Admin\PurchaseOrderController::class);
+    Route::group(['prefix' => 'purchase-order'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'status']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'byBusiness']);
+    });
 });
