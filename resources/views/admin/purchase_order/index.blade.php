@@ -199,9 +199,9 @@
             let business_id = $(this).val();
 
             // Reset dropdowns
-            $('#branch_id').html('<option value="">--Select Branch--</option>');
-            $('#supplier_id').html('<option value="">--Select Supplier--</option>');
-            $('#warehouse_id').html('<option value="">--Select Warehouse--</option>');
+            $('#branch_id').html('<option value="">--All Branches--</option>');
+            $('#supplier_id').html('<option value="">--All Suppliers--</option>');
+            $('#warehouse_id').html('<option value="">--All Warehouses--</option>');
 
             if (!business_id) {
                 return;
