@@ -224,7 +224,7 @@
                 .then(([branchRes, supplierRes, warehouseRes, productRes]) => {
 
                     // Branches
-                    let branchOptions = '<option value="">--Select Branch--</option>';
+                    let branchOptions = '<option value="">--All Branches--</option>';
                     $.each(branchRes.Data, function(_, item) {
                         branchOptions += `<option value="${item.branch_id}">
                                 ${item.code} ${item.name}
@@ -233,7 +233,7 @@
                     $('#branch_id').html(branchOptions);
 
                     // Suppliers
-                    let supplierOptions = '<option value="">--Select Supplier--</option>';
+                    let supplierOptions = '<option value="">--All Suppliers--</option>';
                     $.each(supplierRes.Data, function(_, item) {
                         supplierOptions += `<option value="${item.supplier_id}">
                                     ${item.code} ${item.name}
@@ -242,7 +242,7 @@
                     $('#supplier_id').html(supplierOptions);
 
                     // Warehouses
-                    let warehouseOptions = '<option value="">--Select Warehouse--</option>';
+                    let warehouseOptions = '<option value="">--All Warehouses--</option>';
                     $.each(warehouseRes.Data, function(_, item) {
                         warehouseOptions += `<option value="${item.warehouse_id}">
                                     ${item.code} ${item.name}
