@@ -133,8 +133,10 @@ class JournalEntryService
                               'description'  => $obj['description'],
                               'business_id'  => $obj['business_id'],
                               'branch_id'    => $obj['branch_id'],
+                              'status'       => 'posted',
                               'updatedby_id' => Auth::user()->id,
                               'date_updated' => now(),
+                              'date_posted'  => now(),
                         ]);
 
                         // Purani details remove
@@ -156,7 +158,9 @@ class JournalEntryService
                               'description'      => $obj['description'],
                               'business_id'      => $obj['business_id'],
                               'branch_id'        => $obj['branch_id'],
+                              'status'           => 'posted',
                               'createdby_id'     => Auth::user()->id,
+                              'date_posted'      => now(),
                               'date_created'     => now(),
                         ]);
                   }

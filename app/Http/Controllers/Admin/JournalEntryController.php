@@ -165,4 +165,22 @@ class JournalEntryController extends Controller
         $journal_entry_detail = $this->journal_entry_service->getDetailsById($request->journal_entry_id);
         return $this->success(Message::SUCCESS, $journal_entry_detail);
     }
+
+    public function destroy($journal_entry_id)
+    {
+        try {
+
+            $this->journal_entry_service->delete($journal_entry_id);
+
+            return $this->success(
+                Message::DELETE,
+                []
+            );
+        } catch (Exception $e) {
+
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
 }

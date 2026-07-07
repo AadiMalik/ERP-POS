@@ -238,7 +238,9 @@ $(document).ready(function () {
                         }
                   ]
             });
-            $("#btnSave").off("click").on("click", function () {
+            $("#btnSave").off("click").on("click", function (e) {
+                  e.preventDefault();
+                  e.stopPropagation();
                   obj = {};
                   obj = $("#jsGrid").jsGrid("option", "data");
                   updateTotals();
