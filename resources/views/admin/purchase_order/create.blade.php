@@ -11,9 +11,7 @@
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0">{{ isset($purchase_order) ? 'Update' : 'Create' }} Purchase Order</h5>
             </div>
-            <form
-                action="{{url('admin/purchase-order') }}"
-                method="POST">
+            <form action="{{ url('admin/purchase-order') }}" method="POST">
                 @csrf
                 <input type="hidden" name="purchase_order_id"
                     value="{{ isset($purchase_order) ? $purchase_order->purchase_order_id : '' }}">
@@ -75,14 +73,14 @@
                         <div class="col-md-3">
                             <label class="fw-semibold">PO Date <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" name="purchase_order_date"
-                                value="{{ old('purchase_order_date', Carbon::parse($purchase_order->purchase_order_date)->format('Y-m-d') ?? date('Y-m-d')) }}"
+                                value="{{ old('purchase_order_date', isset($purchase_order)?Carbon::parse($purchase_order->purchase_order_date)->format('Y-m-d') : date('Y-m-d')) }}"
                                 required>
                         </div>
 
                         <div class="col-md-3">
                             <label class="fw-semibold">Expected Date <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" name="purchase_expected_date"
-                                value="{{ old('purchase_expected_date', Carbon::parse($purchase_order->purchase_expected_date)->format('Y-m-d') ?? date('Y-m-d', strtotime('+7 days'))) }}"
+                                value="{{ old('purchase_expected_date', isset($purchase_order)?Carbon::parse($purchase_order->purchase_expected_date)->format('Y-m-d') : date('Y-m-d', strtotime('+7 days'))) }}"
                                 required>
                         </div>
                         <div class="col-md-9">
@@ -148,7 +146,7 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        
+
                                                         <select
                                                             name="products[{{ $loop->index }}][product_variation_unit_conversion_id]"
                                                             class="form-select conversion-select">
@@ -752,5 +750,93 @@
                 }
             </style>
         `);
+
+        $('#business_id').on('change', function() {
+
+            let business_id = $(this).val();
+
+            // Reset dropdowns
+            $('#branch_id').html('<option value="">--Select Branch--</option>');
+            $('#supplier_id').html('<option value="">--Select Supplier--</option>');
+            $('#warehouse_id').html('<option value="">--Select Warehouse--</option>');
+            $('#product_id').html('<option value="">--Select Product--</option>');
+
+            if (!business_id) {
+                return;
+            }
+
+            Promise.all([
+                    ajaxRequest({
+                        url: url_local + '/admin/branch/by-business/' + business_id,
+                        data: {}
+                    }),
+                    ajaxRequest({
+                        url: url_local + '/admin/supplier/by-business/' + business_id,
+                        data: {}
+                    }),
+                    ajaxRequest({
+                        url: url_local + '/admin/warehouse/by-business/' + business_id,
+                        data: {}
+                    }),
+                    ajaxRequest({
+                        url: url_local + '/admin/product/by-business/' + business_id,
+                        data: {}
+                    })
+                ])
+                .then(([branchRes, supplierRes, warehouseRes, productRes]) => {
+
+                    // Branches
+                    let branchOptions = '<option value="">--Select Branch--</option>';
+                    $.each(branchRes.Data, function(_, item) {
+                        branchOptions += `<option value="${item.branch_id}">
+                                ${item.code} ${item.name}
+                              </option>`;
+                    });
+                    $('#branch_id').html(branchOptions);
+
+                    // Suppliers
+                    let supplierOptions = '<option value="">--Select Supplier--</option>';
+                    $.each(supplierRes.Data, function(_, item) {
+                        supplierOptions += `<option value="${item.supplier_id}">
+                                    ${item.code} ${item.name}
+                                </option>`;
+                    });
+                    $('#supplier_id').html(supplierOptions);
+
+                    // Warehouses
+                    let warehouseOptions = '<option value="">--Select Warehouse--</option>';
+                    $.each(warehouseRes.Data, function(_, item) {
+                        warehouseOptions += `<option value="${item.warehouse_id}">
+                                    ${item.code} ${item.name}
+                                </option>`;
+                    });
+                    $('#warehouse_id').html(warehouseOptions);
+                    // Products
+                    products = productRes.Data || [];
+
+                    // Existing rows update
+                    let productOptions = '<option value="">--Select Product--</option>';
+
+                    $.each(products, function(_, item) {
+                        productOptions += `<option value="${item.product_id}">${item.code} ${item.name}</option>`;
+                    });
+
+                    $('.product-select').each(function() {
+
+                        let selected = $(this).val();
+
+                        $(this).html(productOptions);
+
+                        if (selected) {
+                            $(this).val(selected);
+                        }
+                    });
+
+                })
+                .catch((err) => {
+                    errorMessage(err.Message ?? 'Something went wrong.');
+                });
+
+        });
     </script>
 @endsection

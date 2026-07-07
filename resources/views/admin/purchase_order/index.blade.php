@@ -16,7 +16,7 @@
                     </button>
 
                 </div>
-                <a href="{{ url('admin/supplier/create') }}" class="btn btn-primary rounded-pill">
+                <a href="{{ url('admin/purchase-order/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
                     Add New
                 </a>
@@ -192,6 +192,69 @@
             tableCallback: function() {
                 initDataTablepurchase_order_table();
             }
+        });
+
+        $('#business_id').on('change', function() {
+
+            let business_id = $(this).val();
+
+            // Reset dropdowns
+            $('#branch_id').html('<option value="">--Select Branch--</option>');
+            $('#supplier_id').html('<option value="">--Select Supplier--</option>');
+            $('#warehouse_id').html('<option value="">--Select Warehouse--</option>');
+
+            if (!business_id) {
+                return;
+            }
+
+            Promise.all([
+                    ajaxRequest({
+                        url: url_local + '/admin/branch/by-business/' + business_id,
+                        data: {}
+                    }),
+                    ajaxRequest({
+                        url: url_local + '/admin/supplier/by-business/' + business_id,
+                        data: {}
+                    }),
+                    ajaxRequest({
+                        url: url_local + '/admin/warehouse/by-business/' + business_id,
+                        data: {}
+                    })
+                ])
+                .then(([branchRes, supplierRes, warehouseRes, productRes]) => {
+
+                    // Branches
+                    let branchOptions = '<option value="">--Select Branch--</option>';
+                    $.each(branchRes.Data, function(_, item) {
+                        branchOptions += `<option value="${item.branch_id}">
+                                ${item.code} ${item.name}
+                              </option>`;
+                    });
+                    $('#branch_id').html(branchOptions);
+
+                    // Suppliers
+                    let supplierOptions = '<option value="">--Select Supplier--</option>';
+                    $.each(supplierRes.Data, function(_, item) {
+                        supplierOptions += `<option value="${item.supplier_id}">
+                                    ${item.code} ${item.name}
+                                </option>`;
+                    });
+                    $('#supplier_id').html(supplierOptions);
+
+                    // Warehouses
+                    let warehouseOptions = '<option value="">--Select Warehouse--</option>';
+                    $.each(warehouseRes.Data, function(_, item) {
+                        warehouseOptions += `<option value="${item.warehouse_id}">
+                                    ${item.code} ${item.name}
+                                </option>`;
+                    });
+                    $('#warehouse_id').html(warehouseOptions);
+
+                })
+                .catch((err) => {
+                    errorMessage(err.Message ?? 'Something went wrong.');
+                });
+
         });
     </script>
 @endsection
