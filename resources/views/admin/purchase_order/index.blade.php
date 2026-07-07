@@ -79,12 +79,10 @@
                             <label class="form-label">Status</label>
                             <select id="status" class="form-select">
                                 <option value="">--All Statuses--</option>
-                                @if (RoleNames::SUPERADMIN != getRoleName())
                                     @foreach ($statuses as $value => $label)
                                         <option value="{{ $value }}">{{ $label ?? '' }}
                                         </option>
                                     @endforeach
-                                @endif
                             </select>
                         </div>
                         <div class="col-md-3">
