@@ -807,7 +807,7 @@
                     let warehouseOptions = '<option value="">--Select Warehouse--</option>';
                     $.each(warehouseRes.Data, function(_, item) {
                         warehouseOptions += `<option value="${item.warehouse_id}">
-                                    ${item.code} ${item.name}
+                                    ${item.name}
                                 </option>`;
                     });
                     $('#warehouse_id').html(warehouseOptions);
