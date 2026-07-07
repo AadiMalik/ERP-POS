@@ -7,6 +7,8 @@ use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\JournalEntry;
 use App\Models\JournalEntryDetail;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderDetail;
 use App\Repository\Repository;
 use Carbon\Carbon;
 use Exception;
@@ -16,220 +18,260 @@ use Yajra\DataTables\DataTables;
 
 class PurchaseOrderService
 {
-      protected $model_journal_entry;
-      protected $model_journal_entry_details;
-      protected $with = [
-            'business',
-            'branch',
-            'journal',
-            'journalEntryDetails'
-      ];
+    protected $model_purchase_order;
+    protected $model_purchase_order_details;
+    protected $with = [
+        'business',
+        'branch',
+        'supplier',
+        'warehouse',
+        'purchaseOrderDetails',
+        'purchaseOrderDetails.product',
+        'purchaseOrderDetails.product.productVariations',
+        'purchaseOrderDetails.productVariation',
+        'purchaseOrderDetails.productVariation.productVariationUnitConversion',
+        'purchaseOrderDetails.unit',
+        'purchaseOrderDetails.productVariationUnitConversion',
+    ];
 
-      public function __construct()
-      {
-            $this->model_journal_entry = new Repository(new JournalEntry());
-            $this->model_journal_entry_details = new Repository(new JournalEntryDetail());
-      }
+    public function __construct()
+    {
+        $this->model_purchase_order = new Repository(new PurchaseOrder());
+        $this->model_purchase_order_details = new Repository(new PurchaseOrderDetail());
+    }
 
-      public function getData($obj)
-      {
-            $wh = [];
-            $orderBy = Filter::ORDERBY;
+    public function getData($obj)
+    {
+        $wh = [];
+        $orderBy = Filter::ORDERBY;
 
-            if (isset($obj['orderBy']) && $obj['orderBy'] != 0 && $obj['orderBy'] != "") {
-                  $orderBy = $obj['orderBy'];
-            }
-            if (isset($obj['business_id']) && $obj['business_id'] != 0 && $obj['business_id'] != "") {
-                  $wh[] = ['business_id', $obj['business_id']];
-            }
-            if (isset($obj['brand_id']) && $obj['brand_id'] != 0 && $obj['brand_id'] != "") {
-                  $wh[] = ['brand_id', $obj['brand_id']];
-            }
-            if (!empty($obj['start_date'])) {
-                  $wh[] = ['entry_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
-            }
+        if (isset($obj['orderBy']) && $obj['orderBy'] != 0 && $obj['orderBy'] != "") {
+            $orderBy = $obj['orderBy'];
+        }
+        if (isset($obj['business_id']) && $obj['business_id'] != 0 && $obj['business_id'] != "") {
+            $wh[] = ['business_id', $obj['business_id']];
+        }
+        if (isset($obj['branch_id']) && $obj['branch_id'] != 0 && $obj['branch_id'] != "") {
+            $wh[] = ['branch_id', $obj['branch_id']];
+        }
+        if (isset($obj['supplier_id']) && $obj['supplier_id'] != 0 && $obj['supplier_id'] != "") {
+            $wh[] = ['supplier_id', $obj['supplier_id']];
+        }
+        if (isset($obj['warehouse_id']) && $obj['warehouse_id'] != 0 && $obj['warehouse_id'] != "") {
+            $wh[] = ['warehouse_id', $obj['warehouse_id']];
+        }
+        if (isset($obj['status']) && $obj['status'] != 0 && $obj['status'] != "") {
+            $wh[] = ['status', $obj['status']];
+        }
+        if (!empty($obj['start_date'])) {
+            $wh[] = ['purchase_order_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+        }
 
-            if (!empty($obj['end_date'])) {
-                  $wh[] = ['entry_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
-            }
-            $allow_roles = [
-                  RoleNames::SUPERADMIN,
-                  RoleNames::BUSINESSADMIN
-            ];
-            $datatable = $this->model_journal_entry->getModel()::with($this->with)
-                  ->withSum('journalEntryDetails as total_debit', 'debit')
-                  ->withSum('journalEntryDetails as total_credit', 'credit')
-                  ->where($wh)
-                  ->where('is_deleted', 0)
-                  ->orderBy('entry_date', $orderBy);
-            $datatable = applyRoleScope($datatable, $allow_roles);
-            return DataTables::of($datatable)
-                  ->addColumn('entry_date', function ($item) {
-                        return !empty($item->entry_date)
-                              ? Carbon::parse($item->entry_date)->format('d-m-Y')
-                              : 'N/A';
-                  })
-                  ->addColumn('journal', function ($item) {
-                        return $item->journal->name ?? '';
-                  })
-                  ->addColumn('business', function ($item) {
-                        return $item->business->name ?? '';
-                  })
-                  ->addColumn('branch', function ($item) {
-                        return $item->branch->name ?? '';
-                  })
-                  ->addColumn('total_debit', function ($item) {
-                        return number_format($item->total_debit ?? 0, 3);
-                  })
+        if (!empty($obj['end_date'])) {
+            $wh[] = ['purchase_order_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+        }
+        $allow_roles = [
+            RoleNames::SUPERADMIN,
+            RoleNames::BUSINESSADMIN
+        ];
+        $datatable = $this->model_purchase_order->getModel()::with($this->with)
+            ->withCount('purchaseOrderDetails as total_products')
+            ->where($wh)
+            ->where('is_deleted', 0)
+            ->orderBy('purchase_order_date', $orderBy);
+        $datatable = applyRoleScope($datatable, $allow_roles);
+        return DataTables::of($datatable)
+            ->addColumn('purchase_order_date', function ($item) {
+                return !empty($item->purchase_order_date)
+                    ? Carbon::parse($item->purchase_order_date)->format('d-m-Y')
+                    : 'N/A';
+            })
+            ->addColumn('supplier', function ($item) {
+                return $item->supplier->code ?? '' . ' ' . $item->supplier->name ?? '';
+            })
+            ->addColumn('warehouse', function ($item) {
+                return $item->warehouse->name ?? '';
+            })
+            ->addColumn('business', function ($item) {
+                return $item->business->name ?? '';
+            })
+            ->addColumn('branch', function ($item) {
+                return $item->branch->name ?? '';
+            })
+            ->addColumn('total_products', function ($item) {
+                return number_format($item->total_products ?? 0, 3);
+            })
+            ->addColumn('status', function ($item) {
 
-                  ->addColumn('total_credit', function ($item) {
-                        return number_format($item->total_credit ?? 0, 3);
-                  })
-                  ->addColumn('status', function ($item) {
-                        return $item->status == 'posted'
-                              ? '<span class="badge bg-success">Posted</span>'
-                              : '<span class="badge bg-danger">Pending</span>';
-                  })
-                  ->addColumn('action', function ($item) {
+                $statuses = [
+                    Status::PENDING   => ucfirst(Status::PENDING),
+                    Status::APPROVED  => ucfirst(Status::APPROVED),
+                    Status::COMPLETED => ucfirst(Status::COMPLETED),
+                    Status::CANCELLED => ucfirst(Status::CANCELLED),
+                ];
 
-                        return "
+                $html = "<select class='form-select form-select-sm change-status'
+                data-id='{$item->purchase_order_id}'>";
+
+                foreach ($statuses as $value => $label) {
+                    $selected = $item->status == $value ? 'selected' : '';
+                    $html .= "<option value='{$value}' {$selected}>{$label}</option>";
+                }
+
+                $html .= "</select>";
+
+                return $html;
+            })
+            ->addColumn('action', function ($item) {
+
+                return "
                     <a class='btn btn-icon btn-outline-primary mr-2'
-                     href='" . route('journal-entry.edit', $item->journal_entry_id) . "'
-                    id='editProduct'>
+                     href='" . route('purchase-order.edit', $item->purchase_order_id) . "'
+                    id='editPurchaseOrder'>
 
                     <i class='fa fa-pencil'></i>
                     </a>
 
                     <a class='btn btn-icon btn-outline-danger'
-                    id='deleteJournalEntry'
-                    data-id='{$item->journal_entry_id}'>
+                    id='deletePurchaseOrder'
+                    data-id='{$item->purchase_order_id}'>
 
                     <i class='fa fa-trash'></i>
                     </a>
                 ";
-                  })
-                  ->rawColumns(['entry_date', 'business', 'branch', 'journal', 'total_debit', 'total_credit', 'status', 'action'])
-                  ->make(true);
-      }
+            })
+            ->rawColumns(['purchase_order_date', 'business', 'branch', 'warehouse', 'supplier', 'total_products',  'status', 'action'])
+            ->make(true);
+    }
 
-      public function save($obj)
-      {
-            DB::beginTransaction();
+    public function save($obj)
+    {
+        DB::beginTransaction();
 
-            try {
+        try {
 
-                  //==============================
-                  // Update
-                  //==============================
-                  if (!empty($obj['journal_entry_id'])) {
+            //====================================
+            // Update
+            //====================================
 
-                        $journal_entry = $this->model_journal_entry->getModel()::findOrFail($obj['journal_entry_id']);
+            if (!empty($obj['purchase_order_id'])) {
 
-                        $journal_entry->update([
-                              'journal_id'   => $obj['journal_id'],
-                              'entry_no'     => $obj['entry_no'],
-                              'entry_date'   => $obj['entry_date'],
-                              'reference_no' => $obj['reference_no'],
-                              'description'  => $obj['description'],
-                              'business_id'  => $obj['business_id'],
-                              'branch_id'    => $obj['branch_id'],
-                              'updatedby_id' => Auth::user()->id,
-                              'date_updated' => now(),
-                        ]);
+                $purchase_order = $this->model_purchase_order
+                    ->getModel()::findOrFail($obj['purchase_order_id']);
 
-                        // Purani details remove
-                        $this->model_journal_entry_details->getModel()::where('journal_entry_id', $journal_entry->journal_entry_id)
-                              ->delete();
-                  }
+                $purchase_order->update([
+                    'business_id'            => $obj['business_id'],
+                    'supplier_id'            => $obj['supplier_id'],
+                    'warehouse_id'           => $obj['warehouse_id'],
+                    'purchase_order_date'    => $obj['purchase_order_date'],
+                    'purchase_expected_date' => $obj['purchase_expected_date'],
+                    'description'            => $obj['description'],
+                    'subtotal'               => $obj['subtotal'],
+                    'discount'               => $obj['discount'],
+                    'discount_amount'        => $obj['discount_amount'],
+                    'tax'                    => $obj['tax'],
+                    'tax_amount'             => $obj['tax_amount'],
+                    'shipping_charge'        => $obj['shipping_charge'],
+                    'total'                  => $obj['total'],
+                    'updatedby_id'           => Auth::user()->id,
+                    'date_updated'           => now(),
+                ]);
 
-                  //==============================
-                  // Create
-                  //==============================
-                  else {
+                // Remove previous items
 
-                        $journal_entry = $this->model_journal_entry->create([
-                              'journal_entry_id' => generateUuid(),
-                              'journal_id'       => $obj['journal_id'],
-                              'entry_no'         => $obj['entry_no'],
-                              'entry_date'       => $obj['entry_date'],
-                              'reference_no'     => $obj['reference_no'],
-                              'description'      => $obj['description'],
-                              'business_id'      => $obj['business_id'],
-                              'branch_id'        => $obj['branch_id'],
-                              'createdby_id'     => Auth::user()->id,
-                              'date_created'     => now(),
-                        ]);
-                  }
-
-                  //==============================
-                  // Save Details
-                  //==============================
-                  foreach ($obj['details'] as $detail) {
-
-                        $this->model_journal_entry_details->create([
-                              'journal_entry_detail_id' => generateUuid(),
-                              'journal_entry_id'        => $journal_entry->journal_entry_id,
-                              'account_id'   => $detail['account_id'],
-                              'debit'        => (float)$detail['debit'],
-                              'credit'       => (float)$detail['credit'],
-                              'description'  => $detail['description'] ?? null,
-                              'reference_no' => $detail['reference_no'] ?? null,
-                              'cheque_date'  => !empty($detail['cheque_date']) ? $detail['cheque_date'] : null,
-                              'cheque_no'    => $detail['cheque_no'] ?? null,
-                              'bill_no'      => $detail['bill_no'] ?? null
-                        ]);
-                  }
-
-                  DB::commit();
-
-                  return true;
-            } catch (Exception $e) {
-
-                  DB::rollBack();
-
-                  throw $e;
+                $this->model_purchase_order_details->getModel()::where('purchase_order_id', $purchase_order->purchase_order_id)
+                    ->delete();
             }
-      }
 
-      public function getById($journal_entry_id)
-      {
-            return $this->model_journal_entry->find($journal_entry_id);
-      }
+            //====================================
+            // Create
+            //====================================
 
-      public function getDetailsById($journal_entry_id)
-      {
-            $journal_entries = $this->model_journal_entry_details->getModel()::with('account')->where('journal_entry_id', $journal_entry_id)->get();
-            $data = [];
-            foreach ($journal_entries as $index => $item) {
-                  $data[] = [
-                        "account_id" => $item->account_id,
-                        "account_name" => $item->account->code . ' ' . $item->account->name,
-                        "debit" => $item->debit,
-                        "credit" => $item->credit,
-                        "description" => $item->description,
-                        "reference_no" => $item->reference_no,
-                        "cheque_date" => $item->cheque_date,
-                        "cheque_no" => $item->cheque_no,
-                        "bill_no" => $item->bill_no,
-                        "tbl_id" => $index,
-                        "tbl_index" => $index
-                  ];
+            else {
+
+                $purchase_order = $this->model_purchase_order->create([
+                    'purchase_order_id'      => generateUuid(),
+                    'business_id'            => $obj['business_id'],
+                    'supplier_id'            => $obj['supplier_id'],
+                    'warehouse_id'           => $obj['warehouse_id'],
+                    'purchase_order_no'      => $obj['purchase_order_no'],
+                    'purchase_order_date'    => $obj['purchase_order_date'],
+                    'purchase_expected_date' => $obj['purchase_expected_date'],
+                    'description'            => $obj['description'],
+                    'subtotal'               => $obj['subtotal'],
+                    'discount'               => $obj['discount'],
+                    'discount_amount'        => $obj['discount_amount'],
+                    'tax'                    => $obj['tax'],
+                    'tax_amount'             => $obj['tax_amount'],
+                    'shipping_charge'        => $obj['shipping_charge'],
+                    'total'                  => $obj['total'],
+                    'createdby_id'           => Auth::user()->id,
+                    'date_created'           => now(),
+                ]);
             }
-            return $data;
-      }
 
-      public function delete($journal_entry_id)
-      {
-            return $this->model_journal_entry->update([
-                  'is_deleted' => 1,
-                  'deletedby_id' => Auth::id(),
-                  'date_deleted' => now()
-            ], $journal_entry_id);
-      }
+            //====================================
+            // Save Items
+            //====================================
 
-      public function getAll()
-      {
-            return $this->model_journal_entry->getModel()::where('is_deleted', 0)
-                  ->get();
-      }
+            foreach ($obj['products'] as $product) {
+
+                $this->model_purchase_order_details->create([
+
+                    'purchase_order_detail_id'              => generateUuid(),
+                    'purchase_order_id'                     => $purchase_order->purchase_order_id,
+
+                    'product_id'                            => $product['product_id'],
+                    'product_variation_id'                  => $product['product_variation_id'],
+                    'product_variation_unit_conversion_id'  => $product['product_variation_unit_conversion_id'],
+
+                    'unit_id'                               => $product['unit_id'],
+                    'base_quantity'                         => $product['ordered_quantity'],
+                    'ordered_quantity'                      => $product['ordered_quantity'],
+                    'conversion_factor'                     => $product['conversion_factor'],
+                    'unit_price'                            => $product['unit_price'],
+                    'total'                                 => $product['total'],
+                ]);
+            }
+
+            DB::commit();
+
+            return true;
+        } catch (Exception $e) {
+
+            DB::rollBack();
+
+            throw $e;
+        }
+    }
+
+    public function getById($purchase_order_id)
+    {
+        return $this->model_purchase_order->with($this->with)->find($purchase_order_id);
+    }
+
+    public function status($obj)
+    {
+        return $this->model_purchase_order->update([
+            'status' => $obj['status'],
+            'updatedby_id' => Auth::user()->id,
+            'date_updated' => now()
+        ], $obj['purchase_order_id']);
+    }
+
+    public function delete($purchase_order_id)
+    {
+        return $this->model_purchase_order->update([
+            'is_deleted' => 1,
+            'status' => Status::CANCELLED,
+            'deletedby_id' => Auth::id(),
+            'date_deleted' => now()
+        ], $purchase_order_id);
+    }
+
+    public function getAll()
+    {
+        return $this->model_purchase_order->getModel()::where('is_deleted', 0)
+            ->get();
+    }
 }

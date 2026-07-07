@@ -1,5 +1,6 @@
 @php
     use App\Enums\RoleNames;
+    use Carbon\Carbon;
 @endphp
 @extends('layouts.app')
 
@@ -11,12 +12,9 @@
                 <h5 class="mb-0">{{ isset($purchase_order) ? 'Update' : 'Create' }} Purchase Order</h5>
             </div>
             <form
-                action="{{ isset($purchase_order) ? url('admin/purchase-order/' . $purchase_order->purchase_order_id) : url('admin/purchase-order') }}"
+                action="{{url('admin/purchase-order') }}"
                 method="POST">
                 @csrf
-                @if (isset($purchase_order))
-                    @method('PUT')
-                @endif
                 <input type="hidden" name="purchase_order_id"
                     value="{{ isset($purchase_order) ? $purchase_order->purchase_order_id : '' }}">
                 <div class="card-body">
@@ -41,12 +39,14 @@
                             <label class="fw-semibold">Supplier <span class="text-danger">*</span></label>
                             <select class="form-select" name="supplier_id" id="supplier_id" required>
                                 <option value="">-- Select Supplier --</option>
-                                @foreach ($suppliers as $item)
-                                    <option value="{{ $item->supplier_id }}"
-                                        {{ old('supplier_id', $purchase_order->supplier_id ?? '') == $item->supplier_id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
+                                @if (RoleNames::SUPERADMIN != getRoleName())
+                                    @foreach ($suppliers as $item)
+                                        <option value="{{ $item->supplier_id }}"
+                                            {{ old('supplier_id', $purchase_order->supplier_id ?? '') == $item->supplier_id ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
 
@@ -54,33 +54,35 @@
                             <label class="fw-semibold">Warehouse <span class="text-danger">*</span></label>
                             <select class="form-select" name="warehouse_id" id="warehouse_id" required>
                                 <option value="">-- Select Warehouse --</option>
-                                @foreach ($warehouses as $item)
-                                    <option value="{{ $item->warehouse_id }}"
-                                        {{ old('warehouse_id', $purchase_order->warehouse_id ?? '') == $item->warehouse_id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
+                                @if (RoleNames::SUPERADMIN != getRoleName())
+                                    @foreach ($warehouses as $item)
+                                        <option value="{{ $item->warehouse_id }}"
+                                            {{ old('warehouse_id', $purchase_order->warehouse_id ?? '') == $item->warehouse_id ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
 
                         <div class="col-md-3">
                             <label class="fw-semibold">PO Number</label>
-                            <input type="text" class="form-control"
+                            <input type="text" class="form-control" name="purchase_order_no"
                                 value="{{ $purchase_order->purchase_order_no ?? ($purchase_order_no ?? 'Auto Generated') }}"
-                                disabled>
+                                readonly>
                         </div>
 
                         <div class="col-md-3">
                             <label class="fw-semibold">PO Date <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" name="purchase_order_date"
-                                value="{{ old('purchase_order_date', $purchase_order->purchase_order_date ?? date('Y-m-d')) }}"
+                                value="{{ old('purchase_order_date', Carbon::parse($purchase_order->purchase_order_date)->format('Y-m-d') ?? date('Y-m-d')) }}"
                                 required>
                         </div>
 
                         <div class="col-md-3">
                             <label class="fw-semibold">Expected Date <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" name="purchase_expected_date"
-                                value="{{ old('purchase_expected_date', $purchase_order->purchase_expected_date ?? date('Y-m-d', strtotime('+7 days'))) }}"
+                                value="{{ old('purchase_expected_date', Carbon::parse($purchase_order->purchase_expected_date)->format('Y-m-d') ?? date('Y-m-d', strtotime('+7 days'))) }}"
                                 required>
                         </div>
                         <div class="col-md-9">
@@ -133,7 +135,7 @@
                                                             class="form-select variation-select">
                                                             <option value="">--Select Variation--</option>
                                                             @if ($detail->product)
-                                                                @foreach ($detail->product->variations as $variation)
+                                                                @foreach ($detail->product->productVariations as $variation)
                                                                     <option value="{{ $variation->product_variation_id }}"
                                                                         data-unit-id="{{ $variation->purchase_unit->unit_id ?? '' }}"
                                                                         data-unit-name="{{ $variation->purchase_unit->name ?? '' }}"
@@ -146,13 +148,15 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <select name="products[{{ $loop->index }}][conversion_id]"
+                                                        
+                                                        <select
+                                                            name="products[{{ $loop->index }}][product_variation_unit_conversion_id]"
                                                             class="form-select conversion-select">
                                                             <option value="" data-conversion-factor="1"
                                                                 data-to-unit-id="" data-to-unit-name="N/A">--Select
                                                                 Conversion--</option>
                                                             @if ($detail->productVariation)
-                                                                @foreach ($detail->productVariation->unitConversions as $conversion)
+                                                                @foreach ($detail->productVariation->productVariationUnitConversion as $conversion)
                                                                     <option
                                                                         value="{{ $conversion->product_variation_unit_conversion_id }}"
                                                                         data-from-unit-id="{{ $conversion->from_unit_id }}"
@@ -160,7 +164,7 @@
                                                                         data-to-unit-id="{{ $conversion->to_unit_id }}"
                                                                         data-to-unit-name="{{ $conversion->toUnit->name ?? '' }}"
                                                                         data-conversion-factor="{{ $conversion->conversion_factor }}"
-                                                                        {{ $detail->conversion_id == $conversion->product_variation_unit_conversion_id ? 'selected' : '' }}>
+                                                                        {{ $detail->product_variation_unit_conversion_id == $conversion->product_variation_unit_conversion_id ? 'selected' : '' }}>
                                                                         {{ $conversion->fromUnit->name ?? 'N/A' }} to
                                                                         {{ $conversion->toUnit->name ?? 'N/A' }}
                                                                         ({{ $conversion->conversion_factor }})
@@ -196,6 +200,7 @@
                                                     </td>
                                                     <td>
                                                         <input type="text" class="form-control row-total"
+                                                            name="products[{{ $loop->index }}][total]"
                                                             value="{{ number_format($detail->total, 2) }}" readonly>
                                                     </td>
                                                     <td>
@@ -334,10 +339,10 @@
                 const variationSelect = row.find('.variation-select');
 
                 // Reset all dropdowns
-                variationSelect.html('<option value="">--Select Variation--</option>');
+                let options = '<option value="">--Select Variation--</option>';
                 row.find('.conversion-select').html(
                     '<option value="" data-conversion-factor="1" data-to-unit-id="" data-to-unit-name="N/A">--Select Conversion--</option>'
-                    );
+                );
 
                 // Reset unit and price
                 row.find('.selected-unit-id').val('');
@@ -360,17 +365,17 @@
                         let variations = response.Data || [];
 
                         if (variations.length === 0) {
-                            variationSelect.html(`
+                            options += `
                                 <option value="" 
                                     data-unit-id="" 
                                     data-unit-name="N/A" 
                                     data-price="0">
                                     No Variation Available
                                 </option>
-                            `);
+                            `;
                         } else {
                             $.each(variations, function(i, variation) {
-                                variationSelect.html(`
+                                options += `
                                     <option 
                                         value="${variation.product_variation_id}"
                                         data-unit-id="${variation.purchase_unit?.unit_id ?? ''}"
@@ -378,10 +383,10 @@
                                         data-price="${variation.purchase_price ?? 0}">
                                         ${variation.name}
                                     </option>
-                                `);
+                                `;
                             });
                         }
-
+                        variationSelect.html(options);
                         // Trigger change to load first variation's data
                         variationSelect.trigger('change');
                     },
@@ -406,9 +411,8 @@
 
                 // Reset conversion dropdown
                 const conversionSelect = row.find('.conversion-select');
-                conversionSelect.html(
-                    '<option value="" data-conversion-factor="1" data-to-unit-id="" data-to-unit-name="N/A">--Select Conversion--</option>'
-                    );
+                let options =
+                    '<option value="" data-conversion-factor="1" data-to-unit-id="" data-to-unit-name="N/A">--Select Conversion--</option>';
 
                 // Update unit
                 row.find('.selected-unit-id').val(unitId);
@@ -431,17 +435,16 @@
                     type: "GET",
                     success: function(response) {
                         let conversions = response.Data || [];
-
                         if (conversions.length === 0) {
-                            conversionSelect.html(`
+                            options += `
                                 <option value="" data-conversion-factor="1" data-to-unit-id="" data-to-unit-name="N/A">
                                     No Conversion Available
                                 </option>
-                            `);
+                            `;
                         } else {
                             $.each(conversions, function(i, conversion) {
                                 console.log(conversion);
-                                conversionSelect.html(`
+                                options += `
                                     <option 
                                         value="${conversion.product_variation_unit_conversion_id}"
                                         data-from-unit-id="${conversion.from_unit_id}"
@@ -452,10 +455,10 @@
                                         ${conversion.from_unit?.name || 'N/A'} to ${conversion.to_unit?.name || 'N/A'} 
                                         (${conversion.conversion_factor})
                                     </option>
-                                `);
+                                `;
                             });
                         }
-
+                        conversionSelect.html(options);
                         // Trigger change to load first conversion's data
                         conversionSelect.trigger('change');
                     },
@@ -620,12 +623,6 @@
                 $('#tax_amount').closest('tr').hide();
             }
 
-            if (shippingCharge > 0) {
-                $('#shipping_charge').closest('tr').show();
-            } else {
-                $('#shipping_charge').closest('tr').hide();
-            }
-
             return grandTotal;
         }
 
@@ -653,7 +650,7 @@
                         </select>
                     </td>
                     <td>
-                        <select name="products[${productIndex}][conversion_id]" class="form-select conversion-select">
+                        <select name="products[${productIndex}][product_variation_unit_conversion_id]" class="form-select conversion-select">
                             <option value="" data-conversion-factor="1" data-to-unit-id="" data-to-unit-name="N/A">--Select Conversion--</option>
                         </select>
                     </td>
@@ -671,7 +668,7 @@
                                class="form-control price-input" value="0" onkeypress="return isNumberKey(event)" required>
                     </td>
                     <td>
-                        <input type="text" class="form-control row-total" value="0.00" readonly>
+                        <input type="text" name="products[${productIndex}][total]" class="form-control row-total" value="0.00" readonly>
                     </td>
                     <td>
                         <a href="javascript:void(0)" class="text-danger" style="cursor: pointer;" onclick="removeRow(this)">

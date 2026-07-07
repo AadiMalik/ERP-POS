@@ -44,6 +44,10 @@ class ProductVariation extends Model
         return $this->hasMany(ProductVariationAttribute::class, 'product_variation_id', 'product_variation_id');
     }
 
+    public function productVariationUnitConversion() {
+        return $this->hasMany(ProductVariationUnitConversion::class, 'product_variation_id', 'product_variation_id');
+    }
+
     public function business()
     {
         return $this->belongsTo(Business::class, 'business_id', 'business_id');

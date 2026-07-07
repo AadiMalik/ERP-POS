@@ -220,7 +220,7 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
     Route::resource('purchase-order', App\Http\Controllers\Admin\PurchaseOrderController::class);
     Route::group(['prefix' => 'purchase-order'], function () {
         Route::post('data', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'getData']);
-        Route::post('change-status/{id}', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'status']);
+        Route::post('change-status', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'byBusiness']);
     });
 });

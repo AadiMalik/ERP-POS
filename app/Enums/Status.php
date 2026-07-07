@@ -8,4 +8,9 @@ class  Status
     const INACTIVE = 'inactive';
     const SUSPENDED = 'suspended';
     const EXPIRED = 'expired';
+    const CANCELLED = 'cancelled';
+    const APPROVED = 'approved';
+    const REJECTED = 'rejected';
+    const PENDING = 'pending';
+    const COMPLETED = 'completed';
 }

@@ -18,6 +18,7 @@ class GoodReceiptNoteDetail extends Model
         'product_variation_batch_id',
         'product_id',
         'product_variation_id',
+        'product_variation_unit_conversion_id',
         'received_quantity',
         'base_quantity',
         'unit_id',
@@ -44,6 +45,11 @@ class GoodReceiptNoteDetail extends Model
     public function productVariation()
     {
         return $this->belongsTo(ProductVariation::class, 'product_variation_id', 'product_variation_id');
+    }
+
+    public function productVariationUnitConversion()
+    {
+        return $this->belongsTo(ProductVariationUnitConversion::class, 'product_variation_unit_conversion_id', 'product_variation_unit_conversion_id');
     }
 
     public function unit()

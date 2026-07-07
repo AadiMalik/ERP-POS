@@ -17,6 +17,7 @@ class PurchaseOrderDetail extends Model
         'purchase_order_id',
         'product_id',
         'product_variation_id',
+        'product_variation_unit_conversion_id',
         'ordered_quantity',
         'received_quantity',
         'rejected_quantity',
@@ -39,7 +40,12 @@ class PurchaseOrderDetail extends Model
 
     public function productVariation()
     {
-        return $this->belongsTo(ProductVariation::class, 'product_variation_id');
+        return $this->belongsTo(ProductVariation::class, 'product_variation_id','product_variation_id');
+    }
+
+    public function productVariationUnitConversion()
+    {
+        return $this->belongsTo(ProductVariationUnitConversion::class, 'product_variation_unit_conversion_id');
     }
 
     public function purchaseOrder()
@@ -61,5 +67,4 @@ class PurchaseOrderDetail extends Model
     {
         return $this->belongsTo(User::class, 'updatedby_id');
     }
-
 }
