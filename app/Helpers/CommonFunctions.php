@@ -76,7 +76,7 @@ function utcDateTime($datetime)
     )->utc()->format('Y-m-d H:i:s');
 }
 
-function utcDate($datetime)
+function utcDate($datetime, $fromUtc = false)
 {
     if (blank($datetime)) {
         return $datetime;
@@ -86,7 +86,9 @@ function utcDate($datetime)
 
     $timezone = $setting['timezone'] ?? 'UTC';
     $dateFormat = $setting['date_format'] ?? 'd-m-Y';
-
+    if ($fromUtc) {
+        return Carbon::parse($datetime)->format('Y-m-d');
+    }
     return Carbon::createFromFormat(
         $dateFormat,
         $datetime,

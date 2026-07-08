@@ -92,8 +92,8 @@ class PurchaseOrderController extends Controller
     public function store(Request $request)
     {
         $request->merge([
-            'purchase_order_date' => utcDate($request->purchase_order_date),
-            'purchase_expected_date' => utcDate($request->purchase_expected_date),
+            'purchase_order_date' => ($request->purchase_order_id) ? utcDate($request->purchase_order_date, true) : utcDate($request->purchase_order_date),
+            'purchase_expected_date' => ($request->purchase_order_id) ? utcDate($request->purchase_expected_date, true) : utcDate($request->purchase_expected_date),
         ]);
         $validator = Validator::make($request->all(), [
             'supplier_id' => ['required', Rule::exists('suppliers', 'supplier_id')->where('is_deleted', 0)],
