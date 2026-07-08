@@ -23,6 +23,7 @@
 <!-- Helpers -->
 <script src="{{ asset('public/assets/vendor/js/helpers.js') }}"></script>
 <script src="{{ asset('public/assets/js/config.js') }}"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
     .select2-container {
         width: 100% !important;

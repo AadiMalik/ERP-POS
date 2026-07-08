@@ -72,15 +72,15 @@
 
                         <div class="col-md-3">
                             <label class="fw-semibold">PO Date <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" name="purchase_order_date"
-                                value="{{ old('purchase_order_date', isset($purchase_order)?Carbon::parse($purchase_order->purchase_order_date)->format('Y-m-d') : date('Y-m-d')) }}"
+                            <input type="text" class="form-control datepicker" name="purchase_order_date"
+                                value="{{ old('purchase_order_date', isset($purchase_order)?localDate($purchase_order->purchase_order_date) : localDate(date('Y-m-d'))) }}"
                                 required>
                         </div>
 
                         <div class="col-md-3">
                             <label class="fw-semibold">Expected Date <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" name="purchase_expected_date"
-                                value="{{ old('purchase_expected_date', isset($purchase_order)?Carbon::parse($purchase_order->purchase_expected_date)->format('Y-m-d') : date('Y-m-d', strtotime('+7 days'))) }}"
+                            <input type="text" class="form-control datepicker" name="purchase_expected_date"
+                                value="{{ old('purchase_expected_date', isset($purchase_order)?localDate($purchase_order->purchase_expected_date) : localDate(date('Y-m-d', strtotime('+7 days')))) }}"
                                 required>
                         </div>
                         <div class="col-md-9">

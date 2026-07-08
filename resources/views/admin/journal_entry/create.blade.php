@@ -100,8 +100,8 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Entry Date<span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="entry_date" name="entry_date"
-                                value="{{ isset($journal_entry) ? Carbon::parse($journal_entry->entry_date)->format('Y-m-d') : date('Y-m-d') }}">
+                            <input type="text" class="form-control datepicker" id="entry_date" name="entry_date"
+                                value="{{ isset($journal_entry) ? localDate($journal_entry->entry_date) : localDate(date('Y-m-d')) }}">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Reference No<span class="text-danger">*</span></label>

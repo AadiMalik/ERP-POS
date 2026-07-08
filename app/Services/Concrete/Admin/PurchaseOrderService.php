@@ -83,7 +83,7 @@ class PurchaseOrderService
         return DataTables::of($datatable)
             ->addColumn('purchase_order_date', function ($item) {
                 return !empty($item->purchase_order_date)
-                    ? Carbon::parse($item->purchase_order_date)->format('d-m-Y')
+                    ? localDate($item->purchase_order_date)
                     : 'N/A';
             })
             ->addColumn('supplier', function ($item) {

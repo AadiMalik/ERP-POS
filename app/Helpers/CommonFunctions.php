@@ -26,6 +26,74 @@ function getRoleName()
     return Auth::user()?->getRoleNames()->first();
 }
 
+function localDateTime($date)
+{
+    if (blank($date)) {
+        return $date;
+    }
+    $setting = session('business_setting');
+    $date_format = $setting['date_format'] ?? 'd-m-Y';
+    $time_format = $setting['time_format'] ?? 'H:i:s';
+    $timezone = $setting['timezone'] ?? 'UTC';
+
+    return Carbon::parse($date, 'UTC')
+        ->setTimezone($timezone)
+        ->format($date_format . ' ' . $time_format);
+}
+
+function localDate($date)
+{
+    if (blank($date)) {
+        return $date;
+    }
+
+    $setting = session('business_setting', []);
+
+    $date_format = $setting['date_format'] ?? 'd-m-Y';
+    $timezone   = $setting['timezone'] ?? 'UTC';
+
+    return Carbon::parse($date, 'UTC')
+        ->setTimezone($timezone)
+        ->format($date_format);
+}
+
+function utcDateTime($datetime)
+{
+    if (blank($datetime)) {
+        return $datetime;
+    }
+
+    $setting = session('business_setting', []);
+
+    $timezone = $setting['timezone'] ?? 'UTC';
+    $dateFormat = $setting['date_format'] ?? 'd-m-Y';
+    $timeFormat = $setting['time_format'] ?? 'H:i';
+
+    return Carbon::createFromFormat(
+        $dateFormat . ' ' . $timeFormat,
+        $datetime,
+        $timezone
+    )->utc()->format('Y-m-d H:i:s');
+}
+
+function utcDate($datetime)
+{
+    if (blank($datetime)) {
+        return $datetime;
+    }
+
+    $setting = session('business_setting', []);
+
+    $timezone = $setting['timezone'] ?? 'UTC';
+    $dateFormat = $setting['date_format'] ?? 'd-m-Y';
+
+    return Carbon::createFromFormat(
+        $dateFormat,
+        $datetime,
+        $timezone
+    )->utc()->format('Y-m-d');
+}
+
 function generateJVNum($journal_id)
 {
     $business_id = Auth::user()->business_id;

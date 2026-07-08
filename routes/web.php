@@ -22,7 +22,7 @@ Auth::routes(['register' => false]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin'], function () {
+Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix' => 'admin'], function () {
     //permissions
     Route::resource('permissions', App\Http\Controllers\Admin\PermissionController::class);
     Route::group(['prefix' => 'permissions'], function () {
@@ -222,5 +222,19 @@ Route::group(['middleware' => ['auth', 'check.subscription'], 'prefix' => 'admin
         Route::post('data', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'getData']);
         Route::post('change-status', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'byBusiness']);
+    });
+
+    //Setting
+    Route::group(['prefix' => 'setting'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\SettingController::class, 'index']);
+        Route::post('business', [App\Http\Controllers\Admin\SettingController::class, 'updateBusinessSetting'])->name('business.update');
+        Route::post('accounting', [App\Http\Controllers\Admin\SettingController::class, 'updateAccountingSetting'])->name('accounting.update');
+        Route::post('inventory', [App\Http\Controllers\Admin\SettingController::class, 'updateInventorySetting'])->name('inventory.update');
+        Route::post('customer', [App\Http\Controllers\Admin\SettingController::class, 'updateCustomerSetting'])->name('customer.update');
+        Route::post('supplier', [App\Http\Controllers\Admin\SettingController::class, 'updateSupplierSetting'])->name('supplier.update');
+        Route::post('email', [App\Http\Controllers\Admin\SettingController::class, 'updateEmailSetting'])->name('email.update');
+        Route::post('sms', [App\Http\Controllers\Admin\SettingController::class, 'updateSmsSetting'])->name('sms.update');
+        Route::post('whatsapp', [App\Http\Controllers\Admin\SettingController::class, 'updateWhatsappSetting'])->name('whatsapp.update');
+        Route::post('fbr', [App\Http\Controllers\Admin\SettingController::class, 'updateFbrSetting'])->name('fbr.update');
     });
 });

@@ -12,6 +12,7 @@ use App\Services\Concrete\Admin\SupplierService;
 use App\Services\Concrete\Admin\UnitService;
 use App\Services\Concrete\Admin\WarehouseService;
 use App\Traits\ResponseAPI;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -90,6 +91,10 @@ class PurchaseOrderController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge([
+            'purchase_order_date' => utcDate($request->purchase_order_date),
+            'purchase_expected_date' => utcDate($request->purchase_expected_date),
+        ]);
         $validator = Validator::make($request->all(), [
             'supplier_id' => ['required', Rule::exists('suppliers', 'supplier_id')->where('is_deleted', 0)],
             'warehouse_id' => ['required', Rule::exists('warehouses', 'warehouse_id')->where('is_deleted', 0)],

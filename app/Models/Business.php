@@ -59,4 +59,50 @@ class Business extends Model
     {
         return $this->belongsTo(User::class, 'deletedby_id');
     }
+
+    public function businessSetting()
+    {
+        return $this->hasOne(BusinessSetting::class, 'business_id', 'business_id');
+    }
+
+    public function accountingSetting()
+    {
+        return $this->hasOne(AccountingSetting::class, 'business_id', 'business_id');
+    }
+
+    public function customerSetting()
+    {
+        return $this->hasOne(CustomerSetting::class, 'business_id', 'business_id');
+    }
+
+    public function supplierSetting()
+    {
+        return $this->hasOne(SupplierSetting::class, 'business_id', 'business_id');
+    }
+
+    public function inventorySetting()
+    {
+        return $this->hasOne(InventorySetting::class, 'business_id', 'business_id');
+    }
+
+    public function emailSetting()
+    {
+        return $this->hasOne(EmailSetting::class, 'business_id', 'business_id');
+    }
+
+    public function smsSetting()
+    {
+        return $this->hasOne(SmsSetting::class, 'business_id', 'business_id');
+    }
+
+    public function fbrSetting()
+    {
+        return $this->hasOne(FbrSetting::class, 'business_id', 'business_id');
+    }
+
+    public function whatsappSetting()
+    {
+        return $this->hasOne(WhatsappSetting::class, 'business_id', 'business_id');
+    }
+
 }
