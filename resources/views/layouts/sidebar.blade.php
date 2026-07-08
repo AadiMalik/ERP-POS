@@ -205,6 +205,11 @@
                         <div data-i18n="Journals">Journals</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/journal-entry') }}" class="menu-link">
+                        <div data-i18n="Journal Entries">Journal Entries</div>
+                    </a>
+                </li>
             </ul>
         </li>
 
