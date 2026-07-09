@@ -222,6 +222,18 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::post('data', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'getData']);
         Route::post('change-status', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'byBusiness']);
+        
+        Route::get('details/{purchase_order_id}', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'details']);
+    });
+
+    //purchase
+    Route::resource('purchase', App\Http\Controllers\Admin\PurchaseController::class);
+    Route::group(['prefix' => 'purchase'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\PurchaseController::class, 'getData']);
+        Route::post('change-status', [App\Http\Controllers\Admin\PurchaseController::class, 'status']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\PurchaseController::class, 'byBusiness']);
+        
+        Route::get('details/{purchase_id}', [App\Http\Controllers\Admin\PurchaseController::class, 'details']);
     });
 
     //Setting

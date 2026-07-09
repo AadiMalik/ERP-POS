@@ -170,6 +170,27 @@ function generatePONo($business_id = null)
     );
 }
 
+function generatePUNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $purchase = Purchase::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($purchase) {
+        $next_number = (int) substr($purchase->purchase_no, strrpos($purchase->purchase_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'PU-%04d',
+        $next_number
+    );
+}
+
 function generateSupplierCode($business_id = null)
 {
     $business_id = $business_id ?? Auth::user()->business_id;

@@ -231,6 +231,11 @@
                         <div data-i18n="Purchase Orders">Purchase Orders</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/purchase') }}" class="menu-link">
+                        <div data-i18n="Purchases">Purchases</div>
+                    </a>
+                </li>
             </ul>
         </li>
 

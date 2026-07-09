@@ -5,24 +5,25 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\Message;
 use App\Enums\Status;
 use App\Http\Controllers\Controller;
+use App\Traits\ResponseAPI;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\ProductService;
+use App\Services\Concrete\Admin\PurchaseService;
 use App\Services\Concrete\Admin\PurchaseOrderService;
 use App\Services\Concrete\Admin\SupplierService;
 use App\Services\Concrete\Admin\UnitService;
 use App\Services\Concrete\Admin\WarehouseService;
-use App\Traits\ResponseAPI;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class PurchaseOrderController extends Controller
+class PurchaseController extends Controller
 {
     use ResponseAPI;
 
+    protected $purchase_service;
     protected $purchase_order_service;
     protected $business_service;
     protected $product_service;
@@ -31,6 +32,7 @@ class PurchaseOrderController extends Controller
     protected $unit_service;
 
     public function __construct(
+        PurchaseService $purchase_service,
         PurchaseOrderService $purchase_order_service,
         ProductService $product_service,
         BusinessService $business_service,
@@ -38,6 +40,7 @@ class PurchaseOrderController extends Controller
         WarehouseService $warehouse_service,
         UnitService $unit_service
     ) {
+        $this->purchase_service = $purchase_service;
         $this->purchase_order_service = $purchase_order_service;
         $this->product_service = $product_service;
         $this->business_service = $business_service;
@@ -51,6 +54,7 @@ class PurchaseOrderController extends Controller
         $business = $this->business_service->getAll();
         $suppliers = $this->supplier_service->getAllActive();
         $warehouses = $this->warehouse_service->getAllActive();
+        $purchase_orders = $this->purchase_order_service->getAllApproved();
         $statuses = [
             Status::PENDING   => ucfirst(Status::PENDING),
             Status::APPROVED  => ucfirst(Status::APPROVED),
@@ -58,11 +62,11 @@ class PurchaseOrderController extends Controller
             Status::CANCELLED => ucfirst(Status::CANCELLED),
         ];
 
-        return view('admin.purchase_order.index', compact('business', 'suppliers', 'warehouses', 'statuses'));
+        return view('admin.purchase.index', compact('business', 'suppliers', 'purchase_orders', 'warehouses', 'statuses'));
     }
     public function getData(Request $request)
     {
-        return $this->purchase_order_service->getData($request->all());
+        return $this->purchase_service->getData($request->all());
     }
 
     public function create()
@@ -72,41 +76,41 @@ class PurchaseOrderController extends Controller
         $suppliers = $this->supplier_service->getAllActive();
         $warehouses = $this->warehouse_service->getAllActive();
         $units = $this->unit_service->getAllActive();
-        $purchase_order_no = generatePONo();
+        $purchase_orders = $this->purchase_order_service->getAllApproved();
+        $purchase_no = generatePUNo();
 
-        return view('admin.purchase_order.create', compact('business', 'products', 'suppliers', 'warehouses', 'units', 'purchase_order_no'));
+        return view('admin.purchase.create', compact('business', 'products', 'suppliers', 'purchase_orders', 'warehouses', 'units', 'purchase_no'));
     }
 
-    public function edit($purchase_order_id)
+    public function edit($purchase_id)
     {
-        $purchase_order = $this->purchase_order_service->getById($purchase_order_id);
+        $purchase = $this->purchase_service->getById($purchase_id);
         $business = $this->business_service->getAll();
         $products = $this->product_service->getAllActive();
         $suppliers = $this->supplier_service->getAllActive();
         $warehouses = $this->warehouse_service->getAllActive();
         $units = $this->unit_service->getAllActive();
+        $purchase_orders = $this->purchase_order_service->getAllApproved();
 
-        return view('admin.purchase_order.create', compact('purchase_order', 'business', 'products', 'suppliers', 'warehouses', 'units'));
+        return view('admin.purchase.create', compact('purchase', 'business', 'products', 'purchase_orders', 'suppliers', 'warehouses', 'units'));
     }
 
     public function store(Request $request)
     {
         $request->merge([
-            'purchase_order_date' => ($request->purchase_order_id) ? utcDate($request->purchase_order_date, true) : utcDate($request->purchase_order_date),
-            'purchase_expected_date' => ($request->purchase_order_id) ? utcDate($request->purchase_expected_date, true) : utcDate($request->purchase_expected_date),
+            'purchase_date' => ($request->purchase_id) ? utcDate($request->purchase_date, true) : utcDate($request->purchase_date),
         ]);
         $validator = Validator::make($request->all(), [
             'supplier_id' => ['required', Rule::exists('suppliers', 'supplier_id')->where('is_deleted', 0)],
             'warehouse_id' => ['required', Rule::exists('warehouses', 'warehouse_id')->where('is_deleted', 0)],
-            'purchase_order_no' => [
+            'purchase_no' => [
                 'required',
-                Rule::unique('purchase_orders', 'purchase_order_no')
+                Rule::unique('purchases', 'purchase_no')
                     ->where('is_deleted', 0)
                     ->where('business_id', $request->business_id ?? Auth::user()->business_id)
-                    ->ignore($request->purchase_order_id, 'purchase_order_id')
+                    ->ignore($request->purchase_id, 'purchase_id')
             ],
-            'purchase_order_date' => ['required', 'date'],
-            'purchase_expected_date' => ['required', 'date', 'after_or_equal:purchase_order_date'],
+            'purchase_date' => ['required', 'date'],
             'subtotal' => ['required', 'numeric', 'min:0'],
             'discount' => ['required', 'numeric', 'min:0'],
             'discount_amount' => ['required', 'numeric', 'min:0'],
@@ -133,9 +137,9 @@ class PurchaseOrderController extends Controller
             $obj = $request->all();
             $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
             $obj['branch_id'] = $request->branch_id ?? Auth::user()->branch_id ?? null;
-            $this->purchase_order_service->save($obj);
+            $this->purchase_service->save($obj);
             return redirect('admin/purchase-order')
-                ->with('success', empty($request->purchase_order_id) ? Message::SAVE : Message::UPDATE);
+                ->with('success', empty($request->purchase_id) ? Message::SAVE : Message::UPDATE);
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -144,7 +148,7 @@ class PurchaseOrderController extends Controller
     public function status(Request $request)
     {
         $rules = [
-            'purchase_order_id' => 'required|exists:purchase_orders,purchase_order_id',
+            'purchase_id' => 'required|exists:purchases,purchase_id',
             'status' => 'required|in:' . Status::PENDING . ',' . Status::APPROVED . ',' . Status::COMPLETED . ',' . Status::CANCELLED
         ];
 
@@ -153,7 +157,7 @@ class PurchaseOrderController extends Controller
             return $this->validationResponse($validate->errors()->first());
         }
         try {
-            $this->purchase_order_service->status($request->all());
+            $this->purchase_service->status($request->all());
             return $this->success(
                 Message::STATUS,
                 []
@@ -165,11 +169,11 @@ class PurchaseOrderController extends Controller
         }
     }
 
-    public function details($purchase_order_id)
+    public function details($purchase_id)
     {
         try {
-            $purchase_order = $this->purchase_order_service->getDetails($purchase_order_id);
-            return $this->success(Message::SUCCESS, $purchase_order);
+            $purchase = $this->purchase_service->getDetails($purchase_id);
+            return $this->success(Message::SUCCESS, $purchase);
         } catch (Exception $e) {
             return $this->error(
                 Message::ERROR
@@ -180,8 +184,8 @@ class PurchaseOrderController extends Controller
     public function byBusiness($business_id)
     {
         try {
-            $purchase_orders = $this->purchase_order_service->getByBusiness($business_id);
-            return $this->success(Message::SUCCESS, $purchase_orders);
+            $purchases = $this->purchase_service->getByBusiness($business_id);
+            return $this->success(Message::SUCCESS, $purchases);
         } catch (Exception $e) {
             return $this->error(
                 Message::ERROR

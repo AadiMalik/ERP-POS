@@ -5,10 +5,8 @@ namespace App\Services\Concrete\Admin;
 use App\Enums\Filter;
 use App\Enums\RoleNames;
 use App\Enums\Status;
-use App\Models\JournalEntry;
-use App\Models\JournalEntryDetail;
-use App\Models\PurchaseOrder;
-use App\Models\PurchaseOrderDetail;
+use App\Models\Purchase;
+use App\Models\PurchaseDetail;
 use App\Repository\Repository;
 use Carbon\Carbon;
 use Exception;
@@ -16,28 +14,28 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
-class PurchaseOrderService
+class PurchaseService
 {
-    protected $model_purchase_order;
-    protected $model_purchase_order_details;
+    protected $model_purchase;
+    protected $model_purchase_details;
     protected $with = [
         'business',
         'branch',
         'supplier',
         'warehouse',
-        'purchaseOrderDetails',
-        'purchaseOrderDetails.product',
-        'purchaseOrderDetails.product.productVariations',
-        'purchaseOrderDetails.productVariation',
-        'purchaseOrderDetails.productVariation.productVariationUnitConversion',
-        'purchaseOrderDetails.unit',
-        'purchaseOrderDetails.productVariationUnitConversion',
+        'purchaseDetails',
+        'purchaseDetails.product',
+        'purchaseDetails.product.productVariations',
+        'purchaseDetails.productVariation',
+        'purchaseDetails.productVariation.productVariationUnitConversion',
+        'purchaseDetails.unit',
+        'purchaseDetails.productVariationUnitConversion',
     ];
 
     public function __construct()
     {
-        $this->model_purchase_order = new Repository(new PurchaseOrder());
-        $this->model_purchase_order_details = new Repository(new PurchaseOrderDetail());
+        $this->model_purchase = new Repository(new Purchase());
+        $this->model_purchase_details = new Repository(new PurchaseDetail());
     }
 
     public function getData($obj)
@@ -60,31 +58,37 @@ class PurchaseOrderService
         if (isset($obj['warehouse_id']) && $obj['warehouse_id'] != 0 && $obj['warehouse_id'] != "") {
             $wh[] = ['warehouse_id', $obj['warehouse_id']];
         }
+        if (isset($obj['purchase_id']) && $obj['purchase_id'] != 0 && $obj['purchase_id'] != "") {
+            $wh[] = ['purchase_id', $obj['purchase_id']];
+        }
         if (isset($obj['status']) && $obj['status'] != 0 && $obj['status'] != "") {
             $wh[] = ['status', $obj['status']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['purchase_order_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['purchase_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
         }
 
         if (!empty($obj['end_date'])) {
-            $wh[] = ['purchase_order_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['purchase_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
         }
         $allow_roles = [
             RoleNames::SUPERADMIN,
             RoleNames::BUSINESSADMIN
         ];
-        $datatable = $this->model_purchase_order->getModel()::with($this->with)
-            ->withCount('purchaseOrderDetails as total_products')
+        $datatable = $this->model_purchase->getModel()::with($this->with)
+            ->withCount('purchaseDetails as total_products')
             ->where($wh)
             ->where('is_deleted', 0)
-            ->orderBy('purchase_order_date', $orderBy);
+            ->orderBy('purchase_date', $orderBy);
         $datatable = applyRoleScope($datatable, $allow_roles);
         return DataTables::of($datatable)
-            ->addColumn('purchase_order_date', function ($item) {
-                return !empty($item->purchase_order_date)
-                    ? localDate($item->purchase_order_date)
+            ->addColumn('purchase_date', function ($item) {
+                return !empty($item->purchase_date)
+                    ? localDate($item->purchase_date)
                     : 'N/A';
+            })
+            ->addColumn('purchase_order_no', function ($item) {
+                return $item->purchase_order->purchase_order_no ?? '';
             })
             ->addColumn('supplier', function ($item) {
                 return $item->supplier->code ?? '' . ' ' . $item->supplier->name ?? '';
@@ -114,7 +118,7 @@ class PurchaseOrderService
                 ];
 
                 $html = "<select class='form-select form-select-sm change-status'
-                data-id='{$item->purchase_order_id}'>";
+                data-id='{$item->purchase_id}'>";
 
                 foreach ($statuses as $value => $label) {
                     $selected = $item->status == $value ? 'selected' : '';
@@ -129,21 +133,21 @@ class PurchaseOrderService
 
                 return "
                     <a class='btn btn-icon btn-outline-primary mr-2'
-                     href='" . route('purchase-order.edit', $item->purchase_order_id) . "'
-                    id='editPurchaseOrder'>
+                     href='" . route('purchase-order.edit', $item->purchase_id) . "'
+                    id='editPurchase'>
 
                     <i class='fa fa-pencil'></i>
                     </a>
 
                     <a class='btn btn-icon btn-outline-danger'
-                    id='deletePurchaseOrder'
-                    data-id='{$item->purchase_order_id}'>
+                    id='deletePurchase'
+                    data-id='{$item->purchase_id}'>
 
                     <i class='fa fa-trash'></i>
                     </a>
                 ";
             })
-            ->rawColumns(['purchase_order_date', 'business', 'branch', 'warehouse', 'supplier', 'total_products', 'total',  'status', 'action'])
+            ->rawColumns(['purchase_date','purchase_order_no', 'business', 'branch', 'warehouse', 'supplier', 'total_products', 'total',  'status', 'action'])
             ->make(true);
     }
 
@@ -157,17 +161,16 @@ class PurchaseOrderService
             // Update
             //====================================
 
-            if (!empty($obj['purchase_order_id'])) {
+            if (!empty($obj['purchase_id'])) {
 
-                $purchase_order = $this->model_purchase_order
-                    ->getModel()::findOrFail($obj['purchase_order_id']);
+                $purchase_order = $this->model_purchase
+                    ->getModel()::findOrFail($obj['purchase_id']);
 
                 $purchase_order->update([
                     'business_id'            => $obj['business_id'],
                     'supplier_id'            => $obj['supplier_id'],
                     'warehouse_id'           => $obj['warehouse_id'],
-                    'purchase_order_date'    => $obj['purchase_order_date'],
-                    'purchase_expected_date' => $obj['purchase_expected_date'],
+                    'purchase_date'          => $obj['purchase_date'],
                     'description'            => $obj['description'],
                     'subtotal'               => $obj['subtotal'],
                     'discount'               => $obj['discount'],
@@ -182,7 +185,7 @@ class PurchaseOrderService
 
                 // Remove previous items
 
-                $this->model_purchase_order_details->getModel()::where('purchase_order_id', $purchase_order->purchase_order_id)
+                $this->model_purchase_details->getModel()::where('purchase_id', $purchase_order->purchase_id)
                     ->delete();
             }
 
@@ -192,13 +195,13 @@ class PurchaseOrderService
 
             else {
 
-                $purchase_order = $this->model_purchase_order->create([
-                    'purchase_order_id'      => generateUuid(),
+                $purchase_order = $this->model_purchase->create([
+                    'purchase_id'      => generateUuid(),
                     'business_id'            => $obj['business_id'],
                     'supplier_id'            => $obj['supplier_id'],
                     'warehouse_id'           => $obj['warehouse_id'],
                     'purchase_order_no'      => $obj['purchase_order_no'],
-                    'purchase_order_date'    => $obj['purchase_order_date'],
+                    'purchase_date'    => $obj['purchase_date'],
                     'purchase_expected_date' => $obj['purchase_expected_date'],
                     'description'            => $obj['description'],
                     'subtotal'               => $obj['subtotal'],
@@ -219,10 +222,10 @@ class PurchaseOrderService
 
             foreach ($obj['products'] as $product) {
 
-                $this->model_purchase_order_details->create([
+                $this->model_purchase_details->create([
 
                     'purchase_order_detail_id'              => generateUuid(),
-                    'purchase_order_id'                     => $purchase_order->purchase_order_id,
+                    'purchase_id'                     => $purchase_order->purchase_id,
 
                     'product_id'                            => $product['product_id'],
                     'product_variation_id'                  => $product['product_variation_id'],
@@ -248,61 +251,48 @@ class PurchaseOrderService
         }
     }
 
-    public function getById($purchase_order_id)
+    public function getById($purchase_id)
     {
-        return $this->model_purchase_order->with($this->with)->find($purchase_order_id);
+        return $this->model_purchase->with($this->with)->find($purchase_id);
     }
 
     public function status($obj)
     {
-        return $this->model_purchase_order->update([
+        return $this->model_purchase->update([
             'status' => $obj['status'],
             'updatedby_id' => Auth::user()->id,
             'date_updated' => now()
-        ], $obj['purchase_order_id']);
+        ], $obj['purchase_id']);
     }
 
-    public function delete($purchase_order_id)
+    public function delete($purchase_id)
     {
-        return $this->model_purchase_order->update([
+        return $this->model_purchase->update([
             'is_deleted' => 1,
             'status' => Status::CANCELLED,
             'deletedby_id' => Auth::id(),
             'date_deleted' => now()
-        ], $purchase_order_id);
+        ], $purchase_id);
     }
 
     public function getAll()
     {
-        return $this->model_purchase_order->getModel()::where('is_deleted', 0)
+        return $this->model_purchase->getModel()::where('is_deleted', 0)
             ->get();
     }
-    public function getAllPending()
-    {
-        return $this->model_purchase_order->getModel()::where('status', Status::PENDING)
-            ->where('is_deleted', 0)
-            ->get();
-    }
-
-    public function getAllApproved()
-    {
-        return $this->model_purchase_order->getModel()::where('status', Status::APPROVED)
-            ->where('is_deleted', 0)
-            ->get();
-    }
-    public function getDetails($purchase_order_id)
+    public function getDetails($purchase_id)
     {
         try {
-            $purchase_order = $this->model_purchase_order->getModel()::with($this->with)->findOrFail($purchase_order_id);
+            $purchase_order = $this->model_purchase->getModel()::with($this->with)->findOrFail($purchase_id);
 
             $data = [
                 'header' => [
-                    'purchase_order_id' => $purchase_order->purchase_order_id,
+                    'purchase_id' => $purchase_order->purchase_id,
                     'supplier_id' => $purchase_order->supplier_id,
                     'warehouse_id' => $purchase_order->warehouse_id,
                     'branch_id' => $purchase_order->branch_id,
                     'purchase_order_no' => $purchase_order->purchase_order_no,
-                    'purchase_order_date' => $purchase_order->purchase_order_date,
+                    'purchase_date' => $purchase_order->purchase_date,
                     'purchase_expected_date' => $purchase_order->purchase_expected_date,
                     'subtotal' => $purchase_order->subtotal,
                     'discount' => $purchase_order->discount,
@@ -313,19 +303,7 @@ class PurchaseOrderService
                 'details' => []
             ];
 
-            foreach ($purchase_order->purchaseOrderDetails as $detail) {
-                $productVariations = [];
-
-                foreach ($detail->product->productVariations as $variation) {
-
-                    $productVariations[] = [
-                        'product_variation_id' => $variation->product_variation_id,
-                        'name' => $variation->name,
-                        'purchase_price' => $variation->purchase_price,
-                        'unit_id' => optional($variation->purchase_unit)->unit_id,
-                        'unit_name' => optional($variation->purchase_unit)->name,
-                    ];
-                }
+            foreach ($purchase_order->purchaseDetails as $detail) {
                 $conversions = [];
                 if ($detail->productVariation) {
                     foreach ($detail->productVariation->productVariationUnitConversion as $conversion) {
@@ -355,7 +333,6 @@ class PurchaseOrderService
                     'conversion_factor' => $detail->conversion_factor,
                     'unit_price' => $detail->unit_price,
                     'total' => $detail->total,
-                    'productVariations' => $productVariations,
                     'conversions' => $conversions,
                 ];
             }
@@ -367,7 +344,7 @@ class PurchaseOrderService
     }
     public function getByBusiness($business_id)
     {
-        return $this->model_purchase_order->getModel()::with($this->with)
+        return $this->model_purchase->getModel()::with($this->with)
             ->where('business_id', $business_id)
             ->where('is_deleted', 0)
             ->get();
