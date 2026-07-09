@@ -99,7 +99,10 @@ class PurchaseOrderService
                 return $item->branch->name ?? '';
             })
             ->addColumn('total_products', function ($item) {
-                return number_format($item->total_products ?? 0, 3);
+                return decimal($item->total_products ?? 0);
+            })
+             ->addColumn('total', function ($item) {
+                return currency($item->total ?? 0);
             })
             ->addColumn('status', function ($item) {
 
@@ -140,7 +143,7 @@ class PurchaseOrderService
                     </a>
                 ";
             })
-            ->rawColumns(['purchase_order_date', 'business', 'branch', 'warehouse', 'supplier', 'total_products',  'status', 'action'])
+            ->rawColumns(['purchase_order_date', 'business', 'branch', 'warehouse', 'supplier', 'total_products','total',  'status', 'action'])
             ->make(true);
     }
 

@@ -52,8 +52,8 @@
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <span class="fw-semibold d-block">John Doe</span>
-                                    <small class="text-muted">Admin</small>
+                                    <span class="fw-semibold d-block">{{auth()->user()->name??'Admin'}}</span>
+                                    <small class="text-muted">{{getRoleName()}}</small>
                                 </div>
                             </div>
                         </a>
@@ -68,7 +68,7 @@
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="{{ url('admin/setting') }}">
                             <i class="fa fa-cog me-2"></i>
                             <span class="align-middle">Settings</span>
                         </a>

@@ -45,6 +45,11 @@
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
     <!-- / Layout wrapper -->
+    <script>
+        let decimal_points = "{{ session('accounting_setting.decimal_points', 2) }}";
+        let currency_symbol = "{{ session('accounting_setting.currency_symbol', 'Rs') }}";
+        let currency_position = "{{ session('accounting_setting.currency_position', 'left') }}";
+    </script>
     @include('layouts/js')
     @yield('js')
 </body>

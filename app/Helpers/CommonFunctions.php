@@ -96,6 +96,33 @@ function utcDate($datetime, $fromUtc = false)
     )->utc()->format('Y-m-d');
 }
 
+function currency($amount = 0, $showSymbol = true)
+{
+    $setting = session('accounting_setting', []);
+
+    $symbol   = $setting['currency_symbol'] ?? 'Rs';
+    $position = strtolower($setting['currency_position'] ?? 'left');
+    $decimal  = (int) ($setting['decimal_points'] ?? 2);
+
+    // Keep numeric value
+    $amount = round((float) $amount, $decimal);
+
+    if (!$showSymbol) {
+        return $amount;
+    }
+
+    return $position === 'after'
+        ? $amount . ' ' . $symbol
+        : $symbol . ' ' . $amount;
+}
+
+function decimal($value = 0)
+{
+    $decimal = (int) (session('accounting_setting.decimal_points') ?? 2);
+
+    return sprintf('%.' . $decimal . 'f', (float) $value);
+}
+
 function generateJVNum($journal_id)
 {
     $business_id = Auth::user()->business_id;

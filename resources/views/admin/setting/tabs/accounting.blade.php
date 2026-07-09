@@ -28,7 +28,7 @@
             <div class="col-md-6 mb-3">
                 <label>{{ $label }}</label>
                 <select class="form-select select2" name="{{ $field }}">
-                    <option value="">Select</option>
+                    <option value="">--Select Account--</option>
                     @foreach ($accounts as $account)
                         <option value="{{ $account->account_id }}"
                             {{ $accounting_setting->$field == $account->account_id ? 'selected' : '' }}>
@@ -49,8 +49,8 @@
         <div class="col-md-3 mb-3">
             <label>Currency Position</label>
             <select class="form-select" name="currency_position">
-                <option value="left">Left</option>
-                <option value="right">Right</option>
+                <option value="before" {{ $accounting_setting->currency_position == 'before' ? 'selected' : '' }}>Before</option>
+                <option value="after" {{ $accounting_setting->currency_position == 'after' ? 'selected' : '' }}>After</option>
             </select>
         </div>
         <div class="col-md-3 mb-3">
@@ -61,7 +61,8 @@
         <div class="col-md-12">
             <hr>
             <div class="text-end">
-                <button type="button" class="btn btn-primary" id="btnAccountingSetting">
+                <button type="button" class="btn btn-primary"
+                    onclick="saveSetting('#accountingSettingForm','{{ url('admin/setting/accounting') }}')">
                     Save Changes
                 </button>
             </div>

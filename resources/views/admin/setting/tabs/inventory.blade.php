@@ -23,11 +23,34 @@
         @endforeach
         <div class="col-md-6">
             <label>Low Stock Quantity</label>
-            <input class="form-control" name="low_stock_quantity" value="{{ $inventory_setting->low_stock_quantity }}">
+            <input type="text" onkeypress="return isNumberKey(event)" class="form-control" name="low_stock_quantity" value="{{ $inventory_setting->low_stock_quantity }}">
         </div>
+        @php
+            $barcode_types = [
+                'CODE128' => 'CODE128',
+                'CODE39' => 'CODE39',
+                'EAN13' => 'EAN13',
+                'EAN8' => 'EAN8',
+                'UPC' => 'UPC',
+                'UPCE' => 'UPCE',
+                'ITF14' => 'ITF14',
+                'CODABAR' => 'CODABAR',
+                'MSI' => 'MSI',
+                'PHARMACODE' => 'PHARMACODE',
+                'POSTNET' => 'POSTNET',
+                'QRCODE' => 'QRCODE',
+                'DATAMATRIX' => 'DATAMATRIX',
+            ];
+        @endphp
         <div class="col-md-6">
             <label>Barcode Type</label>
-            <input class="form-control" name="barcode_type" value="{{ $inventory_setting->barcode_type }}">
+            <select class="form-select select2" name="barcode_type">
+                @foreach ($barcode_types as $key => $value)
+                    <option value="{{ $key }}"
+                        {{ $inventory_setting->barcode_type == $key ? 'selected' : '' }}>
+                        {{ $value }}</option>
+                @endforeach
+            </select>
         </div>
         <div class="col-md-12">
             <hr>

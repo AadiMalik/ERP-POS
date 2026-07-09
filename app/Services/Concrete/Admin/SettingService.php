@@ -118,25 +118,67 @@ class SettingService
         return $setting;
     }
 
-    public function updateAccountingSetting($obj)
+    public function updateAccountingSetting(array $obj)
     {
-        $obj['updatedby_id'] = Auth::user()->id;
-        $obj['date_updated'] = now();
-        return $this->model_accounting_setting->update($obj, $obj['business_id']);
+        $model = $this->model_accounting_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id'],
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
     }
 
-    public function updateCustomerSetting($obj)
+    public function updateCustomerSetting(array $obj)
     {
-        $obj['updatedby_id'] = Auth::user()->id;
-        $obj['date_updated'] = now();
-        return $this->model_customer_setting->update($obj, $obj['business_id']);
+        $model = $this->model_customer_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
     }
 
-    public function updateSupplierSetting($obj)
+    public function updateSupplierSetting(array $obj)
     {
-        $obj['updatedby_id'] = Auth::user()->id;
-        $obj['date_updated'] = now();
-        return $this->model_supplier_setting->update($obj, $obj['business_id']);
+        $model = $this->model_supplier_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
     }
 
     public function updateInventorySetting($obj)
@@ -146,31 +188,87 @@ class SettingService
         return $this->model_inventory_setting->update($obj, $obj['business_id']);
     }
 
-    public function updateEmailSetting($obj)
+    public function updateEmailSetting(array $obj)
     {
-        $obj['updatedby_id'] = Auth::user()->id;
-        $obj['date_updated'] = now();
-        return $this->model_email_setting->update($obj, $obj['business_id']);
+        $model = $this->model_email_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
     }
 
-    public function updateSmsSetting($obj)
+    public function updateSmsSetting(array $obj)
     {
-        $obj['updatedby_id'] = Auth::user()->id;
-        $obj['date_updated'] = now();
-        return $this->model_sms_setting->update($obj, $obj['business_id']);
+        $model = $this->model_sms_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
     }
 
-    public function updateFbrSetting($obj)
+    public function updateFbrSetting(array $obj)
     {
-        $obj['updatedby_id'] = Auth::user()->id;
-        $obj['date_updated'] = now();
-        return $this->model_fbr_setting->update($obj, $obj['business_id']);
+        $model = $this->model_fbr_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
     }
 
-    public function updateWhatsappSetting($obj)
+    public function updateWhatsappSetting(array $obj)
     {
-        $obj['updatedby_id'] = Auth::user()->id;
-        $obj['date_updated'] = now();
-        return $this->model_whatsapp_setting->update($obj, $obj['business_id']);
+        $model = $this->model_whatsapp_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
     }
 }

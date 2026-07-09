@@ -307,3 +307,25 @@ function isNumberKey(evt) {
 
     return true;
 }
+
+
+//Helper Functions
+function decimal(value) {
+    value = parseFloat(value || 0);
+
+    return value.toFixed(decimal_points);
+}
+
+function currency(amount) {
+    amount = decimal(amount);
+
+    return currency_position === 'after'
+        ? `${amount} ${currency_symbol}`
+        : `${currency_symbol} ${amount}`;
+}
+console.log(currency_symbol);
+$('.currency-label').each(function () {
+
+    $(this).append(' (' + currency_symbol + ')');
+
+});

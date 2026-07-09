@@ -73,14 +73,14 @@
                         <div class="col-md-3">
                             <label class="fw-semibold">PO Date <span class="text-danger">*</span></label>
                             <input type="text" class="form-control datepicker" name="purchase_order_date"
-                                value="{{ old('purchase_order_date', isset($purchase_order)?localDate($purchase_order->purchase_order_date) : localDate(date('Y-m-d'))) }}"
+                                value="{{ old('purchase_order_date', isset($purchase_order) ? localDate($purchase_order->purchase_order_date) : localDate(date('Y-m-d'))) }}"
                                 required>
                         </div>
 
                         <div class="col-md-3">
                             <label class="fw-semibold">Expected Date <span class="text-danger">*</span></label>
                             <input type="text" class="form-control datepicker" name="purchase_expected_date"
-                                value="{{ old('purchase_expected_date', isset($purchase_order)?localDate($purchase_order->purchase_expected_date) : localDate(date('Y-m-d', strtotime('+7 days')))) }}"
+                                value="{{ old('purchase_expected_date', isset($purchase_order) ? localDate($purchase_order->purchase_expected_date) : localDate(date('Y-m-d', strtotime('+7 days')))) }}"
                                 required>
                         </div>
                         <div class="col-md-9">
@@ -107,8 +107,8 @@
                                             <th style="min-width: 160px;">Conversion</th>
                                             <th style="min-width: 80px;">Unit</th>
                                             <th style="min-width: 100px;">Quantity</th>
-                                            <th style="min-width: 120px;">Unit Price</th>
-                                            <th style="min-width: 120px;">Total</th>
+                                            <th style="min-width: 120px;" class="currency-label">Unit Price</th>
+                                            <th style="min-width: 120px;" class="currency-label">Total</th>
                                             <th style="min-width: 10px;">Action</th>
                                         </tr>
                                     </thead>
@@ -183,7 +183,7 @@
                                                             name="products[{{ $loop->index }}][ordered_quantity]"
                                                             class="form-control quantity-input"
                                                             onkeypress="return isNumberKey(event)"
-                                                            value="{{ $detail->ordered_quantity }}" required>
+                                                            value="{{ decimal($detail->ordered_quantity) }}" required>
                                                         <input type="hidden"
                                                             name="products[{{ $loop->index }}][conversion_factor]"
                                                             class="conversion-factor"
@@ -194,12 +194,12 @@
                                                             name="products[{{ $loop->index }}][unit_price]"
                                                             class="form-control price-input"
                                                             onkeypress="return isNumberKey(event)"
-                                                            value="{{ $detail->unit_price }}" required>
+                                                            value="{{ decimal($detail->unit_price) }}" required>
                                                     </td>
                                                     <td>
                                                         <input type="text" class="form-control row-total"
                                                             name="products[{{ $loop->index }}][total]"
-                                                            value="{{ number_format($detail->total, 2) }}" readonly>
+                                                            value="{{ decimal($detail->total) }}" readonly>
                                                     </td>
                                                     <td>
                                                         <a href="javascript:void(0)" class="text-danger"
@@ -213,11 +213,12 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td colspan="6" class="text-end"><strong>Subtotal</strong></td>
+                                            <td colspan="6" class="text-end"><strong
+                                                    class="currency-label">Subtotal</strong></td>
                                             <td>
                                                 <input type="text" name="subtotal" id="subtotal"
                                                     class="form-control"
-                                                    value="{{ old('subtotal', $purchase_order->subtotal ?? 0) }}"
+                                                    value="{{ old('subtotal', decimal($purchase_order->subtotal ?? 0)) }}"
                                                     readonly>
                                             </td>
                                             <td></td>
@@ -228,16 +229,17 @@
                                                 <input type="text" name="discount" id="discount"
                                                     class="form-control discount-input"
                                                     onkeypress="return isNumberKey(event)"
-                                                    value="{{ old('discount', $purchase_order->discount ?? 0) }}">
+                                                    value="{{ old('discount', decimal($purchase_order->discount ?? 0)) }}">
                                             </td>
                                             <td></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="6" class="text-end"><strong>Discount Amount</strong></td>
+                                            <td colspan="6" class="text-end"><strong class="currency-label">Discount
+                                                    Amount</strong></td>
                                             <td>
                                                 <input type="text" name="discount_amount" id="discount_amount"
                                                     class="form-control"
-                                                    value="{{ old('discount_amount', $purchase_order->discount_amount ?? 0) }}"
+                                                    value="{{ old('discount_amount', decimal($purchase_order->discount_amount ?? 0)) }}"
                                                     readonly>
                                             </td>
                                             <td></td>
@@ -247,36 +249,40 @@
                                             <td>
                                                 <input type="text" name="tax" id="tax"
                                                     class="form-control tax-input" onkeypress="return isNumberKey(event)"
-                                                    value="{{ old('tax', $purchase_order->tax ?? 0) }}">
+                                                    value="{{ old('tax', decimal($purchase_order->tax ?? 0)) }}">
                                             </td>
                                             <td></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="6" class="text-end"><strong>Tax Amount</strong></td>
+                                            <td colspan="6" class="text-end"><strong class="currency-label">Tax
+                                                    Amount</strong></td>
                                             <td>
                                                 <input type="text" name="tax_amount" id="tax_amount"
                                                     class="form-control"
-                                                    value="{{ old('tax_amount', $purchase_order->tax_amount ?? 0) }}"
+                                                    value="{{ old('tax_amount', decimal($purchase_order->tax_amount ?? 0)) }}"
                                                     readonly>
                                             </td>
                                             <td></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="6" class="text-end"><strong>Shipping Charge</strong></td>
+                                            <td colspan="6" class="text-end"><strong class="currency-label">Shipping
+                                                    Charge</strong></td>
                                             <td>
                                                 <input type="text" name="shipping_charge"
                                                     onkeypress="return isNumberKey(event)" id="shipping_charge"
                                                     class="form-control shipping-input"
-                                                    value="{{ old('shipping_charge', $purchase_order->shipping_charge ?? 0) }}">
+                                                    value="{{ old('shipping_charge', decimal($purchase_order->shipping_charge ?? 0)) }}">
                                             </td>
                                             <td></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="6" class="text-end"><strong>Grand Total</strong></td>
+                                            <td colspan="6" class="text-end"><strong class="currency-label">Grand
+                                                    Total</strong></td>
                                             <td>
                                                 <input type="text" name="total" id="grand_total"
                                                     class="form-control"
-                                                    value="{{ old('total', $purchase_order->total ?? 0) }}" readonly>
+                                                    value="{{ old('total', decimal($purchase_order->total ?? 0)) }}"
+                                                    readonly>
                                             </td>
                                             <td></td>
                                         </tr>
@@ -345,9 +351,9 @@
                 // Reset unit and price
                 row.find('.selected-unit-id').val('');
                 row.find('.selected-unit-name').text('N/A');
-                row.find('.price-input').val(0);
-                row.find('.quantity-input').val(1);
-                row.find('.conversion-factor').val(1);
+                row.find('.price-input').val(decimal(0));
+                row.find('.quantity-input').val(decimal(1));
+                row.find('.conversion-factor').val(decimal(1));
 
                 if (!productId) {
                     calculateRowTotal(row);
@@ -417,8 +423,8 @@
                 row.find('.selected-unit-name').text(unitName);
 
                 // Update price
-                row.find('.price-input').val(price);
-                row.find('.conversion-factor').val(1);
+                row.find('.price-input').val(decimal(price));
+                row.find('.conversion-factor').val(decimal(1));
 
                 if (!variationId) {
                     calculateRowTotal(row);
@@ -449,9 +455,9 @@
                                         data-from-unit-name="${conversion.from_unit?.name || 'N/A'}"
                                         data-to-unit-id="${conversion.to_unit_id}"
                                         data-to-unit-name="${conversion.to_unit?.name || 'N/A'}"
-                                        data-conversion-factor="${conversion.conversion_factor}">
+                                    data-conversion-factor="${decimal(conversion.conversion_factor)}">
                                         ${conversion.from_unit?.name || 'N/A'} to ${conversion.to_unit?.name || 'N/A'} 
-                                        (${conversion.conversion_factor})
+                                        (${decimal(conversion.conversion_factor)})
                                     </option>
                                 `;
                             });
@@ -485,7 +491,7 @@
                 row.find('.selected-unit-name').text(toUnitName);
 
                 // Update conversion factor
-                row.find('.conversion-factor').val(conversionFactor);
+                row.find('.conversion-factor').val(conversionFactor.toFixed(decimal_points));
 
                 // Calculate row total
                 calculateRowTotal(row);
@@ -545,7 +551,7 @@
             const total = convertedQuantity * price;
 
             // Update row total with 2 decimal places
-            row.find('.row-total').val(total.toFixed(2));
+            row.find('.row-total').val(total.toFixed(decimal_points));
 
             // Highlight if total is negative or zero
             const totalInput = row.find('.row-total');
@@ -593,10 +599,10 @@
             const afterTax = afterDiscount + taxAmount;
             const grandTotal = afterTax + shippingCharge;
 
-            $('#subtotal').val(subtotal.toFixed(2));
-            $('#discount_amount').val(discountAmount.toFixed(2));
-            $('#tax_amount').val(taxAmount.toFixed(2));
-            $('#grand_total').val(grandTotal.toFixed(2));
+            $('#subtotal').val(subtotal.toFixed(decimal_points));
+            $('#discount_amount').val(discountAmount.toFixed(decimal_points));
+            $('#tax_amount').val(taxAmount.toFixed(decimal_points));
+            $('#grand_total').val(grandTotal.toFixed(decimal_points));
 
             // Color coding
             const grandTotalInput = $('#grand_total');
@@ -818,7 +824,8 @@
                     let productOptions = '<option value="">--Select Product--</option>';
 
                     $.each(products, function(_, item) {
-                        productOptions += `<option value="${item.product_id}">${item.code} ${item.name}</option>`;
+                        productOptions +=
+                            `<option value="${item.product_id}">${item.code} ${item.name}</option>`;
                     });
 
                     $('.product-select').each(function() {

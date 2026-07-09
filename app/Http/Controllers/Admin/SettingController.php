@@ -92,4 +92,230 @@ class SettingController extends Controller
             return $this->error(Message::NOTUPDATE);
         }
     }
+
+    public function updateAccountingSetting(Request $request)
+    {
+        $rules = [
+            'default_cash_account_id'            => 'nullable|exists:accounts,account_id',
+            'default_bank_account_id'            => 'nullable|exists:accounts,account_id',
+            'default_discount_account_id'        => 'nullable|exists:accounts,account_id',
+            'default_tax_account_id'             => 'nullable|exists:accounts,account_id',
+            'default_revenue_account_id'         => 'nullable|exists:accounts,account_id',
+            'default_purchase_account_id'        => 'nullable|exists:accounts,account_id',
+            'default_expense_account_id'         => 'nullable|exists:accounts,account_id',
+            'default_supplier_account_id'        => 'nullable|exists:accounts,account_id',
+            'default_customer_account_id'        => 'nullable|exists:accounts,account_id',
+            'default_carriage_account_id'        => 'nullable|exists:accounts,account_id',
+            'default_round_off_account_id'       => 'nullable|exists:accounts,account_id',
+            'default_purchase_return_account_id' => 'nullable|exists:accounts,account_id',
+            'default_sale_account_id'            => 'nullable|exists:accounts,account_id',
+            'default_sale_return_account_id'     => 'nullable|exists:accounts,account_id',
+            'default_inventory_account_id'       => 'nullable|exists:accounts,account_id',
+
+            'currency'          => 'required|string|max:20',
+            'currency_symbol'   => 'required|string|max:10',
+            'currency_position' => 'required|in:before,after',
+            'decimal_points'    => 'required|integer|min:0|max:6',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->all();
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updateAccountingSetting($obj);
+
+        if ($setting) {
+            return $this->success(
+                Message::UPDATE,
+                $setting
+            );
+        }
+
+        return $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateCustomerSetting(Request $request)
+    {
+        $rules = [
+            'customer_code_prefix'      => 'nullable|string|max:20',
+            'customer_enable_credit_limit'       => 'required|boolean',
+            'customer_credit_limit'              => 'required_if:customer_enable_credit_limit,1|nullable|numeric|min:0',
+
+            'loyalty_program'           => 'required|boolean',
+            'loyalty_every_amount'      => 'required_if:loyalty_program,1|nullable|numeric|min:0',
+            'loyalty_point_rate'        => 'required_if:loyalty_program,1|nullable|numeric|min:0',
+            'loyalty_min_order_amount'  => 'required_if:loyalty_program,1|nullable|numeric|min:0',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->all();
+        $obj['enable_credit_limit'] = $request->customer_enable_credit_limit ? 1 : 0;
+        $obj['credit_limit'] = $request->customer_credit_limit ?? 0;
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updateCustomerSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateSupplierSetting(Request $request)
+    {
+        $rules = [
+            'supplier_code_prefix' => 'nullable|string|max:20',
+            'supplier_enable_credit_limit'  => 'required|boolean',
+            'supplier_credit_limit'         => 'required_if:supplier_enable_credit_limit,1|nullable|numeric|min:0',
+            'default_payment_days' => 'nullable|integer|min:0',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->all();
+        $obj['enable_credit_limit'] = $request->supplier_enable_credit_limit ? 1 : 0;
+        $obj['credit_limit'] = $request->supplier_credit_limit ?? 0;
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updateSupplierSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateEmailSetting(Request $request)
+    {
+        $rules = [
+            'enable_email_notifications' => 'required|boolean',
+
+            'mail_mailer'        => 'required_if:enable_email_notifications,1',
+            'mail_host'          => 'required_if:enable_email_notifications,1',
+            'mail_port'          => 'required_if:enable_email_notifications,1|numeric',
+            'mail_username'      => 'required_if:enable_email_notifications,1',
+            'mail_password'      => 'required_if:enable_email_notifications,1',
+            'mail_encryption'    => 'nullable|in:tls,ssl',
+            'mail_from_address'  => 'required_if:enable_email_notifications,1|email',
+            'mail_from_name'     => 'required_if:enable_email_notifications,1',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->all();
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updateEmailSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateSmsSetting(Request $request)
+    {
+        $rules = [
+            'enable_sms' => 'required|boolean',
+
+            'provider'         => 'required_if:enable_sms,1',
+            'api_key'          => 'required_if:enable_sms,1',
+            'sender_id'        => 'required_if:enable_sms,1',
+            'username'         => 'nullable',
+            'password'         => 'nullable',
+            'send_invoice_sms' => 'required_if:enable_sms,1|boolean',
+            'send_due_sms'     => 'required_if:enable_sms,1|boolean',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->all();
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updateSmsSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateWhatsappSetting(Request $request)
+    {
+        $rules = [
+            'enable_whatsapp' => 'required|boolean',
+
+            'provider'        => 'required_if:enable_whatsapp,1',
+            'api_key'         => 'nullable',
+            'access_token'    => 'nullable',
+            'instance_id'     => 'nullable',
+            'phone_number_id' => 'nullable',
+            'webhook_url'     => 'nullable|url',
+            'send_invoice'    => 'required_if:enable_whatsapp,1|boolean',
+            'send_receipt'    => 'required_if:enable_whatsapp,1|boolean',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->all();
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updateWhatsappSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateFbrSetting(Request $request)
+    {
+        $rules = [
+            'enable_fbr' => 'required|boolean',
+
+            'fbr_environment'    => 'required_if:enable_fbr,1|in:sandbox,production',
+            'fbr_pos_id'         => 'required_if:enable_fbr,1',
+            'fbr_license_key'    => 'required_if:enable_fbr,1',
+            'fbr_ntn'            => 'required_if:enable_fbr,1',
+            'fbr_strn'           => 'required_if:enable_fbr,1',
+            'fbr_sandbox_url'    => 'required_if:enable_fbr,1|url',
+            'fbr_production_url' => 'required_if:enable_fbr,1|url',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->all();
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updateFbrSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
 }

@@ -123,4 +123,114 @@
             });
         }
     </script>
+
+    {{-- customer setting js --}}
+    <script>
+        function toggleCustomerSettings() {
+            let credit = $('[name="customer_enable_credit_limit"]').val();
+            $('[name="customer_credit_limit"]').prop('disabled', credit != 1);
+
+            let loyalty = $('[name="loyalty_program"]').val();
+
+            $('[name="loyalty_every_amount"]').prop('disabled', loyalty != 1);
+            $('[name="loyalty_point_rate"]').prop('disabled', loyalty != 1);
+            $('[name="loyalty_min_order_amount"]').prop('disabled', loyalty != 1);
+        }
+
+        $(document).on('change',
+            '[name="customer_enable_credit_limit"], [name="loyalty_program"]',
+            toggleCustomerSettings
+        );
+
+        $(document).ready(function() {
+            toggleCustomerSettings();
+        });
+    </script>
+
+    {{-- Supplier setting js --}}
+    <script>
+        function toggleSupplierSettings() {
+            let credit = $('[name="supplier_enable_credit_limit"]').val();
+
+            $('[name="supplier_credit_limit"]').prop('disabled', credit != 1);
+        }
+
+        $(document).on('change', '[name="supplier_enable_credit_limit"]', function() {
+            toggleSupplierSettings();
+        });
+
+        $(document).ready(function() {
+            toggleSupplierSettings();
+        });
+    </script>
+
+    {{-- Email setting js --}}
+    <script>
+        function toggleEmailSettings() {
+            let enabled = $('[name="enable_email_notifications"]').val();
+
+            $('.email-config-field').prop('disabled', enabled != 1);
+
+            $('.email-config-field.select2').trigger('change.select2');
+        }
+
+        $(document).on('change', '[name="enable_email_notifications"]', function() {
+            toggleEmailSettings();
+        });
+
+        $(document).ready(function() {
+            toggleEmailSettings();
+        });
+    </script>
+
+    {{-- SMS setting js --}}
+    <script>
+        function toggleSmsSettings() {
+            let enabled = $('[name="enable_sms"]').val();
+
+            $('.sms-config-field').prop('disabled', enabled != 1);
+        }
+
+        $(document).on('change', '[name="enable_sms"]', function() {
+            toggleSmsSettings();
+        });
+
+        $(document).ready(function() {
+            toggleSmsSettings();
+        });
+    </script>
+
+    {{-- Whatsapp setting js --}}
+    <script>
+        function toggleWhatsappSettings() {
+            let enabled = $('[name="enable_whatsapp"]').val();
+
+            $('.whatsapp-config-field').prop('disabled', enabled != 1);
+        }
+
+        $(document).on('change', '[name="enable_whatsapp"]', function() {
+            toggleWhatsappSettings();
+        });
+
+        $(document).ready(function() {
+            toggleWhatsappSettings();
+        });
+    </script>
+
+    {{-- FBR setting js --}}
+    <script>
+        function toggleFbrSettings() {
+            let enabled = $('[name="enable_fbr"]').val();
+
+            $('.fbr-config-field').prop('disabled', enabled != 1);
+        }
+
+        $(document).on('change', '[name="enable_fbr"]', function() {
+            toggleFbrSettings();
+        });
+
+        $(document).ready(function() {
+            toggleFbrSettings();
+        });
+    </script>
 @endsection
