@@ -227,8 +227,8 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{ url('/admin/purchase-order') }}" class="menu-link">
-                        <div data-i18n="Purchase Orders">Purchase Orders</div>
+                    <a href="{{ url('/admin/purchase-request') }}" class="menu-link">
+                        <div data-i18n="Purchase Requests">Purchase Requests</div>
                     </a>
                 </li>
                 <li class="menu-item">

@@ -5,10 +5,8 @@ namespace App\Services\Concrete\Admin;
 use App\Enums\Filter;
 use App\Enums\RoleNames;
 use App\Enums\Status;
-use App\Models\JournalEntry;
-use App\Models\JournalEntryDetail;
-use App\Models\PurchaseOrder;
-use App\Models\PurchaseOrderDetail;
+use App\Models\PurchaseRequest;
+use App\Models\PurchaseRequestDetail;
 use App\Repository\Repository;
 use Carbon\Carbon;
 use Exception;
@@ -16,28 +14,26 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
-class PurchaseOrderService
+class PurchaseRequestService
 {
-    protected $model_purchase_order;
-    protected $model_purchase_order_details;
+    protected $model_purchase_request;
+    protected $model_purchase_request_details;
     protected $with = [
         'business',
         'branch',
         'supplier',
         'warehouse',
-        'purchaseOrderDetails',
-        'purchaseOrderDetails.product',
-        'purchaseOrderDetails.product.productVariations',
-        'purchaseOrderDetails.productVariation',
-        'purchaseOrderDetails.productVariation.productVariationUnitConversion',
-        'purchaseOrderDetails.unit',
-        'purchaseOrderDetails.productVariationUnitConversion',
+        'purchaseRequestDetails',
+        'purchaseRequestDetails.product',
+        'purchaseRequestDetails.product.productVariations',
+        'purchaseRequestDetails.productVariation',
+        'purchaseRequestDetails.unit',
     ];
 
     public function __construct()
     {
-        $this->model_purchase_order = new Repository(new PurchaseOrder());
-        $this->model_purchase_order_details = new Repository(new PurchaseOrderDetail());
+        $this->model_purchase_request = new Repository(new PurchaseRequest());
+        $this->model_purchase_request_details = new Repository(new PurchaseRequestDetail());
     }
 
     public function getData($obj)
@@ -64,26 +60,26 @@ class PurchaseOrderService
             $wh[] = ['status', $obj['status']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['purchase_order_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['purchase_request_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
         }
 
         if (!empty($obj['end_date'])) {
-            $wh[] = ['purchase_order_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['purchase_request_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
         }
         $allow_roles = [
             RoleNames::SUPERADMIN,
             RoleNames::BUSINESSADMIN
         ];
-        $datatable = $this->model_purchase_order->getModel()::with($this->with)
-            ->withCount('purchaseOrderDetails as total_products')
+        $datatable = $this->model_purchase_request->getModel()::with($this->with)
+            ->withCount('purchaseRequestDetails as total_products')
             ->where($wh)
             ->where('is_deleted', 0)
-            ->orderBy('purchase_order_date', $orderBy);
+            ->orderBy('purchase_request_date', $orderBy);
         $datatable = applyRoleScope($datatable, $allow_roles);
         return DataTables::of($datatable)
-            ->addColumn('purchase_order_date', function ($item) {
-                return !empty($item->purchase_order_date)
-                    ? localDate($item->purchase_order_date)
+            ->addColumn('purchase_request_date', function ($item) {
+                return !empty($item->purchase_request_date)
+                    ? localDate($item->purchase_request_date)
                     : 'N/A';
             })
             ->addColumn('supplier', function ($item) {
@@ -109,12 +105,14 @@ class PurchaseOrderService
                 $statuses = [
                     Status::PENDING   => ucfirst(Status::PENDING),
                     Status::APPROVED  => ucfirst(Status::APPROVED),
-                    Status::COMPLETED => ucfirst(Status::COMPLETED),
+                    Status::QUOTATION_SENT => ucfirst(Status::QUOTATION_SENT),
+                    Status::QUOTATION_RECEIVED => ucfirst(Status::QUOTATION_RECEIVED),
+                    Status::CONVERTED => ucfirst(Status::CONVERTED),
                     Status::CANCELLED => ucfirst(Status::CANCELLED),
                 ];
 
                 $html = "<select class='form-select form-select-sm change-status'
-                data-id='{$item->purchase_order_id}'>";
+                data-id='{$item->purchase_request_id}'>";
 
                 foreach ($statuses as $value => $label) {
                     $selected = $item->status == $value ? 'selected' : '';
@@ -129,21 +127,21 @@ class PurchaseOrderService
 
                 return "
                     <a class='btn btn-icon btn-outline-primary mr-2'
-                     href='" . route('purchase-order.edit', $item->purchase_order_id) . "'
-                    id='editPurchaseOrder'>
+                     href='" . route('purchase-request.edit', $item->purchase_request_id) . "'
+                    id='editPurchaseRequest'>
 
                     <i class='fa fa-pencil'></i>
                     </a>
 
                     <a class='btn btn-icon btn-outline-danger'
-                    id='deletePurchaseOrder'
-                    data-id='{$item->purchase_order_id}'>
+                    id='deletePurchaseRequest'
+                    data-id='{$item->purchase_request_id}'>
 
                     <i class='fa fa-trash'></i>
                     </a>
                 ";
             })
-            ->rawColumns(['purchase_order_date', 'business', 'branch', 'warehouse', 'supplier', 'total_products', 'total',  'status', 'action'])
+            ->rawColumns(['purchase_request_date', 'business', 'branch', 'warehouse', 'supplier', 'total_products', 'total',  'status', 'action'])
             ->make(true);
     }
 
@@ -157,32 +155,25 @@ class PurchaseOrderService
             // Update
             //====================================
 
-            if (!empty($obj['purchase_order_id'])) {
+            if (!empty($obj['purchase_request_id'])) {
 
-                $purchase_order = $this->model_purchase_order
-                    ->getModel()::findOrFail($obj['purchase_order_id']);
+                $purchase_request = $this->model_purchase_request
+                    ->getModel()::findOrFail($obj['purchase_request_id']);
 
-                $purchase_order->update([
+                $purchase_request->update([
                     'business_id'            => $obj['business_id'],
                     'supplier_id'            => $obj['supplier_id'],
                     'warehouse_id'           => $obj['warehouse_id'],
-                    'purchase_order_date'    => $obj['purchase_order_date'],
+                    'purchase_request_date'    => $obj['purchase_request_date'],
                     'purchase_expected_date' => $obj['purchase_expected_date'],
                     'description'            => $obj['description'],
-                    'subtotal'               => $obj['subtotal'],
-                    'discount'               => $obj['discount'],
-                    'discount_amount'        => $obj['discount_amount'],
-                    'tax'                    => $obj['tax'],
-                    'tax_amount'             => $obj['tax_amount'],
-                    'shipping_charge'        => $obj['shipping_charge'],
-                    'total'                  => $obj['total'],
                     'updatedby_id'           => Auth::user()->id,
                     'date_updated'           => now(),
                 ]);
 
                 // Remove previous items
 
-                $this->model_purchase_order_details->getModel()::where('purchase_order_id', $purchase_order->purchase_order_id)
+                $this->model_purchase_request_details->getModel()::where('purchase_request_id', $purchase_request->purchase_request_id)
                     ->delete();
             }
 
@@ -192,22 +183,15 @@ class PurchaseOrderService
 
             else {
 
-                $purchase_order = $this->model_purchase_order->create([
-                    'purchase_order_id'      => generateUuid(),
+                $purchase_request = $this->model_purchase_request->create([
+                    'purchase_request_id'      => generateUuid(),
                     'business_id'            => $obj['business_id'],
                     'supplier_id'            => $obj['supplier_id'],
                     'warehouse_id'           => $obj['warehouse_id'],
-                    'purchase_order_no'      => $obj['purchase_order_no'],
-                    'purchase_order_date'    => $obj['purchase_order_date'],
+                    'purchase_request_no'      => $obj['purchase_request_no'],
+                    'purchase_request_date'    => $obj['purchase_request_date'],
                     'purchase_expected_date' => $obj['purchase_expected_date'],
                     'description'            => $obj['description'],
-                    'subtotal'               => $obj['subtotal'],
-                    'discount'               => $obj['discount'],
-                    'discount_amount'        => $obj['discount_amount'],
-                    'tax'                    => $obj['tax'],
-                    'tax_amount'             => $obj['tax_amount'],
-                    'shipping_charge'        => $obj['shipping_charge'],
-                    'total'                  => $obj['total'],
                     'createdby_id'           => Auth::user()->id,
                     'date_created'           => now(),
                 ]);
@@ -219,21 +203,14 @@ class PurchaseOrderService
 
             foreach ($obj['products'] as $product) {
 
-                $this->model_purchase_order_details->create([
+                $this->model_purchase_request_details->create([
 
-                    'purchase_order_detail_id'              => generateUuid(),
-                    'purchase_order_id'                     => $purchase_order->purchase_order_id,
-
+                    'purchase_request_detail_id'              => generateUuid(),
+                    'purchase_request_id'                     => $purchase_request->purchase_request_id,
                     'product_id'                            => $product['product_id'],
                     'product_variation_id'                  => $product['product_variation_id'],
-                    'product_variation_unit_conversion_id'  => $product['product_variation_unit_conversion_id'],
-
                     'unit_id'                               => $product['unit_id'],
-                    'base_quantity'                         => $product['ordered_quantity'],
-                    'ordered_quantity'                      => $product['ordered_quantity'],
-                    'conversion_factor'                     => $product['conversion_factor'],
-                    'unit_price'                            => $product['unit_price'],
-                    'total'                                 => $product['total'],
+                    'requested_quantity'                    => $product['requested_quantity']
                 ]);
             }
 
@@ -248,72 +225,68 @@ class PurchaseOrderService
         }
     }
 
-    public function getById($purchase_order_id)
+    public function getById($purchase_request_id)
     {
-        return $this->model_purchase_order->with($this->with)->find($purchase_order_id);
+        return $this->model_purchase_request->with($this->with)->find($purchase_request_id);
     }
 
     public function status($obj)
     {
-        return $this->model_purchase_order->update([
+        return $this->model_purchase_request->update([
             'status' => $obj['status'],
             'updatedby_id' => Auth::user()->id,
             'date_updated' => now()
-        ], $obj['purchase_order_id']);
+        ], $obj['purchase_request_id']);
     }
 
-    public function delete($purchase_order_id)
+    public function delete($purchase_request_id)
     {
-        return $this->model_purchase_order->update([
+        return $this->model_purchase_request->update([
             'is_deleted' => 1,
             'status' => Status::CANCELLED,
             'deletedby_id' => Auth::id(),
             'date_deleted' => now()
-        ], $purchase_order_id);
+        ], $purchase_request_id);
     }
 
     public function getAll()
     {
-        return $this->model_purchase_order->getModel()::where('is_deleted', 0)
+        return $this->model_purchase_request->getModel()::where('is_deleted', 0)
             ->get();
     }
     public function getAllPending()
     {
-        return $this->model_purchase_order->getModel()::where('status', Status::PENDING)
+        return $this->model_purchase_request->getModel()::where('status', Status::PENDING)
             ->where('is_deleted', 0)
             ->get();
     }
 
     public function getAllApproved()
     {
-        return $this->model_purchase_order->getModel()::where('status', Status::APPROVED)
+        return $this->model_purchase_request->getModel()::where('status', Status::APPROVED)
             ->where('is_deleted', 0)
             ->get();
     }
-    public function getDetails($purchase_order_id)
+    public function getDetails($purchase_request_id)
     {
         try {
-            $purchase_order = $this->model_purchase_order->getModel()::with($this->with)->findOrFail($purchase_order_id);
+            $purchase_request = $this->model_purchase_request->getModel()::with($this->with)->findOrFail($purchase_request_id);
 
             $data = [
                 'header' => [
-                    'purchase_order_id' => $purchase_order->purchase_order_id,
-                    'supplier_id' => $purchase_order->supplier_id,
-                    'warehouse_id' => $purchase_order->warehouse_id,
-                    'branch_id' => $purchase_order->branch_id,
-                    'purchase_order_no' => $purchase_order->purchase_order_no,
-                    'purchase_order_date' => $purchase_order->purchase_order_date,
-                    'purchase_expected_date' => $purchase_order->purchase_expected_date,
-                    'subtotal' => $purchase_order->subtotal,
-                    'discount' => $purchase_order->discount,
-                    'tax' => $purchase_order->tax,
-                    'shipping_charge' => $purchase_order->shipping_charge,
-                    'description' => $purchase_order->description,
+                    'purchase_request_id' => $purchase_request->purchase_request_id,
+                    'supplier_id' => $purchase_request->supplier_id,
+                    'warehouse_id' => $purchase_request->warehouse_id,
+                    'branch_id' => $purchase_request->branch_id,
+                    'purchase_request_no' => $purchase_request->purchase_request_no,
+                    'purchase_request_date' => $purchase_request->purchase_request_date,
+                    'purchase_expected_date' => $purchase_request->purchase_expected_date,
+                    'description' => $purchase_request->description,
                 ],
                 'details' => []
             ];
 
-            foreach ($purchase_order->purchaseOrderDetails as $detail) {
+            foreach ($purchase_request->purchaseRequestDetails as $detail) {
                 $productVariations = [];
 
                 foreach ($detail->product->productVariations as $variation) {
@@ -326,37 +299,16 @@ class PurchaseOrderService
                         'unit_name' => optional($variation->purchase_unit)->name,
                     ];
                 }
-                $conversions = [];
-                if ($detail->productVariation) {
-                    foreach ($detail->productVariation->productVariationUnitConversion as $conversion) {
-                        $conversions[] = [
-                            'product_variation_unit_conversion_id' => $conversion->product_variation_unit_conversion_id,
-                            'from_unit_id' => $conversion->from_unit_id,
-                            'from_unit_name' => $conversion->fromUnit->name ?? 'N/A',
-                            'to_unit_id' => $conversion->to_unit_id,
-                            'to_unit_name' => $conversion->toUnit->name ?? 'N/A',
-                            'conversion_factor' => $conversion->conversion_factor,
-                        ];
-                    }
-                }
 
                 $data['details'][] = [
                     'product_id' => $detail->product_id,
                     'product_name' => $detail->product->name ?? '',
                     'product_variation_id' => $detail->product_variation_id,
                     'product_variation_name' => $detail->productVariation->name ?? '',
-                    'product_variation_unit_conversion_id' => $detail->product_variation_unit_conversion_id,
-                    'base_quantity' => $detail->base_quantity,
-                    'ordered_quantity' => $detail->ordered_quantity,
-                    'received_quantity' => $detail->received_quantity,
-                    'rejected_quantity' => $detail->rejected_quantity,
+                    'requested_quantity' => $detail->requested_quantity,
                     'unit_id' => $detail->unit_id,
                     'unit_name' => $detail->unit->name ?? 'N/A',
-                    'conversion_factor' => $detail->conversion_factor,
-                    'unit_price' => $detail->unit_price,
-                    'total' => $detail->total,
-                    'productVariations' => $productVariations,
-                    'conversions' => $conversions,
+                    'productVariations' => $productVariations
                 ];
             }
 
@@ -367,7 +319,7 @@ class PurchaseOrderService
     }
     public function getByBusiness($business_id)
     {
-        return $this->model_purchase_order->getModel()::with($this->with)
+        return $this->model_purchase_request->getModel()::with($this->with)
             ->where('business_id', $business_id)
             ->where('is_deleted', 0)
             ->get();

@@ -216,14 +216,14 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\SupplierController::class, 'byBusiness']);
     });
 
-    //purchase order
-    Route::resource('purchase-order', App\Http\Controllers\Admin\PurchaseOrderController::class);
-    Route::group(['prefix' => 'purchase-order'], function () {
-        Route::post('data', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'getData']);
-        Route::post('change-status', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'status']);
-        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'byBusiness']);
-        
-        Route::get('details/{purchase_order_id}', [App\Http\Controllers\Admin\PurchaseOrderController::class, 'details']);
+    //purchase request
+    Route::resource('purchase-request', App\Http\Controllers\Admin\PurchaseRequestController::class);
+    Route::group(['prefix' => 'purchase-request'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'getData']);
+        Route::post('change-status', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'status']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'byBusiness']);
+
+        Route::get('details/{purchase_request_id}', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'details']);
     });
 
     //purchase
@@ -232,7 +232,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::post('data', [App\Http\Controllers\Admin\PurchaseController::class, 'getData']);
         Route::post('change-status', [App\Http\Controllers\Admin\PurchaseController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\PurchaseController::class, 'byBusiness']);
-        
+
         Route::get('details/{purchase_id}', [App\Http\Controllers\Admin\PurchaseController::class, 'details']);
     });
 

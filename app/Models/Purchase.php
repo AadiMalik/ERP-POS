@@ -18,9 +18,10 @@ class Purchase extends Model
         'branch_id',
         'business_id',
         'warehouse_id',
-        'purchase_order_id',
+        'purchase_request_id',
         'purchase_no',
         'purchase_date',
+        'expected_delivery_date',
         'purchase_type',
         'subtotal',
         'discount',
@@ -45,8 +46,8 @@ class Purchase extends Model
         return $this->belongsTo(Supplier::class, 'supplier_id', 'supplier_id');
     }
 
-    public function purchaseOrder() {
-        return $this->belongsTo(PurchaseOrder::class, 'purchase_order_id', 'purchase_order_id');
+    public function purchaseRequest() {
+        return $this->belongsTo(PurchaseRequest::class, 'purchase_request_id', 'purchase_request_id');
     }
 
     public function purchaseDetails() {

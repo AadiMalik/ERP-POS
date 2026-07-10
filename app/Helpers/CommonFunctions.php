@@ -7,7 +7,7 @@ use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\Product;
 use App\Models\Purchase;
-use App\Models\PurchaseOrder;
+use App\Models\PurchaseRequest;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -149,28 +149,28 @@ function generateJVNum($journal_id)
     );
 }
 
-function generatePONo($business_id = null)
+function generatePRNo($business_id = null)
 {
     $business_id = $business_id ?? Auth::user()->business_id;
 
-    $purchase_order = PurchaseOrder::where('business_id', $business_id)
+    $purchase_request = PurchaseRequest::where('business_id', $business_id)
         ->where('is_deleted', 0)
         ->latest('date_created')
         ->first();
 
     $next_number = 1;
 
-    if ($purchase_order) {
-        $next_number = (int) substr($purchase_order->purchase_order_no, strrpos($purchase_order->purchase_order_no, '-') + 1) + 1;
+    if ($purchase_request) {
+        $next_number = (int) substr($purchase_request->purchase_request_no, strrpos($purchase_request->purchase_request_no, '-') + 1) + 1;
     }
 
     return sprintf(
-        'PO-%04d',
+        'PR-%04d',
         $next_number
     );
 }
 
-function generatePUNo($business_id = null)
+function generatePONo($business_id = null)
 {
     $business_id = $business_id ?? Auth::user()->business_id;
 
@@ -186,7 +186,7 @@ function generatePUNo($business_id = null)
     }
 
     return sprintf(
-        'PU-%04d',
+        'PO-%04d',
         $next_number
     );
 }

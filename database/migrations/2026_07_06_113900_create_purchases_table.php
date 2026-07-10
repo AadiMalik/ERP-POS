@@ -19,10 +19,11 @@ return new class extends Migration
             $table->uuid('branch_id')->nullable();
             $table->uuid('business_id')->nullable();
             $table->uuid('warehouse_id')->nullable();
-            $table->uuid('purchase_order_id')->nullable();
+            $table->uuid('purchase_request_id')->nullable();
             $table->string('purchase_no')->nullable();
             $table->timestamp('purchase_date')->nullable();
-            $table->enum('purchase_type', ['purchase_order', 'direct'])->default('direct');
+            $table->timestamp('expected_delivery_date')->nullable();
+            $table->enum('purchase_type', ['purchase_request', 'direct'])->default('direct');
             $table->decimal('subtotal', 18, 3)->default(0.000);
             $table->decimal('discount', 18, 3)->default(0.000);
             $table->decimal('discount_amount', 18, 3)->default(0.000);

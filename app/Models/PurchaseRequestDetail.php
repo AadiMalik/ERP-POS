@@ -5,27 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PurchaseOrderDetail extends Model
+class PurchaseRequestDetail extends Model
 {
     use HasFactory;
     public $timestamps = false;
-    protected $primaryKey = 'purchase_order_detail_id';
+    protected $primaryKey = 'purchase_request_detail_id';
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [
-        'purchase_order_detail_id',
-        'purchase_order_id',
+        'purchase_request_detail_id',
+        'purchase_request_id',
         'product_id',
         'product_variation_id',
-        'product_variation_unit_conversion_id',
-        'ordered_quantity',
-        'received_quantity',
-        'rejected_quantity',
-        'base_quantity',
+        'requested_quantity',
         'unit_id',
-        'conversion_factor',
-        'unit_price',
-        'total',
         'description',
         'createdby_id',
         'updatedby_id',
@@ -43,14 +36,9 @@ class PurchaseOrderDetail extends Model
         return $this->belongsTo(ProductVariation::class, 'product_variation_id','product_variation_id');
     }
 
-    public function productVariationUnitConversion()
+    public function purchaseRequest()
     {
-        return $this->belongsTo(ProductVariationUnitConversion::class, 'product_variation_unit_conversion_id');
-    }
-
-    public function purchaseOrder()
-    {
-        return $this->belongsTo(PurchaseOrder::class, 'purchase_order_id');
+        return $this->belongsTo(PurchaseRequest::class, 'purchase_request_id');
     }
 
     public function unit()

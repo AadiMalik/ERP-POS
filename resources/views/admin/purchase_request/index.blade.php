@@ -5,7 +5,7 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">
-            Purchase Orders
+            Purchase Requests
         </h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
@@ -16,7 +16,7 @@
                     </button>
 
                 </div>
-                <a href="{{ url('admin/purchase-order/create') }}" class="btn btn-primary rounded-pill">
+                <a href="{{ url('admin/purchase-request/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
                     Add New
                 </a>
@@ -100,15 +100,14 @@
                     </div>
                 </div>
                 <div class="table-responsive p-4">
-                    <table id="purchase_order_table" class="table datatables">
+                    <table id="purchase_request_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Order No.</th>
-                                <th>Order Date</th>
+                                <th>Request No.</th>
+                                <th>Request Date</th>
                                 <th>Supplier</th>
                                 <th>Warehouse</th>
                                 <th>Products</th>
-                                <th>Total</th>
                                 <th>Status</th>
                                 <th>Business</th>
                                 <th>Action</th>
@@ -123,20 +122,19 @@
 @section('js')
     @include('admin.partials.datatable', [
         'columns' => "
-                    {data:'purchase_order_no',name:'purchase_order_no'},
-                    {data:'purchase_order_date',name:'purchase_order_date'},
+                    {data:'purchase_request_no',name:'purchase_request_no'},
+                    {data:'purchase_request_date',name:'purchase_request_date'},
                     {data:'supplier',name:'supplier',sortable:false},
                     {data:'warehouse',name:'warehouse',sortable:false},
                     {data:'total_products',name:'total_products',sortable:false},
-                    {data:'total',name:'total'},
                     {data:'status',name:'status',sortable:false},
                     {data:'business',name:'business',sortable:false},
                     {data:'action',name:'action',sortable:false}",
-        'route' => 'purchase-order/data',
+        'route' => 'purchase-request/data',
         'buttons' => false,
         'pageLength' => 10,
-        'class' => 'purchase_order_table',
-        'variable' => 'purchase_order_table',
+        'class' => 'purchase_request_table',
+        'variable' => 'purchase_request_table',
         'datefilter' => true,
         'params' =>
             "business_id:$('#business_id').val(),supplier_id:$('#supplier_id').val(),warehouse_id:$('#warehouse_id').val(),status:$('#status').val()",
@@ -150,32 +148,32 @@
             $('#status').select2();
         });
         $('#search_btn').click(function() {
-            initDataTablepurchase_order_table();
+            initDataTablepurchase_request_table();
         });
         //status
         $(document).on('change', '.change-status', function() {
 
-            let purchase_order_id = $(this).data('id');
+            let purchase_request_id = $(this).data('id');
             let status = $(this).val();
             let select = $(this);
 
             $.ajax({
-                url: url_local + "/admin/purchase-order/change-status", // route
+                url: url_local + "/admin/purchase-request/change-status", // route
                 type: 'POST',
                 data: {
                     _token: $('meta[name="csrf-token"]').attr('content'),
-                    purchase_order_id: purchase_order_id,
+                    purchase_request_id: purchase_request_id,
                     status: status
                 },
                 success: function(response) {
 
                     successMessage(response.Message);
-                    initDataTablepurchase_order_table();
+                    initDataTablepurchase_request_table();
                 },
                 error: function() {
 
                     errorMessage(error.Message || 'Something went wrong.');
-                    initDataTablepurchase_order_table();
+                    initDataTablepurchase_request_table();
                     // Previous value restore
                     select.val(select.data('old'));
                 }
@@ -185,10 +183,10 @@
         //delete
         deleteRecord({
             buttonClass: "#deletePurchaseOrder",
-            url: url_local + "/admin/purchase-order",
+            url: url_local + "/admin/purchase-request",
 
             tableCallback: function() {
-                initDataTablepurchase_order_table();
+                initDataTablepurchase_request_table();
             }
         });
 

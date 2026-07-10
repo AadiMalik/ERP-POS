@@ -13,19 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('purchase_order_details', function (Blueprint $table) {
-            $table->uuid('purchase_order_detail_id')->primary();
-            $table->uuid('purchase_order_id')->nullable();
+        Schema::create('purchase_request_details', function (Blueprint $table) {
+            $table->uuid('purchase_request_detail_id')->primary();
+            $table->uuid('purchase_request_id')->nullable();
             $table->uuid('product_id')->nullable();
             $table->uuid('product_variation_id')->nullable();
-            $table->decimal('ordered_quantity', 18, 3)->nullable();
-            $table->decimal('received_quantity', 18, 3)->nullable();
-            $table->decimal('rejected_quantity', 18, 3)->nullable();
-            $table->decimal('base_quantity', 18, 3)->nullable();
+            $table->decimal('requested_quantity', 18, 3)->nullable();
             $table->uuid('unit_id')->nullable();
-            $table->decimal('conversion_factor', 18, 3)->nullable();
-            $table->decimal('unit_price', 18, 3)->nullable();
-            $table->decimal('total', 18, 3)->nullable();
             $table->text('description')->nullable();
 
             $table->uuid('createdby_id')->nullable();
@@ -42,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('purchase_order_details');
+        Schema::dropIfExists('purchase_request_details');
     }
 };

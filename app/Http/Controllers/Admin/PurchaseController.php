@@ -9,7 +9,7 @@ use App\Traits\ResponseAPI;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\ProductService;
 use App\Services\Concrete\Admin\PurchaseService;
-use App\Services\Concrete\Admin\PurchaseOrderService;
+use App\Services\Concrete\Admin\PurchaseRequestService;
 use App\Services\Concrete\Admin\SupplierService;
 use App\Services\Concrete\Admin\UnitService;
 use App\Services\Concrete\Admin\WarehouseService;
@@ -24,7 +24,7 @@ class PurchaseController extends Controller
     use ResponseAPI;
 
     protected $purchase_service;
-    protected $purchase_order_service;
+    protected $purchase_request_service;
     protected $business_service;
     protected $product_service;
     protected $warehouse_service;
@@ -33,7 +33,7 @@ class PurchaseController extends Controller
 
     public function __construct(
         PurchaseService $purchase_service,
-        PurchaseOrderService $purchase_order_service,
+        PurchaseRequestService $purchase_request_service,
         ProductService $product_service,
         BusinessService $business_service,
         SupplierService $supplier_service,
@@ -41,7 +41,7 @@ class PurchaseController extends Controller
         UnitService $unit_service
     ) {
         $this->purchase_service = $purchase_service;
-        $this->purchase_order_service = $purchase_order_service;
+        $this->purchase_request_service = $purchase_request_service;
         $this->product_service = $product_service;
         $this->business_service = $business_service;
         $this->supplier_service = $supplier_service;
@@ -54,7 +54,7 @@ class PurchaseController extends Controller
         $business = $this->business_service->getAll();
         $suppliers = $this->supplier_service->getAllActive();
         $warehouses = $this->warehouse_service->getAllActive();
-        $purchase_orders = $this->purchase_order_service->getAllApproved();
+        $purchase_requests = $this->purchase_request_service->getAllApproved();
         $statuses = [
             Status::PENDING   => ucfirst(Status::PENDING),
             Status::APPROVED  => ucfirst(Status::APPROVED),
@@ -62,7 +62,7 @@ class PurchaseController extends Controller
             Status::CANCELLED => ucfirst(Status::CANCELLED),
         ];
 
-        return view('admin.purchase.index', compact('business', 'suppliers', 'purchase_orders', 'warehouses', 'statuses'));
+        return view('admin.purchase.index', compact('business', 'suppliers', 'purchase_requests', 'warehouses', 'statuses'));
     }
     public function getData(Request $request)
     {
@@ -76,10 +76,10 @@ class PurchaseController extends Controller
         $suppliers = $this->supplier_service->getAllActive();
         $warehouses = $this->warehouse_service->getAllActive();
         $units = $this->unit_service->getAllActive();
-        $purchase_orders = $this->purchase_order_service->getAllApproved();
-        $purchase_no = generatePUNo();
+        $purchase_requests = $this->purchase_request_service->getAllApproved();
+        $purchase_no = generatePONo();
 
-        return view('admin.purchase.create', compact('business', 'products', 'suppliers', 'purchase_orders', 'warehouses', 'units', 'purchase_no'));
+        return view('admin.purchase.create', compact('business', 'products', 'suppliers', 'purchase_requests', 'warehouses', 'units', 'purchase_no'));
     }
 
     public function edit($purchase_id)
@@ -90,9 +90,9 @@ class PurchaseController extends Controller
         $suppliers = $this->supplier_service->getAllActive();
         $warehouses = $this->warehouse_service->getAllActive();
         $units = $this->unit_service->getAllActive();
-        $purchase_orders = $this->purchase_order_service->getAllApproved();
+        $purchase_requests = $this->purchase_request_service->getAllApproved();
 
-        return view('admin.purchase.create', compact('purchase', 'business', 'products', 'purchase_orders', 'suppliers', 'warehouses', 'units'));
+        return view('admin.purchase.create', compact('purchase', 'business', 'products', 'purchase_requests', 'suppliers', 'warehouses', 'units'));
     }
 
     public function store(Request $request)

@@ -50,13 +50,13 @@
                         </div>
                         <div
                             class="col-md-3 purchase-order-section {{ old('purchase_type', $purchase->purchase_type ?? 'direct') == 'purchase' ? '' : 'd-none' }}">
-                            <label class="fw-semibold">Purchase Order<span class="text-danger">*</span></label>
-                            <select class="form-select" name="purchase_order_id" id="purchase_order_id">
-                                <option value="">-- Select Purchase Order --</option>
-                                @foreach ($purchase_orders as $item)
-                                    <option value="{{ $item->purchase_order_id }}"
-                                        {{ old('purchase_order_id', $purchase->purchase_order_id ?? '') == $item->purchase_order_id ? 'selected' : '' }}>
-                                        {{ $item->purchase_order_no }}
+                            <label class="fw-semibold">Purchase Request<span class="text-danger">*</span></label>
+                            <select class="form-select" name="purchase_request_id" id="purchase_request_id">
+                                <option value="">-- Select Purchase Request --</option>
+                                @foreach ($purchase_requests as $item)
+                                    <option value="{{ $item->purchase_request_id }}"
+                                        {{ old('purchase_request_id', $purchase->purchase_request_id ?? '') == $item->purchase_request_id ? 'selected' : '' }}>
+                                        {{ $item->purchase_request_no }}
                                     </option>
                                 @endforeach
                             </select>
@@ -92,13 +92,13 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label class="fw-semibold">Purchase Number</label>
+                            <label class="fw-semibold">PO Number</label>
                             <input type="text" class="form-control" name="purchase_no"
                                 value="{{ $purchase->purchase_no ?? ($purchase_no ?? 'Auto Generated') }}" readonly>
                         </div>
 
                         <div class="col-md-3">
-                            <label class="fw-semibold">Purchase Date <span class="text-danger">*</span></label>
+                            <label class="fw-semibold">PO Date <span class="text-danger">*</span></label>
                             <input type="text" class="form-control datepicker" name="purchase_date"
                                 value="{{ old('purchase_date', isset($purchase) ? localDate($purchase->purchase_date) : localDate(date('Y-m-d'))) }}"
                                 required>
@@ -363,9 +363,9 @@
         var productIndex = {{ isset($purchase) ? $purchase->purchaseDetails->count() : 0 }};
 
         // ============================================
-        // PURCHASE ORDER SELECTION
+        // PURCHASE Request SELECTION
         // ============================================
-        $('#purchase_order_id').change(function() {
+        $('#purchase_request_id').change(function() {
             let id = $(this).val();
             if (!id) {
                 $('#productRows').empty();
@@ -375,22 +375,22 @@
 
             // Show loading state
             $('#productRows').html(
-                '<tr><td colspan="8" class="text-center">Loading purchase order details...</td></tr>');
+                '<tr><td colspan="8" class="text-center">Loading purchase request details...</td></tr>');
 
             $.ajax({
-                url: url_local + '/admin/purchase-order/details/' + id,
+                url: url_local + '/admin/purchase-request/details/' + id,
                 type: 'GET',
                 success: function(response) {
-                    console.log('Purchase Order Response:', response);
+                    console.log('Purchase Request Response:', response);
                     if (response.Success) {
-                        loadPurchaseOrder(response.Data);
+                        loadPurchaseRequest(response.Data);
                     } else {
-                        errorMessage(response.Message || 'Failed to load purchase order details.');
+                        errorMessage(response.Message || 'Failed to load purchase request details.');
                     }
                 },
                 error: function(xhr) {
-                    console.error('Error loading purchase order:', xhr);
-                    errorMessage('Failed to load purchase order details. Please try again.');
+                    console.error('Error loading purchase request:', xhr);
+                    errorMessage('Failed to load purchase request details. Please try again.');
                 }
             });
         });
@@ -398,7 +398,7 @@
         // ============================================
         // FUNCTION: LOAD PURCHASE ORDER
         // ============================================
-        function loadPurchaseOrder(data) {
+        function loadPurchaseRequest(data) {
             try {
                 // Set header fields
                 if (data.header) {
@@ -407,9 +407,6 @@
                     if ($('#branch_id').length) {
                         $('#branch_id').val(data.header.branch_id).trigger('change');
                     }
-                    $('#discount').val(data.header.discount || 0);
-                    $('#tax').val(data.header.tax || 0);
-                    $('#shipping_charge').val(data.header.shipping_charge || 0);
                     $('textarea[name=description]').val(data.header.description || '');
                 }
 
@@ -420,11 +417,11 @@
                 // Add each product detail
                 if (data.details && data.details.length > 0) {
                     $.each(data.details, function(i, item) {
-                        addPurchaseOrderRow(item);
+                        addPurchaseRequestRow(item);
                     });
                 } else {
                     $('#productRows').html(
-                        '<tr><td colspan="8" class="text-center text-muted">No products found in this purchase order.</td></tr>'
+                        '<tr><td colspan="8" class="text-center text-muted">No products found in this purchase request.</td></tr>'
                     );
                 }
 
@@ -434,7 +431,7 @@
                 }, 500);
 
             } catch (error) {
-                console.error('Error in loadPurchaseOrder:', error);
+                console.error('Error in loadPurchaseRequest:', error);
                 errorMessage('Error loading purchase order data.');
             }
         }
@@ -442,7 +439,7 @@
         // ============================================
         // FUNCTION: ADD PURCHASE ORDER ROW
         // ============================================
-        function addPurchaseOrderRow(item) {
+        function addPurchaseRequestRow(item) {
 
             const products = @json($products);
 
@@ -480,37 +477,6 @@
                     data-price="${item.unit_price}"
                     ${variation.product_variation_id == item.product_variation_id ? 'selected' : ''}>
                     ${variation.name}
-                </option>
-            `;
-
-                });
-
-            }
-
-
-
-            //=========================
-            // Conversions
-            //=========================
-
-            let conversionOptions =
-                '<option value="">--Select Conversion--</option>';
-
-            if (item.conversions && item.conversions.length) {
-
-                $.each(item.conversions, function(i, conversion) {
-
-                    conversionOptions += `
-                <option
-                    value="${conversion.product_variation_unit_conversion_id}"
-                    data-conversion-factor="${conversion.conversion_factor}"
-                    data-to-unit-id="${conversion.to_unit_id}"
-                    data-to-unit-name="${conversion.to_unit_name}"
-                    ${conversion.product_variation_unit_conversion_id == item.product_variation_unit_conversion_id ? 'selected' : ''}>
-                    ${conversion.from_unit_name}
-                    →
-                    ${conversion.to_unit_name}
-                    (${conversion.conversion_factor})
                 </option>
             `;
 

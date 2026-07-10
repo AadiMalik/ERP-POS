@@ -16,15 +16,21 @@ return new class extends Migration
         Schema::create('purchase_details', function (Blueprint $table) {
             $table->uuid('purchase_detail_id')->primary();
             $table->uuid('purchase_id')->nullable();
+            $table->uuid('purchase_request_detail_id')->nullable();
             $table->uuid('product_id')->nullable();
             $table->uuid('product_variation_id')->nullable();
             $table->decimal('ordered_quantity', 18, 3)->nullable();
             $table->decimal('received_quantity', 18, 3)->nullable();
             $table->decimal('rejected_quantity', 18, 3)->nullable();
+            $table->decimal('pending_quantity', 18, 3)->nullable();
             $table->decimal('base_quantity', 18, 3)->nullable();
             $table->uuid('unit_id')->nullable();
             $table->decimal('conversion_factor', 18, 3)->nullable();
             $table->decimal('unit_price', 18, 3)->nullable();
+            $table->decimal('discount', 18, 3)->default(0);
+            $table->decimal('discount_amount', 18, 3)->default(0);
+            $table->decimal('tax', 18, 3)->default(0);
+            $table->decimal('tax_amount', 18, 3)->default(0);
             $table->decimal('total', 18, 3)->nullable();
             $table->text('description')->nullable();
 
