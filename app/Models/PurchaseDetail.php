@@ -27,6 +27,11 @@ class PurchaseDetail extends Model
         'unit_id',
         'conversion_factor',
         'unit_price',
+        'discount',
+        'discount_amount',
+        'tax',
+        'tax_amount',
+        'subtotal',
         'total',
         'description',
 

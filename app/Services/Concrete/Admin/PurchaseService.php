@@ -7,6 +7,7 @@ use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\Purchase;
 use App\Models\PurchaseDetail;
+use App\Models\PurchaseRequest;
 use App\Repository\Repository;
 use Carbon\Carbon;
 use Exception;
@@ -23,6 +24,7 @@ class PurchaseService
         'branch',
         'supplier',
         'warehouse',
+        'purchaseRequest',
         'purchaseDetails',
         'purchaseDetails.product',
         'purchaseDetails.product.productVariations',
@@ -58,8 +60,8 @@ class PurchaseService
         if (isset($obj['warehouse_id']) && $obj['warehouse_id'] != 0 && $obj['warehouse_id'] != "") {
             $wh[] = ['warehouse_id', $obj['warehouse_id']];
         }
-        if (isset($obj['purchase_id']) && $obj['purchase_id'] != 0 && $obj['purchase_id'] != "") {
-            $wh[] = ['purchase_id', $obj['purchase_id']];
+        if (isset($obj['purchase_request_id']) && $obj['purchase_request_id'] != 0 && $obj['purchase_request_id'] != "") {
+            $wh[] = ['purchase_request_id', $obj['purchase_request_id']];
         }
         if (isset($obj['status']) && $obj['status'] != 0 && $obj['status'] != "") {
             $wh[] = ['status', $obj['status']];
@@ -87,8 +89,8 @@ class PurchaseService
                     ? localDate($item->purchase_date)
                     : 'N/A';
             })
-            ->addColumn('purchase_order_no', function ($item) {
-                return $item->purchase_order->purchase_order_no ?? '';
+            ->addColumn('purchase_request_no', function ($item) {
+                return $item->purchase_request->purchase_request_no ?? '';
             })
             ->addColumn('supplier', function ($item) {
                 return $item->supplier->code ?? '' . ' ' . $item->supplier->name ?? '';
@@ -133,7 +135,7 @@ class PurchaseService
 
                 return "
                     <a class='btn btn-icon btn-outline-primary mr-2'
-                     href='" . route('purchase-order.edit', $item->purchase_id) . "'
+                     href='" . route('purchase.edit', $item->purchase_id) . "'
                     id='editPurchase'>
 
                     <i class='fa fa-pencil'></i>
@@ -147,7 +149,7 @@ class PurchaseService
                     </a>
                 ";
             })
-            ->rawColumns(['purchase_date','purchase_order_no', 'business', 'branch', 'warehouse', 'supplier', 'total_products', 'total',  'status', 'action'])
+            ->rawColumns(['purchase_date', 'purchase_request_no', 'business', 'branch', 'warehouse', 'supplier', 'total_products', 'total',  'status', 'action'])
             ->make(true);
     }
 
@@ -163,14 +165,16 @@ class PurchaseService
 
             if (!empty($obj['purchase_id'])) {
 
-                $purchase_order = $this->model_purchase
+                $purchase = $this->model_purchase
                     ->getModel()::findOrFail($obj['purchase_id']);
 
-                $purchase_order->update([
+                $purchase->update([
                     'business_id'            => $obj['business_id'],
+                    'purchase_request_id'    => $obj['purchase_request_id'],
                     'supplier_id'            => $obj['supplier_id'],
                     'warehouse_id'           => $obj['warehouse_id'],
                     'purchase_date'          => $obj['purchase_date'],
+                    'expected_delivery_date' => $obj['expected_delivery_date'],
                     'description'            => $obj['description'],
                     'subtotal'               => $obj['subtotal'],
                     'discount'               => $obj['discount'],
@@ -185,7 +189,7 @@ class PurchaseService
 
                 // Remove previous items
 
-                $this->model_purchase_details->getModel()::where('purchase_id', $purchase_order->purchase_id)
+                $this->model_purchase_details->getModel()::where('purchase_id', $purchase->purchase_id)
                     ->delete();
             }
 
@@ -195,14 +199,15 @@ class PurchaseService
 
             else {
 
-                $purchase_order = $this->model_purchase->create([
-                    'purchase_id'      => generateUuid(),
+                $purchase = $this->model_purchase->create([
+                    'purchase_id'            => generateUuid(),
                     'business_id'            => $obj['business_id'],
+                    'purchase_request_id'    => $obj['purchase_request_id'],
                     'supplier_id'            => $obj['supplier_id'],
                     'warehouse_id'           => $obj['warehouse_id'],
-                    'purchase_order_no'      => $obj['purchase_order_no'],
-                    'purchase_date'    => $obj['purchase_date'],
-                    'purchase_expected_date' => $obj['purchase_expected_date'],
+                    'purchase_no'            => $obj['purchase_no'],
+                    'purchase_date'          => $obj['purchase_date'],
+                    'expected_delivery_date' => $obj['expected_delivery_date'],
                     'description'            => $obj['description'],
                     'subtotal'               => $obj['subtotal'],
                     'discount'               => $obj['discount'],
@@ -224,8 +229,9 @@ class PurchaseService
 
                 $this->model_purchase_details->create([
 
-                    'purchase_order_detail_id'              => generateUuid(),
-                    'purchase_id'                     => $purchase_order->purchase_id,
+                    'purchase_detail_id'                    => generateUuid(),
+                    'purchase_id'                           => $purchase->purchase_id,
+                    'purchase_request_detail_id'            => isset($product['purchase_request_detail_id']) ? $product['purchase_request_detail_id'] : null,
 
                     'product_id'                            => $product['product_id'],
                     'product_variation_id'                  => $product['product_variation_id'],
@@ -236,6 +242,11 @@ class PurchaseService
                     'ordered_quantity'                      => $product['ordered_quantity'],
                     'conversion_factor'                     => $product['conversion_factor'],
                     'unit_price'                            => $product['unit_price'],
+                    'subtotal'                              => $product['subtotal'],
+                    'discount'                              => $product['discount'],
+                    'discount_amount'                       => $product['discount_amount'],
+                    'tax'                                   => $product['tax'],
+                    'tax_amount'                            => $product['tax_amount'],
                     'total'                                 => $product['total'],
                 ]);
             }
@@ -258,11 +269,27 @@ class PurchaseService
 
     public function status($obj)
     {
-        return $this->model_purchase->update([
-            'status' => $obj['status'],
-            'updatedby_id' => Auth::user()->id,
-            'date_updated' => now()
-        ], $obj['purchase_id']);
+        try {
+            $this->model_purchase->update([
+                'status' => $obj['status'],
+                'updatedby_id' => Auth::user()->id,
+                'date_updated' => now()
+            ], $obj['purchase_id']);
+
+            $purchase = $this->model_purchase->find($obj['purchase_id']);
+            if ($obj['status'] == Status::APPROVED && $purchase->purchase_request_id != null) {
+                PurchaseRequest::where('purchase_request_id', $purchase->purchase_request_id)
+                    ->update([
+                        'status' => Status::CONVERTED,
+                        'updatedby_id' => Auth::user()->id,
+                        'date_updated' => now()
+                    ]);
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+
+        return $purchase;
     }
 
     public function delete($purchase_id)
@@ -283,27 +310,27 @@ class PurchaseService
     public function getDetails($purchase_id)
     {
         try {
-            $purchase_order = $this->model_purchase->getModel()::with($this->with)->findOrFail($purchase_id);
+            $purchase = $this->model_purchase->getModel()::with($this->with)->findOrFail($purchase_id);
 
             $data = [
                 'header' => [
-                    'purchase_id' => $purchase_order->purchase_id,
-                    'supplier_id' => $purchase_order->supplier_id,
-                    'warehouse_id' => $purchase_order->warehouse_id,
-                    'branch_id' => $purchase_order->branch_id,
-                    'purchase_order_no' => $purchase_order->purchase_order_no,
-                    'purchase_date' => $purchase_order->purchase_date,
-                    'purchase_expected_date' => $purchase_order->purchase_expected_date,
-                    'subtotal' => $purchase_order->subtotal,
-                    'discount' => $purchase_order->discount,
-                    'tax' => $purchase_order->tax,
-                    'shipping_charge' => $purchase_order->shipping_charge,
-                    'description' => $purchase_order->description,
+                    'purchase_id' => $purchase->purchase_id,
+                    'supplier_id' => $purchase->supplier_id,
+                    'warehouse_id' => $purchase->warehouse_id,
+                    'branch_id' => $purchase->branch_id,
+                    'purchase_no' => $purchase->purchase_no,
+                    'purchase_date' => $purchase->purchase_date,
+                    'purchase_expected_date' => $purchase->purchase_expected_date,
+                    'subtotal' => $purchase->subtotal,
+                    'discount' => $purchase->discount,
+                    'tax' => $purchase->tax,
+                    'shipping_charge' => $purchase->shipping_charge,
+                    'description' => $purchase->description,
                 ],
                 'details' => []
             ];
 
-            foreach ($purchase_order->purchaseDetails as $detail) {
+            foreach ($purchase->purchaseDetails as $detail) {
                 $conversions = [];
                 if ($detail->productVariation) {
                     foreach ($detail->productVariation->productVariationUnitConversion as $conversion) {
@@ -332,6 +359,11 @@ class PurchaseService
                     'unit_name' => $detail->unit->name ?? 'N/A',
                     'conversion_factor' => $detail->conversion_factor,
                     'unit_price' => $detail->unit_price,
+                    'subtotal' => $detail->subtotal,
+                    'discount' => $detail->discount,
+                    'discount_amount' => $detail->discount_amount,
+                    'tax' => $detail->tax,
+                    'tax_amount' => $detail->tax_amount,
                     'total' => $detail->total,
                     'conversions' => $conversions,
                 ];

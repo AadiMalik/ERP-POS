@@ -167,6 +167,7 @@ class PurchaseRequestService
                     'purchase_request_date'    => $obj['purchase_request_date'],
                     'purchase_expected_date' => $obj['purchase_expected_date'],
                     'description'            => $obj['description'],
+                    'status'                 => status::PENDING,
                     'updatedby_id'           => Auth::user()->id,
                     'date_updated'           => now(),
                 ]);
@@ -184,14 +185,15 @@ class PurchaseRequestService
             else {
 
                 $purchase_request = $this->model_purchase_request->create([
-                    'purchase_request_id'      => generateUuid(),
+                    'purchase_request_id'    => generateUuid(),
                     'business_id'            => $obj['business_id'],
                     'supplier_id'            => $obj['supplier_id'],
                     'warehouse_id'           => $obj['warehouse_id'],
-                    'purchase_request_no'      => $obj['purchase_request_no'],
-                    'purchase_request_date'    => $obj['purchase_request_date'],
+                    'purchase_request_no'    => $obj['purchase_request_no'],
+                    'purchase_request_date'  => $obj['purchase_request_date'],
                     'purchase_expected_date' => $obj['purchase_expected_date'],
                     'description'            => $obj['description'],
+                    'status'                 => status::PENDING,
                     'createdby_id'           => Auth::user()->id,
                     'date_created'           => now(),
                 ]);
@@ -263,7 +265,7 @@ class PurchaseRequestService
 
     public function getAllApproved()
     {
-        return $this->model_purchase_request->getModel()::where('status', Status::APPROVED)
+        return $this->model_purchase_request->getModel()::whereIn('status', [Status::APPROVED, Status::QUOTATION_SENT, Status::QUOTATION_RECEIVED])
             ->where('is_deleted', 0)
             ->get();
     }
@@ -279,8 +281,8 @@ class PurchaseRequestService
                     'warehouse_id' => $purchase_request->warehouse_id,
                     'branch_id' => $purchase_request->branch_id,
                     'purchase_request_no' => $purchase_request->purchase_request_no,
-                    'purchase_request_date' => $purchase_request->purchase_request_date,
-                    'purchase_expected_date' => $purchase_request->purchase_expected_date,
+                    'purchase_request_date' => localDate($purchase_request->purchase_request_date),
+                    'purchase_expected_date' => localDate($purchase_request->purchase_expected_date),
                     'description' => $purchase_request->description,
                 ],
                 'details' => []
@@ -301,6 +303,7 @@ class PurchaseRequestService
                 }
 
                 $data['details'][] = [
+                    'purchase_request_detail_id' => $detail->purchase_request_detail_id,
                     'product_id' => $detail->product_id,
                     'product_name' => $detail->product->name ?? '',
                     'product_variation_id' => $detail->product_variation_id,

@@ -170,7 +170,8 @@ class ProductVariationUnitConversionController extends Controller
             );
         } catch (Exception $e) {
             return $this->error(
-                Message::ERROR
+                $e->getMessage()
+                // Message::ERROR
             );
         }
     }

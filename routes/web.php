@@ -22,7 +22,8 @@ Auth::routes(['register' => false]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix' => 'admin'], function () {
+// Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix' => 'admin'], function () {
+Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], function () {
     //permissions
     Route::resource('permissions', App\Http\Controllers\Admin\PermissionController::class);
     Route::group(['prefix' => 'permissions'], function () {

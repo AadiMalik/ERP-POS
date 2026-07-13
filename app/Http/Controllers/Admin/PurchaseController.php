@@ -71,6 +71,7 @@ class PurchaseController extends Controller
 
     public function create()
     {
+        
         $business = $this->business_service->getAll();
         $products = $this->product_service->getAllActive();
         $suppliers = $this->supplier_service->getAllActive();
@@ -99,6 +100,7 @@ class PurchaseController extends Controller
     {
         $request->merge([
             'purchase_date' => ($request->purchase_id) ? utcDate($request->purchase_date, true) : utcDate($request->purchase_date),
+            'expected_delivery_date' => ($request->purchase_id) ? utcDate($request->expected_delivery_date, true) : utcDate($request->expected_delivery_date),
         ]);
         $validator = Validator::make($request->all(), [
             'supplier_id' => ['required', Rule::exists('suppliers', 'supplier_id')->where('is_deleted', 0)],
@@ -111,6 +113,7 @@ class PurchaseController extends Controller
                     ->ignore($request->purchase_id, 'purchase_id')
             ],
             'purchase_date' => ['required', 'date'],
+            'expected_delivery_date' => ['required', 'date'],
             'subtotal' => ['required', 'numeric', 'min:0'],
             'discount' => ['required', 'numeric', 'min:0'],
             'discount_amount' => ['required', 'numeric', 'min:0'],
@@ -126,6 +129,11 @@ class PurchaseController extends Controller
             'products.*.ordered_quantity' => ['required', 'numeric', 'min:0.0001'],
             'products.*.conversion_factor' => ['required', 'numeric', 'min:0.0001'],
             'products.*.unit_price' => ['required', 'numeric', 'min:0'],
+            'products.*.subtotal' => ['required', 'numeric', 'min:0'],
+            'products.*.discount' => ['required', 'numeric', 'min:0'],
+            'products.*.discount_amount' => ['required', 'numeric', 'min:0'],
+            'products.*.tax' => ['required', 'numeric', 'min:0'],
+            'products.*.tax_amount' => ['required', 'numeric', 'min:0'],
             'products.*.total' => ['required', 'numeric', 'min:0'],
         ]);
 
@@ -138,7 +146,7 @@ class PurchaseController extends Controller
             $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
             $obj['branch_id'] = $request->branch_id ?? Auth::user()->branch_id ?? null;
             $this->purchase_service->save($obj);
-            return redirect('admin/purchase-order')
+            return redirect('admin/purchase')
                 ->with('success', empty($request->purchase_id) ? Message::SAVE : Message::UPDATE);
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -164,7 +172,8 @@ class PurchaseController extends Controller
             );
         } catch (Exception $e) {
             return $this->error(
-                Message::ERROR
+                $e->getMessage()
+                // Message::ERROR
             );
         }
     }

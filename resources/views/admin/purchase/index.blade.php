@@ -51,12 +51,12 @@
                             </select>
                         </div> --}}
                         <div class="col-md-3">
-                            <label class="form-label">Purchase Order</label>
-                            <select id="purchase_order_id" class="form-select">
-                                <option value="">--All Purchase Order--</option>
+                            <label class="form-label">Purchase Request</label>
+                            <select id="purchase_request_id" class="form-select">
+                                <option value="">--All Purchase Requests--</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
-                                    @foreach ($purchase_orders as $item)
-                                        <option value="{{ $item->purchase_order_id }}">{{ $item->purchase_order_no ?? '' }}
+                                    @foreach ($purchase_requests as $item)
+                                        <option value="{{ $item->purchase_request_id }}">{{ $item->purchase_request_no ?? '' }}
                                         </option>
                                     @endforeach
                                 @endif
@@ -117,7 +117,7 @@
                             <tr>
                                 <th>Purchase No.</th>
                                 <th>Purchase Date</th>
-                                <th>Order No.</th>
+                                <th>Request No.</th>
                                 <th>Supplier</th>
                                 <th>Warehouse</th>
                                 <th>Products</th>
@@ -138,7 +138,7 @@
         'columns' => "
                         {data:'purchase_no',name:'purchase_no'},
                         {data:'purchase_date',name:'purchase_date'},
-                        {data:'purchase_order_no',name:'purchase_order_no',sortable:false},
+                        {data:'purchase_request_no',name:'purchase_request_no',sortable:false},
                         {data:'supplier',name:'supplier',sortable:false},
                         {data:'warehouse',name:'warehouse',sortable:false},
                         {data:'total_products',name:'total_products',sortable:false},
@@ -153,13 +153,13 @@
         'variable' => 'purchase_table',
         'datefilter' => true,
         'params' =>
-            "business_id:$('#business_id').val(),$('#purchase_order_id').val(),supplier_id:$('#supplier_id').val(),warehouse_id:$('#warehouse_id').val(),status:$('#status').val()",
+            "business_id:$('#business_id').val(),purchase_request_id:$('#purchase_request_id').val(),supplier_id:$('#supplier_id').val(),warehouse_id:$('#warehouse_id').val(),status:$('#status').val()",
     ])
 
     <script>
         $(document).ready(function() {
             $('#business_id').select2();
-            $('#purchase_order_id').select2();
+            $('#purchase_request_id').select2();
             $('#supplier_id').select2();
             $('#warehouse_id').select2();
             $('#status').select2();
@@ -215,7 +215,7 @@
             $('#branch_id').html('<option value="">--All Branches--</option>');
             $('#supplier_id').html('<option value="">--All Suppliers--</option>');
             $('#warehouse_id').html('<option value="">--All Warehouses--</option>');
-            $('#purchase_order_id').html('<option value="">--All Purchase Orders--</option>');
+            $('#purchase_request_id').html('<option value="">--All Purchase Requests--</option>');
 
             if (!business_id) {
                 return;
@@ -235,11 +235,11 @@
                         data: {}
                     }),
                     ajaxRequest({
-                        url: url_local + '/admin/purchase-order/by-business/' + business_id,
+                        url: url_local + '/admin/purchase-request/by-business/' + business_id,
                         data: {}
                     })
                 ])
-                .then(([branchRes, supplierRes, warehouseRes, productRes, purchaseOrderRes]) => {
+                .then(([branchRes, supplierRes, warehouseRes, productRes, purchaseRequestRes]) => {
 
                     // Branches
                     let branchOptions = '<option value="">--All Branches--</option>';
@@ -268,14 +268,14 @@
                     });
                     $('#warehouse_id').html(warehouseOptions);
 
-                    // Purchase Orders
-                    let purchaseOrderOptions = '<option value="">--All Purchase Orders--</option>';
-                    $.each(purchaseOrderRes.Data, function(_, item) {
-                        purchaseOrderOptions += `<option value="${item.purchase_order_id}">
-                                    ${item.purchase_order_no}
+                    // Purchase Requests
+                    let purchaseRequestOptions = '<option value="">--All Purchase Requests--</option>';
+                    $.each(purchaseRequestRes.Data, function(_, item) {
+                        purchaseRequestOptions += `<option value="${item.purchase_request_id}">
+                                    ${item.purchase_request_no}
                                 </option>`;
                     });
-                    $('#purchase_order_id').html(purchaseOrderOptions);
+                    $('#purchase_request_id').html(purchaseRequestOptions);
 
                 })
                 .catch((err) => {
