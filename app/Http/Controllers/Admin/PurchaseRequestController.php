@@ -212,7 +212,8 @@ class PurchaseRequestController extends Controller
 
         try {
             $purchase_request_quotation = $this->purchase_request_service->sendQuotation($request->all());
-            if ($purchase_request_quotation['Status'] == true) {
+            
+            if ($purchase_request_quotation['Status']===true) {
                 return $this->success(
                     Message::SUCCESS,
                     []

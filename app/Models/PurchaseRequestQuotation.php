@@ -30,6 +30,7 @@ class PurchaseRequestQuotation extends Model
         'discount_amount',
         'subtotal',
         'total',
+        'pdf_file',
         'is_deleted',
         'createdby_id',
         'updatedby_id',
@@ -38,6 +39,13 @@ class PurchaseRequestQuotation extends Model
         'updated_at',
         'deleted_at',
     ];
+
+    public function getPdfUrlAttribute()
+    {
+        return !empty($this->pdf_file)
+            ? asset('public/uploads/quotations/' . $this->pdf_file)
+            : asset('public/assets/img/no-file.png'); // optional default pdf_file
+    }
 
     public function purchaseRequestQuotationDetails()
     {

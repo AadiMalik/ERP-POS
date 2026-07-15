@@ -10,10 +10,17 @@ use App\Models\PurchaseRequestDetail;
 use App\Models\PurchaseRequestQuotation;
 use App\Models\PurchaseRequestQuotationDetail;
 use App\Repository\Repository;
+use App\Services\Concrete\Email\DTO\EmailData;
+use App\Services\Concrete\Email\EmailService;
+use App\Services\Concrete\Whatsapp\DTO\WhatsappData;
+use App\Services\Concrete\Whatsapp\WhatsappService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
 
 class PurchaseRequestService
@@ -22,6 +29,8 @@ class PurchaseRequestService
     protected $model_purchase_request_details;
     protected $model_purchase_request_quotation;
     protected $model_purchase_request_quotation_details;
+    protected $email_service;
+    protected $whatsapp_service;
     protected $with = [
         'business',
         'branch',
@@ -40,6 +49,8 @@ class PurchaseRequestService
         $this->model_purchase_request_details = new Repository(new PurchaseRequestDetail());
         $this->model_purchase_request_quotation = new Repository(new PurchaseRequestQuotation());
         $this->model_purchase_request_quotation_details = new Repository(new PurchaseRequestQuotationDetail());
+        $this->email_service = new EmailService();
+        $this->whatsapp_service = new WhatsappService();
     }
 
     public function getData($obj)
@@ -425,10 +436,93 @@ class PurchaseRequestService
 
                 $this->model_purchase_request_quotation_details->getModel()::insert($details);
 
-                /*
-        Mail::to($supplier->email)
-            ->send(new PurchaseQuotationMail($quotation));
-        */
+                //pdf generate
+                $quotation = $this->model_purchase_request_quotation
+                    ->getModel()::with([
+                        'supplier',
+                        'business',
+                        'createdby',
+                        'purchaseRequestQuotationDetails.product',
+                        'purchaseRequestQuotationDetails.productVariation',
+                        'purchaseRequestQuotationDetails.unit'
+                    ])
+                    ->find($purchase_request_quotation->purchase_request_quotation_id);
+
+                $pdf = Pdf::loadView(
+                    'admin.purchase_request_quotation.pdf.pdf',
+                    compact('quotation')
+                );
+
+                $fileName = 'quotation_' . $quotation->purchase_request_quotation_no . '.pdf';
+
+                $folder = public_path('uploads/quotations');
+
+                if (!File::exists($folder)) {
+                    File::makeDirectory($folder, 0755, true);
+                }
+                $path = $folder . '/' . $fileName;
+                $pdf->save($path);
+
+                $purchase_request_quotation->update([
+                    'pdf_path' => $fileName
+                ]);
+
+                if ($obj['send_email'] === "1") {
+                    $email = new EmailData([
+                        'to' => $quotation->supplier->email,
+                        'subject' => 'Purchase Request Quotation',
+                        'body' => 'Please find attached quotation.',
+                        'attachment' => public_path('uploads/quotations/' . $fileName),
+                        'attachment_name' => 'Quotation.pdf'
+                    ]);
+
+                    $response = $this->email_service->send(
+                        $purchase_request_quotation->business_id,
+                        $email
+                    );
+
+                    if (!$response['status']) {
+
+                        Log::error($response['message']);
+                        DB::rollBack();
+                        return [
+                            'Status' => false,
+                            'Message' => $response['message']
+                        ];
+                    }
+                }
+
+                if ($obj['send_whatsapp'] === "1") {
+                    $whatsapp = new WhatsappData([
+
+                        'phone' => $quotation->supplier->phone,
+
+                        'message' => 'Please review attached quotation.',
+
+                        'attachment' => public_path('uploads/quotations/' . $fileName),
+
+                        'file_name' => 'Quotation.pdf'
+
+                    ]);
+
+                    $response = $this->whatsapp_service->send(
+
+                        $quotation->business_id,
+
+                        $whatsapp
+
+                    );
+
+                    if (!$response['status']) {
+
+                        Log::error($response['message']);
+                        DB::rollBack();
+                        return [
+                            'Status' => false,
+                            'Message' => $response['message']
+                        ];
+                    }
+                }
             }
             DB::commit();
             return [
