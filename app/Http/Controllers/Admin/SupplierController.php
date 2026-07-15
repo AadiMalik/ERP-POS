@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Session;
 
 class SupplierController extends Controller
 {
@@ -40,11 +41,19 @@ class SupplierController extends Controller
     public function create()
     {
         $business = $this->business_service->getAllActive();
-        return view('admin.supplier.create', compact('business'));
+        $prefix = session('supplier_setting.supplier_code_prefix') ?? 'SUP-';
+        return view('admin.supplier.create', compact('business', 'prefix'));
     }
 
     public function store(Request $request)
     {
+        $prefix = session('supplier_setting.supplier_code_prefix') ?? 'SUP-';
+
+        if ($request->filled('code')) {
+            $request->merge([
+                'code' => $prefix . str_pad($request->code, 4, '0', STR_PAD_LEFT)
+            ]);
+        }
         $rules = [
             'code' => [
                 'nullable',
@@ -77,7 +86,7 @@ class SupplierController extends Controller
             'supplier_id' => $request->supplier_id,
             'business_id' => $request->business_id ?? Auth::user()->business_id,
             'branch_id' => $request->branch_id ?? Auth::user()->branch_id,
-            'code' => $request->code,
+            'code' => $request->code ?? generateSupplierCode(),
             'name' => $request->name,
             'company_name' => $request->company_name,
             'contact_person' => $request->contact_person ?? null,

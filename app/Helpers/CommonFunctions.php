@@ -8,6 +8,7 @@ use App\Models\JournalEntry;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseRequest;
+use App\Models\PurchaseRequestQuotation;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -170,6 +171,27 @@ function generatePRNo($business_id = null)
     );
 }
 
+function generateQuotationNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $purchase_request_quaotation = PurchaseRequestQuotation::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($purchase_request_quaotation) {
+        $next_number = (int) substr($purchase_request_quaotation->purchase_request_quaotation_no, strrpos($purchase_request_quaotation->purchase_request_quaotation_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'PRQ-%04d',
+        $next_number
+    );
+}
+
 function generatePONo($business_id = null)
 {
     $business_id = $business_id ?? Auth::user()->business_id;
@@ -195,20 +217,21 @@ function generateSupplierCode($business_id = null)
 {
     $business_id = $business_id ?? Auth::user()->business_id;
 
+    $prefix = session('supplier_setting.supplier_code_prefix') ?? 'SUP-';
+
     $last_supplier = Supplier::where('business_id', $business_id)
-        ->orderByDesc('code')
+        ->where('code', 'like', $prefix . '%')
+        ->orderByDesc('supplier_id')
         ->first();
 
     $next_number = 1;
 
     if ($last_supplier && $last_supplier->code) {
-        $next_number = (int) substr($last_supplier->code, strrpos($last_supplier->code, '-') + 1) + 1;
+        $number = str_replace($prefix, '', $last_supplier->code);
+        $next_number = (int) $number + 1;
     }
 
-    return sprintf(
-        'SUP-%04d',
-        $next_number
-    );
+    return $prefix . str_pad($next_number, 4, '0', STR_PAD_LEFT);
 }
 
 function applyRoleScope(
@@ -373,7 +396,7 @@ function checkPackageLimit($type)
             ],
             'purchase_orders'   => [
                 'column' => 'max_purchase_orders',
-                'count' => PurchaseOrder::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+                'count' => PurchaseRequest::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
             ],
             'purchases'         => [
                 'column' => 'max_purchases',

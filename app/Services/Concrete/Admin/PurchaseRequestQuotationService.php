@@ -1,0 +1,372 @@
+<?php
+
+namespace App\Services\Concrete\Admin;
+
+use App\Enums\Filter;
+use App\Enums\RoleNames;
+use App\Enums\Status;
+use App\Models\PurchaseRequestQuotation;
+use App\Models\PurchaseRequestQuotationDetail;
+use App\Repository\Repository;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\DataTables;
+
+class PurchaseRequestQuotationService
+{
+    protected $model_purchase_request_quotation;
+    protected $model_purchase_request_quotation_details;
+    protected $with = [
+        'business',
+        'branch',
+        'supplier',
+        'purchaseRequestQuotationDetails',
+        'purchaseRequestQuotationDetails.product',
+        'purchaseRequestQuotationDetails.product.productVariations',
+        'purchaseRequestQuotationDetails.productVariation',
+        'purchaseRequestQuotationDetails.unit',
+    ];
+
+    public function __construct()
+    {
+        $this->model_purchase_request_quotation = new Repository(new PurchaseRequestQuotation());
+        $this->model_purchase_request_quotation_details = new Repository(new PurchaseRequestQuotationDetail());
+    }
+
+    public function getData($obj)
+    {
+        $wh = [];
+        $orderBy = Filter::ORDERBY;
+
+        if (isset($obj['orderBy']) && $obj['orderBy'] != 0 && $obj['orderBy'] != "") {
+            $orderBy = $obj['orderBy'];
+        }
+        if (isset($obj['business_id']) && $obj['business_id'] != 0 && $obj['business_id'] != "") {
+            $wh[] = ['business_id', $obj['business_id']];
+        }
+        if (isset($obj['branch_id']) && $obj['branch_id'] != 0 && $obj['branch_id'] != "") {
+            $wh[] = ['branch_id', $obj['branch_id']];
+        }
+        if (isset($obj['supplier_id']) && $obj['supplier_id'] != 0 && $obj['supplier_id'] != "") {
+            $wh[] = ['supplier_id', $obj['supplier_id']];
+        }
+        if (isset($obj['warehouse_id']) && $obj['warehouse_id'] != 0 && $obj['warehouse_id'] != "") {
+            $wh[] = ['warehouse_id', $obj['warehouse_id']];
+        }
+        if (isset($obj['purchase_request_id']) && $obj['purchase_request_id'] != 0 && $obj['purchase_request_id'] != "") {
+            $wh[] = ['purchase_request_id', $obj['purchase_request_id']];
+        }
+        if (isset($obj['status']) && $obj['status'] != 0 && $obj['status'] != "") {
+            $wh[] = ['status', $obj['status']];
+        }
+        if (!empty($obj['start_date'])) {
+            $wh[] = ['sent_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+        }
+
+        if (!empty($obj['end_date'])) {
+            $wh[] = ['sent_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+        }
+        $allow_roles = [
+            RoleNames::SUPERADMIN,
+            RoleNames::BUSINESSADMIN
+        ];
+        $datatable = $this->model_purchase_request_quotation->getModel()::with($this->with)
+            ->withCount('purchaseRequestQuotationDetails as total_products')
+            ->where($wh)
+            ->where('is_deleted', 0)
+            ->orderBy('sent_date', $orderBy);
+        $datatable = applyRoleScope($datatable, $allow_roles);
+        return DataTables::of($datatable)
+            ->addColumn('sent_date', function ($item) {
+                return !empty($item->sent_date)
+                    ? localDate($item->sent_date)
+                    : 'N/A';
+            })
+            ->addColumn('received_date', function ($item) {
+                  return !empty($item->received_date)
+                      ? localDate($item->received_date)
+                      : 'N/A';
+              })
+            ->addColumn('purchase_request', function ($item) {
+                  return $item->purchaseRequest->purchase_request_no ?? 'N/A';
+              })
+            ->addColumn('supplier', function ($item) {
+                return $item->supplier->code ?? '' . ' ' . $item->supplier->name ?? '';
+            })
+            ->addColumn('warehouse', function ($item) {
+                return $item->warehouse->name ?? '';
+            })
+            ->addColumn('business', function ($item) {
+                return $item->business->name ?? '';
+            })
+            ->addColumn('branch', function ($item) {
+                return $item->branch->name ?? '';
+            })
+            ->addColumn('total_products', function ($item) {
+                return decimal($item->total_products ?? 0);
+            })
+            ->addColumn('total', function ($item) {
+                return currency($item->total ?? 0);
+            })
+            ->addColumn('status', function ($item) {
+
+                $statuses = [
+                    Status::SENT   => ucfirst(Status::SENT),
+                    Status::RECEIVED  => ucfirst(Status::RECEIVED),
+                    Status::SELECTED => ucfirst(Status::SELECTED),
+                    Status::REJECTED => ucfirst(Status::REJECTED)
+                ];
+
+                $html = "<select class='form-select form-select-sm change-status'
+                data-id='{$item->purchase_request_quotation_id}'>";
+
+                foreach ($statuses as $value => $label) {
+                    $selected = $item->status == $value ? 'selected' : '';
+                    $html .= "<option value='{$value}' {$selected}>{$label}</option>";
+                }
+
+                $html .= "</select>";
+
+                return $html;
+            })
+            ->addColumn('action', function ($item) {
+
+                return "
+                    <a class='btn btn-icon btn-outline-primary mr-2'
+                     href='" . route('purchase-request-quotation.edit', $item->purchase_request_quotation_id) . "'
+                    id='editPurchaseRequestQuotation'>
+
+                    <i class='fa fa-pencil'></i>
+                    </a>
+
+                    <a class='btn btn-icon btn-outline-danger'
+                    id='deletePurchaseRequestQuotation'
+                    data-id='{$item->purchase_request_quotation_id}'>
+
+                    <i class='fa fa-trash'></i>
+                    </a>
+                ";
+            })
+            ->rawColumns(['sent_date','received_date', 'business', 'branch', 'warehouse', 'supplier', 'total_products', 'total',  'status', 'action'])
+            ->make(true);
+    }
+
+    public function save($obj)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            //====================================
+            // Update
+            //====================================
+
+            if (!empty($obj['purchase_request_quotation_id'])) {
+
+                $purchase_request_quotation = $this->model_purchase_request_quotation
+                    ->getModel()::findOrFail($obj['purchase_request_quotation_id']);
+
+                $purchase_request_quotation->update([
+                    'business_id'            => $obj['business_id'],
+                    'supplier_id'            => $obj['supplier_id'],
+                    'sent_date'              => $obj['sent_date'],
+                    'received_date'          => $obj['received_date'],
+                    'description'            => $obj['description'],
+                    'status'                 => status::SENT,
+                    'updatedby_id'           => Auth::user()->id,
+                    'date_updated'           => now(),
+                ]);
+
+                // Remove previous items
+
+                $this->model_purchase_request_quotation_details->getModel()::where('purchase_request_quotation_id', $purchase_request_quotation->purchase_request_quotation_id)
+                    ->delete();
+            }
+
+            //====================================
+            // Create
+            //====================================
+
+            else {
+
+                $purchase_request_quotation = $this->model_purchase_request_quotation->create([
+                    'purchase_request_quotation_id'         => generateUuid(),
+                    'business_id'                           => $obj['business_id'],
+                    'supplier_id'                           => $obj['supplier_id'],
+                    'purchase_request_quotation_no'         => $obj['purchase_request_quotation_no'],
+                    'sent_date'                             => $obj['sent_date'],
+                    'received_date'                         => $obj['received_date'],
+                    'description'                           => $obj['description'],
+                    'status'                                => status::SENT,
+                    'createdby_id'                          => Auth::user()->id,
+                    'date_created'                          => now(),
+                ]);
+            }
+
+            //====================================
+            // Save Items
+            //====================================
+
+            foreach ($obj['products'] as $product) {
+
+                $this->model_purchase_request_quotation_details->create([
+
+                    'purchase_request_quotation_detail_id'              => generateUuid(),
+                    'purchase_request_quotation_id'                     => $purchase_request_quotation->purchase_request_quotation_id,
+                    'product_id'                            => $product['product_id'],
+                    'product_variation_id'                  => $product['product_variation_id'],
+                    'unit_id'                               => $product['unit_id'],
+                    'requested_quantity'                    => $product['requested_quantity'],
+                    'quoted_quantity'                       => $product['quoted_quantity'],
+                    'unit_price'                            => $product['unit_price'],
+                    'tax'                                   => $product['tax'],
+                    'tax_amount'                            => $product['tax_amount'],
+                    'discount'                              => $product['discount'],
+                    'discount_amount'                       => $product['discount_amount'],
+                    'subtotal'                              => $product['subtotal'],
+                    'total'                                 => $product['total'],
+                    'createdby_id'                          => Auth::user()->id,
+                    'date_created'                          => now(),
+                ]);
+            }
+
+            DB::commit();
+
+            return true;
+        } catch (Exception $e) {
+
+            DB::rollBack();
+
+            throw $e;
+        }
+    }
+
+    public function getById($purchase_request_quotation_id)
+    {
+        return $this->model_purchase_request_quotation->with($this->with)->find($purchase_request_quotation_id);
+    }
+
+    public function status($obj)
+    {
+        return $this->model_purchase_request_quotation->update([
+            'status' => $obj['status'],
+            'updatedby_id' => Auth::user()->id,
+            'date_updated' => now()
+        ], $obj['purchase_request_quotation_id']);
+    }
+
+    public function delete($purchase_request_quotation_id)
+    {
+        return $this->model_purchase_request_quotation->update([
+            'is_deleted' => 1,
+            'status' => Status::REJECTED,
+            'deletedby_id' => Auth::id(),
+            'date_deleted' => now()
+        ], $purchase_request_quotation_id);
+    }
+
+    public function getAll()
+    {
+        return $this->model_purchase_request_quotation->getModel()::where('is_deleted', 0)
+            ->get();
+    }
+    public function getAllSent()
+    {
+        return $this->model_purchase_request_quotation->getModel()::where('status', Status::SENT)
+            ->where('is_deleted', 0)
+            ->get();
+    }
+
+    public function getAllSeleted()
+    {
+        return $this->model_purchase_request_quotation->getModel()::where('status', Status::SELECTED)
+            ->where('is_deleted', 0)
+            ->get();
+    }
+    public function getDetails($purchase_request_quotation_id)
+    {
+        try {
+            $purchase_request_quotation = $this->model_purchase_request_quotation->getModel()::with($this->with)->findOrFail($purchase_request_quotation_id);
+
+            $data = [
+                'header' => [
+                    'purchase_request_quotation_id' => $purchase_request_quotation->purchase_request_quotation_id,
+                    'supplier_id' => $purchase_request_quotation->supplier_id,
+                    'business_id' => $purchase_request_quotation->business_id,
+                    'branch_id' => $purchase_request_quotation->branch_id,
+                    'purchase_request_quotation_no' => $purchase_request_quotation->purchase_request_quotation_no,
+                    'purchase_request_quotation_date' => localDate($purchase_request_quotation->purchase_request_quotation_date),
+                    'purchase_expected_date' => localDate($purchase_request_quotation->purchase_expected_date),
+                    'description' => $purchase_request_quotation->description,
+                ],
+                'details' => []
+            ];
+
+            foreach ($purchase_request_quotation->purchaseRequestQuotationDetails as $detail) {
+                $productVariations = [];
+
+                foreach ($detail->product->productVariations as $variation) {
+
+                    $productVariations[] = [
+                        'product_variation_id' => $variation->product_variation_id,
+                        'name' => $variation->name,
+                        'purchase_price' => $variation->purchase_price,
+                        'unit_id' => optional($variation->purchase_unit)->unit_id,
+                        'unit_name' => optional($variation->purchase_unit)->name,
+                    ];
+                }
+
+                $data['details'][] = [
+                    'purchase_request_quotation_detail_id' => $detail->purchase_request_quotation_detail_id,
+                    'purchase_request_quotation_id' => $detail->purchase_request_quotation_id,
+                    'product_id' => $detail->product_id,
+                    'product_name' => $detail->product->name ?? '',
+                    'product_variation_id' => $detail->product_variation_id,
+                    'product_variation_name' => $detail->productVariation->name ?? '',
+                    'requested_quantity' => $detail->requested_quantity,
+                    'quoted_quantity' => $detail->quoted_quantity,
+                    'unit_id' => $detail->unit_id,
+                    'unit_name' => $detail->unit->name ?? 'N/A',
+                    'unit_price' => $detail->unit_price,
+                    'discount' => $detail->discount,
+                    'discount_amount' => $detail->discount_amount,
+                    'tax' => $detail->tax,
+                    'tax_amount' => $detail->tax_amount,
+                    'subtotal' => $detail->subtotal,
+                    'total' => $detail->total,
+                    'productVariations' => $productVariations
+                ];
+            }
+
+            return $data;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getByBusiness($business_id)
+    {
+        return $this->model_purchase_request_quotation->getModel()::with($this->with)
+            ->where('business_id', $business_id)
+            ->where('is_deleted', 0)
+            ->get();
+    }
+
+    public function getByPurchaseRequest($purchase_request_id)
+    {
+        return $this->model_purchase_request_quotation->getModel()::with($this->with)
+            ->where('purchase_request_id', $purchase_request_id)
+            ->where('is_deleted', 0)
+            ->get();
+    }
+
+    public function getSelectedByPurchaseRequest($purchase_request_id)
+    {
+        return $this->model_purchase_request_quotation->getModel()::with($this->with)
+            ->where('purchase_request_id', $purchase_request_id)
+            ->where('status', Status::SELECTED)
+            ->where('is_deleted', 0)
+            ->get();
+    }
+}

@@ -36,6 +36,14 @@ function warningMessage(message) {
     });
 }
 
+function showLoader() {
+    $("#preloader").fadeIn(100);
+}
+
+function hideLoader() {
+    $("#preloader").fadeOut(100);
+}
+
 // ==============================
 // UNIVERSAL AJAX REQUEST
 // ==============================
@@ -61,7 +69,7 @@ function ajaxRequest({
             },
 
             beforeSend: function () {
-                $("#preloader").show();
+                showLoader();
 
                 if (typeof beforeSend === "function") {
                     beforeSend();
@@ -69,7 +77,7 @@ function ajaxRequest({
             },
 
             success: function (response) {
-                $("#preloader").hide();
+                hideLoader();
 
                 if (
                     response.Success ||
@@ -83,7 +91,7 @@ function ajaxRequest({
             },
 
             error: function (xhr) {
-                $("#preloader").hide();
+                hideLoader();
 
                 let message = "Something went wrong";
 

@@ -223,8 +223,18 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::post('data', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'getData']);
         Route::post('change-status', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'byBusiness']);
-
+        Route::post('send-quotation',[App\Http\Controllers\Admin\PurchaseRequestController::class,'sendQuotation']);
         Route::get('details/{purchase_request_id}', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'details']);
+    });
+
+    //purchase
+    Route::resource('purchase-request-quotation', App\Http\Controllers\Admin\PurchaseRequestQuotationController::class);
+    Route::group(['prefix' => 'purchase-request-quotation'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\PurchaseRequestQuotationController::class, 'getData']);
+        Route::post('change-status', [App\Http\Controllers\Admin\PurchaseRequestQuotationController::class, 'status']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\PurchaseRequestQuotationController::class, 'byBusiness']);
+
+        Route::get('details/{purchase_request_id}', [App\Http\Controllers\Admin\PurchaseRequestQuotationController::class, 'details']);
     });
 
     //purchase

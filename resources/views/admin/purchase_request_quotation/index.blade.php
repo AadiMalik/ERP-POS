@@ -5,7 +5,7 @@ use App\Enums\RoleNames;
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold py-3 mb-4">
-        Purchase Requests
+        Purchase Request Quotations
     </h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
@@ -64,18 +64,6 @@ use App\Enums\RoleNames;
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Warehouse</label>
-                    <select id="warehouse_id" class="form-select">
-                        <option value="">--All Warehouses--</option>
-                        @if (RoleNames::SUPERADMIN != getRoleName())
-                        @foreach ($warehouses as $item)
-                        <option value="{{ $item->warehouse_id }}">{{ $item->name ?? '' }}
-                        </option>
-                        @endforeach
-                        @endif
-                    </select>
-                </div>
-                <div class="col-md-3">
                     <label class="form-label">Status</label>
                     <select id="status" class="form-select">
                         <option value="">--All Statuses--</option>
@@ -100,13 +88,13 @@ use App\Enums\RoleNames;
             </div>
         </div>
         <div class="table-responsive p-4">
-            <table id="purchase_request_table" class="table datatables">
+            <table id="purchase_request_quotation_table" class="table datatables">
                 <thead>
                     <tr>
-                        <th>Request No.</th>
-                        <th>Request Date</th>
+                        <th>Quotation No.</th>
+                        <th>Sent Date</th>
+                        <th>Received Date</th>
                         <th>Supplier</th>
-                        <th>Warehouse</th>
                         <th>Products</th>
                         <th>Status</th>
                         <th>Business</th>
@@ -117,43 +105,37 @@ use App\Enums\RoleNames;
         </div>
     </div>
 
-    @include('admin/purchase_request/model/send')
 </div>
 @endsection
 @section('js')
 @include('admin.partials.datatable', [
 'columns' => "
-{data:'purchase_request_no',name:'purchase_request_no'},
-{data:'purchase_request_date',name:'purchase_request_date'},
+{data:'purchase_request_quotation_no',name:'purchase_request_quotation_no'},
+{data:'sent_date',name:'sent_date'},
+{data:'received_date',name:'received_date'},
 {data:'supplier',name:'supplier',sortable:false},
-{data:'warehouse',name:'warehouse',sortable:false},
 {data:'total_products',name:'total_products',sortable:false},
 {data:'status',name:'status',sortable:false},
 {data:'business',name:'business',sortable:false},
 {data:'action',name:'action',sortable:false}",
-'route' => 'purchase-request/data',
+'route' => 'purchase-request-quotation/data',
 'buttons' => false,
 'pageLength' => 10,
-'class' => 'purchase_request_table',
-'variable' => 'purchase_request_table',
+'class' => 'purchase_request_quotation_table',
+'variable' => 'purchase_request_quotation_table',
 'datefilter' => true,
 'params' =>
-"business_id:$('#business_id').val(),supplier_id:$('#supplier_id').val(),warehouse_id:$('#warehouse_id').val(),status:$('#status').val()",
+"business_id:$('#business_id').val(),supplier_id:$('#supplier_id').val(),status:$('#status').val()",
 ])
 
 <script>
     $(document).ready(function() {
         $('#business_id').select2();
         $('#supplier_id').select2();
-        $('#supplier_ids').select2({
-            dropdownParent: $('#ajaxModel'),
-            width: '100%'
-        });
-        $('#warehouse_id').select2();
         $('#status').select2();
     });
     $('#search_btn').click(function() {
-        initDataTablepurchase_request_table();
+        initDataTablepurchase_request_quotation_table();
     });
     //status
     $(document).on('change', '.change-status', function() {
@@ -163,22 +145,22 @@ use App\Enums\RoleNames;
         let select = $(this);
 
         $.ajax({
-            url: url_local + "/admin/purchase-request/change-status", // route
+            url: url_local + "/admin/purchase-request-quotation/change-status", // route
             type: 'POST',
             data: {
                 _token: $('meta[name="csrf-token"]').attr('content'),
-                purchase_request_id: purchase_request_id,
+                purchase_request_quotation_id: purchase_request_quotation_id,
                 status: status
             },
             success: function(response) {
 
                 successMessage(response.Message);
-                initDataTablepurchase_request_table();
+                initDataTablepurchase_request_quotation_table();
             },
             error: function() {
 
                 errorMessage(error.Message || 'Something went wrong.');
-                initDataTablepurchase_request_table();
+                initDataTablepurchase_request_quotation_table();
                 // Previous value restore
                 select.val(select.data('old'));
             }
@@ -187,11 +169,11 @@ use App\Enums\RoleNames;
     });
     //delete
     deleteRecord({
-        buttonClass: "#deletePurchaseRequest",
-        url: url_local + "/admin/purchase-request",
+        buttonClass: "#deletePurchaseRequestQuotation",
+        url: url_local + "/admin/purchase-request-quotation",
 
         tableCallback: function() {
-            initDataTablepurchase_request_table();
+            initDataTablepurchase_request_quotation_table();
         }
     });
 
@@ -202,7 +184,6 @@ use App\Enums\RoleNames;
         // Reset dropdowns
         $('#branch_id').html('<option value="">--All Branches--</option>');
         $('#supplier_id').html('<option value="">--All Suppliers--</option>');
-        $('#warehouse_id').html('<option value="">--All Warehouses--</option>');
 
         if (!business_id) {
             return;
@@ -216,13 +197,9 @@ use App\Enums\RoleNames;
                 ajaxRequest({
                     url: url_local + '/admin/supplier/by-business/' + business_id,
                     data: {}
-                }),
-                ajaxRequest({
-                    url: url_local + '/admin/warehouse/by-business/' + business_id,
-                    data: {}
                 })
             ])
-            .then(([branchRes, supplierRes, warehouseRes, productRes]) => {
+            .then(([branchRes, supplierRes, productRes]) => {
 
                 // Branches
                 let branchOptions = '<option value="">--All Branches--</option>';
@@ -242,15 +219,6 @@ use App\Enums\RoleNames;
                 });
                 $('#supplier_id').html(supplierOptions);
 
-                // Warehouses
-                let warehouseOptions = '<option value="">--All Warehouses--</option>';
-                $.each(warehouseRes.Data, function(_, item) {
-                    warehouseOptions += `<option value="${item.warehouse_id}">
-                                    ${item.name}
-                                </option>`;
-                });
-                $('#warehouse_id').html(warehouseOptions);
-
             })
             .catch((err) => {
                 errorMessage(err.Message ?? 'Something went wrong.');
@@ -258,49 +226,5 @@ use App\Enums\RoleNames;
 
     });
 
-    $(document).on('click', '.sendQuotation', function() {
-        let purchase_request_id = $(this).data('id');
-        $('#purchase_request_id').val(purchase_request_id);
-        $('#ajaxModel').modal('show');
-    });
-
-    $(document).off('click', '#btnSendQuotation').on('click', '#btnSendQuotation', function() {
-        let btn = $(this);
-        $.ajax({
-            url: "{{ url('admin/purchase-request/send-quotation') }}",
-            type: "POST",
-            data: {
-                purchase_request_id: $('#purchase_request_id').val(),
-                supplier_ids: $('#supplier_ids').val(),
-                _token: $('meta[name="csrf-token"]').attr('content')
-            },
-            beforeSend: function() {
-                btn.prop('disabled', true);
-                showLoader();
-            },
-            success: function(response) {
-                successMessage(response.Message);
-                $('#ajaxModel').modal('hide');
-                $('#supplier_ids').val('').trigger('change');
-            },
-
-            complete: function() {
-                btn.prop('disabled', false);
-                hideLoader();
-            },
-            error: function(xhr) {
-                btn.prop('disabled', false);
-                hideLoader();
-                if (xhr.status == 422) {
-
-                    $.each(xhr.responseJSON.errors, function(key, value) {
-                        errorMessage(value[0]);
-                    });
-                } else {
-                    errorMessage(xhr.responseJSON.Message);
-                }
-            }
-        });
-    });
 </script>
 @endsection

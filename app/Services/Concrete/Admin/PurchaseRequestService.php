@@ -7,6 +7,8 @@ use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestDetail;
+use App\Models\PurchaseRequestQuotation;
+use App\Models\PurchaseRequestQuotationDetail;
 use App\Repository\Repository;
 use Carbon\Carbon;
 use Exception;
@@ -18,6 +20,8 @@ class PurchaseRequestService
 {
     protected $model_purchase_request;
     protected $model_purchase_request_details;
+    protected $model_purchase_request_quotation;
+    protected $model_purchase_request_quotation_details;
     protected $with = [
         'business',
         'branch',
@@ -34,6 +38,8 @@ class PurchaseRequestService
     {
         $this->model_purchase_request = new Repository(new PurchaseRequest());
         $this->model_purchase_request_details = new Repository(new PurchaseRequestDetail());
+        $this->model_purchase_request_quotation = new Repository(new PurchaseRequestQuotation());
+        $this->model_purchase_request_quotation_details = new Repository(new PurchaseRequestQuotationDetail());
     }
 
     public function getData($obj)
@@ -83,7 +89,7 @@ class PurchaseRequestService
                     : 'N/A';
             })
             ->addColumn('supplier', function ($item) {
-                return $item->supplier->code ?? '' . ' ' . $item->supplier->name ?? '';
+                return isset($item->supplier) ? $item->supplier->code ?? '' . ' ' . $item->supplier->name ?? '' : 'N/A';
             })
             ->addColumn('warehouse', function ($item) {
                 return $item->warehouse->name ?? '';
@@ -125,21 +131,46 @@ class PurchaseRequestService
             })
             ->addColumn('action', function ($item) {
 
-                return "
-                    <a class='btn btn-icon btn-outline-primary mr-2'
-                     href='" . route('purchase-request.edit', $item->purchase_request_id) . "'
-                    id='editPurchaseRequest'>
+                $html = "";
 
-                    <i class='fa fa-pencil'></i>
-                    </a>
+                if ($item->status == Status::PENDING) {
+                    $html .= "
+                        <a class='btn btn-icon btn-outline-primary mr-2'
+                            href='" . route('purchase-request.edit', $item->purchase_request_id) . "'>
+                            <i class='fa fa-pencil'></i>
+                        </a>";
+                }
 
-                    <a class='btn btn-icon btn-outline-danger'
-                    id='deletePurchaseRequest'
-                    data-id='{$item->purchase_request_id}'>
+                if ($item->status == Status::APPROVED || $item->status == Status::QUOTATION_SENT) {
+                    $html .= "
+                        <button
+                            class='btn btn-icon btn-outline-success mr-2 sendQuotation'
+                            data-id='{$item->purchase_request_id}'
+                            title='Send RFQ'>
+                            <i class='fa fa-paper-plane'></i>
+                        </button>";
+                }
+                if ($item->status != Status::PENDING) {
+                    $html .= "
+                        <a class='btn btn-icon btn-outline-info mr-2'
+                            href='" . route('purchase-request-quotation.index', [
+                        'purchase_request_id' => $item->purchase_request_id
+                    ]) . "'
+                            title='Quotations'>
+                            <i class='fa fa-file-text'></i>
+                        </a>";
+                }
+                if ($item->status == Status::PENDING) {
+                    $html .= "
+                    <button
+                        class='btn btn-icon btn-outline-danger'
+                        data-id='{$item->purchase_request_id}'
+                        id='deletePurchaseRequest'>
+                        <i class='fa fa-trash'></i>
+                    </button>";
+                }
 
-                    <i class='fa fa-trash'></i>
-                    </a>
-                ";
+                return $html;
             })
             ->rawColumns(['purchase_request_date', 'business', 'branch', 'warehouse', 'supplier', 'total_products', 'total',  'status', 'action'])
             ->make(true);
@@ -326,5 +357,90 @@ class PurchaseRequestService
             ->where('business_id', $business_id)
             ->where('is_deleted', 0)
             ->get();
+    }
+
+    public function sendQuotation(array $obj)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            $purchase_request = $this->model_purchase_request->getModel()::with('purchaseRequestDetails')
+                ->findOrFail($obj['purchase_request_id']);
+            foreach ($obj['supplier_ids'] as $supplier_id) {
+
+                // check already sent
+                $exists = $this->model_purchase_request_quotation->getModel()::where(
+                    'purchase_request_id',
+                    $obj['purchase_request_id']
+                )->where('supplier_id', $supplier_id)
+                    ->where('is_deleted', 0)
+                    ->exists();
+
+                if ($exists) {
+                    continue;
+                }
+
+                $purchase_request_quotation = $this->model_purchase_request_quotation->getModel()::create([
+                    'purchase_request_quotation_id' => generateUuid(),
+                    'purchase_request_id' => $obj['purchase_request_id'],
+                    'supplier_id' => $supplier_id,
+                    'branch_id' => auth()->user()->branch_id,
+                    'business_id' => auth()->user()->business_id,
+                    'purchase_request_quotation_no' => generateQuotationNo(),
+                    'sent_date' => now(),
+                    'status' => Status::SENT,
+                    'description' => $purchase_request->description,
+                    'tax' => 0,
+                    'discount' => 0,
+                    'tax_amount' => 0,
+                    'discount_amount' => 0,
+                    'subtotal' => 0,
+                    'total' => 0,
+                    'createdby_id' => auth()->user()->id,
+                    'date_created' => now(),
+                ]);
+
+                $details = [];
+                foreach ($purchase_request->purchaseRequestDetails as $item) {
+                    $details[] = [
+                        'purchase_request_quotation_detail_id' => generateUuid(),
+                        'purchase_request_quotation_id' => $purchase_request_quotation->purchase_request_quotation_id,
+                        'product_id' => $item->product_id,
+                        'product_variation_id' => $item->product_variation_id,
+                        'requested_quantity' => $item->requested_quantity,
+                        'quoted_quantity' => 0,
+                        'unit_id' => $item->unit_id,
+                        'unit_price' => 0,
+                        'discount' => 0,
+                        'discount_amount' => 0,
+                        'tax' => 0,
+                        'tax_amount' => 0,
+                        'subtotal' => 0,
+                        'total' => 0,
+                        'createdby_id' => auth()->user()->id,
+                        'date_created' => now(),
+                    ];
+                }
+
+                $this->model_purchase_request_quotation_details->getModel()::insert($details);
+
+                /*
+        Mail::to($supplier->email)
+            ->send(new PurchaseQuotationMail($quotation));
+        */
+            }
+            DB::commit();
+            return [
+                'Status' => true,
+                'Message' => 'Quotation sent successfully.'
+            ];
+        } catch (Exception $ex) {
+            DB::rollBack();
+            return [
+                'Status' => false,
+                'Message' => $ex->getMessage()
+            ];
+        }
     }
 }

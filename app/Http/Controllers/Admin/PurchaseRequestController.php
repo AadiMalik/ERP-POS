@@ -12,7 +12,6 @@ use App\Services\Concrete\Admin\SupplierService;
 use App\Services\Concrete\Admin\UnitService;
 use App\Services\Concrete\Admin\WarehouseService;
 use App\Traits\ResponseAPI;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -98,7 +97,7 @@ class PurchaseRequestController extends Controller
             'purchase_expected_date' => ($request->purchase_request_id) ? utcDate($request->purchase_expected_date, true) : utcDate($request->purchase_expected_date),
         ]);
         $validator = Validator::make($request->all(), [
-            'supplier_id' => ['required', Rule::exists('suppliers', 'supplier_id')->where('is_deleted', 0)],
+            'supplier_id' => ['nullable', Rule::exists('suppliers', 'supplier_id')->where('is_deleted', 0)],
             'warehouse_id' => ['required', Rule::exists('warehouses', 'warehouse_id')->where('is_deleted', 0)],
             'purchase_request_no' => [
                 'required',
@@ -155,6 +154,23 @@ class PurchaseRequestController extends Controller
             );
         }
     }
+    public function destroy($purchase_request_id)
+    {
+        try {
+
+            $this->purchase_request_service->delete($purchase_request_id);
+
+            return $this->success(
+                Message::DELETE,
+                []
+            );
+        } catch (Exception $e) {
+
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
 
     public function details($purchase_request_id)
     {
@@ -173,6 +189,37 @@ class PurchaseRequestController extends Controller
         try {
             $purchase_requests = $this->purchase_request_service->getByBusiness($business_id);
             return $this->success(Message::SUCCESS, $purchase_requests);
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
+
+    //send quotation
+    public function sendQuotation(Request $request)
+    {
+        $rules = [
+            'purchase_request_id' => 'required|exists:purchase_requests,purchase_request_id',
+            'supplier_ids' => 'required|array|min:1',
+            'supplier_ids.*' => 'required|exists:suppliers,supplier_id'
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        try {
+            $purchase_request_quotation = $this->purchase_request_service->sendQuotation($request->all());
+            if ($purchase_request_quotation['Status'] == true) {
+                return $this->success(
+                    Message::SUCCESS,
+                    []
+                );
+            } else {
+                return $this->error($purchase_request_quotation['Message']);
+            }
         } catch (Exception $e) {
             return $this->error(
                 Message::ERROR
