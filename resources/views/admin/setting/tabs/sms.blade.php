@@ -102,14 +102,6 @@
         </div>
 
         <div class="col-md-4 mb-3">
-            <label>Send OTP</label>
-            <select class="form-select select2" name="send_otp">
-                <option value="1" {{ $sms_setting->send_otp ? 'selected' : '' }}>Yes</option>
-                <option value="0" {{ !$sms_setting->send_otp ? 'selected' : '' }}>No</option>
-            </select>
-        </div>
-
-        <div class="col-md-4 mb-3">
             <label>Invoice SMS</label>
             <select class="form-select select2" name="send_invoice_sms">
                 <option value="1" {{ $sms_setting->send_invoice_sms ? 'selected' : '' }}>Yes</option>
@@ -122,22 +114,6 @@
             <select class="form-select select2" name="send_due_sms">
                 <option value="1" {{ $sms_setting->send_due_sms ? 'selected' : '' }}>Yes</option>
                 <option value="0" {{ !$sms_setting->send_due_sms ? 'selected' : '' }}>No</option>
-            </select>
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <label>Receipt SMS</label>
-            <select class="form-select select2" name="send_receipt_sms">
-                <option value="1" {{ $sms_setting->send_receipt_sms ? 'selected' : '' }}>Yes</option>
-                <option value="0" {{ !$sms_setting->send_receipt_sms ? 'selected' : '' }}>No</option>
-            </select>
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <label>Order Status SMS</label>
-            <select class="form-select select2" name="send_order_status_sms">
-                <option value="1" {{ $sms_setting->send_order_status_sms ? 'selected' : '' }}>Yes</option>
-                <option value="0" {{ !$sms_setting->send_order_status_sms ? 'selected' : '' }}>No</option>
             </select>
         </div>
 
