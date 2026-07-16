@@ -12,6 +12,8 @@ use App\Models\PurchaseRequestQuotationDetail;
 use App\Repository\Repository;
 use App\Services\Concrete\Email\DTO\EmailData;
 use App\Services\Concrete\Email\EmailService;
+use App\Services\Concrete\SMS\DTO\SMSData;
+use App\Services\Concrete\SMS\SMSService;
 use App\Services\Concrete\Whatsapp\DTO\WhatsappData;
 use App\Services\Concrete\Whatsapp\WhatsappService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -31,6 +33,7 @@ class PurchaseRequestService
     protected $model_purchase_request_quotation_details;
     protected $email_service;
     protected $whatsapp_service;
+    protected $sms_service;
     protected $with = [
         'business',
         'branch',
@@ -51,6 +54,7 @@ class PurchaseRequestService
         $this->model_purchase_request_quotation_details = new Repository(new PurchaseRequestQuotationDetail());
         $this->email_service = new EmailService();
         $this->whatsapp_service = new WhatsappService();
+        $this->sms_service = new SMSService();
     }
 
     public function getData($obj)
@@ -521,6 +525,57 @@ class PurchaseRequestService
                             'Status' => false,
                             'Message' => $response['message']
                         ];
+                    }
+                }
+
+                if ($obj['send_sms'] === "1") {
+                    $productLines = [];
+
+                    foreach ($quotation->purchaseRequestQuotationDetails as $index => $item) {
+
+                        if ($index == 2) {
+                            break;
+                        }
+
+                        $product = $item->product?->name ?? '';
+
+                        $variation = $item->productVariation?->name;
+
+                        if (!empty($variation)) {
+                            $product .= " ({$variation})";
+                        }
+
+                        $product .= " x{$item->requested_quantity}";
+
+                        $productLines[] = $product;
+                    }
+
+                    $remaining = count($quotation->purchaseRequestQuotationDetails) - count($productLines);
+
+                    $message = "Quotation Request\n";
+                    $message .= "Business: {$quotation->business->name}\n";
+                    $message .= "Quotation: {$quotation->purchase_request_quotation_no}\n";
+                    $message .= implode(", ", $productLines);
+
+                    if ($remaining > 0) {
+                        $message .= " +{$remaining} more";
+                    }
+                    $message .= "\n";
+                    $message .= $quotation->pdf_url;
+                    
+                    $sms = new SMSData([
+                        'phone'   => $quotation->supplier->phone,
+                        'message' => $message
+                    ]);
+
+                    $response = $this->sms_service->send(
+                        $quotation->business_id,
+                        $sms
+                    );
+
+                    if (!$response['status']) {
+
+                        Log::error($response['message']);
                     }
                 }
             }

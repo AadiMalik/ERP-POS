@@ -22,13 +22,17 @@ use App\Enums\RoleNames;
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <input type="checkbox" class="form-check-input" name="send_email" id="send_email" value="">
                             <label class="form-check-label" for="send_email">Send Email</label>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <input type="checkbox" class="form-check-input" name="send_whatsapp" id="send_whatsapp" value="">
                             <label class="form-check-label" for="send_whatsapp">Send Whatsapp</label>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <input type="checkbox" class="form-check-input" name="send_sms" id="send_sms" value="">
+                            <label class="form-check-label" for="send_sms">Send SMS</label>
                         </div>
                     </div>
                 </div>
