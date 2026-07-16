@@ -23,11 +23,11 @@
             <label>Mail Mailer<span class="text-danger">*</span></label>
             <select class="form-select select2 email-config-field" name="mail_mailer">
                 <option value="">--Select Mailer--</option>
-                <option value="smtp" {{ $email_setting->mail_mailer == 'smtp' ? 'selected' : '' }}>SMTP</option>
-                <option value="sendmail" {{ $email_setting->mail_mailer == 'sendmail' ? 'selected' : '' }}>Sendmail
-                </option>
-                <option value="mailgun" {{ $email_setting->mail_mailer == 'mailgun' ? 'selected' : '' }}>Mailgun
-                </option>
+                @foreach ($email_mailer as $value => $item)
+                    <option value="{{ $value }}" {{ $email_setting->mail_mailer == $value ? 'selected' : '' }}>
+                        {{ $item ?? '' }}
+                    </option>
+                @endforeach
             </select>
         </div>
 

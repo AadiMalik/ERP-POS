@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\EmailProvider;
 use App\Enums\Message;
+use App\Enums\SMSProvider;
+use App\Enums\WhatsappProvider;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\AccountService;
 use App\Services\Concrete\Admin\BusinessService;
@@ -49,6 +52,9 @@ class SettingController extends Controller
         $fbr_setting = $this->setting_service->getFbrSetting(Auth::user()->business_id);
         $whatsapp_setting = $this->setting_service->getWhatsappSetting(Auth::user()->business_id);
         $timezones = $this->common_service->getAllTimezone();
+        $email_mailer = EmailProvider::getoptions();
+        $sms_provider = SMSProvider::getOptions();
+        $whatsapp_provider = WhatsappProvider::getOptions();
         return view('admin.setting.index', compact(
             'business',
             'accounts',
@@ -61,7 +67,10 @@ class SettingController extends Controller
             'sms_setting',
             'fbr_setting',
             'whatsapp_setting',
-            'timezones'
+            'timezones',
+            'email_mailer',
+            'sms_provider',
+            'whatsapp_provider'
         ));
     }
 
@@ -201,7 +210,8 @@ class SettingController extends Controller
     {
         $rules = [
             'enable_email_notifications' => 'required|boolean',
-
+            
+            'provider'           => 'required_if:enable_email_notifications,1|in:'.EmailProvider::SMTP.','.EmailProvider::SENDMAIL.','.EmailProvider::MAILGUN.',',
             'mail_mailer'        => 'required_if:enable_email_notifications,1',
             'mail_host'          => 'required_if:enable_email_notifications,1',
             'mail_port'          => 'required_if:enable_email_notifications,1|numeric',
@@ -231,21 +241,75 @@ class SettingController extends Controller
     public function updateSmsSetting(Request $request)
     {
         $rules = [
+
             'enable_sms' => 'required|boolean',
 
-            'provider'         => 'required_if:enable_sms,1',
-            'api_key'          => 'required_if:enable_sms,1',
-            'sender_id'        => 'required_if:enable_sms,1',
-            'username'         => 'nullable',
-            'password'         => 'nullable',
+            'provider' => 'required_if:enable_sms,1|in:'.SMSProvider::TWILIO.','.SMSProvider::INFOBIP.','.SMSProvider::BRANDSMS.','.SMSProvider::MSG91.','.SMSProvider::VONAGE.',',
+
+            // Common
+            'base_url' => 'nullable|string|max:255',
+            'api_key' => 'nullable|string',
+            'username' => 'nullable|string|max:255',
+            'password' => 'nullable|string',
+            'account_sid' => 'nullable|string|max:255',
+            'auth_token' => 'nullable|string',
+            'sender_id' => 'nullable|string|max:255',
+            'template_id' => 'nullable|string|max:255',
+            'entity_id' => 'nullable|string|max:255',
+            'flow_id' => 'nullable|string|max:255',
+
+            // Notification Settings
             'send_invoice_sms' => 'required_if:enable_sms,1|boolean',
-            'send_due_sms'     => 'required_if:enable_sms,1|boolean',
+            'send_due_sms' => 'required_if:enable_sms,1|boolean',
+
         ];
 
-        $validate = Validator::make($request->all(), $rules);
+        $validator = Validator::make($request->all(), $rules);
 
-        if ($validate->fails()) {
-            return $this->validationResponse($validate->errors()->first());
+        $validator->sometimes(
+            ['account_sid', 'auth_token', 'sender_id'],
+            'required',
+            function ($input) {
+                return $input->enable_sms && $input->provider == SMSProvider::TWILIO;
+            }
+        );
+
+        $validator->sometimes(
+            ['base_url', 'api_key', 'sender_id'],
+            'required',
+            function ($input) {
+                return $input->enable_sms && $input->provider == SMSProvider::INFOBIP;
+            }
+        );
+
+        $validator->sometimes(
+            ['base_url', 'username', 'password', 'sender_id'],
+            'required',
+            function ($input) {
+                return $input->enable_sms && $input->provider == SMSProvider::BRANDSMS;
+            }
+        );
+
+        $validator->sometimes(
+            ['api_key', 'sender_id', 'template_id', 'flow_id'],
+            'required',
+            function ($input) {
+                return $input->enable_sms && $input->provider == SMSProvider::MSG91;
+            }
+        );
+
+        $validator->sometimes(
+            ['api_key', 'password', 'sender_id'],
+            'required',
+            function ($input) {
+                return $input->enable_sms && $input->provider == SMSProvider::VONAGE;
+            }
+        );
+
+        if ($validator->fails()) {
+            return $this->validationResponse(
+                $validator->errors()->first()
+            );
         }
 
         $obj = $request->all();
@@ -263,7 +327,7 @@ class SettingController extends Controller
         $rules = [
             'enable_whatsapp' => 'required|boolean',
 
-            'provider'        => 'required_if:enable_whatsapp,1',
+            'provider'        => 'required_if:enable_whatsapp,1|in:'.WhatsappProvider::META.','.WhatsappProvider::TWILIO.','.WhatsappProvider::ULTRAMSG.','.WhatsappProvider::GREENAPI,
             'api_key'         => 'nullable',
             'access_token'    => 'nullable',
             'instance_id'     => 'nullable',

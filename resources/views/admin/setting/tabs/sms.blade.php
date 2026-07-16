@@ -2,88 +2,154 @@
     @csrf
 
     <div class="row">
-        <div class="col-md-12">
+
+        <div class="col-12">
             <h4>SMS Configuration</h4>
             <hr>
         </div>
 
+        {{-- Enable SMS --}}
         <div class="col-md-6 mb-3">
-            <label>Enable SMS Notifications</label>
+            <label>Enable SMS</label>
             <select class="form-select select2" name="enable_sms">
-                <option value="1" {{ $sms_setting->enable_sms == 1 ? 'selected' : '' }}>Yes</option>
-                <option value="0" {{ $sms_setting->enable_sms == 0 ? 'selected' : '' }}>No</option>
+                <option value="1" {{ $sms_setting->enable_sms ? 'selected' : '' }}>Yes</option>
+                <option value="0" {{ !$sms_setting->enable_sms ? 'selected' : '' }}>No</option>
             </select>
         </div>
 
+        {{-- Provider --}}
         <div class="col-md-6 mb-3">
-            <label>SMS Provider</label>
-            <select class="form-select select2 sms-config-field" name="provider">
+            <label>Provider</label>
+            <select class="form-select select2" id="sms_provider" name="provider">
                 <option value="">--Select Provider--</option>
-                <option value="twilio" {{ $sms_setting->provider == 'twilio' ? 'selected' : '' }}>Twilio</option>
-                <option value="vonage" {{ $sms_setting->provider == 'vonage' ? 'selected' : '' }}>Vonage (Nexmo)</option>
-                <option value="msg91" {{ $sms_setting->provider == 'msg91' ? 'selected' : '' }}>MSG91</option>
-                <option value="custom" {{ $sms_setting->provider == 'custom' ? 'selected' : '' }}>Custom API</option>
+                @foreach ($sms_provider as $value => $item)
+                    <option value="{{ $value }}" {{ $sms_setting->provider == $value ? 'selected' : '' }}>
+                        {{ $item ?? '' }}
+                    </option>
+                @endforeach
             </select>
         </div>
 
-        <div class="col-md-6 mb-3">
+        <div class="col-12">
+            <h5 class="mt-2">Connection</h5>
+            <hr>
+        </div>
+
+        {{-- Base URL --}}
+        <div class="col-md-6 mb-3 provider-field provider-infobip provider-brandsms">
+            <label>Base URL</label>
+            <input type="text" class="form-control" name="base_url" value="{{ $sms_setting->base_url }}">
+        </div>
+
+        {{-- API KEY --}}
+        <div class="col-md-6 mb-3 provider-field provider-infobip provider-msg91 provider-vonage">
             <label>API Key</label>
-            <input type="text"
-                class="form-control sms-config-field"
-                name="api_key"
-                value="{{ $sms_setting->api_key }}">
+            <input type="text" class="form-control" name="api_key" value="{{ $sms_setting->api_key }}">
         </div>
 
-        <div class="col-md-6 mb-3">
-            <label>Sender ID</label>
-            <input type="text"
-                class="form-control sms-config-field"
-                name="sender_id"
-                value="{{ $sms_setting->sender_id }}">
-        </div>
-
-        <div class="col-md-6 mb-3">
+        {{-- Username --}}
+        <div class="col-md-6 mb-3 provider-field provider-brandsms">
             <label>Username</label>
-            <input type="text"
-                class="form-control sms-config-field"
-                name="username"
-                value="{{ $sms_setting->username }}">
+            <input type="text" class="form-control" name="username" value="{{ $sms_setting->username }}">
         </div>
 
-        <div class="col-md-6 mb-3">
-            <label>Password</label>
-            <input type="password"
-                class="form-control sms-config-field"
-                name="password"
-                value="{{ $sms_setting->password }}">
+        {{-- Password --}}
+        <div class="col-md-6 mb-3 provider-field provider-brandsms provider-vonage">
+            <label>Password / API Secret</label>
+            <input type="password" class="form-control" name="password" value="{{ $sms_setting->password }}">
         </div>
 
-        <div class="col-md-6 mb-3">
-            <label>Send Invoice SMS</label>
-            <select class="form-select select2 sms-config-field" name="send_invoice_sms">
-                <option value="1" {{ $sms_setting->send_invoice_sms == 1 ? 'selected' : '' }}>Yes</option>
-                <option value="0" {{ $sms_setting->send_invoice_sms == 0 ? 'selected' : '' }}>No</option>
+        {{-- Account SID --}}
+        <div class="col-md-6 mb-3 provider-field provider-twilio">
+            <label>Account SID</label>
+            <input type="text" class="form-control" name="account_sid" value="{{ $sms_setting->account_sid }}">
+        </div>
+
+        {{-- Auth Token --}}
+        <div class="col-md-6 mb-3 provider-field provider-twilio">
+            <label>Auth Token</label>
+            <input type="password" class="form-control" name="auth_token" value="{{ $sms_setting->auth_token }}">
+        </div>
+
+        {{-- Sender --}}
+        <div
+            class="col-md-6 mb-3 provider-field provider-twilio provider-infobip provider-brandsms provider-msg91 provider-vonage">
+            <label>Sender ID</label>
+            <input type="text" class="form-control" name="sender_id" value="{{ $sms_setting->sender_id }}">
+        </div>
+
+        {{-- Template --}}
+        <div class="col-md-6 mb-3 provider-field provider-msg91">
+            <label>Template ID</label>
+            <input type="text" class="form-control" name="template_id" value="{{ $sms_setting->template_id }}">
+        </div>
+
+        {{-- Entity --}}
+        <div class="col-md-6 mb-3 provider-field provider-msg91">
+            <label>Entity ID</label>
+            <input type="text" class="form-control" name="entity_id" value="{{ $sms_setting->entity_id }}">
+        </div>
+
+        {{-- Flow --}}
+        <div class="col-md-6 mb-3 provider-field provider-msg91">
+            <label>Flow ID</label>
+            <input type="text" class="form-control" name="flow_id" value="{{ $sms_setting->flow_id }}">
+        </div>
+
+        <div class="col-12">
+            <h5 class="mt-2">Notifications</h5>
+            <hr>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label>Send OTP</label>
+            <select class="form-select select2" name="send_otp">
+                <option value="1" {{ $sms_setting->send_otp ? 'selected' : '' }}>Yes</option>
+                <option value="0" {{ !$sms_setting->send_otp ? 'selected' : '' }}>No</option>
+            </select>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label>Invoice SMS</label>
+            <select class="form-select select2" name="send_invoice_sms">
+                <option value="1" {{ $sms_setting->send_invoice_sms ? 'selected' : '' }}>Yes</option>
+                <option value="0" {{ !$sms_setting->send_invoice_sms ? 'selected' : '' }}>No</option>
+            </select>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label>Due Reminder SMS</label>
+            <select class="form-select select2" name="send_due_sms">
+                <option value="1" {{ $sms_setting->send_due_sms ? 'selected' : '' }}>Yes</option>
+                <option value="0" {{ !$sms_setting->send_due_sms ? 'selected' : '' }}>No</option>
             </select>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Send Due Reminder SMS</label>
-            <select class="form-select select2 sms-config-field" name="send_due_sms">
-                <option value="1" {{ $sms_setting->send_due_sms == 1 ? 'selected' : '' }}>Yes</option>
-                <option value="0" {{ $sms_setting->send_due_sms == 0 ? 'selected' : '' }}>No</option>
+            <label>Receipt SMS</label>
+            <select class="form-select select2" name="send_receipt_sms">
+                <option value="1" {{ $sms_setting->send_receipt_sms ? 'selected' : '' }}>Yes</option>
+                <option value="0" {{ !$sms_setting->send_receipt_sms ? 'selected' : '' }}>No</option>
             </select>
         </div>
 
-        <div class="col-md-12">
+        <div class="col-md-6 mb-3">
+            <label>Order Status SMS</label>
+            <select class="form-select select2" name="send_order_status_sms">
+                <option value="1" {{ $sms_setting->send_order_status_sms ? 'selected' : '' }}>Yes</option>
+                <option value="0" {{ !$sms_setting->send_order_status_sms ? 'selected' : '' }}>No</option>
+            </select>
+        </div>
+
+        <div class="col-12">
             <hr>
             <div class="text-end">
-                <button type="button"
-                    class="btn btn-primary"
+                <button type="button" class="btn btn-primary"
                     onclick="saveSetting('#smsSettingForm','{{ url('admin/setting/sms') }}')">
                     Save Changes
                 </button>
             </div>
         </div>
+
     </div>
 </form>
-

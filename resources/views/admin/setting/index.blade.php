@@ -198,6 +198,27 @@
         $(document).ready(function() {
             toggleSmsSettings();
         });
+
+        function loadSMSFields() {
+
+            $('.provider-field').hide();
+
+            let provider = $('#sms_provider').val();
+
+            $('.provider-' + provider).show();
+        }
+
+        $(document).ready(function() {
+
+            loadSMSFields();
+
+            $('#sms_provider').on('change', function() {
+
+                loadSMSFields();
+
+            });
+
+        });
     </script>
 
     {{-- Whatsapp setting js --}}
