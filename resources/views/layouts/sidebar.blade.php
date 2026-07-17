@@ -232,6 +232,11 @@
                     </a>
                 </li>
                 <li class="menu-item">
+                    <a href="{{ url('/admin/purchase-request-quotation') }}" class="menu-link">
+                        <div data-i18n="Purchase Request Quotations">Quotations</div>
+                    </a>
+                </li>
+                <li class="menu-item">
                     <a href="{{ url('/admin/purchase') }}" class="menu-link">
                         <div data-i18n="Purchases">Purchases</div>
                     </a>

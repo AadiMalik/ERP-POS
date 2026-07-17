@@ -41,10 +41,12 @@ class PurchaseRequestQuotationController extends Controller
         $this->supplier_service = $supplier_service;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $business = $this->business_service->getAll();
         $suppliers = $this->supplier_service->getAllActive();
+        $purchase_requests = $this->purchase_request_service->getAllApproved();
+        $purchase_request_id = $request->purchase_request_id ?? null;
         $statuses = [
             Status::SENT   => ucfirst(Status::SENT),
             Status::RECEIVED  => ucfirst(Status::RECEIVED),
@@ -52,7 +54,7 @@ class PurchaseRequestQuotationController extends Controller
             Status::REJECTED => ucfirst(Status::REJECTED),
         ];
 
-        return view('admin.purchase_request_quotation.index', compact('business', 'suppliers','statuses'));
+        return view('admin.purchase_request_quotation.index', compact('business', 'purchase_requests', 'purchase_request_id', 'suppliers', 'statuses'));
     }
     public function getData(Request $request)
     {
@@ -62,31 +64,46 @@ class PurchaseRequestQuotationController extends Controller
     public function create()
     {
         $business = $this->business_service->getAll();
-        $products = $this->product_service->getAllActive();
         $suppliers = $this->supplier_service->getAllActive();
+        $purchase_requests = $this->purchase_request_service->getAllApproved();
         $purchase_request_quotation_no = generateQuotationNo();
 
-        return view('admin.purchase_request_quotation.create', compact('business', 'products', 'suppliers', 'purchase_request_quotation_no'));
+        return view('admin.purchase_request_quotation.create', compact('business', 'suppliers', 'purchase_requests',  'purchase_request_quotation_no'));
     }
 
     public function edit($purchase_request_quotation_id)
     {
         $purchase_request_quotation = $this->purchase_request_quotation_service->getById($purchase_request_quotation_id);
         $business = $this->business_service->getAll();
-        $products = $this->product_service->getAllActive();
         $suppliers = $this->supplier_service->getAllActive();
+        $purchase_requests = $this->purchase_request_service->getAllApproved();
 
-        return view('admin.purchase_request_quotation.create', compact('purchase_request_quotation', 'business', 'products', 'suppliers'));
+        return view('admin.purchase_request_quotation.create', compact('purchase_request_quotation', 'business', 'purchase_requests', 'suppliers'));
     }
 
     public function store(Request $request)
     {
         $request->merge([
-            'sent_date' => ($request->purchase_request_quotation_id) ? utcDate($request->sent_date, true) : utcDate($request->sent_date),
             'received_date' => ($request->purchase_request_quotation_id) ? utcDate($request->received_date, true) : utcDate($request->received_date),
         ]);
         $validator = Validator::make($request->all(), [
             'supplier_id' => ['required', Rule::exists('suppliers', 'supplier_id')->where('is_deleted', 0)],
+            'purchase_request_id' => [
+                'required',
+                Rule::exists('purchase_requests', 'purchase_request_id')
+                    ->where('is_deleted', 0),
+
+                Rule::unique('purchase_request_quotations')
+                    ->where(function ($query) use ($request) {
+                        $query->where('purchase_request_id', $request->purchase_request_id)
+                            ->where('supplier_id', $request->supplier_id)
+                            ->where('is_deleted', 0);
+                    })
+                    ->ignore(
+                        $request->purchase_request_quotation_id,
+                        'purchase_request_quotation_id'
+                    ),
+            ],
             'purchase_request_quotation_no' => [
                 'required',
                 Rule::unique('purchase_request_quotations', 'purchase_request_quotation_no')
@@ -94,22 +111,11 @@ class PurchaseRequestQuotationController extends Controller
                     ->where('business_id', $request->business_id ?? Auth::user()->business_id)
                     ->ignore($request->purchase_request_quotation_id, 'purchase_request_quotation_id')
             ],
-            'sent_date' => ['required', 'date'],
-            'received_date' => ['required', 'date', 'after_or_equal:sent_date'],
             'products' => ['required', 'array', 'min:1'],
             'products.*.product_id' => ['required', Rule::exists('products', 'product_id')->where('is_deleted', 0)],
             'products.*.product_variation_id' => ['required', Rule::exists('product_variations', 'product_variation_id')->where('is_deleted', 0)],
             'products.*.unit_id' => ['required', Rule::exists('units', 'unit_id')->where('is_deleted', 0)],
-            'products.*.requested_quantity' => ['required', 'numeric', 'min:0.0001'],
-            'products.*.quoted_quantity' => ['required', 'numeric', 'min:0.0001'],
-            'products.*.unit_price' => ['required', 'numeric', 'min:0.0001'],
-            'products.*.discount' => ['required', 'numeric', 'min:0'],
-            'products.*.discount_amount' => ['required', 'numeric', 'min:0'],
-            'products.*.tax' => ['required', 'numeric', 'min:0'],
-            'products.*.tax_amount' => ['required', 'numeric', 'min:0'],
-            'products.*.subtotal' => ['required', 'numeric', 'min:0.0001'],
-            'products.*.total' => ['required', 'numeric', 'min:0.0001'],
-            'products.*.discription' => ['nullable'],
+            'products.*.requested_quantity' => ['required', 'numeric', 'min:0.0001']
         ]);
 
         if ($validator->fails()) {
@@ -120,9 +126,17 @@ class PurchaseRequestQuotationController extends Controller
             $obj = $request->all();
             $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
             $obj['branch_id'] = $request->branch_id ?? Auth::user()->branch_id ?? null;
-            $this->purchase_request_quotation_service->save($obj);
-            return redirect('admin/purchase-request-quotation')
-                ->with('success', empty($request->purchase_request_quotation_id) ? Message::SAVE : Message::UPDATE);
+            $obj['send_email'] = $request->send_email === 'on' ? 1 : 0;
+            $obj['send_sms'] = $request->send_sms  === 'on' ? 1 : 0;
+            $obj['send_whatsapp'] = $request->send_whatsapp  === 'on' ? 1 : 0;
+            $purchase_request_quotation = $this->purchase_request_quotation_service->save($obj);
+
+            if ($purchase_request_quotation['Status'] === true) {
+                return redirect('admin/purchase-request-quotation')
+                    ->with('success', empty($request->purchase_request_quotation_id) ? Message::SAVE : Message::UPDATE);
+            } else {
+                return redirect()->back()->with('error', $purchase_request_quotation['Message']);
+            }
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

@@ -29,6 +29,7 @@ class PurchaseRequestQuotation extends Model
         'tax_amount',
         'discount_amount',
         'subtotal',
+        'other_charge',
         'total',
         'pdf_file',
         'is_deleted',
