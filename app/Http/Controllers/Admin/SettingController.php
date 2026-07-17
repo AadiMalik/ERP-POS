@@ -211,8 +211,7 @@ class SettingController extends Controller
         $rules = [
             'enable_email_notifications' => 'required|boolean',
             
-            'provider'           => 'required_if:enable_email_notifications,1|in:'.EmailProvider::SMTP.','.EmailProvider::SENDMAIL.','.EmailProvider::MAILGUN.',',
-            'mail_mailer'        => 'required_if:enable_email_notifications,1',
+            'mail_mailer'        => 'required_if:enable_email_notifications,1|in:'.EmailProvider::SMTP.','.EmailProvider::SENDMAIL.','.EmailProvider::MAILGUN.',',
             'mail_host'          => 'required_if:enable_email_notifications,1',
             'mail_port'          => 'required_if:enable_email_notifications,1|numeric',
             'mail_username'      => 'required_if:enable_email_notifications,1',

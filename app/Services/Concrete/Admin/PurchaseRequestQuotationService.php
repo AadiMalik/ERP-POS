@@ -8,16 +8,28 @@ use App\Enums\Status;
 use App\Models\PurchaseRequestQuotation;
 use App\Models\PurchaseRequestQuotationDetail;
 use App\Repository\Repository;
+use App\Services\Concrete\Email\DTO\EmailData;
+use App\Services\Concrete\Email\EmailService;
+use App\Services\Concrete\SMS\DTO\SMSData;
+use App\Services\Concrete\SMS\SMSService;
+use App\Services\Concrete\Whatsapp\DTO\WhatsappData;
+use App\Services\Concrete\Whatsapp\WhatsappService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
 
 class PurchaseRequestQuotationService
 {
     protected $model_purchase_request_quotation;
     protected $model_purchase_request_quotation_details;
+    protected $email_service;
+    protected $whatsapp_service;
+    protected $sms_service;
     protected $with = [
         'business',
         'branch',
@@ -33,6 +45,9 @@ class PurchaseRequestQuotationService
     {
         $this->model_purchase_request_quotation = new Repository(new PurchaseRequestQuotation());
         $this->model_purchase_request_quotation_details = new Repository(new PurchaseRequestQuotationDetail());
+        $this->email_service = new EmailService();
+        $this->whatsapp_service = new WhatsappService();
+        $this->sms_service = new SMSService();
     }
 
     public function getData($obj)
@@ -85,13 +100,13 @@ class PurchaseRequestQuotationService
                     : 'N/A';
             })
             ->addColumn('received_date', function ($item) {
-                  return !empty($item->received_date)
-                      ? localDate($item->received_date)
-                      : 'N/A';
-              })
+                return !empty($item->received_date)
+                    ? localDate($item->received_date)
+                    : 'N/A';
+            })
             ->addColumn('purchase_request', function ($item) {
-                  return $item->purchaseRequest->purchase_request_no ?? 'N/A';
-              })
+                return $item->purchaseRequest->purchase_request_no ?? 'N/A';
+            })
             ->addColumn('supplier', function ($item) {
                 return $item->supplier->code ?? '' . ' ' . $item->supplier->name ?? '';
             })
@@ -149,7 +164,7 @@ class PurchaseRequestQuotationService
                     </a>
                 ";
             })
-            ->rawColumns(['sent_date','received_date', 'business', 'branch', 'warehouse', 'supplier', 'total_products', 'total',  'status', 'action'])
+            ->rawColumns(['sent_date', 'received_date', 'business', 'branch', 'warehouse', 'supplier', 'total_products', 'total',  'status', 'action'])
             ->make(true);
     }
 
@@ -169,14 +184,17 @@ class PurchaseRequestQuotationService
                     ->getModel()::findOrFail($obj['purchase_request_quotation_id']);
 
                 $purchase_request_quotation->update([
-                    'business_id'            => $obj['business_id'],
-                    'supplier_id'            => $obj['supplier_id'],
-                    'sent_date'              => $obj['sent_date'],
-                    'received_date'          => $obj['received_date'],
-                    'description'            => $obj['description'],
-                    'status'                 => status::SENT,
-                    'updatedby_id'           => Auth::user()->id,
-                    'date_updated'           => now(),
+                    'business_id'               => $obj['business_id'],
+                    'supplier_id'               => $obj['supplier_id'],
+                    'received_date'             => $obj['received_date'],
+                    'description'               => $obj['description'],
+                    'subtotal'                  => $obj['subtotal'],
+                    'discount_amount'           => $obj['discount_amount'],
+                    'tax_amount'                => $obj['tax_amount'],
+                    'total'                     => $obj['total'],
+                    'status'                    => status::SENT,
+                    'updatedby_id'              => Auth::user()->id,
+                    'date_updated'              => now(),
                 ]);
 
                 // Remove previous items
@@ -196,9 +214,13 @@ class PurchaseRequestQuotationService
                     'business_id'                           => $obj['business_id'],
                     'supplier_id'                           => $obj['supplier_id'],
                     'purchase_request_quotation_no'         => $obj['purchase_request_quotation_no'],
-                    'sent_date'                             => $obj['sent_date'],
+                    'sent_date'                             => now(),
                     'received_date'                         => $obj['received_date'],
                     'description'                           => $obj['description'],
+                    'subtotal'                              => $obj['subtotal'],
+                    'discount_amount'                       => $obj['discount_amount'],
+                    'tax_amount'                            => $obj['tax_amount'],
+                    'total'                                 => $obj['total'],
                     'status'                                => status::SENT,
                     'createdby_id'                          => Auth::user()->id,
                     'date_created'                          => now(),
@@ -213,8 +235,8 @@ class PurchaseRequestQuotationService
 
                 $this->model_purchase_request_quotation_details->create([
 
-                    'purchase_request_quotation_detail_id'              => generateUuid(),
-                    'purchase_request_quotation_id'                     => $purchase_request_quotation->purchase_request_quotation_id,
+                    'purchase_request_quotation_detail_id'  => generateUuid(),
+                    'purchase_request_quotation_id'         => $purchase_request_quotation->purchase_request_quotation_id,
                     'product_id'                            => $product['product_id'],
                     'product_variation_id'                  => $product['product_variation_id'],
                     'unit_id'                               => $product['unit_id'],
@@ -232,9 +254,151 @@ class PurchaseRequestQuotationService
                 ]);
             }
 
+            //pdf generate
+            $quotation = $this->model_purchase_request_quotation
+                ->getModel()::with([
+                    'supplier',
+                    'business',
+                    'createdby',
+                    'purchaseRequestQuotationDetails.product',
+                    'purchaseRequestQuotationDetails.productVariation',
+                    'purchaseRequestQuotationDetails.unit'
+                ])
+                ->find($purchase_request_quotation->purchase_request_quotation_id);
+
+            $pdf = Pdf::loadView(
+                'admin.purchase_request_quotation.pdf.pdf',
+                compact('quotation')
+            );
+
+            $fileName = 'quotation_' . $quotation->purchase_request_quotation_no . '.pdf';
+
+            $folder = public_path('uploads/quotations');
+
+            if (!File::exists($folder)) {
+                File::makeDirectory($folder, 0755, true);
+            }
+            $path = $folder . '/' . $fileName;
+            $pdf->save($path);
+
+            $purchase_request_quotation->update([
+                'pdf_path' => $fileName
+            ]);
+
+            if ($obj['send_email'] === 1) {
+                $email = new EmailData([
+                    'to' => $quotation->supplier->email,
+                    'subject' => 'Purchase Request Quotation',
+                    'body' => 'Please find attached quotation.',
+                    'attachment' => public_path('uploads/quotations/' . $fileName),
+                    'attachment_name' => 'Quotation.pdf'
+                ]);
+
+                $response = $this->email_service->send(
+                    $purchase_request_quotation->business_id,
+                    $email
+                );
+
+                if (!$response['status']) {
+
+                    Log::error($response['message']);
+                    DB::rollBack();
+                    return [
+                        'Status' => false,
+                        'Message' => $response['message']
+                    ];
+                }
+            }
+
+            if ($obj['send_whatsapp'] === 1) {
+                $whatsapp = new WhatsappData([
+
+                    'phone' => $quotation->supplier->phone,
+
+                    'message' => 'Please review attached quotation.',
+
+                    'attachment' => public_path('uploads/quotations/' . $fileName),
+
+                    'file_name' => 'Quotation.pdf'
+
+                ]);
+
+                $response = $this->whatsapp_service->send(
+
+                    $quotation->business_id,
+
+                    $whatsapp
+
+                );
+
+                if (!$response['status']) {
+
+                    Log::error($response['message']);
+                    DB::rollBack();
+                    return [
+                        'Status' => false,
+                        'Message' => $response['message']
+                    ];
+                }
+            }
+
+            if ($obj['send_sms'] === 1) {
+                $productLines = [];
+
+                foreach ($quotation->purchaseRequestQuotationDetails as $index => $item) {
+
+                    if ($index == 2) {
+                        break;
+                    }
+
+                    $product = $item->product?->name ?? '';
+
+                    $variation = $item->productVariation?->name;
+
+                    if (!empty($variation)) {
+                        $product .= " ({$variation})";
+                    }
+
+                    $product .= " x{$item->requested_quantity}";
+
+                    $productLines[] = $product;
+                }
+
+                $remaining = count($quotation->purchaseRequestQuotationDetails) - count($productLines);
+
+                $message = "Quotation Request\n";
+                $message .= "Business: {$quotation->business->name}\n";
+                $message .= "Quotation: {$quotation->purchase_request_quotation_no}\n";
+                $message .= implode(", ", $productLines);
+
+                if ($remaining > 0) {
+                    $message .= " +{$remaining} more";
+                }
+                $message .= "\n";
+                $message .= $quotation->pdf_url;
+
+                $sms = new SMSData([
+                    'phone'   => $quotation->supplier->phone,
+                    'message' => $message
+                ]);
+
+                $response = $this->sms_service->send(
+                    $quotation->business_id,
+                    $sms
+                );
+
+                if (!$response['status']) {
+
+                    Log::error($response['message']);
+                }
+            }
+
             DB::commit();
 
-            return true;
+            return [
+                'Status' => true,
+                'Message' => null
+            ];
         } catch (Exception $e) {
 
             DB::rollBack();

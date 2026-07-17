@@ -183,9 +183,8 @@ function generateQuotationNo($business_id = null)
     $next_number = 1;
 
     if ($purchase_request_quaotation) {
-        $next_number = (int) substr($purchase_request_quaotation->purchase_request_quaotation_no, strrpos($purchase_request_quaotation->purchase_request_quaotation_no, '-') + 1) + 1;
+        $next_number = (int) substr($purchase_request_quaotation->purchase_request_quotation_no, strrpos($purchase_request_quaotation->purchase_request_quotation_no, '-') + 1) + 1;
     }
-
     return sprintf(
         'PRQ-%04d',
         $next_number
