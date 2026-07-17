@@ -23,20 +23,32 @@ class CommonMail extends Mailable
 
     public function build()
     {
-        $mail = $this
-            ->subject($this->email->subject)
-            ->view('emails.common')
-            ->with([
-                'body' => $this->email->body
-            ]);
-        if ($this->email->attachment) {
+        $mail = $this->subject($this->email->subject);
+
+        // Blade View
+        if (!empty($this->email->view)) {
+
+            $mail->view(
+                $this->email->view,
+                $this->email->data
+            );
+        }
+        // HTML Body
+        elseif (!empty($this->email->body)) {
+
+            $mail->html($this->email->body);
+        }
+
+        if (!empty($this->email->attachment)) {
+
             $mail->attach(
                 $this->email->attachment,
                 [
-                    'as' => $this->email->attachmentName
+                    'as' => $this->email->attachment_name
                 ]
             );
         }
+
         return $mail;
     }
 }

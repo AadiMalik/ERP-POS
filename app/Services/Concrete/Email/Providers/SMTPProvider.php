@@ -15,6 +15,7 @@ class SMTPProvider implements EmailProviderInterface
 {
 
     protected $setting;
+    
 
     public function __construct($setting)
     {
