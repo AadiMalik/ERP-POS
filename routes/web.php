@@ -234,7 +234,8 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::post('change-status', [App\Http\Controllers\Admin\PurchaseRequestQuotationController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\PurchaseRequestQuotationController::class, 'byBusiness']);
 
-        Route::get('details/{purchase_request_id}', [App\Http\Controllers\Admin\PurchaseRequestQuotationController::class, 'details']);
+        Route::get('details/{purchase_request_quotation_id}', [App\Http\Controllers\Admin\PurchaseRequestQuotationController::class, 'details']);
+        Route::get('detail-received/{purchase_request_id}', [App\Http\Controllers\Admin\PurchaseRequestQuotationController::class, 'getRecievedQuotationByPRId']);
     });
 
     //purchase

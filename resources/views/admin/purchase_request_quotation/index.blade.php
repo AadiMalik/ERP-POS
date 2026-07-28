@@ -141,7 +141,7 @@ use App\Enums\RoleNames;
         //status
         $(document).on('change', '.change-status', function() {
 
-            let purchase_request_id = $(this).data('id');
+            let purchase_request_quotation_id = $(this).data('id');
             let status = $(this).val();
             let select = $(this);
 

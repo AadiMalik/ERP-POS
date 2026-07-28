@@ -452,34 +452,45 @@ class PurchaseRequestQuotationService
     public function getDetails($purchase_request_quotation_id)
     {
         try {
-            $purchase_request_quotation = $this->model_purchase_request_quotation->getModel()::with($this->with)->findOrFail($purchase_request_quotation_id);
+            $purchase_request_quotation = $this->model_purchase_request_quotation->getModel()::with($this->with)
+                ->findOrFail($purchase_request_quotation_id);
 
             $data = [
                 'header' => [
                     'purchase_request_quotation_id' => $purchase_request_quotation->purchase_request_quotation_id,
+                    'purchase_request_id' => $purchase_request_quotation->purchase_request_id,
                     'supplier_id' => $purchase_request_quotation->supplier_id,
+                    'supplier_reference_no' => $purchase_request_quotation->supplier_reference_no,
                     'business_id' => $purchase_request_quotation->business_id,
                     'branch_id' => $purchase_request_quotation->branch_id,
                     'purchase_request_quotation_no' => $purchase_request_quotation->purchase_request_quotation_no,
-                    'purchase_request_quotation_date' => localDate($purchase_request_quotation->purchase_request_quotation_date),
-                    'purchase_expected_date' => localDate($purchase_request_quotation->purchase_expected_date),
+                    'sent_date' => localDate($purchase_request_quotation->sent_date),
+                    'received_date' => localDate($purchase_request_quotation->received_date),
                     'description' => $purchase_request_quotation->description,
+                    'subtotal' => decimal($purchase_request_quotation->subtotal),
+                    'discount' => decimal($purchase_request_quotation->discount),
+                    'discount_amount' => decimal($purchase_request_quotation->discount_amount),
+                    'tax' => decimal($purchase_request_quotation->tax),
+                    'tax_amount' => decimal($purchase_request_quotation->tax_amount),
+                    'other_charge' => decimal($purchase_request_quotation->other_charge),
+                    'total' => decimal($purchase_request_quotation->total),
                 ],
                 'details' => []
             ];
 
             foreach ($purchase_request_quotation->purchaseRequestQuotationDetails as $detail) {
-                $productVariations = [];
-
-                foreach ($detail->product->productVariations as $variation) {
-
-                    $productVariations[] = [
-                        'product_variation_id' => $variation->product_variation_id,
-                        'name' => $variation->name,
-                        'purchase_price' => $variation->purchase_price,
-                        'unit_id' => optional($variation->purchase_unit)->unit_id,
-                        'unit_name' => optional($variation->purchase_unit)->name,
-                    ];
+                $conversions = [];
+                if ($detail->productVariation) {
+                    foreach ($detail->productVariation->productVariationUnitConversion as $conversion) {
+                        $conversions[] = [
+                            'product_variation_unit_conversion_id' => $conversion->product_variation_unit_conversion_id,
+                            'from_unit_id' => $conversion->from_unit_id,
+                            'from_unit_name' => $conversion->fromUnit->name ?? 'N/A',
+                            'to_unit_id' => $conversion->to_unit_id,
+                            'to_unit_name' => $conversion->toUnit->name ?? 'N/A',
+                            'conversion_factor' => $conversion->conversion_factor,
+                        ];
+                    }
                 }
 
                 $data['details'][] = [
@@ -500,7 +511,79 @@ class PurchaseRequestQuotationService
                     'tax_amount' => $detail->tax_amount,
                     'subtotal' => $detail->subtotal,
                     'total' => $detail->total,
-                    'productVariations' => $productVariations
+                    'conversions' => $conversions
+                ];
+            }
+
+            return $data;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+    public function getRecievedQuotationByPRId($purchase_request_id)
+    {
+        try {
+            $purchase_request_quotation = $this->model_purchase_request_quotation->getModel()::with($this->with)
+                ->where('purchase_request_id', $purchase_request_id)->where('status', Status::RECEIVED)->first();
+            if ($purchase_request_quotation == null) {
+                return [];
+            }
+            $data = [
+                'header' => [
+                    'purchase_request_quotation_id' => $purchase_request_quotation->purchase_request_quotation_id,
+                    'purchase_request_id' => $purchase_request_quotation->purchase_request_id,
+                    'supplier_id' => $purchase_request_quotation->supplier_id,
+                    'supplier_reference_no' => $purchase_request_quotation->supplier_reference_no,
+                    'business_id' => $purchase_request_quotation->business_id,
+                    'branch_id' => $purchase_request_quotation->branch_id,
+                    'purchase_request_quotation_no' => $purchase_request_quotation->purchase_request_quotation_no,
+                    'sent_date' => localDate($purchase_request_quotation->sent_date),
+                    'received_date' => localDate($purchase_request_quotation->received_date),
+                    'description' => $purchase_request_quotation->description,
+                    'subtotal' => decimal($purchase_request_quotation->subtotal),
+                    'discount' => decimal($purchase_request_quotation->discount),
+                    'discount_amount' => decimal($purchase_request_quotation->discount_amount),
+                    'tax' => decimal($purchase_request_quotation->tax),
+                    'tax_amount' => decimal($purchase_request_quotation->tax_amount),
+                    'other_charge' => decimal($purchase_request_quotation->other_charge),
+                    'total' => decimal($purchase_request_quotation->total),
+                ],
+                'details' => []
+            ];
+
+            foreach ($purchase_request_quotation->purchaseRequestQuotationDetails as $detail) {
+                $conversions = [];
+                if ($detail->productVariation) {
+                    foreach ($detail->productVariation->productVariationUnitConversion as $conversion) {
+                        $conversions[] = [
+                            'product_variation_unit_conversion_id' => $conversion->product_variation_unit_conversion_id,
+                            'from_unit_id' => $conversion->from_unit_id,
+                            'from_unit_name' => $conversion->fromUnit->name ?? 'N/A',
+                            'to_unit_id' => $conversion->to_unit_id,
+                            'to_unit_name' => $conversion->toUnit->name ?? 'N/A',
+                            'conversion_factor' => $conversion->conversion_factor,
+                        ];
+                    }
+                }
+                $data['details'][] = [
+                    'purchase_request_quotation_detail_id' => $detail->purchase_request_quotation_detail_id,
+                    'purchase_request_quotation_id' => $detail->purchase_request_quotation_id,
+                    'product_id' => $detail->product_id,
+                    'product_name' => $detail->product->name ?? '',
+                    'product_variation_id' => $detail->product_variation_id,
+                    'product_variation_name' => $detail->productVariation->name ?? '',
+                    'requested_quantity' => $detail->requested_quantity,
+                    'quoted_quantity' => $detail->quoted_quantity,
+                    'unit_id' => $detail->unit_id,
+                    'unit_name' => $detail->unit->name ?? 'N/A',
+                    'unit_price' => decimal($detail->unit_price),
+                    'discount' => decimal($detail->discount),
+                    'discount_amount' => decimal($detail->discount_amount),
+                    'tax' => decimal($detail->tax),
+                    'tax_amount' => decimal($detail->tax_amount),
+                    'subtotal' => decimal($detail->subtotal),
+                    'total' => decimal($detail->total),
+                    'conversions' => $conversions
                 ];
             }
 

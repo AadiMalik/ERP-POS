@@ -195,6 +195,18 @@ class PurchaseRequestQuotationController extends Controller
         }
     }
 
+    public function getRecievedQuotationByPRId($purchase_request_id)
+    {
+        try {
+            $purchase_request_quotation = $this->purchase_request_quotation_service->getRecievedQuotationByPRId($purchase_request_id);
+            return $this->success(Message::SUCCESS, $purchase_request_quotation);
+        } catch (Exception $e) {
+            return $this->error(
+                $e->getMessage()
+            );
+        }
+    }
+
     public function byBusiness($business_id)
     {
         try {
