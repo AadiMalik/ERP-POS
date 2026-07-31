@@ -98,10 +98,17 @@ class PurchaseController extends Controller
 
     public function store(Request $request)
     {
-        $request->merge([
-            'purchase_date' => ($request->purchase_id) ? utcDate($request->purchase_date, true) : utcDate($request->purchase_date),
-            'expected_delivery_date' => ($request->purchase_id) ? utcDate($request->expected_delivery_date, true) : utcDate($request->expected_delivery_date),
-        ]);
+        // Conversion is optional; the form posts an empty string when none is
+        // selected, so normalize it to null before validation runs the
+        // "exists" check on product_variation_unit_conversion_id.
+        $products = $request->input('products', []);
+        foreach ($products as $index => $product) {
+            if (($product['product_variation_unit_conversion_id'] ?? '') === '') {
+                $products[$index]['product_variation_unit_conversion_id'] = null;
+            }
+        }
+        $request->merge(['products' => $products]);
+
         $validator = Validator::make($request->all(), [
             'supplier_id' => ['required', Rule::exists('suppliers', 'supplier_id')->where('is_deleted', 0)],
             'warehouse_id' => ['required', Rule::exists('warehouses', 'warehouse_id')->where('is_deleted', 0)],
@@ -115,16 +122,16 @@ class PurchaseController extends Controller
             'purchase_date' => ['required', 'date'],
             'expected_delivery_date' => ['required', 'date'],
             'subtotal' => ['required', 'numeric', 'min:0'],
-            'discount' => ['required', 'numeric', 'min:0'],
+            'discount' => ['nullable', 'numeric', 'min:0'],
             'discount_amount' => ['required', 'numeric', 'min:0'],
-            'tax' => ['required', 'numeric', 'min:0'],
+            'tax' => ['nullable', 'numeric', 'min:0'],
             'tax_amount' => ['required', 'numeric', 'min:0'],
             'shipping_charge' => ['required', 'numeric', 'min:0'],
             'total' => ['required', 'numeric', 'min:0'],
             'products' => ['required', 'array', 'min:1'],
             'products.*.product_id' => ['required', Rule::exists('products', 'product_id')->where('is_deleted', 0)],
             'products.*.product_variation_id' => ['required', Rule::exists('product_variations', 'product_variation_id')->where('is_deleted', 0)],
-            'products.*.product_variation_unit_conversion_id' => ['required', Rule::exists('product_variation_unit_conversions', 'product_variation_unit_conversion_id')->where('is_deleted', 0)],
+            'products.*.product_variation_unit_conversion_id' => ['nullable', Rule::exists('product_variation_unit_conversions', 'product_variation_unit_conversion_id')->where('is_deleted', 0)],
             'products.*.unit_id' => ['required', Rule::exists('units', 'unit_id')->where('is_deleted', 0)],
             'products.*.ordered_quantity' => ['required', 'numeric', 'min:0.0001'],
             'products.*.conversion_factor' => ['required', 'numeric', 'min:0.0001'],
@@ -143,12 +150,15 @@ class PurchaseController extends Controller
 
         try {
             $obj = $request->all();
+            $obj['purchase_date'] = ($request->purchase_id) ? utcDate($request->purchase_date, true) : utcDate($request->purchase_date);
+            $obj['expected_delivery_date'] = ($request->purchase_id) ? utcDate($request->expected_delivery_date, true) : utcDate($request->expected_delivery_date);
             $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
             $obj['branch_id'] = $request->branch_id ?? Auth::user()->branch_id ?? null;
             $this->purchase_service->save($obj);
             return redirect('admin/purchase')
                 ->with('success', empty($request->purchase_id) ? Message::SAVE : Message::UPDATE);
         } catch (Exception $e) {
+            dd($e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

@@ -83,9 +83,6 @@ class PurchaseRequestQuotationController extends Controller
 
     public function store(Request $request)
     {
-        $request->merge([
-            'received_date' => ($request->purchase_request_quotation_id) ? utcDate($request->received_date, true) : utcDate($request->received_date),
-        ]);
         $validator = Validator::make($request->all(), [
             'supplier_id' => ['required', Rule::exists('suppliers', 'supplier_id')->where('is_deleted', 0)],
             'purchase_request_id' => [
@@ -124,6 +121,7 @@ class PurchaseRequestQuotationController extends Controller
 
         try {
             $obj = $request->all();
+            $obj['received_date'] = ($request->purchase_request_quotation_id) ? utcDate($request->received_date, true) : utcDate($request->received_date);
             $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
             $obj['branch_id'] = $request->branch_id ?? Auth::user()->branch_id ?? null;
             $obj['send_email'] = $request->send_email === 'on' ? 1 : 0;

@@ -502,6 +502,7 @@ class PurchaseRequestQuotationService
                     'product_variation_name' => $detail->productVariation->name ?? '',
                     'requested_quantity' => $detail->requested_quantity,
                     'quoted_quantity' => $detail->quoted_quantity,
+                    'ordered_quantity' => $detail->quoted_quantity,
                     'unit_id' => $detail->unit_id,
                     'unit_name' => $detail->unit->name ?? 'N/A',
                     'unit_price' => $detail->unit_price,

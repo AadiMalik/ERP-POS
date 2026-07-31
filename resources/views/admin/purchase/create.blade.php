@@ -68,6 +68,15 @@
                                     value="{{ $purchase->purchase_request_id }}">
                             @endif
                         </div>
+                        <div class="col-md-3 mb-3 purchase-request-area">
+                            <label>
+                                Quotation<span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" id="purchase_request_quotation_id"
+                                {{ isset($purchase) && $purchase->purchase_type == 'purchase_request' ? 'disabled' : '' }}>
+                                <option value="">--Select Quotation--</option>
+                            </select>
+                        </div>
                         <div class="col-md-3 mb-3">
                             <label>
                                 Supplier<span class="text-danger">*</span>
@@ -98,7 +107,7 @@
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>PO Number</label>
-                            <input type="text" class="form-control" readonly
+                            <input type="text" class="form-control" name="purchase_no" readonly
                                 value="{{ $purchase->purchase_no ?? ($purchase_no ?? 'Auto Generated') }}">
                         </div>
                         <div class="col-md-3 mb-3">
@@ -296,9 +305,26 @@
         function bindPurchaseType() {
             $(document).on('change', '#purchase_type', function() {
                 purchaseType = $(this).val();
+                resetPurchaseForm();
                 togglePurchaseTypeUI();
             });
 
+        }
+
+        // ======================================================
+        // RESET FORM ON PURCHASE TYPE CHANGE
+        // ======================================================
+
+        function resetPurchaseForm() {
+            productIndex = 0;
+
+            // Clear Purchase Request -> cascades to clear Quotation,
+            // remove all product rows and reset subtotal/discount/tax
+            $('#purchase_request_id').val(null).trigger('change');
+
+            // Reset shipping charge and refresh the grand total
+            $('#shipping_charge').val(decimal(0));
+            applyFooterCalculations();
         }
 
         // ======================================================
@@ -402,6 +428,10 @@
             </span>
         </td>
         <td>
+            <input
+                type="hidden"
+                class="quoted-qty"
+                value="${data.quoted_quantity ?? data.ordered_quantity ?? 0}">
             <input
                 type="text"
                 class="form-control ordered-qty"
@@ -912,32 +942,124 @@
 
         $(document).on('change', '#purchase_request_id', function() {
             let purchase_request_id = $(this).val();
-            $('#productRows').html('');
+            resetQuotationSelect();
+            showSelectPurchaseRequestRow();
+            $('#shipping_charge').val(decimal(0));
+            calculateGrandTotal();
             if (!purchase_request_id) {
-                $('#productRows').html(`
+                return;
+            }
+            loadQuotationsByPurchaseRequest(purchase_request_id);
+
+        });
+
+        // ======================================================
+        // RESET QUOTATION SELECT
+        // ======================================================
+
+        function resetQuotationSelect() {
+            $('#purchase_request_quotation_id')
+                .html('<option value="">--Select Quotation--</option>');
+        }
+
+        // ======================================================
+        // PLACEHOLDER ROWS
+        // ======================================================
+
+        function showSelectPurchaseRequestRow() {
+            $('#productRows').html(`
         <tr id="emptyRow">
             <td colspan="14" class="text-center text-muted">
                 Select Purchase Request
             </td>
         </tr>
     `);
-                calculateGrandTotal();
+        }
 
+        function showSelectQuotationRow() {
+            $('#productRows').html(`
+        <tr id="emptyRow">
+            <td colspan="14" class="text-center text-muted">
+                Select Quotation
+            </td>
+        </tr>
+    `);
+        }
+
+        // ======================================================
+        // LOAD QUOTATIONS FOR PURCHASE REQUEST
+        // ======================================================
+
+        function loadQuotationsByPurchaseRequest(purchase_request_id) {
+            $.ajax({
+                url: url_local +
+                    '/admin/purchase-request-quotation/selected-by-purchase-request/' +
+                    purchase_request_id,
+                type: 'GET',
+                dataType: 'json',
+                beforeSend: function() {
+                    $('#purchase_request_quotation_id')
+                        .prop('disabled', true)
+                        .html('<option>Loading...</option>');
+                },
+                success: function(response) {
+                    let html = '<option value="">--Select Quotation--</option>';
+                    if (response.Success && response.Data.length) {
+                        $.each(response.Data, function(_, quotation) {
+                            html += `
+                    <option value="${quotation.purchase_request_quotation_id}">
+                        ${quotation.purchase_request_quotation_no} - ${quotation.supplier?.name ?? ''}
+                    </option>
+                `;
+                        });
+                    } else {
+                        $('#productRows').html(`
+            <tr>
+                <td colspan="14" class="text-center">
+                    No approved quotation found for this purchase request.
+                </td>
+            </tr>
+        `);
+                    }
+                    $('#purchase_request_quotation_id')
+                        .html(html)
+                        .prop('disabled', false);
+                    if (response.Success && response.Data.length) {
+                        showSelectQuotationRow();
+                    }
+                },
+                error: function() {
+                    $('#purchase_request_quotation_id')
+                        .html('<option value="">--Select Quotation--</option>')
+                        .prop('disabled', false);
+                    errorMessage('Unable to load quotations.');
+                }
+            });
+        }
+
+        // ======================================================
+        // QUOTATION CHANGE
+        // ======================================================
+
+        $(document).on('change', '#purchase_request_quotation_id', function() {
+            let purchase_request_quotation_id = $(this).val();
+            if (!purchase_request_quotation_id) {
+                showSelectQuotationRow();
+                calculateGrandTotal();
                 return;
             }
-            loadPurchaseRequestQuotation(purchase_request_id);
-
+            loadPurchaseRequestQuotationDetails(purchase_request_quotation_id);
         });
 
         // ======================================================
-        // LOAD PURCHASE REQUEST QUOTATION
+        // LOAD SELECTED QUOTATION DETAILS
         // ======================================================
 
-        function loadPurchaseRequestQuotation(purchase_request_id) {
+        function loadPurchaseRequestQuotationDetails(purchase_request_quotation_id) {
             $.ajax({
                 url: url_local +
-                    '/admin/purchase-request-quotation/detail-received/' +
-                    purchase_request_id,
+                    '/admin/purchase-request-quotation/details/' +
+                    purchase_request_quotation_id,
                 type: 'GET',
                 dataType: 'json',
                 beforeSend: function() {
@@ -955,16 +1077,6 @@
                 success: function(response) {
                     if (!response.Success) {
                         errorMessage(response.Message);
-                        return;
-                    }
-                    if (!response.Data || response.Data.length === 0) {
-                        $('#productRows').html(`
-            <tr>
-                <td colspan="14" class="text-center">
-                    No approved quatation found
-                </td>
-            </tr>
-        `);
                         return;
                     }
                     bindPurchaseRequestHeader(response.Data.header);
@@ -994,6 +1106,10 @@
                 $('textarea[name="description"]')
                     .val(header.description);
             }
+
+            // Quotation's Other Charges populates Shipping Charges,
+            // staying editable afterwards.
+            $('#shipping_charge').val(decimal(header.other_charge ?? 0));
         }
 
         // ======================================================
@@ -1014,6 +1130,7 @@
         </tr>
     `);
 
+                calculateGrandTotal();
                 return;
             }
             $.each(details, function(_, item) {
@@ -1032,6 +1149,7 @@
                 product_variation_id: item.product_variation_id,
                 purchase_request_detail_id: item.purchase_request_detail_id,
                 ordered_quantity: decimal(item.ordered_quantity),
+                quoted_quantity: decimal(item.quoted_quantity ?? item.ordered_quantity),
                 received_quantity: decimal(0),
                 unit_price: decimal(item.unit_price),
                 subtotal: decimal(item.subtotal),
@@ -1053,21 +1171,20 @@
                     ${item.product_name}
                 </option>
             `);
-            row.find('.product-select').prop('disabled', true);
+            // Disabled selects are not posted by the browser, so add a
+            // hidden field carrying the same name to keep the value submitted.
+            row.find('.product-select')
+                .prop('disabled', true)
+                .after(`<input type="hidden" name="${row.find('.product-select').attr('name')}" value="${item.product_id}">`);
             // Variation
-            let variation = `
-                <option
-                    value="${item.product_variation_id}"
-                    selected>
-                    ${item.product_variation_name}
-                </option>
-            `;
             row.find('.variation-select').html(`
             <option value="${item.product_variation_id}" selected>
                 ${item.product_variation_name}
             </option>
             `);
-            row.find('.variation-select').prop('disabled', true);
+            row.find('.variation-select')
+                .prop('disabled', true)
+                .after(`<input type="hidden" name="${row.find('.variation-select').attr('name')}" value="${item.product_variation_id}">`);
             // Conversion
             let conversionOptions =
                 `<option value="">--Select Conversion--</option>`;
@@ -1090,22 +1207,26 @@
             }
             row.find('.conversion-select')
                 .html(conversionOptions);
-            row.find('.conversion-select')
-                .val(item.product_variation_unit_conversion_id);
-            row.find('.conversion-select').trigger('change');
+            // Conversion is intentionally left unselected here so the
+            // quotation's original values display untouched; picking a
+            // conversion afterwards triggers recalculation (see the
+            // .conversion-select change handler).
             row.find('.selected-unit-id')
                 .val(item.unit_id);
             row.find('.selected-unit-name')
                 .html(item.unit_name);
             row.find('.conversion-factor')
-                .val(item.conversion_factor);
+                .val(item.conversion_factor ?? 1);
             row.find('.ordered-qty')
                 .val(decimal(item.ordered_quantity))
                 .prop('readonly', true);
             row.find('.received-qty')
                 .val(0)
                 .prop('readonly', true);
-            calculateRow(row);
+
+            // Display the quotation's stored calculations as-is; do not
+            // recompute them until the user changes something (e.g. conversion).
+            syncRowTotals(row);
 
         }
 
@@ -1130,6 +1251,20 @@
 
             calculateGrandTotal();
 
+        }
+
+        // ======================================================
+        // SYNC ROW TOTALS (no recalculation)
+        // ======================================================
+
+        // Caches the row's currently displayed subtotal/discount/tax/total
+        // into its .data() so calculateGrandTotal() can sum it, without
+        // recomputing the values themselves.
+        function syncRowTotals(row) {
+            row.data('subtotal', decimal(row.find('.row-subtotal').val()));
+            row.data('discount_amount', decimal(row.find('.row-discount-amount').val()));
+            row.data('tax_amount', decimal(row.find('.row-tax-amount').val()));
+            row.data('total', decimal(row.find('.row-total').val()));
         }
 
         // ======================================================
@@ -1169,7 +1304,7 @@
             if (conversionFactor <= 0) {
                 conversionFactor = 1;
             }
-            let calculationQty = receivedQty * conversionFactor;
+            let calculationQty = orderedQty * conversionFactor;
             let subtotal = calculationQty * unitPrice;
             let discountAmount =
                 subtotal * discountPercent / 100;
@@ -1259,7 +1394,6 @@
             let tax = decimal($('#tax_amount').val() || 0);
             let shipping = decimal($('#shipping_charge').val() || 0);
             let total = subtotal - discount + (tax*1 + shipping*1);
-console.log(decimal(total));
             $('#total').val(decimal(total));
         }
 
@@ -1360,7 +1494,6 @@ console.log(decimal(total));
 
                 let product = row.find('.product-select').val();
                 let variation = row.find('.variation-select').val();
-                let conversion = row.find('.conversion-select').val();
 
                 let orderedQty = decimal(
                     row.find('.ordered-qty').val()
@@ -1391,18 +1524,6 @@ console.log(decimal(total));
                     errorMessage('Please select variation.');
 
                     row.find('.variation-select').focus();
-
-                    valid = false;
-
-                    return false;
-
-                }
-
-                if (!conversion) {
-
-                    errorMessage('Please select conversion.');
-
-                    row.find('.conversion-select').focus();
 
                     valid = false;
 

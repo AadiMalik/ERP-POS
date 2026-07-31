@@ -92,10 +92,6 @@ class PurchaseRequestController extends Controller
 
     public function store(Request $request)
     {
-        $request->merge([
-            'purchase_request_date' => ($request->purchase_request_id) ? utcDate($request->purchase_request_date, true) : utcDate($request->purchase_request_date),
-            'purchase_expected_date' => ($request->purchase_request_id) ? utcDate($request->purchase_expected_date, true) : utcDate($request->purchase_expected_date),
-        ]);
         $validator = Validator::make($request->all(), [
             'supplier_id' => ['nullable', Rule::exists('suppliers', 'supplier_id')->where('is_deleted', 0)],
             'warehouse_id' => ['required', Rule::exists('warehouses', 'warehouse_id')->where('is_deleted', 0)],
@@ -121,6 +117,8 @@ class PurchaseRequestController extends Controller
 
         try {
             $obj = $request->all();
+            $obj['purchase_request_date'] = ($request->purchase_request_id) ? utcDate($request->purchase_request_date, true) : utcDate($request->purchase_request_date);
+            $obj['purchase_expected_date'] = ($request->purchase_request_id) ? utcDate($request->purchase_expected_date, true) : utcDate($request->purchase_expected_date);
             $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
             $obj['branch_id'] = $request->branch_id ?? Auth::user()->branch_id ?? null;
             $this->purchase_request_service->save($obj);
