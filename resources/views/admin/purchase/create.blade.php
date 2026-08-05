@@ -195,7 +195,8 @@
                                 <tr>
                                     <th>Shipping</th>
                                     <td>
-                                        <input class="form-control" id="shipping_charge" name="shipping_charge">
+                                        <input class="form-control" id="shipping_charge" name="shipping_charge"
+                                            value="{{ old('shipping_charge', $purchase->shipping_charge ?? 0) }}">
                                     </td>
                                 </tr>
                                 <tr>
@@ -238,6 +239,8 @@
         var productIndex = 0;
         var purchaseType = 'direct';
         var productsData = [];
+        var isEditMode = {{ isset($purchase) ? 'true' : 'false' }};
+        var editPurchaseData = @json($purchase_details ?? null);
         // ======================================================
         // DOCUMENT READY
         // ======================================================
@@ -259,7 +262,7 @@
             productIndex = $('#productRows tr.product-row').length;
             purchaseType = $('#purchase_type').val();
             togglePurchaseTypeUI();
-            if ($('#purchase_id').length) {
+            if (isEditMode) {
                 initializeUpdateMode();
             } else {
                 initializeCreateMode();
@@ -298,6 +301,7 @@
             if (purchaseType == 'purchase_request') {
                 $('#purchase_request_id').prop('disabled', true);
             }
+            loadPurchaseForEdit();
         }
         // ======================================================
         // PURCHASE TYPE
@@ -345,7 +349,10 @@
         function showDirectPurchase() {
             $('.purchase-request-area').hide();
             $('#addProductBtn').show();
-            if ($('#purchase_request_id').val()) {
+            // #purchase_type is always disabled in edit mode, so this reset-on-toggle
+            // only makes sense for a live user-driven type change, never on initial
+            // page load (where a direct purchase may still carry a stale request id).
+            if (!isEditMode && $('#purchase_request_id').val()) {
                 $('#purchase_request_id').val(null).trigger('change');
             }
             if ($('#productRows tr.product-row').length == 0) {
@@ -376,7 +383,7 @@
         // ======================================================
         // COMMON PRODUCT ROW TEMPLATE
         // ======================================================
-        $(document).off('click').on('click', '#addProductBtn', function() {
+        $(document).off('click', '#addProductBtn').on('click', '#addProductBtn', function() {
             addProductRow();
         });
 
@@ -748,7 +755,7 @@
         // LOAD VARIATIONS
         // ======================================================
 
-        function loadVariations(productId, row) {
+        function loadVariations(productId, row, onLoaded) {
             $.ajax({
                 url: url_local + '/admin/product/variation-by-product/' + productId,
                 type: 'GET',
@@ -776,6 +783,9 @@
                         });
                     }
                     row.find('.variation-select').html(html);
+                    if (typeof onLoaded === 'function') {
+                        onLoaded(row);
+                    }
                 },
                 error: function() {
                     errorMessage('Unable to load variations.');
@@ -1234,23 +1244,85 @@
         // UPDATE PAGE
         // ======================================================
 
-        function loadPurchaseForEdit(purchase) {
+        function loadPurchaseForEdit() {
 
-            if (!purchase)
+            if (!editPurchaseData || !editPurchaseData.details || !editPurchaseData.details.length) {
                 return;
+            }
 
             $('#productRows').html('');
 
             productIndex = 0;
 
-            $.each(purchase.purchase_details, function(_, item) {
-
-                addProductRow(item);
-
+            $.each(editPurchaseData.details, function(_, item) {
+                if (purchaseType == 'purchase_request') {
+                    // Same locked-row treatment already used for quotation-driven rows.
+                    addPurchaseRequestRow(item);
+                } else {
+                    addDirectEditProductRow(item);
+                }
             });
 
             calculateGrandTotal();
 
+        }
+
+        // ======================================================
+        // DIRECT PURCHASE EDIT ROW (product/variation stay editable)
+        // ======================================================
+
+        function addDirectEditProductRow(item) {
+            addProductRow({
+                ordered_quantity: decimal(item.ordered_quantity),
+                received_quantity: decimal(item.received_quantity ?? item.ordered_quantity),
+                unit_price: decimal(item.unit_price),
+                subtotal: decimal(item.subtotal),
+                discount: decimal(item.discount),
+                discount_amount: decimal(item.discount_amount),
+                tax: decimal(item.tax),
+                tax_amount: decimal(item.tax_amount),
+                total: decimal(item.total),
+                unit_id: item.unit_id,
+                unit_name: item.unit_name,
+                conversion_factor: item.conversion_factor
+            });
+
+            let row = $('#productRows tr:last');
+            row.find('.product-select').val(item.product_id);
+
+            loadVariations(item.product_id, row, function() {
+                if (row.find('.variation-select option[value="' + item.product_variation_id + '"]').length === 0) {
+                    row.find('.variation-select')
+                        .append(`<option value="${item.product_variation_id}">${item.product_variation_name}</option>`);
+                }
+                row.find('.variation-select').val(item.product_variation_id);
+
+                // Conversions are already supplied by getDetails(); no extra AJAX call needed.
+                let conversionOptions = `<option value="">--Select Conversion--</option>`;
+                $.each(item.conversions || [], function(_, conversion) {
+                    conversionOptions += `
+                        <option
+                            value="${conversion.product_variation_unit_conversion_id}"
+                            data-factor="${conversion.conversion_factor}"
+                            data-unit-id="${conversion.to_unit_id}"
+                            data-unit-name="${conversion.to_unit_name}">
+                            ${conversion.from_unit_name} → ${conversion.to_unit_name} (${conversion.conversion_factor})
+                        </option>
+                    `;
+                });
+                row.find('.conversion-select').html(conversionOptions);
+                if (item.product_variation_unit_conversion_id) {
+                    row.find('.conversion-select').val(item.product_variation_unit_conversion_id);
+                }
+
+                row.find('.selected-unit-id').val(item.unit_id);
+                row.find('.selected-unit-name').html(item.unit_name);
+                row.find('.conversion-factor').val(item.conversion_factor ?? 1);
+
+                // Display the stored calculations as-is; existing change handlers
+                // recalculate once the user edits anything on the row.
+                syncRowTotals(row);
+            });
         }
 
         // ======================================================

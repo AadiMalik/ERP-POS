@@ -46,4 +46,28 @@ class  TransactionType
             self::PRODUCTION_OUT => 'Production Out',
         ];
     }
+
+    /**
+     * Transaction types that increase stock (Stock In).
+     */
+    public static function inboundTypes()
+    {
+        return [
+            self::OPENING,
+            self::PURCHASE,
+            self::SALE_RETURN,
+            self::STOCK_TAKE_INCREASE,
+            self::TRANSFER_IN,
+            self::PRODUCTION_IN,
+        ];
+    }
+
+    /**
+     * True if the given transaction type increases stock (Stock In) rather
+     * than decreasing it (Stock Out).
+     */
+    public static function isInbound($type)
+    {
+        return in_array($type, self::inboundTypes(), true);
+    }
 }

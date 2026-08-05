@@ -84,17 +84,17 @@ class ProductVariationStockTransaction extends Model
 
     public function createdby()
     {
-        return $this->belongsTo(User::class, 'createdby_id', 'user_id');
+        return $this->belongsTo(User::class, 'createdby_id');
     }
 
     public function updatedby()
     {
-        return $this->belongsTo(User::class, 'updatedby_id', 'user_id');
+        return $this->belongsTo(User::class, 'updatedby_id');
     }
 
     public function deletedby()
     {
-        return $this->belongsTo(User::class, 'deletedby_id', 'user_id');
+        return $this->belongsTo(User::class, 'deletedby_id');
     }
 
 }

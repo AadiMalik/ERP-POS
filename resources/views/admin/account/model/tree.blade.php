@@ -4,10 +4,10 @@
         $levelClass = 'level-' . $level;
     @endphp
     <div class="tree-node">
-        <div class="account-item {{ $levelClass }}" data-account="{{ $account->id }}">
+        <div class="account-item {{ $levelClass }}" data-account="{{ $account->account_id }}">
             <div class="account-info">
                 @if ($hasChild)
-                    <button class="toggle-btn" data-target="child{{ $account->id }}">
+                    <button class="toggle-btn" data-target="child{{ $account->account_id }}">
                         <i class="fa fa-chevron-right toggle-icon"></i>
                     </button>
                 @else
@@ -46,7 +46,7 @@
             </div>
         </div>
         @if ($hasChild)
-            <div class="child-accounts" id="child{{ $account->id }}">
+            <div class="child-accounts" id="child{{ $account->account_id }}">
                 @include('admin.account.model.tree', [
                     'accounts' => $account->childAccounts,
                     'level' => $level + 1,

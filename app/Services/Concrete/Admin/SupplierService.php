@@ -122,7 +122,7 @@ class SupplierService
                 if (!$supplier) {
                     throw new Exception('supplier not found');
                 }
-
+                $obj['account_id'] = session('accounting_setting.default_supplier_account_id') ?? null;
                 $obj['updatedby_id'] = Auth::user()->id;
                 $obj['date_updated'] = now();
 
@@ -145,6 +145,7 @@ class SupplierService
 
             $obj['supplier_id'] = generateUuid();
             $obj['code'] = $obj['code'] ?? generateSupplierCode();
+            $obj['account_id'] = session('accounting_setting.default_supplier_account_id') ?? null;
             $obj['createdby_id'] = Auth::user()->id;
             $obj['date_created'] = now();
 

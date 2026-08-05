@@ -206,6 +206,11 @@
                     </a>
                 </li>
                 <li class="menu-item">
+                    <a href="{{ url('/admin/account') }}" class="menu-link">
+                        <div data-i18n="Accounts">Accounts</div>
+                    </a>
+                </li>
+                <li class="menu-item">
                     <a href="{{ url('/admin/journal-entry') }}" class="menu-link">
                         <div data-i18n="Journal Entries">Journal Entries</div>
                     </a>

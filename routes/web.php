@@ -152,6 +152,7 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::get('by-warehouse/{warehouse_id}', [App\Http\Controllers\Admin\ProductVariationStockController::class, 'byWarehouse']);
         Route::get('by-product/{product_id}', [App\Http\Controllers\Admin\ProductVariationStockController::class, 'byProduct']);
         Route::get('by-variation/{product_variation_id}', [App\Http\Controllers\Admin\ProductVariationStockController::class, 'byVariation']);
+        Route::get('history/{product_variation_stock_id}', [App\Http\Controllers\Admin\ProductVariationStockController::class, 'history']);
     });
 
     // product variation stock transaction

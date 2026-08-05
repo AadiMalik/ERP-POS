@@ -3,59 +3,105 @@
     <style>
         /* Main Container Styles */
         .coa-container {
-            padding: 20px 0;
+            --coa-primary: #696cff;
+            --coa-primary-soft: rgba(105, 108, 255, 0.08);
+            --coa-primary-soft-hover: rgba(105, 108, 255, 0.13);
+            --coa-border: #e7e7f0;
+            --coa-line: #e2e1ee;
+            --coa-text: #2b2c40;
+            --coa-text-muted: #6f6b7d;
+            --coa-surface-alt: #f8f7fc;
+            --coa-success-soft: rgba(40, 167, 69, 0.1);
+            --coa-radius: 12px;
+            padding: 8px 0 24px;
         }
 
         /* Section Styles */
         .coa-section {
-            margin-bottom: 10px;
-            border: 1px solid #e1e5eb;
-            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid var(--coa-border);
+            border-radius: var(--coa-radius);
             overflow: hidden;
             background: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 1px 2px rgba(43, 44, 64, 0.04);
+            transition: box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .coa-section:hover {
+            box-shadow: 0 10px 24px rgba(43, 44, 64, 0.08);
+            border-color: #dcdcf0;
         }
 
         .coa-section-header {
-            background: #f8f9fa;
-            padding: 15px 20px;
-            border-bottom: 1px solid #e1e5eb;
+            background: linear-gradient(180deg, #fcfcff 0%, var(--coa-surface-alt) 100%);
+            padding: 15px 22px;
+            border-bottom: 1px solid var(--coa-border);
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: background 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 12px;
         }
 
         .coa-section-header:hover {
-            background: #f0f2f5;
+            background: var(--coa-primary-soft);
         }
 
         .coa-section-header .section-title {
             font-weight: 600;
-            color: #2c3e50;
-            font-size: 16px;
+            color: var(--coa-text);
+            font-size: 15px;
+            letter-spacing: 0.1px;
+        }
+
+        .coa-section-header .section-title i.fa-folder-open {
+            color: #fff;
+            background: var(--coa-primary);
+            font-size: 12px;
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(105, 108, 255, 0.35);
+        }
+
+        .coa-section-header .badge.bg-primary {
+            background: var(--coa-primary) !important;
+            font-weight: 500;
+            font-size: 11.5px;
+            padding: 4px 10px;
         }
 
         .coa-section-header .section-badge {
-            background: #6c757d;
+            background: var(--coa-primary);
             color: white;
-            padding: 2px 10px;
+            padding: 3px 11px;
             border-radius: 20px;
             font-size: 12px;
+            font-weight: 500;
+        }
+
+        .coa-section-header small.text-success {
+            font-weight: 600;
+            font-size: 12.5px;
+            opacity: 0.9;
         }
 
         .coa-section-content {
             padding: 0;
             background: #fff;
+            display: none;
         }
 
         /* Account Item Styles */
         .account-item {
             position: relative;
-            padding: 12px 20px;
-            border-bottom: 1px solid #f0f2f5;
-            transition: all 0.3s ease;
+            padding: 12px 22px;
+            border-bottom: 1px solid #f1f0f7;
+            transition: background 0.15s ease, box-shadow 0.15s ease;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -67,30 +113,35 @@
         }
 
         .account-item:hover {
-            background: #f8fbff;
+            background: var(--coa-primary-soft);
+            box-shadow: inset 3px 0 0 var(--coa-primary);
         }
 
         /* Level-based indentation */
         .level-0 {
-            padding-left: 30px;
+            padding-left: 22px;
             font-weight: 600;
-            background: #fafbfc;
+            background: var(--coa-surface-alt);
+        }
+
+        .level-0:hover {
+            background: var(--coa-primary-soft-hover);
         }
 
         .level-1 {
-            padding-left: 60px;
+            padding-left: 54px;
         }
 
         .level-2 {
-            padding-left: 90px;
+            padding-left: 84px;
         }
 
         .level-3 {
-            padding-left: 120px;
+            padding-left: 114px;
         }
 
         .level-4 {
-            padding-left: 150px;
+            padding-left: 144px;
         }
 
         /* Tree line indicators */
@@ -100,29 +151,55 @@
         .level-4::before {
             content: '';
             position: absolute;
-            left: 40px;
+            left: 36px;
             top: 0;
             bottom: 0;
             width: 1px;
-            background: #d8dde3;
+            background: var(--coa-line);
         }
 
         .level-2::before {
-            left: 70px;
+            left: 66px;
         }
 
         .level-3::before {
-            left: 100px;
+            left: 96px;
         }
 
         .level-4::before {
-            left: 130px;
+            left: 126px;
+        }
+
+        /* Tree elbow connectors */
+        .level-1::after,
+        .level-2::after,
+        .level-3::after,
+        .level-4::after {
+            content: '';
+            position: absolute;
+            left: 36px;
+            top: 50%;
+            width: 14px;
+            height: 1px;
+            background: var(--coa-line);
+        }
+
+        .level-2::after {
+            left: 66px;
+        }
+
+        .level-3::after {
+            left: 96px;
+        }
+
+        .level-4::after {
+            left: 126px;
         }
 
         /* Action Buttons Container - Hidden by default */
         .account-actions {
             display: none;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
         }
 
@@ -135,38 +212,38 @@
         .action-btn {
             width: 32px;
             height: 32px;
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid transparent;
             background: transparent;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #6c757d;
+            color: var(--coa-text-muted);
             cursor: pointer;
         }
 
         .action-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(43, 44, 64, 0.12);
         }
 
         .action-btn-edit:hover {
-            background: #fff3cd;
-            color: #856404;
+            background: #fff4dd;
+            color: #a86400;
             border-color: #ffc107;
         }
 
         .action-btn-delete:hover {
-            background: #f8d7da;
-            color: #721c24;
+            background: #fde3e6;
+            color: #b3141e;
             border-color: #dc3545;
         }
 
         .action-btn-ledger:hover {
-            background: #cce5ff;
-            color: #004085;
-            border-color: #007bff;
+            background: var(--coa-primary-soft);
+            color: var(--coa-primary);
+            border-color: var(--coa-primary);
         }
 
         /* Account Info Styles */
@@ -175,50 +252,57 @@
             align-items: center;
             gap: 12px;
             flex: 1;
+            min-width: 0;
         }
 
         .account-icon {
             width: 30px;
             height: 30px;
-            border-radius: 6px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 13px;
+            flex-shrink: 0;
         }
 
         .account-icon-folder {
-            background: #fff3cd;
-            color: #856404;
+            background: #fff2d6;
+            color: #a86400;
         }
 
         .account-icon-file {
-            background: #e9ecef;
-            color: #495057;
+            background: var(--coa-surface-alt);
+            color: var(--coa-text-muted);
         }
 
         .account-name {
             font-weight: 500;
-            color: #2c3e50;
+            color: var(--coa-text);
         }
 
         .account-code {
-            color: #6c757d;
+            color: var(--coa-text-muted);
             font-size: 13px;
             margin-left: 8px;
         }
 
         .account-balance {
-            font-size: 13px;
-            color: #28a745;
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e7e34;
+            background: var(--coa-success-soft);
+            padding: 3px 10px;
+            border-radius: 20px;
             margin-left: 15px;
+            white-space: nowrap;
         }
 
         /* Arrow indicator for expandable sections */
         .expand-icon {
-            transition: transform 0.3s ease;
-            margin-right: 8px;
-            color: #6c757d;
+            transition: transform 0.25s ease;
+            margin-right: 4px;
+            color: var(--coa-text-muted);
         }
 
         .expand-icon.expanded {
@@ -232,36 +316,52 @@
 
         .child-accounts.open {
             display: block;
+            animation: coaFadeIn 0.2s ease;
+        }
+
+        @keyframes coaFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Toggle button */
         .toggle-btn {
             background: none;
             border: none;
-            padding: 0 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            padding: 0;
             cursor: pointer;
-            color: #6c757d;
-            transition: transform 0.3s ease;
+            color: var(--coa-text-muted);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s ease, color 0.2s ease, transform 0.25s ease;
         }
 
         .toggle-btn:hover {
-            color: #495057;
+            background: var(--coa-primary-soft);
+            color: var(--coa-primary);
         }
 
         .toggle-btn.rotated {
             transform: rotate(90deg);
         }
 
-        .coa-section-content {
-            display: none;
-        }
-
-        .child-accounts {
-            display: none;
-        }
-
-        .child-accounts.open {
-            display: block;
+        /* Header action buttons */
+        #createParentAccount,
+        #createChildAccount {
+            font-weight: 500;
+            box-shadow: 0 2px 6px rgba(105, 108, 255, 0.25);
         }
     </style>
 @endsection
@@ -305,7 +405,7 @@
                                 </div>
                                 <div>
                                     <small class="text-success me-3">Balance: 0.00 DR</small>
-                                    <i class="fa fa-chevron-down expand-icon"
+                                    <i class="fa fa-chevron-right expand-icon"
                                         id="sectionIcon{{ $type->account_type_id }}"></i>
                                 </div>
                             </div>
@@ -316,7 +416,8 @@
                                     <!-- Sub Type Header -->
                                     <div class="tree-node">
 
-                                        <div class="account-item level-0" data-account="{{ $subType->id }}">
+                                        <div class="account-item level-0"
+                                            data-account="{{ $subType->account_sub_type_id }}">
 
                                             <div class="account-info">
 
@@ -325,7 +426,8 @@
                                                 @endphp
 
                                                 @if ($hasAccounts)
-                                                    <button class="toggle-btn" data-target="subType{{ $subType->id }}">
+                                                    <button class="toggle-btn"
+                                                        data-target="subType{{ $subType->account_sub_type_id }}">
                                                         <i class="fa fa-chevron-right toggle-icon"></i>
                                                     </button>
                                                 @else
@@ -359,7 +461,8 @@
                                         </div>
 
                                         @if ($hasAccounts)
-                                            <div class="child-accounts" id="subType{{ $subType->id }}">
+                                            <div class="child-accounts"
+                                                id="subType{{ $subType->account_sub_type_id }}">
 
                                                 @include('admin.account.model.tree', [
                                                     'accounts' => $subType->accounts,
@@ -384,6 +487,7 @@
 @section('js')
     <script src="{{ asset('public/assets/js/admin/account.js') }}"></script>
     <script>
+        (function() {
         //================= SECTION =================//
 
         let sections = document.querySelectorAll(".coa-section");
@@ -397,7 +501,7 @@
             if (index == 0) {
 
                 body.style.display = "block";
-                icon.className = "fa fa-chevron-down expand-icon";
+                icon.classList.add("expanded");
 
             }
 
@@ -406,18 +510,20 @@
                 sections.forEach(function(sec) {
 
                     sec.querySelector(".coa-section-content").style.display = "none";
-                    sec.querySelector(".expand-icon").className = "fa fa-chevron-right expand-icon";
+                    sec.querySelector(".expand-icon").classList.remove("expanded");
 
                 });
 
                 body.style.display = "block";
-                icon.className = "fa fa-chevron-down expand-icon";
+                icon.classList.add("expanded");
 
             }
 
         });
 
         //================ TREE =================//
+        // Each toggle only opens/closes its own target node. Sibling branches
+        // are left untouched so expanding one parent never collapses another.
 
         document.addEventListener("click", function(e) {
 
@@ -429,20 +535,7 @@
 
             const target = document.getElementById(btn.dataset.target);
 
-            const treeNode = btn.closest(".tree-node");
-
-            const wrapper = treeNode.parentElement;
-
-            wrapper.querySelectorAll(":scope > .tree-node > .child-accounts.open")
-                .forEach(function(item) {
-
-                    if (item != target) {
-
-                        closeNode(item);
-
-                    }
-
-                });
+            if (!target) return;
 
             if (target.classList.contains("open")) {
 
@@ -460,13 +553,12 @@
 
             node.classList.add("open");
 
-            const icon = document.querySelector(
-                '.toggle-btn[data-target="' + node.id + '"] .toggle-icon'
+            const btn = document.querySelector(
+                '.toggle-btn[data-target="' + node.id + '"]'
             );
 
-            if (icon) {
-                icon.classList.remove('fa-chevron-right');
-                icon.classList.add('fa-chevron-down');
+            if (btn) {
+                btn.classList.add('rotated');
             }
 
         }
@@ -479,13 +571,12 @@
 
             node.classList.remove("open");
 
-            const icon = document.querySelector(
-                '.toggle-btn[data-target="' + node.id + '"] .toggle-icon'
+            const btn = document.querySelector(
+                '.toggle-btn[data-target="' + node.id + '"]'
             );
 
-            if (icon) {
-                icon.classList.remove('fa-chevron-down');
-                icon.classList.add('fa-chevron-right');
+            if (btn) {
+                btn.classList.remove('rotated');
             }
 
         }
@@ -505,5 +596,6 @@
             }
 
         };
+        })();
     </script>
 @endsection

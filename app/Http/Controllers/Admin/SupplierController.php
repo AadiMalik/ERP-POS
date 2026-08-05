@@ -127,7 +127,8 @@ class SupplierController extends Controller
     {
         $supplier = $this->supplier_service->getById($supplier_id);
         $business = $this->business_service->getAllActive();
-        return view('admin.supplier.create', compact('supplier', 'business'));
+        $prefix = session('supplier_setting.supplier_code_prefix') ?? 'SUP-';
+        return view('admin.supplier.create', compact('supplier', 'business','prefix'));
     }
 
     public function status($supplier_id)

@@ -105,6 +105,49 @@
             </div>
         </div>
     </div>
+
+    <!-- Stock History Modal -->
+    <div class="modal fade" id="stockHistoryModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Stock History
+                        <small class="d-block text-muted fw-normal" id="stockHistorySubtitle"></small>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-primary d-flex justify-content-between align-items-center">
+                        <span>Current Available Balance</span>
+                        <strong id="stockHistoryCurrentBalance">0.00</strong>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Date / Time</th>
+                                    <th>Source Module</th>
+                                    <th>Reference No</th>
+                                    <th>Type</th>
+                                    <th>In / Out</th>
+                                    <th class="text-end">Quantity</th>
+                                    <th class="text-end">Running Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stockHistoryRows">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- ========== table components end ========== -->
 @endsection
 @section('js')
@@ -269,6 +312,71 @@
             tableCallback: function() {
                 initDataTableproduct_variation_stock_table();
             }
+        });
+
+        // Stock History
+        $(document).off('click', '#viewStockHistory').on('click', '#viewStockHistory', function() {
+            let product_variation_stock_id = $(this).data('id');
+
+            $('#stockHistoryRows').html(
+                '<tr><td colspan="7" class="text-center"><div class="spinner-border spinner-border-sm"></div> Loading...</td></tr>'
+            );
+            $('#stockHistorySubtitle').text('');
+            $('#stockHistoryCurrentBalance').text('0.00');
+            $('#stockHistoryModal').modal('show');
+
+            $.ajax({
+                url: url_local + '/admin/product-variation-stock/history/' + product_variation_stock_id,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (!response.Success) {
+                        errorMessage(response.Message);
+                        return;
+                    }
+
+                    let data = response.Data;
+
+                    $('#stockHistorySubtitle').text(
+                        data.product + ' - ' + data.product_variation + ' (' + data.warehouse + ')'
+                    );
+                    $('#stockHistoryCurrentBalance').text(decimal(data.current_balance));
+
+                    if (!data.ledger.length) {
+                        $('#stockHistoryRows').html(
+                            '<tr><td colspan="7" class="text-center text-muted">No stock movements found.</td></tr>'
+                        );
+                        return;
+                    }
+
+                    let rows = '';
+                    $.each(data.ledger, function(_, item) {
+                        let directionBadge = item.direction == 'in' ?
+                            '<span class="badge bg-success">Stock In</span>' :
+                            '<span class="badge bg-danger">Stock Out</span>';
+                        let sign = item.direction == 'in' ? '+' : '-';
+
+                        rows += `
+                            <tr>
+                                <td>${item.transaction_date}</td>
+                                <td>${item.source_module}</td>
+                                <td>${item.reference_no}</td>
+                                <td>${item.transaction_type}</td>
+                                <td>${directionBadge}</td>
+                                <td class="text-end">${sign}${decimal(item.quantity)} ${item.unit}</td>
+                                <td class="text-end fw-semibold">${decimal(item.running_balance)}</td>
+                            </tr>
+                        `;
+                    });
+
+                    $('#stockHistoryRows').html(rows);
+                },
+                error: function() {
+                    $('#stockHistoryRows').html(
+                        '<tr><td colspan="7" class="text-center text-danger">Unable to load stock history.</td></tr>'
+                    );
+                }
+            });
         });
     </script>
 @endsection

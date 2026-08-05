@@ -28,6 +28,6 @@ class ProductFeature extends Model
     }
 
     public function createdby() {
-        return $this->belongsTo(User::class, 'createdby_id', 'user_id');
+        return $this->belongsTo(User::class, 'createdby_id');
     }
 }

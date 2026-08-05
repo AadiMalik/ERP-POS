@@ -135,4 +135,19 @@ class ProductVariationStockController extends Controller
             );
         }
     }
+
+    public function history($product_variation_stock_id)
+    {
+        try {
+            $ledger = $this->product_variation_stock_service->getLedger($product_variation_stock_id);
+            return $this->success(
+                Message::SUCCESS,
+                $ledger
+            );
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
 }

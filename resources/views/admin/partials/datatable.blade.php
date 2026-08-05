@@ -13,15 +13,15 @@
         }
         @endphp
         @isset($start)
-        $('.date_range').on('click' , function(){
+        $('.date_range').off('click').on('click' , function(){
             {{$variable}}.destroy()
             initDataTable{{$variable}}()
-            
+
         })
         @endisset
-        
-        
-        $('button[data-toggle="tab"]').on('shown.bs.tab', function(e){
+
+
+        $('button[data-toggle="tab"]').off('shown.bs.tab').on('shown.bs.tab', function(e){
             {{$variable}}.destroy()
             initDataTable{{$variable}}()
         });

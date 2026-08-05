@@ -86,6 +86,13 @@ class PurchaseController extends Controller
     public function edit($purchase_id)
     {
         $purchase = $this->purchase_service->getById($purchase_id);
+
+        if (!$purchase || $purchase->status !== Status::PENDING) {
+            return redirect('admin/purchase')
+                ->with('error', 'Only pending purchases can be edited.');
+        }
+
+        $purchase_details = $this->purchase_service->getDetails($purchase_id);
         $business = $this->business_service->getAll();
         $products = $this->product_service->getAllActive();
         $suppliers = $this->supplier_service->getAllActive();
@@ -93,7 +100,7 @@ class PurchaseController extends Controller
         $units = $this->unit_service->getAllActive();
         $purchase_requests = $this->purchase_request_service->getAllApproved();
 
-        return view('admin.purchase.create', compact('purchase', 'business', 'products', 'purchase_requests', 'suppliers', 'warehouses', 'units'));
+        return view('admin.purchase.create', compact('purchase', 'purchase_details', 'business', 'products', 'purchase_requests', 'suppliers', 'warehouses', 'units'));
     }
 
     public function store(Request $request)
@@ -136,6 +143,7 @@ class PurchaseController extends Controller
             'products.*.ordered_quantity' => ['required', 'numeric', 'min:0.0001'],
             'products.*.conversion_factor' => ['required', 'numeric', 'min:0.0001'],
             'products.*.unit_price' => ['required', 'numeric', 'min:0'],
+            'products.*.received_quantity' => ['nullable', 'numeric', 'min:0'],
             'products.*.subtotal' => ['required', 'numeric', 'min:0'],
             'products.*.discount' => ['required', 'numeric', 'min:0'],
             'products.*.discount_amount' => ['required', 'numeric', 'min:0'],
@@ -158,8 +166,7 @@ class PurchaseController extends Controller
             return redirect('admin/purchase')
                 ->with('success', empty($request->purchase_id) ? Message::SAVE : Message::UPDATE);
         } catch (Exception $e) {
-            dd($e->getMessage());
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage())->withInput();
         }
     }
 

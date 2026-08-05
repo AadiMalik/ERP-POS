@@ -3,12 +3,22 @@
 namespace App\Services\Concrete\Admin;
 
 use App\Enums\Filter;
+use App\Enums\JournalSourceTypes;
+use App\Enums\ReferenceType;
 use App\Enums\RoleNames;
 use App\Enums\Status;
+use App\Enums\TransactionType;
+use App\Models\AccountingSetting;
+use App\Models\Journal;
+use App\Models\JournalEntry;
+use App\Models\JournalEntryDetail;
+use App\Models\ProductVariationStock;
+use App\Models\ProductVariationStockTransaction;
 use App\Models\Purchase;
 use App\Models\PurchaseDetail;
 use App\Models\PurchaseRequest;
 use App\Repository\Repository;
+use App\Services\Concrete\Admin\ProductVariationStockService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -133,14 +143,18 @@ class PurchaseService
             })
             ->addColumn('action', function ($item) {
 
-                return "
-                    <a class='btn btn-icon btn-outline-primary mr-2'
-                     href='" . route('purchase.edit', $item->purchase_id) . "'
-                    id='editPurchase'>
+                $editButton = $item->status === Status::PENDING
+                    ? "<a class='btn btn-icon btn-outline-primary mr-2'
+                        href='" . route('purchase.edit', $item->purchase_id) . "'
+                        id='editPurchase'>
+                        <i class='fa fa-pencil'></i>
+                        </a>"
+                    : "<button type='button' class='btn btn-icon btn-outline-primary mr-2' disabled
+                        title='Only pending purchases can be edited'>
+                        <i class='fa fa-pencil'></i>
+                        </button>";
 
-                    <i class='fa fa-pencil'></i>
-                    </a>
-
+                return $editButton . "
                     <a class='btn btn-icon btn-outline-danger'
                     id='deletePurchase'
                     data-id='{$item->purchase_id}'>
@@ -167,6 +181,10 @@ class PurchaseService
 
                 $purchase = $this->model_purchase
                     ->getModel()::findOrFail($obj['purchase_id']);
+
+                if ($purchase->status !== Status::PENDING) {
+                    throw new Exception('Only pending purchases can be updated.');
+                }
 
                 $purchase->update([
                     'business_id'            => $obj['business_id'],
@@ -238,8 +256,9 @@ class PurchaseService
                     'product_variation_unit_conversion_id'  => $product['product_variation_unit_conversion_id'],
 
                     'unit_id'                               => $product['unit_id'],
-                    'base_quantity'                         => $product['ordered_quantity'],
+                    'base_quantity'                         => $product['ordered_quantity'] * $product['conversion_factor'],
                     'ordered_quantity'                      => $product['ordered_quantity'],
+                    'received_quantity'                     => $product['received_quantity'] ?? $product['ordered_quantity'],
                     'conversion_factor'                     => $product['conversion_factor'],
                     'unit_price'                            => $product['unit_price'],
                     'subtotal'                              => $product['subtotal'],
@@ -269,15 +288,20 @@ class PurchaseService
 
     public function status($obj)
     {
+        DB::beginTransaction();
+
         try {
-            $this->model_purchase->update([
-                'status' => $obj['status'],
+            $purchase = $this->model_purchase->getModel()::with($this->with)->findOrFail($obj['purchase_id']);
+            $old_status = $purchase->status;
+            $new_status = $obj['status'];
+
+            $purchase->update([
+                'status' => $new_status,
                 'updatedby_id' => Auth::user()->id,
                 'date_updated' => now()
-            ], $obj['purchase_id']);
+            ]);
 
-            $purchase = $this->model_purchase->find($obj['purchase_id']);
-            if ($obj['status'] == Status::APPROVED && $purchase->purchase_request_id != null) {
+            if ($new_status == Status::APPROVED && $purchase->purchase_request_id != null) {
                 PurchaseRequest::where('purchase_request_id', $purchase->purchase_request_id)
                     ->update([
                         'status' => Status::CONVERTED,
@@ -285,7 +309,23 @@ class PurchaseService
                         'date_updated' => now()
                     ]);
             }
+
+            if ($purchase->purchase_type === 'direct') {
+                if ($new_status === Status::APPROVED && $old_status !== Status::APPROVED) {
+                    $this->applyDirectPurchaseApproval($purchase);
+                } elseif (
+                    $old_status === Status::APPROVED &&
+                    $new_status !== Status::APPROVED &&
+                    $new_status !== Status::COMPLETED
+                ) {
+                    $this->reverseDirectPurchaseApproval($purchase);
+                }
+            }
+
+            DB::commit();
         } catch (Exception $e) {
+            DB::rollBack();
+
             throw $e;
         }
 
@@ -294,12 +334,235 @@ class PurchaseService
 
     public function delete($purchase_id)
     {
-        return $this->model_purchase->update([
-            'is_deleted' => 1,
-            'status' => Status::CANCELLED,
-            'deletedby_id' => Auth::id(),
-            'date_deleted' => now()
-        ], $purchase_id);
+        DB::beginTransaction();
+
+        try {
+            $purchase = $this->model_purchase->getModel()::with($this->with)->findOrFail($purchase_id);
+
+            if ($purchase->purchase_type === 'direct' && $purchase->status === Status::APPROVED) {
+                $this->reverseDirectPurchaseApproval($purchase);
+            }
+
+            $purchase->update([
+                'is_deleted' => 1,
+                'status' => Status::CANCELLED,
+                'deletedby_id' => Auth::id(),
+                'date_deleted' => now()
+            ]);
+
+            DB::commit();
+
+            return true;
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Auto-post a Purchase Voucher and stock-in transactions when a Direct
+     * Purchase is approved. Idempotent: a no-op if an active voucher already
+     * exists for this purchase (e.g. duplicate status calls).
+     */
+    protected function applyDirectPurchaseApproval(Purchase $purchase)
+    {
+        $existing = JournalEntry::where('source_type', JournalSourceTypes::PURCHASE)
+            ->where('source_id', $purchase->purchase_id)
+            ->where('is_deleted', 0)
+            ->exists();
+
+        if ($existing) {
+            return;
+        }
+
+        $accounting_setting = AccountingSetting::where('business_id', $purchase->business_id)->first();
+
+        if (!$accounting_setting || !$accounting_setting->enable_accounting || empty($accounting_setting->default_purchase_account_id)) {
+            throw new Exception('Purchase Account is not configured in Accounting Settings. Please configure it before approving direct purchases.');
+        }
+
+        if (empty($purchase->supplier) || empty($purchase->supplier->account_id)) {
+            throw new Exception('The selected supplier does not have a linked Chart of Account. Please configure it before approving direct purchases.');
+        }
+
+        $journal = Journal::where('short', 'PV')->where('is_deleted', 0)->first();
+
+        if (!$journal) {
+            throw new Exception('No "Purchase Voucher" journal category found. Please configure it before approving direct purchases.');
+        }
+
+        $entry_no = generateJVNum($journal->journal_id);
+
+        $journal_entry = JournalEntry::create([
+            'journal_entry_id' => generateUuid(),
+            'journal_id'       => $journal->journal_id,
+            'business_id'      => $purchase->business_id,
+            'branch_id'        => $purchase->branch_id,
+            'entry_no'         => $entry_no,
+            'reference_no'     => $purchase->purchase_no,
+            'entry_date'       => now(),
+            'description'      => 'Auto-generated payment voucher for approved direct purchase ' . $purchase->purchase_no,
+            'source_type'      => JournalSourceTypes::PURCHASE,
+            'source_id'        => $purchase->purchase_id,
+            'status'           => 'posted',
+            'postedby_id'      => Auth::id(),
+            'date_posted'      => now(),
+            'createdby_id'     => Auth::id(),
+            'date_created'     => now(),
+        ]);
+
+        $amount = $purchase->total;
+
+        JournalEntryDetail::create([
+            'journal_entry_detail_id' => generateUuid(),
+            'journal_entry_id'        => $journal_entry->journal_entry_id,
+            'account_id'              => $accounting_setting->default_purchase_account_id,
+            'debit'                   => $amount,
+            'credit'                  => 0,
+            'supplier_id'             => $purchase->supplier_id,
+            'description'             => 'Purchase - ' . $purchase->purchase_no,
+        ]);
+
+        JournalEntryDetail::create([
+            'journal_entry_detail_id' => generateUuid(),
+            'journal_entry_id'        => $journal_entry->journal_entry_id,
+            'account_id'              => $purchase->supplier->account_id,
+            'debit'                   => 0,
+            'credit'                  => $amount,
+            'supplier_id'             => $purchase->supplier_id,
+            'description'             => 'Purchase - ' . $purchase->purchase_no,
+        ]);
+
+        foreach ($purchase->purchaseDetails as $detail) {
+            $conversion_factor = $detail->conversion_factor > 0 ? $detail->conversion_factor : 1;
+            $quantity = $detail->received_quantity ?? $detail->ordered_quantity;
+            $base_quantity = $quantity * $conversion_factor;
+
+            if ($base_quantity <= 0) {
+                continue;
+            }
+
+            // unit_price is priced per base unit (subtotal = ordered_quantity *
+            // conversion_factor * unit_price), so line cost scales correctly
+            // even when received_quantity differs from ordered_quantity.
+            $line_cost = $detail->unit_price * $base_quantity;
+
+            $stock = ProductVariationStock::where('business_id', $purchase->business_id)
+                ->where('warehouse_id', $purchase->warehouse_id)
+                ->where('product_id', $detail->product_id)
+                ->where('product_variation_id', $detail->product_variation_id)
+                ->first();
+
+            $existing_qty = $stock->quantity ?? 0;
+            $existing_avg = $stock->avg_price ?? 0;
+            $new_qty = $existing_qty + $base_quantity;
+            $new_avg = $new_qty > 0
+                ? (($existing_qty * $existing_avg) + $line_cost) / $new_qty
+                : 0;
+
+            if ($stock) {
+                $stock->update([
+                    'quantity'  => $new_qty,
+                    'avg_price' => $new_avg,
+                ]);
+            } else {
+                $stock = ProductVariationStock::create([
+                    'product_variation_stock_id' => generateUuid(),
+                    'business_id'                => $purchase->business_id,
+                    'warehouse_id'               => $purchase->warehouse_id,
+                    'product_id'                 => $detail->product_id,
+                    'product_variation_id'       => $detail->product_variation_id,
+                    'quantity'                   => $new_qty,
+                    'avg_price'                  => $new_avg,
+                    'status'                     => 'active',
+                    'createdby_id'               => Auth::id(),
+                    'date_created'               => now(),
+                ]);
+            }
+
+            ProductVariationStockTransaction::create([
+                'product_variation_stock_transaction_id' => generateUuid(),
+                'transaction_date'                       => now(),
+                'transaction_type'                        => TransactionType::PURCHASE,
+                'business_id'                             => $purchase->business_id,
+                'product_id'                              => $detail->product_id,
+                'product_variation_id'                    => $detail->product_variation_id,
+                'warehouse_id'                             => $purchase->warehouse_id,
+                'unit_id'                                  => $detail->unit_id,
+                'product_variation_unit_conversion_id'     => $detail->product_variation_unit_conversion_id,
+                'conversion_factor'                        => $conversion_factor,
+                'quantity'                                 => $quantity,
+                'base_quantity'                            => $base_quantity,
+                'unit_price'                               => $detail->unit_price,
+                'total_price'                              => $line_cost,
+                'quantity_after'                           => $new_qty,
+                'avg_price_after'                          => $new_avg,
+                'reference_id'                              => $purchase->purchase_id,
+                'reference_type'                            => ReferenceType::PURCHASE,
+                'remarks'                                   => 'Auto-created on approval of direct purchase ' . $purchase->purchase_no,
+                'createdby_id'                              => Auth::id(),
+                'date_created'                              => now(),
+            ]);
+        }
+    }
+
+    /**
+     * Reverse the Purchase Voucher and stock effects created when a Direct
+     * Purchase was approved. Idempotent: a no-op if nothing active remains
+     * to reverse (e.g. already reversed, or never approved).
+     */
+    protected function reverseDirectPurchaseApproval(Purchase $purchase)
+    {
+        $journal_entry = JournalEntry::where('source_type', JournalSourceTypes::PURCHASE)
+            ->where('source_id', $purchase->purchase_id)
+            ->where('is_deleted', 0)
+            ->first();
+
+        if ($journal_entry) {
+            $journal_entry->update([
+                'is_deleted'   => 1,
+                'deletedby_id' => Auth::id(),
+                'date_deleted' => now(),
+            ]);
+        }
+
+        $stock_transactions = ProductVariationStockTransaction::where('reference_type', ReferenceType::PURCHASE)
+            ->where('reference_id', $purchase->purchase_id)
+            ->where('is_deleted', 0)
+            ->get();
+
+        if ($stock_transactions->isEmpty()) {
+            return;
+        }
+
+        $stock_transactions->each(function ($transaction) {
+            $transaction->update([
+                'is_deleted'   => 1,
+                'deletedby_id' => Auth::id(),
+                'date_deleted' => now(),
+            ]);
+        });
+
+        // Recompute each affected stock row (and rewrite the running-balance
+        // snapshot on every remaining transaction) from scratch rather than
+        // reversing the moving-average formula in place, so both the Stock
+        // table and the stock ledger stay exact and in sync.
+        $affected = $stock_transactions->unique(function ($transaction) {
+            return $transaction->business_id . '|' . $transaction->warehouse_id . '|' .
+                $transaction->product_id . '|' . $transaction->product_variation_id;
+        });
+
+        $stock_service = app(ProductVariationStockService::class);
+
+        foreach ($affected as $transaction) {
+            $stock_service->recomputeLedger(
+                $transaction->business_id,
+                $transaction->warehouse_id,
+                $transaction->product_id,
+                $transaction->product_variation_id
+            );
+        }
     }
 
     public function getAll()
@@ -346,6 +609,7 @@ class PurchaseService
                 }
 
                 $data['details'][] = [
+                    'purchase_request_detail_id' => $detail->purchase_request_detail_id,
                     'product_id' => $detail->product_id,
                     'product_name' => $detail->product->name ?? '',
                     'product_variation_id' => $detail->product_variation_id,

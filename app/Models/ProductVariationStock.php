@@ -18,6 +18,7 @@ class ProductVariationStock extends Model
         'warehouse_id',
         'product_id',
         'product_variation_id',
+        'avg_price',
         'quantity',
         'status',
         'is_deleted',
@@ -51,16 +52,16 @@ class ProductVariationStock extends Model
 
     public function createdby()
     {
-        return $this->belongsTo(User::class, 'createdby_id', 'user_id');
+        return $this->belongsTo(User::class, 'createdby_id');
     }
 
     public function updatedby()
     {
-        return $this->belongsTo(User::class, 'updatedby_id', 'user_id');
+        return $this->belongsTo(User::class, 'updatedby_id');
     }
 
     public function deletedby()
     {
-        return $this->belongsTo(User::class, 'deletedby_id', 'user_id');
+        return $this->belongsTo(User::class, 'deletedby_id');
     }
 }

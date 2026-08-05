@@ -47,5 +47,3 @@
         allowInput: true
     });
 </script>
-
-@yield('js')

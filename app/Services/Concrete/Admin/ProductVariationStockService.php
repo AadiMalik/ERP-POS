@@ -3,9 +3,13 @@
 namespace App\Services\Concrete\Admin;
 
 use App\Enums\Filter;
+use App\Enums\ReferenceType;
 use App\Enums\RoleNames;
 use App\Enums\Status;
+use App\Enums\TransactionType;
+use App\Models\Purchase;
 use App\Models\ProductVariationStock;
+use App\Models\ProductVariationStockTransaction;
 use App\Repository\Repository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -91,6 +95,14 @@ class ProductVariationStockService
             ->addColumn('action', function ($item) {
 
                 return "
+                    <a class='btn btn-icon btn-outline-info mr-2'
+                    id='viewStockHistory'
+                    title='Stock History'
+                    data-id='{$item->product_variation_stock_id}'>
+
+                    <i class='fa fa-history'></i>
+                    </a>
+
                     <a class='btn btn-icon btn-outline-danger'
                     id='deleteProductVariationStock'
                     data-id='{$item->product_variation_stock_id}'>
@@ -166,5 +178,129 @@ class ProductVariationStockService
             ->where('status', Status::ACTIVE)
             ->where('is_deleted', 0)
             ->get();
+    }
+
+    /**
+     * Replay every active stock transaction for one product+variation+warehouse
+     * in chronological order, rewriting each transaction's quantity_after /
+     * avg_price_after snapshot and the aggregate stock row's quantity /
+     * avg_price to match. Called after any transaction is reversed/deleted so
+     * later transactions' stored running balances never go stale, and the
+     * running balance shown in the ledger always matches the Stock table.
+     */
+    public function recomputeLedger($business_id, $warehouse_id, $product_id, $product_variation_id)
+    {
+        $transactions = ProductVariationStockTransaction::where('business_id', $business_id)
+            ->where('warehouse_id', $warehouse_id)
+            ->where('product_id', $product_id)
+            ->where('product_variation_id', $product_variation_id)
+            ->where('is_deleted', 0)
+            ->orderBy('transaction_date')
+            ->orderBy('date_created')
+            ->orderBy('product_variation_stock_transaction_id')
+            ->get();
+
+        $quantity = 0;
+        $avg_price = 0;
+
+        foreach ($transactions as $transaction) {
+            if (TransactionType::isInbound($transaction->transaction_type)) {
+                $new_quantity = $quantity + $transaction->base_quantity;
+                $avg_price = $new_quantity > 0
+                    ? (($quantity * $avg_price) + $transaction->total_price) / $new_quantity
+                    : 0;
+                $quantity = $new_quantity;
+            } else {
+                $quantity -= $transaction->base_quantity;
+            }
+
+            $transaction->update([
+                'quantity_after'   => $quantity,
+                'avg_price_after'  => $avg_price,
+            ]);
+        }
+
+        $stock = ProductVariationStock::where('business_id', $business_id)
+            ->where('warehouse_id', $warehouse_id)
+            ->where('product_id', $product_id)
+            ->where('product_variation_id', $product_variation_id)
+            ->first();
+
+        if ($stock) {
+            $stock->update([
+                'quantity'  => $quantity,
+                'avg_price' => $avg_price,
+            ]);
+        }
+
+        return ['quantity' => $quantity, 'avg_price' => $avg_price];
+    }
+
+    /**
+     * Full stock ledger for a single Stock row: every active movement in
+     * chronological order plus the current available balance, so the UI can
+     * render a Stock History view that always matches the Stock table.
+     */
+    public function getLedger($product_variation_stock_id)
+    {
+        $stock = $this->model_product_variation_stock->getModel()::with($this->with)
+            ->findOrFail($product_variation_stock_id);
+
+        $transactions = ProductVariationStockTransaction::with(['unit'])
+            ->where('business_id', $stock->business_id)
+            ->where('warehouse_id', $stock->warehouse_id)
+            ->where('product_id', $stock->product_id)
+            ->where('product_variation_id', $stock->product_variation_id)
+            ->where('is_deleted', 0)
+            ->orderBy('transaction_date')
+            ->orderBy('date_created')
+            ->orderBy('product_variation_stock_transaction_id')
+            ->get();
+
+        $transaction_types = TransactionType::getOptions();
+        $source_modules = ReferenceType::getOptions();
+
+        $ledger = $transactions->map(function ($transaction) use ($transaction_types, $source_modules) {
+            $is_inbound = TransactionType::isInbound($transaction->transaction_type);
+
+            return [
+                'transaction_date'   => $transaction->transaction_date,
+                'direction'          => $is_inbound ? 'in' : 'out',
+                'transaction_type'   => $transaction_types[$transaction->transaction_type] ?? ucfirst($transaction->transaction_type),
+                'source_module'      => $source_modules[$transaction->reference_type] ?? ucfirst($transaction->reference_type ?? '-'),
+                'reference_no'       => $this->resolveReferenceNo($transaction->reference_type, $transaction->reference_id),
+                'unit'               => $transaction->unit?->name ?? '-',
+                'quantity'           => $transaction->base_quantity,
+                'running_balance'    => $transaction->quantity_after,
+                'remarks'            => $transaction->remarks,
+            ];
+        });
+
+        return [
+            'product' => $stock->product?->name ?? '-',
+            'product_variation' => $stock->productVariation?->name ?? '-',
+            'warehouse' => $stock->warehouse?->name ?? '-',
+            'current_balance' => $stock->quantity,
+            'current_avg_price' => $stock->avg_price,
+            'ledger' => $ledger,
+        ];
+    }
+
+    /**
+     * Best-effort resolution of a human-readable document number for a stock
+     * transaction's source. Only "purchase" is wired up today; other source
+     * modules fall back to the raw reference id until they're implemented.
+     */
+    protected function resolveReferenceNo($reference_type, $reference_id)
+    {
+        if (empty($reference_id)) {
+            return '-';
+        }
+
+        if ($reference_type === ReferenceType::PURCHASE) {
+            return Purchase::where('purchase_id', $reference_id)->value('purchase_no') ?? $reference_id;
+        }
+
+        return $reference_id;
     }
 }
