@@ -189,6 +189,7 @@ class PurchaseService
                 $purchase->update([
                     'business_id'            => $obj['business_id'],
                     'purchase_request_id'    => $obj['purchase_request_id'],
+                    'purchase_type'          => $obj['purchase_type'] ?? $purchase->purchase_type,
                     'supplier_id'            => $obj['supplier_id'],
                     'warehouse_id'           => $obj['warehouse_id'],
                     'purchase_date'          => $obj['purchase_date'],
@@ -221,6 +222,7 @@ class PurchaseService
                     'purchase_id'            => generateUuid(),
                     'business_id'            => $obj['business_id'],
                     'purchase_request_id'    => $obj['purchase_request_id'],
+                    'purchase_type'          => $obj['purchase_type'] ?? 'direct',
                     'supplier_id'            => $obj['supplier_id'],
                     'warehouse_id'           => $obj['warehouse_id'],
                     'purchase_no'            => $obj['purchase_no'],
@@ -562,6 +564,39 @@ class PurchaseService
                 $transaction->product_id,
                 $transaction->product_variation_id
             );
+        }
+    }
+
+    /**
+     * Compare ordered vs received quantity across every line of a Purchase
+     * and flip the Purchase to Completed once every line is fully received,
+     * or back to Approved if a reversal leaves a line short again. Only acts
+     * on purchases currently Approved or Completed; never touches
+     * pending/cancelled purchases. Called after every GRN approval/reversal.
+     */
+    public function syncPurchaseCompletionStatus($purchase_id)
+    {
+        $purchase = $this->model_purchase->getModel()::find($purchase_id);
+
+        if (!$purchase || !in_array($purchase->status, [Status::APPROVED, Status::COMPLETED], true)) {
+            return;
+        }
+
+        $fully_received = PurchaseDetail::where('purchase_id', $purchase_id)
+            ->where(function ($query) {
+                $query->whereColumn('received_quantity', '<', 'ordered_quantity')
+                    ->orWhereNull('received_quantity');
+            })
+            ->doesntExist();
+
+        $new_status = $fully_received ? Status::COMPLETED : Status::APPROVED;
+
+        if ($purchase->status !== $new_status) {
+            $purchase->update([
+                'status'       => $new_status,
+                'updatedby_id' => Auth::id(),
+                'date_updated' => now(),
+            ]);
         }
     }
 

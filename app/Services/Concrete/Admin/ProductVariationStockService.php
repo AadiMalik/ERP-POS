@@ -7,6 +7,7 @@ use App\Enums\ReferenceType;
 use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Enums\TransactionType;
+use App\Models\GoodReceiptNote;
 use App\Models\Purchase;
 use App\Models\ProductVariationStock;
 use App\Models\ProductVariationStockTransaction;
@@ -66,6 +67,10 @@ class ProductVariationStockService
 
                 return $item->product?->name ?? '-';
             })
+            ->addColumn('unit', function ($item) {
+
+                return $item->productVariation?->unit->name ?? '-';
+            })
             ->addColumn('business', function ($item) {
 
                 return $item->business?->name ?? '-';
@@ -77,6 +82,14 @@ class ProductVariationStockService
             ->addColumn('warehouse', function ($item) {
 
                 return $item->warehouse?->name ?? '-';
+            })
+            ->addColumn('avg_price', function ($item) {
+
+                return decimal($item->avg_price ?? 0);
+            })
+            ->addColumn('quantity', function ($item) {
+
+                return decimal($item->quantity ?? 0);
             })
             ->addColumn('status', function ($item) {
 
@@ -111,7 +124,7 @@ class ProductVariationStockService
                     </a>
                 ";
             })
-            ->rawColumns(['business', 'product', 'productVariation', 'warehouse', 'status', 'action'])
+            ->rawColumns(['business', 'product','unit','avg_price','quantity', 'productVariation', 'warehouse', 'status', 'action'])
             ->make(true);
     }
     public function status($product_variation_stock_id)
@@ -299,6 +312,10 @@ class ProductVariationStockService
 
         if ($reference_type === ReferenceType::PURCHASE) {
             return Purchase::where('purchase_id', $reference_id)->value('purchase_no') ?? $reference_id;
+        }
+
+        if ($reference_type === ReferenceType::GRN) {
+            return GoodReceiptNote::where('good_receipt_note_id', $reference_id)->value('good_receipt_note_no') ?? $reference_id;
         }
 
         return $reference_id;

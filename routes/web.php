@@ -250,6 +250,15 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::get('details/{purchase_id}', [App\Http\Controllers\Admin\PurchaseController::class, 'details']);
     });
 
+    //good receipt note
+    Route::resource('good-receipt-note', App\Http\Controllers\Admin\GoodReceiptNoteController::class);
+    Route::group(['prefix' => 'good-receipt-note'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\GoodReceiptNoteController::class, 'getData']);
+        Route::post('change-status', [App\Http\Controllers\Admin\GoodReceiptNoteController::class, 'status']);
+        Route::get('details/{good_receipt_note_id}', [App\Http\Controllers\Admin\GoodReceiptNoteController::class, 'details']);
+        Route::get('purchase-details/{purchase_id}', [App\Http\Controllers\Admin\GoodReceiptNoteController::class, 'getPurchaseDetails']);
+    });
+
     //Setting
     Route::group(['prefix' => 'setting'], function () {
         Route::get('/', [App\Http\Controllers\Admin\SettingController::class, 'index']);

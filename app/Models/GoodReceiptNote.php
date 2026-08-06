@@ -22,6 +22,7 @@ class GoodReceiptNote extends Model
         'good_receipt_note_no',
         'good_receipt_note_date',
         'description',
+        'total',
         'status',
         'is_deleted',
         'createdby_id',
@@ -40,6 +41,11 @@ class GoodReceiptNote extends Model
     public function purchase()
     {
         return $this->belongsTo(Purchase::class, 'purchase_id');
+    }
+
+    public function goodReceiptNoteDetails()
+    {
+        return $this->hasMany(GoodReceiptNoteDetail::class, 'good_receipt_note_id', 'good_receipt_note_id');
     }
 
     public function warehouse()

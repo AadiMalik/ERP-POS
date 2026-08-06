@@ -15,6 +15,8 @@ class GoodReceiptNoteDetail extends Model
     protected $fillable = [
         'good_receipt_note_detail_id',
         'good_receipt_note_id',
+        'purchase_id',
+        'purchase_detail_id',
         'product_variation_batch_id',
         'product_id',
         'product_variation_id',
@@ -30,6 +32,11 @@ class GoodReceiptNoteDetail extends Model
     public function goodReceiptNote()
     {
         return $this->belongsTo(GoodReceiptNote::class, 'good_receipt_note_id', 'good_receipt_note_id');
+    }
+
+    public function purchaseDetail()
+    {
+        return $this->belongsTo(PurchaseDetail::class, 'purchase_detail_id', 'purchase_detail_id');
     }
 
     public function productVariationBatch()

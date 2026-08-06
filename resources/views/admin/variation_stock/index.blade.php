@@ -88,6 +88,7 @@
                             <tr>
                                 <th>Product</th>
                                 <th>Variation</th>
+                                <th>Unit</th>
                                 <th>Warehouse</th>
                                 <th>Avg Cost</th>
                                 <th>Quantity</th>
@@ -155,6 +156,7 @@
         'columns' => "
             {data: 'product' , name: 'product', 'sortable': false , searchable: false},
             {data: 'productVariation' , name: 'productVariation', 'sortable': false , searchable: false},
+            {data: 'unit' , name: 'unit', 'sortable': false , searchable: false},
             {data: 'warehouse' , name: 'warehouse', 'sortable': false , searchable: false},
             {data: 'avg_price' , name: 'avg_price'},
             {data: 'quantity' , name: 'quantity'},

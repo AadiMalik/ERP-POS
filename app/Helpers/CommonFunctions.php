@@ -3,6 +3,7 @@
 use App\Enums\RoleNames;
 use App\Models\Branch;
 use App\Models\Category;
+use App\Models\GoodReceiptNote;
 use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\Product;
@@ -208,6 +209,27 @@ function generatePONo($business_id = null)
 
     return sprintf(
         'PO-%04d',
+        $next_number
+    );
+}
+
+function generateGRNNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $grn = GoodReceiptNote::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($grn) {
+        $next_number = (int) substr($grn->good_receipt_note_no, strrpos($grn->good_receipt_note_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'GRN-%04d',
         $next_number
     );
 }
