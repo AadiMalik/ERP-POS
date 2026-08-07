@@ -213,7 +213,7 @@ class PurchaseRequestController extends Controller
             
             if ($purchase_request_quotation['Status']===true) {
                 return $this->success(
-                    Message::SUCCESS,
+                    $purchase_request_quotation['Message'] ?? Message::SUCCESS,
                     []
                 );
             } else {

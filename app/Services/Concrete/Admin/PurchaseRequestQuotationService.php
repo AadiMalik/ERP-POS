@@ -8,28 +8,17 @@ use App\Enums\Status;
 use App\Models\PurchaseRequestQuotation;
 use App\Models\PurchaseRequestQuotationDetail;
 use App\Repository\Repository;
-use App\Services\Concrete\Email\DTO\EmailData;
-use App\Services\Concrete\Email\EmailService;
-use App\Services\Concrete\SMS\DTO\SMSData;
-use App\Services\Concrete\SMS\SMSService;
-use App\Services\Concrete\Whatsapp\DTO\WhatsappData;
-use App\Services\Concrete\Whatsapp\WhatsappService;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Jobs\SendPurchaseRequestQuotationJob;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
 
 class PurchaseRequestQuotationService
 {
     protected $model_purchase_request_quotation;
     protected $model_purchase_request_quotation_details;
-    protected $email_service;
-    protected $whatsapp_service;
-    protected $sms_service;
     protected $with = [
         'business',
         'branch',
@@ -45,9 +34,6 @@ class PurchaseRequestQuotationService
     {
         $this->model_purchase_request_quotation = new Repository(new PurchaseRequestQuotation());
         $this->model_purchase_request_quotation_details = new Repository(new PurchaseRequestQuotationDetail());
-        $this->email_service = new EmailService();
-        $this->whatsapp_service = new WhatsappService();
-        $this->sms_service = new SMSService();
     }
 
     public function getData($obj)
@@ -254,146 +240,24 @@ class PurchaseRequestQuotationService
                 ]);
             }
 
-            //pdf generate
-            $quotation = $this->model_purchase_request_quotation
-                ->getModel()::with([
-                    'supplier',
-                    'business',
-                    'createdby',
-                    'purchaseRequestQuotationDetails.product',
-                    'purchaseRequestQuotationDetails.productVariation',
-                    'purchaseRequestQuotationDetails.unit'
-                ])
-                ->find($purchase_request_quotation->purchase_request_quotation_id);
-
-            $pdf = Pdf::loadView(
-                'admin.purchase_request_quotation.pdf.pdf',
-                compact('quotation')
-            );
-
-            $fileName = 'quotation_' . $quotation->purchase_request_quotation_no . '.pdf';
-
-            $folder = public_path('uploads/quotations');
-
-            if (!File::exists($folder)) {
-                File::makeDirectory($folder, 0755, true);
-            }
-            $path = $folder . '/' . $fileName;
-            $pdf->save($path);
-
-            $purchase_request_quotation->update([
-                'pdf_path' => $fileName
-            ]);
-
-            if ($obj['send_email'] === 1) {
-                $email = new EmailData([
-                    'to' => $quotation->supplier->email,
-                    'subject' => 'Purchase Request Quotation',
-                    'body' => 'Please find attached quotation.',
-                    'attachment' => public_path('uploads/quotations/' . $fileName),
-                    'attachment_name' => 'Quotation.pdf'
-                ]);
-
-                $response = $this->email_service->send(
-                    $purchase_request_quotation->business_id,
-                    $email
-                );
-
-                if (!$response['status']) {
-
-                    Log::error($response['message']);
-                    DB::rollBack();
-                    return [
-                        'Status' => false,
-                        'Message' => $response['message']
-                    ];
-                }
-            }
-
-            if ($obj['send_whatsapp'] === 1) {
-                $whatsapp = new WhatsappData([
-
-                    'phone' => $quotation->supplier->phone,
-
-                    'message' => 'Please review attached quotation.',
-
-                    'attachment' => public_path('uploads/quotations/' . $fileName),
-
-                    'file_name' => 'Quotation.pdf'
-
-                ]);
-
-                $response = $this->whatsapp_service->send(
-
-                    $quotation->business_id,
-
-                    $whatsapp
-
-                );
-
-                if (!$response['status']) {
-
-                    Log::error($response['message']);
-                    DB::rollBack();
-                    return [
-                        'Status' => false,
-                        'Message' => $response['message']
-                    ];
-                }
-            }
-
-            if ($obj['send_sms'] === 1) {
-                $productLines = [];
-
-                foreach ($quotation->purchaseRequestQuotationDetails as $index => $item) {
-
-                    if ($index == 2) {
-                        break;
-                    }
-
-                    $product = $item->product?->name ?? '';
-
-                    $variation = $item->productVariation?->name;
-
-                    if (!empty($variation)) {
-                        $product .= " ({$variation})";
-                    }
-
-                    $product .= " x{$item->requested_quantity}";
-
-                    $productLines[] = $product;
-                }
-
-                $remaining = count($quotation->purchaseRequestQuotationDetails) - count($productLines);
-
-                $message = "Quotation Request\n";
-                $message .= "Business: {$quotation->business->name}\n";
-                $message .= "Quotation: {$quotation->purchase_request_quotation_no}\n";
-                $message .= implode(", ", $productLines);
-
-                if ($remaining > 0) {
-                    $message .= " +{$remaining} more";
-                }
-                $message .= "\n";
-                $message .= $quotation->pdf_url;
-
-                $sms = new SMSData([
-                    'phone'   => $quotation->supplier->phone,
-                    'message' => $message
-                ]);
-
-                $response = $this->sms_service->send(
-                    $quotation->business_id,
-                    $sms
-                );
-
-                if (!$response['status']) {
-
-                    Log::error($response['message']);
-                }
-            }
-
             DB::commit();
+
+            // PDF generation and Email/WhatsApp/SMS sending involve dompdf
+            // rendering and outbound network calls, which are too slow to do
+            // inline in the request that saved this record (this is what was
+            // causing the print/send timeout). Hand off to a queued job
+            // instead, so the response below returns immediately.
+            $send_email = ($obj['send_email'] ?? 0) === 1;
+            $send_whatsapp = ($obj['send_whatsapp'] ?? 0) === 1;
+            $send_sms = ($obj['send_sms'] ?? 0) === 1;
+
+            SendPurchaseRequestQuotationJob::dispatch(
+                $purchase_request_quotation->purchase_request_quotation_id,
+                $send_email,
+                $send_whatsapp,
+                $send_sms,
+                Auth::user()->id
+            );
 
             return [
                 'Status' => true,

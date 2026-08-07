@@ -38,7 +38,11 @@ return [
             'driver' => 'database',
             'table' => 'jobs',
             'queue' => 'default',
-            'retry_after' => 90,
+            // PDF render + up to 3 sequential provider API calls (email/whatsapp/sms)
+            // can comfortably exceed the 90s default; keep this above the job's own
+            // $timeout (SendPurchaseRequestQuotationJob::$timeout = 120) so a slow
+            // provider doesn't cause the same job to be picked up twice.
+            'retry_after' => 300,
             'after_commit' => false,
         ],
 

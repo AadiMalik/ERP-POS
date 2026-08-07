@@ -218,4 +218,14 @@ class PurchaseController extends Controller
             );
         }
     }
+
+    public function destroy($purchase_id)
+    {
+        try {
+            $this->purchase_service->delete($purchase_id);
+            return $this->success(Message::DELETE, []);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
 }

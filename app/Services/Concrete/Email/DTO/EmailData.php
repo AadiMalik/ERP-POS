@@ -7,8 +7,8 @@ class EmailData
     public string $to;
 
     public ?string $subject = null;
-    // blade view
-    public string $view;
+    // blade view (optional)
+    public ?string $view = null;
     // blade data
     public array $data = [];
     // Direct HTML Body (optional)
@@ -21,10 +21,10 @@ class EmailData
     public function __construct(array $data)
     {
         $this->to = $data['to'];
-        $this->subject = $data['subject'];
-        $this->view = $data['view'];
-        $this->data = $data['data'];
-        $this->body = $data['body'];
+        $this->subject = $data['subject'] ?? null;
+        $this->view = $data['view'] ?? null;
+        $this->data = $data['data'] ?? [];
+        $this->body = $data['body'] ?? null;
         $this->attachment = $data['attachment'] ?? null;
         $this->attachment_name = $data['attachment_name'] ?? null;
         $this->cc = $data['cc'] ?? [];
