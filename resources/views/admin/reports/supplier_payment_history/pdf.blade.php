@@ -1,0 +1,98 @@
+@php
+    $business = Auth::user()->business;
+@endphp
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 10px;
+            color: #222;
+        }
+
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table.data-table th,
+        table.data-table td {
+            border: 1px solid #ccc;
+            padding: 4px 5px;
+        }
+
+        table.data-table th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    @include('admin.partials.print.pdf_header', [
+        'business' => $business,
+        'branch' => null,
+        'title' => 'Supplier Payment History Report',
+        'doc_no' => '',
+        'doc_date' => localDate(now()),
+        'reference' => [],
+    ])
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Payment Date</th>
+                <th>Payment No.</th>
+                <th>Supplier</th>
+                <th>Method</th>
+                <th>Ref. Purchase</th>
+                <th>Bank/Cash Account</th>
+                <th class="text-right">Tax</th>
+                <th class="text-right">Discount</th>
+                <th class="text-right">Net Payment</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($rows as $row)
+                <tr>
+                    <td>{{ localDate($row->payment_date) }}</td>
+                    <td>{{ $row->payment_no }}</td>
+                    <td>{{ $row->supplier->name ?? '' }}</td>
+                    <td>{{ ucwords(str_replace('_', ' ', $row->payment_method)) }}</td>
+                    <td>{{ $row->purchase->purchase_no ?? '' }}</td>
+                    <td>{{ $row->paymentAccount->name ?? '' }}</td>
+                    <td class="text-right">{{ currency($row->tax_amount) }}</td>
+                    <td class="text-right">{{ currency($row->discount_amount) }}</td>
+                    <td class="text-right">{{ currency($row->net_amount) }}</td>
+                    <td>{{ ucfirst($row->status) }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="10" class="text-center">No payments found</td>
+                </tr>
+            @endforelse
+            <tr>
+                <td colspan="6"><strong>Total</strong></td>
+                <td class="text-right"><strong>{{ currency($rows->sum('tax_amount')) }}</strong></td>
+                <td class="text-right"><strong>{{ currency($rows->sum('discount_amount')) }}</strong></td>
+                <td class="text-right"><strong>{{ currency($rows->sum('net_amount')) }}</strong></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>

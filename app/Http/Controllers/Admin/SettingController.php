@@ -127,6 +127,7 @@ class SettingController extends Controller
             'currency_symbol'   => 'required|string|max:10',
             'currency_position' => 'required|in:before,after',
             'decimal_points'    => 'required|integer|min:0|max:6',
+            'aging_basis'       => 'nullable|in:due_date,invoice_date',
         ];
 
         $validate = Validator::make($request->all(), $rules);

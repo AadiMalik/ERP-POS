@@ -70,6 +70,17 @@
                 </option>
             </select>
         </div>
+        <div class="col-md-6 mb-3">
+            <label>Supplier Aging Basis</label>
+            <select class="form-select" name="aging_basis">
+                <option value="due_date" {{ $accounting_setting->aging_basis == 'due_date' ? 'selected' : '' }}>
+                    Due Date (Invoice Date + Supplier Credit Days)
+                </option>
+                <option value="invoice_date" {{ $accounting_setting->aging_basis == 'invoice_date' ? 'selected' : '' }}>
+                    Invoice (GRN) Date
+                </option>
+            </select>
+        </div>
         <div class="col-md-12">
             <hr>
             <div class="text-end">

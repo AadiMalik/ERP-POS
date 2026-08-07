@@ -33,6 +33,7 @@ class AccountingSetting extends Model
         'currency_symbol',
         'currency_position',
         'decimal_points',
+        'aging_basis',
 
         'createdby_id',
         'updatedby_id',

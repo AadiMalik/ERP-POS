@@ -259,6 +259,37 @@
             </ul>
         </li>
 
+        {{-- Procurement Reports --}}
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons fa fa-file-text-o"></i>
+                <div data-i18n="Procurement Reports">Procurement Reports</div>
+            </a>
+
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ url('/admin/reports/supplier-ledger') }}" class="menu-link">
+                        <div data-i18n="Supplier Ledger">Supplier Ledger</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/reports/supplier-aging') }}" class="menu-link">
+                        <div data-i18n="Supplier Aging">Supplier Aging</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/reports/accounts-payable') }}" class="menu-link">
+                        <div data-i18n="Accounts Payable">Accounts Payable</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/reports/supplier-payment-history') }}" class="menu-link">
+                        <div data-i18n="Supplier Payment History">Supplier Payment History</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Pages</span>
         </li>

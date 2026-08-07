@@ -275,6 +275,45 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::get('{supplier_payment_id}/print', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'print'])->name('supplier-payment.print');
     });
 
+    //procurement reports
+    Route::group(['prefix' => 'reports'], function () {
+        Route::group(['prefix' => 'supplier-ledger'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\SupplierLedgerReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\SupplierLedgerReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\SupplierLedgerReportController::class, 'print'])->name('reports.supplier-ledger.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\SupplierLedgerReportController::class, 'pdf'])->name('reports.supplier-ledger.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\SupplierLedgerReportController::class, 'export'])->name('reports.supplier-ledger.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\SupplierLedgerReportController::class, 'exportCsv'])->name('reports.supplier-ledger.export-csv');
+        });
+
+        Route::group(['prefix' => 'supplier-aging'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\SupplierAgingReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\SupplierAgingReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\SupplierAgingReportController::class, 'print'])->name('reports.supplier-aging.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\SupplierAgingReportController::class, 'pdf'])->name('reports.supplier-aging.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\SupplierAgingReportController::class, 'export'])->name('reports.supplier-aging.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\SupplierAgingReportController::class, 'exportCsv'])->name('reports.supplier-aging.export-csv');
+        });
+
+        Route::group(['prefix' => 'accounts-payable'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\AccountsPayableReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\AccountsPayableReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\AccountsPayableReportController::class, 'print'])->name('reports.accounts-payable.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\AccountsPayableReportController::class, 'pdf'])->name('reports.accounts-payable.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\AccountsPayableReportController::class, 'export'])->name('reports.accounts-payable.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\AccountsPayableReportController::class, 'exportCsv'])->name('reports.accounts-payable.export-csv');
+        });
+
+        Route::group(['prefix' => 'supplier-payment-history'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\SupplierPaymentHistoryReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\SupplierPaymentHistoryReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\SupplierPaymentHistoryReportController::class, 'print'])->name('reports.supplier-payment-history.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\SupplierPaymentHistoryReportController::class, 'pdf'])->name('reports.supplier-payment-history.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\SupplierPaymentHistoryReportController::class, 'export'])->name('reports.supplier-payment-history.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\SupplierPaymentHistoryReportController::class, 'exportCsv'])->name('reports.supplier-payment-history.export-csv');
+        });
+    });
+
     //Setting
     Route::group(['prefix' => 'setting'], function () {
         Route::get('/', [App\Http\Controllers\Admin\SettingController::class, 'index']);
