@@ -6,6 +6,7 @@ use App\Enums\Message;
 use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\BusinessService;
+use App\Services\Concrete\Admin\DocumentSendLogService;
 use App\Services\Concrete\Admin\ProductService;
 use App\Services\Concrete\Admin\PurchaseRequestQuotationService;
 use App\Services\Concrete\Admin\PurchaseRequestService;
@@ -14,6 +15,7 @@ use App\Traits\ResponseAPI;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -26,19 +28,22 @@ class PurchaseRequestQuotationController extends Controller
     protected $business_service;
     protected $product_service;
     protected $supplier_service;
+    protected $document_send_log_service;
 
     public function __construct(
         PurchaseRequestService $purchase_request_service,
         PurchaseRequestQuotationService $purchase_request_quotation_service,
         ProductService $product_service,
         BusinessService $business_service,
-        SupplierService $supplier_service
+        SupplierService $supplier_service,
+        DocumentSendLogService $document_send_log_service
     ) {
         $this->purchase_request_quotation_service = $purchase_request_quotation_service;
         $this->purchase_request_service = $purchase_request_service;
         $this->product_service = $product_service;
         $this->business_service = $business_service;
         $this->supplier_service = $supplier_service;
+        $this->document_send_log_service = $document_send_log_service;
     }
 
     public function index(Request $request)
@@ -238,5 +243,31 @@ class PurchaseRequestQuotationController extends Controller
                 Message::ERROR
             );
         }
+    }
+
+    public function print($purchase_request_quotation_id)
+    {
+        $quotation = $this->purchase_request_quotation_service->getById($purchase_request_quotation_id);
+
+        if (!$quotation) {
+            abort(404);
+        }
+
+        try {
+            $this->document_send_log_service->log(
+                $quotation->business_id,
+                'purchase_request_quotation',
+                $purchase_request_quotation_id,
+                'print',
+                null,
+                'sent',
+                null,
+                Auth::id()
+            );
+        } catch (Exception $e) {
+            Log::warning('Print audit log failed: ' . $e->getMessage());
+        }
+
+        return view('admin.purchase_request_quotation.print.print', compact('quotation'));
     }
 }

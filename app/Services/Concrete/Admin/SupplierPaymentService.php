@@ -28,6 +28,7 @@ class SupplierPaymentService
         'business',
         'branch',
         'supplier',
+        'supplier.account',
         'purchase',
         'paymentAccount',
     ];
@@ -141,6 +142,11 @@ class SupplierPaymentService
                         <i class='fa fa-pencil'></i>
                         </button>";
 
+                $printButton = "<a class='btn btn-icon btn-outline-secondary mr-2' target='_blank'
+                    href='" . route('supplier-payment.print', $item->supplier_payment_id) . "' title='Print'>
+                    <i class='fa fa-print'></i>
+                    </a>";
+
                 $deleteButton = $item->status !== Status::CANCELLED
                     ? "<a class='btn btn-icon btn-outline-danger'
                     id='deleteSupplierPayment'
@@ -149,7 +155,7 @@ class SupplierPaymentService
                     </a>"
                     : '';
 
-                return $editButton . $deleteButton;
+                return $editButton . $printButton . $deleteButton;
             })
             ->rawColumns(['business', 'branch', 'supplier', 'purchase_no', 'payment_method', 'amount', 'net_amount', 'status', 'action'])
             ->make(true);

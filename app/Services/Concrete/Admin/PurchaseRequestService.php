@@ -161,6 +161,12 @@ class PurchaseRequestService
                             <i class='fa fa-file-text'></i>
                         </a>";
                 }
+                $html .= "
+                    <a class='btn btn-icon btn-outline-secondary mr-2' target='_blank'
+                        href='" . route('purchase-request.print', $item->purchase_request_id) . "' title='Print'>
+                        <i class='fa fa-print'></i>
+                    </a>";
+
                 if ($item->status == Status::PENDING) {
                     $html .= "
                     <button

@@ -7,6 +7,7 @@ use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Traits\ResponseAPI;
 use App\Services\Concrete\Admin\BusinessService;
+use App\Services\Concrete\Admin\DocumentSendLogService;
 use App\Services\Concrete\Admin\GrnService;
 use App\Services\Concrete\Admin\PurchaseService;
 use App\Services\Concrete\Admin\SupplierService;
@@ -14,6 +15,7 @@ use App\Services\Concrete\Admin\WarehouseService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -26,19 +28,22 @@ class GoodReceiptNoteController extends Controller
     protected $business_service;
     protected $supplier_service;
     protected $warehouse_service;
+    protected $document_send_log_service;
 
     public function __construct(
         GrnService $grn_service,
         PurchaseService $purchase_service,
         BusinessService $business_service,
         SupplierService $supplier_service,
-        WarehouseService $warehouse_service
+        WarehouseService $warehouse_service,
+        DocumentSendLogService $document_send_log_service
     ) {
         $this->grn_service = $grn_service;
         $this->purchase_service = $purchase_service;
         $this->business_service = $business_service;
         $this->supplier_service = $supplier_service;
         $this->warehouse_service = $warehouse_service;
+        $this->document_send_log_service = $document_send_log_service;
     }
 
     public function index()
@@ -175,5 +180,31 @@ class GoodReceiptNoteController extends Controller
         } catch (Exception $e) {
             return $this->error(Message::ERROR);
         }
+    }
+
+    public function print($good_receipt_note_id)
+    {
+        $grn = $this->grn_service->getById($good_receipt_note_id);
+
+        if (!$grn) {
+            abort(404);
+        }
+
+        try {
+            $this->document_send_log_service->log(
+                $grn->business_id,
+                'good_receipt_note',
+                $good_receipt_note_id,
+                'print',
+                null,
+                'sent',
+                null,
+                Auth::id()
+            );
+        } catch (Exception $e) {
+            Log::warning('Print audit log failed: ' . $e->getMessage());
+        }
+
+        return view('admin.good_receipt_note.print.print', compact('grn'));
     }
 }

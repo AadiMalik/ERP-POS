@@ -179,6 +179,11 @@ class GrnService
                         <i class='fa fa-pencil'></i>
                         </button>";
 
+                $printButton = "<a class='btn btn-icon btn-outline-secondary mr-2' target='_blank'
+                    href='" . route('good-receipt-note.print', $item->good_receipt_note_id) . "' title='Print'>
+                    <i class='fa fa-print'></i>
+                    </a>";
+
                 $deleteButton = $item->status !== Status::CANCELLED
                     ? "<a class='btn btn-icon btn-outline-danger'
                     id='deleteGoodReceiptNote'
@@ -187,7 +192,7 @@ class GrnService
                     </a>"
                     : '';
 
-                return $editButton . $deleteButton;
+                return $editButton . $printButton . $deleteButton;
             })
             ->rawColumns(['good_receipt_note_date', 'purchase_no', 'business', 'branch', 'warehouse', 'supplier', 'total_products', 'total', 'status', 'action'])
             ->make(true);

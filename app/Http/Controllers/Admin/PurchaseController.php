@@ -7,6 +7,7 @@ use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Traits\ResponseAPI;
 use App\Services\Concrete\Admin\BusinessService;
+use App\Services\Concrete\Admin\DocumentSendLogService;
 use App\Services\Concrete\Admin\ProductService;
 use App\Services\Concrete\Admin\PurchaseService;
 use App\Services\Concrete\Admin\PurchaseRequestService;
@@ -16,6 +17,7 @@ use App\Services\Concrete\Admin\WarehouseService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -30,6 +32,7 @@ class PurchaseController extends Controller
     protected $warehouse_service;
     protected $supplier_service;
     protected $unit_service;
+    protected $document_send_log_service;
 
     public function __construct(
         PurchaseService $purchase_service,
@@ -38,7 +41,8 @@ class PurchaseController extends Controller
         BusinessService $business_service,
         SupplierService $supplier_service,
         WarehouseService $warehouse_service,
-        UnitService $unit_service
+        UnitService $unit_service,
+        DocumentSendLogService $document_send_log_service
     ) {
         $this->purchase_service = $purchase_service;
         $this->purchase_request_service = $purchase_request_service;
@@ -47,6 +51,7 @@ class PurchaseController extends Controller
         $this->supplier_service = $supplier_service;
         $this->warehouse_service = $warehouse_service;
         $this->unit_service = $unit_service;
+        $this->document_send_log_service = $document_send_log_service;
     }
 
     public function index()
@@ -217,6 +222,32 @@ class PurchaseController extends Controller
                 Message::ERROR
             );
         }
+    }
+
+    public function print($purchase_id)
+    {
+        $purchase = $this->purchase_service->getById($purchase_id);
+
+        if (!$purchase) {
+            abort(404);
+        }
+
+        try {
+            $this->document_send_log_service->log(
+                $purchase->business_id,
+                'purchase',
+                $purchase_id,
+                'print',
+                null,
+                'sent',
+                null,
+                Auth::id()
+            );
+        } catch (Exception $e) {
+            Log::warning('Print audit log failed: ' . $e->getMessage());
+        }
+
+        return view('admin.purchase.print.print', compact('purchase'));
     }
 
     public function destroy($purchase_id)

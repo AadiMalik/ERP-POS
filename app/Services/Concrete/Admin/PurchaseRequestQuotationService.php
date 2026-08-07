@@ -23,6 +23,7 @@ class PurchaseRequestQuotationService
         'business',
         'branch',
         'supplier',
+        'purchaseRequest',
         'purchaseRequestQuotationDetails',
         'purchaseRequestQuotationDetails.product',
         'purchaseRequestQuotationDetails.product.productVariations',
@@ -140,6 +141,12 @@ class PurchaseRequestQuotationService
                     id='editPurchaseRequestQuotation'>
 
                     <i class='fa fa-pencil'></i>
+                    </a>
+
+                    <a class='btn btn-icon btn-outline-secondary mr-2' target='_blank'
+                     href='" . route('purchase-request-quotation.print', $item->purchase_request_quotation_id) . "'
+                    title='Print'>
+                    <i class='fa fa-print'></i>
                     </a>
 
                     <a class='btn btn-icon btn-outline-danger'

@@ -207,6 +207,7 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::post('data', [App\Http\Controllers\Admin\JournalEntryController::class, 'getData'])->name('journal-entry-data');
         Route::get('entry-no', [App\Http\Controllers\Admin\JournalEntryController::class, 'getEntryNo'])->name('journal-entry.entry-no');
         Route::get('detail', [App\Http\Controllers\Admin\JournalEntryController::class, 'detail'])->name('journal-entry.detail');
+        Route::get('{journal_entry_id}/print', [App\Http\Controllers\Admin\JournalEntryController::class, 'print'])->name('journal-entry.print');
     });
     Route::resource('journal-entry', App\Http\Controllers\Admin\JournalEntryController::class);
 
@@ -226,6 +227,7 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'byBusiness']);
         Route::post('send-quotation',[App\Http\Controllers\Admin\PurchaseRequestController::class,'sendQuotation']);
         Route::get('details/{purchase_request_id}', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'details']);
+        Route::get('{purchase_request_id}/print', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'print'])->name('purchase-request.print');
     });
 
     //purchase
@@ -238,6 +240,7 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::get('details/{purchase_request_quotation_id}', [App\Http\Controllers\Admin\PurchaseRequestQuotationController::class, 'details']);
         Route::get('detail-received/{purchase_request_id}', [App\Http\Controllers\Admin\PurchaseRequestQuotationController::class, 'getRecievedQuotationByPRId']);
         Route::get('selected-by-purchase-request/{purchase_request_id}', [App\Http\Controllers\Admin\PurchaseRequestQuotationController::class, 'selectedByPurchaseRequest']);
+        Route::get('{purchase_request_quotation_id}/print', [App\Http\Controllers\Admin\PurchaseRequestQuotationController::class, 'print'])->name('purchase-request-quotation.print');
     });
 
     //purchase
@@ -248,6 +251,7 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\PurchaseController::class, 'byBusiness']);
 
         Route::get('details/{purchase_id}', [App\Http\Controllers\Admin\PurchaseController::class, 'details']);
+        Route::get('{purchase_id}/print', [App\Http\Controllers\Admin\PurchaseController::class, 'print'])->name('purchase.print');
     });
 
     //good receipt note
@@ -257,6 +261,7 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::post('change-status', [App\Http\Controllers\Admin\GoodReceiptNoteController::class, 'status']);
         Route::get('details/{good_receipt_note_id}', [App\Http\Controllers\Admin\GoodReceiptNoteController::class, 'details']);
         Route::get('purchase-details/{purchase_id}', [App\Http\Controllers\Admin\GoodReceiptNoteController::class, 'getPurchaseDetails']);
+        Route::get('{good_receipt_note_id}/print', [App\Http\Controllers\Admin\GoodReceiptNoteController::class, 'print'])->name('good-receipt-note.print');
     });
 
     //supplier payment
@@ -267,6 +272,7 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::get('details/{supplier_payment_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'details']);
         Route::get('ledger/{supplier_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'supplierLedger']);
         Route::get('purchases-by-supplier/{supplier_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'purchasesBySupplier']);
+        Route::get('{supplier_payment_id}/print', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'print'])->name('supplier-payment.print');
     });
 
     //Setting

@@ -53,6 +53,11 @@ class PurchaseRequestQuotation extends Model
         return $this->hasMany(PurchaseRequestQuotationDetail::class, 'purchase_request_quotation_id', 'purchase_request_quotation_id');
     }
 
+    public function purchaseRequest()
+    {
+        return $this->belongsTo(PurchaseRequest::class, 'purchase_request_id', 'purchase_request_id');
+    }
+
     public function supplier()
     {
         return $this->belongsTo(Supplier::class, 'supplier_id', 'supplier_id');

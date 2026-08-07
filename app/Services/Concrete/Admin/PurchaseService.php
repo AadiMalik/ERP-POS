@@ -155,6 +155,11 @@ class PurchaseService
                         </button>";
 
                 return $editButton . "
+                    <a class='btn btn-icon btn-outline-secondary mr-2' target='_blank'
+                    href='" . route('purchase.print', $item->purchase_id) . "' title='Print'>
+                    <i class='fa fa-print'></i>
+                    </a>
+
                     <a class='btn btn-icon btn-outline-danger'
                     id='deletePurchase'
                     data-id='{$item->purchase_id}'>

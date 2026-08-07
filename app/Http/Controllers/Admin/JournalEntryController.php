@@ -7,12 +7,14 @@ use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\AccountService;
 use App\Services\Concrete\Admin\BranchService;
 use App\Services\Concrete\Admin\BusinessService;
+use App\Services\Concrete\Admin\DocumentSendLogService;
 use App\Services\Concrete\Admin\JournalEntryService;
 use App\Services\Concrete\Admin\JournalService;
 use App\Traits\ResponseAPI;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -25,19 +27,22 @@ class JournalEntryController extends Controller
     protected $account_service;
     protected $business_service;
     protected $branch_service;
+    protected $document_send_log_service;
 
     public function __construct(
         JournalEntryService $journal_entry_service,
         JournalService $journal_service,
         AccountService $account_service,
         BusinessService $business_service,
-        BranchService $branch_service
+        BranchService $branch_service,
+        DocumentSendLogService $document_send_log_service
     ) {
         $this->journal_entry_service = $journal_entry_service;
         $this->journal_service = $journal_service;
         $this->account_service = $account_service;
         $this->business_service = $business_service;
         $this->branch_service = $branch_service;
+        $this->document_send_log_service = $document_send_log_service;
     }
 
     public function index()
@@ -182,5 +187,31 @@ class JournalEntryController extends Controller
                 Message::ERROR
             );
         }
+    }
+
+    public function print($journal_entry_id)
+    {
+        $journal_entry = $this->journal_entry_service->getById($journal_entry_id);
+
+        if (!$journal_entry) {
+            abort(404);
+        }
+
+        try {
+            $this->document_send_log_service->log(
+                $journal_entry->business_id,
+                'journal_entry',
+                $journal_entry_id,
+                'print',
+                null,
+                'sent',
+                null,
+                Auth::id()
+            );
+        } catch (Exception $e) {
+            Log::warning('Print audit log failed: ' . $e->getMessage());
+        }
+
+        return view('admin.journal_entry.print.print', compact('journal_entry'));
     }
 }

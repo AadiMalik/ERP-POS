@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Purchase;
 use App\Services\Concrete\Admin\AccountService;
 use App\Services\Concrete\Admin\BusinessService;
+use App\Services\Concrete\Admin\DocumentSendLogService;
 use App\Services\Concrete\Admin\SettingService;
 use App\Services\Concrete\Admin\SupplierPaymentService;
 use App\Services\Concrete\Admin\SupplierService;
@@ -17,6 +18,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -29,19 +31,22 @@ class SupplierPaymentController extends Controller
     protected $supplier_service;
     protected $setting_service;
     protected $account_service;
+    protected $document_send_log_service;
 
     public function __construct(
         SupplierPaymentService $supplier_payment_service,
         BusinessService $business_service,
         SupplierService $supplier_service,
         SettingService $setting_service,
-        AccountService $account_service
+        AccountService $account_service,
+        DocumentSendLogService $document_send_log_service
     ) {
         $this->supplier_payment_service = $supplier_payment_service;
         $this->business_service = $business_service;
         $this->supplier_service = $supplier_service;
         $this->setting_service = $setting_service;
         $this->account_service = $account_service;
+        $this->document_send_log_service = $document_send_log_service;
     }
 
     public function index()
@@ -211,5 +216,31 @@ class SupplierPaymentController extends Controller
         } catch (Exception $e) {
             return $this->error(Message::ERROR);
         }
+    }
+
+    public function print($supplier_payment_id)
+    {
+        $payment = $this->supplier_payment_service->getById($supplier_payment_id);
+
+        if (!$payment) {
+            abort(404);
+        }
+
+        try {
+            $this->document_send_log_service->log(
+                $payment->business_id,
+                'supplier_payment',
+                $supplier_payment_id,
+                'print',
+                null,
+                'sent',
+                null,
+                Auth::id()
+            );
+        } catch (Exception $e) {
+            Log::warning('Print audit log failed: ' . $e->getMessage());
+        }
+
+        return view('admin.supplier_payment.print.print', compact('payment'));
     }
 }

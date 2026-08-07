@@ -22,7 +22,8 @@ class JournalEntryService
             'business',
             'branch',
             'journal',
-            'journalEntryDetails'
+            'journalEntryDetails',
+            'journalEntryDetails.account'
       ];
 
       public function __construct()
@@ -98,6 +99,12 @@ class JournalEntryService
                     id='editProduct'>
 
                     <i class='fa fa-pencil'></i>
+                    </a>
+
+                    <a class='btn btn-icon btn-outline-secondary mr-2' target='_blank'
+                    href='" . route('journal-entry.print', $item->journal_entry_id) . "'
+                    title='Print'>
+                    <i class='fa fa-print'></i>
                     </a>
 
                     <a class='btn btn-icon btn-outline-danger'
@@ -197,7 +204,7 @@ class JournalEntryService
 
       public function getById($journal_entry_id)
       {
-            return $this->model_journal_entry->find($journal_entry_id);
+            return $this->model_journal_entry->getModel()::with($this->with)->find($journal_entry_id);
       }
 
       public function getDetailsById($journal_entry_id)
