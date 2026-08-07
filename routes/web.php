@@ -259,6 +259,16 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::get('purchase-details/{purchase_id}', [App\Http\Controllers\Admin\GoodReceiptNoteController::class, 'getPurchaseDetails']);
     });
 
+    //supplier payment
+    Route::resource('supplier-payment', App\Http\Controllers\Admin\SupplierPaymentController::class);
+    Route::group(['prefix' => 'supplier-payment'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'getData']);
+        Route::post('change-status', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'status']);
+        Route::get('details/{supplier_payment_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'details']);
+        Route::get('ledger/{supplier_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'supplierLedger']);
+        Route::get('purchases-by-supplier/{supplier_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'purchasesBySupplier']);
+    });
+
     //Setting
     Route::group(['prefix' => 'setting'], function () {
         Route::get('/', [App\Http\Controllers\Admin\SettingController::class, 'index']);

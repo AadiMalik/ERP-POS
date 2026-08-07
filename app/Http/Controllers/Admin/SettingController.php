@@ -120,6 +120,8 @@ class SettingController extends Controller
             'default_sale_account_id'            => 'nullable|exists:accounts,account_id',
             'default_sale_return_account_id'     => 'nullable|exists:accounts,account_id',
             'default_inventory_account_id'       => 'nullable|exists:accounts,account_id',
+            'default_withholding_tax_account_id' => 'nullable|exists:accounts,account_id',
+            'manual_payment_account_selection'   => 'nullable|boolean',
 
             'currency'          => 'required|string|max:20',
             'currency_symbol'   => 'required|string|max:10',

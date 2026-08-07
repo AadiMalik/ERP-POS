@@ -251,6 +251,11 @@
                         <div data-i18n="Goods Receipt Notes">Goods Receipt Notes</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/supplier-payment') }}" class="menu-link">
+                        <div data-i18n="Supplier Payments">Supplier Payments</div>
+                    </a>
+                </li>
             </ul>
         </li>
 

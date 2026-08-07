@@ -11,6 +11,7 @@ use App\Models\Purchase;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestQuotation;
 use App\Models\Supplier;
+use App\Models\SupplierPayment;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Support\Facades\Auth;
@@ -230,6 +231,27 @@ function generateGRNNo($business_id = null)
 
     return sprintf(
         'GRN-%04d',
+        $next_number
+    );
+}
+
+function generateSupplierPaymentNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $supplier_payment = SupplierPayment::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($supplier_payment) {
+        $next_number = (int) substr($supplier_payment->payment_no, strrpos($supplier_payment->payment_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'SP-%04d',
         $next_number
     );
 }

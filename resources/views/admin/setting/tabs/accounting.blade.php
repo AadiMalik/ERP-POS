@@ -15,6 +15,7 @@
         'default_sale_account_id' => 'Sale Account',
         'default_sale_return_account_id' => 'Sale Return',
         'default_inventory_account_id' => 'Inventory Account',
+        'default_withholding_tax_account_id' => 'Withholding Tax Account',
     ];
 @endphp
 <form id="accountingSettingForm">
@@ -57,6 +58,17 @@
             <label>Decimal Points</label>
             <input type="number" class="form-control" name="decimal_points"
                 value="{{ $accounting_setting->decimal_points }}">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label>Supplier Payment Account Selection</label>
+            <select class="form-select" name="manual_payment_account_selection">
+                <option value="0" {{ !$accounting_setting->manual_payment_account_selection ? 'selected' : '' }}>
+                    Automatic (use default Cash/Bank account)
+                </option>
+                <option value="1" {{ $accounting_setting->manual_payment_account_selection ? 'selected' : '' }}>
+                    Manual (let user pick the Cash/Bank account)
+                </option>
+            </select>
         </div>
         <div class="col-md-12">
             <hr>
