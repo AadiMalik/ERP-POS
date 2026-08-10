@@ -256,14 +256,14 @@
                         <div data-i18n="Supplier Payments">Supplier Payments</div>
                     </a>
                 </li>
+
             </ul>
         </li>
-
-        {{-- Procurement Reports --}}
+        {{-- Reports --}}
         <li class="menu-item">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fa fa-file-text-o"></i>
-                <div data-i18n="Procurement Reports">Procurement Reports</div>
+                <i class="menu-icon tf-icons fa fa-file"></i>
+                <div data-i18n="Reports">Reports</div>
             </a>
 
             <ul class="menu-sub">
@@ -289,6 +289,7 @@
                 </li>
             </ul>
         </li>
+
 
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Pages</span>
