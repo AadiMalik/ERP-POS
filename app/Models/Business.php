@@ -105,4 +105,9 @@ class Business extends Model
         return $this->hasOne(WhatsappSetting::class, 'business_id', 'business_id');
     }
 
+    public function printSetting()
+    {
+        return $this->hasOne(PrintSetting::class, 'business_id', 'business_id');
+    }
+
 }

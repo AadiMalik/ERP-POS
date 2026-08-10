@@ -1,10 +1,16 @@
 @php
     use App\Services\Concrete\Admin\Reports\AccountsPayableReportService;
     $business = Auth::user()->business;
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve(Auth::user()->business_id);
 @endphp
 @extends('layouts.print')
 
 @section('title', 'Accounts Payable Report')
+
+@section('css')
+    @include('admin.partials.print.page_css', ['print_config' => $print_config])
+@endsection
 
 @section('content')
     @include('admin.partials.print.header', [
@@ -16,6 +22,7 @@
         'reference' => [
             'Supplier' => optional($invoices->firstWhere('supplier_id', request('supplier_id')))->supplier_name ?? 'All Suppliers',
         ],
+        'print_config' => $print_config,
     ])
 
     <table class="print-table">
@@ -70,5 +77,6 @@
 
     @include('admin.partials.print.footer', [
         'signatories' => ['Prepared By', 'Verified By'],
+        'print_config' => $print_config,
     ])
 @endsection

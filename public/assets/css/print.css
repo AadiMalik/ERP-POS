@@ -66,8 +66,8 @@ body {
 }
 
 .print-header .company-logo {
-    width: 60px;
-    height: 60px;
+    max-width: 60px;
+    max-height: 60px;
     object-fit: contain;
 }
 
@@ -113,33 +113,43 @@ body {
     margin-bottom: 15px;
 }
 
-/* Status stamp */
-.badge-stamp-wrap {
+/* Watermark - centered, rotated, behind all content */
+.print-watermark {
     position: absolute;
-    top: 15mm;
-    right: 12mm;
-    text-align: right;
-    z-index: 5;
+    top: 50%;
+    left: 50%;
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Status badges - sit in their own row above the letterhead, right-aligned,
+   so they never overlap the company block or the doc-block details below. */
+.badge-stamp-wrap {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
 .badge-stamp {
     display: inline-block;
-    padding: 6px 14px;
-    border: 3px solid #999;
-    border-radius: 6px;
-    font-size: 14px;
+    padding: 4px 12px;
+    border: 2px solid #999;
+    border-radius: 4px;
+    font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    transform: rotate(8deg);
-    opacity: 0.9;
-    margin-bottom: 6px;
+    letter-spacing: 0.5px;
 }
 
 .badge-stamp-ribbon {
-    display: block;
+    display: inline-block;
     font-size: 11px;
-    transform: rotate(8deg);
 }
 
 .badge-stamp-success {
@@ -252,6 +262,13 @@ body {
 .print-remarks {
     font-size: 11px;
     margin-bottom: 20px;
+}
+
+/* Configurable footer text sections (notes, T&Cs, bank details, etc.) */
+.print-footer-section {
+    font-size: 11px;
+    margin-bottom: 10px;
+    white-space: pre-line;
 }
 
 /* Signature / footer */

@@ -64,6 +64,10 @@
                                 data-bs-target="#fbr">
                                 FBR
                             </button>
+                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
+                                data-bs-target="#print">
+                                Print
+                            </button>
                         </div>
                     </div>
                     <div class="col-md-9">
@@ -94,6 +98,9 @@
                             </div>
                             <div class="tab-pane fade" id="fbr">
                                 @include('admin.setting.tabs.fbr')
+                            </div>
+                            <div class="tab-pane fade" id="print">
+                                @include('admin.setting.tabs.print')
                             </div>
                         </div>
                     </div>

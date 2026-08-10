@@ -1,9 +1,17 @@
+@php
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve($quotation->business_id);
+@endphp
 @extends('layouts.print')
 
 @section('title', 'Quotation - ' . ($quotation->purchase_request_quotation_no ?? ''))
 
+@section('css')
+    @include('admin.partials.print.page_css', ['print_config' => $print_config])
+@endsection
+
 @section('content')
-    @include('admin.partials.print.status_badge', ['status' => $quotation->status])
+    @include('admin.partials.print.status_badge', ['status' => $quotation->status, 'print_config' => $print_config])
 
     @include('admin.partials.print.header', [
         'business' => $quotation->business,
@@ -17,6 +25,7 @@
             'Received Date' => !empty($quotation->received_date) ? localDate($quotation->received_date) : 'N/A',
             'Vendor Reference No.' => $quotation->vendor_reference_no ?? 'N/A',
         ],
+        'print_config' => $print_config,
     ])
 
     <table class="print-table">
@@ -89,5 +98,6 @@
 
     @include('admin.partials.print.footer', [
         'signatories' => ['Prepared By', 'Approved By'],
+        'print_config' => $print_config,
     ])
 @endsection

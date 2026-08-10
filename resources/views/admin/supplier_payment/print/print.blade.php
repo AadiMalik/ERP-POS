@@ -1,13 +1,21 @@
+@php
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve($payment->business_id);
+@endphp
 @extends('layouts.print')
 
 @section('title', 'Supplier Payment - ' . ($payment->payment_no ?? ''))
+
+@section('css')
+    @include('admin.partials.print.page_css', ['print_config' => $print_config])
+@endsection
 
 @section('content')
     @php
         $posted = $payment->status === \App\Enums\Status::POSTED;
     @endphp
 
-    @include('admin.partials.print.status_badge', ['status' => $payment->status, 'posted' => $posted])
+    @include('admin.partials.print.status_badge', ['status' => $payment->status, 'posted' => $posted, 'print_config' => $print_config])
 
     @include('admin.partials.print.header', [
         'business' => $payment->business,
@@ -20,6 +28,7 @@
             'Linked Purchase No.' => $payment->purchase->purchase_no ?? 'N/A',
             'Payment Method' => ucwords(str_replace('_', ' ', $payment->payment_method ?? '')),
         ],
+        'print_config' => $print_config,
     ])
 
     <table class="print-reference">
@@ -70,5 +79,6 @@
 
     @include('admin.partials.print.footer', [
         'signatories' => ['Prepared By', 'Posted By'],
+        'print_config' => $print_config,
     ])
 @endsection

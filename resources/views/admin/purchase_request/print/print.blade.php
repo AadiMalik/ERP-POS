@@ -1,9 +1,17 @@
+@php
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve($purchase_request->business_id);
+@endphp
 @extends('layouts.print')
 
 @section('title', 'Purchase Request - ' . ($purchase_request->purchase_request_no ?? ''))
 
+@section('css')
+    @include('admin.partials.print.page_css', ['print_config' => $print_config])
+@endsection
+
 @section('content')
-    @include('admin.partials.print.status_badge', ['status' => $purchase_request->status])
+    @include('admin.partials.print.status_badge', ['status' => $purchase_request->status, 'print_config' => $print_config])
 
     @include('admin.partials.print.header', [
         'business' => $purchase_request->business,
@@ -16,6 +24,7 @@
             'Warehouse' => $purchase_request->warehouse->name ?? 'N/A',
             'Expected Date' => !empty($purchase_request->purchase_expected_date) ? localDate($purchase_request->purchase_expected_date) : 'N/A',
         ],
+        'print_config' => $print_config,
     ])
 
     <table class="print-table">
@@ -53,5 +62,6 @@
 
     @include('admin.partials.print.footer', [
         'signatories' => ['Requested By', 'Approved By'],
+        'print_config' => $print_config,
     ])
 @endsection

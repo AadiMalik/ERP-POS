@@ -6,6 +6,7 @@ use App\Exports\SupplierPaymentHistoryExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\DocumentSendLogService;
+use App\Services\Concrete\Admin\PrintSettingResolverService;
 use App\Services\Concrete\Admin\Reports\SupplierPaymentHistoryReportService;
 use App\Services\Concrete\Admin\SupplierService;
 use App\Traits\ResponseAPI;
@@ -25,17 +26,20 @@ class SupplierPaymentHistoryReportController extends Controller
     protected $business_service;
     protected $supplier_service;
     protected $document_send_log_service;
+    protected $print_setting_resolver;
 
     public function __construct(
         SupplierPaymentHistoryReportService $supplier_payment_history_report_service,
         BusinessService $business_service,
         SupplierService $supplier_service,
-        DocumentSendLogService $document_send_log_service
+        DocumentSendLogService $document_send_log_service,
+        PrintSettingResolverService $print_setting_resolver
     ) {
         $this->supplier_payment_history_report_service = $supplier_payment_history_report_service;
         $this->business_service = $business_service;
         $this->supplier_service = $supplier_service;
         $this->document_send_log_service = $document_send_log_service;
+        $this->print_setting_resolver = $print_setting_resolver;
     }
 
     public function index()
@@ -68,8 +72,10 @@ class SupplierPaymentHistoryReportController extends Controller
 
         $this->log($business_id, 'pdf');
 
+        $print_config = $this->print_setting_resolver->resolve($business_id);
+
         return Pdf::loadView('admin.reports.supplier_payment_history.pdf', compact('rows'))
-            ->setPaper('a4', 'landscape')
+            ->setPaper($print_config->page('paper_size', 'a4'), $print_config->page('orientation', 'landscape'))
             ->stream('supplier-payment-history.pdf');
     }
 

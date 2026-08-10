@@ -1,13 +1,21 @@
+@php
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve($journal_entry->business_id);
+@endphp
 @extends('layouts.print')
 
 @section('title', 'Journal Voucher - ' . ($journal_entry->entry_no ?? ''))
+
+@section('css')
+    @include('admin.partials.print.page_css', ['print_config' => $print_config])
+@endsection
 
 @section('content')
     @php
         $posted = $journal_entry->status === 'posted';
     @endphp
 
-    @include('admin.partials.print.status_badge', ['status' => $journal_entry->status, 'posted' => $posted])
+    @include('admin.partials.print.status_badge', ['status' => $journal_entry->status, 'posted' => $posted, 'print_config' => $print_config])
 
     @include('admin.partials.print.header', [
         'business' => $journal_entry->business,
@@ -19,6 +27,7 @@
             'Journal' => $journal_entry->journal->name ?? 'N/A',
             'Reference No.' => $journal_entry->reference_no ?? 'N/A',
         ],
+        'print_config' => $print_config,
     ])
 
     <table class="print-table">
@@ -71,5 +80,6 @@
 
     @include('admin.partials.print.footer', [
         'signatories' => ['Prepared By', 'Posted By'],
+        'print_config' => $print_config,
     ])
 @endsection

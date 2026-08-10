@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\AccountService;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CommonService;
+use App\Services\Concrete\Admin\PrintSettingResolverService;
 use App\Services\Concrete\Admin\SettingService;
 use App\Traits\ResponseAPI;
 use Illuminate\Http\Request;
@@ -25,17 +26,20 @@ class SettingController extends Controller
     protected $setting_service;
     protected $account_service;
     protected $common_service;
+    protected $print_setting_resolver;
 
     public function __construct(
         BusinessService $business_service,
         SettingService $setting_service,
         AccountService $account_service,
-        CommonService $common_service
+        CommonService $common_service,
+        PrintSettingResolverService $print_setting_resolver
     ) {
         $this->business_service = $business_service;
         $this->setting_service = $setting_service;
         $this->account_service = $account_service;
         $this->common_service = $common_service;
+        $this->print_setting_resolver = $print_setting_resolver;
     }
 
     public function index()
@@ -51,6 +55,7 @@ class SettingController extends Controller
         $sms_setting = $this->setting_service->getSmsSetting(Auth::user()->business_id);
         $fbr_setting = $this->setting_service->getFbrSetting(Auth::user()->business_id);
         $whatsapp_setting = $this->setting_service->getWhatsappSetting(Auth::user()->business_id);
+        $print_setting = $this->setting_service->getPrintSetting(Auth::user()->business_id);
         $timezones = $this->common_service->getAllTimezone();
         $email_mailer = EmailProvider::getoptions();
         $sms_provider = SMSProvider::getOptions();
@@ -67,6 +72,7 @@ class SettingController extends Controller
             'sms_setting',
             'fbr_setting',
             'whatsapp_setting',
+            'print_setting',
             'timezones',
             'email_mailer',
             'sms_provider',
@@ -379,6 +385,35 @@ class SettingController extends Controller
         $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
 
         $setting = $this->setting_service->updateFbrSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updatePrintSetting(Request $request)
+    {
+        $rules = [
+            'header_config' => 'nullable|array',
+            'footer_config' => 'nullable|array',
+            'page_config'   => 'nullable|array',
+            'body_config'   => 'nullable|array',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->only(['header_config', 'footer_config', 'page_config', 'body_config']);
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updatePrintSetting($obj);
+
+        if ($setting) {
+            $this->print_setting_resolver->forgetCache($obj['business_id']);
+        }
 
         return $setting
             ? $this->success(Message::UPDATE, $setting)

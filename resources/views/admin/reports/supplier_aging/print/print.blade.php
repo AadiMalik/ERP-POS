@@ -1,9 +1,15 @@
 @php
     $business = Auth::user()->business;
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve(Auth::user()->business_id);
 @endphp
 @extends('layouts.print')
 
 @section('title', 'Supplier Aging Report')
+
+@section('css')
+    @include('admin.partials.print.page_css', ['print_config' => $print_config])
+@endsection
 
 @section('content')
     @include('admin.partials.print.header', [
@@ -13,6 +19,7 @@
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
+        'print_config' => $print_config,
     ])
 
     <table class="print-table">
@@ -66,5 +73,6 @@
 
     @include('admin.partials.print.footer', [
         'signatories' => ['Prepared By', 'Verified By'],
+        'print_config' => $print_config,
     ])
 @endsection

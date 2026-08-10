@@ -13,6 +13,7 @@ use App\Models\EmailSetting;
 use App\Models\FbrSetting;
 use App\Models\InventorySetting;
 use App\Models\SmsSetting;
+use App\Models\PrintSetting;
 use App\Models\SupplierSetting;
 use App\Models\WhatsappSetting;
 use App\Repository\Repository;
@@ -33,6 +34,7 @@ class SettingService
     protected $model_sms_setting;
     protected $model_whatsapp_setting;
     protected $model_fbr_setting;
+    protected $model_print_setting;
 
     public function __construct()
     {
@@ -46,6 +48,7 @@ class SettingService
         $this->model_sms_setting = new Repository(new SmsSetting());
         $this->model_whatsapp_setting = new Repository(new WhatsappSetting());
         $this->model_fbr_setting = new Repository(new FbrSetting());
+        $this->model_print_setting = new Repository(new PrintSetting());
     }
 
     public function getBusinessSetting($business_id)
@@ -91,6 +94,20 @@ class SettingService
     public function getWhatsappSetting($business_id)
     {
         return $this->model_whatsapp_setting->getModel()::firstOrCreate(['business_id' => $business_id]);
+    }
+
+    public function getPrintSetting($business_id)
+    {
+        return $this->model_print_setting->getModel()::firstOrCreate(
+            ['business_id' => $business_id],
+            [
+                'header_config' => config('print_defaults.header'),
+                'footer_config' => config('print_defaults.footer'),
+                'page_config' => config('print_defaults.page'),
+                'body_config' => config('print_defaults.body'),
+                'date_created' => now(),
+            ]
+        );
     }
 
     public function updateBusinessSetting(array $obj)
@@ -254,6 +271,27 @@ class SettingService
     public function updateWhatsappSetting(array $obj)
     {
         $model = $this->model_whatsapp_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
+    }
+
+    public function updatePrintSetting(array $obj)
+    {
+        $model = $this->model_print_setting->getModel();
 
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']

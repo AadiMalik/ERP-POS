@@ -1,6 +1,8 @@
 @php
     use App\Services\Concrete\Admin\Reports\AccountsPayableReportService;
     $business = Auth::user()->business;
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve(Auth::user()->business_id);
 @endphp
 <!DOCTYPE html>
 <html>
@@ -49,6 +51,7 @@
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
+        'print_config' => $print_config,
     ])
 
     <table class="data-table">

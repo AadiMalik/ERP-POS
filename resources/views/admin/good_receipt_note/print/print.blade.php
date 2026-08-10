@@ -1,9 +1,17 @@
+@php
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve($grn->business_id);
+@endphp
 @extends('layouts.print')
 
 @section('title', 'Goods Receipt Note - ' . ($grn->good_receipt_note_no ?? ''))
 
+@section('css')
+    @include('admin.partials.print.page_css', ['print_config' => $print_config])
+@endsection
+
 @section('content')
-    @include('admin.partials.print.status_badge', ['status' => $grn->status])
+    @include('admin.partials.print.status_badge', ['status' => $grn->status, 'print_config' => $print_config])
 
     @include('admin.partials.print.header', [
         'business' => $grn->business,
@@ -16,6 +24,7 @@
             'Warehouse' => $grn->warehouse->name ?? 'N/A',
             'Purchase No.' => $grn->purchase->purchase_no ?? 'N/A',
         ],
+        'print_config' => $print_config,
     ])
 
     <table class="print-table">
@@ -66,5 +75,6 @@
 
     @include('admin.partials.print.footer', [
         'signatories' => ['Prepared By', 'Approved By', 'Received By'],
+        'print_config' => $print_config,
     ])
 @endsection

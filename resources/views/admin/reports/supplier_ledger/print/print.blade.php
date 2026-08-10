@@ -1,6 +1,14 @@
+@php
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve($result['supplier']->business_id);
+@endphp
 @extends('layouts.print')
 
 @section('title', 'Supplier Ledger - ' . ($result['supplier']->name ?? ''))
+
+@section('css')
+    @include('admin.partials.print.page_css', ['print_config' => $print_config])
+@endsection
 
 @section('content')
     @include('admin.partials.print.header', [
@@ -13,6 +21,7 @@
             'Supplier' => $result['supplier']->name ?? 'N/A',
             'Period' => (!empty($result['start_date']) ? localDate($result['start_date']) : 'Beginning') . ' to ' . (!empty($result['end_date']) ? localDate($result['end_date']) : 'Today'),
         ],
+        'print_config' => $print_config,
     ])
 
     <table class="print-table">
@@ -60,5 +69,6 @@
 
     @include('admin.partials.print.footer', [
         'signatories' => ['Prepared By', 'Verified By'],
+        'print_config' => $print_config,
     ])
 @endsection
