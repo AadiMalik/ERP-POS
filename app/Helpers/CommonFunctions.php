@@ -8,6 +8,7 @@ use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\Product;
 use App\Models\Purchase;
+use App\Models\PurchaseReturn;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestQuotation;
 use App\Models\Supplier;
@@ -231,6 +232,27 @@ function generateGRNNo($business_id = null)
 
     return sprintf(
         'GRN-%04d',
+        $next_number
+    );
+}
+
+function generatePurchaseReturnNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $purchase_return = PurchaseReturn::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($purchase_return) {
+        $next_number = (int) substr($purchase_return->purchase_return_no, strrpos($purchase_return->purchase_return_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'PRTN-%04d',
         $next_number
     );
 }

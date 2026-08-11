@@ -264,6 +264,16 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::get('{good_receipt_note_id}/print', [App\Http\Controllers\Admin\GoodReceiptNoteController::class, 'print'])->name('good-receipt-note.print');
     });
 
+    //purchase return
+    Route::resource('purchase-return', App\Http\Controllers\Admin\PurchaseReturnController::class);
+    Route::group(['prefix' => 'purchase-return'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\PurchaseReturnController::class, 'getData']);
+        Route::post('change-status', [App\Http\Controllers\Admin\PurchaseReturnController::class, 'status']);
+        Route::get('details/{purchase_return_id}', [App\Http\Controllers\Admin\PurchaseReturnController::class, 'details']);
+        Route::get('source-lines/{return_type}/{source_id}', [App\Http\Controllers\Admin\PurchaseReturnController::class, 'sourceLines']);
+        Route::get('{purchase_return_id}/print', [App\Http\Controllers\Admin\PurchaseReturnController::class, 'print'])->name('purchase-return.print');
+    });
+
     //supplier payment
     Route::resource('supplier-payment', App\Http\Controllers\Admin\SupplierPaymentController::class);
     Route::group(['prefix' => 'supplier-payment'], function () {

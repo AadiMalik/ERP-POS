@@ -20,13 +20,13 @@
                         <i class="fa fa-print"></i> Print
                     </a>
                     <a href="javascript:void(0);" id="btn_pdf" target="_blank" class="btn btn-outline-danger">
-                        <i class="fa fa-file-pdf-o"></i> PDF
+                        <i class="fa fa-file-pdf"></i> PDF
                     </a>
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
-                        <i class="fa fa-file-excel-o"></i> Excel
+                        <i class="fa fa-file-excel"></i> Excel
                     </a>
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
-                        <i class="fa fa-file-text-o"></i> CSV
+                        <i class="fa fa-file-text"></i> CSV
                     </a>
                 </div>
             </div>
