@@ -68,6 +68,10 @@
                                 data-bs-target="#print">
                                 Print
                             </button>
+                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
+                                data-bs-target="#barcode">
+                                Barcode &amp; QR
+                            </button>
                         </div>
                     </div>
                     <div class="col-md-9">
@@ -101,6 +105,9 @@
                             </div>
                             <div class="tab-pane fade" id="print">
                                 @include('admin.setting.tabs.print')
+                            </div>
+                            <div class="tab-pane fade" id="barcode">
+                                @include('admin.setting.tabs.barcode')
                             </div>
                         </div>
                     </div>

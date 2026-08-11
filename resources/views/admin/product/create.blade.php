@@ -410,8 +410,14 @@ use App\Enums\RoleNames;
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Barcode</label>
-                            <input type="text" class="form-control" id="modalVariationBarcode"
-                                placeholder="1234567890">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="modalVariationBarcode"
+                                    placeholder="Leave blank to auto-generate">
+                                @include('admin.partials.barcode_scanner', ['targetInputId' => '#modalVariationBarcode'])
+                            </div>
+                            <small class="text-muted">Scan or type an existing manufacturer barcode, or leave blank
+                                to auto-generate one on save.</small>
+                            <div id="modalVariationCodePreview" class="mt-2"></div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Base Unit <span class="text-danger">*</span></label>
@@ -543,6 +549,9 @@ use App\Enums\RoleNames;
         name: "{{ $var->name }}",
         sku: '{{ $var->sku }}',
         barcode: "{{ $var->barcode ?? '' }}",
+        barcode_type: "{{ $var->barcode_type ?? '' }}",
+        barcode_is_manual: {{ $var->barcode_is_manual ? 'true' : 'false' }},
+        qr_code: "{{ $var->qr_code ?? '' }}",
         purchase_price: {{$var->purchase_price ?? 0}},
         sale_price: {{$var->sale_price ?? 0}},
         minimum_stock: {{$var->minimum_stock ?? 0}},
@@ -788,6 +797,7 @@ use App\Enums\RoleNames;
         document.getElementById('modalVariationName').value = variation.name || '';
         document.getElementById('modalVariationSku').value = variation.sku || '';
         document.getElementById('modalVariationBarcode').value = variation.barcode || '';
+        renderVariationCodePreview(variation);
         document.getElementById('modalVariationUnit').value = variation.base_unit_id || '';
         document.getElementById('modalVariationPurchaseUnit').value = variation.purchase_unit_id || '';
         document.getElementById('modalVariationSaleUnit').value = variation.sale_unit_id || '';
@@ -816,12 +826,39 @@ use App\Enums\RoleNames;
         renderVariations();
     }
 
+    function renderVariationCodePreview(variation) {
+        const container = document.getElementById('modalVariationCodePreview');
+
+        if (!variation.product_variation_id || (!variation.barcode && !variation.qr_code)) {
+            container.innerHTML = '';
+            return;
+        }
+
+        let html = '<div class="d-flex align-items-center gap-2">';
+
+        if (variation.barcode) {
+            html += `<img src="${url_local}/admin/barcode/render/${variation.product_variation_id}?type=barcode" style="max-height:32px;" alt="barcode">`;
+        }
+
+        if (variation.qr_code) {
+            html += `<img src="${url_local}/admin/barcode/render/${variation.product_variation_id}?type=qr" style="max-height:40px;" alt="qr code">`;
+        }
+
+        if (variation.barcode_is_manual) {
+            html += '<span class="badge bg-info">Manufacturer barcode</span>';
+        }
+
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
     function resetVariationModal() {
         document.getElementById('editVariationIndex').value = '';
         document.getElementById('editVariationId').value = '';
         document.getElementById('modalVariationName').value = '';
         document.getElementById('modalVariationSku').value = '';
         document.getElementById('modalVariationBarcode').value = '';
+        document.getElementById('modalVariationCodePreview').innerHTML = '';
         document.getElementById('modalVariationUnit').value = '';
         document.getElementById('modalVariationPurchaseUnit').value = '';
         document.getElementById('modalVariationSaleUnit').value = '';

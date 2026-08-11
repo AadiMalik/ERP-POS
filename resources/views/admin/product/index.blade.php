@@ -25,6 +25,10 @@
                         <i class="fa fa-filter"></i>
                         Filters
                     </button>
+                    <button type="button" id="btnBackfillBarcodes" class="btn btn-outline-secondary">
+                        <i class="fa fa-barcode"></i>
+                        Backfill Barcodes/QR
+                    </button>
 
                 </div>
                 <a href="{{ url('admin/product/create') }}" class="btn btn-primary rounded-pill">
@@ -212,6 +216,28 @@
         $('#search_btn').click(function() {
             initDataTableproduct_table();
         });
+
+        // backfill barcodes/qr codes for existing variations that don't have one yet
+        $('#btnBackfillBarcodes').click(function() {
+            Swal.fire({
+                title: "Backfill missing barcodes/QR codes?",
+                text: "This only fills in variations that don't have a barcode yet. Existing barcodes are never changed.",
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonText: "Yes, backfill",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    ajaxRequest({
+                        url: url_local + "/admin/product/barcode/backfill",
+                        method: "POST",
+                    }).then((response) => {
+                        successMessage(response.Message);
+                    }).catch((err) => {
+                        errorMessage(err.Message || "Backfill failed");
+                    });
+                }
+            });
+        });
         //status
         updateStatus({
             buttonClass: ".statusProduct",
@@ -292,6 +318,7 @@
         $(document).on('click', '.view-variations', function() {
 
             let product_id = $(this).data('id');
+            $('#variationModal').data('product-id', product_id);
 
             ajaxRequest({
                 url: url_local + '/admin/product/variations/' + product_id,
@@ -326,6 +353,45 @@
                 $('#variationModal').modal('hide');
                 initDataTableproduct_table();
             }
+        });
+
+        //regenerate barcode/qr code
+        $(document).on('click', '.regenerate-barcode', function() {
+            let product_variation_id = $(this).data('id');
+            let isManual = $(this).data('is-manual') == 1;
+            let productId = $('#variationModal').data('product-id');
+
+            Swal.fire({
+                title: "Regenerate barcode/QR code?",
+                text: isManual ?
+                    "This variation has a manufacturer-provided barcode. Regenerating will replace it with a system-generated one." :
+                    "This will replace the current barcode/QR code with a new one.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, regenerate",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    ajaxRequest({
+                        url: url_local + "/admin/barcode/regenerate",
+                        method: "POST",
+                        data: {
+                            product_variation_ids: [product_variation_id],
+                            overwrite_manual: isManual ? 1 : 0,
+                        },
+                    }).then((response) => {
+                        successMessage(response.Message);
+
+                        ajaxRequest({
+                            url: url_local + '/admin/product/variations/' + productId,
+                            method: 'GET'
+                        }).then((res) => {
+                            $('#variationModal .modal-body').html(res.Data);
+                        });
+                    }).catch((err) => {
+                        errorMessage(err.Message || "Regenerate failed");
+                    });
+                }
+            });
         });
 
 

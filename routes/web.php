@@ -120,6 +120,17 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::delete('image/delete/{id}', [App\Http\Controllers\Admin\ProductController::class, 'deleteImage']);
         Route::post('image/set-default/{id}', [App\Http\Controllers\Admin\ProductController::class, 'setDefaultImage']);
         Route::post('image/sorting', [App\Http\Controllers\Admin\ProductController::class, 'saveImageSorting']);
+        // barcode backfill
+        Route::post('barcode/backfill', [App\Http\Controllers\Admin\ProductController::class, 'backfillBarcodes'])->name('product.barcode-backfill');
+    });
+
+    //barcode & qr code
+    Route::group(['prefix' => 'barcode'], function () {
+        Route::get('lookup', [App\Http\Controllers\Admin\BarcodeController::class, 'lookup'])->name('barcode.lookup');
+        Route::post('regenerate', [App\Http\Controllers\Admin\BarcodeController::class, 'regenerate'])->name('barcode.regenerate');
+        Route::get('render/{product_variation_id}', [App\Http\Controllers\Admin\BarcodeController::class, 'render'])->name('barcode.render');
+        Route::get('label-preview', [App\Http\Controllers\Admin\BarcodeController::class, 'labelPreview'])->name('barcode.label-preview');
+        Route::get('label-pdf', [App\Http\Controllers\Admin\BarcodeController::class, 'labelPdf'])->name('barcode.label-pdf');
     });
 
     //product variation unit conversion
@@ -337,5 +348,6 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::post('whatsapp', [App\Http\Controllers\Admin\SettingController::class, 'updateWhatsappSetting'])->name('whatsapp.update');
         Route::post('fbr', [App\Http\Controllers\Admin\SettingController::class, 'updateFbrSetting'])->name('fbr.update');
         Route::post('print', [App\Http\Controllers\Admin\SettingController::class, 'updatePrintSetting'])->name('print.update');
+        Route::post('barcode', [App\Http\Controllers\Admin\SettingController::class, 'updateBarcodeSetting'])->name('barcode.update');
     });
 });

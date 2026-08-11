@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
 use App\Http\Controllers\Controller;
+use App\Models\ProductVariation;
+use App\Services\Concrete\Admin\BarcodeService;
 use App\Services\Concrete\Admin\BrandService;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CategoryService;
@@ -25,19 +27,22 @@ class ProductController extends Controller
     protected $category_service;
     protected $brand_service;
     protected $unit_service;
+    protected $barcode_service;
 
     public function __construct(
         ProductService $product_service,
         BusinessService $business_service,
         CategoryService $category_service,
         BrandService $brand_service,
-        UnitService $unit_service
+        UnitService $unit_service,
+        BarcodeService $barcode_service
     ) {
         $this->product_service = $product_service;
         $this->business_service = $business_service;
         $this->category_service = $category_service;
         $this->brand_service = $brand_service;
         $this->unit_service = $unit_service;
+        $this->barcode_service = $barcode_service;
     }
     public function index()
     {
@@ -122,6 +127,19 @@ class ProductController extends Controller
             'features.*.name' => 'required_with:features',
             'features.*.description' => 'required_with:features',
         ];
+
+        foreach ($variations as $index => $variation) {
+            if (!empty($variation['barcode'])) {
+                $rules["variations.$index.barcode"] = [
+                    Rule::unique('product_variations', 'barcode')
+                        ->where(function ($query) use ($request) {
+                            return $query->where('business_id', $request->business_id ?? Auth::user()->business_id)
+                                ->where('is_deleted', 0);
+                        })
+                        ->ignore($variation['product_variation_id'] ?? null, 'product_variation_id'),
+                ];
+            }
+        }
 
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
@@ -298,6 +316,28 @@ class ProductController extends Controller
             return $this->error(
                 Message::ERROR
             );
+        }
+    }
+
+    public function backfillBarcodes(Request $request)
+    {
+        try {
+            $businessId = $request->business_id ?? Auth::user()->business_id;
+
+            $variations = ProductVariation::where('business_id', $businessId)
+                ->where('is_deleted', 0)
+                ->where(function ($q) {
+                    $q->whereNull('barcode')->orWhere('barcode', '');
+                })
+                ->get();
+
+            foreach ($variations as $variation) {
+                $this->barcode_service->generateForVariation($variation, null, null, false);
+            }
+
+            return $this->success(Message::SUCCESS, ['count' => $variations->count()]);
+        } catch (Exception $e) {
+            return $this->error(Message::ERROR);
         }
     }
 

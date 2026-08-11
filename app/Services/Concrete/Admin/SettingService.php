@@ -2,10 +2,13 @@
 
 namespace App\Services\Concrete\Admin;
 
+use App\Enums\BarcodeType;
 use App\Enums\Filter;
+use App\Enums\QrDataSource;
 use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\AccountingSetting;
+use App\Models\BarcodeSetting;
 use App\Models\Business;
 use App\Models\BusinessSetting;
 use App\Models\CustomerSetting;
@@ -35,6 +38,7 @@ class SettingService
     protected $model_whatsapp_setting;
     protected $model_fbr_setting;
     protected $model_print_setting;
+    protected $model_barcode_setting;
 
     public function __construct()
     {
@@ -49,6 +53,7 @@ class SettingService
         $this->model_whatsapp_setting = new Repository(new WhatsappSetting());
         $this->model_fbr_setting = new Repository(new FbrSetting());
         $this->model_print_setting = new Repository(new PrintSetting());
+        $this->model_barcode_setting = new Repository(new BarcodeSetting());
     }
 
     public function getBusinessSetting($business_id)
@@ -74,6 +79,28 @@ class SettingService
     public function getInventorySetting($business_id)
     {
         return $this->model_inventory_setting->getModel()::firstOrCreate(['business_id' => $business_id]);
+    }
+
+    public function getBarcodeSetting($business_id)
+    {
+        // firstOrCreate() does not reflect DB column defaults back onto the in-memory
+        // model after an insert, so every default is spelled out explicitly here -
+        // otherwise a freshly created setting would read as disabled/blank in PHP
+        // even though the DB row itself has the correct defaults.
+        return $this->model_barcode_setting->getModel()::firstOrCreate(
+            ['business_id' => $business_id],
+            [
+                'enable_barcode' => true,
+                'enable_qr_code' => true,
+                'barcode_type' => BarcodeType::CODE128,
+                'code128_length' => 12,
+                'qr_data_source' => QrDataSource::INTERNAL_REFERENCE,
+                'qr_size_px' => 200,
+                'qr_error_correction' => 'M',
+                'label_config' => config('barcode_label_defaults'),
+                'date_created' => now(),
+            ]
+        );
     }
 
     public function getEmailSetting($business_id)
@@ -198,11 +225,46 @@ class SettingService
         return $setting;
     }
 
-    public function updateInventorySetting($obj)
+    public function updateInventorySetting(array $obj)
     {
-        $obj['updatedby_id'] = Auth::user()->id;
-        $obj['date_updated'] = now();
-        return $this->model_inventory_setting->update($obj, $obj['business_id']);
+        $model = $this->model_inventory_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
+    }
+
+    public function updateBarcodeSetting(array $obj)
+    {
+        $model = $this->model_barcode_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
     }
 
     public function updateEmailSetting(array $obj)

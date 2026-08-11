@@ -25,6 +25,7 @@ class ProductService
     protected $model_product_feature;
     protected $model_product_variation;
     protected $model_product_variation_attribute;
+    protected $barcode_service;
     protected $with = [
         'business',
         'category',
@@ -39,13 +40,14 @@ class ProductService
         'productFeatures'
     ];
 
-    public function __construct()
+    public function __construct(BarcodeService $barcode_service)
     {
         $this->model_product = new Repository(new Product());
         $this->model_product_image = new Repository(new ProductImage());
         $this->model_product_feature = new Repository(new ProductFeature());
         $this->model_product_variation = new Repository(new ProductVariation());
         $this->model_product_variation_attribute = new Repository(new ProductVariationAttribute());
+        $this->barcode_service = $barcode_service;
     }
 
     public function getData($obj)
@@ -225,7 +227,9 @@ class ProductService
                         )->update([
                             'name' => $variation['name'],
                             'sku' => $variation['sku'],
-                            'barcode' => $variation['barcode'],
+                            // 'barcode' intentionally not set here - BarcodeService::generateForVariation()
+                            // (called below) is the sole writer, so it can tell an untouched existing
+                            // barcode apart from a newly submitted manual one and keep permanence intact.
                             'base_unit_id' => $variation['base_unit_id'],
                             'purchase_unit_id' => $variation['purchase_unit_id'],
                             'sale_unit_id' => $variation['sale_unit_id'],
@@ -238,6 +242,12 @@ class ProductService
                         ]);
 
                         $product_variation_id = $variation['product_variation_id'];
+
+                        $this->barcode_service->generateForVariation(
+                            $this->model_product_variation->getModel()::find($product_variation_id),
+                            $variation['barcode'] ?? null,
+                            $variation['barcode_type'] ?? null
+                        );
                     }
 
                     // =========================
@@ -252,7 +262,9 @@ class ProductService
                             'product_id' => $product->product_id,
                             'name' => $variation['name'],
                             'sku' => $variation['sku'],
-                            'barcode' => $variation['barcode'],
+                            // 'barcode' intentionally not set here - BarcodeService::generateForVariation()
+                            // (called below) is the sole writer, so it can tell an untouched existing
+                            // barcode apart from a newly submitted manual one and keep permanence intact.
                             'base_unit_id' => $variation['base_unit_id'],
                             'purchase_unit_id' => $variation['purchase_unit_id'],
                             'sale_unit_id' => $variation['sale_unit_id'],
@@ -262,6 +274,12 @@ class ProductService
                             'createdby_id' => Auth::id(),
                             'date_created' => now(),
                         ]);
+
+                        $this->barcode_service->generateForVariation(
+                            $this->model_product_variation->getModel()::find($product_variation_id),
+                            $variation['barcode'] ?? null,
+                            $variation['barcode_type'] ?? null
+                        );
 
                         $requestVariationIds[] = $product_variation_id;
                     }
@@ -360,7 +378,7 @@ class ProductService
                     'product_id' => $product->product_id,
                     'name' => $variation['name'],
                     'sku' => $variation['sku'],
-                    'barcode' => $variation['barcode'],
+                    // 'barcode' intentionally not set here - see comment above in the update branch.
                     'base_unit_id' => $variation['base_unit_id'],
                     'purchase_unit_id' => $variation['purchase_unit_id'],
                     'sale_unit_id' => $variation['sale_unit_id'],
@@ -371,6 +389,12 @@ class ProductService
                     'createdby_id' => Auth::id(),
                     'date_created' => now(),
                 ]);
+
+                $this->barcode_service->generateForVariation(
+                    $this->model_product_variation->getModel()::find($product_variation_id),
+                    $variation['barcode'] ?? null,
+                    $variation['barcode_type'] ?? null
+                );
 
                 foreach (($variation['attributes'] ?? []) as $name => $value) {
 

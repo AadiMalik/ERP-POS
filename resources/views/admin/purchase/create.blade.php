@@ -128,13 +128,20 @@
                     <hr>
                     {{-- ================= PRODUCT TABLE ================= --}}
                     <div class="card">
-                        <div class="card-header d-flex justify-content-between">
+                        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <h5 class="mb-0">
                                 Products
                             </h5>
-                            <button type="button" class="btn btn-primary" id="addProductBtn">
-                                <i class="fa fa-plus"></i>Add Product
-                            </button>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="input-group" style="width:260px;">
+                                    <input type="text" class="form-control" id="purchase_barcode_scan"
+                                        placeholder="Scan or enter barcode">
+                                    @include('admin.partials.barcode_scanner', ['targetInputId' => '#purchase_barcode_scan'])
+                                </div>
+                                <button type="button" class="btn btn-primary" id="addProductBtn">
+                                    <i class="fa fa-plus"></i>Add Product
+                                </button>
+                            </div>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped" id="productTable">
@@ -717,6 +724,58 @@
                 if (currentValue) {
                     $(this).val(currentValue);
                 }
+            });
+        }
+
+        // ======================================================
+        // BARCODE SCAN -> ADD/SELECT PRODUCT ROW
+        // ======================================================
+
+        $('#purchase_barcode_scan').on('change keypress', function(e) {
+            if (e.type === 'keypress' && e.which !== 13) {
+                return;
+            }
+            e.preventDefault();
+
+            let code = $(this).val().trim();
+            if (!code) {
+                return;
+            }
+
+            resolveBarcodeLookup(code, function(data) {
+                addScannedProductToPurchase(data.product, data.variation);
+                $('#purchase_barcode_scan').val('').focus();
+            });
+        });
+
+        function addScannedProductToPurchase(product, variation) {
+            let existingRow = null;
+
+            $('.product-row').each(function() {
+                let row = $(this);
+                if (
+                    row.find('.product-select').val() === product.product_id &&
+                    row.find('.variation-select').val() === variation.product_variation_id
+                ) {
+                    existingRow = row;
+                    return false;
+                }
+            });
+
+            if (existingRow) {
+                let qtyInput = existingRow.find('.ordered-qty');
+                qtyInput.val((parseFloat(qtyInput.val()) || 0) + 1).trigger('change');
+                return;
+            }
+
+            addProductRow();
+            let row = $('.product-row').last();
+
+            row.find('.product-select').val(product.product_id);
+            resetVariationSection(row);
+
+            loadVariations(product.product_id, row, function(row) {
+                row.find('.variation-select').val(variation.product_variation_id).trigger('change');
             });
         }
 

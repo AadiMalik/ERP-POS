@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\BarcodeType;
 use App\Enums\EmailProvider;
 use App\Enums\Message;
+use App\Enums\QrDataSource;
 use App\Enums\SMSProvider;
 use App\Enums\WhatsappProvider;
 use App\Http\Controllers\Controller;
@@ -56,10 +58,13 @@ class SettingController extends Controller
         $fbr_setting = $this->setting_service->getFbrSetting(Auth::user()->business_id);
         $whatsapp_setting = $this->setting_service->getWhatsappSetting(Auth::user()->business_id);
         $print_setting = $this->setting_service->getPrintSetting(Auth::user()->business_id);
+        $barcode_setting = $this->setting_service->getBarcodeSetting(Auth::user()->business_id);
         $timezones = $this->common_service->getAllTimezone();
         $email_mailer = EmailProvider::getoptions();
         $sms_provider = SMSProvider::getOptions();
         $whatsapp_provider = WhatsappProvider::getOptions();
+        $barcode_types = BarcodeType::getOptions();
+        $qr_data_sources = QrDataSource::getOptions();
         return view('admin.setting.index', compact(
             'business',
             'accounts',
@@ -73,10 +78,13 @@ class SettingController extends Controller
             'fbr_setting',
             'whatsapp_setting',
             'print_setting',
+            'barcode_setting',
             'timezones',
             'email_mailer',
             'sms_provider',
-            'whatsapp_provider'
+            'whatsapp_provider',
+            'barcode_types',
+            'qr_data_sources'
         ));
     }
 
@@ -385,6 +393,74 @@ class SettingController extends Controller
         $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
 
         $setting = $this->setting_service->updateFbrSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateInventorySetting(Request $request)
+    {
+        $rules = [
+            'low_stock_quantity' => 'nullable|integer|min:0',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        // Plain checkboxes (not selects) are omitted from the request entirely when
+        // unchecked, so presence rather than value determines the boolean, matching the
+        // convention already used for product toggles in ProductController::store().
+        $obj = [
+            'stock_tracking'     => $request->has('stock_tracking') ? 1 : 0,
+            'negative_stock'     => $request->has('negative_stock') ? 1 : 0,
+            'low_stock_alert'    => $request->has('low_stock_alert') ? 1 : 0,
+            'low_stock_quantity' => $request->low_stock_quantity,
+            'enable_batch_no'    => $request->has('enable_batch_no') ? 1 : 0,
+            'enable_expiry_date' => $request->has('enable_expiry_date') ? 1 : 0,
+        ];
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updateInventorySetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateBarcodeSetting(Request $request)
+    {
+        $rules = [
+            'barcode_type'        => 'required|in:' . implode(',', array_keys(BarcodeType::getOptions())),
+            'barcode_prefix'      => 'nullable|string|max:20',
+            'code128_length'      => 'nullable|integer|min:4|max:48',
+            'qr_data_source'      => 'required|in:' . implode(',', array_keys(QrDataSource::getOptions())),
+            'qr_size_px'          => 'nullable|integer|min:50|max:1000',
+            'qr_error_correction' => 'nullable|in:L,M,Q,H',
+            'label_config'        => 'nullable|array',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->only([
+            'barcode_type',
+            'barcode_prefix',
+            'code128_length',
+            'qr_data_source',
+            'qr_size_px',
+            'qr_error_correction',
+            'label_config',
+        ]);
+        $obj['enable_barcode'] = $request->has('enable_barcode') ? 1 : 0;
+        $obj['enable_qr_code'] = $request->has('enable_qr_code') ? 1 : 0;
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updateBarcodeSetting($obj);
 
         return $setting
             ? $this->success(Message::UPDATE, $setting)
