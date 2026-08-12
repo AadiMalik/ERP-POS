@@ -186,4 +186,21 @@ class AccountService
             ->where('is_deleted', 0)
             ->get();
     }
+
+    /**
+     * All active Chart of Accounts entries for a business, ordered by code -
+     * used to populate the Account picker filter on the accounting reports.
+     */
+    public function getAllActive(?string $business_id = null)
+    {
+        $query = $this->model_account->getModel()::with(['accountType', 'accountSubType'])
+            ->where('is_deleted', 0)
+            ->where('status', Status::ACTIVE);
+
+        if (!empty($business_id)) {
+            $query->where('business_id', $business_id);
+        }
+
+        return $query->orderBy('code')->get();
+    }
 }

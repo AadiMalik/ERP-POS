@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Exports;
+
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+
+class AccountLedgerExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
+{
+    public function __construct(protected array $result)
+    {
+    }
+
+    public function collection()
+    {
+        return $this->result['rows'];
+    }
+
+    public function headings(): array
+    {
+        return [
+            'Date',
+            'Voucher Type',
+            'JV Number',
+            'Reference Number',
+            'Narration',
+            'Debit',
+            'Credit',
+            'Running Balance',
+        ];
+    }
+
+    public function map($row): array
+    {
+        return [
+            localDate($row->entry_date),
+            $row->voucher_name ?? $row->source_type,
+            $row->entry_no,
+            $row->reference_no,
+            $row->detail_description ?: $row->entry_description,
+            decimal($row->debit),
+            decimal($row->credit),
+            decimal($row->running_balance) . ' ' . $row->running_balance_type,
+        ];
+    }
+}

@@ -389,6 +389,123 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
             Route::get('export', [App\Http\Controllers\Admin\Reports\StockLedgerReportController::class, 'export'])->name('reports.stock-ledger.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\StockLedgerReportController::class, 'exportCsv'])->name('reports.stock-ledger.export-csv');
         });
+
+        //accounting reports
+        Route::group(['prefix' => 'general-ledger'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\GeneralLedgerReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\GeneralLedgerReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\GeneralLedgerReportController::class, 'print'])->name('reports.general-ledger.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\GeneralLedgerReportController::class, 'pdf'])->name('reports.general-ledger.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\GeneralLedgerReportController::class, 'export'])->name('reports.general-ledger.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\GeneralLedgerReportController::class, 'exportCsv'])->name('reports.general-ledger.export-csv');
+        });
+
+        Route::group(['prefix' => 'trial-balance'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\TrialBalanceReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\TrialBalanceReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\TrialBalanceReportController::class, 'print'])->name('reports.trial-balance.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\TrialBalanceReportController::class, 'pdf'])->name('reports.trial-balance.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\TrialBalanceReportController::class, 'export'])->name('reports.trial-balance.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\TrialBalanceReportController::class, 'exportCsv'])->name('reports.trial-balance.export-csv');
+        });
+
+        Route::group(['prefix' => 'journal-register'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\JournalRegisterReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\JournalRegisterReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\JournalRegisterReportController::class, 'print'])->name('reports.journal-register.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\JournalRegisterReportController::class, 'pdf'])->name('reports.journal-register.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\JournalRegisterReportController::class, 'export'])->name('reports.journal-register.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\JournalRegisterReportController::class, 'exportCsv'])->name('reports.journal-register.export-csv');
+        });
+
+        Route::group(['prefix' => 'account-ledger'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\AccountLedgerReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\AccountLedgerReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\AccountLedgerReportController::class, 'print'])->name('reports.account-ledger.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\AccountLedgerReportController::class, 'pdf'])->name('reports.account-ledger.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\AccountLedgerReportController::class, 'export'])->name('reports.account-ledger.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\AccountLedgerReportController::class, 'exportCsv'])->name('reports.account-ledger.export-csv');
+        });
+
+        Route::group(['prefix' => 'account-balance'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\AccountBalanceReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\AccountBalanceReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\AccountBalanceReportController::class, 'print'])->name('reports.account-balance.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\AccountBalanceReportController::class, 'pdf'])->name('reports.account-balance.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\AccountBalanceReportController::class, 'export'])->name('reports.account-balance.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\AccountBalanceReportController::class, 'exportCsv'])->name('reports.account-balance.export-csv');
+        });
+
+        Route::group(['prefix' => 'day-book'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\DayBookReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\DayBookReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\DayBookReportController::class, 'print'])->name('reports.day-book.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\DayBookReportController::class, 'pdf'])->name('reports.day-book.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\DayBookReportController::class, 'export'])->name('reports.day-book.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\DayBookReportController::class, 'exportCsv'])->name('reports.day-book.export-csv');
+        });
+
+        Route::group(['prefix' => 'cash-bank-ledger'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\CashBankLedgerReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\CashBankLedgerReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\CashBankLedgerReportController::class, 'print'])->name('reports.cash-bank-ledger.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\CashBankLedgerReportController::class, 'pdf'])->name('reports.cash-bank-ledger.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\CashBankLedgerReportController::class, 'export'])->name('reports.cash-bank-ledger.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\CashBankLedgerReportController::class, 'exportCsv'])->name('reports.cash-bank-ledger.export-csv');
+        });
+
+        Route::group(['prefix' => 'income-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\IncomeReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\IncomeReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\IncomeReportController::class, 'print'])->name('reports.income-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\IncomeReportController::class, 'pdf'])->name('reports.income-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\IncomeReportController::class, 'export'])->name('reports.income-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\IncomeReportController::class, 'exportCsv'])->name('reports.income-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'expense-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\ExpenseReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\ExpenseReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\ExpenseReportController::class, 'print'])->name('reports.expense-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\ExpenseReportController::class, 'pdf'])->name('reports.expense-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\ExpenseReportController::class, 'export'])->name('reports.expense-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\ExpenseReportController::class, 'exportCsv'])->name('reports.expense-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'tax-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\TaxReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\TaxReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\TaxReportController::class, 'print'])->name('reports.tax-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\TaxReportController::class, 'pdf'])->name('reports.tax-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\TaxReportController::class, 'export'])->name('reports.tax-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\TaxReportController::class, 'exportCsv'])->name('reports.tax-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'equity-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\EquityReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\EquityReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\EquityReportController::class, 'print'])->name('reports.equity-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\EquityReportController::class, 'pdf'])->name('reports.equity-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\EquityReportController::class, 'export'])->name('reports.equity-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\EquityReportController::class, 'exportCsv'])->name('reports.equity-report.export-csv');
+        });
+
+        // Profit & Loss and Balance Sheet render as computed statements (no DataTables data() endpoint).
+        Route::group(['prefix' => 'profit-loss'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\ProfitLossReportController::class, 'index']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\ProfitLossReportController::class, 'print'])->name('reports.profit-loss.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\ProfitLossReportController::class, 'pdf'])->name('reports.profit-loss.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\ProfitLossReportController::class, 'export'])->name('reports.profit-loss.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\ProfitLossReportController::class, 'exportCsv'])->name('reports.profit-loss.export-csv');
+        });
+
+        Route::group(['prefix' => 'balance-sheet'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\BalanceSheetReportController::class, 'index']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\BalanceSheetReportController::class, 'print'])->name('reports.balance-sheet.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\BalanceSheetReportController::class, 'pdf'])->name('reports.balance-sheet.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\BalanceSheetReportController::class, 'export'])->name('reports.balance-sheet.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\BalanceSheetReportController::class, 'exportCsv'])->name('reports.balance-sheet.export-csv');
+        });
     });
 
     //Setting

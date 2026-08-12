@@ -252,6 +252,71 @@
                                 <div data-i18n="Accounts Payable">Accounts Payable</div>
                             </a>
                         </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/general-ledger') }}" class="menu-link">
+                                <div data-i18n="General Ledger">General Ledger</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/trial-balance') }}" class="menu-link">
+                                <div data-i18n="Trial Balance">Trial Balance</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/journal-register') }}" class="menu-link">
+                                <div data-i18n="Journal Register">Journal Register</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/account-ledger') }}" class="menu-link">
+                                <div data-i18n="Account Ledger">Account Ledger</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/account-balance') }}" class="menu-link">
+                                <div data-i18n="Account Balance">Account Balance</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/day-book') }}" class="menu-link">
+                                <div data-i18n="Day Book">Day Book</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/profit-loss') }}" class="menu-link">
+                                <div data-i18n="Profit & Loss">Profit & Loss</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/balance-sheet') }}" class="menu-link">
+                                <div data-i18n="Balance Sheet">Balance Sheet</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/cash-bank-ledger') }}" class="menu-link">
+                                <div data-i18n="Cash & Bank Ledger">Cash & Bank Ledger</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/income-report') }}" class="menu-link">
+                                <div data-i18n="Income Report">Income Report</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/expense-report') }}" class="menu-link">
+                                <div data-i18n="Expense Report">Expense Report</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/tax-report') }}" class="menu-link">
+                                <div data-i18n="Tax Reports">Tax Reports</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/equity-report') }}" class="menu-link">
+                                <div data-i18n="Equity Report">Equity Report</div>
+                            </a>
+                        </li>
                     </ul>
                 </li>
             </ul>
