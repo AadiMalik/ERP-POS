@@ -18,6 +18,7 @@ use App\Models\InventorySetting;
 use App\Models\SmsSetting;
 use App\Models\PrintSetting;
 use App\Models\SupplierSetting;
+use App\Models\ThemeSetting;
 use App\Models\WhatsappSetting;
 use App\Repository\Repository;
 use Carbon\Carbon;
@@ -39,6 +40,7 @@ class SettingService
     protected $model_fbr_setting;
     protected $model_print_setting;
     protected $model_barcode_setting;
+    protected $model_theme_setting;
 
     public function __construct()
     {
@@ -54,6 +56,7 @@ class SettingService
         $this->model_fbr_setting = new Repository(new FbrSetting());
         $this->model_print_setting = new Repository(new PrintSetting());
         $this->model_barcode_setting = new Repository(new BarcodeSetting());
+        $this->model_theme_setting = new Repository(new ThemeSetting());
     }
 
     public function getBusinessSetting($business_id)
@@ -99,6 +102,28 @@ class SettingService
                 'qr_error_correction' => 'M',
                 'label_config' => config('barcode_label_defaults'),
                 'date_created' => now(),
+            ]
+        );
+    }
+
+    public function getThemeSetting($business_id)
+    {
+        $defaults = config('theme_presets.sneat_default');
+
+        return $this->model_theme_setting->getModel()::firstOrCreate(
+            ['business_id' => $business_id],
+            [
+                'preset'          => 'sneat_default',
+                'primary_color'   => $defaults['primary_color'],
+                'secondary_color' => $defaults['secondary_color'],
+                'accent_color'    => $defaults['accent_color'],
+                'font_family'     => $defaults['font_family'],
+                'font_size_base'  => $defaults['font_size_base'],
+                'sidebar_config'  => $defaults['sidebar_config'],
+                'header_config'   => $defaults['header_config'],
+                'footer_config'   => $defaults['footer_config'],
+                'content_config'  => $defaults['content_config'],
+                'date_created'    => now(),
             ]
         );
     }
@@ -370,5 +395,53 @@ class SettingService
         $setting->save();
 
         return $setting;
+    }
+
+    public function updateThemeSetting(array $obj)
+    {
+        $model = $this->model_theme_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        session([
+            'theme_setting' => $setting->fresh()->toArray(),
+        ]);
+
+        return $setting;
+    }
+
+    public function applyThemePreset($business_id, $presetKey)
+    {
+        $preset = config("theme_presets.$presetKey");
+
+        if (!$preset) {
+            return false;
+        }
+
+        return $this->updateThemeSetting([
+            'business_id'      => $business_id,
+            'preset'           => $presetKey,
+            'primary_color'    => $preset['primary_color'],
+            'secondary_color'  => $preset['secondary_color'],
+            'accent_color'     => $preset['accent_color'],
+            'font_family'      => $preset['font_family'],
+            'font_size_base'   => $preset['font_size_base'],
+            'sidebar_config'   => $preset['sidebar_config'],
+            'header_config'    => $preset['header_config'],
+            'footer_config'    => $preset['footer_config'],
+            'content_config'   => $preset['content_config'],
+        ]);
     }
 }

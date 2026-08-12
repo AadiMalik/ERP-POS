@@ -14,6 +14,10 @@
     class="template-customizer-theme-css" />
 <link rel="stylesheet" href="{{ asset('public/assets/css/demo.css') }}" />
 
+<!-- Theme / Appearance engine -->
+@include('layouts.theme-vars')
+<link rel="stylesheet" href="{{ asset('public/assets/css/theme-custom.css') }}" />
+
 <!-- Vendors CSS -->
 <link rel="stylesheet" href="{{ asset('public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
 

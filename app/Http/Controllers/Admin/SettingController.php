@@ -59,6 +59,8 @@ class SettingController extends Controller
         $whatsapp_setting = $this->setting_service->getWhatsappSetting(Auth::user()->business_id);
         $print_setting = $this->setting_service->getPrintSetting(Auth::user()->business_id);
         $barcode_setting = $this->setting_service->getBarcodeSetting(Auth::user()->business_id);
+        $theme_setting = $this->setting_service->getThemeSetting(Auth::user()->business_id);
+        $theme_presets = config('theme_presets');
         $timezones = $this->common_service->getAllTimezone();
         $email_mailer = EmailProvider::getoptions();
         $sms_provider = SMSProvider::getOptions();
@@ -79,6 +81,8 @@ class SettingController extends Controller
             'whatsapp_setting',
             'print_setting',
             'barcode_setting',
+            'theme_setting',
+            'theme_presets',
             'timezones',
             'email_mailer',
             'sms_provider',
@@ -492,6 +496,89 @@ class SettingController extends Controller
         if ($setting) {
             $this->print_setting_resolver->forgetCache($obj['business_id']);
         }
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateThemeSetting(Request $request)
+    {
+        $style_fields = [
+            'sidebar_config.skin'               => 'in:dark,light,gradient',
+            'sidebar_config.width'              => 'in:compact,default,wide',
+            'sidebar_config.collapsed_behavior' => 'in:expanded,collapsed,hover',
+            'sidebar_config.position'           => 'in:fixed,static,offcanvas',
+            'header_config.style'               => 'in:light,dark,colored',
+            'header_config.position'            => 'in:sticky,static',
+            'header_config.type'                => 'in:detached,full',
+            'content_config.background'         => 'in:default,light,dark',
+            'content_config.spacing'            => 'in:comfortable,compact',
+            'content_config.card_style'         => 'in:flat,shadow,bordered',
+            'content_config.border_radius'      => 'in:none,sm,md,lg',
+            'content_config.shadow_level'       => 'in:none,sm,md,lg',
+            'content_config.table_style'        => 'in:default,striped,bordered,borderless,compact',
+            'content_config.button_style'       => 'in:default,rounded,pill,square',
+            'content_config.form_style'         => 'in:default,rounded,flat',
+            'content_config.filter_style'       => 'in:compact,card,bordered,inline,collapsible',
+            'content_config.content_display_style' => 'in:card,table,grid,dashboard',
+        ];
+
+        $rules = array_merge([
+            'preset'                  => 'nullable|string|max:50',
+            'primary_color'           => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'secondary_color'         => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'accent_color'            => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'font_family'             => 'nullable|string|max:100',
+            'font_size_base'          => 'nullable|in:sm,md,lg',
+            'sidebar_config'          => 'required|array',
+            'header_config'           => 'required|array',
+            'footer_config'           => 'required|array',
+            'content_config'          => 'required|array',
+            'footer_config.visible'   => 'required|boolean',
+            'footer_config.sticky'    => 'required|boolean',
+            'footer_config.style'     => 'in:light,dark,colored',
+        ], $style_fields);
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->only([
+            'preset',
+            'primary_color',
+            'secondary_color',
+            'accent_color',
+            'font_family',
+            'font_size_base',
+            'sidebar_config',
+            'header_config',
+            'footer_config',
+            'content_config',
+        ]);
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updateThemeSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function applyThemePreset(Request $request)
+    {
+        $rules = [
+            'preset' => ['required', 'string', Rule::in(array_keys(config('theme_presets')))],
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $business_id = $request->business_id ?? Auth::user()->business_id;
+        $setting = $this->setting_service->applyThemePreset($business_id, $request->preset);
 
         return $setting
             ? $this->success(Message::UPDATE, $setting)

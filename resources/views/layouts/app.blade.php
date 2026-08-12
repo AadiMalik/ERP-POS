@@ -1,3 +1,33 @@
+@php
+    $theme = array_replace_recursive(
+        config('theme_presets.sneat_default'),
+        session('theme_setting') ?: []
+    );
+
+    $sidebar_theme = $theme['sidebar_config'] ?? [];
+    $header_theme  = $theme['header_config'] ?? [];
+    $footer_theme  = $theme['footer_config'] ?? [];
+    $content_theme = $theme['content_config'] ?? [];
+
+    $layoutClasses = [];
+    if (($sidebar_theme['position'] ?? 'static') === 'fixed') {
+        $layoutClasses[] = 'layout-menu-fixed';
+    } elseif (($sidebar_theme['position'] ?? 'static') === 'offcanvas') {
+        $layoutClasses[] = 'layout-menu-offcanvas';
+    }
+    if (($sidebar_theme['collapsed_behavior'] ?? 'expanded') === 'collapsed') {
+        $layoutClasses[] = 'layout-menu-collapsed';
+    } elseif (($sidebar_theme['collapsed_behavior'] ?? 'expanded') === 'hover') {
+        $layoutClasses[] = 'layout-menu-collapsed layout-menu-hover';
+    }
+    if (($header_theme['position'] ?? 'static') === 'sticky') {
+        $layoutClasses[] = 'layout-navbar-fixed';
+    }
+    if ($footer_theme['sticky'] ?? false) {
+        $layoutClasses[] = 'layout-footer-fixed';
+    }
+    $layoutClasses = implode(' ', $layoutClasses);
+@endphp
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -16,13 +46,25 @@
 
 </head>
 
-<body>
+<body
+    data-sidebar-skin="{{ $sidebar_theme['skin'] ?? 'light' }}"
+    data-header-style="{{ $header_theme['style'] ?? 'light' }}"
+    data-footer-style="{{ $footer_theme['style'] ?? 'light' }}"
+    data-content-bg="{{ $content_theme['background'] ?? 'default' }}"
+    data-content-spacing="{{ $content_theme['spacing'] ?? 'comfortable' }}"
+    data-card-style="{{ $content_theme['card_style'] ?? 'shadow' }}"
+    data-table-style="{{ $content_theme['table_style'] ?? 'default' }}"
+    data-button-style="{{ $content_theme['button_style'] ?? 'default' }}"
+    data-form-style="{{ $content_theme['form_style'] ?? 'default' }}"
+    data-filter-style="{{ $content_theme['filter_style'] ?? 'compact' }}"
+    data-content-style="{{ $content_theme['content_display_style'] ?? 'card' }}"
+>
     <!-- ======== Preloader =========== -->
     <div id="preloader">
         <div class="spinner"></div>
     </div>
     <!-- Layout wrapper -->
-    <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-wrapper layout-content-navbar {{ $layoutClasses }}">
         <div class="layout-container">
             @include('layouts/sidebar')
             <!-- ======== Preloader =========== -->
@@ -33,7 +75,9 @@
                 <div class="content-wrapper">
                     @yield('content')
 
-                    @include('layouts/footer')
+                    @if($footer_theme['visible'] ?? true)
+                        @include('layouts/footer')
+                    @endif
                     <div class="content-backdrop fade"></div>
                 </div>
                 <!-- Content wrapper -->

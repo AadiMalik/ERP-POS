@@ -72,6 +72,10 @@
                                 data-bs-target="#barcode">
                                 Barcode &amp; QR
                             </button>
+                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
+                                data-bs-target="#theme">
+                                Theme / Appearance
+                            </button>
                         </div>
                     </div>
                     <div class="col-md-9">
@@ -108,6 +112,9 @@
                             </div>
                             <div class="tab-pane fade" id="barcode">
                                 @include('admin.setting.tabs.barcode')
+                            </div>
+                            <div class="tab-pane fade" id="theme">
+                                @include('admin.setting.tabs.theme')
                             </div>
                         </div>
                     </div>
@@ -266,6 +273,88 @@
 
         $(document).ready(function() {
             toggleFbrSettings();
+        });
+    </script>
+
+    {{-- Theme / Appearance setting js --}}
+    <script src="{{ asset('public/assets/js/theme-customizer.js') }}"></script>
+    <script>
+        window.THEME_PRESETS = @json($theme_presets);
+
+        function saveThemeSetting(form) {
+            ajaxRequest({
+                url: '{{ route('theme.update') }}',
+                method: 'POST',
+                data: new FormData($(form)[0]),
+                isFormData: true
+            }).then(res => {
+                successMessage(res.Message);
+                setTimeout(() => location.reload(), 800);
+            }).catch(err => {
+                errorMessage(err.Message);
+            });
+        }
+
+        function applyThemePreset(presetKey) {
+            let preset = window.THEME_PRESETS[presetKey];
+            if (preset && window.applyThemeToDOM) {
+                window.applyThemeToDOM(preset);
+            }
+
+            ajaxRequest({
+                url: '{{ route('theme.preset') }}',
+                method: 'POST',
+                data: {
+                    preset: presetKey,
+                    _token: '{{ csrf_token() }}'
+                }
+            }).then(res => {
+                successMessage(res.Message);
+                setTimeout(() => location.reload(), 600);
+            }).catch(err => {
+                errorMessage(err.Message);
+            });
+        }
+
+        $(document).on('click', '.btn-apply-preset, .theme-preset-card', function(e) {
+            e.stopPropagation();
+            applyThemePreset($(this).data('preset'));
+        });
+
+        // Live preview: instantly reflect field changes on this very page before Save
+        $(document).on('input change', '#themeSettingForm input, #themeSettingForm select', function() {
+            if (!window.applyThemeToDOM) return;
+
+            let data = new FormData($('#themeSettingForm')[0]);
+            window.applyThemeToDOM({
+                primary_color: data.get('primary_color'),
+                secondary_color: data.get('secondary_color'),
+                accent_color: data.get('accent_color'),
+                font_family: data.get('font_family'),
+                font_size_base: data.get('font_size_base'),
+                sidebar_config: {
+                    skin: data.get('sidebar_config[skin]'),
+                    width: data.get('sidebar_config[width]'),
+                },
+                header_config: {
+                    style: data.get('header_config[style]'),
+                },
+                footer_config: {
+                    style: data.get('footer_config[style]'),
+                },
+                content_config: {
+                    background: data.get('content_config[background]'),
+                    spacing: data.get('content_config[spacing]'),
+                    card_style: data.get('content_config[card_style]'),
+                    border_radius: data.get('content_config[border_radius]'),
+                    shadow_level: data.get('content_config[shadow_level]'),
+                    table_style: data.get('content_config[table_style]'),
+                    button_style: data.get('content_config[button_style]'),
+                    form_style: data.get('content_config[form_style]'),
+                    filter_style: data.get('content_config[filter_style]'),
+                    content_display_style: data.get('content_config[content_display_style]'),
+                },
+            });
         });
     </script>
 @endsection

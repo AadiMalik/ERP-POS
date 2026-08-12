@@ -1,0 +1,318 @@
+/**
+ * ERP Theme / Appearance engine.
+ *
+ * This file is intentionally theme-agnostic: every rule below reads the
+ * --erp-* custom properties and data-* attributes emitted server-side by
+ * resources/views/layouts/theme-vars.blade.php (and, on the settings page,
+ * mirrored live by public/assets/js/theme-customizer.js). Switching a preset
+ * or a single control never requires editing this file or any page markup -
+ * every existing/future page that uses the app's shared layout, .card,
+ * .table, .btn, .form-control and #filterSection markup already picks this
+ * up automatically.
+ */
+
+/* ---------------------------------------------------------------------
+ * Colors: buttons, links, badges, form controls, active states
+ * --------------------------------------------------------------------- */
+.btn-primary {
+    background-color: var(--erp-primary);
+    border-color: var(--erp-primary);
+}
+
+.btn-outline-primary {
+    color: var(--erp-primary);
+    border-color: var(--erp-primary);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary.active {
+    background-color: var(--erp-primary);
+    border-color: var(--erp-primary);
+}
+
+.text-primary {
+    color: var(--erp-primary) !important;
+}
+
+.bg-primary,
+.badge.bg-primary {
+    background-color: var(--erp-primary) !important;
+}
+
+.btn-secondary {
+    background-color: var(--erp-secondary);
+    border-color: var(--erp-secondary);
+}
+
+.text-secondary {
+    color: var(--erp-secondary) !important;
+}
+
+.bg-secondary,
+.badge.bg-secondary {
+    background-color: var(--erp-secondary) !important;
+}
+
+.btn-info {
+    background-color: var(--erp-accent);
+    border-color: var(--erp-accent);
+}
+
+.text-info {
+    color: var(--erp-accent) !important;
+}
+
+.bg-info,
+.badge.bg-info {
+    background-color: var(--erp-accent) !important;
+}
+
+.form-check-input:checked,
+.form-check-input:focus {
+    background-color: var(--erp-primary);
+    border-color: var(--erp-primary);
+}
+
+.nav-pills .nav-link.active,
+.settings-nav .nav-link.active {
+    background-color: var(--erp-primary) !important;
+}
+
+.page-item.active .page-link {
+    background-color: var(--erp-primary);
+    border-color: var(--erp-primary);
+}
+
+.layout-wrapper:not(.layout-horizontal) .bg-menu-theme .menu-inner .menu-item.active > .menu-link {
+    background-color: rgba(var(--erp-primary-rgb), .92);
+}
+
+/* ---------------------------------------------------------------------
+ * Sidebar skin
+ * --------------------------------------------------------------------- */
+body[data-sidebar-skin="dark"] .bg-menu-theme {
+    background-color: #2b2c40 !important;
+}
+
+body[data-sidebar-skin="dark"] .bg-menu-theme .menu-link,
+body[data-sidebar-skin="dark"] .bg-menu-theme .menu-header,
+body[data-sidebar-skin="dark"] .bg-menu-theme .app-brand-text {
+    color: #d3d3e0 !important;
+}
+
+body[data-sidebar-skin="dark"] .bg-menu-theme .menu-item.active > .menu-link {
+    color: #fff !important;
+}
+
+body[data-sidebar-skin="gradient"] .bg-menu-theme {
+    background: linear-gradient(180deg, var(--erp-primary) 0%, rgba(var(--erp-primary-rgb), .75) 100%) !important;
+}
+
+body[data-sidebar-skin="gradient"] .bg-menu-theme .menu-link,
+body[data-sidebar-skin="gradient"] .bg-menu-theme .app-brand-text {
+    color: rgba(255, 255, 255, .85) !important;
+}
+
+body[data-sidebar-skin="gradient"] .bg-menu-theme .menu-item.active > .menu-link {
+    background-color: rgba(0, 0, 0, .15);
+    color: #fff !important;
+}
+
+/* Sidebar width (only applied for non-default presets; "default" leaves the
+   template's own width untouched to avoid any pixel drift). */
+.layout-menu {
+    width: var(--erp-sidebar-width, unset);
+}
+
+/* ---------------------------------------------------------------------
+ * Header style
+ * --------------------------------------------------------------------- */
+body[data-header-style="dark"] .bg-navbar-theme {
+    background-color: #2b2c40 !important;
+    color: #d3d3e0;
+}
+
+body[data-header-style="colored"] .bg-navbar-theme {
+    background-color: var(--erp-primary) !important;
+}
+
+body[data-header-style="colored"] .bg-navbar-theme .nav-link,
+body[data-header-style="colored"] .bg-navbar-theme i {
+    color: rgba(255, 255, 255, .9) !important;
+}
+
+/* ---------------------------------------------------------------------
+ * Footer style
+ * --------------------------------------------------------------------- */
+body[data-footer-style="dark"] .bg-footer-theme {
+    background-color: #2b2c40 !important;
+    color: #d3d3e0;
+}
+
+body[data-footer-style="colored"] .bg-footer-theme {
+    background-color: var(--erp-primary) !important;
+    color: rgba(255, 255, 255, .9);
+}
+
+/* ---------------------------------------------------------------------
+ * Content background & spacing
+ * --------------------------------------------------------------------- */
+body[data-content-bg="light"] .content-wrapper {
+    background-color: #f7f8fa;
+}
+
+body[data-content-bg="dark"] .content-wrapper {
+    background-color: #1a1c2b;
+    color: #d3d3e0;
+}
+
+body[data-content-bg="dark"] .content-wrapper .card {
+    background-color: #232538;
+    color: #d3d3e0;
+}
+
+body[data-content-spacing="compact"] .container-xxl.container-p-y {
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+}
+
+body[data-content-spacing="compact"] .card + .card,
+body[data-content-spacing="compact"] .row {
+    margin-top: .5rem;
+}
+
+/* ---------------------------------------------------------------------
+ * Card style / radius / shadow
+ * --------------------------------------------------------------------- */
+.card {
+    border-radius: var(--erp-radius);
+}
+
+body[data-card-style="flat"] .card {
+    box-shadow: none;
+    border: 1px solid #eceef1;
+}
+
+body[data-card-style="shadow"] .card {
+    box-shadow: var(--erp-shadow);
+    border: none;
+}
+
+body[data-card-style="bordered"] .card {
+    box-shadow: none;
+    border: 1px solid #d9dee3;
+}
+
+/* ---------------------------------------------------------------------
+ * Table style
+ * --------------------------------------------------------------------- */
+body[data-table-style="striped"] .table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, .02);
+}
+
+body[data-table-style="bordered"] .table,
+body[data-table-style="bordered"] .table th,
+body[data-table-style="bordered"] .table td {
+    border: 1px solid #d9dee3;
+}
+
+body[data-table-style="borderless"] .table th,
+body[data-table-style="borderless"] .table td {
+    border: none;
+}
+
+body[data-table-style="compact"] .table th,
+body[data-table-style="compact"] .table td {
+    padding: .4rem .75rem;
+}
+
+/* ---------------------------------------------------------------------
+ * Button style
+ * --------------------------------------------------------------------- */
+body[data-button-style="rounded"] .btn {
+    border-radius: .5rem;
+}
+
+body[data-button-style="pill"] .btn {
+    border-radius: 50rem;
+}
+
+body[data-button-style="square"] .btn {
+    border-radius: 0;
+}
+
+/* ---------------------------------------------------------------------
+ * Form control style
+ * --------------------------------------------------------------------- */
+body[data-form-style="rounded"] .form-control,
+body[data-form-style="rounded"] .form-select {
+    border-radius: .5rem;
+}
+
+body[data-form-style="flat"] .form-control,
+body[data-form-style="flat"] .form-select {
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------
+ * Filter section styles - hooks the existing #filterSection / #toggleFilter
+ * markup shared across index pages, no per-page changes required.
+ * --------------------------------------------------------------------- */
+body[data-filter-style="compact"] #filterSection {
+    padding: .75rem 1rem;
+}
+
+body[data-filter-style="card"] #filterSection {
+    margin: 1rem;
+    padding: 1rem;
+    border: none;
+    border-radius: var(--erp-radius);
+    box-shadow: var(--erp-shadow);
+    background: #fff;
+}
+
+body[data-filter-style="bordered"] #filterSection {
+    border: 1px solid #d9dee3 !important;
+    border-radius: var(--erp-radius);
+    margin: 0 1rem 1rem;
+}
+
+body[data-filter-style="inline"] #filterSection .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+body[data-filter-style="inline"] #filterSection .col-md-3,
+body[data-filter-style="inline"] #filterSection [class*="col-"] {
+    max-width: 220px;
+}
+
+body[data-filter-style="collapsible"] #filterSection {
+    border-radius: var(--erp-radius);
+    background: #fbfbfd;
+}
+
+/* ---------------------------------------------------------------------
+ * Content display style - applied to the primary content card on
+ * index/listing pages. These are intentionally cosmetic-only: pages keep
+ * rendering their real table/data markup regardless of this setting, so
+ * no data is ever hidden by a style choice. Pages that want a true
+ * grid/dashboard layout can opt in with their own markup and still inherit
+ * these variables/hooks.
+ * --------------------------------------------------------------------- */
+body[data-content-style="dashboard"] .content-wrapper > .container-xxl > .card:first-of-type {
+    background: linear-gradient(135deg, rgba(var(--erp-primary-rgb), .08) 0%, rgba(var(--erp-primary-rgb), 0) 60%);
+}
+
+body[data-content-style="grid"] .content-wrapper .row.g-3,
+body[data-content-style="grid"] .content-wrapper .row.g-2 {
+    row-gap: 1.25rem !important;
+}
+
+body[data-content-style="table"] .card-body {
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+}

@@ -115,4 +115,9 @@ class Business extends Model
         return $this->hasOne(BarcodeSetting::class, 'business_id', 'business_id');
     }
 
+    public function themeSetting()
+    {
+        return $this->hasOne(ThemeSetting::class, 'business_id', 'business_id');
+    }
+
 }
