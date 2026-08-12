@@ -179,6 +179,21 @@
                         <div data-i18n="Transactions">Transactions</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/opening-stock') }}" class="menu-link">
+                        <div data-i18n="Opening Stock">Opening Stock</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/stock-taking') }}" class="menu-link">
+                        <div data-i18n="Stock Taking">Stock Taking</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/transfer-note') }}" class="menu-link">
+                        <div data-i18n="Transfer Note">Transfer Note</div>
+                    </a>
+                </li>
             </ul>
         </li>
 
@@ -261,6 +276,11 @@
                 <li class="menu-item">
                     <a href="{{ url('/admin/good-receipt-note') }}" class="menu-link">
                         <div data-i18n="Goods Receipt Notes">Goods Receipt Notes</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/purchase-return') }}" class="menu-link">
+                        <div data-i18n="Purchase Returns">Purchase Returns</div>
                     </a>
                 </li>
                 <li class="menu-item">

@@ -1,0 +1,542 @@
+@php
+    use App\Enums\RoleNames;
+@endphp
+@extends('layouts.app')
+@section('content')
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4">{{ isset($purchase_return) ? 'Update' : 'New' }} Purchase Return</h4>
+        <div class="card">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0">{{ isset($purchase_return) ? 'Update' : 'Create' }} Purchase Return</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url('admin/purchase-return') }}" method="POST" id="purchaseReturnForm">
+                    @csrf
+                    <input type="hidden" name="purchase_return_id" value="{{ $purchase_return->purchase_return_id ?? '' }}">
+                    {{-- ================= HEADER ================= --}}
+                    <div class="row">
+                        @if (!empty($business) && RoleNames::SUPERADMIN == getRoleName())
+                            <div class="col-md-3 mb-3">
+                                <label>Business <span class="text-danger">*</span></label>
+                                <select class="form-control select2" name="business_id" id="business_id">
+                                    <option value="">--Select Business--</option>
+                                    @foreach ($business as $item)
+                                        <option value="{{ $item->business_id }}"
+                                            {{ old('business_id', $purchase_return->business_id ?? '') == $item->business_id ? 'selected' : '' }}>
+                                            {{ $item->code }} - {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+                        <div class="col-md-3 mb-3">
+                            <label>Return Type <span class="text-danger">*</span></label>
+                            <select class="form-control select2" name="return_type" id="return_type"
+                                {{ isset($purchase_return) ? 'disabled' : '' }}>
+                                <option value="direct"
+                                    {{ old('return_type', $purchase_return->return_type ?? '') == 'direct' ? 'selected' : '' }}>
+                                    Direct Purchase</option>
+                                <option value="grn"
+                                    {{ old('return_type', $purchase_return->return_type ?? '') == 'grn' ? 'selected' : '' }}>
+                                    GRN</option>
+                            </select>
+                            @if (isset($purchase_return))
+                                <input type="hidden" name="return_type" value="{{ $purchase_return->return_type }}">
+                            @endif
+                        </div>
+                        <div class="col-md-3 mb-3 source-direct">
+                            <label>
+                                Purchase<span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control select2" name="purchase_id" id="purchase_id"
+                                {{ isset($purchase_return) ? 'disabled' : '' }}>
+                                <option value="">--Select Purchase--</option>
+                                @foreach ($direct_purchases as $item)
+                                    <option value="{{ $item->purchase_id }}"
+                                        {{ old('purchase_id', $purchase_return->return_type === 'direct' ? ($purchase_return->purchase_id ?? '') : '') == $item->purchase_id ? 'selected' : '' }}>
+                                        {{ $item->purchase_no }} - {{ $item->supplier->name ?? '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @if (isset($purchase_return) && $purchase_return->return_type === 'direct')
+                                <input type="hidden" name="purchase_id" value="{{ $purchase_return->purchase_id }}">
+                            @endif
+                        </div>
+                        <div class="col-md-3 mb-3 source-grn" style="display:none;">
+                            <label>
+                                GRN<span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control select2" name="good_receipt_note_id" id="good_receipt_note_id"
+                                {{ isset($purchase_return) ? 'disabled' : '' }}>
+                                <option value="">--Select GRN--</option>
+                                @foreach ($grns as $item)
+                                    <option value="{{ $item->good_receipt_note_id }}"
+                                        {{ old('good_receipt_note_id', $purchase_return->return_type === 'grn' ? ($purchase_return->good_receipt_note_id ?? '') : '') == $item->good_receipt_note_id ? 'selected' : '' }}>
+                                        {{ $item->good_receipt_note_no }} - {{ $item->supplier->name ?? '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @if (isset($purchase_return) && $purchase_return->return_type === 'grn')
+                                <input type="hidden" name="good_receipt_note_id" value="{{ $purchase_return->good_receipt_note_id }}">
+                            @endif
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label>Supplier</label>
+                            <input type="text" class="form-control" id="supplier_name" readonly
+                                value="{{ $purchase_return->supplier->name ?? '' }}">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label>Warehouse</label>
+                            <input type="text" class="form-control" id="warehouse_name" readonly
+                                value="{{ $purchase_return->warehouse->name ?? '' }}">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label>Return Number</label>
+                            <input type="text" class="form-control" name="purchase_return_no" readonly
+                                value="{{ $purchase_return->purchase_return_no ?? ($purchase_return_no ?? 'Auto Generated') }}">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label>Return Date</label>
+                            <input type="text" class="form-control datepicker" name="purchase_return_date"
+                                value="{{ old('purchase_return_date', isset($purchase_return) ? localDate($purchase_return->purchase_return_date) : localDate(date('Y-m-d'))) }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Reason</label>
+                            <input type="text" class="form-control" name="reason"
+                                value="{{ old('reason', $purchase_return->reason ?? '') }}">
+                        </div>
+                        <div class="col-md-12">
+                            <label>Description</label>
+                            <textarea class="form-control" rows="3" name="description">{{ old('description', $purchase_return->description ?? '') }}</textarea>
+                        </div>
+                    </div>
+                    <hr>
+                    {{-- ================= PRODUCT TABLE ================= --}}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                Products
+                            </h5>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped" id="productTable">
+                                <thead>
+                                    <tr>
+                                        <th style="min-width:220px;">Product</th>
+                                        <th style="min-width:150px;">Variation</th>
+                                        <th style="min-width:90px;">Unit</th>
+                                        <th style="min-width:110px;">Received Qty</th>
+                                        <th style="min-width:120px;">Already Returned</th>
+                                        <th style="min-width:110px;">Returnable</th>
+                                        <th style="min-width:130px;">Return Qty</th>
+                                        <th style="min-width:120px;">Unit Cost</th>
+                                        <th style="min-width:90px;">Discount %</th>
+                                        <th style="min-width:90px;">Tax %</th>
+                                        <th style="min-width:130px">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productRows">
+                                    <tr id="emptyRow">
+                                        <td colspan="11" class="text-center text-muted">
+                                            Select a Purchase or GRN
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <br>
+                    {{-- ================= FOOTER TOTALS ================= --}}
+                    <div class="row">
+                        <div class="offset-md-6 col-md-6">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Subtotal</th>
+                                    <td>
+                                        <input class="form-control" id="subtotal" readonly>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Discount</th>
+                                    <td>
+                                        <input class="form-control" id="discount_amount" readonly>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Tax</th>
+                                    <td>
+                                        <input class="form-control" id="tax_amount" readonly>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Total</th>
+                                    <td>
+                                        <input class="form-control fw-bold" id="total" name="total" readonly>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button class="text-end btn btn-primary" id="submitBtn">
+                                {{ isset($purchase_return) ? 'Update Purchase Return' : 'Save Purchase Return' }}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('js')
+    @if ($errors->any())
+        <script>
+            errorMessage("{{ $errors->first() }}");
+        </script>
+    @endif
+    @if (session('error'))
+        <script>
+            errorMessage("{{ session('error') }}");
+        </script>
+    @endif
+    <script>
+        var isEditMode = {{ isset($purchase_return) ? 'true' : 'false' }};
+        var editPurchaseReturnData = @json($purchase_return_details ?? null);
+
+        $(function() {
+            if ($.fn.select2) {
+                $('.select2').select2({
+                    width: '100%'
+                });
+            }
+
+            toggleSourceFields($('#return_type').val());
+
+            if (isEditMode) {
+                loadPurchaseReturnForEdit();
+            } else {
+                let sourceId = $('#return_type').val() === 'grn' ? $('#good_receipt_note_id').val() : $(
+                    '#purchase_id').val();
+                if (sourceId) {
+                    loadSourceLines($('#return_type').val(), sourceId);
+                }
+            }
+        });
+
+        // ======================================================
+        // RETURN TYPE TOGGLE
+        // ======================================================
+
+        function toggleSourceFields(return_type) {
+            if (return_type === 'grn') {
+                $('.source-direct').hide();
+                $('.source-grn').show();
+            } else {
+                $('.source-grn').hide();
+                $('.source-direct').show();
+            }
+        }
+
+        $(document).on('change', '#return_type', function() {
+            toggleSourceFields($(this).val());
+            resetProductRows();
+        });
+
+        // ======================================================
+        // SOURCE CHANGE
+        // ======================================================
+
+        $(document).on('change', '#purchase_id', function() {
+            let purchase_id = $(this).val();
+
+            if (!purchase_id) {
+                resetProductRows();
+                return;
+            }
+
+            loadSourceLines('direct', purchase_id);
+        });
+
+        $(document).on('change', '#good_receipt_note_id', function() {
+            let good_receipt_note_id = $(this).val();
+
+            if (!good_receipt_note_id) {
+                resetProductRows();
+                return;
+            }
+
+            loadSourceLines('grn', good_receipt_note_id);
+        });
+
+        function resetProductRows() {
+            $('#supplier_name').val('');
+            $('#warehouse_name').val('');
+            $('#productRows').html(`
+                <tr id="emptyRow">
+                    <td colspan="11" class="text-center text-muted">
+                        Select a Purchase or GRN
+                    </td>
+                </tr>
+            `);
+            calculateGrandTotal();
+        }
+
+        // ======================================================
+        // LOAD RETURNABLE LINES (create mode)
+        // ======================================================
+
+        function loadSourceLines(return_type, source_id) {
+            $.ajax({
+                url: url_local + '/admin/purchase-return/source-lines/' + return_type + '/' + source_id,
+                type: 'GET',
+                dataType: 'json',
+                beforeSend: function() {
+                    $('#productRows').html(`
+                        <tr>
+                            <td colspan="11" class="text-center">
+                                <div class="spinner-border spinner-border-sm"></div>
+                                Loading...
+                            </td>
+                        </tr>
+                    `);
+                },
+                success: function(response) {
+                    if (!response.Success) {
+                        errorMessage(response.Message);
+                        return;
+                    }
+                    bindSourceHeader(response.Data.header);
+                    bindProductRows(response.Data.lines);
+                },
+                error: function(error) {
+                    errorMessage(error.responseJSON?.Message || 'Unable to load returnable lines.');
+                }
+            });
+        }
+
+        function bindSourceHeader(header) {
+            if (!header) return;
+            $('#supplier_name').val(header.supplier_name ?? '');
+            $('#warehouse_name').val(header.warehouse_name ?? '');
+        }
+
+        function bindProductRows(lines) {
+            $('#productRows').html('');
+
+            if (!lines || !lines.length) {
+                $('#productRows').html(`
+                    <tr id="emptyRow">
+                        <td colspan="11" class="text-center text-muted">
+                            Nothing remaining to return for this source.
+                        </td>
+                    </tr>
+                `);
+                calculateGrandTotal();
+                return;
+            }
+
+            $.each(lines, function(_, line) {
+                addProductRow(line);
+            });
+
+            calculateGrandTotal();
+        }
+
+        // ======================================================
+        // ROW TEMPLATE
+        // ======================================================
+
+        function addProductRow(line, return_quantity) {
+            return_quantity = return_quantity ?? 0;
+
+            let row = $(`
+                <tr class="product-row">
+                    <td>
+                        <input type="hidden" name="products[][purchase_detail_id]" value="${line.purchase_detail_id}">
+                        <input type="hidden" name="products[][good_receipt_note_detail_id]" value="${line.good_receipt_note_detail_id ?? ''}">
+                        <input type="hidden" name="products[][reason]" value="">
+                        ${line.product_name}
+                    </td>
+                    <td>${line.product_variation_name}</td>
+                    <td>${line.unit_name}</td>
+                    <td class="received-qty">${decimal(line.received_quantity)}</td>
+                    <td class="already-returned-qty">${decimal(line.already_returned_quantity)}</td>
+                    <td class="returnable-qty">${decimal(line.returnable_quantity)}</td>
+                    <td>
+                        <input type="text" class="form-control return-qty"
+                            name="products[${$('#productRows tr.product-row').length}][return_quantity]"
+                            value="${decimal(return_quantity)}"
+                            data-returnable="${line.returnable_quantity}">
+                    </td>
+                    <td class="unit-price">${decimal(line.unit_price)}</td>
+                    <td class="discount-percent">${decimal(line.discount)}</td>
+                    <td class="tax-percent">${decimal(line.tax)}</td>
+                    <td class="row-total">${decimal(0)}</td>
+                </tr>
+            `);
+
+            row.data('unit_price', line.unit_price);
+            row.data('conversion_factor', line.conversion_factor || 1);
+            row.data('discount_percent', line.discount || 0);
+            row.data('tax_percent', line.tax || 0);
+            row.find('input[name*="[purchase_detail_id]"]').attr('name',
+                `products[${$('#productRows tr.product-row').length}][purchase_detail_id]`);
+            row.find('input[name*="[good_receipt_note_detail_id]"]').attr('name',
+                `products[${$('#productRows tr.product-row').length}][good_receipt_note_detail_id]`);
+
+            $('#productRows').append(row);
+            reindexRows();
+            calculateRow(row.is(':last-child') ? $('#productRows tr.product-row').last() : row);
+        }
+
+        function reindexRows() {
+            $('#productRows tr.product-row').each(function(index) {
+                $(this).find('input[name*="[purchase_detail_id]"]').attr('name',
+                    `products[${index}][purchase_detail_id]`);
+                $(this).find('input[name*="[good_receipt_note_detail_id]"]').attr('name',
+                    `products[${index}][good_receipt_note_detail_id]`);
+                $(this).find('input.return-qty').attr('name', `products[${index}][return_quantity]`);
+                $(this).find('input[name*="[reason]"]').attr('name', `products[${index}][reason]`);
+            });
+        }
+
+        // ======================================================
+        // RETURN QTY CHANGE
+        // ======================================================
+
+        function calculateRow(row) {
+            let returnable = decimal(row.find('.return-qty').data('returnable'));
+            let qty = decimal(row.find('.return-qty').val());
+
+            if (qty > returnable) {
+                qty = returnable;
+                row.find('.return-qty').val(decimal(qty));
+            }
+            if (qty < 0) {
+                qty = 0;
+                row.find('.return-qty').val(decimal(qty));
+            }
+
+            let unitPrice = decimal(row.data('unit_price'));
+            let conversionFactor = decimal(row.data('conversion_factor')) || 1;
+            let discountPercent = decimal(row.data('discount_percent'));
+            let taxPercent = decimal(row.data('tax_percent'));
+
+            let baseQty = qty * conversionFactor;
+            let subtotal = baseQty * unitPrice;
+            let discountAmount = round(subtotal * discountPercent / 100, 3);
+            let taxable = subtotal - discountAmount;
+            let taxAmount = round(taxable * taxPercent / 100, 3);
+            let total = taxable + taxAmount;
+
+            row.find('.row-total').html(decimal(total));
+            row.data('subtotal', subtotal);
+            row.data('discount_amount', discountAmount);
+            row.data('tax_amount', taxAmount);
+            row.data('total', total);
+        }
+
+        function round(value, precision) {
+            let factor = Math.pow(10, precision);
+            return Math.round((value + Number.EPSILON) * factor) / factor;
+        }
+
+        $(document).on('keyup change', '.return-qty', function() {
+            let row = $(this).closest('tr');
+            calculateRow(row);
+            calculateGrandTotal();
+        });
+
+        $(document).on('blur', '.return-qty', function() {
+            $(this).val(decimal($(this).val()));
+        });
+
+        // ======================================================
+        // GRAND TOTAL
+        // ======================================================
+
+        function calculateGrandTotal() {
+            let subtotal = 0;
+            let discount_amount = 0;
+            let tax_amount = 0;
+            let total = 0;
+
+            $('#productRows tr.product-row').each(function() {
+                subtotal += decimal($(this).data('subtotal'));
+                discount_amount += decimal($(this).data('discount_amount'));
+                tax_amount += decimal($(this).data('tax_amount'));
+                total += decimal($(this).data('total'));
+            });
+
+            $('#subtotal').val(decimal(subtotal));
+            $('#discount_amount').val(decimal(discount_amount));
+            $('#tax_amount').val(decimal(tax_amount));
+            $('#total').val(decimal(total));
+        }
+
+        // ======================================================
+        // EDIT MODE
+        // ======================================================
+
+        function loadPurchaseReturnForEdit() {
+            if (!editPurchaseReturnData || !editPurchaseReturnData.details || !editPurchaseReturnData.details
+                .length) {
+                return;
+            }
+
+            bindSourceHeader({
+                supplier_name: $('#supplier_name').val(),
+                warehouse_name: $('#warehouse_name').val()
+            });
+
+            $('#productRows').html('');
+
+            $.each(editPurchaseReturnData.details, function(_, item) {
+                addProductRow({
+                    purchase_detail_id: item.purchase_detail_id,
+                    good_receipt_note_detail_id: item.good_receipt_note_detail_id,
+                    product_name: item.product_name,
+                    product_variation_name: item.product_variation_name,
+                    received_quantity: item.received_quantity,
+                    already_returned_quantity: item.already_returned_quantity,
+                    returnable_quantity: (decimal(item.received_quantity) - decimal(item
+                        .already_returned_quantity)) + decimal(item.return_quantity),
+                    unit_name: item.unit_name,
+                    unit_price: item.unit_price,
+                    conversion_factor: item.conversion_factor,
+                    discount: item.discount,
+                    tax: item.tax
+                }, item.return_quantity);
+            });
+
+            calculateGrandTotal();
+        }
+
+        // ======================================================
+        // FORM SUBMIT
+        // ======================================================
+
+        $('#purchaseReturnForm').on('submit', function(e) {
+            if ($('#productRows tr.product-row').length == 0) {
+                e.preventDefault();
+                errorMessage('Please select a purchase or GRN with returnable products.');
+                return false;
+            }
+
+            let hasQuantity = false;
+            $('#productRows .return-qty').each(function() {
+                if (decimal($(this).val()) > 0) {
+                    hasQuantity = true;
+                }
+            });
+
+            if (!hasQuantity) {
+                e.preventDefault();
+                errorMessage('Please enter a return quantity for at least one product.');
+                return false;
+            }
+        });
+    </script>
+@endsection

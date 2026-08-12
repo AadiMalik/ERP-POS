@@ -9,6 +9,7 @@ use App\Enums\Status;
 use App\Enums\TransactionType;
 use App\Models\GoodReceiptNote;
 use App\Models\Purchase;
+use App\Models\PurchaseReturn;
 use App\Models\ProductVariationStock;
 use App\Models\ProductVariationStockTransaction;
 use App\Repository\Repository;
@@ -316,6 +317,10 @@ class ProductVariationStockService
 
         if ($reference_type === ReferenceType::GRN) {
             return GoodReceiptNote::where('good_receipt_note_id', $reference_id)->value('good_receipt_note_no') ?? $reference_id;
+        }
+
+        if ($reference_type === ReferenceType::PURCHASE_RETURN) {
+            return PurchaseReturn::where('purchase_return_id', $reference_id)->value('purchase_return_no') ?? $reference_id;
         }
 
         return $reference_id;

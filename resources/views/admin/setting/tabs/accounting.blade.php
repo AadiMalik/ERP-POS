@@ -15,6 +15,8 @@
         'default_sale_account_id' => 'Sale Account',
         'default_sale_return_account_id' => 'Sale Return',
         'default_inventory_account_id' => 'Inventory Account',
+        'default_opening_stock_account_id' => 'Opening Stock Account',
+        'default_stock_adjustment_account_id' => 'Stock Adjustment Account',
         'default_withholding_tax_account_id' => 'Withholding Tax Account',
     ];
 @endphp

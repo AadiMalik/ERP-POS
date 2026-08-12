@@ -27,6 +27,8 @@ class AccountingSetting extends Model
         'default_sale_account_id',
         'default_sale_return_account_id',
         'default_inventory_account_id',
+        'default_opening_stock_account_id',
+        'default_stock_adjustment_account_id',
         'default_withholding_tax_account_id',
         'manual_payment_account_selection',
         'currency',

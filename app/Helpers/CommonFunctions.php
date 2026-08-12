@@ -6,13 +6,16 @@ use App\Models\Category;
 use App\Models\GoodReceiptNote;
 use App\Models\Journal;
 use App\Models\JournalEntry;
+use App\Models\OpeningStock;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestQuotation;
+use App\Models\StockTaking;
 use App\Models\Supplier;
 use App\Models\SupplierPayment;
+use App\Models\TransferNote;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Support\Facades\Auth;
@@ -253,6 +256,69 @@ function generatePurchaseReturnNo($business_id = null)
 
     return sprintf(
         'PRTN-%04d',
+        $next_number
+    );
+}
+
+function generateOpeningStockNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $opening_stock = OpeningStock::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($opening_stock) {
+        $next_number = (int) substr($opening_stock->opening_stock_no, strrpos($opening_stock->opening_stock_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'OS-%04d',
+        $next_number
+    );
+}
+
+function generateStockTakingNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $stock_taking = StockTaking::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($stock_taking) {
+        $next_number = (int) substr($stock_taking->stock_taking_no, strrpos($stock_taking->stock_taking_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'STK-%04d',
+        $next_number
+    );
+}
+
+function generateTransferNoteNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $transfer_note = TransferNote::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($transfer_note) {
+        $next_number = (int) substr($transfer_note->transfer_note_no, strrpos($transfer_note->transfer_note_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'TRF-%04d',
         $next_number
     );
 }

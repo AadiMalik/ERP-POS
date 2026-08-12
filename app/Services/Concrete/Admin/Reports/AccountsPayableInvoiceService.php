@@ -35,8 +35,9 @@ class AccountsPayableInvoiceService
     {
         $invoices = $this->fetchGrnInvoices($filters)->concat($this->fetchDirectPurchaseInvoices($filters));
         $payments = $this->fetchPayments($filters);
+        $returns = $this->fetchPurchaseReturns($filters);
 
-        return $this->allocatePayments($invoices, $payments);
+        return $this->allocatePayments($invoices, $payments, $returns);
     }
 
     protected function fetchGrnInvoices(array $filters): Collection
@@ -166,6 +167,44 @@ class AccountsPayableInvoiceService
     }
 
     /**
+     * Posted Purchase Return credits, keyed the same way invoices are:
+     * a GRN-sourced return nets against its specific GRN invoice, a
+     * direct-purchase-sourced return nets against its purchase invoice.
+     */
+    protected function fetchPurchaseReturns(array $filters): Collection
+    {
+        $query = JournalEntryDetail::query()
+            ->join('journal_entries', 'journal_entries.journal_entry_id', '=', 'journal_entry_details.journal_entry_id')
+            ->join('purchase_returns', 'purchase_returns.purchase_return_id', '=', 'journal_entries.source_id')
+            ->where('journal_entries.source_type', JournalSourceTypes::PURCHASE_RETURN)
+            ->where('journal_entries.status', Status::POSTED)
+            ->where('journal_entries.is_deleted', 0)
+            ->where('journal_entry_details.debit', '>', 0)
+            ->whereColumn('journal_entry_details.supplier_id', 'purchase_returns.supplier_id');
+
+        if (!empty($filters['business_id'])) {
+            $query->where('journal_entries.business_id', $filters['business_id']);
+        }
+
+        if (!empty($filters['branch_id'])) {
+            $query->where('journal_entries.branch_id', $filters['branch_id']);
+        }
+
+        if (!empty($filters['supplier_id'])) {
+            $query->where('purchase_returns.supplier_id', $filters['supplier_id']);
+        }
+
+        $query = applyRoleScope($query, $filters['allow_roles'] ?? [], 'journal_entries.business_id', 'journal_entries.branch_id');
+
+        return $query->get([
+            'purchase_returns.purchase_id',
+            'purchase_returns.good_receipt_note_id',
+            'purchase_returns.return_type',
+            'journal_entry_details.debit as returned_amount',
+        ]);
+    }
+
+    /**
      * Allocate each purchase's posted payments against that purchase's
      * posted GRNs oldest-first. This is an explicit modeling assumption:
      * supplier_payments.purchase_id links to a Purchase, not a specific
@@ -174,29 +213,36 @@ class AccountsPayableInvoiceService
      * good_receipt_note_id is ever added to supplier_payments, this becomes
      * a direct lookup instead of FIFO.
      */
-    protected function allocatePayments(Collection $invoices, Collection $payments): Collection
+    protected function allocatePayments(Collection $invoices, Collection $payments, Collection $returns): Collection
     {
         $paymentsByPurchase = $payments->groupBy('purchase_id');
 
+        $returnsByInvoiceKey = $returns
+            ->groupBy(fn ($return) => $return->return_type === 'grn' ? $return->good_receipt_note_id : $return->purchase_id)
+            ->map(fn ($rows) => (float) $rows->sum('returned_amount'));
+
         return $invoices
             ->groupBy('purchase_id')
-            ->flatMap(function (Collection $grnRows, $purchase_id) use ($paymentsByPurchase) {
+            ->flatMap(function (Collection $grnRows, $purchase_id) use ($paymentsByPurchase, $returnsByInvoiceKey) {
                 $grnRows = $grnRows->sortBy('invoice_date')->values();
 
                 $purchasePayments = $paymentsByPurchase->get($purchase_id, collect());
                 $paymentPool = (float) $purchasePayments->sum('paid_amount');
                 $paymentRefs = $purchasePayments->pluck('payment_no')->unique()->values();
 
-                return $grnRows->map(function ($grn) use (&$paymentPool, $paymentRefs) {
+                return $grnRows->map(function ($grn) use (&$paymentPool, $paymentRefs, $returnsByInvoiceKey) {
                     $invoiced = (float) $grn->invoiced_amount;
-                    $applied = min($invoiced, max($paymentPool, 0));
+                    $returned = (float) ($returnsByInvoiceKey->get($grn->good_receipt_note_id) ?? 0);
+                    $netInvoiced = max($invoiced - $returned, 0);
+                    $applied = min($netInvoiced, max($paymentPool, 0));
 
                     $grn->due_date = Carbon::parse($grn->invoice_date)->addDays((int) ($grn->credit_days ?? 0));
+                    $grn->returned_amount = round($returned, 2);
                     $grn->paid_amount = round($applied, 2);
-                    $grn->outstanding_amount = round($invoiced - $applied, 2);
+                    $grn->outstanding_amount = round($netInvoiced - $applied, 2);
                     $grn->remaining_balance = $grn->outstanding_amount;
                     $grn->payment_references = $applied > 0 ? $paymentRefs->implode(', ') : '';
-                    $grn->status = $this->deriveStatus($grn->paid_amount, $invoiced);
+                    $grn->status = $this->deriveStatus($grn->paid_amount + $returned, $invoiced);
 
                     $paymentPool -= $applied;
 

@@ -285,6 +285,35 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::get('{purchase_return_id}/print', [App\Http\Controllers\Admin\PurchaseReturnController::class, 'print'])->name('purchase-return.print');
     });
 
+    //opening stock
+    Route::resource('opening-stock', App\Http\Controllers\Admin\OpeningStockController::class);
+    Route::group(['prefix' => 'opening-stock'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\OpeningStockController::class, 'getData']);
+        Route::post('change-status', [App\Http\Controllers\Admin\OpeningStockController::class, 'status']);
+        Route::get('details/{opening_stock_id}', [App\Http\Controllers\Admin\OpeningStockController::class, 'details']);
+        Route::get('{opening_stock_id}/print', [App\Http\Controllers\Admin\OpeningStockController::class, 'print'])->name('opening-stock.print');
+    });
+
+    //stock taking
+    Route::resource('stock-taking', App\Http\Controllers\Admin\StockTakingController::class);
+    Route::group(['prefix' => 'stock-taking'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\StockTakingController::class, 'getData']);
+        Route::post('change-status', [App\Http\Controllers\Admin\StockTakingController::class, 'status']);
+        Route::get('details/{stock_taking_id}', [App\Http\Controllers\Admin\StockTakingController::class, 'details']);
+        Route::get('system-stock/{warehouse_id}', [App\Http\Controllers\Admin\StockTakingController::class, 'systemStock']);
+        Route::get('{stock_taking_id}/print', [App\Http\Controllers\Admin\StockTakingController::class, 'print'])->name('stock-taking.print');
+    });
+
+    //transfer note
+    Route::resource('transfer-note', App\Http\Controllers\Admin\TransferNoteController::class);
+    Route::group(['prefix' => 'transfer-note'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\TransferNoteController::class, 'getData']);
+        Route::post('change-status', [App\Http\Controllers\Admin\TransferNoteController::class, 'status']);
+        Route::get('details/{transfer_note_id}', [App\Http\Controllers\Admin\TransferNoteController::class, 'details']);
+        Route::get('source-stock/{warehouse_id}', [App\Http\Controllers\Admin\TransferNoteController::class, 'sourceStock']);
+        Route::get('{transfer_note_id}/print', [App\Http\Controllers\Admin\TransferNoteController::class, 'print'])->name('transfer-note.print');
+    });
+
     //supplier payment
     Route::resource('supplier-payment', App\Http\Controllers\Admin\SupplierPaymentController::class);
     Route::group(['prefix' => 'supplier-payment'], function () {

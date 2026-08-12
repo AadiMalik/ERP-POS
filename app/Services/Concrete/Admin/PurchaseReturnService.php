@@ -15,6 +15,7 @@ use App\Models\JournalEntry;
 use App\Models\JournalEntryDetail;
 use App\Models\ProductVariationStock;
 use App\Models\ProductVariationStockTransaction;
+use App\Services\Concrete\Admin\ProductVariationStockService;
 use App\Models\Purchase;
 use App\Models\PurchaseDetail;
 use App\Models\PurchaseReturn;
