@@ -302,27 +302,12 @@ class ProductVariationStockService
 
     /**
      * Best-effort resolution of a human-readable document number for a stock
-     * transaction's source. Only "purchase" is wired up today; other source
-     * modules fall back to the raw reference id until they're implemented.
+     * transaction's source. Delegates to the shared ReferenceResolverService
+     * so this and Reports\StockLedgerReportService resolve reference types
+     * identically.
      */
     protected function resolveReferenceNo($reference_type, $reference_id)
     {
-        if (empty($reference_id)) {
-            return '-';
-        }
-
-        if ($reference_type === ReferenceType::PURCHASE) {
-            return Purchase::where('purchase_id', $reference_id)->value('purchase_no') ?? $reference_id;
-        }
-
-        if ($reference_type === ReferenceType::GRN) {
-            return GoodReceiptNote::where('good_receipt_note_id', $reference_id)->value('good_receipt_note_no') ?? $reference_id;
-        }
-
-        if ($reference_type === ReferenceType::PURCHASE_RETURN) {
-            return PurchaseReturn::where('purchase_return_id', $reference_id)->value('purchase_return_no') ?? $reference_id;
-        }
-
-        return $reference_id;
+        return app(ReferenceResolverService::class)->resolveDocNo($reference_type, $reference_id);
     }
 }

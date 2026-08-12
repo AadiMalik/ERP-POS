@@ -362,6 +362,33 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
             Route::get('export', [App\Http\Controllers\Admin\Reports\SupplierPaymentHistoryReportController::class, 'export'])->name('reports.supplier-payment-history.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\SupplierPaymentHistoryReportController::class, 'exportCsv'])->name('reports.supplier-payment-history.export-csv');
         });
+
+        Route::group(['prefix' => 'purchase-return-summary'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\PurchaseReturnSummaryReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\PurchaseReturnSummaryReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\PurchaseReturnSummaryReportController::class, 'print'])->name('reports.purchase-return-summary.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\PurchaseReturnSummaryReportController::class, 'pdf'])->name('reports.purchase-return-summary.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\PurchaseReturnSummaryReportController::class, 'export'])->name('reports.purchase-return-summary.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\PurchaseReturnSummaryReportController::class, 'exportCsv'])->name('reports.purchase-return-summary.export-csv');
+        });
+
+        Route::group(['prefix' => 'purchase-return-detail'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\PurchaseReturnDetailReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\PurchaseReturnDetailReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\PurchaseReturnDetailReportController::class, 'print'])->name('reports.purchase-return-detail.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\PurchaseReturnDetailReportController::class, 'pdf'])->name('reports.purchase-return-detail.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\PurchaseReturnDetailReportController::class, 'export'])->name('reports.purchase-return-detail.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\PurchaseReturnDetailReportController::class, 'exportCsv'])->name('reports.purchase-return-detail.export-csv');
+        });
+
+        Route::group(['prefix' => 'stock-ledger'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\StockLedgerReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\StockLedgerReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\StockLedgerReportController::class, 'print'])->name('reports.stock-ledger.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\StockLedgerReportController::class, 'pdf'])->name('reports.stock-ledger.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\StockLedgerReportController::class, 'export'])->name('reports.stock-ledger.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\StockLedgerReportController::class, 'exportCsv'])->name('reports.stock-ledger.export-csv');
+        });
     });
 
     //Setting

@@ -194,6 +194,18 @@
                         <div data-i18n="Transfer Note">Transfer Note</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div data-i18n="Stock Reports">Reports</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/stock-ledger') }}" class="menu-link">
+                                <div data-i18n="Stock Ledger">Stock Ledger &amp; Movement</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
         </li>
 
@@ -306,6 +318,16 @@
                         <li class="menu-item">
                             <a href="{{ url('/admin/reports/supplier-payment-history') }}" class="menu-link">
                                 <div data-i18n="Supplier Payment History">Supplier Payment History</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/purchase-return-summary') }}" class="menu-link">
+                                <div data-i18n="Purchase Return Summary">Purchase Return Summary</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/purchase-return-detail') }}" class="menu-link">
+                                <div data-i18n="Purchase Return Detail">Purchase Return Detail</div>
                             </a>
                         </li>
                     </ul>
