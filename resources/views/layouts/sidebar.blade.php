@@ -95,6 +95,46 @@
                 </li>
             </ul>
         </li>
+        @if (getRoleName() == \App\Enums\RoleNames::SUPERADMIN)
+            <!-- Subscriptions & Billing -->
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-credit-card"></i>
+                    <div data-i18n="Subscriptions">Subscriptions &amp; Billing</div>
+                </a>
+
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                        <a href="{{ route('subscriptions.dashboard') }}" class="menu-link">
+                            <div data-i18n="Subscriptions">Dashboard</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ route('subscription-renewal-requests.index') }}" class="menu-link">
+                            <div data-i18n="Renewal Requests">Renewal Requests</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ route('subscription-invoices.index') }}" class="menu-link">
+                            <div data-i18n="Invoices">Invoices</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ route('subscription-settings.edit') }}" class="menu-link">
+                            <div data-i18n="Subscription Settings">Settings</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        @else
+            <!-- My Subscription -->
+            <li class="menu-item">
+                <a href="{{ route('my-subscription.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons fa fa-credit-card"></i>
+                    <div data-i18n="My Subscription">My Subscription</div>
+                </a>
+            </li>
+        @endif
         <!-- Users -->
         <li class="menu-item">
             <a href="javascript:void(0);" class="menu-link menu-toggle">

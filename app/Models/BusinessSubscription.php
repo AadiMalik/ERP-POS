@@ -16,8 +16,10 @@ class BusinessSubscription extends Model
         'business_subscription_id',
         'business_id',
         'package_id',
+        'billing_cycle',
         'start_at',
         'end_at',
+        'grace_period_ends_at',
         'subtotal',
         'discount',
         'discount_type',
@@ -29,6 +31,8 @@ class BusinessSubscription extends Model
         'payment_method',
         'payment_reference',
         'status',
+        'cancelled_at',
+        'renewed_from_subscription_id',
 
         'is_deleted',
         'createdby_id',
@@ -49,8 +53,32 @@ class BusinessSubscription extends Model
         return $this->belongsTo(Package::class, 'package_id');
     }
 
+    public function invoices()
+    {
+        return $this->hasMany(SubscriptionInvoice::class, 'business_subscription_id', 'business_subscription_id');
+    }
+
+    public function renewedFrom()
+    {
+        return $this->belongsTo(BusinessSubscription::class, 'renewed_from_subscription_id', 'business_subscription_id');
+    }
+
+    public function history()
+    {
+        return $this->hasMany(SubscriptionHistory::class, 'business_subscription_id', 'business_subscription_id');
+    }
+
     public function createdby()
     {
         return $this->belongsTo(User::class, 'createdby_id');
+    }
+
+    public function getRemainingDaysAttribute()
+    {
+        if (empty($this->end_at)) {
+            return null;
+        }
+
+        return now()->diffInDays($this->end_at, false);
     }
 }

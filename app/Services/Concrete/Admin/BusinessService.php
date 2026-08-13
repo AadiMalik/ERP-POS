@@ -16,12 +16,14 @@ class BusinessService
     protected $model_business;
     protected $model_package;
     protected $model_business_subscription;
+    protected SubscriptionService $subscription_service;
 
-    public function __construct()
+    public function __construct(SubscriptionService $subscription_service)
     {
         $this->model_business = new Repository(new Business());
         $this->model_package = new Repository(new Package());
         $this->model_business_subscription = new Repository(new BusinessSubscription());
+        $this->subscription_service = $subscription_service;
     }
 
     public function getData($data)
@@ -82,8 +84,12 @@ class BusinessService
 
     public function save($obj)
     {
-        DB::transaction(function () use ($obj) {
+        return DB::transaction(function () use ($obj) {
             if (!empty($obj['business_id'])) {
+                // Package/subscription changes are handled exclusively
+                // through the dedicated Renew flow (SubscriptionService),
+                // never through this edit path.
+                unset($obj['package_id']);
                 $obj['updatedby_id'] = Auth::user()->id;
                 $obj['date_updated'] = now();
                 $this->model_business->update($obj, $obj['business_id']);
@@ -92,45 +98,13 @@ class BusinessService
             $obj['business_id'] = generateUuid();
             $obj['createdby_id'] = Auth::user()->id;
             $obj['date_created'] = now();
+            $package_id = $obj['package_id'];
+            unset($obj['package_id']);
             $saved_obj = $this->model_business->create($obj);
-            $this->subscription($obj['package_id'], $saved_obj);
-            return $saved_obj;
+            $package = $this->model_package->getModel()::findOrFail($package_id);
+            $this->subscription_service->createInitial($saved_obj, $package);
+            return $saved_obj->fresh();
         });
-    }
-
-    private function subscription($package_id, $business)
-    {
-        $package = $this->model_package->getModel()::findOrFail($package_id);
-
-        $startDate = now();
-        $endDate = now()->addDays($package->duration_days);
-
-        $business->update([
-            'package_id' => $package->package_id,
-            'subscription_start' => $startDate,
-            'subscription_end' => $endDate,
-        ]);
-
-        $package_subscription = $this->model_business_subscription->getModel()::create([
-            'business_subscription_id' => generateUuid(),
-            'business_id' => $business->business_id,
-            'package_id' => $package->package_id,
-            'start_at' => $startDate,
-            'end_at' => $endDate,
-            'subtotal' => $package->price,
-            'discount' => 0,
-            'discount_amount' => 0,
-            'tax' => 0,
-            'tax_amount' => 0,
-            'total' => $package->price,
-            'payment_method' => 'cash',
-            'payment_status' => 'paid',
-            'payment_reference' => 'admin created',
-            'status' => Status::ACTIVE,
-            'createdby_id' => Auth::id(),
-            'date_created' => now(),
-        ]);
-        return $package_subscription;
     }
 
     public function getById($business_id)

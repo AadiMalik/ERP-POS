@@ -533,6 +533,14 @@ function applyRoleScope(
     return $query;
 }
 
+/**
+ * Compatibility wrapper - the real logic now lives in FeatureLimitService,
+ * which centralizes every subscription limit/module check in one place
+ * instead of duplicating it across module services. Kept as a free function
+ * with the same signature/return shape so none of the existing call sites
+ * (BranchService, CategoryService, ProductService, SubCategoryService,
+ * SupplierService, WarehouseService) need to change.
+ */
 function checkPackageLimit($type)
 {
     try {

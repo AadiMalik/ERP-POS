@@ -22,8 +22,7 @@ Auth::routes(['register' => false]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-// Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix' => 'admin'], function () {
-Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], function () {
+Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix' => 'admin'], function () {
     //permissions
     Route::resource('permissions', App\Http\Controllers\Admin\PermissionController::class);
     Route::group(['prefix' => 'permissions'], function () {
@@ -45,6 +44,52 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
     Route::resource('business', App\Http\Controllers\Admin\BusinessController::class);
     Route::group(['prefix' => 'business'], function () {
         Route::post('data', [App\Http\Controllers\Admin\BusinessController::class, 'getData'])->name('business-data');
+    });
+
+    //////////////////// Subscription & Billing (Super Admin) ////////////////////
+    Route::group(['prefix' => 'subscriptions', 'middleware' => ['superadmin']], function () {
+        Route::get('/', [App\Http\Controllers\Admin\SubscriptionController::class, 'index'])->name('subscriptions.dashboard');
+        Route::post('data', [App\Http\Controllers\Admin\SubscriptionController::class, 'getData'])->name('subscriptions-data');
+        Route::get('{business}', [App\Http\Controllers\Admin\SubscriptionController::class, 'show'])->name('subscriptions.show');
+        Route::get('{business}/renew', [App\Http\Controllers\Admin\SubscriptionController::class, 'renewForm'])->name('subscriptions.renew.form');
+        Route::post('{business}/renew', [App\Http\Controllers\Admin\SubscriptionController::class, 'renew'])->name('subscriptions.renew');
+        Route::post('{business}/suspend', [App\Http\Controllers\Admin\SubscriptionController::class, 'suspend'])->name('subscriptions.suspend');
+        Route::post('{business}/reactivate', [App\Http\Controllers\Admin\SubscriptionController::class, 'reactivate'])->name('subscriptions.reactivate');
+        Route::post('{business}/cancel', [App\Http\Controllers\Admin\SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
+    });
+
+    Route::group(['prefix' => 'subscription-renewal-requests', 'middleware' => ['superadmin']], function () {
+        Route::get('/', [App\Http\Controllers\Admin\SubscriptionRenewalRequestController::class, 'index'])->name('subscription-renewal-requests.index');
+        Route::post('data', [App\Http\Controllers\Admin\SubscriptionRenewalRequestController::class, 'getData'])->name('subscription-renewal-requests-data');
+        Route::post('{subscription_renewal_request_id}/approve', [App\Http\Controllers\Admin\SubscriptionRenewalRequestController::class, 'approve'])->name('subscription-renewal-requests.approve');
+        Route::post('{subscription_renewal_request_id}/reject', [App\Http\Controllers\Admin\SubscriptionRenewalRequestController::class, 'reject'])->name('subscription-renewal-requests.reject');
+        Route::post('{subscription_renewal_request_id}/request-changes', [App\Http\Controllers\Admin\SubscriptionRenewalRequestController::class, 'requestChanges'])->name('subscription-renewal-requests.request-changes');
+    });
+
+    Route::group(['prefix' => 'subscription-invoices', 'middleware' => ['superadmin']], function () {
+        Route::get('/', [App\Http\Controllers\Admin\SubscriptionInvoiceController::class, 'index'])->name('subscription-invoices.index');
+        Route::post('data', [App\Http\Controllers\Admin\SubscriptionInvoiceController::class, 'getData'])->name('subscription-invoices-data');
+        Route::get('{subscription_invoice_id}', [App\Http\Controllers\Admin\SubscriptionInvoiceController::class, 'show'])->name('subscription-invoices.show');
+        Route::get('{subscription_invoice_id}/pdf', [App\Http\Controllers\Admin\SubscriptionInvoiceController::class, 'pdf'])->name('subscription-invoices.pdf');
+        Route::post('{subscription_invoice_id}/void', [App\Http\Controllers\Admin\SubscriptionInvoiceController::class, 'void'])->name('subscription-invoices.void');
+    });
+
+    Route::group(['prefix' => 'subscription-payments', 'middleware' => ['superadmin']], function () {
+        Route::post('{subscription_payment_id}/approve', [App\Http\Controllers\Admin\SubscriptionPaymentController::class, 'approve'])->name('subscription-payments.approve');
+        Route::post('{subscription_payment_id}/reject', [App\Http\Controllers\Admin\SubscriptionPaymentController::class, 'reject'])->name('subscription-payments.reject');
+    });
+
+    Route::group(['prefix' => 'subscription-settings', 'middleware' => ['superadmin']], function () {
+        Route::get('/', [App\Http\Controllers\Admin\SubscriptionSettingController::class, 'edit'])->name('subscription-settings.edit');
+        Route::post('/', [App\Http\Controllers\Admin\SubscriptionSettingController::class, 'update'])->name('subscription-settings.update');
+    });
+
+    //////////////////// Subscription (Business Admin self-service) ////////////////////
+    Route::group(['prefix' => 'my-subscription'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\MySubscriptionController::class, 'index'])->name('my-subscription.index');
+        Route::post('renewal-requests', [App\Http\Controllers\Admin\MySubscriptionController::class, 'storeRenewalRequest'])->name('my-subscription.renewal-requests.store');
+        Route::get('invoices/{subscription_invoice_id}/pdf', [App\Http\Controllers\Admin\MySubscriptionController::class, 'invoicePdf'])->name('my-subscription.invoice-pdf');
+        Route::post('invoices/{subscription_invoice_id}/payments', [App\Http\Controllers\Admin\MySubscriptionController::class, 'storePayment'])->name('my-subscription.payments.store');
     });
     //branch
     Route::resource('branch', App\Http\Controllers\Admin\BranchController::class);

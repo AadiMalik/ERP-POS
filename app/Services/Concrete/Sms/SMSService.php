@@ -10,17 +10,39 @@ class SMSService
 {
     public function send(string $businessId, SMSData $sms): array
     {
+        $setting = SmsSetting::where('business_id', $businessId)->first();
+
+        if (!$setting) {
+            return [
+                'status' => false,
+                'message' => 'SMS settings not found.'
+            ];
+        }
+
+        return $this->deliver($setting, $sms);
+    }
+
+    /**
+     * Sends using the platform-level channel config (the SmsSetting row
+     * with business_id = NULL). See EmailService::sendPlatform() for why.
+     */
+    public function sendPlatform(SMSData $sms): array
+    {
+        $setting = SmsSetting::whereNull('business_id')->first();
+
+        if (!$setting) {
+            return [
+                'status' => false,
+                'message' => 'Platform SMS settings are not configured.'
+            ];
+        }
+
+        return $this->deliver($setting, $sms);
+    }
+
+    protected function deliver(SmsSetting $setting, SMSData $sms): array
+    {
         try {
-
-            $setting = SmsSetting::where('business_id', $businessId)->first();
-
-            if (!$setting) {
-                return [
-                    'status' => false,
-                    'message' => 'SMS settings not found.'
-                ];
-            }
-
             if (!$setting->enable_sms) {
                 return [
                     'status' => false,

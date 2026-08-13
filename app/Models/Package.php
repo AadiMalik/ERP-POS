@@ -22,6 +22,7 @@ class Package extends Model
         'order',
         'duration_type',
         'duration_days',
+        'trial_days',
         'status',
         'max_branches',
         'max_users',
