@@ -230,6 +230,91 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\SupplierController::class, 'byBusiness']);
     });
 
+    ////////////////////// Orders (centralized) ///////////////////////////
+    //order type
+    Route::resource('order-type', App\Http\Controllers\Admin\OrderTypeController::class);
+    Route::group(['prefix' => 'order-type'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\OrderTypeController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\OrderTypeController::class, 'status']);
+    });
+
+    //payment method
+    Route::resource('payment-method', App\Http\Controllers\Admin\PaymentMethodController::class);
+    Route::group(['prefix' => 'payment-method'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\PaymentMethodController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\PaymentMethodController::class, 'status']);
+    });
+
+    //order source
+    Route::resource('order-source', App\Http\Controllers\Admin\OrderSourceController::class);
+    Route::group(['prefix' => 'order-source'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\OrderSourceController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\OrderSourceController::class, 'status']);
+    });
+
+    //discount
+    Route::resource('discount', App\Http\Controllers\Admin\DiscountController::class);
+    Route::group(['prefix' => 'discount'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\DiscountController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\DiscountController::class, 'status']);
+    });
+
+    //voucher
+    Route::resource('voucher', App\Http\Controllers\Admin\VoucherController::class);
+    Route::group(['prefix' => 'voucher'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\VoucherController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\VoucherController::class, 'status']);
+    });
+
+    ////////////////////// POS (operational interface only) ///////////////////////////
+    //pos register
+    Route::resource('pos-register', App\Http\Controllers\Admin\PosRegisterController::class);
+    Route::group(['prefix' => 'pos-register'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\PosRegisterController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\PosRegisterController::class, 'status']);
+    });
+
+    //pos register session
+    Route::group(['prefix' => 'pos-register-session'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'getData']);
+        Route::post('open', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'open']);
+        Route::post('close', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'close']);
+        Route::get('summary/{pos_register_session_id}', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'summary']);
+        Route::post('cash-movement', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'addCashMovement']);
+        Route::get('current', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'current']);
+    });
+    Route::get('pos-register-session', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'index']);
+
+    //order (centralized - shared by POS, Website, Mobile App, API)
+    Route::group(['middleware' => ['permission:pos.access']], function () {
+        // Registered before the resource route below so these literal paths
+        // (e.g. GET order/search-products) are matched before the
+        // resource's GET order/{order} (show) wildcard would otherwise
+        // swallow them.
+        Route::group(['prefix' => 'order'], function () {
+            Route::post('data', [App\Http\Controllers\Admin\OrderController::class, 'getData']);
+            Route::post('hold', [App\Http\Controllers\Admin\OrderController::class, 'hold']);
+            Route::post('resume', [App\Http\Controllers\Admin\OrderController::class, 'resume']);
+            Route::post('reopen', [App\Http\Controllers\Admin\OrderController::class, 'reopen'])->middleware('permission:order.reopen');
+            Route::post('cancel', [App\Http\Controllers\Admin\OrderController::class, 'cancel']);
+            Route::post('complete', [App\Http\Controllers\Admin\OrderController::class, 'complete']);
+            Route::post('void', [App\Http\Controllers\Admin\OrderController::class, 'void'])->middleware('permission:order.cancel_void');
+            Route::get('search-products', [App\Http\Controllers\Admin\OrderController::class, 'searchProducts']);
+            Route::get('filter-options/{business_id}', [App\Http\Controllers\Admin\OrderController::class, 'filterOptions']);
+            Route::get('details/{order_id}', [App\Http\Controllers\Admin\OrderController::class, 'details']);
+            Route::get('{order_id}/print', [App\Http\Controllers\Admin\OrderController::class, 'print'])->name('order.print');
+        });
+        Route::resource('order', App\Http\Controllers\Admin\OrderController::class)->except(['create', 'edit']);
+    });
+
+    //pos screen
+    Route::group(['middleware' => ['permission:pos.access']], function () {
+        Route::get('pos-screen', [App\Http\Controllers\Admin\PosScreenController::class, 'index'])->name('pos-screen');
+        Route::post('pos-screen/context', [App\Http\Controllers\Admin\PosScreenController::class, 'selectContext'])->name('pos-screen.context');
+        Route::get('pos-screen/context-options/{business_id}', [App\Http\Controllers\Admin\PosScreenController::class, 'contextOptions']);
+        Route::get('pos-screen/change-context', [App\Http\Controllers\Admin\PosScreenController::class, 'changeContext'])->name('pos-screen.change-context');
+    });
+
     //purchase request
     Route::resource('purchase-request', App\Http\Controllers\Admin\PurchaseRequestController::class);
     Route::group(['prefix' => 'purchase-request'], function () {
@@ -520,6 +605,8 @@ Route::group(['middleware' => ['auth', 'setting'], 'prefix' => 'admin'], functio
         Route::post('sms', [App\Http\Controllers\Admin\SettingController::class, 'updateSmsSetting'])->name('sms.update');
         Route::post('whatsapp', [App\Http\Controllers\Admin\SettingController::class, 'updateWhatsappSetting'])->name('whatsapp.update');
         Route::post('fbr', [App\Http\Controllers\Admin\SettingController::class, 'updateFbrSetting'])->name('fbr.update');
+        Route::post('pos', [App\Http\Controllers\Admin\SettingController::class, 'updatePosSetting'])->name('pos.update');
+        Route::post('pra', [App\Http\Controllers\Admin\SettingController::class, 'updatePraSetting'])->name('pra.update');
         Route::post('print', [App\Http\Controllers\Admin\SettingController::class, 'updatePrintSetting'])->name('print.update');
         Route::post('barcode', [App\Http\Controllers\Admin\SettingController::class, 'updateBarcodeSetting'])->name('barcode.update');
         Route::post('theme', [App\Http\Controllers\Admin\SettingController::class, 'updateThemeSetting'])->name('theme.update');

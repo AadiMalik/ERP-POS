@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Auth\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,4 +17,22 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// Shared email+OTP customer identity/auth API - consumed identically by the
+// website and the mobile app (and staff-side customer creation reuses the
+// same User/CustomerProfile data, just without going through OTP).
+Route::prefix('v1/auth')->middleware('throttle:20,1')->group(function () {
+    Route::post('check-email', [AuthController::class, 'checkEmail']);
+    Route::post('send-otp', [AuthController::class, 'sendOtp']);
+    Route::post('resend-otp', [AuthController::class, 'resendOtp']);
+    Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
+    Route::post('login-password', [AuthController::class, 'loginWithPassword']);
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('reset-password', [AuthController::class, 'resetPassword']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('set-password', [AuthController::class, 'setPassword']);
+        Route::post('logout', [AuthController::class, 'logout']);
+    });
 });

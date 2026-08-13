@@ -16,6 +16,8 @@ use App\Models\EmailSetting;
 use App\Models\FbrSetting;
 use App\Models\InventorySetting;
 use App\Models\SmsSetting;
+use App\Models\PosSetting;
+use App\Models\PraSetting;
 use App\Models\PrintSetting;
 use App\Models\SupplierSetting;
 use App\Models\ThemeSetting;
@@ -41,6 +43,8 @@ class SettingService
     protected $model_print_setting;
     protected $model_barcode_setting;
     protected $model_theme_setting;
+    protected $model_pos_setting;
+    protected $model_pra_setting;
 
     public function __construct()
     {
@@ -57,6 +61,8 @@ class SettingService
         $this->model_print_setting = new Repository(new PrintSetting());
         $this->model_barcode_setting = new Repository(new BarcodeSetting());
         $this->model_theme_setting = new Repository(new ThemeSetting());
+        $this->model_pos_setting = new Repository(new PosSetting());
+        $this->model_pra_setting = new Repository(new PraSetting());
     }
 
     public function getBusinessSetting($business_id)
@@ -143,15 +149,25 @@ class SettingService
         return $this->model_fbr_setting->getModel()::firstOrCreate(['business_id' => $business_id]);
     }
 
+    public function getPosSetting($business_id)
+    {
+        return $this->model_pos_setting->getModel()::firstOrCreate(['business_id' => $business_id]);
+    }
+
+    public function getPraSetting($business_id)
+    {
+        return $this->model_pra_setting->getModel()::firstOrCreate(['business_id' => $business_id]);
+    }
+
     public function getWhatsappSetting($business_id)
     {
         return $this->model_whatsapp_setting->getModel()::firstOrCreate(['business_id' => $business_id]);
     }
 
-    public function getPrintSetting($business_id)
+    public function getPrintSetting($business_id, $document_type = 'default')
     {
         return $this->model_print_setting->getModel()::firstOrCreate(
-            ['business_id' => $business_id],
+            ['business_id' => $business_id, 'document_type' => $document_type],
             [
                 'header_config' => config('print_defaults.header'),
                 'footer_config' => config('print_defaults.footer'),
@@ -355,6 +371,48 @@ class SettingService
         return $setting;
     }
 
+    public function updatePosSetting(array $obj)
+    {
+        $model = $this->model_pos_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
+    }
+
+    public function updatePraSetting(array $obj)
+    {
+        $model = $this->model_pra_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
+    }
+
     public function updateWhatsappSetting(array $obj)
     {
         $model = $this->model_whatsapp_setting->getModel();
@@ -381,7 +439,8 @@ class SettingService
         $model = $this->model_print_setting->getModel();
 
         $setting = $model::firstOrNew([
-            'business_id' => $obj['business_id']
+            'business_id' => $obj['business_id'],
+            'document_type' => $obj['document_type'] ?? 'default',
         ]);
 
         if (!$setting->exists) {

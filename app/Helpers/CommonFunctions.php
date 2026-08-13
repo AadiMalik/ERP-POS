@@ -3,10 +3,13 @@
 use App\Enums\RoleNames;
 use App\Models\Branch;
 use App\Models\Category;
+use App\Models\CustomerProfile;
 use App\Models\GoodReceiptNote;
 use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\OpeningStock;
+use App\Models\Order;
+use App\Models\Voucher;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
@@ -154,6 +157,52 @@ function generateJVNum($journal_id)
         now()->format('dmY'),
         $next_number
     );
+}
+
+/**
+ * Concurrency-safe per-business/branch/day sequential order number, unlike the
+ * generateXNo() helpers below (which scan the max existing suffix with no
+ * locking - acceptable for today's low-concurrency back-office documents, but
+ * not for POS terminals that can post simultaneously). Uses SELECT ... FOR
+ * UPDATE on a dedicated counter row, so it MUST be called from inside the same
+ * DB transaction that creates the order. When $reset is 'never', a fixed
+ * sentinel date is used instead of the real date so all orders for a
+ * business/branch share one perpetual counter row.
+ */
+function generateDailyOrderNumber($business_id, $branch_id, $date, $reset = 'daily')
+{
+    $counter_date = $reset === 'never'
+        ? '1970-01-01'
+        : Carbon::parse($date)->format('Y-m-d');
+
+    $counter = \App\Models\OrderCounter::where('business_id', $business_id)
+        ->where('branch_id', $branch_id)
+        ->where('counter_date', $counter_date)
+        ->lockForUpdate()
+        ->first();
+
+    if (!$counter) {
+        try {
+            $counter = \App\Models\OrderCounter::create([
+                'business_id'  => $business_id,
+                'branch_id'    => $branch_id,
+                'counter_date' => $counter_date,
+                'last_number'  => 0,
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Another concurrent transaction won the race to insert today's
+            // first counter row - re-select and lock the row it just created.
+            $counter = \App\Models\OrderCounter::where('business_id', $business_id)
+                ->where('branch_id', $branch_id)
+                ->where('counter_date', $counter_date)
+                ->lockForUpdate()
+                ->firstOrFail();
+        }
+    }
+
+    $counter->increment('last_number');
+
+    return $counter->last_number;
 }
 
 function generatePRNo($business_id = null)
@@ -365,6 +414,27 @@ function generateSupplierCode($business_id = null)
     return $prefix . str_pad($next_number, 4, '0', STR_PAD_LEFT);
 }
 
+function generateCustomerCode($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $prefix = session('customer_setting.customer_code_prefix') ?? 'CUS-';
+
+    $last_customer = CustomerProfile::where('business_id', $business_id)
+        ->where('code', 'like', $prefix . '%')
+        ->orderByDesc('customer_profile_id')
+        ->first();
+
+    $next_number = 1;
+
+    if ($last_customer && $last_customer->code) {
+        $number = str_replace($prefix, '', $last_customer->code);
+        $next_number = (int) $number + 1;
+    }
+
+    return $prefix . str_pad($next_number, 4, '0', STR_PAD_LEFT);
+}
+
 function applyRoleScope(
     Builder $query,
     array $allowed_roles = [],
@@ -497,51 +567,28 @@ function checkPackageLimit($type)
 
         $package = $business->package;
 
-        // Allowed fields
-        $limits = [
-
-            'branches'          => [
-                'column' => 'max_branches',
-                'count' => Branch::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'users'             => [
-                'column' => 'max_users',
-                'count' => User::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
+        // Allowed fields — column resolved for every type, but the (potentially
+        // expensive) count query only runs for the requested $type. This also
+        // avoids eagerly touching model classes (e.g. Customer, Order, Voucher)
+        // for limit types that aren't being checked on a given call.
+        $columns = [
+            'branches'          => 'max_branches',
+            'users'             => 'max_users',
             'customers'         => 'max_customers',
-            'warehouses'        => [
-                'column' => 'max_warehouses',
-                'count' => Warehouse::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'categories'        => [
-                'column' => 'max_categories',
-                'count' => Category::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'products'          => [
-                'column' => 'max_products',
-                'count' => Product::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'suppliers'         => [
-                'column' => 'max_suppliers',
-                'count' => Supplier::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'purchase_orders'   => [
-                'column' => 'max_purchase_orders',
-                'count' => PurchaseRequest::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'purchases'         => [
-                'column' => 'max_purchases',
-                'count' => Purchase::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
+            'warehouses'        => 'max_warehouses',
+            'categories'        => 'max_categories',
+            'products'          => 'max_products',
+            'suppliers'         => 'max_suppliers',
+            'purchase_orders'   => 'max_purchase_orders',
+            'purchases'         => 'max_purchases',
             'sales'             => 'max_sales',
             'transfers'         => 'max_transfers',
             'expenses'          => 'max_expenses',
             'vouchers'          => 'max_vouchers',
-
         ];
 
         // Invalid type
-        if (!isset($limits[$type])) {
+        if (!isset($columns[$type])) {
 
             return [
                 'status' => false,
@@ -549,8 +596,23 @@ function checkPackageLimit($type)
             ];
         }
 
-        $limit = (int) $package->{$limits[$type]['column']};
-        $count = $limits[$type]['count'];
+        $count = match ($type) {
+            'branches' => Branch::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            'users' => User::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            'customers' => CustomerProfile::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            'warehouses' => Warehouse::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            'categories' => Category::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            'products' => Product::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            'suppliers' => Supplier::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            'purchase_orders' => PurchaseRequest::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            'purchases' => Purchase::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            'sales' => Order::where('business_id', $user->business_id)->where('status', 'posted')->where('is_deleted', 0)->count(),
+            'transfers' => TransferNote::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+            'expenses' => 0, // no Expense model exists in this codebase yet
+            'vouchers' => Voucher::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
+        };
+
+        $limit = (int) $package->{$columns[$type]};
 
         // Unlimited
         if ($limit == -1) {

@@ -144,6 +144,10 @@ class RoleService
                         'name' => RoleNames::BUSINESSADMIN,
                         'description' => 'Full access to all business operations and all branch data including employees, inventory, finance, sales, purchases, reports, and settings.',
                     ],
+                    [
+                        'name' => RoleNames::USER,
+                        'description' => 'Customer account used to sign in across POS, website, and the mobile app.',
+                    ],
                 ];
             } else {
                 $business_id = Auth::user()->business_id;
@@ -224,7 +228,7 @@ class RoleService
 
             foreach ($roles as $role) {
 
-                $this->model_role->getModel()::updateOrCreate(
+                $savedRole = $this->model_role->getModel()::updateOrCreate(
 
                     [
                         'business_id' => $business_id,
@@ -238,6 +242,31 @@ class RoleService
                         'updated_at' => now(),
                     ]
                 );
+
+                if ($role['name'] === RoleNames::POSMANAGER) {
+                    $savedRole->syncPermissions([
+                        'pos.access',
+                        'pos.register.close',
+                        'pos.register.report.view',
+                        'order.create',
+                        'order.edit',
+                        'order.discount.apply',
+                        'order.coupon.apply',
+                        'order.price.change',
+                        'order.hold',
+                        'order.cancel_void',
+                        'order.refund.process',
+                        'order.payment.credit',
+                        'order.customer.change',
+                        'order.reopen',
+                    ]);
+                } elseif ($role['name'] === RoleNames::ORDERTAKER) {
+                    $savedRole->syncPermissions([
+                        'pos.access',
+                        'order.create',
+                        'order.hold',
+                    ]);
+                }
             }
 
             return true;

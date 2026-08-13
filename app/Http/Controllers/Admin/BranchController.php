@@ -77,6 +77,8 @@ class BranchController extends Controller
             'city',
             'state',
             'country',
+            'open_time',
+            'close_time',
         ]);
         if ($request->hasFile('logo')) {
 

@@ -400,6 +400,73 @@
 
             </ul>
         </li>
+
+        {{-- Orders (centralized - shared by POS, Website, Mobile App, API) --}}
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons fa fa-receipt"></i>
+                <div data-i18n="Orders">Orders</div>
+            </a>
+
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ url('/admin/order') }}" class="menu-link">
+                        <div data-i18n="Orders">Orders</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/order-type') }}" class="menu-link">
+                        <div data-i18n="Order Types">Order Types</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/order-source') }}" class="menu-link">
+                        <div data-i18n="Order Sources">Order Sources</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/payment-method') }}" class="menu-link">
+                        <div data-i18n="Payment Methods">Payment Methods</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/discount') }}" class="menu-link">
+                        <div data-i18n="Discounts">Discounts</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/voucher') }}" class="menu-link">
+                        <div data-i18n="Vouchers">Vouchers</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        {{-- POS (operational interface only) --}}
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons fa fa-cash-register"></i>
+                <div data-i18n="POS">POS</div>
+            </a>
+
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ url('/admin/pos-screen') }}" class="menu-link">
+                        <div data-i18n="POS Screen">POS Screen</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/pos-register') }}" class="menu-link">
+                        <div data-i18n="Registers">Registers</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/pos-register-session') }}" class="menu-link">
+                        <div data-i18n="Register Sessions">Register Sessions</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
     </ul>
 </aside>
 <!-- / Menu -->

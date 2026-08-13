@@ -99,6 +99,31 @@
                             </div>
                         </div>
 
+                        <!-- POS Register Mode Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">POS Automatic Register Hours</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="fw-semibold">Open Time</label>
+                                        <input type="time" class="form-control" name="open_time"
+                                            value="{{ $branch->open_time ?? '' }}">
+                                        <small class="text-muted">Overrides the business default when Register Mode
+                                            is Automatic. Leave blank to use the business default.</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="fw-semibold">Close Time</label>
+                                        <input type="time" class="form-control" name="close_time"
+                                            value="{{ $branch->close_time ?? '' }}">
+                                        <small class="text-muted">Overrides the business default when Register Mode
+                                            is Automatic. Leave blank to use the business default.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Logo & Description Section -->
                         <div class="card mb-4">
                             <div class="card-header bg-light">

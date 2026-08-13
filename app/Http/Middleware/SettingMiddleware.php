@@ -34,6 +34,8 @@ class SettingMiddleware
                 'whatsapp_setting'   => $business->whatsappSetting?->toArray() ?? [],
                 'barcode_setting'    => $business->barcodeSetting?->toArray() ?? [],
                 'theme_setting'      => $business->themeSetting?->toArray() ?? [],
+                'pos_setting'        => $business->posSetting?->toArray() ?? [],
+                'pra_setting'        => $business->praSetting?->toArray() ?? [],
             ]);
         }
         return $next($request);

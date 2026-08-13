@@ -21,18 +21,23 @@ class UserService
 {
 
     protected $model_user;
-    public function __construct()
+    protected $customer_service;
+
+    public function __construct(CustomerService $customer_service)
     {
         // set the model
         $this->model_user = new Repository(new User());
+        $this->customer_service = $customer_service;
     }
 
     public function getData($obj)
     {
         $wh = [];
         $role_id = null;
+        $business_id_filter = null;
+
         if (isset($obj['business_id']) && $obj['business_id'] != 0 && $obj['business_id'] != "") {
-            $wh[] = ['business_id', $obj['business_id']];
+            $business_id_filter = $obj['business_id'];
         }
         if (isset($obj['branch_id']) && $obj['branch_id'] != 0 && $obj['branch_id'] != "") {
             $wh[] = ['branch_id', $obj['branch_id']];
@@ -47,18 +52,42 @@ class UserService
         if (isset($obj['role_id']) && $obj['role_id'] != 0 && $obj['role_id'] != "") {
             $role_id = $obj['role_id'];
         }
+
+        // Customer role - resolved once per call so a "Role = Customer"
+        // filter can be scoped through customer_profiles.business_id
+        // instead of users.business_id (which stays null for accounts
+        // created via OTP self-registration on the website/mobile app).
+        $customer_role_id = Role::where('name', RoleNames::USER)->whereNull('business_id')->value('id');
+        $is_customer_filter = $role_id && $customer_role_id && (int) $role_id === (int) $customer_role_id;
+
         $datatable = $this->model_user->getModel()::with([
             'business',
             'branch',
             'roles'
         ])->where($wh)
             ->where('is_deleted', 0);
+
         if ($role_id) {
             $datatable->whereHas('roles', function ($q) use ($role_id) {
                 $q->where('roles.id', $role_id);
             });
         }
-        $datatable = applyRoleScope($datatable);
+
+        if ($is_customer_filter) {
+            $target_business_id = $business_id_filter
+                ?? (getRoleName() != RoleNames::SUPERADMIN ? Auth::user()->business_id : null);
+
+            if ($target_business_id) {
+                $datatable->whereHas('customerProfiles', function ($q) use ($target_business_id) {
+                    $q->where('business_id', $target_business_id)->where('is_deleted', 0);
+                });
+            }
+        } else {
+            if ($business_id_filter) {
+                $datatable->where('business_id', $business_id_filter);
+            }
+            $datatable = applyRoleScope($datatable);
+        }
 
         return DataTables::of($datatable)
 
@@ -131,14 +160,30 @@ class UserService
 
         try {
 
-            if (!empty($obj['id'])) {
+            $role = !empty($obj['role_id']) ? Role::find($obj['role_id']) : null;
+            $is_customer = $role && $role->name === RoleNames::USER;
+
+            // Customers reuse an existing global account for their email
+            // instead of creating a duplicate one - the same rule the OTP
+            // onboarding flow (AuthController) follows - so the same person
+            // never ends up with two User rows just because a second
+            // business added them as a customer.
+            $existing_customer = ($is_customer && empty($obj['id']) && !empty($obj['email']))
+                ? User::whereRaw('LOWER(email) = ?', [strtolower(trim($obj['email']))])->first()
+                : null;
+
+            if ($existing_customer) {
+                $saved_obj = $existing_customer;
+            } elseif (!empty($obj['id'])) {
+                $obj['business_id'] = $obj['business_id']??Auth::user()->business_id;
                 $obj['updatedby_id'] = Auth::id();
                 $obj['date_updated'] = now();
                 $this->model_user->update($obj, $obj['id']);
                 $saved_obj = $this->model_user->find($obj['id']);
             } else {
 
-                $obj['password'] = Hash::make($obj['password']);
+                $obj['password'] = !empty($obj['password']) ? Hash::make($obj['password']) : null;
+                $obj['business_id'] = $obj['business_id']??Auth::user()->business_id;
                 $obj['createdby_id'] = Auth::id();
                 $obj['date_created'] = now();
                 $saved_obj = $this->model_user->create($obj);
@@ -150,14 +195,18 @@ class UserService
             }
 
             // Assign Role
-            if (!empty($obj['role_id'])) {
+            if ($role) {
 
-                $role = Role::find($obj['role_id']);
+                // Old role remove + new assign
+                $saved_obj->syncRoles([$role->name]);
 
-                if ($role) {
-
-                    // Old role remove + new assign
-                    $saved_obj->syncRoles([$role->name]);
+                // Customer accounts carry a business-scoped commercial
+                // profile (credit terms, address, ...) alongside the
+                // shared User identity - persisted here, not on a
+                // separate Customer screen.
+                if ($is_customer) {
+                    $profile_business_id = $obj['business_id'] ?? $saved_obj->business_id;
+                    $this->customer_service->upsertProfile($saved_obj->id, $profile_business_id, $obj);
                 }
             }
 

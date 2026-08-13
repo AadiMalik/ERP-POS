@@ -19,18 +19,16 @@
             </select>
         </div>
         <div class="col-md-6 mb-3">
-            <label>Tax Type<span class="text-danger">*</span></label>
-            <select class="form-select select2" name="tax_type">
-                <option value="inclusive" {{ $business_setting->tax_type == 'inclusive' ? 'selected' : '' }}>Inclusive
-                </option>
-                <option value="exclusive" {{ $business_setting->tax_type == 'exclusive' ? 'selected' : '' }}>Exclusive
-                </option>
-            </select>
+            <label>Overall Tax Rate (%)<span class="text-danger">*</span></label>
+            <input type="text" onkeypress="return isNumberKey(event)" class="form-control" name="overall_tax_rate"
+                value="{{ $business_setting->overall_tax_rate }}">
+            <small class="text-muted">Applied to orders paid by cash or any other non-card method.</small>
         </div>
         <div class="col-md-6 mb-3">
-            <label>Tax Rate<span class="text-danger">*</span></label>
-            <input type="text" onkeypress="return isNumberKey(event)" class="form-control" name="tax_rate"
-                value="{{ $business_setting->tax_rate }}">
+            <label>Card Tax Rate (%)<span class="text-danger">*</span></label>
+            <input type="text" onkeypress="return isNumberKey(event)" class="form-control" name="card_tax_rate"
+                value="{{ $business_setting->card_tax_rate }}">
+            <small class="text-muted">Applied automatically when an order is paid fully by card.</small>
         </div>
 
         @php

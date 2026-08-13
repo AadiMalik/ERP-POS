@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\AccountService;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CommonService;
+use App\Services\Concrete\Admin\CustomerService;
 use App\Services\Concrete\Admin\PrintSettingResolverService;
 use App\Services\Concrete\Admin\SettingService;
 use App\Traits\ResponseAPI;
@@ -29,19 +30,22 @@ class SettingController extends Controller
     protected $account_service;
     protected $common_service;
     protected $print_setting_resolver;
+    protected $customer_service;
 
     public function __construct(
         BusinessService $business_service,
         SettingService $setting_service,
         AccountService $account_service,
         CommonService $common_service,
-        PrintSettingResolverService $print_setting_resolver
+        PrintSettingResolverService $print_setting_resolver,
+        CustomerService $customer_service
     ) {
         $this->business_service = $business_service;
         $this->setting_service = $setting_service;
         $this->account_service = $account_service;
         $this->common_service = $common_service;
         $this->print_setting_resolver = $print_setting_resolver;
+        $this->customer_service = $customer_service;
     }
 
     public function index()
@@ -60,6 +64,9 @@ class SettingController extends Controller
         $print_setting = $this->setting_service->getPrintSetting(Auth::user()->business_id);
         $barcode_setting = $this->setting_service->getBarcodeSetting(Auth::user()->business_id);
         $theme_setting = $this->setting_service->getThemeSetting(Auth::user()->business_id);
+        $pos_setting = $this->setting_service->getPosSetting(Auth::user()->business_id);
+        $pra_setting = $this->setting_service->getPraSetting(Auth::user()->business_id);
+        $pos_customers = $this->customer_service->getAllActive(Auth::user()->business_id);
         $theme_presets = config('theme_presets');
         $timezones = $this->common_service->getAllTimezone();
         $email_mailer = EmailProvider::getoptions();
@@ -82,6 +89,9 @@ class SettingController extends Controller
             'print_setting',
             'barcode_setting',
             'theme_setting',
+            'pos_setting',
+            'pra_setting',
+            'pos_customers',
             'theme_presets',
             'timezones',
             'email_mailer',
@@ -95,11 +105,11 @@ class SettingController extends Controller
     public function updateBusinessSetting(Request $request)
     {
         $rules = [
-            'timezone'    => 'required',
-            'tax_type'    => 'required|in:inclusive,exclusive',
-            'tax_rate'    => 'nullable|numeric|min:0',
-            'date_format' => 'required',
-            'time_format' => 'required',
+            'timezone'         => 'required',
+            'overall_tax_rate' => 'nullable|numeric|min:0|max:100',
+            'card_tax_rate'    => 'nullable|numeric|min:0|max:100',
+            'date_format'      => 'required',
+            'time_format'      => 'required',
         ];
 
         $validate = Validator::make($request->all(), $rules);
@@ -138,6 +148,7 @@ class SettingController extends Controller
             'default_sale_account_id'            => 'nullable|exists:accounts,account_id',
             'default_sale_return_account_id'     => 'nullable|exists:accounts,account_id',
             'default_inventory_account_id'       => 'nullable|exists:accounts,account_id',
+            'default_cogs_account_id'            => 'nullable|exists:accounts,account_id',
             'default_opening_stock_account_id'   => 'nullable|exists:accounts,account_id',
             'default_stock_adjustment_account_id' => 'nullable|exists:accounts,account_id',
             'default_withholding_tax_account_id' => 'nullable|exists:accounts,account_id',
@@ -399,6 +410,73 @@ class SettingController extends Controller
         $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
 
         $setting = $this->setting_service->updateFbrSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updatePosSetting(Request $request)
+    {
+        $rules = [
+            'register_mode'            => 'nullable|in:manual,automatic',
+            'open_time'                => 'nullable|date_format:H:i',
+            'close_time'               => 'nullable|date_format:H:i',
+            'invoice_prefix'           => 'nullable|string|max:50',
+            'invoice_start'            => 'nullable|integer|min:1',
+            'invoice_footer'           => 'nullable|string',
+            'default_customer_user_id' => 'nullable|exists:users,id',
+            'default_payment_method_id' => 'nullable',
+            'default_order_type_id'    => 'nullable',
+            'default_order_source_id'  => 'nullable',
+            'enable_discount'          => 'nullable|boolean',
+            'discount_level'           => 'nullable|in:line,order,both',
+            'allow_backdated_sale'     => 'nullable|boolean',
+            'backdated_sale_max_days'  => 'nullable|integer|min:0',
+            'daily_order_id_reset'     => 'nullable|in:daily,never',
+            'return_window_days'       => 'nullable|integer|min:0',
+            'require_return_reason'    => 'nullable|boolean',
+            'allow_partial_return'     => 'nullable|boolean',
+            'auto_print_invoice'       => 'nullable|boolean',
+            'show_product_image'       => 'nullable|boolean',
+            'enable_hold_order'        => 'nullable|boolean',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->all();
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updatePosSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updatePraSetting(Request $request)
+    {
+        $rules = [
+            'enable_pra'          => 'required|boolean',
+            'pra_code_prefix'     => 'required_if:enable_pra,1|nullable|string|max:50',
+            'pra_registration_no' => 'required_if:enable_pra,1|nullable|string|max:100',
+            'pra_api_key'         => 'required_if:enable_pra,1|nullable|string',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->all();
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updatePraSetting($obj);
 
         return $setting
             ? $this->success(Message::UPDATE, $setting)

@@ -38,12 +38,19 @@
                         </div>
                         @if (!isset($user))
                             <div class="col-md-6">
-                                <label class="fw-semibold">Password<span class="text-danger">*</span></label>
-                                <input type="password" class="form-control" name="password" required>
+                                <label class="fw-semibold" id="password_label">Password<span
+                                        class="text-danger" id="password_required_mark">*</span></label>
+                                <input type="password" class="form-control" id="password" name="password">
+                                <small class="form-text text-muted d-none" id="password_hint">
+                                    Optional for customers - they set their own password via the OTP
+                                    onboarding flow.
+                                </small>
                             </div>
                             <div class="col-md-6">
-                                <label class="fw-semibold">Confirm Password<span class="text-danger">*</span></label>
-                                <input type="password" class="form-control" name="password_confirmation" required>
+                                <label class="fw-semibold" id="password_confirmation_label">Confirm
+                                    Password<span class="text-danger" id="password_confirmation_required_mark">*</span></label>
+                                <input type="password" class="form-control" id="password_confirmation"
+                                    name="password_confirmation">
                             </div>
                         @endif
                         <div class="col-md-6">
@@ -76,12 +83,65 @@
                                 <option value="">--Select Branch--</option>
 
                                 @foreach ($branches as $item)
-                                    <option value="{{ $item->business_id }}"
+                                    <option value="{{ $item->branch_id }}"
                                         {{ old('branch_id', $user->branch_id ?? '') == $item->business_id ? 'selected' : '' }}>
                                         {{ $item->name }}
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body border-top" id="customer_profile_div" style="display:none;">
+                    <h6 class="mb-3">Customer Profile</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="fw-semibold">
+                                Code <small>(if blank, will be auto generated)</small>
+                            </label>
+                            <input type="text" class="form-control" name="code"
+                                value="{{ old('code', $customer_profile->code ?? '') }}"
+                                {{ isset($customer_profile) ? 'readonly' : '' }}>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold">Company Name</label>
+                            <input type="text" class="form-control" name="company_name"
+                                value="{{ old('company_name', $customer_profile->company_name ?? '') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold">Contact Person</label>
+                            <input type="text" class="form-control" name="contact_person"
+                                value="{{ old('contact_person', $customer_profile->contact_person ?? '') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold">Credit Limit</label>
+                            <input type="number" step="0.01" class="form-control" name="credit_limit"
+                                value="{{ old('credit_limit', $customer_profile->credit_limit ?? 0) }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold">Credit Days</label>
+                            <input type="number" class="form-control" name="credit_days"
+                                value="{{ old('credit_days', $customer_profile->credit_days ?? 0) }}">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="fw-semibold">Address</label>
+                            <textarea class="form-control" rows="2" name="address">{{ old('address', $customer_profile->address ?? '') }}</textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="fw-semibold">City</label>
+                            <input type="text" class="form-control" name="city"
+                                value="{{ old('city', $customer_profile->city ?? '') }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="fw-semibold">State</label>
+                            <input type="text" class="form-control" name="state"
+                                value="{{ old('state', $customer_profile->state ?? '') }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="fw-semibold">Country</label>
+                            <input type="text" class="form-control" name="country"
+                                value="{{ old('country', $customer_profile->country ?? '') }}">
                         </div>
                     </div>
                 </div>
@@ -139,18 +199,31 @@
                 'Order Taker'
             ];
 
+            const customerRole = 'User';
+
             $('#role_id').on('change', function() {
 
                 let role = $(this).find(':selected').data('role');
+                let isCustomer = role === customerRole;
 
                 $('#business_div').hide();
                 $('#branch_div').hide();
+                $('#customer_profile_div').toggle(isCustomer);
 
                 $('#business_id').prop('required', false);
                 $('#branch_id').prop('required', false);
 
                 // Super Admin creating Business Admin
-                if (role === 'Business Admin' && role === 'Business Admin') {
+                if (role === 'Business Admin') {
+
+                    $('#business_div').show();
+                    $('#business_id').prop('required', true);
+                }
+
+                // Customers are always tied to a business too - their
+                // CustomerProfile (credit terms, address, ...) is saved
+                // against it.
+                if (isCustomer) {
 
                     $('#business_div').show();
                     $('#business_id').prop('required', true);
@@ -161,6 +234,15 @@
 
                     $('#branch_div').show();
                     $('#branch_id').prop('required', true);
+                }
+
+                // Customers set their own password later via OTP onboarding -
+                // staff roles still require one up front.
+                if ($('#password').length) {
+                    $('#password, #password_confirmation').prop('required', !isCustomer);
+                    $('#password_required_mark, #password_confirmation_required_mark').toggleClass('d-none',
+                        isCustomer);
+                    $('#password_hint').toggleClass('d-none', !isCustomer);
                 }
             });
 

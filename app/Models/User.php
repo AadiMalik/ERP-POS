@@ -65,6 +65,16 @@ class User extends Authenticatable
         return $this->belongsTo(Branch::class,'branch_id');
     }
 
+    public function customerProfiles()
+    {
+        return $this->hasMany(CustomerProfile::class, 'user_id');
+    }
+
+    public function customerProfile($business_id)
+    {
+        return $this->customerProfiles()->where('business_id', $business_id)->first();
+    }
+
     public function createdby()
     {
         return $this->belongsTo(User::class,'createdby_id');

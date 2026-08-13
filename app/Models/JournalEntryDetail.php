@@ -18,7 +18,7 @@ class JournalEntryDetail extends Model
         'account_id',
         'debit',
         'credit',
-        'customer_id',
+        'user_id',
         'supplier_id',
         'bill_no',
         'cheque_no',
@@ -41,8 +41,8 @@ class JournalEntryDetail extends Model
     //     return $this->belongsTo(Supplier::class, 'supplier_id');
     // }
 
-    public function customer()
+    public function user()
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

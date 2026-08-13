@@ -11,6 +11,7 @@ class PrintSetting extends Model
     public $timestamps = false;
     protected $fillable = [
         'business_id',
+        'document_type',
         'header_config',
         'footer_config',
         'page_config',

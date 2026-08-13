@@ -65,6 +65,14 @@
                                 FBR
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
+                                data-bs-target="#pra">
+                                PRA
+                            </button>
+                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
+                                data-bs-target="#pos">
+                                POS
+                            </button>
+                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#print">
                                 Print
                             </button>
@@ -106,6 +114,12 @@
                             </div>
                             <div class="tab-pane fade" id="fbr">
                                 @include('admin.setting.tabs.fbr')
+                            </div>
+                            <div class="tab-pane fade" id="pra">
+                                @include('admin.setting.tabs.pra')
+                            </div>
+                            <div class="tab-pane fade" id="pos">
+                                @include('admin.setting.tabs.pos')
                             </div>
                             <div class="tab-pane fade" id="print">
                                 @include('admin.setting.tabs.print')
@@ -273,6 +287,44 @@
 
         $(document).ready(function() {
             toggleFbrSettings();
+        });
+    </script>
+
+    {{-- PRA setting js --}}
+    <script>
+        function togglePraSettings() {
+            let enabled = $('[name="enable_pra"]').val();
+
+            $('.pra-config-field').prop('disabled', enabled != 1);
+        }
+
+        $(document).on('change', '[name="enable_pra"]', function() {
+            togglePraSettings();
+        });
+
+        $(document).ready(function() {
+            togglePraSettings();
+        });
+    </script>
+
+    {{-- POS setting js --}}
+    <script>
+        function togglePosSettings() {
+            let backdated = $('[name="allow_backdated_sale"]').is(':checked');
+
+            $('[name="backdated_sale_max_days"]').prop('disabled', !backdated);
+
+            let automatic = $('[name="register_mode"]').val() === 'automatic';
+
+            $('.register-mode-automatic-field').toggle(automatic);
+        }
+
+        $(document).on('change', '[name="allow_backdated_sale"], [name="register_mode"]', function() {
+            togglePosSettings();
+        });
+
+        $(document).ready(function() {
+            togglePosSettings();
         });
     </script>
 

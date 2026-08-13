@@ -12,8 +12,8 @@ class BusinessSetting extends Model
     protected $fillable = [
         'business_id',
         'timezone',
-        'tax_type',
-        'tax_rate',
+        'overall_tax_rate',
+        'card_tax_rate',
         'date_format',
         'time_format',
         'createdby_id',

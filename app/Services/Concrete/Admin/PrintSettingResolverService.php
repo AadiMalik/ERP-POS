@@ -25,16 +25,16 @@ class PrintSettingResolverService
         $this->setting_service = $setting_service;
     }
 
-    public function resolve(?string $business_id): PrintConfig
+    public function resolve(?string $business_id, string $document_type = 'default'): PrintConfig
     {
-        $key = $business_id ?? 'null';
+        $key = ($business_id ?? 'null') . ':' . $document_type;
 
         if (isset($this->memo[$key])) {
             return $this->memo[$key];
         }
 
-        $data = Cache::remember($this->cacheKey($business_id), 3600, function () use ($business_id) {
-            $setting = $this->setting_service->getPrintSetting($business_id);
+        $data = Cache::remember($this->cacheKey($business_id, $document_type), 3600, function () use ($business_id, $document_type) {
+            $setting = $this->setting_service->getPrintSetting($business_id, $document_type);
 
             return [
                 'header_config' => $setting->header_config,
@@ -47,14 +47,14 @@ class PrintSettingResolverService
         return $this->memo[$key] = new PrintConfig($data);
     }
 
-    public function forgetCache(?string $business_id): void
+    public function forgetCache(?string $business_id, string $document_type = 'default'): void
     {
-        Cache::forget($this->cacheKey($business_id));
-        unset($this->memo[$business_id ?? 'null']);
+        Cache::forget($this->cacheKey($business_id, $document_type));
+        unset($this->memo[($business_id ?? 'null') . ':' . $document_type]);
     }
 
-    protected function cacheKey(?string $business_id): string
+    protected function cacheKey(?string $business_id, string $document_type = 'default'): string
     {
-        return 'print_setting:' . ($business_id ?? 'null');
+        return 'print_setting:' . ($business_id ?? 'null') . ':' . $document_type;
     }
 }
