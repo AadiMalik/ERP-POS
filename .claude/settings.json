@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(php -r ' *)"
+      "Bash(php -r ' *)",
+      "Bash(mysql -u root smart_mart -e ' *)",
+      "Bash(/c/xampp/mysql/bin/mysql.exe -u root smart_mart -e ' *)",
+      "Read(//c//**)",
+      "Bash(npm ls *)",
+      "Bash(grep -A2 'id=\"openSessionModal\"' /tmp/ot_pos_screen.html | head -5 *)",
+      "Read(//tmp/**)"
     ]
   }
 }

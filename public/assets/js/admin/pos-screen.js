@@ -39,12 +39,22 @@
     // INIT
     // ==============================
     $(document).ready(function () {
-        $('.select2').select2();
+        $('.select2').not('#open_pos_register_id').select2();
+
+        // Select2 appends its dropdown to <body> by default, which renders it
+        // behind/outside the Bootstrap modal (and outside its focus trap) -
+        // clicks land on the modal backdrop instead of the option list. Scope
+        // this dropdown to the modal itself so it opens correctly.
+        $('#open_pos_register_id').select2({
+            dropdownParent: $('#openSessionModal'),
+        });
 
         state.open_session_modal = new bootstrap.Modal(document.getElementById('openSessionModal'));
         state.close_session_modal = new bootstrap.Modal(document.getElementById('closeSessionModal'));
         state.cash_movement_modal = new bootstrap.Modal(document.getElementById('cashMovementModal'));
         state.held_orders_offcanvas = new bootstrap.Offcanvas(document.getElementById('heldOrdersOffcanvas'));
+        state.order_history_offcanvas = new bootstrap.Offcanvas(document.getElementById('orderHistoryOffcanvas'));
+        state.pos_reports_offcanvas = new bootstrap.Offcanvas(document.getElementById('posReportsOffcanvas'));
 
         bootstrapSession();
         wireEvents();
@@ -54,24 +64,37 @@
     // REGISTER SESSION BOOTSTRAP
     // ==============================
     function bootstrapSession() {
+        $('#posNoSessionChecking').removeClass('d-none');
+        $('#posNoSessionBrowseOnly').addClass('d-none');
+
         ajaxRequest({ url: URLS.session_current })
             .then(function (response) {
                 if (response.Data) {
                     state.session = response.Data;
                     onSessionReady();
                 } else {
-                    showOpenSessionModal();
+                    state.session = null;
+                    showBrowseOnly();
                 }
             })
             .catch(function (err) {
+                state.session = null;
                 errorMessage(err.Message || 'Unable to check register session.');
-                showOpenSessionModal();
+                showBrowseOnly();
             });
     }
 
-    function showOpenSessionModal() {
+    // No open session (manual mode not opened yet, or automatic mode outside
+    // its business-hours window): cart/checkout stay hidden, but the header's
+    // Order History / Reports buttons remain usable, and the Open Register
+    // modal is reachable (and dismissible) from here.
+    function showBrowseOnly() {
         $('#posScreenBody').hide();
         $('#posNoSessionArea').show();
+        $('#posNoSessionChecking').addClass('d-none');
+        $('#posNoSessionBrowseOnly').removeClass('d-none');
+        $('#registerBadge').addClass('d-none');
+        $('#cashInBtn, #cashOutBtn, #closeRegisterBtn').addClass('d-none');
         state.open_session_modal.show();
     }
 
@@ -92,6 +115,16 @@
 
     function wireEvents() {
         $('#openSessionSubmitBtn').on('click', submitOpenSession);
+        $('#openRegisterFromBrowseBtn').on('click', function () { state.open_session_modal.show(); });
+        $('#orderHistoryBtn').on('click', function () {
+            loadOrderHistory();
+            state.order_history_offcanvas.show();
+        });
+        $('#orderHistoryStatusFilter').on('change', loadOrderHistory);
+        $('#posReportsBtn').on('click', function () {
+            loadPosReports();
+            state.pos_reports_offcanvas.show();
+        });
         $('#cashInBtn').on('click', function () { openCashMovementModal('in'); });
         $('#cashOutBtn').on('click', function () { openCashMovementModal('out'); });
         $('#cashMovementSubmitBtn').on('click', submitCashMovement);
@@ -707,6 +740,11 @@
     // HOLD / RESUME
     // ==============================
     function holdOrder() {
+        if (!state.session) {
+            errorMessage('Open a register session before placing an order.');
+            return;
+        }
+
         if (!state.cart.length) {
             errorMessage('Cart is empty.');
             return;
@@ -729,6 +767,113 @@
         fetchHeldOrders(function (rows) {
             $('#heldOrdersCount').text(rows.length);
         });
+    }
+
+    // ==============================
+    // ORDER HISTORY (non-transactional - viewable with no open register)
+    // ==============================
+    function loadOrderHistory() {
+        var $list = $('#orderHistoryList');
+        $list.html('<div class="text-muted text-center py-3">Loading...</div>');
+
+        var data = {
+            draw: 1,
+            start: 0,
+            length: 50,
+            business_id: CFG.business_id,
+            branch_id: CFG.branch_id,
+        };
+
+        var status = $('#orderHistoryStatusFilter').val();
+        if (status) {
+            data.status = status;
+        }
+
+        ajaxRequest({ url: URLS.order_data, method: 'POST', data: data })
+            .then(function (response) {
+                var rows = response.data || response.Data || [];
+                $list.empty();
+
+                if (!rows.length) {
+                    $list.append('<div class="text-muted text-center py-3">No orders found</div>');
+                    return;
+                }
+
+                rows.forEach(function (row) {
+                    $list.append(
+                        '<div class="list-group-item">' +
+                            '<div class="d-flex justify-content-between">' +
+                                '<span>#' + escapeHtml(row.daily_order_id) + '</span>' +
+                                '<span class="fw-bold">' + money(row.total) + '</span>' +
+                            '</div>' +
+                            '<small class="text-muted">' + escapeHtml(row.status || '') + '</small>' +
+                        '</div>'
+                    );
+                });
+            })
+            .catch(function (err) {
+                $list.html('<div class="text-danger text-center py-3">' + escapeHtml(err.Message || 'Unable to load order history.') + '</div>');
+            });
+    }
+
+    // ==============================
+    // REPORTS (my register sessions - non-transactional)
+    // ==============================
+    function loadPosReports() {
+        var $list = $('#posReportsList');
+        $('#posReportsSummary').addClass('d-none');
+        $list.html('<div class="text-muted text-center py-3">Loading...</div>');
+
+        ajaxRequest({ url: URLS.session_my_history })
+            .then(function (response) {
+                var rows = response.Data || [];
+                $list.empty();
+
+                if (!rows.length) {
+                    $list.append('<div class="text-muted text-center py-3">No sessions found</div>');
+                    return;
+                }
+
+                rows.forEach(function (row) {
+                    var $item = $(
+                        '<a href="javascript:void(0);" class="list-group-item list-group-item-action">' +
+                            '<div class="d-flex justify-content-between">' +
+                                '<span>' + escapeHtml(row.register && row.register.name || 'Register') + '</span>' +
+                                '<span class="badge ' + (row.status === 'open' ? 'bg-label-success' : 'bg-label-secondary') + '">' + escapeHtml(row.status) + '</span>' +
+                            '</div>' +
+                            '<small class="text-muted">' + escapeHtml(row.opening_datetime || '') + '</small>' +
+                        '</a>'
+                    );
+
+                    $item.on('click', function () {
+                        loadPosReportSummary(row.pos_register_session_id);
+                    });
+
+                    $list.append($item);
+                });
+            })
+            .catch(function (err) {
+                $list.html('<div class="text-danger text-center py-3">' + escapeHtml(err.Message || 'Unable to load sessions.') + '</div>');
+            });
+    }
+
+    function loadPosReportSummary(pos_register_session_id) {
+        ajaxRequest({ url: URLS.session_summary + '/' + pos_register_session_id })
+            .then(function (response) {
+                var s = response.Data || {};
+                $('#repOpeningCash').text(money(s.opening_cash));
+                $('#repCashSales').text(money(s.cash_sales));
+                $('#repCashIn').text(money(s.cash_movements_in));
+                $('#repCashOut').text(money(s.cash_movements_out));
+                $('#repTotalOrders').text(s.total_orders || 0);
+                $('#repTotalSales').text(money(s.total_sales_amount));
+                $('#repExpectedCash').text(money(s.expected_cash));
+                $('#repActualCash').text(s.actual_cash != null ? money(s.actual_cash) : '-');
+                $('#posReportsSummary').removeClass('d-none');
+            })
+            .catch(function (err) {
+                errorMessage(err.Message || 'Unable to load session summary.');
+            });
     }
 
     function loadHeldOrders() {
@@ -857,6 +1002,11 @@
     // COMPLETE SALE
     // ==============================
     function completeSale() {
+        if (!state.session) {
+            errorMessage('Open a register session before placing an order.');
+            return;
+        }
+
         if (!state.cart.length) {
             errorMessage('Cart is empty.');
             return;

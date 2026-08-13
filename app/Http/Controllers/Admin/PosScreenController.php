@@ -128,6 +128,7 @@ class PosScreenController extends Controller
         }
 
         $is_fixed_context = in_array(getRoleName(), $this->fixed_context_roles, true);
+        $show_pos_actions = true;
 
         return view('admin.pos.screen.index', compact(
             'pos_setting',
@@ -142,7 +143,8 @@ class PosScreenController extends Controller
             'discounts',
             'registers',
             'permissions',
-            'is_fixed_context'
+            'is_fixed_context',
+            'show_pos_actions'
         ));
     }
 

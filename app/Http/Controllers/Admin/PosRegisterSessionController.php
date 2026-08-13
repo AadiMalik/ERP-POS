@@ -103,9 +103,41 @@ class PosRegisterSessionController extends Controller
 
     public function summary($pos_register_session_id)
     {
+        $session = \App\Models\PosRegisterSession::find($pos_register_session_id);
+
+        if (!$session) {
+            return $this->error('This register session was not found.');
+        }
+
+        $user = Auth::user();
+        $same_business = getRoleName() == \App\Enums\RoleNames::SUPERADMIN || $user->business_id == $session->business_id;
+
+        if (
+            Auth::id() != $session->cashier_id
+            && (!$same_business || (!$user->can('pos.register.close') && !$user->can('pos.register.report.view')))
+        ) {
+            return $this->error('You do not have permission to view this register session.', 403);
+        }
+
         try {
             $summary = $this->pos_register_session_service->getSummary($pos_register_session_id);
             return $this->success(Message::FETCH, $summary);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * The acting cashier's own recent register sessions - used by the in-POS
+     * Reports panel. Deliberately separate from getData()/index(), which are
+     * restricted to Super Admin/Business Admin for the full cross-cashier
+     * admin listing.
+     */
+    public function myHistory()
+    {
+        try {
+            $sessions = $this->pos_register_session_service->getRecentForCashier(Auth::id());
+            return $this->success(Message::FETCH, $sessions);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }

@@ -182,6 +182,16 @@ class OrderController extends Controller
             return $this->error('You do not have permission to ' . ($is_update ? 'edit' : 'create') . ' orders.', 403);
         }
 
+        // This endpoint is only ever reached via the session-authenticated
+        // admin/POS web surface (no Website/Mobile/API channel exists yet -
+        // see OrderService's class docblock), so register_session_id is
+        // always required here. OrderService::save()'s business_id/branch_id/
+        // warehouse_id fallback path is reserved for a genuine future
+        // non-POS channel and must not be reachable from this controller.
+        if (empty($request->register_session_id)) {
+            return $this->error('An open register session is required to place orders.', 422);
+        }
+
         $obj = $request->all();
 
         if (!empty($obj['discount_id']) && !Auth::user()->can('order.discount.apply')) {
@@ -253,6 +263,21 @@ class OrderController extends Controller
 
     public function complete(Request $request)
     {
+        // Defense in depth: store() already requires register_session_id on
+        // every order created through this controller, so this should never
+        // actually be empty - but post() silently skips its open-session
+        // check when it is, so this closes that gap explicitly rather than
+        // relying on it being an unreachable state.
+        $order = \App\Models\Order::find($request->order_id);
+
+        if (!$order) {
+            return $this->error('Order not found.');
+        }
+
+        if (empty($order->register_session_id)) {
+            return $this->error('This order has no register session and cannot be completed from POS.', 422);
+        }
+
         try {
             $order = $this->order_service->post($request->all());
             return $this->success(Message::SUCCESS, $order);

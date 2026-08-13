@@ -483,30 +483,32 @@
         </li>
 
         {{-- POS (operational interface only) --}}
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fa fa-cash-register"></i>
-                <div data-i18n="POS">POS</div>
-            </a>
+        @can('pos.access')
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-cash-register"></i>
+                    <div data-i18n="POS">POS</div>
+                </a>
 
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ url('/admin/pos-screen') }}" class="menu-link">
-                        <div data-i18n="POS Screen">POS Screen</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/pos-register') }}" class="menu-link">
-                        <div data-i18n="Registers">Registers</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/pos-register-session') }}" class="menu-link">
-                        <div data-i18n="Register Sessions">Register Sessions</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                        <a href="{{ url('/admin/pos-screen') }}" class="menu-link">
+                            <div data-i18n="POS Screen">POS Screen</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url('/admin/pos-register') }}" class="menu-link">
+                            <div data-i18n="Registers">Registers</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ url('/admin/pos-register-session') }}" class="menu-link">
+                            <div data-i18n="Register Sessions">Register Sessions</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        @endcan
     </ul>
 </aside>
 <!-- / Menu -->

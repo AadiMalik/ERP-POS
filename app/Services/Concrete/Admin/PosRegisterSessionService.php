@@ -385,6 +385,21 @@ class PosRegisterSessionService
     }
 
     /**
+     * Recent sessions opened by $cashier_id (own history only) - used by the
+     * in-POS Reports panel, which every POS role can reach regardless of
+     * `pos-register-session/data`'s Super Admin/Business Admin-only scope.
+     */
+    public function getRecentForCashier($cashier_id, $limit = 20)
+    {
+        return PosRegisterSession::with(['register', 'branch'])
+            ->where('cashier_id', $cashier_id)
+            ->where('is_deleted', 0)
+            ->orderByDesc('opening_datetime')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
      * Resolves the session a POS screen should use for $user, branching on
      * the business's register_mode:
      * - manual: the user's own open session (they must open one explicitly).

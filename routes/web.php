@@ -312,23 +312,26 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
     });
 
     ////////////////////// POS (operational interface only) ///////////////////////////
-    //pos register
-    Route::resource('pos-register', App\Http\Controllers\Admin\PosRegisterController::class);
-    Route::group(['prefix' => 'pos-register'], function () {
-        Route::post('data', [App\Http\Controllers\Admin\PosRegisterController::class, 'getData']);
-        Route::post('change-status/{id}', [App\Http\Controllers\Admin\PosRegisterController::class, 'status']);
-    });
+    Route::group(['middleware' => ['permission:pos.access']], function () {
+        //pos register
+        Route::resource('pos-register', App\Http\Controllers\Admin\PosRegisterController::class);
+        Route::group(['prefix' => 'pos-register'], function () {
+            Route::post('data', [App\Http\Controllers\Admin\PosRegisterController::class, 'getData']);
+            Route::post('change-status/{id}', [App\Http\Controllers\Admin\PosRegisterController::class, 'status']);
+        });
 
-    //pos register session
-    Route::group(['prefix' => 'pos-register-session'], function () {
-        Route::post('data', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'getData']);
-        Route::post('open', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'open']);
-        Route::post('close', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'close']);
-        Route::get('summary/{pos_register_session_id}', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'summary']);
-        Route::post('cash-movement', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'addCashMovement']);
-        Route::get('current', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'current']);
+        //pos register session
+        Route::group(['prefix' => 'pos-register-session'], function () {
+            Route::post('data', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'getData']);
+            Route::post('open', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'open']);
+            Route::post('close', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'close']);
+            Route::get('summary/{pos_register_session_id}', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'summary']);
+            Route::post('cash-movement', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'addCashMovement']);
+            Route::get('current', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'current']);
+            Route::get('my-history', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'myHistory']);
+        });
+        Route::get('pos-register-session', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'index']);
     });
-    Route::get('pos-register-session', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'index']);
 
     //order (centralized - shared by POS, Website, Mobile App, API)
     Route::group(['middleware' => ['permission:pos.access']], function () {

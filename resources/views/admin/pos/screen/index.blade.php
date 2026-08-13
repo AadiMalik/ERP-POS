@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.pos')
 @section('css')
     <style>
         .pos-screen-wrapper .product-search-wrap { position: relative; }
@@ -24,33 +24,29 @@
 @endsection
 @section('content')
     <div class="container-fluid pos-screen-wrapper py-3" id="posScreen">
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-            <h4 class="fw-bold mb-0">POS Screen</h4>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                @if (!$is_fixed_context)
-                    <a href="{{ route('pos-screen.change-context') }}" class="btn btn-sm btn-outline-secondary">
-                        <i class="fa fa-exchange-alt"></i> Change Branch
-                    </a>
-                @endif
-                <span id="registerBadge" class="badge bg-label-secondary d-none"></span>
-                <button type="button" class="btn btn-sm btn-outline-success d-none" id="cashInBtn">
-                    <i class="fa fa-plus"></i> Cash
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-warning d-none" id="cashOutBtn">
-                    <i class="fa fa-minus"></i> Cash
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-danger d-none" id="closeRegisterBtn">
-                    Close Register
-                </button>
+        @if (!$is_fixed_context)
+            <div class="mb-3">
+                <a href="{{ route('pos-screen.change-context') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa fa-exchange-alt"></i> Change Branch
+                </a>
             </div>
-        </div>
+        @endif
 
         {{-- Shown until a register session is confirmed open --}}
         <div id="posNoSessionArea" class="card">
             <div class="card-body pos-disabled-overlay">
-                <div class="text-center text-muted">
+                <div class="text-center text-muted" id="posNoSessionChecking">
                     <div class="spinner-border mb-2" role="status"></div>
                     <p class="mb-0">Checking register session...</p>
+                </div>
+                <div class="text-center d-none" id="posNoSessionBrowseOnly">
+                    <i class="fa fa-cash-register fs-1 text-muted mb-2"></i>
+                    <p class="mb-1 fw-semibold">No register session is open</p>
+                    <p class="text-muted mb-3">You can still view Order History and Reports from the header above,
+                        but you must open a register before placing orders.</p>
+                    <button type="button" class="btn btn-primary" id="openRegisterFromBrowseBtn">
+                        <i class="fa fa-lock-open"></i> Open Register
+                    </button>
                 </div>
             </div>
         </div>
@@ -217,11 +213,12 @@
     </div>
 
     {{-- ================= Open Register Session Modal ================= --}}
-    <div class="modal fade" id="openSessionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal fade" id="openSessionModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Open Register Session</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     @if ($pos_setting->register_mode == 'manual')
@@ -324,6 +321,56 @@
             </div>
         </div>
     </div>
+
+    {{-- ================= Order History Offcanvas (non-transactional - viewable without an open register) ================= --}}
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="orderHistoryOffcanvas">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Order History</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <select class="form-select form-select-sm mb-3" id="orderHistoryStatusFilter">
+                <option value="">All Statuses</option>
+                <option value="posted">Posted</option>
+                <option value="hold">Hold</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="void">Void</option>
+                <option value="returned">Returned</option>
+            </select>
+            <div id="orderHistoryList" class="list-group">
+                <div class="text-muted text-center py-3">No orders found</div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ================= Reports Offcanvas (my register sessions - non-transactional) ================= --}}
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="posReportsOffcanvas">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">My Register Sessions</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div id="posReportsList" class="list-group mb-3">
+                <div class="text-muted text-center py-3">No sessions found</div>
+            </div>
+            <div id="posReportsSummary" class="d-none">
+                <hr>
+                <h6>Session Summary</h6>
+                <table class="table table-sm" id="posReportsSummaryTable">
+                    <tbody>
+                        <tr><th>Opening Cash</th><td class="text-end" id="repOpeningCash">0.00</td></tr>
+                        <tr><th>Cash Sales</th><td class="text-end" id="repCashSales">0.00</td></tr>
+                        <tr><th>Cash In</th><td class="text-end" id="repCashIn">0.00</td></tr>
+                        <tr><th>Cash Out</th><td class="text-end" id="repCashOut">0.00</td></tr>
+                        <tr><th>Total Orders</th><td class="text-end" id="repTotalOrders">0</td></tr>
+                        <tr><th>Total Sales</th><td class="text-end" id="repTotalSales">0.00</td></tr>
+                        <tr class="fw-bold"><th>Expected Cash</th><td class="text-end" id="repExpectedCash">0.00</td></tr>
+                        <tr><th>Actual Cash</th><td class="text-end" id="repActualCash">0.00</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('js')
     @php
@@ -343,6 +390,7 @@
                 'session_close' => url('admin/pos-register-session/close'),
                 'session_summary' => url('admin/pos-register-session/summary'),
                 'session_cash_movement' => url('admin/pos-register-session/cash-movement'),
+                'session_my_history' => url('admin/pos-register-session/my-history'),
                 'search_products' => url('admin/order/search-products'),
                 'order_store' => url('admin/order'),
                 'order_hold' => url('admin/order/hold'),
