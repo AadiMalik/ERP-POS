@@ -17,32 +17,49 @@
 
                     <div class="row g-4">
                         <!-- Left Column - Form Fields -->
-                        <div class="col-md-7">
-                            <!-- Subscription Package Section -->
-                            <div class="card mb-4">
-                                <div class="card-header bg-light">
-                                    <h6 class="mb-0">Subscription Package</h6>
+        <div class="col-md-7">
+                            @if (!isset($business))
+                                <!-- Subscription Package Section (new business only - existing
+                                     businesses change plans exclusively through Renew Subscription) -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">Subscription Package</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <label class="fw-semibold mb-2">
+                                            Select Package <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select" name="package_id" id="packageSelect" required>
+                                            <option value="">-- Select Package --</option>
+                                            @foreach ($packages as $item)
+                                                <option value="{{ $item->package_id }}" data-name="{{ $item->name }}"
+                                                    data-price="{{ $item->price }}"
+                                                    data-duration_type="{{ $item->duration_type }}"
+                                                    data-duration_days="{{ $item->duration_days }}"
+                                                    data-description="{{ $item->description }}"
+                                                    {{ old('package_id') == $item->package_id ? 'selected' : '' }}>
+                                                    {{ $item->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="card-body">
-                                    <label class="fw-semibold mb-2">
-                                        Select Package <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-select" name="package_id" id="packageSelect"
-                                        {{ !isset($business) ? 'required' : '' }}>
-                                        <option value="">-- Select Package --</option>
-                                        @foreach ($packages as $item)
-                                            <option value="{{ $item->package_id }}" data-name="{{ $item->name }}"
-                                                data-price="{{ $item->price }}"
-                                                data-duration_type="{{ $item->duration_type }}"
-                                                data-duration_days="{{ $item->duration_days }}"
-                                                data-description="{{ $item->description }}"
-                                                {{ old('package_id', $business->package_id ?? '') == $item->package_id ? 'selected' : '' }}>
-                                                {{ $item->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                            @else
+                                <div class="card mb-4">
+                                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">Subscription Package</h6>
+                                        <a href="{{ route('subscriptions.show', $business->business_id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fa fa-refresh"></i> Manage Subscription
+                                        </a>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-0">
+                                            Current plan: <strong>{{ $business->package->name ?? '-' }}</strong>.
+                                            Plan and billing changes are made from the Subscription page, not here.
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
+                            @endif
 
                             <!-- Basic Information Section -->
                             <div class="card mb-4">

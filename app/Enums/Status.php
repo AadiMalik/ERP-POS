@@ -26,4 +26,19 @@ class  Status
     const SELECTED='selected';
     const AVAILABLE='available';
     const OUT_OF_STOCK='out of stock';
+
+    // Subscription lifecycle
+    const TRIAL = 'trial';
+    const PAYMENT_PENDING = 'payment_pending';
+    const GRACE_PERIOD = 'grace_period';
+    const EXPIRING_SOON = 'expiring_soon';
+    const CHANGES_REQUESTED = 'changes_requested';
+
+    // Subscription invoice / payment status
+    const DRAFT = 'draft';
+    const UNPAID = 'unpaid';
+    const PARTIALLY_PAID = 'partially_paid';
+    const PAID = 'paid';
+    const VOID = 'void';
+    const CONFIRMED = 'confirmed';
 }

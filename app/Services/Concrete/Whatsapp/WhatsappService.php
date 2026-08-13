@@ -14,22 +14,41 @@ class WhatsappService
         WhatsappData $data
     ): array
     {
+        $setting = WhatsappSetting::where('business_id', $businessId)->first();
+
+        if (!$setting) {
+            return [
+                'status' => false,
+                'message' => 'Whatsapp setting not found.'
+            ];
+        }
+
+        return $this->deliver($setting, $data);
+    }
+
+    /**
+     * Sends using the platform-level channel config (the WhatsappSetting
+     * row with business_id = NULL). See EmailService::sendPlatform() for
+     * why.
+     */
+    public function sendPlatform(WhatsappData $data): array
+    {
+        $setting = WhatsappSetting::whereNull('business_id')->first();
+
+        if (!$setting) {
+            return [
+                'status' => false,
+                'message' => 'Platform Whatsapp settings are not configured.'
+            ];
+        }
+
+        return $this->deliver($setting, $data);
+    }
+
+    protected function deliver(WhatsappSetting $setting, WhatsappData $data): array
+    {
 
         try {
-
-            $setting = WhatsappSetting::where(
-                'business_id',
-                $businessId
-            )->first();
-
-            if (!$setting) {
-
-                return [
-                    'status' => false,
-                    'message' => 'Whatsapp setting not found.'
-                ];
-
-            }
 
             if (!$setting->enable_whatsapp) {
 

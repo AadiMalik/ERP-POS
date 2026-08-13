@@ -463,121 +463,17 @@ function applyRoleScope(
     return $query;
 }
 
+/**
+ * Compatibility wrapper - the real logic now lives in FeatureLimitService,
+ * which centralizes every subscription limit/module check in one place
+ * instead of duplicating it across module services. Kept as a free function
+ * with the same signature/return shape so none of the existing call sites
+ * (BranchService, CategoryService, ProductService, SubCategoryService,
+ * SupplierService, WarehouseService) need to change.
+ */
 function checkPackageLimit($type)
 {
-    try {
-
-        $user = Auth::user();
-
-        // Super Admin Skip
-        if (getRoleName() == RoleNames::SUPERADMIN) {
-            return [
-                'status' => true,
-                'message' => 'Super admin bypass'
-            ];
-        }
-
-        if (!$user->business) {
-
-            return [
-                'status' => false,
-                'message' => 'Business not found'
-            ];
-        }
-
-        $business = $user->business;
-
-        if (!$business->package) {
-
-            return [
-                'status' => false,
-                'message' => 'Package not found'
-            ];
-        }
-
-        $package = $business->package;
-
-        // Allowed fields
-        $limits = [
-
-            'branches'          => [
-                'column' => 'max_branches',
-                'count' => Branch::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'users'             => [
-                'column' => 'max_users',
-                'count' => User::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'customers'         => 'max_customers',
-            'warehouses'        => [
-                'column' => 'max_warehouses',
-                'count' => Warehouse::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'categories'        => [
-                'column' => 'max_categories',
-                'count' => Category::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'products'          => [
-                'column' => 'max_products',
-                'count' => Product::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'suppliers'         => [
-                'column' => 'max_suppliers',
-                'count' => Supplier::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'purchase_orders'   => [
-                'column' => 'max_purchase_orders',
-                'count' => PurchaseRequest::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'purchases'         => [
-                'column' => 'max_purchases',
-                'count' => Purchase::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            ],
-            'sales'             => 'max_sales',
-            'transfers'         => 'max_transfers',
-            'expenses'          => 'max_expenses',
-            'vouchers'          => 'max_vouchers',
-
-        ];
-
-        // Invalid type
-        if (!isset($limits[$type])) {
-
-            return [
-                'status' => false,
-                'message' => 'Invalid limit type'
-            ];
-        }
-
-        $limit = (int) $package->{$limits[$type]['column']};
-        $count = $limits[$type]['count'];
-
-        // Unlimited
-        if ($limit == -1) {
-            return [
-                'status' => true,
-                'message' => 'Unlimited access'
-            ];
-        }
-
-        if ($count >= $limit) {
-            return [
-                'status' => false,
-                'message' => ucfirst($type) . ' limit exceeded'
-            ];
-        }
-
-        return [
-            'status' => true,
-            'message' => ucfirst($type) . ' limit available'
-        ];
-    } catch (Exception $e) {
-
-        return [
-            'status' => false,
-            'message' => $e->getMessage()
-        ];
-    }
+    return app(\App\Services\Concrete\Admin\FeatureLimitService::class)->check($type);
 }
 
 function numberToWord($num = '')

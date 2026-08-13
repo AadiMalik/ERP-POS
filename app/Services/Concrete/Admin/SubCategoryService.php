@@ -128,7 +128,7 @@ class SubCategoryService
                   return $this->model_sub_category->find($obj['sub_category_id']);
             }
             //check limit
-            $limit = checkPackageLimit('branches');
+            $limit = checkPackageLimit('categories');
 
             if (!$limit['status']) {
                   throw new Exception($limit['message']);

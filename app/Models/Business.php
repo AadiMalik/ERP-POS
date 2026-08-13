@@ -31,6 +31,8 @@ class Business extends Model
         'description',
         'subscription_start',
         'subscription_end',
+        'current_business_subscription_id',
+        'grace_period_ends_at',
 
         'is_deleted',
         'createdby_id',
@@ -44,6 +46,21 @@ class Business extends Model
     public function package()
     {
         return $this->belongsTo(Package::class, 'package_id');
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(BusinessSubscription::class, 'business_id', 'business_id');
+    }
+
+    public function currentSubscription()
+    {
+        return $this->belongsTo(BusinessSubscription::class, 'current_business_subscription_id', 'business_subscription_id');
+    }
+
+    public function renewalRequests()
+    {
+        return $this->hasMany(SubscriptionRenewalRequest::class, 'business_id', 'business_id');
     }
 
     public function createdby()

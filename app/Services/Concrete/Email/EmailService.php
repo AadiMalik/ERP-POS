@@ -10,17 +10,42 @@ class EmailService
 {
     public function send(string $business_id, EmailData $email): array
     {
+        $setting = EmailSetting::where('business_id', $business_id)->first();
+
+        if (!$setting) {
+            return [
+                'status' => false,
+                'message' => 'Email settings not found.'
+            ];
+        }
+
+        return $this->deliver($setting, $email);
+    }
+
+    /**
+     * Sends using the platform-level channel config (the EmailSetting row
+     * with business_id = NULL) instead of a specific business's own
+     * settings. Used for Super Admin -> business notifications (e.g.
+     * subscription reminders), which must work even for a brand-new
+     * business that has no EmailSetting row of its own yet.
+     */
+    public function sendPlatform(EmailData $email): array
+    {
+        $setting = EmailSetting::whereNull('business_id')->first();
+
+        if (!$setting) {
+            return [
+                'status' => false,
+                'message' => 'Platform email settings are not configured.'
+            ];
+        }
+
+        return $this->deliver($setting, $email);
+    }
+
+    protected function deliver(EmailSetting $setting, EmailData $email): array
+    {
         try {
-
-            $setting = EmailSetting::where('business_id', $business_id)->first();
-
-            if (isset($setting) && !$setting) {
-                return [
-                    'status' => false,
-                    'message' => 'Email settings not found.'
-                ];
-            }
-
             if (!$setting->enable_email_notifications) {
                 return [
                     'status' => false,
