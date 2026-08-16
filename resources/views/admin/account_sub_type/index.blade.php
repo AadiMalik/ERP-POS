@@ -20,11 +20,10 @@
                     </button>
 
                 </div>
-                @if (RoleNames::SUPERADMIN != getRoleName())
-                    <button type="button" id="resetAccountSubType" class="btn rounded-pill btn-info">
-                        <i class="fa fa-refresh"></i> Reset Account Sub Types
-                    </button>
-                @endif
+                <button type="button" id="resetAccountSubType" class="btn rounded-pill btn-info">
+                    <i class="fa fa-refresh"></i>
+                    {{ RoleNames::SUPERADMIN == getRoleName() ? 'Reset System Template' : 'Reset Account Sub Types' }}
+                </button>
             </div>
             <div class="card-body">
                 <div id="filterSection" class="card-body border-bottom" style="display:none;">

@@ -42,7 +42,7 @@ class RoleService
         if (!empty($obj['end_date'])) {
             $wh[] = ['date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
         }
-        $with = ['permissions'];
+        $with = ['permissions','business'];
 
 
         $allow_roles = [
@@ -74,6 +74,10 @@ class RoleService
 
                 return $badges;
             })
+            ->editColumn('business', function ($item) {
+
+                return $item->business->name??'';
+            })
             ->editColumn('description', function ($item) {
 
                 return Str::limit($item->description, 50, '...');
@@ -94,7 +98,7 @@ class RoleService
 
                 return $action_column;
             })
-            ->rawColumns(['permissions', 'description', 'action'])
+            ->rawColumns(['permissions','business', 'description', 'action'])
             ->make(true);
         return $data;
     }

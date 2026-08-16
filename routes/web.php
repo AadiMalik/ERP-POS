@@ -227,6 +227,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::post('data', [App\Http\Controllers\Admin\AccountTypeController::class, 'getData']);
         Route::post('reset', [App\Http\Controllers\Admin\AccountTypeController::class, 'reset']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\AccountTypeController::class, 'byBusiness']);
+        Route::get('template', [App\Http\Controllers\Admin\AccountTypeController::class, 'template']);
     });
 
     //Account Sub Types
@@ -250,6 +251,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::post('save-child', [App\Http\Controllers\Admin\AccountController::class, 'storeChild']);
 
         Route::get('parent-by-sub-type/{account_sub_type_id}', [App\Http\Controllers\Admin\AccountController::class, 'parentByAccountSubType']);
+        Route::get('next-code/{parent_account_id}', [App\Http\Controllers\Admin\AccountController::class, 'nextCode']);
     });
 
     //journal

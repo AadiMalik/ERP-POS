@@ -109,9 +109,11 @@ $("body").on("click", "#editChildAccount", function (event) {
 
                   await loadParentAccounts(data.account_sub_type_id);
 
+                  suppressChildCodePreview = true;
                   $("#child_parent_account_id")
                         .val(data.parent_account_id)
                         .trigger("change");
+                  suppressChildCodePreview = false;
 
                   $("#child_code").val(data.code);
                   $("#child_name").val(data.name);
@@ -243,12 +245,41 @@ $('#child_account_sub_type_id').change(function () {
       loadParentAccounts(account_sub_type_id);
 });
 
+// Set while editChildAccount restores a saved parent_account_id, so that
+// programmatic "change" trigger doesn't overwrite the stored code with a
+// fresh preview. A manual selection by the user always previews normally.
+let suppressChildCodePreview = false;
+
+$('#child_parent_account_id').change(function () {
+      let parent_account_id = $(this).val();
+
+      if (!parent_account_id) {
+            $('#child_code').val('');
+            return;
+      }
+
+      if (suppressChildCodePreview) {
+            return;
+      }
+
+      previewChildCode(parent_account_id);
+});
+
+function previewChildCode(parent_account_id) {
+      return $.get(url_local + "/admin/account/next-code/" + parent_account_id)
+            .then(function (response) {
+                  $('#child_code').val(response.Data.code);
+            });
+}
+
 // helper function
 function loadParentAccountTypes(business_id) {
 
-      return $.get(
-            url_local + "/admin/account-type/by-business/" + business_id
-      ).then(function (response) {
+      let url = business_id ?
+            url_local + "/admin/account-type/by-business/" + business_id :
+            url_local + "/admin/account-type/template";
+
+      return $.get(url).then(function (response) {
 
             let options = '<option value="">--Select Account Type--</option>';
 
@@ -294,9 +325,11 @@ function loadParentSubTypes(account_type_id) {
 // child helper
 function loadChildAccountTypes(business_id) {
 
-      return $.get(
-            url_local + "/admin/account-type/by-business/" + business_id
-      ).then(function (response) {
+      let url = business_id ?
+            url_local + "/admin/account-type/by-business/" + business_id :
+            url_local + "/admin/account-type/template";
+
+      return $.get(url).then(function (response) {
 
             let options = '<option value="">--Select Account Type--</option>';
 
@@ -348,9 +381,13 @@ function loadParentAccounts(account_sub_type_id) {
 
             $.each(response.Data, function (i, item) {
 
+                  // Level 2 accounts (they themselves have a parent) get a
+                  // prefix so it's clear picking one creates a Level 3 account.
+                  let prefix = item.parent_account_id ? '&mdash;&nbsp;' : '';
+
                   options +=
                         `<option value="${item.account_id}">
-                ${item.code} ${item.name}
+                ${prefix}${item.code} ${item.name}
             </option>`;
 
             });

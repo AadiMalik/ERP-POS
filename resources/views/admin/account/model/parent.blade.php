@@ -14,9 +14,9 @@
                     <div class="row">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-6">
-                                <label class="form-label">Business <span class="text-danger">*</span></label>
-                                <select id="parent_business_id" name="parent_business_id" class="form-select" required>
-                                    <option value="">--Select Business--</option>
+                                <label class="form-label">Business</label>
+                                <select id="parent_business_id" name="parent_business_id" class="form-select">
+                                    <option value="">System Template (Global)</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">
                                             {{ isset($item->code) ? $item->code : '' }}
@@ -51,7 +51,7 @@
                                 Code <span class="text-danger">**</span>
                             </label>
                             <input type="text" class="form-control" id="parent_code" name="parent_code"
-                                placeholder="Enter Code" required>
+                                placeholder="e.g. 1130" pattern="[0-9]+" title="Numbers only" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">

@@ -7,7 +7,8 @@
       "Read(//c//**)",
       "Bash(npm ls *)",
       "Bash(grep -A2 'id=\"openSessionModal\"' /tmp/ot_pos_screen.html | head -5 *)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(php \"/c/Users/ADNANJ~1/AppData/Local/Temp/claude/c--xampp-htdocs-erp/4fe0128b-96e2-4d5e-8237-4fa298c2e7d0/scratchpad/check_template.php\")"
     ]
   }
 }

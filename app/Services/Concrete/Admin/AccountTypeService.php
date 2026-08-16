@@ -127,11 +127,13 @@ class AccountTypeService
             ->where('is_deleted', 0)
             ->get();
     }
-    public function resetBusinessAccountType()
+    public function resetBusinessAccountType($business_id = false)
     {
         try {
 
-            $business_id = Auth::user()->business_id;
+            // false (default) = reset the current user's own business; an explicit
+            // business_id (including null, for the global template) overrides it.
+            $business_id = $business_id === false ? Auth::user()->business_id : $business_id;
 
             $account_types = [
                 [

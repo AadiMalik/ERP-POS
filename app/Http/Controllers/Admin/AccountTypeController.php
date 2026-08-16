@@ -125,4 +125,25 @@ class AccountTypeController extends Controller
             );
         }
     }
+
+    /**
+     * Account Types belonging to the global COA template (business_id =
+     * null) - used when Super Admin selects "System Template (Global)" as
+     * the target business in the Add Parent/Add Child modals, since a null
+     * business_id can't be carried as a route segment.
+     */
+    public function template()
+    {
+        try {
+            $account_type = $this->account_type_service->getByBusiness(null);
+            return $this->success(
+                Message::SUCCESS,
+                $account_type
+            );
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
 }

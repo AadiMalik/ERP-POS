@@ -30,6 +30,7 @@
                             <th>Role</th>
                             <th>Description</th>
                             <th>Permissions</th>
+                            <th>Business</th>
                             <th>Action</th>
                         </tr>
                         <!-- end table row-->
@@ -49,6 +50,7 @@
     {data: 'name' , name: 'name'},
     {data: 'description' , name: 'description'},
     {data: 'permissions' , name: 'permissions' , 'sortable': false , searchable: false},
+    {data: 'business' , name: 'business' , 'sortable': false , searchable: false},
     {data: 'action' , name: 'action' , 'sortable': false , searchable: false},",
         'route' => 'roles/data',
         'buttons' => false,

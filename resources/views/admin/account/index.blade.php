@@ -366,18 +366,39 @@
     </style>
 @endsection
 
+@php
+    use App\Enums\RoleNames;
+@endphp
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">Chart of Accounts (COA)</h4>
         <div class="card">
-            <div class="card-header d-flex justify-content-between">
-                <!-- Action Buttons -->
-                <a href="javascript:void(0)" id="createParentAccount" class="btn rounded-pill btn-primary me-2">
-                    <i class="icon-base fa fa-plus mr-5"></i> Add Parent
-                </a>
-                <a href="javascript:void(0)" id="createChildAccount" class="btn rounded-pill btn-primary">
-                    <i class="icon-base fa fa-plus mr-5"></i> Add Child
-                </a>
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                @if (RoleNames::SUPERADMIN == getRoleName())
+                    <div>
+                        <label class="form-label mb-1">Business</label>
+                        <select id="coa_business_filter" class="form-select">
+                            <option value="" {{ empty($selected_business_id) ? 'selected' : '' }}>
+                                System Template (Global)
+                            </option>
+                            @foreach ($business as $item)
+                                <option value="{{ $item->business_id }}"
+                                    {{ $selected_business_id == $item->business_id ? 'selected' : '' }}>
+                                    {{ isset($item->code) ? $item->code : '' }} {{ $item->name ?? '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+                <div>
+                    <!-- Action Buttons -->
+                    <a href="javascript:void(0)" id="createParentAccount" class="btn rounded-pill btn-primary me-2">
+                        <i class="icon-base fa fa-plus mr-5"></i> Add Parent
+                    </a>
+                    <a href="javascript:void(0)" id="createChildAccount" class="btn rounded-pill btn-primary">
+                        <i class="icon-base fa fa-plus mr-5"></i> Add Child
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <!-- COA Sections -->
@@ -488,6 +509,19 @@
     <script src="{{ asset('public/assets/js/admin/account.js') }}"></script>
     <script>
         (function() {
+        //================= BUSINESS FILTER =================//
+
+        const coaBusinessFilter = document.getElementById("coa_business_filter");
+
+        if (coaBusinessFilter) {
+            coaBusinessFilter.addEventListener("change", function() {
+                const businessId = this.value;
+                window.location.href = businessId ?
+                    "{{ url('admin/account') }}?business_id=" + encodeURIComponent(businessId) :
+                    "{{ url('admin/account') }}";
+            });
+        }
+
         //================= SECTION =================//
 
         let sections = document.querySelectorAll(".coa-section");

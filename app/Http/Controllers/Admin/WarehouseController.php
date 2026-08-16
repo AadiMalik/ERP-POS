@@ -65,7 +65,7 @@ class WarehouseController extends Controller
                     ->ignore($request->warehouse_id, 'warehouse_id')
             ]
         ];
-        if (getRoleName() == RoleNames::BUSINESSADMIN) {
+        if (getRoleName() == RoleNames::SUPERADMIN) {
             $rules['business_id'] = 'required|exists:businesses,business_id';
         }
         if (in_array(getRoleName(), RoleNames::branchLevelRoles())) {

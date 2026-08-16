@@ -17,13 +17,20 @@ class BusinessService
     protected $model_package;
     protected $model_business_subscription;
     protected SubscriptionService $subscription_service;
+    protected ChartOfAccountsCloneService $chart_of_accounts_clone_service;
+    protected AccountingSettingCloneService $accounting_setting_clone_service;
 
-    public function __construct(SubscriptionService $subscription_service)
-    {
+    public function __construct(
+        SubscriptionService $subscription_service,
+        ChartOfAccountsCloneService $chart_of_accounts_clone_service,
+        AccountingSettingCloneService $accounting_setting_clone_service
+    ) {
         $this->model_business = new Repository(new Business());
         $this->model_package = new Repository(new Package());
         $this->model_business_subscription = new Repository(new BusinessSubscription());
         $this->subscription_service = $subscription_service;
+        $this->chart_of_accounts_clone_service = $chart_of_accounts_clone_service;
+        $this->accounting_setting_clone_service = $accounting_setting_clone_service;
     }
 
     public function getData($data)
@@ -103,6 +110,8 @@ class BusinessService
             $saved_obj = $this->model_business->create($obj);
             $package = $this->model_package->getModel()::findOrFail($package_id);
             $this->subscription_service->createInitial($saved_obj, $package);
+            $account_id_map = $this->chart_of_accounts_clone_service->cloneTemplateToBusiness($saved_obj->business_id);
+            $this->accounting_setting_clone_service->cloneTemplateToBusiness($saved_obj->business_id, $account_id_map);
             return $saved_obj->fresh();
         });
     }

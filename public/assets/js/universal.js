@@ -331,7 +331,6 @@ function currency(amount) {
         ? `${amount} ${currency_symbol}`
         : `${currency_symbol} ${amount}`;
 }
-console.log(currency_symbol);
 $('.currency-label').each(function () {
 
     $(this).append(' (' + currency_symbol + ')');
