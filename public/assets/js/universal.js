@@ -79,11 +79,7 @@ function ajaxRequest({
             success: function (response) {
                 hideLoader();
 
-                if (
-                    response.Success ||
-                    response.Success ||
-                    response.Status
-                ) {
+                if (response.Success === true) {
                     resolve(response);
                 } else {
                     reject(response);
@@ -93,11 +89,7 @@ function ajaxRequest({
             error: function (xhr) {
                 hideLoader();
 
-                let message = "Something went wrong";
-
-                if (xhr.responseJSON?.message) {
-                    message = xhr.responseJSON.message;
-                }
+                let message = xhr.responseJSON?.Message || xhr.responseJSON?.ErrorMessage || "Something went wrong";
 
                 reject({
                     Message: message,

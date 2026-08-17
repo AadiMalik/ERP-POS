@@ -14,9 +14,15 @@
     @include('layouts/css')
     @yield('css')
     <style>
-        /* POS is a dedicated, full-screen interface - no admin sidebar/navbar/footer chrome. */
-        body { background: #f5f5f9; }
-        .pos-content-wrapper { min-height: calc(100vh - 56px); }
+        /* POS is a dedicated, full-screen, non-scrolling interface - no admin
+           sidebar/navbar/footer chrome. The header and footer keep their
+           natural height; .pos-content-wrapper takes exactly what's left of
+           the viewport, so the screen itself (not the page) owns all
+           internal scrolling. */
+        html, body { height: 100%; overflow: hidden; }
+        body { background: #f5f5f9; display: flex; flex-direction: column; }
+        .pos-content-wrapper { flex: 1 1 auto; min-height: 0; overflow: hidden; }
+        .pos-footer { flex: 0 0 auto; }
     </style>
 </head>
 

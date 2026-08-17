@@ -20,9 +20,11 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\OrderPayment;
 use App\Models\OrderStatusHistory;
+use App\Models\OrderType;
 use App\Models\PaymentMethod;
 use App\Models\PosRegisterSession;
 use App\Models\PosSetting;
+use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\ProductVariationStock;
 use App\Models\ProductVariationStockTransaction;
@@ -273,6 +275,7 @@ class OrderService
                 'voucher_id' => $order->voucher_id,
                 'voucher_discount_amount' => $order->voucher_discount_amount,
                 'notes' => $order->notes,
+                'delivery_address' => $order->delivery_address,
                 'status' => $order->status,
                 'fbr_invoice_number' => $order->fbr_invoice_number,
                 'fbr_status' => $order->fbr_status,
@@ -392,6 +395,18 @@ class OrderService
                 throw new Exception('order_source_id is required to identify the originating sales channel.');
             }
 
+            // "Delivery" order types are identified by the default seeded
+            // code (OrderTypeService::$default_types) rather than a dedicated
+            // flag column - see OrderService class docblock context. A
+            // delivery order must carry a delivery address before it can be
+            // saved as draft/hold, same as any other required order field.
+            $is_delivery_order = !empty($order_type_id)
+                && OrderType::where('order_type_id', $order_type_id)->value('code') === 'DELIVERY';
+
+            if ($is_delivery_order && empty(trim($obj['delivery_address'] ?? ''))) {
+                throw new Exception('Delivery address is required for delivery orders.');
+            }
+
             $status = in_array($obj['status'] ?? 'draft', ['draft', 'hold'], true) ? $obj['status'] : 'draft';
 
             //====================================
@@ -414,6 +429,7 @@ class OrderService
                     'order_source_id' => $order_source_id,
                     'sale_date' => $sale_date->format('Y-m-d'),
                     'notes' => $obj['notes'] ?? null,
+                    'delivery_address' => $obj['delivery_address'] ?? null,
                     'status' => $status,
                     'fbr_invoice_number' => $obj['fbr_invoice_number'] ?? $order->fbr_invoice_number,
                     'pra_invoice_number' => $obj['pra_invoice_number'] ?? $order->pra_invoice_number,
@@ -445,6 +461,7 @@ class OrderService
                     'order_date' => now(),
                     'sale_date' => $sale_date->format('Y-m-d'),
                     'notes' => $obj['notes'] ?? null,
+                    'delivery_address' => $obj['delivery_address'] ?? null,
                     'status' => $status,
                     'fbr_invoice_number' => $obj['fbr_invoice_number'] ?? null,
                     'pra_invoice_number' => $obj['pra_invoice_number'] ?? null,
@@ -863,7 +880,7 @@ class OrderService
         DB::beginTransaction();
 
         try {
-            $order = $this->model_order->getModel()::with(['details', 'payments'])->findOrFail($obj['order_id']);
+            $order = $this->model_order->getModel()::with(['details.product', 'payments'])->findOrFail($obj['order_id']);
 
             $existing = JournalEntry::where('source_type', JournalSourceTypes::POS_SALE)
                 ->where('source_id', $order->order_id)
@@ -1143,6 +1160,30 @@ class OrderService
                 ]);
             }
 
+            // Stock sufficiency check - tracked products only. Runs as a
+            // separate pass before any decrement below, so a shortfall on
+            // any line aborts the whole sale (via the rollBack() in the
+            // catch below) before any earlier line's stock has been
+            // mutated. Mirrors TransferNoteService's insufficient-stock
+            // check style/messaging.
+            foreach ($order->details as $detail) {
+                $product = $detail->product;
+
+                if (!$product || !$product->is_track_stock) {
+                    continue;
+                }
+
+                $available_qty = (float) (ProductVariationStock::where('business_id', $order->business_id)
+                    ->where('warehouse_id', $order->warehouse_id)
+                    ->where('product_id', $detail->product_id)
+                    ->where('product_variation_id', $detail->product_variation_id)
+                    ->value('quantity') ?? 0);
+
+                if ((float) $detail->base_quantity > $available_qty) {
+                    throw new Exception('Insufficient stock for "' . ($product->name ?? 'product') . '". Available: ' . $available_qty . ', required: ' . $detail->base_quantity . '.');
+                }
+            }
+
             // Per line: snapshot cost, decrement stock, write the stock
             // transaction, and accumulate the COGS total.
             $total_cost = 0;
@@ -1398,7 +1439,7 @@ class OrderService
         $business_id = $obj['business_id'] ?? Auth::user()->business_id;
         $term = $obj['term'] ?? '';
 
-        $query = ProductVariation::with(['product', 'saleUnit', 'productVariationUnitConversion'])
+        $query = ProductVariation::with(['product', 'unit', 'saleUnit', 'productVariationUnitConversion.toUnit'])
             ->where('business_id', $business_id)
             ->where('is_deleted', 0)
             ->where('status', Status::ACTIVE);
@@ -1415,5 +1456,36 @@ class OrderService
         }
 
         return $query->limit(30)->get();
+    }
+
+    /**
+     * Category-wise product browsing for the POS screen - a separate,
+     * product-grouped listing (image, nested variations/units) rather than
+     * an extension of searchProducts()'s flat ProductVariation shape, which
+     * is purpose-built for instant-add search/scan instead.
+     */
+    public function getProductsByCategory($obj)
+    {
+        $business_id = $obj['business_id'] ?? Auth::user()->business_id;
+        $category_id = $obj['category_id'] ?? null;
+
+        $query = Product::with([
+                'productVariations.unit',
+                'productVariations.saleUnit',
+                'productVariations.productVariationUnitConversion.toUnit',
+                'productImages' => function ($q) {
+                    $q->orderBy('is_default', 'desc')->orderBy('sorting');
+                },
+            ])
+            ->where('business_id', $business_id)
+            ->where('is_deleted', 0)
+            ->where('status', Status::ACTIVE)
+            ->where('is_pos_visible', 1);
+
+        if (!empty($category_id)) {
+            $query->where('category_id', $category_id);
+        }
+
+        return $query->orderBy('name')->limit(60)->get();
     }
 }

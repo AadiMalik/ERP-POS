@@ -342,6 +342,16 @@ class OrderController extends Controller
         }
     }
 
+    public function productsByCategory(Request $request)
+    {
+        try {
+            $products = $this->order_service->getProductsByCategory($request->all());
+            return $this->success(Message::FETCH, $products);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
     public function details($order_id)
     {
         try {

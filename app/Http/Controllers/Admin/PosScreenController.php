@@ -8,14 +8,18 @@ use App\Http\Controllers\Controller;
 use App\Models\BusinessSetting;
 use App\Models\PosRegister;
 use App\Models\PosSetting;
+use App\Models\Role;
 use App\Services\Concrete\Admin\BranchService;
 use App\Services\Concrete\Admin\BusinessService;
+use App\Services\Concrete\Admin\CategoryService;
 use App\Services\Concrete\Admin\CustomerService;
 use App\Services\Concrete\Admin\DiscountService;
 use App\Services\Concrete\Admin\OrderSourceService;
 use App\Services\Concrete\Admin\OrderTypeService;
 use App\Services\Concrete\Admin\PaymentMethodService;
+use App\Services\Concrete\Admin\UserService;
 use App\Services\Concrete\Admin\WarehouseService;
+use App\Traits\ResponseAPI;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,6 +27,8 @@ use Illuminate\Support\Facades\Validator;
 
 class PosScreenController extends Controller
 {
+    use ResponseAPI;
+
     // Permission keys the POS screen's UI needs to know about - mirrors the
     // plain DB-backed permission records seeded by
     // database/migrations/2026_08_13_090020_seed_order_pos_permissions.php.
@@ -59,9 +65,11 @@ class PosScreenController extends Controller
     protected $order_source_service;
     protected $payment_method_service;
     protected $discount_service;
+    protected $category_service;
     protected $business_service;
     protected $branch_service;
     protected $warehouse_service;
+    protected $user_service;
 
     public function __construct(
         CustomerService $customer_service,
@@ -69,18 +77,22 @@ class PosScreenController extends Controller
         OrderSourceService $order_source_service,
         PaymentMethodService $payment_method_service,
         DiscountService $discount_service,
+        CategoryService $category_service,
         BusinessService $business_service,
         BranchService $branch_service,
-        WarehouseService $warehouse_service
+        WarehouseService $warehouse_service,
+        UserService $user_service
     ) {
         $this->customer_service = $customer_service;
         $this->order_type_service = $order_type_service;
         $this->order_source_service = $order_source_service;
         $this->payment_method_service = $payment_method_service;
         $this->discount_service = $discount_service;
+        $this->category_service = $category_service;
         $this->business_service = $business_service;
         $this->branch_service = $branch_service;
         $this->warehouse_service = $warehouse_service;
+        $this->user_service = $user_service;
     }
 
     /**
@@ -115,6 +127,7 @@ class PosScreenController extends Controller
         $payment_methods = $this->payment_method_service->getAllActive($business_id);
         $customers = $this->customer_service->getAllActive($business_id);
         $discounts = $this->discount_service->getAllActive($business_id);
+        $categories = $this->category_service->getByBusiness($business_id);
 
         $registers = PosRegister::where('business_id', $business_id)
             ->where('branch_id', $branch_id)
@@ -141,6 +154,7 @@ class PosScreenController extends Controller
             'payment_methods',
             'customers',
             'discounts',
+            'categories',
             'registers',
             'permissions',
             'is_fixed_context',
@@ -242,5 +256,66 @@ class PosScreenController extends Controller
         session()->forget(['pos_context_business_id', 'pos_context_branch_id', 'pos_context_warehouse_id']);
 
         return redirect()->route('pos-screen');
+    }
+
+    /**
+     * Quick "Add Customer" popup on the POS screen - a minimal-field
+     * (Name/Email/Phone) alternative to the full admin Users create form, so
+     * a cashier never has to leave the screen. Reuses UserService::save()
+     * as-is (same "reuse existing account by email" rule + CustomerProfile
+     * creation via CustomerService::upsertProfile()) instead of duplicating
+     * that logic here.
+     */
+    public function quickCreateCustomer(Request $request)
+    {
+        $rules = [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'phone' => 'nullable|string|max:50',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        try {
+            $user = Auth::user();
+            $context = $this->resolveContext($user);
+            $business_id = $context[0] ?? $user->business_id;
+
+            $role_id = Role::where('name', RoleNames::USER)->whereNull('business_id')->value('id');
+
+            if (empty($role_id)) {
+                return $this->error('Customer role is not configured.');
+            }
+
+            $customer = $this->user_service->save([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'role_id' => $role_id,
+                'business_id' => $business_id,
+                'status' => 'active',
+            ]);
+
+            if (!$customer) {
+                return $this->error('Unable to create customer.');
+            }
+
+            $profile = $this->customer_service->getProfile($customer->id, $business_id);
+
+            return $this->success('Customer added.', [
+                'user_id' => $customer->id,
+                'name' => $customer->name,
+                'phone' => $customer->phone,
+                'email' => $customer->email,
+                'credit_limit' => $profile->credit_limit ?? 0,
+                'is_walkin' => $profile->is_walkin ?? 0,
+            ]);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
     }
 }

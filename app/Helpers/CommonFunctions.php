@@ -420,9 +420,15 @@ function generateCustomerCode($business_id = null)
 
     $prefix = session('customer_setting.customer_code_prefix') ?? 'CUS-';
 
+    // customer_profile_id is a UUID - ordering by it does not reflect
+    // creation order, so it could hand out an already-used code (two
+    // profiles created back-to-back could sort either way). date_created
+    // (falling back to code itself for same-timestamp ties) reflects the
+    // actual last-created row.
     $last_customer = CustomerProfile::where('business_id', $business_id)
         ->where('code', 'like', $prefix . '%')
-        ->orderByDesc('customer_profile_id')
+        ->orderByDesc('date_created')
+        ->orderByDesc('code')
         ->first();
 
     $next_number = 1;

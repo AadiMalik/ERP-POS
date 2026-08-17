@@ -1,31 +1,11 @@
 @extends('layouts.pos')
 @section('css')
-    <style>
-        .pos-screen-wrapper .product-search-wrap { position: relative; }
-        #productSearchResults {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 100%;
-            z-index: 1050;
-            max-height: 340px;
-            overflow-y: auto;
-            display: none;
-        }
-        #productSearchResults .list-group-item { cursor: pointer; }
-        #cartRows input.line-qty, #cartRows input.line-price, #cartRows input.line-discount { width: 100%; }
-        .pos-disabled-overlay {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 300px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('public/assets/css/admin/pos-screen.css') }}">
 @endsection
 @section('content')
-    <div class="container-fluid pos-screen-wrapper py-3" id="posScreen">
+    <div class="pos-screen-wrapper" id="posScreen">
         @if (!$is_fixed_context)
-            <div class="mb-3">
+            <div class="pos-context-switch">
                 <a href="{{ route('pos-screen.change-context') }}" class="btn btn-sm btn-outline-secondary">
                     <i class="fa fa-exchange-alt"></i> Change Branch
                 </a>
@@ -51,162 +31,293 @@
             </div>
         </div>
 
-        <div id="posScreenBody" class="row g-3" style="display:none;">
-            <div class="col-lg-8">
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="product-search-wrap">
-                            <input type="text" class="form-control form-control-lg" id="productSearchInput"
-                                placeholder="Scan barcode or search by name / SKU" autocomplete="off">
-                            <div id="productSearchResults" class="list-group shadow"></div>
+        <div id="posScreenBody" class="pos-screen-body" style="display:none;">
+            {{-- ================= Toolbar: product search / scan only ================= --}}
+            <div class="pos-toolbar">
+                <div class="pos-toolbar-zone pos-toolbar-search">
+                    <div class="pos-search-input-wrap">
+                        <i class="fa fa-magnifying-glass pos-search-icon"></i>
+                        <input type="text" class="form-control" id="productSearchInput"
+                            placeholder="Search by name, SKU or scan barcode..." autocomplete="off">
+                        <button type="button" class="btn pos-scan-btn" id="scanFocusBtn" title="Scan barcode">
+                            <i class="fa fa-barcode"></i>
+                        </button>
+                    </div>
+                    <div id="productSearchResults" class="list-group pos-search-results" style="display:none;"></div>
+                </div>
+            </div>
+
+            <div class="pos-main-row">
+                {{-- ================= Category Rail ================= --}}
+                <div class="pos-category-rail" id="posCategoryRail">
+                    <button type="button" class="category-rail-item active" data-category-id="">
+                        <span class="category-rail-icon"><i class="fa fa-th-large"></i></span>
+                        <span class="category-rail-label">All Products</span>
+                    </button>
+                    @foreach ($categories as $item)
+                        <button type="button" class="category-rail-item" data-category-id="{{ $item->category_id }}">
+                            <span class="category-rail-icon"><img src="{{ $item->logo_url }}" alt=""></span>
+                            <span class="category-rail-label">{{ $item->name }}</span>
+                        </button>
+                    @endforeach
+                </div>
+
+                {{-- ================= Product Browse Panel ================= --}}
+                <div class="pos-product-panel" id="posProductPanel">
+                    <div class="pos-product-results" id="posProductResults">
+                        <div id="posProductGrid" class="product-grid"></div>
+                        <div id="posProductGridEmpty" class="pos-empty-state d-none">
+                            <i class="fa fa-box-open fs-1 text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No products found</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">Cart</h6>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="heldOrdersBtn">
-                            <i class="fa fa-pause"></i> Held Orders
-                            <span class="badge bg-label-primary" id="heldOrdersCount">0</span>
-                        </button>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle mb-0" id="cartTable">
-                            <thead>
-                                <tr>
-                                    <th style="min-width:200px;">Product</th>
-                                    <th style="min-width:100px;">Unit</th>
-                                    <th style="min-width:80px;">Qty</th>
-                                    <th style="min-width:100px;">Price</th>
-                                    <th style="min-width:80px;" class="line-discount-col">Disc %</th>
-                                    <th style="min-width:100px;">Total</th>
-                                    <th style="width:40px;"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="cartRows">
-                                <tr id="cartEmptyRow">
-                                    <td colspan="7" class="text-center text-muted py-4">Cart is empty</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <label class="form-label">Customer</label>
-                        <select class="form-select select2" id="customer_id">
-                            @foreach ($customers as $item)
-                                <option value="{{ $item->user_id }}" data-credit-limit="{{ $item->credit_limit ?? 0 }}"
-                                    data-walkin="{{ $item->is_walkin ? 1 : 0 }}"
-                                    {{ $item->is_walkin ? 'selected' : '' }}>
-                                    {{ $item->user->name ?? '' }}{{ $item->is_walkin ? ' (Walk-in)' : '' }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div id="creditLimitHint" class="form-text d-none"></div>
-                    </div>
-                </div>
-
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <label class="form-label">Order Type</label>
-                        <select class="form-select select2 mb-2" id="order_type_id">
-                            @foreach ($order_types as $item)
-                                <option value="{{ $item->order_type_id }}" {{ $item->is_default ? 'selected' : '' }}>
-                                    {{ $item->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <label class="form-label">Order Source</label>
-                        <select class="form-select select2" id="order_source_id">
-                            @foreach ($order_sources as $item)
-                                <option value="{{ $item->order_source_id }}" {{ $item->is_default ? 'selected' : '' }}>
-                                    {{ $item->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
-                @if ($pos_setting->enable_discount)
-                    <div class="card mb-3" id="discountVoucherCard">
-                        <div class="card-body">
-                            @if (in_array($pos_setting->discount_level, ['order', 'both']))
-                                <div class="mb-3" id="orderDiscountWrap">
-                                    <label class="form-label">Order Discount</label>
-                                    <select class="form-select select2" id="discount_id">
-                                        <option value="">--No Discount--</option>
-                                        @foreach ($discounts as $item)
-                                            <option value="{{ $item->discount_id }}">
-                                                {{ $item->name }}
-                                                ({{ $item->type == 'percent' ? $item->value . '%' : $item->value }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            @endif
-                            <div id="voucherWrap">
-                                <label class="form-label">Voucher / Coupon Code</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="voucher_code" placeholder="Enter code">
-                                    <button class="btn btn-outline-primary" type="button" id="applyVoucherBtn">
-                                        Apply
-                                    </button>
+                {{-- ================= Cart / Checkout Panel ================= --}}
+                <div class="pos-cart-panel" id="posCartPanel">
+                    <div class="pos-cart-table-wrap">
+                        <div class="pos-cart-header">
+                            <h6 class="mb-0">Cart <span class="pos-cart-count" id="cartItemCount">(0 Items)</span></h6>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="pos-cart-order-no d-none" id="cartOrderNoBadge"></span>
+                                <button type="button" class="btn btn-sm pos-clear-cart-btn d-none" id="clearCartBtn">
+                                    <i class="fa fa-trash"></i> Clear Cart
+                                </button>
+                            </div>
+                        </div>
+                        <div class="pos-cart-scroll">
+                            <div id="cartRows" class="pos-cart-lines">
+                                <div class="pos-cart-empty" id="cartEmptyRow">
+                                    <i class="fa fa-cart-shopping fs-1 text-muted mb-2"></i>
+                                    <p class="text-muted mb-0">Cart is empty</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                @endif
 
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span>Subtotal</span><span id="sumSubtotal">0.00</span>
+                    <div class="pos-cart-footer">
+                        <div class="pos-footer-row" id="customerOrderDetailsCard">
+                            <div class="pos-customer-row">
+                                <select class="form-select form-select-sm select2" id="customer_id">
+                                    @foreach ($customers as $item)
+                                        <option value="{{ $item->user_id }}" data-credit-limit="{{ $item->credit_limit ?? 0 }}"
+                                            data-walkin="{{ $item->is_walkin ? 1 : 0 }}"
+                                            data-phone="{{ $item->user->phone ?? '' }}" data-email="{{ $item->user->email ?? '' }}"
+                                            {{ $item->is_walkin ? 'selected' : '' }}>
+                                            {{ $item->user->name ?? '' }}{{ $item->is_walkin ? ' (Walk-in)' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button type="button" class="btn btn-sm pos-add-customer-btn" id="addCustomerBtn" title="Add Customer">
+                                    <i class="fa fa-user-plus"></i>
+                                </button>
+                            </div>
+                            <div id="creditLimitHint" class="form-text d-none"></div>
+
+                            <div class="pos-order-meta-row">
+                                <div class="pos-pill-group" data-select-target="order_type_id">
+                                    <span class="pos-pill-group-label">Order Type</span>
+                                    <div class="pos-pill-buttons">
+                                        @foreach ($order_types as $item)
+                                            <button type="button" class="pos-pill {{ $item->is_default ? 'active' : '' }}"
+                                                data-value="{{ $item->order_type_id }}" data-code="{{ $item->code }}">{{ $item->name }}</button>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                <div class="pos-pill-group" data-select-target="order_source_id">
+                                    <span class="pos-pill-group-label">Order Source</span>
+                                    <div class="pos-pill-buttons">
+                                        @foreach ($order_sources as $item)
+                                            <button type="button" class="pos-pill {{ $item->is_default ? 'active' : '' }}"
+                                                data-value="{{ $item->order_source_id }}">{{ $item->name }}</button>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                <select class="d-none" id="order_type_id">
+                                    @foreach ($order_types as $item)
+                                        <option value="{{ $item->order_type_id }}" data-code="{{ $item->code }}" {{ $item->is_default ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <select class="d-none" id="order_source_id">
+                                    @foreach ($order_sources as $item)
+                                        <option value="{{ $item->order_source_id }}" {{ $item->is_default ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="d-none pos-delivery-row" id="deliveryAddressWrap">
+                                <label class="form-label mb-0" for="delivery_address">Delivery Address <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" id="delivery_address" placeholder="Enter delivery address">
+                            </div>
                         </div>
-                        <div class="d-flex justify-content-between mb-1">
-                            <span>Discount</span><span id="sumDiscount">0.00</span>
+
+                        @if ($pos_setting->enable_discount)
+                            <div class="pos-footer-row pos-discount-voucher-row" id="discountVoucherCard">
+                                @if (in_array($pos_setting->discount_level, ['order', 'both']))
+                                    <div id="orderDiscountWrap">
+                                        <label class="form-label mb-1">Discount</label>
+                                        <select class="form-select form-select-sm select2" id="discount_id">
+                                            <option value="">--No Discount--</option>
+                                            @foreach ($discounts as $item)
+                                                <option value="{{ $item->discount_id }}">
+                                                    {{ $item->name }}
+                                                    ({{ $item->type == 'percent' ? $item->value . '%' : $item->value }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @endif
+                                <div id="voucherWrap">
+                                    <label class="form-label mb-1">Voucher / Coupon</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" id="voucher_code" placeholder="Enter code">
+                                        <button class="btn btn-outline-primary" type="button" id="applyVoucherBtn">
+                                            Apply
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="pos-footer-row pos-totals">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Subtotal</span><span id="sumSubtotal">0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Discount</span><span id="sumDiscount">0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Tax</span><span id="sumTax">0.00</span>
+                            </div>
+                            <hr class="my-1">
+                            <div class="d-flex justify-content-between pos-grand-total">
+                                <span>Total</span><span id="sumTotal">0.00</span>
+                            </div>
                         </div>
-                        <div class="d-flex justify-content-between mb-1">
-                            <span>Tax</span><span id="sumTax">0.00</span>
+
+                        <div class="pos-footer-row" id="paymentSection">
+                            <div class="pos-payment-compact-row">
+                                <select class="form-select form-select-sm" id="paymentMethodSelect">
+                                    <option value="">Payment Method</option>
+                                </select>
+                                <input type="number" step="0.01" min="0" class="form-control form-control-sm" id="paidAmountInput" placeholder="Paid Amount">
+                            </div>
+
+                            <div id="singlePaymentBlock">
+                                <div class="d-none" id="creditCustomerSummary">
+                                    <div class="d-flex justify-content-between align-items-center pos-credit-summary">
+                                        <span id="creditCustomerText"></span>
+                                        <a href="javascript:void(0);" id="creditCustomerChangeLink">Change</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-none" id="multiPaymentBlock">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-semibold">Split Payment</span>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="addPaymentRowBtn">
+                                        <i class="fa fa-plus"></i> Add
+                                    </button>
+                                </div>
+                                <div id="paymentRows"></div>
+                            </div>
+
+                            <div class="pos-payment-summary">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Paid</span><span id="paymentEntered">0.00</span>
+                                </div>
+                                <div class="d-flex justify-content-between pos-change-row">
+                                    <span id="paymentRemainingLabel">Remaining</span><span id="paymentRemaining">0.00</span>
+                                </div>
+                            </div>
                         </div>
-                        <hr class="my-2">
-                        <div class="d-flex justify-content-between fw-bold fs-5">
-                            <span>Total</span><span id="sumTotal">0.00</span>
+
+                        <div class="pos-footer-row pos-action-buttons">
+                            @if ($pos_setting->enable_hold_order)
+                                <button type="button" class="btn pos-hold-btn" id="holdOrderBtn">
+                                    <i class="fa fa-pause"></i> Hold <span class="pos-key-hint">(F6)</span>
+                                </button>
+                            @endif
+                            <button type="button" class="btn pos-pay-btn" id="completeSaleBtn">
+                                <i class="fa fa-check"></i> Pay <span class="pos-key-hint">(F9)</span>
+                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <div class="card mb-3">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">Payments</h6>
-                        <button type="button" class="btn btn-sm btn-outline-primary" id="addPaymentRowBtn">
-                            <i class="fa fa-plus"></i> Add
-                        </button>
+    {{-- ================= Product Picker Modal (variation / unit / qty) ================= --}}
+    <div class="modal fade" id="productPickerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productPickerTitle">Select Options</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="product-picker-summary">
+                        <img id="productPickerImage" src="" alt="" class="product-picker-img">
+                        <div>
+                            <div class="fw-semibold" id="productPickerName"></div>
+                            <div class="text-muted small" id="productPickerSku"></div>
+                            <div class="fw-bold text-primary" id="productPickerPrice"></div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div id="paymentRows"></div>
-                        <div class="d-flex justify-content-between mt-2">
-                            <span>Entered</span><span id="paymentEntered">0.00</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span id="paymentRemainingLabel">Remaining</span><span id="paymentRemaining">0.00</span>
-                        </div>
+
+                    <div class="mb-3 d-none" id="productPickerVariationWrap">
+                        <label class="form-label">Variation</label>
+                        <select class="form-select" id="productPickerVariation"></select>
+                    </div>
+
+                    <div class="mb-3" id="productPickerUnitWrap">
+                        <label class="form-label">Unit</label>
+                        <select class="form-select" id="productPickerUnit"></select>
+                    </div>
+
+                    <div class="mb-1">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" step="0.01" min="0.01" class="form-control" id="productPickerQty" value="1">
                     </div>
                 </div>
-
-                <div class="d-grid gap-2">
-                    @if ($pos_setting->enable_hold_order)
-                        <button type="button" class="btn btn-outline-secondary" id="holdOrderBtn">
-                            Hold Order
-                        </button>
-                    @endif
-                    <button type="button" class="btn btn-success btn-lg" id="completeSaleBtn">
-                        Complete Sale
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="productPickerAddBtn">
+                        <i class="fa fa-cart-plus"></i> Add to Cart
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ================= Add Customer Modal (quick create, stays on POS screen) ================= --}}
+    <div class="modal fade" id="addCustomerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Customer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="new_customer_name">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="new_customer_email">
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="new_customer_phone">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="addCustomerSubmitBtn">Save Customer</button>
                 </div>
             </div>
         </div>
@@ -392,6 +503,7 @@
                 'session_cash_movement' => url('admin/pos-register-session/cash-movement'),
                 'session_my_history' => url('admin/pos-register-session/my-history'),
                 'search_products' => url('admin/order/search-products'),
+                'products_by_category' => url('admin/order/products-by-category'),
                 'order_store' => url('admin/order'),
                 'order_hold' => url('admin/order/hold'),
                 'order_resume' => url('admin/order/resume'),
@@ -399,6 +511,7 @@
                 'order_details' => url('admin/order/details'),
                 'order_data' => url('admin/order/data'),
                 'order_print' => url('admin/order'),
+                'quick_customer' => route('pos-screen.quick-customer'),
             ],
         ];
     @endphp

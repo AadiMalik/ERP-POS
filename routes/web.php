@@ -350,6 +350,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
             Route::post('complete', [App\Http\Controllers\Admin\OrderController::class, 'complete']);
             Route::post('void', [App\Http\Controllers\Admin\OrderController::class, 'void'])->middleware('permission:order.cancel_void');
             Route::get('search-products', [App\Http\Controllers\Admin\OrderController::class, 'searchProducts']);
+            Route::get('products-by-category', [App\Http\Controllers\Admin\OrderController::class, 'productsByCategory']);
             Route::get('filter-options/{business_id}', [App\Http\Controllers\Admin\OrderController::class, 'filterOptions']);
             Route::get('details/{order_id}', [App\Http\Controllers\Admin\OrderController::class, 'details']);
             Route::get('{order_id}/print', [App\Http\Controllers\Admin\OrderController::class, 'print'])->name('order.print');
@@ -363,6 +364,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::post('pos-screen/context', [App\Http\Controllers\Admin\PosScreenController::class, 'selectContext'])->name('pos-screen.context');
         Route::get('pos-screen/context-options/{business_id}', [App\Http\Controllers\Admin\PosScreenController::class, 'contextOptions']);
         Route::get('pos-screen/change-context', [App\Http\Controllers\Admin\PosScreenController::class, 'changeContext'])->name('pos-screen.change-context');
+        Route::post('pos-screen/quick-customer', [App\Http\Controllers\Admin\PosScreenController::class, 'quickCreateCustomer'])->name('pos-screen.quick-customer');
     });
 
     //purchase request
