@@ -143,6 +143,23 @@ class PosScreenController extends Controller
         $is_fixed_context = in_array(getRoleName(), $this->fixed_context_roles, true);
         $show_pos_actions = true;
 
+        $pos_order_source_id = $this->resolvePosOrderSourceId($order_sources);
+        $branch_name = optional($this->branch_service->getById($branch_id))->name;
+
+        // Change-Branch modal data - only needed for roles that are allowed to
+        // switch (see $fixed_context_roles); OT/PosManager stay fixed to their
+        // own branch, so skip the extra queries entirely for them.
+        $is_superadmin = RoleNames::SUPERADMIN == getRoleName();
+        $context_businesses = collect();
+        $context_branches = collect();
+        $context_warehouses = collect();
+
+        if (!$is_fixed_context) {
+            $context_businesses = $is_superadmin ? $this->business_service->getAllActive() : collect();
+            $context_branches = $this->branch_service->getByBusiness($business_id);
+            $context_warehouses = $this->warehouse_service->getByBusiness($business_id);
+        }
+
         return view('admin.pos.screen.index', compact(
             'pos_setting',
             'business_setting',
@@ -150,7 +167,6 @@ class PosScreenController extends Controller
             'branch_id',
             'warehouse_id',
             'order_types',
-            'order_sources',
             'payment_methods',
             'customers',
             'discounts',
@@ -158,8 +174,34 @@ class PosScreenController extends Controller
             'registers',
             'permissions',
             'is_fixed_context',
-            'show_pos_actions'
+            'show_pos_actions',
+            'pos_order_source_id',
+            'branch_name',
+            'is_superadmin',
+            'context_businesses',
+            'context_branches',
+            'context_warehouses'
         ));
+    }
+
+    /**
+     * POS-created orders always use the business's seeded 'POS' order
+     * source (see OrderSourceService::$default_sources) - the control is
+     * removed from the POS UI entirely, index.blade.php renders a hidden
+     * field instead of pills. Falls back to whichever source is flagged
+     * is_default, then simply the first, in case an admin renamed the
+     * seeded 'POS' code via the Order Source admin CRUD
+     * (OrderSourceController). Deliberately independent of
+     * pos_setting->default_order_source_id, which OrderService::save()
+     * still falls back to for the non-POS Order module and may be unset.
+     */
+    protected function resolvePosOrderSourceId($order_sources)
+    {
+        $source = $order_sources->firstWhere('code', 'POS')
+            ?? $order_sources->firstWhere('is_default', true)
+            ?? $order_sources->first();
+
+        return optional($source)->order_source_id;
     }
 
     /**

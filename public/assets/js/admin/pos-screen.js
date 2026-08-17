@@ -15,7 +15,7 @@
 
     var state = {
         session: null,
-        cart: [], // {line_key, product_variation_id, product_name, variation_name, unit_id, unit_options, quantity, unit_price, discount, notes, image}
+        cart: [], // {line_key, product_variation_id, product_name, variation_name, unit_id, unit_name, quantity, unit_price, discount, notes, image}
         payments: [],
         order_id: null,
         order_daily_id: null,
@@ -48,7 +48,13 @@
     // INIT
     // ==============================
     $(document).ready(function () {
-        $('.select2').not('#open_pos_register_id, #customer_id').select2();
+        $('.select2').not('#open_pos_register_id, #customer_id, #changeBranchBusinessId, #changeBranchBranchId, #changeBranchWarehouseId').select2();
+
+        // Same reasoning as #open_pos_register_id above - scope this dropdown
+        // to the Change Branch modal so it opens correctly.
+        $('#changeBranchBusinessId, #changeBranchBranchId, #changeBranchWarehouseId').select2({
+            dropdownParent: $('#changeBranchModal'),
+        });
 
         // Select2 appends its dropdown to <body> by default, which renders it
         // behind/outside the Bootstrap modal (and outside its focus trap) -
@@ -86,8 +92,12 @@
         state.pos_reports_offcanvas = new bootstrap.Offcanvas(document.getElementById('posReportsOffcanvas'));
         state.product_picker_modal = new bootstrap.Modal(document.getElementById('productPickerModal'));
         state.add_customer_modal = new bootstrap.Modal(document.getElementById('addCustomerModal'));
+        if ($('#changeBranchModal').length) {
+            state.change_branch_modal = new bootstrap.Modal(document.getElementById('changeBranchModal'));
+        }
 
         renderPaymentMethodTiles();
+        selectDefaultPaymentMethod();
         bootstrapSession();
         wireEvents();
     });
@@ -208,13 +218,16 @@
             }
         });
 
-        $('#productPickerVariation').on('change', function () {
-            renderPickerForSelectedVariation();
+        $('#productPickerGrid').on('click', '.product-card', function () {
+            var idx = $(this).data('idx');
+            var pv = state.picker.variations[idx];
+            if (!pv) return;
+
+            addProductToCart(pv, { image: firstImageOf(state.picker.product) });
+            state.product_picker_modal.hide();
         });
 
-        $('#productPickerAddBtn').on('click', submitProductPicker);
-
-        $('#cartRows').on('input change', '.line-qty, .line-price, .line-discount, .line-unit', function () {
+        $('#cartRows').on('input change', '.line-qty, .line-price, .line-discount', function () {
             var key = $(this).closest('.cart-line').data('key');
             updateLineFromRow(key, $(this).closest('.cart-line'));
         });
@@ -277,11 +290,47 @@
             $select.val($(this).data('value')).trigger('change');
         });
 
-        $('#order_type_id, #order_source_id').on('change', syncPillsFromSelect);
+        $('#order_type_id, #order_source_id, #paymentMethodSelect').on('change', syncPillsFromSelect);
         syncPillsFromSelect();
 
         $('#order_type_id').on('change', updateDeliveryAddressVisibility);
         updateDeliveryAddressVisibility();
+
+        // ---- Change Branch modal (absent entirely for fixed-context roles).
+        // Shared by the Row 1 branch field and the no-session browse screen's
+        // fallback button, so branch switching stays reachable even before a
+        // register session is open. ----
+        if (state.change_branch_modal) {
+            $('.js-change-branch-btn').on('click', function () {
+                state.change_branch_modal.show();
+            });
+
+            $('#changeBranchBusinessId').on('change', function () {
+                var business_id = $(this).val();
+                $('#changeBranchBranchId').html('<option value="">--Select Branch--</option>');
+                $('#changeBranchWarehouseId').html('<option value="">--Select Warehouse--</option>');
+                if (!business_id) return;
+
+                ajaxRequest({ url: url_local + '/admin/pos-screen/context-options/' + business_id })
+                    .then(function (response) {
+                        var data = response.Data;
+                        var branchOptions = '<option value="">--Select Branch--</option>';
+                        (data.branches || []).forEach(function (item) {
+                            branchOptions += '<option value="' + item.branch_id + '">' + escapeHtml(item.name) + '</option>';
+                        });
+                        $('#changeBranchBranchId').html(branchOptions);
+
+                        var warehouseOptions = '<option value="">--Select Warehouse--</option>';
+                        (data.warehouses || []).forEach(function (item) {
+                            warehouseOptions += '<option value="' + item.warehouse_id + '">' + escapeHtml(item.name) + '</option>';
+                        });
+                        $('#changeBranchWarehouseId').html(warehouseOptions);
+                    })
+                    .catch(function (err) {
+                        errorMessage(err.Message || 'Unable to load branches.');
+                    });
+            });
+        }
 
         // ---- Add Customer modal ----
         $('#addCustomerBtn').on('click', function () {
@@ -601,41 +650,24 @@
     // ==============================
     // CART
     // ==============================
-    // overrides (optional): { unit_id, product_variation_unit_conversion_id, quantity }
-    // - set by the product picker modal (openProductPicker()/submitProductPicker())
-    // when a cashier explicitly chose a non-default unit and/or a decimal
-    // quantity. Every pre-existing call site keeps calling this with no
-    // second argument, so the default (qty 1, sale unit) is unchanged.
+    // overrides (optional): { quantity, image } - POS never offers a unit
+    // choice (see primaryUnitOf()), so every line always uses the
+    // variation's primary (Sale, else Base) unit. Every call site keeps
+    // calling this with no quantity override, so the default (qty 1) is
+    // what's actually used.
     function addProductToCart(pv, overrides) {
         overrides = overrides || {};
 
-        // Sale Unit is what a variation is configured to sell/quantify in;
-        // when it isn't configured, fall back to the Base (stocking) unit -
-        // see primaryUnitOf().
         var primary = primaryUnitOf(pv);
+        var unit_id = primary.unit_id;
 
-        var unit_options = [{
-            unit_id: primary.unit_id,
-            name: primary.name,
-            product_variation_unit_conversion_id: null,
-        }];
-
-        (pv.product_variation_unit_conversion || []).forEach(function (conv) {
-            unit_options.push({
-                unit_id: conv.to_unit_id,
-                name: (conv.to_unit && conv.to_unit.name) ? conv.to_unit.name : ('Alt unit (x' + conv.conversion_factor + ')'),
-                product_variation_unit_conversion_id: conv.product_variation_unit_conversion_id,
-            });
-        });
-
-        var unit_id = overrides.unit_id || primary.unit_id;
-        var conversion_id = overrides.unit_id ? (overrides.product_variation_unit_conversion_id || null) : null;
         var quantity = parseFloat(overrides.quantity);
         if (isNaN(quantity) || quantity <= 0) {
             quantity = 1;
         }
 
-        // Same variation + same unit already in cart -> just bump qty.
+        // Same variation already in cart -> just bump qty (unit is always
+        // the same primary unit now, so no need to match on it too).
         var existing = state.cart.find(function (l) {
             return l.product_variation_id === pv.product_variation_id && l.unit_id === unit_id;
         });
@@ -654,8 +686,7 @@
             product_name: (pv.product && pv.product.name) || '',
             variation_name: pv.name || '',
             unit_id: unit_id,
-            product_variation_unit_conversion_id: conversion_id,
-            unit_options: unit_options,
+            unit_name: primary.name,
             quantity: quantity,
             unit_price: pv.sale_price || 0,
             discount: 0,
@@ -768,7 +799,7 @@
     }
 
     // ==============================
-    // PRODUCT PICKER MODAL (variation / unit / decimal qty)
+    // PRODUCT PICKER MODAL (variation grid - only shown for >1 variation)
     // ==============================
     // source: 'variation' - payload is a single flat pv (from search/scan or
     //         a single-variation grid product)
@@ -791,10 +822,11 @@
             return;
         }
 
-        // Fast path: a single variation with no alternate units skips the
-        // modal entirely and adds directly at qty 1 - identical to the
-        // screen's original one-click behavior for simple products.
-        if (variations.length === 1 && !(variations[0].product_variation_unit_conversion || []).length) {
+        // Purely variation-count driven: exactly one variation always
+        // direct-adds at qty 1 - unit conversions are no longer a factor
+        // (POS never offers a unit choice, see primaryUnitOf()/
+        // addProductToCart()). More than one variation opens the picker.
+        if (variations.length === 1) {
             addProductToCart(variations[0], { image: firstImageOf(product) });
             return;
         }
@@ -802,74 +834,42 @@
         state.picker.product = product;
         state.picker.variations = variations;
 
-        var $variationSelect = $('#productPickerVariation');
-        $variationSelect.empty();
-
-        variations.forEach(function (v, idx) {
-            $variationSelect.append('<option value="' + idx + '">' + escapeHtml(v.name || product.name || 'Variation') + '</option>');
-        });
-
-        $('#productPickerVariationWrap').toggleClass('d-none', variations.length <= 1);
-        $('#productPickerQty').val(1);
-        $variationSelect.val(0);
-
-        renderPickerForSelectedVariation();
+        $('#productPickerTitle').text('Select a variation for ' + (product.name || ''));
+        renderVariationPickerGrid(product, variations);
 
         state.product_picker_modal.show();
     }
 
-    function renderPickerForSelectedVariation() {
-        var idx = parseInt($('#productPickerVariation').val(), 10) || 0;
-        var pv = state.picker.variations[idx];
-        if (!pv) return;
+    // Renders each variation as a card in the same visual style as the main
+    // product grid (see renderProductGrid()) - clicking a card adds that
+    // variation immediately at qty 1 and closes the modal.
+    function renderVariationPickerGrid(product, variations) {
+        var $grid = $('#productPickerGrid');
+        $grid.empty();
 
-        var product = state.picker.product || {};
-        var image = (product.product_images && product.product_images[0] && product.product_images[0].image_url) || null;
+        var image = firstImageOf(product);
+        var imgHtml = image
+            ? '<img class="product-card-img" src="' + image + '" alt="">'
+            : '<div class="product-card-img d-flex align-items-center justify-content-center text-muted"><i class="fa fa-image"></i></div>';
 
-        $('#productPickerTitle').text(product.name || pv.name || 'Select Options');
-        $('#productPickerImage').attr('src', image || '').toggle(!!image);
-        $('#productPickerName').text(pv.name || product.name || '');
-        $('#productPickerSku').text(pv.sku || '');
-        $('#productPickerPrice').text(money(pv.sale_price) + (pv.sale_unit ? ' / ' + pv.sale_unit.name : ''));
+        variations.forEach(function (pv, idx) {
+            var unitName = primaryUnitOf(pv).name;
 
-        var primary = primaryUnitOf(pv);
-        var unitOptionsHtml = '<option value="' + primary.unit_id + '" data-conv="">' +
-            escapeHtml(primary.name) + '</option>';
+            var $card = $('<div class="product-card"></div>').data('idx', idx);
+            $card.html(
+                '<div class="product-card-img-wrap">' + imgHtml + '</div>' +
+                '<div class="product-card-body">' +
+                    '<div class="product-card-name">' + escapeHtml(pv.name || product.name || '') + '</div>' +
+                    (pv.sku ? '<div class="product-card-sku">' + escapeHtml(pv.sku) + '</div>' : '') +
+                    '<div class="product-card-footer">' +
+                        '<span class="product-card-price">' + money(pv.sale_price) + '</span>' +
+                        '<span class="product-card-unit">' + escapeHtml(unitName) + '</span>' +
+                    '</div>' +
+                '</div>'
+            );
 
-        (pv.product_variation_unit_conversion || []).forEach(function (conv) {
-            var name = (conv.to_unit && conv.to_unit.name) ? conv.to_unit.name : ('Alt unit (x' + conv.conversion_factor + ')');
-            unitOptionsHtml += '<option value="' + conv.to_unit_id + '" data-conv="' + conv.product_variation_unit_conversion_id + '">' +
-                escapeHtml(name) + '</option>';
+            $grid.append($card);
         });
-
-        var $unitSelect = $('#productPickerUnit');
-        $unitSelect.html(unitOptionsHtml);
-        $('#productPickerUnitWrap').toggleClass('d-none', !(pv.product_variation_unit_conversion || []).length);
-    }
-
-    function submitProductPicker() {
-        var idx = parseInt($('#productPickerVariation').val(), 10) || 0;
-        var pv = state.picker.variations[idx];
-        if (!pv) return;
-
-        var $unitSelect = $('#productPickerUnit');
-        var unit_id = $unitSelect.val();
-        var conversion_id = $unitSelect.find(':selected').data('conv') || null;
-        var quantity = parseFloat($('#productPickerQty').val());
-
-        if (isNaN(quantity) || quantity <= 0) {
-            errorMessage('Please enter a valid quantity.');
-            return;
-        }
-
-        addProductToCart(pv, {
-            unit_id: unit_id,
-            product_variation_unit_conversion_id: conversion_id,
-            quantity: quantity,
-            image: firstImageOf(state.picker.product),
-        });
-
-        state.product_picker_modal.hide();
     }
 
     function renderCart() {
@@ -894,15 +894,7 @@
         }
 
         state.cart.forEach(function (line) {
-            var unitOptionsHtml = line.unit_options.map(function (u) {
-                return '<option value="' + u.unit_id + '" data-conv="' + (u.product_variation_unit_conversion_id || '') + '"' +
-                    (u.unit_id === line.unit_id ? ' selected' : '') + '>' + escapeHtml(u.name) + '</option>';
-            }).join('');
-
-            var unitCell = line.unit_options.length > 1
-                ? '<select class="line-unit">' + unitOptionsHtml + '</select>'
-                : '<span class="text-muted">' + escapeHtml(line.unit_options[0] ? line.unit_options[0].name : '') + '</span>' +
-                    '<select class="line-unit d-none">' + unitOptionsHtml + '</select>';
+            var unitCell = '<span class="text-muted">' + escapeHtml(line.unit_name || '') + '</span>';
 
             var priceCell = can('order.price.change')
                 ? '<input type="number" step="0.01" min="0" class="line-price" value="' + line.unit_price + '">'
@@ -964,10 +956,6 @@
         if ($discountInput.length) {
             line.discount = parseFloat($discountInput.val()) || 0;
         }
-
-        var $unitSelect = $row.find('.line-unit');
-        line.unit_id = $unitSelect.val();
-        line.product_variation_unit_conversion_id = $unitSelect.find(':selected').data('conv') || null;
 
         recalcLocal();
     }
@@ -1076,11 +1064,34 @@
             return m.type !== 'credit' || can('order.payment.credit');
         });
 
+        // Visible badge-style selector mirrors the Order Type pills - the
+        // hidden <select> above stays the source of truth the rest of the
+        // payment logic (selectPaymentTile/activatePaymentUI/etc) reads from.
+        var $pills = $('#paymentMethodPills').empty();
+
         methods.forEach(function (m) {
             $select.append('<option value="' + m.payment_method_id + '">' + escapeHtml(m.name) + '</option>');
+            $pills.append('<button type="button" class="pos-pill" data-value="' + m.payment_method_id + '">' + escapeHtml(m.name) + '</button>');
         });
 
         $select.append('<option value="' + MULTI_PAY_VALUE + '">Multi Pay (Split)</option>');
+        $pills.append('<button type="button" class="pos-pill" data-value="' + MULTI_PAY_VALUE + '">Multi Pay</button>');
+    }
+
+    // Cash is the default tender for a fresh sale (opening the POS or
+    // starting a new order after completing/resetting one) - cashiers pay
+    // in cash far more often than any other method, so this saves a tap.
+    function selectDefaultPaymentMethod() {
+        var methods = (CFG.payment_methods || []).filter(function (m) {
+            return m.type !== 'credit' || can('order.payment.credit');
+        });
+        var cash = methods.find(function (m) { return m.type === 'cash'; }) || methods[0];
+
+        if (cash) {
+            selectPaymentTile(cash.payment_method_id, false);
+        } else {
+            resetPaymentSelection();
+        }
     }
 
     // User picked a payment method from the dropdown - starts a fresh
@@ -1117,6 +1128,7 @@
         $('#multiPaymentBlock').toggleClass('d-none', !isMulti);
         $('#singlePaymentBlock').toggleClass('d-none', !!isMulti);
         updateCreditCustomerSummary();
+        syncPillsFromSelect();
     }
 
     function resetPaymentSelection() {
@@ -1127,6 +1139,7 @@
         $('#singlePaymentBlock').removeClass('d-none');
         $('#paidAmountInput').val('');
         $('#creditCustomerSummary').addClass('d-none');
+        syncPillsFromSelect();
     }
 
     function updateCreditCustomerSummary() {
@@ -1523,8 +1536,7 @@
                 product_name: d.product_name || '',
                 variation_name: d.product_variation_name || '',
                 unit_id: d.unit_id,
-                product_variation_unit_conversion_id: null,
-                unit_options: [{ unit_id: d.unit_id, name: d.unit_name || 'Unit', product_variation_unit_conversion_id: null }],
+                unit_name: d.unit_name || 'Unit',
                 quantity: d.quantity,
                 unit_price: d.unit_price,
                 discount: d.discount,
@@ -1645,7 +1657,7 @@
         $('#delivery_address').val('');
         renderCart();
         renderPayments();
-        resetPaymentSelection();
+        selectDefaultPaymentMethod();
     }
 
     function resetScreenState() {

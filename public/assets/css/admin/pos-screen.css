@@ -1,9 +1,12 @@
 /* ==========================================================================
    POS Screen - single-screen, non-scroll layout
-   Header (pos-header.blade.php) + Toolbar (customer/search/order meta) +
-   Category rail (left) + Product grid (center) + Cart/checkout (right).
-   The page itself never scrolls (see layouts/pos.blade.php); every panel
-   below owns its own internal scroll region.
+   Header (pos-header.blade.php) + an 8/4 column split: left column stacks
+   Search/Order Type/Branch, Categories/Products, and Customer/Delivery/
+   Discount/Voucher/Payment Method; right column stacks Cart and Totals.
+   A sticky footer (Paid Amount / Due-Change / Hold & Pay) always stays on
+   screen. The page itself never scrolls (see layouts/pos.blade.php) - only
+   the product grid and the cart list own their own internal scroll region,
+   so every essential control stays reachable at 100% browser zoom.
    ========================================================================== */
 
 :root {
@@ -145,20 +148,16 @@
 }
 
 /* ============================================================
-   Screen wrapper / toolbar
+   Screen wrapper
    ============================================================ */
 .pos-screen-wrapper {
     height: 100%;
-    padding: 0.5rem;
+    padding: 0.55rem clamp(0.55rem, 1vw, 0.85rem);
     display: flex;
     flex-direction: column;
-    gap: 0.45rem;
+    gap: 0.5rem;
     box-sizing: border-box;
     background: var(--pos-bg);
-}
-
-.pos-context-switch {
-    flex: 0 0 auto;
 }
 
 #posNoSessionArea {
@@ -177,35 +176,140 @@
     min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.5rem;
 }
 
-.pos-toolbar {
+/* ============================================================
+   Two-panel layout: 8-column left / 4-column right
+   ============================================================ */
+.pos-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+    gap: 0.55rem;
+}
+
+.pos-left-col,
+.pos-right-col {
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.pos-row {
     flex: 0 0 auto;
+}
+
+/* Shared field building block (label + control) so every control across
+   Row 1 and Row 3 - search box, pill group, select, input - reads as one
+   consistent compact form language. */
+.pos-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    position: relative;
+    min-width: 0;
+}
+
+.pos-field-label {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--pos-muted);
+    font-weight: 700;
+}
+
+/* ============================================================
+   Row 1 - Search Product / Order Type / Branch
+   ============================================================ */
+.pos-row-top {
     display: flex;
     align-items: flex-start;
     gap: 0.6rem;
     background: #fff;
-    border-radius: 0.6rem;
+    border-radius: 0.7rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
-    padding: 0.35rem 0.75rem;
+    padding: 0.55rem 0.7rem;
 }
 
-.pos-toolbar-zone {
+.pos-field-search {
+    flex: 1 1 40%;
+    min-width: 200px;
+}
+
+.pos-field-ordertype,
+.pos-field-branch {
+    flex: 0 0 auto;
+}
+
+.pos-pill-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    height: 36px;
+}
+
+.pos-pill {
+    border: 1px solid var(--pos-border);
+    background: #fff;
+    color: var(--pos-text);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.32rem 0.65rem;
+    border-radius: 1rem;
+    white-space: nowrap;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.pos-pill:hover {
+    border-color: var(--pos-primary);
+}
+
+.pos-pill.active {
+    background: var(--pos-primary);
+    border-color: var(--pos-primary);
+    color: #fff;
+}
+
+.pos-branch-switch {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    position: relative;
+    height: 36px;
 }
 
-.pos-toolbar-search {
-    flex: 1 1 auto;
-    min-width: 220px;
-    flex-direction: column;
-    align-items: stretch;
+.pos-branch-current,
+.pos-branch-static {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--pos-text);
+    white-space: nowrap;
+    background: var(--pos-bg);
+    border: 1px solid var(--pos-border);
+    border-radius: 0.6rem;
+    padding: 0.4rem 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 100%;
+    box-sizing: border-box;
 }
 
-/* ============ Customer / Order Details (relocated into cart column) ============ */
+.pos-branch-switch #changeBranchBtn.pos-header-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.6rem;
+}
+
+/* ============ Customer / Payment fields (Row 3) ============ */
 .pos-customer-row {
     display: flex;
     align-items: center;
@@ -253,50 +357,101 @@
     color: #fff;
 }
 
-#creditLimitHint {
+/* Floating hint/summary panels anchored to a .pos-field (position:relative)
+   - they open upward (bottom: 100%) since Row 3 sits directly above the
+   sticky footer, so a downward dropdown would cover Hold & Pay. */
+.pos-field-floating-hint {
+    position: absolute;
+    bottom: calc(100% + 0.3rem);
+    left: 0;
+    z-index: 25;
+    background: #fff8e6;
+    border: 1px solid #ffe4a8;
+    color: #8a5a00;
     font-size: 0.68rem;
-    margin-top: 0.15rem;
-}
-
-.pos-order-meta-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 0.6rem 1rem;
-    margin-top: 0.4rem;
-}
-
-.pos-delivery-row {
-    margin-top: 0.4rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.pos-delivery-row .form-label {
-    flex: 0 0 auto;
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    color: var(--pos-muted);
     font-weight: 600;
+    border-radius: 0.4rem;
+    padding: 0.25rem 0.55rem;
     white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
 }
 
-.pos-delivery-row .form-control {
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
-/* Discount + Voucher share one row to save vertical space. */
-.pos-discount-voucher-row {
+.pos-row-meta {
     display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    background: #fff;
+    border-radius: 0.7rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+    padding: 0.5rem 0.65rem;
+}
+
+.pos-meta-row {
+    display: flex;
+    align-items: flex-start;
     gap: 0.6rem;
 }
 
-.pos-discount-voucher-row > div {
-    flex: 1 1 50%;
+.pos-meta-row .pos-field {
+    flex: 1 1 0;
     min-width: 0;
+}
+
+.pos-row-meta .form-select,
+.pos-row-meta .form-control {
+    font-size: 0.8rem;
+    height: 34px;
+}
+
+.pos-field-voucher .input-group .form-control,
+.pos-field-voucher .input-group .btn {
+    height: 34px;
+    font-size: 0.78rem;
+}
+
+.pos-field-payment {
+    position: relative;
+}
+
+/* Payment Method reuses the Order Type pill/badge look (.pos-pill-group /
+   .pos-pill) but allows wrapping to more than one line without a fixed
+   36px box, since the method list is business-configurable and can run
+   longer than the fixed Order Type set. */
+.pos-payment-pills {
+    height: auto;
+    min-height: 34px;
+}
+
+/* Hidden by default - only surfaces (via :has()) once there's something to
+   show, i.e. Multi Pay split rows or a credit-customer summary, so it never
+   sits on top of the Voucher field for the common single-payment case. */
+.pos-payment-extra {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 0.4rem);
+    right: 0;
+    width: 320px;
+    max-width: 90vw;
+    z-index: 25;
+    background: #fff;
+    border-radius: 0.6rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .16);
+    padding: 0.6rem 0.7rem;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.pos-payment-extra:has(#multiPaymentBlock:not(.d-none)),
+.pos-payment-extra:has(#creditCustomerSummary:not(.d-none)) {
+    display: flex;
+}
+
+.pos-payment-extra-summary {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.76rem;
+    color: var(--pos-muted);
+    font-variant-numeric: tabular-nums;
 }
 
 .pos-search-input-wrap {
@@ -365,82 +520,50 @@
     border: 1px solid var(--pos-border);
 }
 
-.pos-pill-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.pos-pill-group-label {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    color: var(--pos-muted);
-    font-weight: 600;
-}
-
-.pos-pill-buttons {
-    display: flex;
-    gap: 0.3rem;
-    flex-wrap: wrap;
-}
-
-.pos-pill {
-    border: 1px solid var(--pos-border);
-    background: #fff;
-    color: var(--pos-text);
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding: 0.22rem 0.6rem;
-    border-radius: 1rem;
-    white-space: nowrap;
-    transition: background .15s ease, color .15s ease, border-color .15s ease;
-}
-
-.pos-pill:hover {
-    border-color: var(--pos-primary);
-}
-
-.pos-pill.active {
-    background: var(--pos-primary);
-    border-color: var(--pos-primary);
-    color: #fff;
-}
-
 /* ============================================================
-   Main row: category rail + product grid + cart
+   Row 2 - Categories (stretches the full row height, down to the
+   sticky footer) + a Products/Checkout column (Products panel above,
+   Customer/Delivery/Discount/Voucher/Payment Method below)
    ============================================================ */
-.pos-main-row {
+.pos-row-products {
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
-    gap: 0.6rem;
+    gap: 0.55rem;
 }
 
-/* ============ Category Rail ============ */
 .pos-category-rail {
-    flex: 0 0 190px;
-    width: 190px;
+    flex: 0 0 138px;
+    width: 138px;
     overflow-y: auto;
     background: #fff;
-    border-radius: 0.6rem;
+    border-radius: 0.7rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
     padding: 0.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.22rem;
+}
+
+.pos-main-col {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .category-rail-item {
     display: flex;
     align-items: center;
-    gap: 0.55rem;
+    gap: 0.5rem;
     border: none;
     background: transparent;
     text-align: left;
-    padding: 0.5rem 0.6rem;
-    border-radius: 0.6rem;
-    font-size: 0.83rem;
+    padding: 0.45rem 0.5rem;
+    border-radius: 0.55rem;
+    font-size: 0.78rem;
     font-weight: 500;
     color: #566a7f;
     transition: background .15s ease, color .15s ease;
@@ -457,16 +580,16 @@
 }
 
 .category-rail-icon {
-    flex: 0 0 28px;
-    width: 28px;
-    height: 28px;
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #f5f5f9;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: var(--pos-primary);
 }
 
@@ -491,6 +614,7 @@
 .pos-product-panel {
     flex: 1 1 auto;
     min-width: 0;
+    min-height: 0;
     display: flex;
     flex-direction: column;
 }
@@ -500,9 +624,9 @@
     min-height: 0;
     overflow-y: auto;
     background: #fff;
-    border-radius: 0.6rem;
+    border-radius: 0.7rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
-    padding: 0.7rem;
+    padding: 0.6rem;
 }
 
 .pos-empty-state {
@@ -516,8 +640,8 @@
 
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 0.55rem;
+    grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+    gap: 0.5rem;
 }
 
 .product-card {
@@ -540,7 +664,7 @@
 .product-card-img-wrap {
     position: relative;
     width: 100%;
-    height: 68px;
+    height: 62px;
     background: #f5f5f9;
 }
 
@@ -555,23 +679,23 @@
     position: absolute;
     top: 0.3rem;
     right: 0.3rem;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     color: #fff;
     background: rgba(105, 108, 255, .9);
     border-radius: 1rem;
-    padding: 0.05rem 0.45rem;
+    padding: 0.05rem 0.4rem;
 }
 
 .product-card-body {
-    padding: 0.4rem 0.5rem;
+    padding: 0.35rem 0.45rem;
     display: flex;
     flex-direction: column;
-    gap: 0.1rem;
+    gap: 0.08rem;
     position: relative;
 }
 
 .product-card-name {
-    font-size: 0.74rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: var(--pos-text);
     overflow: hidden;
@@ -579,12 +703,12 @@
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    min-height: 1.9em;
-    padding-right: 1.3rem;
+    min-height: 1.85em;
+    padding-right: 1.2rem;
 }
 
 .product-card-sku {
-    font-size: 0.64rem;
+    font-size: 0.62rem;
     color: var(--pos-muted);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -595,56 +719,47 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 0.2rem;
+    margin-top: 0.15rem;
 }
 
 .product-card-price {
     font-weight: 700;
     color: var(--pos-primary);
-    font-size: 0.76rem;
+    font-size: 0.74rem;
 }
 
 .product-card-unit {
-    font-size: 0.62rem;
+    font-size: 0.6rem;
     color: var(--pos-muted);
 }
 
 .product-card-add-btn {
     position: absolute;
-    top: -1.25rem;
-    right: 0.4rem;
-    width: 22px;
-    height: 22px;
+    top: -1.2rem;
+    right: 0.35rem;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background: var(--pos-primary);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     box-shadow: 0 4px 10px rgba(105, 108, 255, .45);
     pointer-events: none;
 }
 
-/* ============ Cart / Checkout Panel ============ */
-.pos-cart-panel {
-    flex: 0 0 520px;
-    width: 520px;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.pos-cart-table-wrap {
+/* ============================================================
+   Right column - Cart card
+   ============================================================ */
+.pos-cart-card {
     flex: 1 1 auto;
-    /* header (~44px) + 4 cart rows (~55px each) so at least 4 products are
-       visible before .pos-cart-scroll needs to scroll for more. */
-    min-height: 260px;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     background: #fff;
-    border-radius: 0.6rem;
+    border-radius: 0.7rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
     overflow: hidden;
 }
@@ -654,7 +769,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.65rem 0.85rem;
+    padding: 0.6rem 0.8rem;
     border-bottom: 1px solid var(--pos-border);
     background: var(--pos-primary);
     color: #fff;
@@ -694,8 +809,9 @@
 
 .pos-cart-scroll {
     flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
-    padding: 0.5rem;
+    padding: 0.45rem;
 }
 
 .pos-cart-empty {
@@ -703,7 +819,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2.5rem 1rem;
+    padding: 2rem 1rem;
     text-align: center;
 }
 
@@ -713,10 +829,10 @@
    never shifts the columns after it. */
 .cart-line {
     display: grid;
-    grid-template-columns: 36px 1fr 58px 64px 92px 52px 22px;
+    grid-template-columns: 34px 1fr 56px 60px 88px 50px 20px;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.35rem;
+    gap: 0.45rem;
+    padding: 0.45rem 0.3rem;
     border-radius: 0.5rem;
     border-bottom: 1px solid #f0f0f3;
 }
@@ -726,8 +842,8 @@
 }
 
 .cart-line-img {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 0.4rem;
     object-fit: cover;
     background: #f5f5f9;
@@ -735,8 +851,8 @@
 }
 
 .cart-line-img-placeholder {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 0.4rem;
     background: #f5f5f9;
     color: var(--pos-muted);
@@ -752,7 +868,7 @@
 }
 
 .cart-line-name {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 600;
     color: var(--pos-text);
     overflow: hidden;
@@ -764,31 +880,22 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     color: var(--pos-muted);
-}
-
-.cart-line-meta .line-unit {
-    font-size: 0.7rem;
-    padding: 0.05rem 0.3rem;
-    border-radius: 0.3rem;
-    border: 1px solid var(--pos-border);
-    background: #fff;
-    max-width: 100px;
 }
 
 .cart-line-price {
     grid-column: 3;
-    font-size: 0.76rem;
+    font-size: 0.74rem;
     color: var(--pos-muted);
     text-align: right;
     min-width: 0;
 }
 
 .cart-line-price input.line-price {
-    width: 56px;
+    width: 54px;
     height: 24px;
-    font-size: 0.74rem;
+    font-size: 0.72rem;
     text-align: right;
     padding: 0 0.3rem;
 }
@@ -801,14 +908,14 @@
     align-items: center;
     justify-content: flex-end;
     gap: 0.2rem;
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     color: var(--pos-muted);
 }
 
 .cart-line-discount .line-discount {
-    width: 42px;
+    width: 40px;
     height: 24px;
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     padding: 0 0.25rem;
 }
 
@@ -821,8 +928,8 @@
 
 .qty-dec,
 .qty-inc {
-    width: 20px;
-    height: 20px;
+    width: 19px;
+    height: 19px;
     border-radius: 50%;
     border: 1px solid var(--pos-border);
     background: #fff;
@@ -830,7 +937,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     line-height: 1;
     padding: 0;
     flex: 0 0 auto;
@@ -844,10 +951,10 @@
 }
 
 .cart-line-qty-stepper input.line-qty {
-    width: 38px;
-    height: 20px;
+    width: 34px;
+    height: 19px;
     text-align: center;
-    font-size: 0.74rem;
+    font-size: 0.72rem;
     padding: 0 0.1rem;
 }
 
@@ -855,16 +962,17 @@
     grid-column: 6;
     justify-self: end;
     font-weight: 700;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--pos-text);
     margin-right: 0.1rem;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
 .line-remove {
     grid-column: 7;
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     border: none;
     background: rgba(255, 62, 29, .1);
@@ -872,7 +980,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.68rem;
+    font-size: 0.64rem;
     padding: 0;
     justify-self: end;
 }
@@ -882,71 +990,41 @@
     color: #fff;
 }
 
-.pos-cart-footer {
+/* ============================================================
+   Right column - Totals card (Subtotal / Discount / Tax / Total)
+   ============================================================ */
+.pos-totals-card {
     flex: 0 0 auto;
-    /* Only the cart list (.pos-cart-scroll) and the products/categories
-       panels scroll - the footer (customer/order details, discount/voucher,
-       totals, payment, hold/pay) must always be a fixed, non-scrolling
-       block that fits the remaining column height. */
     background: #fff;
-    border-radius: 0.6rem;
+    border-radius: 0.7rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
-    padding: 0.4rem 0.7rem;
+    padding: 0.55rem 0.75rem;
     display: flex;
     flex-direction: column;
+    gap: 0.28rem;
 }
 
-.pos-footer-row {
-    flex: 0 0 auto;
-}
-
-/* Row separators carry all the spacing between rows (no extra flex `gap` -
-   that would double up with this padding/border and waste vertical space
-   the fixed, non-scrolling footer can't spare). */
-.pos-footer-row+.pos-footer-row {
-    padding-top: 0.3rem;
-    border-top: 1px solid #f0f0f3;
-}
-
-.pos-totals span:last-child {
-    font-variant-numeric: tabular-nums;
-}
-
-/* Tighter than Bootstrap's default .mb-1/.my-1 (which the totals rows use
-   for markup simplicity) so 3 summary rows + the grand total still fit
-   comfortably in the fixed (non-scrolling) footer. */
-.pos-totals .mb-1 {
-    margin-bottom: 0.15rem;
-}
-
-.pos-totals hr.my-1 {
-    margin: 0.2rem 0;
-}
-
-.pos-grand-total {
-    font-weight: 800;
-    font-size: 1.05rem;
+.pos-totals-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
     color: var(--pos-text);
 }
 
-.pos-grand-total span:last-child {
+.pos-totals-row span:last-child {
+    font-variant-numeric: tabular-nums;
+}
+
+.pos-totals-row.pos-grand-total {
+    margin-top: 0.15rem;
+    padding-top: 0.4rem;
+    border-top: 1px dashed var(--pos-border);
+    font-weight: 800;
+    font-size: 1.05rem;
+}
+
+.pos-totals-row.pos-grand-total span:last-child {
     color: var(--pos-primary);
-}
-
-/* Payment method - compact select + paid amount, one row */
-.pos-payment-compact-row {
-    display: flex;
-    gap: 0.4rem;
-    margin-bottom: 0.4rem;
-}
-
-.pos-payment-compact-row #paymentMethodSelect {
-    flex: 1 1 55%;
-}
-
-.pos-payment-compact-row #paidAmountInput {
-    flex: 1 1 45%;
-    font-weight: 700;
 }
 
 .pos-credit-summary {
@@ -955,38 +1033,74 @@
     border-radius: 0.5rem;
     padding: 0.4rem 0.6rem;
     font-size: 0.74rem;
-    margin-top: 0.4rem;
 }
 
 .pos-credit-summary a {
     font-weight: 600;
 }
 
-.pos-payment-summary {
-    margin-top: 0.25rem;
-    padding-top: 0.25rem;
-    border-top: 1px dashed var(--pos-border);
-}
-
-.pos-payment-summary .mb-1 {
-    margin-bottom: 0.1rem;
-}
-
-.pos-change-row {
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: var(--pos-success);
-}
-
 .payment-row .form-select,
 .payment-row .form-control {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
 }
 
-.pos-action-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1.4fr;
-    gap: 0.5rem;
+/* ============================================================
+   Sticky footer - Paid Amount / Due-Change / Hold & Pay
+   ============================================================ */
+.pos-sticky-footer {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: #fff;
+    border-radius: 0.7rem;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, .08);
+    padding: 0.55rem 0.85rem;
+}
+
+.pos-footer-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.pos-footer-field label {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--pos-muted);
+    font-weight: 700;
+    margin: 0;
+}
+
+.pos-footer-paid {
+    flex: 0 0 190px;
+}
+
+.pos-footer-paid .form-control {
+    height: 38px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border-radius: 0.55rem;
+}
+
+.pos-footer-due {
+    flex: 0 0 auto;
+    min-width: 150px;
+}
+
+.pos-footer-due-value {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--pos-success);
+    font-variant-numeric: tabular-nums;
+}
+
+.pos-footer-actions {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.55rem;
 }
 
 .pos-hold-btn {
@@ -995,7 +1109,7 @@
     border: 1px solid #ffddac;
     font-weight: 700;
     border-radius: 0.6rem;
-    padding: 0.4rem;
+    padding: 0.5rem 1.1rem;
 }
 
 .pos-hold-btn:hover {
@@ -1009,7 +1123,8 @@
     font-weight: 700;
     font-size: 1.02rem;
     border-radius: 0.6rem;
-    padding: 0.4rem;
+    padding: 0.5rem 2rem;
+    box-shadow: 0 6px 16px rgba(113, 221, 55, .35);
 }
 
 .pos-pay-btn:hover {
@@ -1018,48 +1133,37 @@
 }
 
 .pos-key-hint {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 500;
     opacity: .75;
 }
 
 /* ============ Product Picker Modal ============ */
-.product-picker-summary {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.product-picker-img {
-    width: 64px;
-    height: 64px;
-    object-fit: cover;
-    border-radius: 0.4rem;
-    background: #f5f5f9;
-    flex: 0 0 64px;
+/* Layers on top of the .product-grid base class already applied in the
+   markup - just constrains the grid to the modal's available height. */
+.product-picker-grid {
+    grid-template-columns: repeat(4, 1fr);
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 0.25rem;
 }
 
 /* ============ Responsive ============ */
 @media (max-width: 1399.98px) {
-    .product-grid {
-        grid-template-columns: repeat(5, 1fr);
+    .pos-layout {
+        grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
     }
 }
 
 @media (max-width: 1199.98px) {
     .pos-category-rail {
-        flex-basis: 150px;
-        width: 150px;
+        flex-basis: 116px;
+        width: 116px;
     }
 
-    .pos-cart-panel {
-        flex-basis: 420px;
-        width: 420px;
-    }
-
-    .product-grid {
-        grid-template-columns: repeat(4, 1fr);
+    .pos-row-top,
+    .pos-meta-row {
+        flex-wrap: wrap;
     }
 }
 
@@ -1074,7 +1178,11 @@
         height: auto;
     }
 
-    .pos-main-row {
+    .pos-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .pos-row-products {
         flex-direction: column;
     }
 
@@ -1090,26 +1198,30 @@
         flex: 0 0 auto;
     }
 
-    .pos-cart-panel {
-        flex-basis: auto;
-        width: 100%;
-    }
-
-    .pos-cart-table-wrap {
-        min-height: 220px;
+    .pos-cart-card {
+        min-height: 260px;
     }
 
     .product-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 
-    .pos-toolbar {
+    .pos-row-top,
+    .pos-meta-row {
         flex-direction: column;
+        align-items: stretch;
     }
 
-    .pos-toolbar-search {
-        width: 100%;
-        min-width: 0;
+    .pos-sticky-footer {
+        flex-wrap: wrap;
+    }
+
+    .pos-footer-actions {
+        justify-content: stretch;
+    }
+
+    .pos-footer-actions .btn {
+        flex: 1 1 auto;
     }
 }
 
