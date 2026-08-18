@@ -41,6 +41,12 @@ class LoginController extends Controller
         RoleNames::POSMANAGER,
     ];
 
+    // Employee accounts land on the Employee Self-Service dashboard instead
+    // of the Admin dashboard - mirrors $pos_only_roles below.
+    protected $ess_only_roles = [
+        RoleNames::EMPLOYEE,
+    ];
+
     /**
      * Create a new controller instance.
      *
@@ -68,6 +74,10 @@ class LoginController extends Controller
 
         if (in_array($role, $this->pos_only_roles, true) && $user->can('pos.access')) {
             return redirect()->route('pos-screen');
+        }
+
+        if (in_array($role, $this->ess_only_roles, true) && $user->can('ess.dashboard.view')) {
+            return redirect()->route('ess.dashboard');
         }
 
         return null;

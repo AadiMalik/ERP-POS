@@ -125,9 +125,19 @@ class RoleDefaultPermissions
 
             case RoleNames::HRMANAGER:
                 return array_merge(
-                    PermissionRegistry::namesForModules(['user']),
+                    PermissionRegistry::namesForModules([
+                        'user',
+                        'department', 'designation', 'shift', 'employee', 'attendance',
+                        'leave-type', 'leave-request', 'salary-component', 'salary-structure',
+                        'payroll', 'payslip', 'employee-advance', 'employee-deduction',
+                        'employee-ledger', 'employee-exit', 'employee-clearance',
+                        'asset', 'asset-allocation',
+                    ]),
                     ['dashboard.view', 'branch.view']
                 );
+
+            case RoleNames::EMPLOYEE:
+                return PermissionRegistry::namesForModules(['ess']);
 
             case RoleNames::REPORTINGANALYST:
                 return array_merge(

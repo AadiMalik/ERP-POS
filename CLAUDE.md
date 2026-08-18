@@ -109,3 +109,18 @@ You are a Senior Software Engineer.
   every run via `RoleDefaultPermissions`. Do not rely on manually editing those two
   roles for a one-off restriction — clone them into a business-scoped custom role
   instead via the Role Create screen.
+- This applies to every new CRUD without exception — including HRM & Payroll
+  modules (Employees, Departments, Designations, Shifts, Attendance, Leaves,
+  Salary Structure, Payroll, Payslips, Employee Advances, Deductions, Employee
+  Ledger, Resignation/Termination, Clearance, Asset Allocation) and their
+  Employee Self-Service (`ess.*`) counterparts under
+  `app/Http/Controllers/Admin/Hrm/`. Follow the existing HRM module blocks in
+  `PermissionRegistry` as the template for any new HR/Payroll screen.
+- Subscription-package-tier gating (a whole module only available on certain
+  packages, e.g. `is_hrm_enabled`/`is_payroll_enabled` on `Package`) is enforced
+  via the `module:<key>` route-group middleware (`App\Http\Middleware\EnsureModuleEnabled`,
+  backed by `FeatureLimitService::hasModule()`) wrapped around that module's
+  routes in `routes/web.php` — see the `module:hrm` / `module:payroll` groups.
+  This is separate from and in addition to per-action `permission:` middleware;
+  never put package-tier checks inline in a controller constructor (it runs
+  during CLI route introspection too, before any authenticated user exists).

@@ -22,7 +22,7 @@ Auth::routes(['register' => false]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix' => 'admin'], function () {
+Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-change-password'], 'prefix' => 'admin'], function () {
     //permissions
     Route::resource('permissions', App\Http\Controllers\Admin\PermissionController::class);
     Route::group(['prefix' => 'permissions'], function () {
@@ -113,9 +113,125 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::post('/', [App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
         Route::post('password', [App\Http\Controllers\Admin\ProfileController::class, 'updatePassword'])->name('profile.password.update');
     });
+    Route::get('force-password-change', [App\Http\Controllers\Admin\ProfileController::class, 'forceChangeForm'])->name('force-password-change');
 
     //global header search (each result group is gated by that module's own .view permission, not a separate one)
     Route::get('search/global', [App\Http\Controllers\Admin\SearchController::class, 'globalSearch'])->name('search.global');
+
+    ////////////////////// HRM & Payroll ///////////////////////////
+    Route::group(['middleware' => ['module:hrm']], function () {
+    //departments
+    Route::resource('department', App\Http\Controllers\Admin\Hrm\DepartmentController::class);
+    Route::post('department/data', [App\Http\Controllers\Admin\Hrm\DepartmentController::class, 'getData'])->name('department-data');
+    //designations
+    Route::resource('designation', App\Http\Controllers\Admin\Hrm\DesignationController::class);
+    Route::post('designation/data', [App\Http\Controllers\Admin\Hrm\DesignationController::class, 'getData'])->name('designation-data');
+    //shifts
+    Route::resource('shift', App\Http\Controllers\Admin\Hrm\ShiftController::class);
+    Route::post('shift/data', [App\Http\Controllers\Admin\Hrm\ShiftController::class, 'getData'])->name('shift-data');
+    //employees
+    Route::resource('employee', App\Http\Controllers\Admin\Hrm\EmployeeController::class);
+    Route::group(['prefix' => 'employee'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\Hrm\EmployeeController::class, 'getData'])->name('employee-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\Hrm\EmployeeController::class, 'status']);
+        Route::post('{employee_id}/documents', [App\Http\Controllers\Admin\Hrm\EmployeeController::class, 'storeDocument'])->name('employee.documents.store');
+    });
+    Route::delete('employee-document/{employee_document_id}', [App\Http\Controllers\Admin\Hrm\EmployeeController::class, 'destroyDocument']);
+    //attendance
+    Route::get('attendance/report', [App\Http\Controllers\Admin\Hrm\AttendanceController::class, 'report'])->name('attendance.report');
+    Route::resource('attendance', App\Http\Controllers\Admin\Hrm\AttendanceController::class);
+    Route::post('attendance/data', [App\Http\Controllers\Admin\Hrm\AttendanceController::class, 'getData'])->name('attendance-data');
+    //leave types
+    Route::resource('leave-type', App\Http\Controllers\Admin\Hrm\LeaveTypeController::class);
+    Route::post('leave-type/data', [App\Http\Controllers\Admin\Hrm\LeaveTypeController::class, 'getData'])->name('leave-type-data');
+    //leave requests
+    Route::resource('leave-request', App\Http\Controllers\Admin\Hrm\LeaveRequestController::class);
+    Route::post('leave-request/data', [App\Http\Controllers\Admin\Hrm\LeaveRequestController::class, 'getData'])->name('leave-request-data');
+    Route::post('leave-request/{leave_request_id}/decide', [App\Http\Controllers\Admin\Hrm\LeaveRequestController::class, 'decide'])->name('leave-request.decide');
+    //salary components
+    Route::resource('salary-component', App\Http\Controllers\Admin\Hrm\SalaryComponentController::class);
+    Route::post('salary-component/data', [App\Http\Controllers\Admin\Hrm\SalaryComponentController::class, 'getData'])->name('salary-component-data');
+    //salary structures
+    Route::get('salary-structure', [App\Http\Controllers\Admin\Hrm\EmployeeSalaryStructureController::class, 'index'])->name('salary-structure.index');
+    Route::get('salary-structure/{employee_id}', [App\Http\Controllers\Admin\Hrm\EmployeeSalaryStructureController::class, 'manage'])->name('salary-structure.manage');
+    Route::post('salary-structure/{employee_id}', [App\Http\Controllers\Admin\Hrm\EmployeeSalaryStructureController::class, 'store'])->name('salary-structure.store');
+    Route::delete('salary-structure-version/{employee_salary_structure_id}', [App\Http\Controllers\Admin\Hrm\EmployeeSalaryStructureController::class, 'destroy']);
+    //employee advances
+    Route::resource('employee-advance', App\Http\Controllers\Admin\Hrm\EmployeeAdvanceController::class);
+    Route::post('employee-advance/data', [App\Http\Controllers\Admin\Hrm\EmployeeAdvanceController::class, 'getData'])->name('employee-advance-data');
+    Route::post('employee-advance/{employee_advance_id}/decide', [App\Http\Controllers\Admin\Hrm\EmployeeAdvanceController::class, 'decide'])->name('employee-advance.decide');
+    //employee deductions
+    Route::resource('employee-deduction', App\Http\Controllers\Admin\Hrm\EmployeeDeductionController::class);
+    Route::post('employee-deduction/data', [App\Http\Controllers\Admin\Hrm\EmployeeDeductionController::class, 'getData'])->name('employee-deduction-data');
+    //employee ledger
+    Route::get('employee-ledger', [App\Http\Controllers\Admin\Hrm\EmployeeLedgerController::class, 'index'])->name('employee-ledger.index');
+    Route::post('employee-ledger/data', [App\Http\Controllers\Admin\Hrm\EmployeeLedgerController::class, 'getData'])->name('employee-ledger-data');
+    }); // end module:hrm
+
+    Route::group(['middleware' => ['module:payroll']], function () {
+    //payroll
+    Route::get('payroll', [App\Http\Controllers\Admin\Hrm\PayrollController::class, 'index'])->name('payroll.index');
+    Route::post('payroll/data', [App\Http\Controllers\Admin\Hrm\PayrollController::class, 'getData'])->name('payroll-data');
+    Route::get('payroll/create', [App\Http\Controllers\Admin\Hrm\PayrollController::class, 'create'])->name('payroll.create');
+    Route::post('payroll', [App\Http\Controllers\Admin\Hrm\PayrollController::class, 'store'])->name('payroll.store');
+    Route::get('payroll/{payroll_run_id}', [App\Http\Controllers\Admin\Hrm\PayrollController::class, 'show'])->name('payroll.show');
+    Route::post('payroll/{payroll_run_id}/finalize', [App\Http\Controllers\Admin\Hrm\PayrollController::class, 'finalize'])->name('payroll.finalize');
+    Route::post('payroll/{payroll_run_id}/pay', [App\Http\Controllers\Admin\Hrm\PayrollController::class, 'pay'])->name('payroll.pay');
+    Route::post('payroll/{payroll_run_id}/reopen', [App\Http\Controllers\Admin\Hrm\PayrollController::class, 'reopen'])->name('payroll.reopen');
+    //payslips
+    Route::get('payslip/{payslip_id}', [App\Http\Controllers\Admin\Hrm\PayslipController::class, 'show'])->name('payslip.show');
+    Route::get('payslip/{payslip_id}/pdf', [App\Http\Controllers\Admin\Hrm\PayslipController::class, 'pdf'])->name('payslip.pdf');
+    }); // end module:payroll
+
+    Route::group(['middleware' => ['module:hrm']], function () {
+    //resignation / termination + clearance
+    Route::get('employee-exit', [App\Http\Controllers\Admin\Hrm\EmployeeExitController::class, 'index'])->name('employee-exit.index');
+    Route::post('employee-exit/data', [App\Http\Controllers\Admin\Hrm\EmployeeExitController::class, 'getData'])->name('employee-exit-data');
+    Route::get('employee-exit/create', [App\Http\Controllers\Admin\Hrm\EmployeeExitController::class, 'create'])->name('employee-exit.create');
+    Route::post('employee-exit', [App\Http\Controllers\Admin\Hrm\EmployeeExitController::class, 'store'])->name('employee-exit.store');
+    Route::get('employee-exit/{employee_exit_id}', [App\Http\Controllers\Admin\Hrm\EmployeeExitController::class, 'show'])->name('employee-exit.show');
+    Route::post('employee-exit/{employee_exit_id}/decide', [App\Http\Controllers\Admin\Hrm\EmployeeExitController::class, 'decide'])->name('employee-exit.decide');
+    Route::post('employee-exit/{employee_exit_id}/finalize', [App\Http\Controllers\Admin\Hrm\EmployeeExitController::class, 'finalize'])->name('employee-exit.finalize');
+    Route::post('exit-clearance/{exit_clearance_id}/decide', [App\Http\Controllers\Admin\Hrm\EmployeeExitController::class, 'clear'])->name('exit-clearance.decide');
+    //assets
+    Route::resource('asset', App\Http\Controllers\Admin\Hrm\AssetController::class);
+    Route::post('asset/data', [App\Http\Controllers\Admin\Hrm\AssetController::class, 'getData'])->name('asset-data');
+    Route::post('asset/change-status/{id}', [App\Http\Controllers\Admin\Hrm\AssetController::class, 'status']);
+    //asset allocation
+    Route::get('asset-allocation', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'index'])->name('asset-allocation.index');
+    Route::post('asset-allocation/data', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'getData'])->name('asset-allocation-data');
+    Route::get('asset-allocation/create', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'create'])->name('asset-allocation.create');
+    Route::post('asset-allocation', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'store'])->name('asset-allocation.store');
+    Route::post('asset-allocation/{asset_allocation_id}/return', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'returnAsset'])->name('asset-allocation.return');
+
+    //////////////////// Employee Self-Service (ESS) ////////////////////
+    Route::group(['prefix' => 'ess'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\Hrm\Ess\EssDashboardController::class, 'index'])->name('ess.dashboard');
+
+        Route::get('attendance', [App\Http\Controllers\Admin\Hrm\Ess\EssAttendanceController::class, 'index'])->name('ess.attendance.index');
+        Route::post('attendance/check-in', [App\Http\Controllers\Admin\Hrm\Ess\EssAttendanceController::class, 'checkIn'])->name('ess.attendance.check-in');
+        Route::post('attendance/check-out', [App\Http\Controllers\Admin\Hrm\Ess\EssAttendanceController::class, 'checkOut'])->name('ess.attendance.check-out');
+
+        Route::get('leave', [App\Http\Controllers\Admin\Hrm\Ess\EssLeaveController::class, 'index'])->name('ess.leave.index');
+        Route::get('leave/create', [App\Http\Controllers\Admin\Hrm\Ess\EssLeaveController::class, 'create'])->name('ess.leave.create');
+        Route::post('leave', [App\Http\Controllers\Admin\Hrm\Ess\EssLeaveController::class, 'store'])->name('ess.leave.store');
+        Route::post('leave/{leave_request_id}/cancel', [App\Http\Controllers\Admin\Hrm\Ess\EssLeaveController::class, 'cancel'])->name('ess.leave.cancel');
+
+        Route::get('payslip', [App\Http\Controllers\Admin\Hrm\Ess\EssPayslipController::class, 'index'])->name('ess.payslip.index');
+        Route::get('payslip/{payslip_id}', [App\Http\Controllers\Admin\Hrm\Ess\EssPayslipController::class, 'show'])->name('ess.payslip.show');
+        Route::get('payslip/{payslip_id}/pdf', [App\Http\Controllers\Admin\Hrm\Ess\EssPayslipController::class, 'pdf'])->name('ess.payslip.pdf');
+
+        Route::get('profile', [App\Http\Controllers\Admin\Hrm\Ess\EssProfileController::class, 'index'])->name('ess.profile.index');
+
+        Route::get('advance', [App\Http\Controllers\Admin\Hrm\Ess\EssAdvanceController::class, 'index'])->name('ess.advance.index');
+        Route::get('advance/create', [App\Http\Controllers\Admin\Hrm\Ess\EssAdvanceController::class, 'create'])->name('ess.advance.create');
+        Route::post('advance', [App\Http\Controllers\Admin\Hrm\Ess\EssAdvanceController::class, 'store'])->name('ess.advance.store');
+
+        Route::get('exit', [App\Http\Controllers\Admin\Hrm\Ess\EssExitController::class, 'index'])->name('ess.exit.index');
+        Route::get('exit/create', [App\Http\Controllers\Admin\Hrm\Ess\EssExitController::class, 'create'])->name('ess.exit.create');
+        Route::post('exit', [App\Http\Controllers\Admin\Hrm\Ess\EssExitController::class, 'store'])->name('ess.exit.store');
+    });
+    }); // end module:hrm (resignation/clearance/asset/ESS)
 
     ////////////////////// Inventory ///////////////////////////
     //warehouse

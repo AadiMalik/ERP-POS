@@ -68,5 +68,7 @@ class Kernel extends HttpKernel
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         'superadmin' => \App\Http\Middleware\EnsureSuperAdmin::class,
+        'must-change-password' => \App\Http\Middleware\ForcePasswordChange::class,
+        'module' => \App\Http\Middleware\EnsureModuleEnabled::class,
     ];
 }

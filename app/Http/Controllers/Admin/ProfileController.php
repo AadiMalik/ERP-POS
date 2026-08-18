@@ -26,6 +26,17 @@ class ProfileController extends Controller
         return view('admin.profile.edit', compact('user'));
     }
 
+    /**
+     * Shown instead of any other admin screen (via the must-change-password
+     * middleware) when the user still has an auto-generated password -
+     * e.g. an Employee account just created by HR. Submits to the same
+     * updatePassword() below, which clears the flag on success.
+     */
+    public function forceChangeForm()
+    {
+        return view('admin.profile.force-change-password');
+    }
+
     public function update(Request $request)
     {
         $rules = [

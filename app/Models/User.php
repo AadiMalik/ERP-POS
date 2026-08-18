@@ -28,6 +28,7 @@ class User extends Authenticatable
         'branch_id',
         'last_login_at',
         'is_deleted',
+        'must_change_password',
         'createdby_id',
         'updatedby_id',
         'deletedby_id',
@@ -73,6 +74,11 @@ class User extends Authenticatable
     public function customerProfile($business_id)
     {
         return $this->customerProfiles()->where('business_id', $business_id)->first();
+    }
+
+    public function employee()
+    {
+        return $this->hasOne(Employee::class, 'user_id');
     }
 
     public function createdby()

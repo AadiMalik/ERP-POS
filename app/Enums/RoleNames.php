@@ -19,6 +19,7 @@ class  RoleNames
     const HRMANAGER = 'HR Manager';
     const REPORTINGANALYST = 'Reporting Analyst';
     const STAFF = 'Staff';
+    const EMPLOYEE = 'Employee';
     //POS
     const ORDERTAKER = 'Order Taker';
     const POSMANAGER = 'POS Manager';

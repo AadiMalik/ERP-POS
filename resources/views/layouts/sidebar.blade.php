@@ -65,6 +65,67 @@
                 <div data-i18n="Analytics">Dashboard</div>
             </a>
         </li>
+        <!-- Self Service (Employee) -->
+        @canany(['ess.dashboard.view', 'ess.attendance.manage', 'ess.leave.view', 'ess.payslip.view', 'ess.profile.view', 'ess.advance.apply', 'ess.resignation.apply'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-id-badge"></i>
+                    <div data-i18n="Self Service">Self Service</div>
+                </a>
+
+                <ul class="menu-sub">
+                    @can('ess.dashboard.view')
+                        <li class="menu-item">
+                            <a href="{{ route('ess.dashboard') }}" class="menu-link">
+                                <div data-i18n="My Dashboard">My Dashboard</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('ess.attendance.manage')
+                        <li class="menu-item">
+                            <a href="{{ route('ess.attendance.index') }}" class="menu-link">
+                                <div data-i18n="My Attendance">My Attendance</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('ess.leave.view')
+                        <li class="menu-item">
+                            <a href="{{ route('ess.leave.index') }}" class="menu-link">
+                                <div data-i18n="My Leave">My Leave</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('ess.payslip.view')
+                        <li class="menu-item">
+                            <a href="{{ route('ess.payslip.index') }}" class="menu-link">
+                                <div data-i18n="My Salary Slips">My Salary Slips</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('ess.advance.apply')
+                        <li class="menu-item">
+                            <a href="{{ route('ess.advance.index') }}" class="menu-link">
+                                <div data-i18n="My Advances">My Advances</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('ess.resignation.apply')
+                        <li class="menu-item">
+                            <a href="{{ route('ess.exit.index') }}" class="menu-link">
+                                <div data-i18n="My Resignation">My Resignation</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('ess.profile.view')
+                        <li class="menu-item">
+                            <a href="{{ route('ess.profile.index') }}" class="menu-link">
+                                <div data-i18n="My Profile">My Profile</div>
+                            </a>
+                        </li>
+                    @endcan
+                </ul>
+            </li>
+        @endcanany
         <!-- Business -->
         @canany(['package.view', 'business.view', 'branch.view', 'setting.manage'])
             <li class="menu-item">
@@ -499,6 +560,134 @@
                         <li class="menu-item">
                             <a href="{{ url('/admin/reports/expense-detail-report') }}" class="menu-link">
                                 <div data-i18n="Expense Reports">Expense Reports</div>
+                            </a>
+                        </li>
+                    @endcan
+                </ul>
+            </li>
+        @endcanany
+
+        {{-- HR & Payroll --}}
+        @canany(['department.view', 'designation.view', 'shift.view', 'employee.view', 'attendance.view',
+            'leave-type.view', 'leave-request.view', 'salary-component.view', 'salary-structure.view',
+            'payroll.view', 'employee-advance.view', 'employee-deduction.view', 'employee-ledger.view',
+            'employee-exit.view', 'asset.view', 'asset-allocation.view'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-users-cog"></i>
+                    <div data-i18n="HR & Payroll">HR &amp; Payroll</div>
+                </a>
+
+                <ul class="menu-sub">
+                    @can('employee.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/employee') }}" class="menu-link">
+                                <div data-i18n="Employees">Employees</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('department.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/department') }}" class="menu-link">
+                                <div data-i18n="Departments">Departments</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('designation.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/designation') }}" class="menu-link">
+                                <div data-i18n="Designations">Designations</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('shift.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/shift') }}" class="menu-link">
+                                <div data-i18n="Shifts">Shifts</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('attendance.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/attendance') }}" class="menu-link">
+                                <div data-i18n="Attendance">Attendance</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('leave-type.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/leave-type') }}" class="menu-link">
+                                <div data-i18n="Leave Types">Leave Types</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('leave-request.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/leave-request') }}" class="menu-link">
+                                <div data-i18n="Leave Requests">Leave Requests</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('salary-component.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/salary-component') }}" class="menu-link">
+                                <div data-i18n="Salary Components">Salary Components</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('salary-structure.view')
+                        <li class="menu-item">
+                            <a href="{{ route('salary-structure.index') }}" class="menu-link">
+                                <div data-i18n="Salary Structures">Salary Structures</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('payroll.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/payroll') }}" class="menu-link">
+                                <div data-i18n="Payroll">Payroll</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('employee-advance.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/employee-advance') }}" class="menu-link">
+                                <div data-i18n="Employee Advances">Employee Advances</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('employee-deduction.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/employee-deduction') }}" class="menu-link">
+                                <div data-i18n="Employee Deductions">Employee Deductions</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('employee-ledger.view')
+                        <li class="menu-item">
+                            <a href="{{ route('employee-ledger.index') }}" class="menu-link">
+                                <div data-i18n="Employee Ledger">Employee Ledger</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('employee-exit.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/employee-exit') }}" class="menu-link">
+                                <div data-i18n="Resignation / Termination">Resignation / Termination</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('asset.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/asset') }}" class="menu-link">
+                                <div data-i18n="Assets">Assets</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('asset-allocation.view')
+                        <li class="menu-item">
+                            <a href="{{ route('asset-allocation.index') }}" class="menu-link">
+                                <div data-i18n="Asset Allocation">Asset Allocation</div>
                             </a>
                         </li>
                     @endcan

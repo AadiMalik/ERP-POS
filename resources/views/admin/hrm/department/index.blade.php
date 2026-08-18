@@ -1,0 +1,58 @@
+@extends('layouts.app')
+@section('content')
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">Departments</h4>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between">
+            <div></div>
+            @can('department.create')
+            <a href="{{ url('admin/department/create') }}" class="btn btn-primary rounded-pill">
+                <i class="fa fa-plus"></i>
+                Add New
+            </a>
+            @endcan
+        </div>
+        <div class="card-body">
+            <div class="table-responsive p-4">
+                <table id="department_table" class="table datatables">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+@section('js')
+@include('admin.partials.datatable', [
+'columns' => "
+{data:'code',name:'code'},
+{data:'name',name:'name'},
+{data:'description',name:'description'},
+{data:'status',name:'status'},
+{data:'action',name:'action',sortable:false}",
+'route' => 'department/data',
+'buttons' => false,
+'pageLength' => 10,
+'class' => 'department_table',
+'variable' => 'department_table',
+'datefilter' => false,
+'params' => "",
+])
+<script>
+    deleteRecord({
+        buttonClass: "#deleteDepartment",
+        url: url_local + "/admin/department",
+        tableCallback: function() {
+            initDataTabledepartment_table();
+        }
+    });
+</script>
+@endsection

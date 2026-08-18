@@ -228,6 +228,11 @@ class RoleService
                         'description' => 'Can create customer orders and process POS billing for assigned branch only.',
                     ],
 
+                    [
+                        'name' => RoleNames::EMPLOYEE,
+                        'description' => 'Self-service access only: own attendance check-in/out, leave application, salary slips, and profile.',
+                    ],
+
                 ];
             }
 

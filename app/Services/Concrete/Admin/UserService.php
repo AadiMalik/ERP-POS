@@ -223,6 +223,7 @@ class UserService
     {
         return $this->model_user->update([
             'password' => Hash::make($obj['password']),
+            'must_change_password' => false,
             'updatedby_id' => Auth::id(),
             'date_updated' => now()
         ], $obj['id']);

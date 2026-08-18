@@ -97,7 +97,7 @@ class DashboardAccessService
         $user = Auth::user();
         $role = getRoleName();
 
-        if (empty($role) || $role === RoleNames::USER) {
+        if (empty($role) || $role === RoleNames::USER || $role === RoleNames::EMPLOYEE) {
             return ['allowed' => false];
         }
 

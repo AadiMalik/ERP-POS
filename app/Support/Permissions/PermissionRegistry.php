@@ -330,6 +330,148 @@ class PermissionRegistry
                 'manage' => ['name' => 'setting.manage', 'label' => 'Manage', 'is_system' => false],
             ]],
 
+            // ---- HRM & Payroll modules ----
+
+            'department' => ['label' => 'Departments', 'actions' => [
+                'view'   => ['name' => 'department.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'department.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'department.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'department.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
+            'designation' => ['label' => 'Designations', 'actions' => [
+                'view'   => ['name' => 'designation.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'designation.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'designation.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'designation.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
+            'shift' => ['label' => 'Shifts', 'actions' => [
+                'view'   => ['name' => 'shift.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'shift.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'shift.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'shift.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
+            'employee' => ['label' => 'Employees', 'actions' => [
+                'view'     => ['name' => 'employee.view', 'label' => 'View', 'is_system' => false],
+                'create'   => ['name' => 'employee.create', 'label' => 'Create', 'is_system' => false],
+                'edit'     => ['name' => 'employee.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'   => ['name' => 'employee.delete', 'label' => 'Delete', 'is_system' => false],
+                'status'   => ['name' => 'employee.status', 'label' => 'Change Status', 'is_system' => false],
+                'document' => ['name' => 'employee.document', 'label' => 'Manage Documents', 'is_system' => false],
+            ]],
+
+            'attendance' => ['label' => 'Attendance', 'actions' => [
+                'view'        => ['name' => 'attendance.view', 'label' => 'View', 'is_system' => false],
+                'create'      => ['name' => 'attendance.create', 'label' => 'Create', 'is_system' => false],
+                'edit'        => ['name' => 'attendance.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'      => ['name' => 'attendance.delete', 'label' => 'Delete', 'is_system' => false],
+                'report_view' => ['name' => 'attendance.report.view', 'label' => 'View Report', 'is_system' => false],
+            ]],
+
+            'leave-type' => ['label' => 'Leave Types', 'actions' => [
+                'view'   => ['name' => 'leave-type.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'leave-type.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'leave-type.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'leave-type.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
+            'leave-request' => ['label' => 'Leave Requests', 'actions' => [
+                'view'    => ['name' => 'leave-request.view', 'label' => 'View', 'is_system' => false],
+                'create'  => ['name' => 'leave-request.create', 'label' => 'Create', 'is_system' => false],
+                'edit'    => ['name' => 'leave-request.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'  => ['name' => 'leave-request.delete', 'label' => 'Delete', 'is_system' => false],
+                'approve' => ['name' => 'leave-request.approve', 'label' => 'Approve / Reject', 'is_system' => false],
+            ]],
+
+            'salary-component' => ['label' => 'Salary Components', 'actions' => [
+                'view'   => ['name' => 'salary-component.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'salary-component.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'salary-component.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'salary-component.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
+            'salary-structure' => ['label' => 'Salary Structures', 'actions' => [
+                'view'   => ['name' => 'salary-structure.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'salary-structure.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'salary-structure.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'salary-structure.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
+            'payroll' => ['label' => 'Payroll', 'actions' => [
+                'view'     => ['name' => 'payroll.view', 'label' => 'View', 'is_system' => false],
+                'create'   => ['name' => 'payroll.create', 'label' => 'Generate Run', 'is_system' => false],
+                'edit'     => ['name' => 'payroll.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'   => ['name' => 'payroll.delete', 'label' => 'Delete', 'is_system' => false],
+                'finalize' => ['name' => 'payroll.finalize', 'label' => 'Finalize', 'is_system' => false],
+                'pay'      => ['name' => 'payroll.pay', 'label' => 'Mark Paid', 'is_system' => false],
+                'reopen'   => ['name' => 'payroll.reopen', 'label' => 'Reopen', 'is_system' => false],
+            ]],
+
+            'payslip' => ['label' => 'Salary Slips', 'actions' => [
+                'view'  => ['name' => 'payslip.view', 'label' => 'View', 'is_system' => false],
+                'print' => ['name' => 'payslip.print', 'label' => 'Print / Download', 'is_system' => false],
+            ]],
+
+            'employee-advance' => ['label' => 'Employee Advances', 'actions' => [
+                'view'    => ['name' => 'employee-advance.view', 'label' => 'View', 'is_system' => false],
+                'create'  => ['name' => 'employee-advance.create', 'label' => 'Create', 'is_system' => false],
+                'edit'    => ['name' => 'employee-advance.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'  => ['name' => 'employee-advance.delete', 'label' => 'Delete', 'is_system' => false],
+                'approve' => ['name' => 'employee-advance.approve', 'label' => 'Approve / Reject', 'is_system' => false],
+            ]],
+
+            'employee-deduction' => ['label' => 'Employee Deductions', 'actions' => [
+                'view'   => ['name' => 'employee-deduction.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'employee-deduction.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'employee-deduction.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'employee-deduction.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
+            'employee-ledger' => ['label' => 'Employee Ledger', 'actions' => [
+                'view' => ['name' => 'employee-ledger.view', 'label' => 'View', 'is_system' => false],
+            ]],
+
+            'employee-exit' => ['label' => 'Resignation / Termination', 'actions' => [
+                'view'     => ['name' => 'employee-exit.view', 'label' => 'View', 'is_system' => false],
+                'create'   => ['name' => 'employee-exit.create', 'label' => 'Create', 'is_system' => false],
+                'edit'     => ['name' => 'employee-exit.edit', 'label' => 'Edit', 'is_system' => false],
+                'approve'  => ['name' => 'employee-exit.approve', 'label' => 'Approve / Reject', 'is_system' => false],
+                'finalize' => ['name' => 'employee-exit.finalize', 'label' => 'Finalize', 'is_system' => false],
+            ]],
+
+            'employee-clearance' => ['label' => 'Employee Clearance', 'actions' => [
+                'view'   => ['name' => 'employee-clearance.view', 'label' => 'View', 'is_system' => false],
+                'manage' => ['name' => 'employee-clearance.manage', 'label' => 'Clear / Reject', 'is_system' => false],
+            ]],
+
+            'asset' => ['label' => 'Assets', 'actions' => [
+                'view'   => ['name' => 'asset.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'asset.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'asset.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'asset.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'asset.status', 'label' => 'Change Status', 'is_system' => false],
+            ]],
+
+            'asset-allocation' => ['label' => 'Asset Allocation', 'actions' => [
+                'view'   => ['name' => 'asset-allocation.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'asset-allocation.create', 'label' => 'Issue', 'is_system' => false],
+                'edit'   => ['name' => 'asset-allocation.edit', 'label' => 'Return / Update', 'is_system' => false],
+                'delete' => ['name' => 'asset-allocation.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
+            'ess' => ['label' => 'Employee Self Service', 'actions' => [
+                'dashboard_view'     => ['name' => 'ess.dashboard.view', 'label' => 'View Dashboard', 'is_system' => false],
+                'attendance_manage'  => ['name' => 'ess.attendance.manage', 'label' => 'Check In / Check Out', 'is_system' => false],
+                'leave_apply'        => ['name' => 'ess.leave.apply', 'label' => 'Apply for Leave', 'is_system' => false],
+                'leave_view'         => ['name' => 'ess.leave.view', 'label' => 'View Own Leave History', 'is_system' => false],
+                'payslip_view'       => ['name' => 'ess.payslip.view', 'label' => 'View Own Salary Slips', 'is_system' => false],
+                'profile_view'       => ['name' => 'ess.profile.view', 'label' => 'View Own Profile', 'is_system' => false],
+                'resignation_apply'  => ['name' => 'ess.resignation.apply', 'label' => 'Submit Resignation', 'is_system' => false],
+                'advance_apply'      => ['name' => 'ess.advance.apply', 'label' => 'Request Advance', 'is_system' => false],
+            ]],
+
             // ---- Already-seeded modules (existing permission names, kept exactly as-is) ----
 
             'pos' => ['label' => 'POS', 'actions' => [
@@ -524,6 +666,10 @@ class PermissionRegistry
             'purchase-return', 'opening-stock', 'stock-taking', 'transfer-note', 'supplier-payment',
             'pos', 'order', 'expense', 'expense-category', 'admin-expense',
             'activity-log', 'login-history', 'notification', 'reports', 'branch', 'user',
+            'department', 'designation', 'shift', 'employee', 'attendance', 'leave-type',
+            'leave-request', 'salary-component', 'salary-structure', 'payroll', 'payslip',
+            'employee-advance', 'employee-deduction', 'employee-ledger', 'employee-exit',
+            'employee-clearance', 'asset', 'asset-allocation',
         ];
     }
 }
