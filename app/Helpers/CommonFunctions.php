@@ -17,6 +17,7 @@ use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestQuotation;
 use App\Models\StockTaking;
 use App\Models\Supplier;
+use App\Models\Expense;
 use App\Models\SupplierPayment;
 use App\Models\TransferNote;
 use App\Models\User;
@@ -393,6 +394,27 @@ function generateSupplierPaymentNo($business_id = null)
     );
 }
 
+function generateExpenseNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $expense = Expense::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($expense && $expense->expense_no) {
+        $next_number = (int) substr($expense->expense_no, strrpos($expense->expense_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'EXP-%04d',
+        $next_number
+    );
+}
+
 function generateSupplierCode($business_id = null)
 {
     $business_id = $business_id ?? Auth::user()->business_id;
@@ -622,7 +644,7 @@ function checkPackageLimit($type)
             'purchases' => Purchase::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
             'sales' => Order::where('business_id', $user->business_id)->where('status', 'posted')->where('is_deleted', 0)->count(),
             'transfers' => TransferNote::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
-            'expenses' => 0, // no Expense model exists in this codebase yet
+            'expenses' => Expense::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
             'vouchers' => Voucher::where('business_id', $user->business_id)->where('is_deleted', 0)->count(),
         };
 

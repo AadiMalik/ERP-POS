@@ -22,6 +22,9 @@
             <button type="button" class="btn btn-icon btn-sm btn-outline-warning d-none" id="cashOutBtn" title="Cash Out">
                 <i class="fa fa-minus"></i>
             </button>
+            <button type="button" class="btn btn-icon btn-sm btn-outline-danger d-none" id="addExpenseBtn" title="Add Expense">
+                <i class="fa fa-receipt"></i>
+            </button>
 
             <a href="{{ route('order.history') }}" target="_blank" class="btn btn-sm pos-header-btn">
                 <i class="fa fa-clock-rotate-left"></i> History

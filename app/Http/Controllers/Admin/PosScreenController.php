@@ -14,9 +14,12 @@ use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CategoryService;
 use App\Services\Concrete\Admin\CustomerService;
 use App\Services\Concrete\Admin\DiscountService;
+use App\Services\Concrete\Admin\ExpenseCategoryService;
+use App\Services\Concrete\Admin\ExpenseService;
 use App\Services\Concrete\Admin\OrderSourceService;
 use App\Services\Concrete\Admin\OrderTypeService;
 use App\Services\Concrete\Admin\PaymentMethodService;
+use App\Services\Concrete\Admin\PosRegisterSessionService;
 use App\Services\Concrete\Admin\UserService;
 use App\Services\Concrete\Admin\WarehouseService;
 use App\Traits\ResponseAPI;
@@ -49,6 +52,7 @@ class PosScreenController extends Controller
         'order.payment.credit',
         'order.customer.change',
         'order.reopen',
+        'expense.access',
     ];
 
     // OT/POSM users are fixed to their own business/branch and go straight to
@@ -70,6 +74,9 @@ class PosScreenController extends Controller
     protected $branch_service;
     protected $warehouse_service;
     protected $user_service;
+    protected $expense_category_service;
+    protected $expense_service;
+    protected $pos_register_session_service;
 
     public function __construct(
         CustomerService $customer_service,
@@ -81,7 +88,10 @@ class PosScreenController extends Controller
         BusinessService $business_service,
         BranchService $branch_service,
         WarehouseService $warehouse_service,
-        UserService $user_service
+        UserService $user_service,
+        ExpenseCategoryService $expense_category_service,
+        ExpenseService $expense_service,
+        PosRegisterSessionService $pos_register_session_service
     ) {
         $this->customer_service = $customer_service;
         $this->order_type_service = $order_type_service;
@@ -93,6 +103,9 @@ class PosScreenController extends Controller
         $this->branch_service = $branch_service;
         $this->warehouse_service = $warehouse_service;
         $this->user_service = $user_service;
+        $this->expense_category_service = $expense_category_service;
+        $this->expense_service = $expense_service;
+        $this->pos_register_session_service = $pos_register_session_service;
     }
 
     /**
@@ -128,6 +141,7 @@ class PosScreenController extends Controller
         $customers = $this->customer_service->getAllActive($business_id);
         $discounts = $this->discount_service->getAllActive($business_id);
         $categories = $this->category_service->getByBusiness($business_id);
+        $expense_categories = $this->expense_category_service->getActiveByBusiness($business_id);
 
         $registers = PosRegister::where('business_id', $business_id)
             ->where('branch_id', $branch_id)
@@ -178,6 +192,7 @@ class PosScreenController extends Controller
             'customers',
             'discounts',
             'categories',
+            'expense_categories',
             'registers',
             'permissions',
             'is_fixed_context',
@@ -363,6 +378,51 @@ class PosScreenController extends Controller
                 'email' => $customer->email,
                 'credit_limit' => $profile->credit_limit ?? 0,
                 'is_walkin' => $profile->is_walkin ?? 0,
+            ]);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * Quick "Add Expense" popup on the POS screen - lets an Order Taker
+     * record a cash expense against their currently active register session
+     * without leaving the screen. Saves and posts (generating its JV) in one
+     * step via ExpenseService::save()'s auto_post flag, since - like a Cash
+     * Out movement - the till cash changes the moment it's logged; the
+     * Admin-side Expense Detail CRUD can still unpost/edit/delete it later.
+     */
+    public function quickCreateExpense(Request $request)
+    {
+        $rules = [
+            'pos_register_session_id' => ['required', 'string'],
+            'expense_category_id' => ['required', 'string'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'description' => ['nullable', 'string'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        try {
+            $expense = $this->expense_service->save([
+                'pos_register_session_id' => $request->pos_register_session_id,
+                'expense_category_id' => $request->expense_category_id,
+                'amount' => $request->amount,
+                'payment_method' => 'cash',
+                'expense_date' => now(),
+                'description' => $request->description,
+                'source' => 'pos',
+                'auto_post' => true,
+            ]);
+
+            return $this->success('Expense recorded.', [
+                'expense_id' => $expense->expense_id,
+                'expense_no' => $expense->expense_no,
+                'amount' => $expense->amount,
             ]);
         } catch (Exception $e) {
             return $this->error($e->getMessage());

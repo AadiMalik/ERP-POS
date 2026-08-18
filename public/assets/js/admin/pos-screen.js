@@ -49,7 +49,15 @@
     // INIT
     // ==============================
     $(document).ready(function () {
-        $('.select2').not('#open_pos_register_id, #customer_id, #changeBranchBusinessId, #changeBranchBranchId, #changeBranchWarehouseId').select2();
+        $('.select2').not('#open_pos_register_id, #customer_id, #changeBranchBusinessId, #changeBranchBranchId, #changeBranchWarehouseId, #expense_category_id').select2();
+
+        // Same reasoning as #open_pos_register_id below - scope this dropdown
+        // to the Add Expense modal so it opens correctly.
+        if ($('#expense_category_id').length) {
+            $('#expense_category_id').select2({
+                dropdownParent: $('#addExpenseModal'),
+            });
+        }
 
         // Same reasoning as #open_pos_register_id above - scope this dropdown
         // to the Change Branch modal so it opens correctly.
@@ -92,6 +100,9 @@
         state.pos_reports_offcanvas = new bootstrap.Offcanvas(document.getElementById('posReportsOffcanvas'));
         state.product_picker_modal = new bootstrap.Modal(document.getElementById('productPickerModal'));
         state.add_customer_modal = new bootstrap.Modal(document.getElementById('addCustomerModal'));
+        if ($('#addExpenseModal').length) {
+            state.add_expense_modal = new bootstrap.Modal(document.getElementById('addExpenseModal'));
+        }
         if ($('#changeBranchModal').length) {
             state.change_branch_modal = new bootstrap.Modal(document.getElementById('changeBranchModal'));
         }
@@ -136,7 +147,7 @@
         $('#posNoSessionChecking').addClass('d-none');
         $('#posNoSessionBrowseOnly').removeClass('d-none');
         $('#registerBadge').addClass('d-none');
-        $('#cashInBtn, #cashOutBtn, #closeRegisterBtn').addClass('d-none');
+        $('#cashInBtn, #cashOutBtn, #closeRegisterBtn, #addExpenseBtn').addClass('d-none');
         state.open_session_modal.show();
     }
 
@@ -150,6 +161,9 @@
             .html(escapeHtml(registerName) + ' <span class="pos-register-status-pill">OPEN</span>');
 
         $('#cashInBtn, #cashOutBtn, #closeRegisterBtn').removeClass('d-none');
+        if (can('expense.access')) {
+            $('#addExpenseBtn').removeClass('d-none');
+        }
 
         loadHeldOrdersCount();
         loadProductsByCategory('');
@@ -169,6 +183,8 @@
         $('#cashInBtn').on('click', function () { openCashMovementModal('in'); });
         $('#cashOutBtn').on('click', function () { openCashMovementModal('out'); });
         $('#cashMovementSubmitBtn').on('click', submitCashMovement);
+        $('#addExpenseBtn').on('click', openAddExpenseModal);
+        $('#addExpenseSubmitBtn').on('click', submitAddExpense);
         $('#closeRegisterBtn').on('click', openCloseSessionModal);
         $('#closeSessionSubmitBtn').on('click', submitCloseSession);
 
@@ -514,6 +530,51 @@
             });
     }
 
+    // ==============================
+    // QUICK ADD EXPENSE
+    // ==============================
+    function openAddExpenseModal() {
+        $('#expense_category_id').val('');
+        if ($.fn.select2) {
+            $('#expense_category_id').trigger('change');
+        }
+        $('#expense_amount').val('');
+        $('#expense_description').val('');
+        state.add_expense_modal.show();
+    }
+
+    function submitAddExpense() {
+        var category_id = $('#expense_category_id').val();
+        var amount = $('#expense_amount').val();
+
+        if (!category_id) {
+            errorMessage('Please select an expense category.');
+            return;
+        }
+        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+            errorMessage('Please enter a valid amount.');
+            return;
+        }
+
+        ajaxRequest({
+            url: URLS.quick_expense,
+            method: 'POST',
+            data: {
+                pos_register_session_id: state.session.pos_register_session_id,
+                expense_category_id: category_id,
+                amount: amount,
+                description: $('#expense_description').val(),
+            },
+        })
+            .then(function () {
+                successMessage('Expense recorded.');
+                state.add_expense_modal.hide();
+            })
+            .catch(function (err) {
+                errorMessage(err.Message || 'Unable to record expense.');
+            });
+    }
+
     function openCloseSessionModal() {
         ajaxRequest({ url: URLS.session_summary + '/' + state.session.pos_register_session_id })
             .then(function (response) {
@@ -523,6 +584,7 @@
                 $('#sumCashRefunds').text(money(s.cash_refunds));
                 $('#sumCashIn').text(money(s.cash_movements_in));
                 $('#sumCashOut').text(money(s.cash_movements_out));
+                $('#sumExpenses').text(money(s.total_expenses));
                 $('#sumExpectedCash').text(money(s.expected_cash));
                 $('#actual_cash').val(s.expected_cash != null ? s.expected_cash : '');
                 $('#closing_notes').val('');
@@ -1462,6 +1524,7 @@
                 $('#repCashSales').text(money(s.cash_sales));
                 $('#repCashIn').text(money(s.cash_movements_in));
                 $('#repCashOut').text(money(s.cash_movements_out));
+                $('#repExpenses').text(money(s.total_expenses));
                 $('#repTotalOrders').text(s.total_orders || 0);
                 $('#repTotalSales').text(money(s.total_sales_amount));
                 $('#repExpectedCash').text(money(s.expected_cash));

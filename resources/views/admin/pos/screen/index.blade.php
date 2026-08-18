@@ -420,6 +420,7 @@
                             <tr><th>Cash Refunds</th><td class="text-end" id="sumCashRefunds">0.00</td></tr>
                             <tr><th>Cash In</th><td class="text-end" id="sumCashIn">0.00</td></tr>
                             <tr><th>Cash Out</th><td class="text-end" id="sumCashOut">0.00</td></tr>
+                            <tr><th>Expenses</th><td class="text-end" id="sumExpenses">0.00</td></tr>
                             <tr class="fw-bold"><th>Expected Cash</th><td class="text-end" id="sumExpectedCash">0.00</td></tr>
                         </tbody>
                     </table>
@@ -465,6 +466,40 @@
         </div>
     </div>
 
+    {{-- ================= Add Expense Modal (quick log against active session) ================= --}}
+    <div class="modal fade" id="addExpenseModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Expense</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Category <span class="text-danger">*</span></label>
+                        <select class="form-select select2" id="expense_category_id">
+                            <option value="">--Select Category--</option>
+                            @foreach ($expense_categories as $item)
+                                <option value="{{ $item->expense_category_id }}">{{ $item->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Amount <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" min="0.01" class="form-control" id="expense_amount">
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-control" id="expense_description">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="addExpenseSubmitBtn">Save Expense</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ================= Held Orders Offcanvas ================= --}}
     <div class="offcanvas offcanvas-end" tabindex="-1" id="heldOrdersOffcanvas">
         <div class="offcanvas-header">
@@ -497,6 +532,7 @@
                         <tr><th>Cash Sales</th><td class="text-end" id="repCashSales">0.00</td></tr>
                         <tr><th>Cash In</th><td class="text-end" id="repCashIn">0.00</td></tr>
                         <tr><th>Cash Out</th><td class="text-end" id="repCashOut">0.00</td></tr>
+                        <tr><th>Expenses</th><td class="text-end" id="repExpenses">0.00</td></tr>
                         <tr><th>Total Orders</th><td class="text-end" id="repTotalOrders">0</td></tr>
                         <tr><th>Total Sales</th><td class="text-end" id="repTotalSales">0.00</td></tr>
                         <tr class="fw-bold"><th>Expected Cash</th><td class="text-end" id="repExpectedCash">0.00</td></tr>
@@ -537,6 +573,7 @@
                 'order_data' => url('admin/order/data'),
                 'order_print' => url('admin/order'),
                 'quick_customer' => route('pos-screen.quick-customer'),
+                'quick_expense' => route('pos-screen.quick-expense'),
             ],
         ];
     @endphp

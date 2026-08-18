@@ -21,10 +21,13 @@ class PosRegisterSessionService
 
     protected $pos_register_service;
 
-    public function __construct(PosRegisterService $pos_register_service)
+    protected $expense_service;
+
+    public function __construct(PosRegisterService $pos_register_service, ExpenseService $expense_service)
     {
         $this->model_pos_register_session = new Repository(new PosRegisterSession());
         $this->pos_register_service = $pos_register_service;
+        $this->expense_service = $expense_service;
     }
 
     public function getData($obj)
@@ -295,11 +298,17 @@ class PosRegisterSessionService
             ->where('is_deleted', 0)
             ->sum('amount');
 
+        $expense_totals = Schema::hasTable('expenses')
+            ? $this->expense_service->getSessionTotals($pos_register_session_id)
+            : ['total_expenses' => 0, 'cash_expenses' => 0, 'expense_count' => 0];
+
         $opening_cash = $session->opening_cash ?? 0;
         // Change handed back is a cash-drawer outflow that isn't part of any
         // order_payments amount (order_payments/cash_sales already nets it
-        // out per order) - it is not subtracted again here.
-        $expected_cash = $opening_cash + $cash_sales - $cash_refunds + $cash_movements_in - $cash_movements_out;
+        // out per order) - it is not subtracted again here. Only posted
+        // cash-method expenses reduce the till - bank/cheque/online expenses
+        // never touched the drawer.
+        $expected_cash = $opening_cash + $cash_sales - $cash_refunds + $cash_movements_in - $cash_movements_out - $expense_totals['cash_expenses'];
 
         return [
             'opening_cash' => $opening_cash,
@@ -307,6 +316,9 @@ class PosRegisterSessionService
             'cash_refunds' => $cash_refunds,
             'cash_movements_in' => $cash_movements_in,
             'cash_movements_out' => $cash_movements_out,
+            'total_expenses' => $expense_totals['total_expenses'],
+            'cash_expenses' => $expense_totals['cash_expenses'],
+            'expense_count' => $expense_totals['expense_count'],
             'expected_cash' => $expected_cash,
             'actual_cash' => $session->actual_cash,
             'cash_difference' => $session->cash_difference,
@@ -373,6 +385,21 @@ class PosRegisterSessionService
             'deletedby_id' => Auth::id(),
             'date_deleted' => now(),
         ], $pos_register_session_id);
+    }
+
+    /**
+     * Recent register sessions for a business (any cashier) - used to
+     * populate the POS Session picker on the Admin "Expense Detail" CRUD,
+     * where an admin can attach an expense to any session/OT.
+     */
+    public function getByBusiness($business_id, $limit = 100)
+    {
+        return PosRegisterSession::with(['register', 'branch', 'cashier'])
+            ->where('business_id', $business_id)
+            ->where('is_deleted', 0)
+            ->orderByDesc('opening_datetime')
+            ->limit($limit)
+            ->get();
     }
 
     public function getCurrentSession($cashier_id)

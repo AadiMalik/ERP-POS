@@ -239,6 +239,14 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\AccountSubTypeController::class, 'byBusiness']);
     });
 
+    //Expense Categories
+    Route::resource('expense-category', App\Http\Controllers\Admin\ExpenseCategoryController::class);
+    Route::group(['prefix' => 'expense-category'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\ExpenseCategoryController::class, 'getData']);
+        Route::post('reset', [App\Http\Controllers\Admin\ExpenseCategoryController::class, 'reset']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\ExpenseCategoryController::class, 'byBusiness']);
+    });
+
     //account
     Route::group(['prefix' => 'account'], function () {
         Route::get('/', [App\Http\Controllers\Admin\AccountController::class, 'index']);
@@ -368,6 +376,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::get('pos-screen/context-options/{business_id}', [App\Http\Controllers\Admin\PosScreenController::class, 'contextOptions']);
         Route::get('pos-screen/change-context', [App\Http\Controllers\Admin\PosScreenController::class, 'changeContext'])->name('pos-screen.change-context');
         Route::post('pos-screen/quick-customer', [App\Http\Controllers\Admin\PosScreenController::class, 'quickCreateCustomer'])->name('pos-screen.quick-customer');
+        Route::post('pos-screen/quick-expense', [App\Http\Controllers\Admin\PosScreenController::class, 'quickCreateExpense'])->name('pos-screen.quick-expense');
     });
 
     //purchase request
@@ -463,6 +472,21 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::get('ledger/{supplier_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'supplierLedger']);
         Route::get('purchases-by-supplier/{supplier_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'purchasesBySupplier']);
         Route::get('{supplier_payment_id}/print', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'print'])->name('supplier-payment.print');
+    });
+
+    //expense detail (POS + Admin, any session/OT)
+    Route::resource('expense', App\Http\Controllers\Admin\ExpenseController::class);
+    Route::group(['prefix' => 'expense'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\ExpenseController::class, 'getData']);
+        Route::post('change-status', [App\Http\Controllers\Admin\ExpenseController::class, 'status']);
+        Route::get('details/{expense_id}', [App\Http\Controllers\Admin\ExpenseController::class, 'details']);
+    });
+
+    //admin expense (business/daily expenses, no POS session or OT)
+    Route::resource('admin-expense', App\Http\Controllers\Admin\AdminExpenseController::class);
+    Route::group(['prefix' => 'admin-expense'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\AdminExpenseController::class, 'getData']);
+        Route::post('change-status', [App\Http\Controllers\Admin\AdminExpenseController::class, 'status']);
     });
 
     //procurement reports
@@ -610,6 +634,11 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
             Route::get('pdf', [App\Http\Controllers\Admin\Reports\ExpenseReportController::class, 'pdf'])->name('reports.expense-report.pdf');
             Route::get('export', [App\Http\Controllers\Admin\Reports\ExpenseReportController::class, 'export'])->name('reports.expense-report.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\ExpenseReportController::class, 'exportCsv'])->name('reports.expense-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'expense-detail-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\ExpenseDetailReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\ExpenseDetailReportController::class, 'data']);
         });
 
         Route::group(['prefix' => 'tax-report'], function () {

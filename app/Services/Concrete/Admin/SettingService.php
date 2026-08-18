@@ -47,9 +47,11 @@ class SettingService
     protected $model_pos_setting;
     protected $model_pra_setting;
     protected $model_thermal_print_setting;
+    protected $expense_category_service;
 
-    public function __construct()
+    public function __construct(ExpenseCategoryService $expense_category_service)
     {
+        $this->expense_category_service = $expense_category_service;
         $this->model_business = new Repository(new Business());
         $this->model_business_setting = new Repository(new BusinessSetting());
         $this->model_accounting_setting = new Repository(new AccountingSetting());
@@ -232,6 +234,8 @@ class SettingService
             'business_id' => $obj['business_id'],
         ]);
 
+        $old_expense_account_id = $setting->default_expense_account_id;
+
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
             $setting->date_created = now();
@@ -241,6 +245,15 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+
+        // Keep every Expense Category that hasn't had its account manually
+        // overridden pointed at the current default - categories with a
+        // deliberate manual override (use_default_account = false) are left
+        // untouched, and expenses already posted before this change keep
+        // their own snapshot account_id, so historical JVs are unaffected.
+        if ($setting->default_expense_account_id !== $old_expense_account_id) {
+            $this->expense_category_service->syncDefaultAccount($obj['business_id'], $setting->default_expense_account_id);
+        }
 
         return $setting;
     }

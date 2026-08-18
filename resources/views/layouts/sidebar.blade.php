@@ -344,7 +344,7 @@
                         </li>
                         <li class="menu-item">
                             <a href="{{ url('/admin/reports/expense-report') }}" class="menu-link">
-                                <div data-i18n="Expense Report">Expense Report</div>
+                                <div data-i18n="Expense Report">Expense Report (By Account)</div>
                             </a>
                         </li>
                         <li class="menu-item">
@@ -358,6 +358,37 @@
                             </a>
                         </li>
                     </ul>
+                </li>
+            </ul>
+        </li>
+
+        {{-- Expense --}}
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons fa fa-receipt"></i>
+                <div data-i18n="Expense">Expense</div>
+            </a>
+
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="{{ url('/admin/expense-category') }}" class="menu-link">
+                        <div data-i18n="Expense Category">Expense Category</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/expense') }}" class="menu-link">
+                        <div data-i18n="Expense Detail (POS)">Expense Detail (POS)</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/admin-expense') }}" class="menu-link">
+                        <div data-i18n="Admin Expenses">Admin Expenses</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ url('/admin/reports/expense-detail-report') }}" class="menu-link">
+                        <div data-i18n="Expense Reports">Expense Reports</div>
+                    </a>
                 </li>
             </ul>
         </li>

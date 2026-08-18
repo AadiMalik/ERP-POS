@@ -263,12 +263,15 @@ class RoleService
                         'order.payment.credit',
                         'order.customer.change',
                         'order.reopen',
+                        'expense.access',
+                        'expense.view',
                     ]);
                 } elseif ($role['name'] === RoleNames::ORDERTAKER) {
                     $savedRole->syncPermissions([
                         'pos.access',
                         'order.create',
                         'order.hold',
+                        'expense.access',
                     ]);
                 }
             }
