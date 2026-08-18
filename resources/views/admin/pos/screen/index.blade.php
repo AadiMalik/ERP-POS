@@ -478,27 +478,6 @@
         </div>
     </div>
 
-    {{-- ================= Order History Offcanvas (non-transactional - viewable without an open register) ================= --}}
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="orderHistoryOffcanvas">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title">Order History</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-        </div>
-        <div class="offcanvas-body">
-            <select class="form-select form-select-sm mb-3" id="orderHistoryStatusFilter">
-                <option value="">All Statuses</option>
-                <option value="posted">Posted</option>
-                <option value="hold">Hold</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="void">Void</option>
-                <option value="returned">Returned</option>
-            </select>
-            <div id="orderHistoryList" class="list-group">
-                <div class="text-muted text-center py-3">No orders found</div>
-            </div>
-        </div>
-    </div>
-
     {{-- ================= Reports Offcanvas (my register sessions - non-transactional) ================= --}}
     <div class="offcanvas offcanvas-end" tabindex="-1" id="posReportsOffcanvas">
         <div class="offcanvas-header">
@@ -540,6 +519,7 @@
                 'card_tax_rate' => $business_setting->card_tax_rate,
             ],
             'permissions' => $permissions,
+            'reorder_from' => $reorder_from,
             'urls' => [
                 'session_current' => url('admin/pos-register-session/current'),
                 'session_open' => url('admin/pos-register-session/open'),

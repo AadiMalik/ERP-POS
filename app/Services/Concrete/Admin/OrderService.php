@@ -100,14 +100,16 @@ class OrderService
         $this->stock_service = $stock_service;
     }
 
-    public function getData($obj)
+    /**
+     * Builds the where/scope conditions shared by getData() (the POS Order
+     * History + Admin Order List table) and getHistorySummary() (the POS
+     * Order History "Sales Summary" panel), so the two always agree on
+     * exactly which orders a given filter set + role is allowed to see.
+     */
+    protected function applyHistoryFilters($query, $obj)
     {
         $wh = [];
-        $orderBy = Filter::ORDERBY;
 
-        if (isset($obj['orderBy']) && $obj['orderBy'] != 0 && $obj['orderBy'] != "") {
-            $orderBy = $obj['orderBy'];
-        }
         if (!empty($obj['order_id'])) {
             $wh[] = ['order_id', $obj['order_id']];
         }
@@ -141,17 +143,53 @@ class OrderService
         if (isset($obj['status']) && $obj['status'] != 0 && $obj['status'] != "") {
             $wh[] = ['status', $obj['status']];
         }
-        if (!empty($obj['start_date'])) {
-            $wh[] = ['order_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+        // Order Takers may only ever browse today's sales - whatever date
+        // range the client sends (or omits) is ignored and today is forced
+        // instead, so this holds even if the frontend's date inputs are
+        // bypassed entirely. Every other role keeps the normal client-
+        // supplied range. Enforced here (the single place order/data and
+        // order/history-summary are served from) so it protects the POS
+        // Order History page, its Sales Summary, and the full Admin Order
+        // List alike.
+        if (getRoleName() === RoleNames::ORDERTAKER) {
+            $today = Carbon::today()->format('Y-m-d');
+            $wh[] = ['sale_date', '>=', $today];
+            $wh[] = ['sale_date', '<=', $today];
+        } else {
+            if (!empty($obj['start_date'])) {
+                $wh[] = ['order_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            }
+            if (!empty($obj['end_date'])) {
+                $wh[] = ['order_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            }
+            if (!empty($obj['sale_date_start'])) {
+                $wh[] = ['sale_date', '>=', Carbon::parse($obj['sale_date_start'])->format('Y-m-d')];
+            }
+            if (!empty($obj['sale_date_end'])) {
+                $wh[] = ['sale_date', '<=', Carbon::parse($obj['sale_date_end'])->format('Y-m-d')];
+            }
         }
-        if (!empty($obj['end_date'])) {
-            $wh[] = ['order_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+
+        $query->where($wh)->where('is_deleted', 0);
+
+        if (!empty($obj['payment_method_id'])) {
+            $query->whereHas('payments', function ($q) use ($obj) {
+                $q->where('payment_method_id', $obj['payment_method_id']);
+            });
         }
-        if (!empty($obj['sale_date_start'])) {
-            $wh[] = ['sale_date', '>=', Carbon::parse($obj['sale_date_start'])->format('Y-m-d')];
-        }
-        if (!empty($obj['sale_date_end'])) {
-            $wh[] = ['sale_date', '<=', Carbon::parse($obj['sale_date_end'])->format('Y-m-d')];
+
+        // Payment status has no dedicated column - it's derived from
+        // paid_amount vs total (same rule the thermal receipt uses, see
+        // admin/order/print/thermal.blade.php) - so it's filtered here via
+        // that same comparison rather than a stored value.
+        if (!empty($obj['payment_status'])) {
+            if ($obj['payment_status'] === 'paid') {
+                $query->whereColumn('paid_amount', '>=', 'total');
+            } elseif ($obj['payment_status'] === 'unpaid') {
+                $query->where('paid_amount', '<=', 0);
+            } elseif ($obj['payment_status'] === 'partially_paid') {
+                $query->where('paid_amount', '>', 0)->whereColumn('paid_amount', '<', 'total');
+            }
         }
 
         $allow_roles = [
@@ -162,19 +200,23 @@ class OrderService
             RoleNames::ORDERTAKER,
         ];
 
-        $datatable = $this->model_order->getModel()::with($this->with)
-            ->withCount('details as total_products')
-            ->where($wh)
-            ->where('is_deleted', 0);
+        return applyRoleScope($query, $allow_roles);
+    }
 
-        if (!empty($obj['payment_method_id'])) {
-            $datatable->whereHas('payments', function ($q) use ($obj) {
-                $q->where('payment_method_id', $obj['payment_method_id']);
-            });
+    public function getData($obj)
+    {
+        $orderBy = Filter::ORDERBY;
+
+        if (isset($obj['orderBy']) && $obj['orderBy'] != 0 && $obj['orderBy'] != "") {
+            $orderBy = $obj['orderBy'];
         }
 
+        $datatable = $this->applyHistoryFilters(
+            $this->model_order->getModel()::with($this->with)->withCount('details as total_products'),
+            $obj
+        );
+
         $datatable->orderBy('order_date', $orderBy);
-        $datatable = applyRoleScope($datatable, $allow_roles);
 
         return DataTables::of($datatable)
             ->addColumn('order_date', function ($item) {
@@ -210,6 +252,40 @@ class OrderService
             ->addColumn('total', function ($item) {
                 return currency($item->total ?? 0);
             })
+            ->addColumn('paid_amount', function ($item) {
+                return currency($item->paid_amount ?? 0);
+            })
+            ->addColumn('due_amount', function ($item) {
+                return currency(max(($item->total ?? 0) - ($item->paid_amount ?? 0), 0));
+            })
+            ->addColumn('payment_method', function ($item) {
+                $names = $item->payments->map(function ($payment) {
+                    return $payment->paymentMethod->name ?? null;
+                })->filter()->unique();
+
+                return $names->isNotEmpty() ? $names->implode(', ') : '-';
+            })
+            ->addColumn('payment_status', function ($item) {
+                $due = max(($item->total ?? 0) - ($item->paid_amount ?? 0), 0);
+
+                if ($due <= 0) {
+                    $payment_status = Status::PAID;
+                } elseif (($item->paid_amount ?? 0) > 0) {
+                    $payment_status = Status::PARTIALLY_PAID;
+                } else {
+                    $payment_status = Status::UNPAID;
+                }
+
+                $badges = [
+                    Status::PAID => 'bg-label-success',
+                    Status::PARTIALLY_PAID => 'bg-label-warning',
+                    Status::UNPAID => 'bg-label-danger',
+                ];
+                $badge = $badges[$payment_status] ?? 'bg-label-secondary';
+                $label = ucwords(str_replace('_', ' ', $payment_status));
+
+                return '<span class="badge ' . $badge . '">' . $label . '</span>';
+            })
             ->addColumn('status', function ($item) {
                 $badges = [
                     'draft' => 'bg-label-secondary',
@@ -235,8 +311,45 @@ class OrderService
 
                 return $viewButton . $printButton;
             })
-            ->rawColumns(['business', 'branch', 'warehouse', 'register', 'cashier', 'customer', 'order_type', 'order_source', 'total', 'status', 'action'])
+            ->rawColumns(['business', 'branch', 'warehouse', 'register', 'cashier', 'customer', 'order_type', 'order_source', 'total', 'status', 'payment_status', 'action'])
             ->make(true);
+    }
+
+    /**
+     * Aggregate totals for whatever filter set the POS Order History page
+     * (or the Admin Order List) currently has applied - backs the "Sales
+     * Summary" panel and its thermal print. Same filters/scope as getData(),
+     * just summed instead of paginated.
+     */
+    public function getHistorySummary($obj)
+    {
+        $base = fn () => $this->applyHistoryFilters($this->model_order->getModel()::query(), $obj);
+
+        $total_orders = $base()->count();
+        $total_sales = (float) $base()->sum('total');
+        $total_paid = (float) $base()->sum('paid_amount');
+        $total_due = max($total_sales - $total_paid, 0);
+
+        $by_status = $base()
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status');
+
+        $by_payment_method = $base()
+            ->with('payments.paymentMethod')
+            ->get()
+            ->flatMap(fn ($order) => $order->payments)
+            ->groupBy(fn ($payment) => $payment->paymentMethod->name ?? 'Unknown')
+            ->map(fn ($payments) => (float) $payments->sum('amount'));
+
+        return [
+            'total_orders' => $total_orders,
+            'total_sales' => $total_sales,
+            'total_paid' => $total_paid,
+            'total_due' => $total_due,
+            'by_status' => $by_status,
+            'by_payment_method' => $by_payment_method,
+        ];
     }
 
     public function getById($order_id)

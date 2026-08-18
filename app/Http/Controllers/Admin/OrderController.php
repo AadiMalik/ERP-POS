@@ -6,6 +6,7 @@ use App\Enums\RoleNames;
 use App\Enums\Message;
 use App\Enums\Status;
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\PosRegister;
 use App\Models\User;
 use App\Services\Concrete\Admin\BranchService;
@@ -16,6 +17,7 @@ use App\Services\Concrete\Admin\OrderService;
 use App\Services\Concrete\Admin\OrderSourceService;
 use App\Services\Concrete\Admin\OrderTypeService;
 use App\Services\Concrete\Admin\PaymentMethodService;
+use App\Services\Concrete\Admin\ThermalPrintSettingResolverService;
 use App\Services\Concrete\Admin\WarehouseService;
 use App\Traits\ResponseAPI;
 use Exception;
@@ -37,6 +39,7 @@ class OrderController extends Controller
     protected $order_source_service;
     protected $payment_method_service;
     protected $document_send_log_service;
+    protected $thermal_print_setting_resolver;
 
     public function __construct(
         OrderService $order_service,
@@ -47,7 +50,8 @@ class OrderController extends Controller
         OrderTypeService $order_type_service,
         OrderSourceService $order_source_service,
         PaymentMethodService $payment_method_service,
-        DocumentSendLogService $document_send_log_service
+        DocumentSendLogService $document_send_log_service,
+        ThermalPrintSettingResolverService $thermal_print_setting_resolver
     ) {
         $this->order_service = $order_service;
         $this->business_service = $business_service;
@@ -58,6 +62,7 @@ class OrderController extends Controller
         $this->order_source_service = $order_source_service;
         $this->payment_method_service = $payment_method_service;
         $this->document_send_log_service = $document_send_log_service;
+        $this->thermal_print_setting_resolver = $thermal_print_setting_resolver;
     }
 
     public function index()
@@ -141,6 +146,8 @@ class OrderController extends Controller
 
     public function show($order_id)
     {
+        $this->assertOrderAccessible($order_id);
+
         $order = $this->order_service->getById($order_id);
 
         if (!$order) {
@@ -148,6 +155,33 @@ class OrderController extends Controller
         }
 
         return view('admin.order.show', compact('order'));
+    }
+
+    /**
+     * order/data has no dedicated authorization of its own - it relies on
+     * applyRoleScope() (App\Helpers\CommonFunctions) to only ever return
+     * rows the acting user's business/branch is allowed to see. show(),
+     * details() and print() fetch by order_id directly though, so without
+     * this check any pos.access user could view/print/reorder-source any
+     * order in the system just by knowing its UUID. Reuses the exact same
+     * role set and scoping rule getData() already applies, via a single-row
+     * existence check against the same helper.
+     */
+    protected function assertOrderAccessible($order_id)
+    {
+        $allow_roles = [
+            RoleNames::SUPERADMIN,
+            RoleNames::BUSINESSADMIN,
+            RoleNames::BRANCHADMIN,
+            RoleNames::POSMANAGER,
+            RoleNames::ORDERTAKER,
+        ];
+
+        $accessible = applyRoleScope(Order::where('order_id', $order_id), $allow_roles)->exists();
+
+        if (!$accessible) {
+            abort(403, 'You are not authorized to access this order.');
+        }
     }
 
     /**
@@ -308,6 +342,8 @@ class OrderController extends Controller
 
     public function print($order_id)
     {
+        $this->assertOrderAccessible($order_id);
+
         $order = $this->order_service->getById($order_id);
 
         if (!$order) {
@@ -329,7 +365,18 @@ class OrderController extends Controller
             Log::warning('Print audit log failed: ' . $e->getMessage());
         }
 
-        return view('admin.order.print.print', compact('order'));
+        // Distinct from $order->sale_date/order_date - this is the actual
+        // moment of *this* print/reprint, so a reprinted receipt is always
+        // identifiable from the original one.
+        $printed_at = now();
+
+        $thermal_config = $this->thermal_print_setting_resolver->resolve($order->business_id);
+
+        if ($thermal_config->isEnabled()) {
+            return view('admin.order.print.thermal', compact('order', 'thermal_config', 'printed_at'));
+        }
+
+        return view('admin.order.print.print', compact('order', 'printed_at'));
     }
 
     public function searchProducts(Request $request)
@@ -354,10 +401,115 @@ class OrderController extends Controller
 
     public function details($order_id)
     {
+        $this->assertOrderAccessible($order_id);
+
         try {
             return $this->success(Message::FETCH, $this->order_service->getDetails($order_id));
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }
+    }
+
+    /**
+     * Dedicated POS Order History page - full-featured listing (filters +
+     * pagination) that supersedes the old header offcanvas stub. Reuses the
+     * same order/data endpoint and the same filter-dropdown data index()
+     * already gathers for the full Admin Order List.
+     */
+    public function history()
+    {
+        $is_superadmin = RoleNames::SUPERADMIN == getRoleName();
+        $business_id = Auth::user()->business_id;
+
+        $branches = $is_superadmin ? collect() : $this->branch_service->getAllActive();
+        $cashiers = $is_superadmin ? collect() : User::where('business_id', $business_id)
+            ->where('is_deleted', 0)
+            ->get();
+        $customers = $this->customer_service->getAllActive($is_superadmin ? null : $business_id);
+        $order_types = $this->order_type_service->getAllActive($is_superadmin ? null : $business_id);
+        $order_sources = $this->order_source_service->getAllActive($is_superadmin ? null : $business_id);
+        $payment_methods = $this->payment_method_service->getAllActive($is_superadmin ? null : $business_id);
+
+        $statuses = [
+            'draft' => 'Draft',
+            'hold' => 'Hold',
+            'posted' => 'Posted',
+            'cancelled' => 'Cancelled',
+            'void' => 'Void',
+            'returned' => 'Returned',
+        ];
+
+        $payment_statuses = [
+            'paid' => 'Paid',
+            'partially_paid' => 'Partially Paid',
+            'unpaid' => 'Unpaid',
+        ];
+
+        // Order Takers/POS Managers are fixed to their own branch (mirrors
+        // PosScreenController::$fixed_context_roles) - the Branch filter is
+        // hidden for them, and Order Takers additionally have their date
+        // range locked to today client-side here, purely to match what the
+        // backend (OrderService::getData()) will enforce regardless.
+        $role = getRoleName();
+        $is_fixed_context = in_array($role, [RoleNames::ORDERTAKER, RoleNames::POSMANAGER], true);
+        $is_order_taker = $role === RoleNames::ORDERTAKER;
+
+        // The POS header's live register-session actions (Cash In/Out, Close
+        // Register, Reports offcanvas, Hold Orders) are only wired up by
+        // pos-screen.js on the POS screen itself - keeping them off here
+        // avoids dead buttons on this page. This page still gets the POS
+        // brand/user-menu/"Switch to Admin" chrome from the same header.
+        $show_pos_actions = false;
+
+        return view('admin.pos.order-history.index', compact(
+            'branches',
+            'cashiers',
+            'customers',
+            'order_types',
+            'order_sources',
+            'payment_methods',
+            'statuses',
+            'payment_statuses',
+            'is_superadmin',
+            'is_fixed_context',
+            'is_order_taker',
+            'show_pos_actions'
+        ));
+    }
+
+    /**
+     * Aggregate totals for the currently filtered POS Order History view
+     * (order count, sales/paid/due, breakdown by status and payment method).
+     * Reuses the exact same filter/scope rules as getData() via
+     * OrderService::getHistorySummary() so the numbers always match what the
+     * table above is showing.
+     */
+    public function historySummary(Request $request)
+    {
+        try {
+            return $this->success(Message::FETCH, $this->order_service->getHistorySummary($request->all()));
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * Thermal-formatted print of the same filtered summary - standalone
+     * print layout (no admin/POS chrome), same as order print/reprint, so it
+     * never leaves the POS interface.
+     */
+    public function historySummaryPrint(Request $request)
+    {
+        $business_id = RoleNames::SUPERADMIN == getRoleName()
+            ? ($request->query('business_id') ?: Auth::user()->business_id)
+            : Auth::user()->business_id;
+
+        $filters = $request->query();
+        $summary = $this->order_service->getHistorySummary($filters);
+        $thermal_config = $this->thermal_print_setting_resolver->resolve($business_id);
+        $business = $this->business_service->getById($business_id);
+        $printed_at = now();
+
+        return view('admin.order.print.thermal-sales-summary', compact('summary', 'thermal_config', 'business', 'filters', 'printed_at'));
     }
 }

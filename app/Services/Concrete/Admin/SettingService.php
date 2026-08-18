@@ -21,6 +21,7 @@ use App\Models\PraSetting;
 use App\Models\PrintSetting;
 use App\Models\SupplierSetting;
 use App\Models\ThemeSetting;
+use App\Models\ThermalPrintSetting;
 use App\Models\WhatsappSetting;
 use App\Repository\Repository;
 use Carbon\Carbon;
@@ -45,6 +46,7 @@ class SettingService
     protected $model_theme_setting;
     protected $model_pos_setting;
     protected $model_pra_setting;
+    protected $model_thermal_print_setting;
 
     public function __construct()
     {
@@ -63,6 +65,7 @@ class SettingService
         $this->model_theme_setting = new Repository(new ThemeSetting());
         $this->model_pos_setting = new Repository(new PosSetting());
         $this->model_pra_setting = new Repository(new PraSetting());
+        $this->model_thermal_print_setting = new Repository(new ThermalPrintSetting());
     }
 
     public function getBusinessSetting($business_id)
@@ -173,6 +176,24 @@ class SettingService
                 'footer_config' => config('print_defaults.footer'),
                 'page_config' => config('print_defaults.page'),
                 'body_config' => config('print_defaults.body'),
+                'date_created' => now(),
+            ]
+        );
+    }
+
+    public function getThermalPrintSetting($business_id)
+    {
+        // firstOrCreate() does not reflect DB column defaults back onto the in-memory
+        // model after an insert, so every default is spelled out explicitly here -
+        // otherwise a freshly created setting would read as blank in PHP even though
+        // the DB row itself has the correct defaults (same lesson as getBarcodeSetting()).
+        return $this->model_thermal_print_setting->getModel()::firstOrCreate(
+            ['business_id' => $business_id],
+            [
+                'is_enabled' => false,
+                'paper_width_mm' => config('thermal_print_defaults.paper_width_mm'),
+                'field_config' => config('thermal_print_defaults.field_config'),
+                'footer_config' => config('thermal_print_defaults.footer_config'),
                 'date_created' => now(),
             ]
         );
@@ -441,6 +462,27 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id'],
             'document_type' => $obj['document_type'] ?? 'default',
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
+    }
+
+    public function updateThermalPrintSetting(array $obj)
+    {
+        $model = $this->model_thermal_print_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id'],
         ]);
 
         if (!$setting->exists) {

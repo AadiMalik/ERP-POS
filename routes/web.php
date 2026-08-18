@@ -343,6 +343,8 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         // swallow them.
         Route::group(['prefix' => 'order'], function () {
             Route::post('data', [App\Http\Controllers\Admin\OrderController::class, 'getData']);
+            Route::post('history-summary', [App\Http\Controllers\Admin\OrderController::class, 'historySummary']);
+            Route::get('history-summary/print', [App\Http\Controllers\Admin\OrderController::class, 'historySummaryPrint'])->name('order.history-summary.print');
             Route::post('hold', [App\Http\Controllers\Admin\OrderController::class, 'hold']);
             Route::post('resume', [App\Http\Controllers\Admin\OrderController::class, 'resume']);
             Route::post('reopen', [App\Http\Controllers\Admin\OrderController::class, 'reopen'])->middleware('permission:order.reopen');
@@ -360,6 +362,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
 
     //pos screen
     Route::group(['middleware' => ['permission:pos.access']], function () {
+        Route::get('order-history', [App\Http\Controllers\Admin\OrderController::class, 'history'])->name('order.history');
         Route::get('pos-screen', [App\Http\Controllers\Admin\PosScreenController::class, 'index'])->name('pos-screen');
         Route::post('pos-screen/context', [App\Http\Controllers\Admin\PosScreenController::class, 'selectContext'])->name('pos-screen.context');
         Route::get('pos-screen/context-options/{business_id}', [App\Http\Controllers\Admin\PosScreenController::class, 'contextOptions']);
@@ -660,6 +663,8 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::post('pos', [App\Http\Controllers\Admin\SettingController::class, 'updatePosSetting'])->name('pos.update');
         Route::post('pra', [App\Http\Controllers\Admin\SettingController::class, 'updatePraSetting'])->name('pra.update');
         Route::post('print', [App\Http\Controllers\Admin\SettingController::class, 'updatePrintSetting'])->name('print.update');
+        Route::post('thermal-print', [App\Http\Controllers\Admin\SettingController::class, 'updateThermalPrintSetting'])->name('thermal_print.update');
+        Route::post('thermal-print/preview', [App\Http\Controllers\Admin\SettingController::class, 'previewThermalPrintSetting'])->name('thermal_print.preview');
         Route::post('barcode', [App\Http\Controllers\Admin\SettingController::class, 'updateBarcodeSetting'])->name('barcode.update');
         Route::post('theme', [App\Http\Controllers\Admin\SettingController::class, 'updateThemeSetting'])->name('theme.update');
         Route::post('theme/preset', [App\Http\Controllers\Admin\SettingController::class, 'applyThemePreset'])->name('theme.preset');

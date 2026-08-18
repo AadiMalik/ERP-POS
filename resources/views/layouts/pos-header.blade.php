@@ -23,9 +23,9 @@
                 <i class="fa fa-minus"></i>
             </button>
 
-            <button type="button" class="btn btn-sm pos-header-btn" id="orderHistoryBtn">
+            <a href="{{ route('order.history') }}" target="_blank" class="btn btn-sm pos-header-btn">
                 <i class="fa fa-clock-rotate-left"></i> History
-            </button>
+            </a>
             <button type="button" class="btn btn-sm pos-header-btn" id="posReportsBtn">
                 <i class="fa fa-chart-bar"></i> Reports
             </button>

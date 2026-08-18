@@ -127,6 +127,11 @@ class Business extends Model
         return $this->hasOne(PrintSetting::class, 'business_id', 'business_id');
     }
 
+    public function thermalPrintSetting()
+    {
+        return $this->hasOne(ThermalPrintSetting::class, 'business_id', 'business_id');
+    }
+
     public function barcodeSetting()
     {
         return $this->hasOne(BarcodeSetting::class, 'business_id', 'business_id');

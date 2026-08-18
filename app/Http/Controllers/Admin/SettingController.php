@@ -13,8 +13,11 @@ use App\Services\Concrete\Admin\AccountService;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CommonService;
 use App\Services\Concrete\Admin\CustomerService;
+use App\Models\Order;
 use App\Services\Concrete\Admin\PrintSettingResolverService;
 use App\Services\Concrete\Admin\SettingService;
+use App\Services\Concrete\Admin\ThermalPrintSettingResolverService;
+use App\Support\Print\ThermalPrintConfig;
 use App\Traits\ResponseAPI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +34,7 @@ class SettingController extends Controller
     protected $common_service;
     protected $print_setting_resolver;
     protected $customer_service;
+    protected $thermal_print_setting_resolver;
 
     public function __construct(
         BusinessService $business_service,
@@ -38,7 +42,8 @@ class SettingController extends Controller
         AccountService $account_service,
         CommonService $common_service,
         PrintSettingResolverService $print_setting_resolver,
-        CustomerService $customer_service
+        CustomerService $customer_service,
+        ThermalPrintSettingResolverService $thermal_print_setting_resolver
     ) {
         $this->business_service = $business_service;
         $this->setting_service = $setting_service;
@@ -46,6 +51,7 @@ class SettingController extends Controller
         $this->common_service = $common_service;
         $this->print_setting_resolver = $print_setting_resolver;
         $this->customer_service = $customer_service;
+        $this->thermal_print_setting_resolver = $thermal_print_setting_resolver;
     }
 
     public function index()
@@ -66,6 +72,7 @@ class SettingController extends Controller
         $theme_setting = $this->setting_service->getThemeSetting(Auth::user()->business_id);
         $pos_setting = $this->setting_service->getPosSetting(Auth::user()->business_id);
         $pra_setting = $this->setting_service->getPraSetting(Auth::user()->business_id);
+        $thermal_print_setting = $this->setting_service->getThermalPrintSetting(Auth::user()->business_id);
         $pos_customers = $this->customer_service->getAllActive(Auth::user()->business_id);
         $theme_presets = config('theme_presets');
         $timezones = $this->common_service->getAllTimezone();
@@ -91,6 +98,7 @@ class SettingController extends Controller
             'theme_setting',
             'pos_setting',
             'pra_setting',
+            'thermal_print_setting',
             'pos_customers',
             'theme_presets',
             'timezones',
@@ -578,6 +586,132 @@ class SettingController extends Controller
         return $setting
             ? $this->success(Message::UPDATE, $setting)
             : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateThermalPrintSetting(Request $request)
+    {
+        $rules = [
+            'paper_width_mm' => 'nullable|integer|in:58,80',
+            'field_config'   => 'nullable|array',
+            'footer_config'  => 'nullable|array',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->only(['paper_width_mm', 'field_config', 'footer_config']);
+        $obj['is_enabled'] = $request->has('is_enabled') ? 1 : 0;
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updateThermalPrintSetting($obj);
+
+        if ($setting) {
+            $this->thermal_print_setting_resolver->forgetCache($obj['business_id']);
+        }
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function previewThermalPrintSetting(Request $request)
+    {
+        $rules = [
+            'paper_width_mm' => 'nullable|integer|in:58,80',
+            'field_config'   => 'nullable|array',
+            'footer_config'  => 'nullable|array',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $business_id = $request->business_id ?? Auth::user()->business_id;
+
+        // Unsaved config built directly from the posted (not yet saved) form
+        // values, so the preview always reflects the current form state -
+        // never the persisted/cached setting.
+        $thermal_config = new ThermalPrintConfig([
+            'is_enabled' => true,
+            'paper_width_mm' => $request->input('paper_width_mm', config('thermal_print_defaults.paper_width_mm')),
+            'field_config' => array_merge(config('thermal_print_defaults.field_config'), $request->input('field_config', [])),
+            'footer_config' => array_merge(config('thermal_print_defaults.footer_config'), $request->input('footer_config', [])),
+        ]);
+
+        $order = $this->resolveThermalPreviewOrder($business_id);
+
+        $html = view('admin.order.print.thermal', compact('order', 'thermal_config'))->render();
+
+        return $this->success(Message::FETCH, $html);
+    }
+
+    /**
+     * Most recent real order for this business, so the preview reflects
+     * genuine data whenever possible. Falls back to an in-memory (never
+     * persisted) sample order for a business that has not made a sale yet,
+     * so the preview never errors out on a brand-new business.
+     */
+    protected function resolveThermalPreviewOrder($business_id)
+    {
+        $order = Order::with([
+            'business', 'branch', 'user', 'cashier', 'orderType', 'orderSource', 'voucher',
+            'details', 'details.product', 'details.unit',
+        ])
+            ->where('business_id', $business_id)
+            ->where('is_deleted', 0)
+            ->latest('date_created')
+            ->first();
+
+        if ($order) {
+            return $order;
+        }
+
+        $business = \App\Models\Business::find($business_id);
+        $branch = Auth::user()->branch ?? \App\Models\Branch::where('business_id', $business_id)
+            ->where('is_deleted', 0)
+            ->first();
+
+        $order = new Order([
+            'order_id' => 'preview',
+            'daily_order_id' => 'PREVIEW-0001',
+            'business_id' => $business_id,
+            'order_date' => now(),
+            'sale_date' => now(),
+            'subtotal' => 1250,
+            'discount' => 10,
+            'discount_amount' => 125,
+            'tax' => 5,
+            'tax_amount' => 56.25,
+            'total' => 1181.25,
+            'paid_amount' => 1181.25,
+            'voucher_discount_amount' => 0,
+        ]);
+
+        $order->setRelation('business', $business);
+        $order->setRelation('branch', $branch);
+        $order->setRelation('user', new \App\Models\User(['name' => 'Walk-in Customer']));
+        $order->setRelation('cashier', new \App\Models\User(['name' => Auth::user()->name ?? 'Cashier']));
+        $order->setRelation('orderType', new \App\Models\OrderType(['name' => 'Dine In']));
+        $order->setRelation('orderSource', new \App\Models\OrderSource(['name' => 'POS']));
+        $order->setRelation('voucher', null);
+
+        $detail_one = new \App\Models\OrderDetail(['quantity' => 2, 'unit_price' => 500, 'total' => 1000]);
+        $detail_one->setRelation('product', new \App\Models\Product(['name' => 'Sample Product A']));
+        $detail_one->setRelation('unit', new \App\Models\Unit(['name' => 'Pcs']));
+
+        $detail_two = new \App\Models\OrderDetail(['quantity' => 1, 'unit_price' => 250, 'total' => 250]);
+        $detail_two->setRelation('product', new \App\Models\Product(['name' => 'Sample Product B']));
+        $detail_two->setRelation('unit', new \App\Models\Unit(['name' => 'Pcs']));
+
+        $order->setRelation('details', collect([$detail_one, $detail_two]));
+        $order->setRelation('payments', collect());
+
+        return $order;
     }
 
     public function updateThemeSetting(Request $request)

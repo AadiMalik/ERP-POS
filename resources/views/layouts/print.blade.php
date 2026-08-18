@@ -15,7 +15,7 @@
         <button type="button" onclick="window.close()">Close</button>
     </div>
 
-    <div class="print-page">
+    <div class="print-page @yield('page_class')">
         @yield('content')
     </div>
 </body>

@@ -9,7 +9,12 @@
                 <a href="{{ route('order.print', $order->order_id) }}" target="_blank"
                     class="btn btn-outline-secondary">
                     <i class="fa fa-print"></i>
-                    Print
+                    Print / Reprint
+                </a>
+                <a href="{{ route('pos-screen') }}?reorder_from={{ $order->order_id }}" target="_blank"
+                    class="btn btn-outline-success">
+                    <i class="fa fa-rotate-right"></i>
+                    Reorder
                 </a>
                 <a href="{{ url('admin/order') }}" class="btn btn-outline-primary">
                     <i class="fa fa-arrow-left"></i>
@@ -23,6 +28,21 @@
                 <h6 class="mb-0">Order Information</h6>
             </div>
             <div class="card-body">
+                @php
+                    $due = max(($order->total ?? 0) - ($order->paid_amount ?? 0), 0);
+                    if ($due <= 0) {
+                        $payment_status = \App\Enums\Status::PAID;
+                    } elseif (($order->paid_amount ?? 0) > 0) {
+                        $payment_status = \App\Enums\Status::PARTIALLY_PAID;
+                    } else {
+                        $payment_status = \App\Enums\Status::UNPAID;
+                    }
+                    $payment_status_badges = [
+                        \App\Enums\Status::PAID => 'bg-label-success',
+                        \App\Enums\Status::PARTIALLY_PAID => 'bg-label-warning',
+                        \App\Enums\Status::UNPAID => 'bg-label-danger',
+                    ];
+                @endphp
                 <div class="row g-3">
                     <div class="col-md-3">
                         <strong>Daily Order ID:</strong><br>
@@ -41,6 +61,26 @@
                         <span class="badge bg-label-primary">{{ ucfirst($order->status ?? '-') }}</span>
                     </div>
                     <div class="col-md-3">
+                        <strong>Payment Status:</strong><br>
+                        <span class="badge {{ $payment_status_badges[$payment_status] ?? 'bg-label-secondary' }}">
+                            {{ ucwords(str_replace('_', ' ', $payment_status)) }}
+                        </span>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Paid Amount:</strong><br>
+                        {{ currency($order->paid_amount ?? 0) }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Due Amount:</strong><br>
+                        {{ currency($due) }}
+                    </div>
+                    @if (!empty($order->voucher))
+                        <div class="col-md-3">
+                            <strong>Voucher:</strong><br>
+                            {{ $order->voucher->code ?? '-' }} (-{{ currency($order->voucher_discount_amount ?? 0) }})
+                        </div>
+                    @endif
+                    <div class="col-md-3">
                         <strong>Business:</strong><br>
                         {{ $order->business->name ?? '-' }}
                     </div>
@@ -57,7 +97,7 @@
                         {{ $order->register->name ?? '-' }}
                     </div>
                     <div class="col-md-3">
-                        <strong>Cashier:</strong><br>
+                        <strong>Order Taker:</strong><br>
                         {{ $order->cashier->name ?? '-' }}
                     </div>
                     <div class="col-md-3">
@@ -72,6 +112,12 @@
                         <strong>Order Source:</strong><br>
                         {{ $order->orderSource->name ?? '-' }}
                     </div>
+                    @if (!empty($order->delivery_address))
+                        <div class="col-md-6">
+                            <strong>Delivery Address:</strong><br>
+                            {{ $order->delivery_address }}
+                        </div>
+                    @endif
                     @if (!empty($order->fbr_invoice_number))
                         <div class="col-md-3">
                             <strong>FBR Invoice No.:</strong><br>

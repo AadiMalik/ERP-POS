@@ -24,6 +24,7 @@
         close_session_modal: null,
         open_session_modal: null,
         held_orders_offcanvas: null,
+        reorder_applied: false,
         active_category_id: '',
         product_picker_modal: null,
         picker: {
@@ -88,7 +89,6 @@
         state.close_session_modal = new bootstrap.Modal(document.getElementById('closeSessionModal'));
         state.cash_movement_modal = new bootstrap.Modal(document.getElementById('cashMovementModal'));
         state.held_orders_offcanvas = new bootstrap.Offcanvas(document.getElementById('heldOrdersOffcanvas'));
-        state.order_history_offcanvas = new bootstrap.Offcanvas(document.getElementById('orderHistoryOffcanvas'));
         state.pos_reports_offcanvas = new bootstrap.Offcanvas(document.getElementById('posReportsOffcanvas'));
         state.product_picker_modal = new bootstrap.Modal(document.getElementById('productPickerModal'));
         state.add_customer_modal = new bootstrap.Modal(document.getElementById('addCustomerModal'));
@@ -153,16 +153,15 @@
 
         loadHeldOrdersCount();
         loadProductsByCategory('');
+
+        if (CFG.reorder_from) {
+            reorderFromOrder(CFG.reorder_from);
+        }
     }
 
     function wireEvents() {
         $('#openSessionSubmitBtn').on('click', submitOpenSession);
         $('#openRegisterFromBrowseBtn').on('click', function () { state.open_session_modal.show(); });
-        $('#orderHistoryBtn').on('click', function () {
-            loadOrderHistory();
-            state.order_history_offcanvas.show();
-        });
-        $('#orderHistoryStatusFilter').on('change', loadOrderHistory);
         $('#posReportsBtn').on('click', function () {
             loadPosReports();
             state.pos_reports_offcanvas.show();
@@ -1341,49 +1340,76 @@
     }
 
     // ==============================
-    // ORDER HISTORY (non-transactional - viewable with no open register)
+    // REORDER (from admin/order/show's Reorder button - ?reorder_from=<id>
+    // on the pos-screen URL, see PosScreenController::index()/POS_CONFIG)
     // ==============================
-    function loadOrderHistory() {
-        var $list = $('#orderHistoryList');
-        $list.html('<div class="text-muted text-center py-3">Loading...</div>');
+    function reorderFromOrder(order_id) {
+        if (state.reorder_applied) return;
+        state.reorder_applied = true;
 
-        var data = {
-            draw: 1,
-            start: 0,
-            length: 50,
-            business_id: CFG.business_id,
-            branch_id: CFG.branch_id,
-        };
-
-        var status = $('#orderHistoryStatusFilter').val();
-        if (status) {
-            data.status = status;
-        }
-
-        ajaxRequest({ url: URLS.order_data, method: 'POST', data: data })
+        ajaxRequest({ url: URLS.order_details + '/' + order_id })
             .then(function (response) {
-                var rows = response.data || response.Data || [];
-                $list.empty();
+                var data = response.Data || {};
+                var header = data.header || {};
+                var details = data.details || [];
 
-                if (!rows.length) {
-                    $list.append('<div class="text-muted text-center py-3">No orders found</div>');
+                if (header.business_id && CFG.business_id && header.business_id !== CFG.business_id) {
+                    errorMessage('This order belongs to a different business and cannot be reordered here.');
                     return;
                 }
 
-                rows.forEach(function (row) {
-                    $list.append(
-                        '<div class="list-group-item">' +
-                            '<div class="d-flex justify-content-between">' +
-                                '<span>#' + escapeHtml(row.daily_order_id) + '</span>' +
-                                '<span class="fw-bold">' + money(row.total) + '</span>' +
-                            '</div>' +
-                            '<small class="text-muted">' + escapeHtml(row.status || '') + '</small>' +
-                        '</div>'
-                    );
+                // Deliberately left null - Hold/Pay must create a brand-new
+                // order (new daily_order_id, current date/time) rather than
+                // editing the source order (see OrderService::save()'s
+                // create-vs-update branch, keyed off order_id presence).
+                state.order_id = null;
+                state.order_daily_id = null;
+                state.cart = [];
+                state.line_seq = 0;
+
+                details.forEach(function (d) {
+                    state.line_seq += 1;
+                    state.cart.push({
+                        line_key: 'line_' + state.line_seq,
+                        product_variation_id: d.product_variation_id,
+                        product_name: d.product_name || '',
+                        variation_name: d.product_variation_name || '',
+                        unit_id: d.unit_id,
+                        unit_name: d.unit_name || 'Unit',
+                        quantity: d.quantity,
+                        unit_price: d.unit_price,
+                        discount: d.discount,
+                        notes: d.notes || '',
+                    });
                 });
+
+                $('#delivery_address').val(header.delivery_address || '');
+
+                if (header.customer_id) {
+                    $('#customer_id').val(header.customer_id).trigger('change');
+                }
+                if (header.order_type_id) {
+                    $('#order_type_id').val(header.order_type_id).trigger('change');
+                }
+
+                // Payments/discount/voucher are intentionally NOT carried
+                // over - a reorder is a fresh sale and the server always
+                // recomputes totals from scratch on save anyway.
+                state.payments = [];
+                renderCart();
+                resetPaymentSelection();
+                selectDefaultPaymentMethod();
+
+                successMessage('Cart loaded from order #' + (header.daily_order_id || '') + ' for reorder.');
+
+                if (window.history && window.history.replaceState) {
+                    var url = new URL(window.location.href);
+                    url.searchParams.delete('reorder_from');
+                    window.history.replaceState(null, '', url.toString());
+                }
             })
             .catch(function (err) {
-                $list.html('<div class="text-danger text-center py-3">' + escapeHtml(err.Message || 'Unable to load order history.') + '</div>');
+                errorMessage(err.Message || 'Unable to load order for reorder.');
             });
     }
 

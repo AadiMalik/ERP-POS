@@ -146,6 +146,13 @@ class PosScreenController extends Controller
         $pos_order_source_id = $this->resolvePosOrderSourceId($order_sources);
         $branch_name = optional($this->branch_service->getById($branch_id))->name;
 
+        // Reorder entry point - order.show's Reorder button links here with
+        // this query param; pos-screen.js reads it from POS_CONFIG on load
+        // to hydrate the cart from that order's line items (see
+        // reorderFromOrder() there). Never trusted as-is beyond an ID -
+        // OrderController::details() re-checks access when it's fetched.
+        $reorder_from = request()->query('reorder_from');
+
         // Change-Branch modal data - only needed for roles that are allowed to
         // switch (see $fixed_context_roles); OT/PosManager stay fixed to their
         // own branch, so skip the extra queries entirely for them.
@@ -180,7 +187,8 @@ class PosScreenController extends Controller
             'is_superadmin',
             'context_businesses',
             'context_branches',
-            'context_warehouses'
+            'context_warehouses',
+            'reorder_from'
         ));
     }
 

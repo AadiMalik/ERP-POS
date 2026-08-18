@@ -1,0 +1,150 @@
+/* Thermal Receipt stylesheet - Smart Mart ERP
+   Compact, single-column flow layout for 58mm/80mm thermal printers.
+   Every optional section is its own conditional block in the Blade template
+   (never an empty cell / visibility:hidden), so hiding a field naturally
+   collapses its space instead of leaving a gap. */
+
+.print-page.thermal-page {
+    max-width: 80mm;
+    min-height: 0;
+    margin: 10px auto;
+    padding: 3mm;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    line-height: 1.35;
+    color: #000;
+}
+
+.thermal-receipt * {
+    box-sizing: border-box;
+}
+
+.thermal-receipt .tr-center {
+    text-align: center;
+}
+
+.thermal-receipt .tr-logo {
+    max-width: 45mm;
+    max-height: 18mm;
+    object-fit: contain;
+    margin: 0 auto 2mm auto;
+    display: block;
+}
+
+.thermal-receipt .tr-name {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 0 1mm 0;
+    text-transform: uppercase;
+}
+
+.thermal-receipt .tr-meta-line {
+    font-size: 10px;
+    margin: 0;
+}
+
+.thermal-receipt .tr-divider {
+    border: none;
+    border-top: 1px dashed #000;
+    margin: 2mm 0;
+}
+
+.thermal-receipt .tr-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 10.5px;
+    margin: 0 0 0.5mm 0;
+}
+
+.thermal-receipt .tr-row .tr-label {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.thermal-receipt .tr-row .tr-value {
+    text-align: right;
+    word-break: break-word;
+}
+
+.thermal-receipt .tr-items {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    margin: 1mm 0;
+}
+
+.thermal-receipt .tr-items th {
+    border-bottom: 1px dashed #000;
+    padding: 1mm 0.5mm;
+    text-align: left;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 9px;
+}
+
+.thermal-receipt .tr-items td {
+    padding: 0.8mm 0.5mm;
+    vertical-align: top;
+}
+
+.thermal-receipt .tr-items th.text-right,
+.thermal-receipt .tr-items td.text-right {
+    text-align: right;
+}
+
+.thermal-receipt .tr-items .tr-item-name {
+    font-weight: 600;
+}
+
+.thermal-receipt .tr-totals {
+    width: 100%;
+    margin-top: 1mm;
+}
+
+.thermal-receipt .tr-totals .tr-row.tr-grand-total {
+    font-size: 12.5px;
+    font-weight: 800;
+    border-top: 1px solid #000;
+    padding-top: 1mm;
+    margin-top: 1mm;
+}
+
+.thermal-receipt .tr-footer {
+    text-align: center;
+    margin-top: 2mm;
+}
+
+.thermal-receipt .tr-thank-you {
+    font-size: 11px;
+    font-weight: 600;
+    margin: 0 0 1mm 0;
+}
+
+.thermal-receipt .tr-qr {
+    margin: 2mm auto;
+    display: flex;
+    justify-content: center;
+}
+
+.thermal-receipt .tr-qr svg {
+    width: 26mm;
+    height: 26mm;
+}
+
+.thermal-receipt .tr-powered-by {
+    font-size: 8.5px;
+    color: #555;
+    margin-top: 1mm;
+}
+
+@media print {
+    .print-page.thermal-page {
+        max-width: none;
+        margin: 0;
+        padding: 2mm;
+        box-shadow: none;
+    }
+}
