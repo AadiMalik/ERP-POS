@@ -35,6 +35,42 @@
                     aria-label="Star themeselection/sneat-html-admin-template-free on GitHub">Star</a>
             </li>
 
+            <!-- Notifications -->
+            @can('notification.view')
+                <li class="nav-item navbar-dropdown dropdown-notifications dropdown me-3">
+                    <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                        <i class="fa fa-bell fs-4"></i>
+                        <span class="badge bg-danger rounded-pill d-none" id="notificationBadge"
+                            style="position:relative; top:-10px; left:-6px; font-size:.65rem;">0</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" style="width: 380px; max-height: 420px; overflow-y: auto;">
+                        <li>
+                            <div class="dropdown-header d-flex align-items-center justify-content-between py-2 px-3">
+                                <h6 class="mb-0">Notifications</h6>
+                                <a href="javascript:void(0);" class="text-body" id="markAllReadDropdownBtn" title="Mark all as read">
+                                    <i class="fa fa-check-double"></i>
+                                </a>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="dropdown-divider"></div>
+                        </li>
+                        <li id="notificationListContainer">
+                            <div class="text-center text-muted py-4">No notifications</div>
+                        </li>
+                        <li>
+                            <div class="dropdown-divider"></div>
+                        </li>
+                        <li>
+                            <a href="{{ url('admin/notifications') }}" class="dropdown-item d-flex justify-content-center p-2 text-primary">
+                                View all notifications
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            @endcan
+            <!--/ Notifications -->
+
             <!-- User -->
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
@@ -104,3 +140,103 @@
 </nav>
 
 <!-- / Navbar -->
+
+@can('notification.view')
+    @push('js')
+        <script>
+            (function() {
+                let soundEnabled = {{ session('notification_setting.sound_enabled', true) ? 'true' : 'false' }};
+                let lastUnreadCount = null;
+                const unreadCountUrl = "{{ route('notifications.unread-count') }}";
+                const latestUrl = "{{ route('notifications.latest') }}";
+                const markReadUrlBase = "{{ url('admin/notifications') }}";
+                const markAllReadUrl = "{{ route('notifications.mark-all-read') }}";
+
+                function playNotificationBeep() {
+                    if (!soundEnabled) return;
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+                        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                        oscillator.connect(gain);
+                        gain.connect(ctx.destination);
+                        oscillator.start();
+                        oscillator.stop(ctx.currentTime + 0.3);
+                    } catch (e) {}
+                }
+
+                function renderNotificationDropdown(items) {
+                    const $container = $('#notificationListContainer');
+                    if (!items || items.length === 0) {
+                        $container.html('<div class="text-center text-muted py-4">No notifications</div>');
+                        return;
+                    }
+                    let html = '';
+                    items.forEach(function(item) {
+                        const unreadClass = item.is_read ? '' : 'bg-label-primary';
+                        html += '<a href="javascript:void(0);" class="dropdown-item d-flex flex-column py-2 px-3 border-bottom notification-item ' + unreadClass + '" data-id="' + item.id + '" data-url="' + (item.url || '') + '">' +
+                            '<span class="fw-semibold small">' + item.title + '</span>' +
+                            '<span class="small text-muted text-truncate d-block" style="max-width:340px;">' + item.message + '</span>' +
+                            '<span class="small text-muted">' + item.date + '</span>' +
+                            '</a>';
+                    });
+                    $container.html(html);
+
+                    $('.notification-item').off('click').on('click', function() {
+                        const id = $(this).data('id');
+                        const url = $(this).data('url');
+                        $.post(markReadUrlBase + '/' + id + '/read', {
+                            _token: "{{ csrf_token() }}"
+                        }).always(function() {
+                            if (url) {
+                                window.location.href = url;
+                            } else {
+                                refreshNotificationBell();
+                            }
+                        });
+                    });
+                }
+
+                window.refreshNotificationBell = function() {
+                    $.getJSON(unreadCountUrl, function(res) {
+                        const count = res.count || 0;
+                        const $badge = $('#notificationBadge');
+
+                        if (count > 0) {
+                            $badge.text(count > 99 ? '99+' : count).removeClass('d-none');
+                        } else {
+                            $badge.addClass('d-none');
+                        }
+
+                        if (lastUnreadCount !== null && count > lastUnreadCount) {
+                            playNotificationBeep();
+                        }
+                        lastUnreadCount = count;
+                    });
+
+                    $.getJSON(latestUrl, function(res) {
+                        renderNotificationDropdown(res.data || []);
+                    });
+                };
+
+                $(function() {
+                    refreshNotificationBell();
+                    setInterval(refreshNotificationBell, 30000);
+
+                    $('#markAllReadDropdownBtn').on('click', function(e) {
+                        e.preventDefault();
+                        $.post(markAllReadUrl, {
+                            _token: "{{ csrf_token() }}"
+                        }).always(function() {
+                            refreshNotificationBell();
+                        });
+                    });
+                });
+            })();
+        </script>
+    @endpush
+@endcan

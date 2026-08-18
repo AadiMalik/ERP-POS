@@ -45,6 +45,8 @@ class SettingController extends Controller
         CustomerService $customer_service,
         ThermalPrintSettingResolverService $thermal_print_setting_resolver
     ) {
+        $this->middleware('permission:setting.manage');
+
         $this->business_service = $business_service;
         $this->setting_service = $setting_service;
         $this->account_service = $account_service;
@@ -63,6 +65,7 @@ class SettingController extends Controller
         $customer_setting = $this->setting_service->getCustomerSetting(Auth::user()->business_id);
         $supplier_setting = $this->setting_service->getSupplierSetting(Auth::user()->business_id);
         $inventory_setting = $this->setting_service->getInventorySetting(Auth::user()->business_id);
+        $notification_setting = $this->setting_service->getNotificationSetting(Auth::user()->business_id);
         $email_setting = $this->setting_service->getEmailSetting(Auth::user()->business_id);
         $sms_setting = $this->setting_service->getSmsSetting(Auth::user()->business_id);
         $fbr_setting = $this->setting_service->getFbrSetting(Auth::user()->business_id);
@@ -89,6 +92,7 @@ class SettingController extends Controller
             'customer_setting',
             'supplier_setting',
             'inventory_setting',
+            'notification_setting',
             'email_setting',
             'sms_setting',
             'fbr_setting',
@@ -516,6 +520,40 @@ class SettingController extends Controller
         $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
 
         $setting = $this->setting_service->updateInventorySetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateNotificationSetting(Request $request)
+    {
+        $rules = [
+            'payment_due_days_before' => 'nullable|integer|min:0',
+            'credit_limit_threshold_percent' => 'nullable|integer|min:1',
+            'supplier_payment_reminder_days_before' => 'nullable|integer|min:0',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        // Plain checkboxes (not selects) are omitted from the request entirely when
+        // unchecked, matching the convention used for every other setting tab.
+        $obj = [
+            'payment_due_alert_enabled'             => $request->has('payment_due_alert_enabled') ? 1 : 0,
+            'payment_due_days_before'                => $request->payment_due_days_before,
+            'credit_limit_alert_enabled'             => $request->has('credit_limit_alert_enabled') ? 1 : 0,
+            'credit_limit_threshold_percent'         => $request->credit_limit_threshold_percent,
+            'supplier_payment_reminder_enabled'      => $request->has('supplier_payment_reminder_enabled') ? 1 : 0,
+            'supplier_payment_reminder_days_before'  => $request->supplier_payment_reminder_days_before,
+            'order_status_alert_enabled'             => $request->has('order_status_alert_enabled') ? 1 : 0,
+            'sound_enabled'                           => $request->has('sound_enabled') ? 1 : 0,
+        ];
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updateNotificationSetting($obj);
 
         return $setting
             ? $this->success(Message::UPDATE, $setting)

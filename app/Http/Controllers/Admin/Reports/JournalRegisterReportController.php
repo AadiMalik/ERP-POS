@@ -36,6 +36,8 @@ class JournalRegisterReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.journal-register.view');
+
         $this->journal_register_report_service = $journal_register_report_service;
         $this->business_service = $business_service;
         $this->journal_service = $journal_service;

@@ -23,6 +23,13 @@ class BranchController extends Controller
 
     public function __construct(BusinessService $business_service, BranchService $branch_service)
     {
+        $this->middleware('permission:branch.view')->only(['index', 'getData', 'byBusiness']);
+        $this->middleware('permission:branch.create')->only(['create']);
+        $this->middleware('permission:branch.edit')->only(['edit']);
+        $this->middleware('permission:branch.create|branch.edit')->only(['store']);
+        $this->middleware('permission:branch.delete')->only(['destroy']);
+        $this->middleware('permission:branch.status')->only(['status']);
+
         $this->business_service = $business_service;
         $this->branch_service = $branch_service;
     }

@@ -489,6 +489,22 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::post('change-status', [App\Http\Controllers\Admin\AdminExpenseController::class, 'status']);
     });
 
+    //audit & security - activity log
+    Route::get('activity-log', [App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('activity-log.index');
+    Route::post('activity-log/data', [App\Http\Controllers\Admin\ActivityLogController::class, 'getData']);
+
+    //audit & security - login history
+    Route::get('login-history', [App\Http\Controllers\Admin\LoginHistoryController::class, 'index'])->name('login-history.index');
+    Route::post('login-history/data', [App\Http\Controllers\Admin\LoginHistoryController::class, 'getData']);
+
+    //notifications
+    Route::get('notifications', [App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/data', [App\Http\Controllers\Admin\NotificationController::class, 'getData']);
+    Route::get('notifications/unread-count', [App\Http\Controllers\Admin\NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
+    Route::get('notifications/latest', [App\Http\Controllers\Admin\NotificationController::class, 'latest'])->name('notifications.latest');
+    Route::post('notifications/{id}/read', [App\Http\Controllers\Admin\NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('notifications/mark-all-read', [App\Http\Controllers\Admin\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+
     //procurement reports
     Route::group(['prefix' => 'reports'], function () {
         Route::group(['prefix' => 'supplier-ledger'], function () {
@@ -697,5 +713,6 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::post('barcode', [App\Http\Controllers\Admin\SettingController::class, 'updateBarcodeSetting'])->name('barcode.update');
         Route::post('theme', [App\Http\Controllers\Admin\SettingController::class, 'updateThemeSetting'])->name('theme.update');
         Route::post('theme/preset', [App\Http\Controllers\Admin\SettingController::class, 'applyThemePreset'])->name('theme.preset');
+        Route::post('notification', [App\Http\Controllers\Admin\SettingController::class, 'updateNotificationSetting'])->name('notification.update');
     });
 });

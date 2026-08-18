@@ -35,6 +35,14 @@ class UserController extends Controller
         BranchService $branch_service,
         CustomerService $customer_service
     ) {
+        $this->middleware('permission:user.view')->only(['index', 'getData']);
+        $this->middleware('permission:user.create')->only(['create']);
+        $this->middleware('permission:user.edit')->only(['edit']);
+        $this->middleware('permission:user.create|user.edit')->only(['store']);
+        $this->middleware('permission:user.delete')->only(['destroy']);
+        $this->middleware('permission:user.status')->only(['status']);
+        $this->middleware('permission:user.change-password')->only(['changePassword', 'updatePassword']);
+
         $this->user_service = $user_service;
         $this->role_service = $role_service;
         $this->business_service = $business_service;

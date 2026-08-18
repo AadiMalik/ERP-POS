@@ -30,6 +30,12 @@ class ProductVariationBatchController extends Controller
         WarehouseService $warehouse_service,
         ProductVariationBatchService $product_variation_batch_service
     ) {
+        $this->middleware('permission:batch.view')->only(['index', 'getData', 'byWarehouse', 'byBusiness', 'byProduct', 'byVariation']);
+        $this->middleware('permission:batch.create|batch.edit')->only(['store']);
+        $this->middleware('permission:batch.edit')->only(['edit']);
+        $this->middleware('permission:batch.delete')->only(['destroy']);
+        $this->middleware('permission:batch.status')->only(['status']);
+
         $this->business_service = $business_service;
         $this->product_service = $product_service;
         $this->warehouse_service = $warehouse_service;

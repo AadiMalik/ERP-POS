@@ -23,6 +23,12 @@ class BrandController extends Controller
 
     public function __construct(BusinessService $business_service, BrandService $brand_service)
     {
+        $this->middleware('permission:brand.view')->only(['index', 'getData', 'byBusiness']);
+        $this->middleware('permission:brand.create|brand.edit')->only(['store']);
+        $this->middleware('permission:brand.edit')->only(['edit']);
+        $this->middleware('permission:brand.delete')->only(['destroy']);
+        $this->middleware('permission:brand.status')->only(['status']);
+
         $this->business_service = $business_service;
         $this->brand_service = $brand_service;
     }

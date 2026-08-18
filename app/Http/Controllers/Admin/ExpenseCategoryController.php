@@ -27,6 +27,8 @@ class ExpenseCategoryController extends Controller
         BusinessService $business_service,
         AccountService $account_service
     ) {
+        $this->middleware('permission:expense-category.manage');
+
         $this->expense_category_service = $expense_category_service;
         $this->business_service = $business_service;
         $this->account_service = $account_service;

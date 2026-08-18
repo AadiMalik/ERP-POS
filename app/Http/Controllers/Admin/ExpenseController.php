@@ -44,6 +44,12 @@ class ExpenseController extends Controller
         SettingService $setting_service,
         PosRegisterSessionService $pos_register_session_service
     ) {
+        $this->middleware('permission:expense.view')->only(['index', 'getData', 'details']);
+        $this->middleware('permission:expense.create')->only(['create']);
+        $this->middleware('permission:expense.create|expense.edit')->only(['store']);
+        $this->middleware('permission:expense.edit')->only(['edit', 'status']);
+        $this->middleware('permission:expense.delete')->only(['destroy']);
+
         $this->expense_service = $expense_service;
         $this->expense_category_service = $expense_category_service;
         $this->business_service = $business_service;

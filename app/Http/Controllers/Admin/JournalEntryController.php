@@ -37,6 +37,13 @@ class JournalEntryController extends Controller
         BranchService $branch_service,
         DocumentSendLogService $document_send_log_service
     ) {
+        $this->middleware('permission:journal-entry.view')->only(['index', 'getData', 'detail', 'getEntryNo']);
+        $this->middleware('permission:journal-entry.create')->only(['create']);
+        $this->middleware('permission:journal-entry.edit')->only(['edit']);
+        $this->middleware('permission:journal-entry.create|journal-entry.edit')->only(['store']);
+        $this->middleware('permission:journal-entry.delete')->only(['destroy']);
+        $this->middleware('permission:journal-entry.print')->only(['print']);
+
         $this->journal_entry_service = $journal_entry_service;
         $this->journal_service = $journal_service;
         $this->account_service = $account_service;

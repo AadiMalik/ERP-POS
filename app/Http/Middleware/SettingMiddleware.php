@@ -28,6 +28,7 @@ class SettingMiddleware
                 'customer_setting'   => $business->customerSetting?->toArray() ?? [],
                 'supplier_setting'   => $business->supplierSetting?->toArray() ?? [],
                 'inventory_setting'  => $business->inventorySetting?->toArray() ?? [],
+                'notification_setting' => $business->notificationSetting?->toArray() ?? [],
                 'email_setting'      => $business->emailSetting?->toArray() ?? [],
                 'sms_setting'        => $business->smsSetting?->toArray() ?? [],
                 'fbr_setting'        => $business->fbrSetting?->toArray() ?? [],

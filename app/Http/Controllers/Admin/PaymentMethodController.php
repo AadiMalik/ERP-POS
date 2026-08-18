@@ -27,6 +27,12 @@ class PaymentMethodController extends Controller
         BusinessService $business_service,
         AccountService $account_service
     ) {
+        $this->middleware('permission:payment-method.view')->only(['index', 'getData']);
+        $this->middleware('permission:payment-method.create|payment-method.edit')->only(['store']);
+        $this->middleware('permission:payment-method.edit')->only(['edit']);
+        $this->middleware('permission:payment-method.delete')->only(['destroy']);
+        $this->middleware('permission:payment-method.status')->only(['status']);
+
         $this->payment_method_service = $payment_method_service;
         $this->business_service = $business_service;
         $this->account_service = $account_service;

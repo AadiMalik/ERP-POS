@@ -17,7 +17,7 @@
                         <div class="col-md-6">
                             <div class="form-check form-switch mt-2">
                                 <input class="form-check-input" type="checkbox" id="toggleSwitch2"
-                                    name="is_system_only">
+                                    name="is_system">
                                 <label class="form-check-label" for="toggleSwitch2">Is System Only</label>
                             </div>
                         </div>

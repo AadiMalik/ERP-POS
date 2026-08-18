@@ -25,17 +25,6 @@
                                 value="{{ isset($role) ? $role->name : '' }}"
                                 {{ getRoleName() != RoleNames::SUPERADMIN ? 'readonly' : '' }} required>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="permissions" class="form-label">Permissions:<span
-                                    class="text-danger">*</span></label>
-                            <select class="form-select" name="permissions[]" id="permissions" multiple required>
-                                @foreach ($permissions as $item)
-                                    <option value="{{ $item->name }}"
-                                        {{ isset($role) && $role->hasPermissionTo($item->name) ? 'selected' : '' }}>
-                                        {{ $item->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
                         @if (getRoleName() == RoleNames::SUPERADMIN)
                             <div class="col-md-6 mb-3">
                                 <label for="business" class="form-label">Business:</label>
@@ -53,6 +42,44 @@
                             <label for="name" class="form-label">Description:<span class="text-danger">*</span></label>
                             <textarea name="description" id="description" class="form-control" cols="20" rows="5" required>{{ isset($role) ? $role->description : '' }}</textarea>
                         </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Permissions:<span class="text-danger">*</span></label>
+                            <div id="permission-modules">
+                                @foreach ($groupedPermissions as $moduleKey => $module)
+                                    <div class="card mb-2">
+                                        <div class="card-header d-flex justify-content-between align-items-center py-2">
+                                            <span class="fw-semibold" role="button" data-bs-toggle="collapse"
+                                                data-bs-target="#module-{{ $moduleKey }}">
+                                                {{ $module['label'] }}
+                                            </span>
+                                            <div class="form-check form-switch mb-0">
+                                                <input class="form-check-input module-toggle-all" type="checkbox"
+                                                    data-module="{{ $moduleKey }}" id="module-all-{{ $moduleKey }}">
+                                                <label class="form-check-label" for="module-all-{{ $moduleKey }}">Enable
+                                                    All</label>
+                                            </div>
+                                        </div>
+                                        <div id="module-{{ $moduleKey }}" class="collapse show">
+                                            <div class="card-body row">
+                                                @foreach ($module['actions'] as $actionKey => $perm)
+                                                    <div class="col-md-3 col-sm-4 col-6 mb-2">
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input permission-toggle" type="checkbox"
+                                                                data-module="{{ $moduleKey }}"
+                                                                name="permissions[]" value="{{ $perm['name'] }}"
+                                                                id="perm-{{ $moduleKey }}-{{ $actionKey }}"
+                                                                {{ isset($role) && $role->hasPermissionTo($perm['name']) ? 'checked' : '' }}>
+                                                            <label class="form-check-label"
+                                                                for="perm-{{ $moduleKey }}-{{ $actionKey }}">{{ $perm['label'] }}</label>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                         <div class="col-md-12 mt-4">
                             <button type="submit" class="btn btn-primary">Save</button>
                         </div>
@@ -64,7 +91,27 @@
 @endsection
 @section('js')
     <script>
-        $('#permissions').select2();
+        // Sync each module's "Enable All" switch with its individual permission switches.
+        $(document).on('change', '.module-toggle-all', function () {
+            var module = $(this).data('module');
+            $('.permission-toggle[data-module="' + module + '"]').prop('checked', this.checked);
+        });
+
+        $(document).on('change', '.permission-toggle', function () {
+            var module = $(this).data('module');
+            var all = $('.permission-toggle[data-module="' + module + '"]');
+            var checked = all.filter(':checked');
+            $('.module-toggle-all[data-module="' + module + '"]').prop('checked', all.length === checked.length);
+        });
+
+        // Pre-check each module's "Enable All" switch on load if every permission in it is already checked.
+        $('.module-toggle-all').each(function () {
+            var module = $(this).data('module');
+            var all = $('.permission-toggle[data-module="' + module + '"]');
+            var checked = all.filter(':checked');
+            $(this).prop('checked', all.length > 0 && all.length === checked.length);
+        });
+
         @if (session('error'))
             errorMessage("{{ session('error') }}");
         @endif

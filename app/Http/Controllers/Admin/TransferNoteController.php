@@ -38,6 +38,14 @@ class TransferNoteController extends Controller
         UnitService $unit_service,
         DocumentSendLogService $document_send_log_service
     ) {
+        $this->middleware('permission:transfer-note.view')->only(['index', 'getData', 'details', 'sourceStock']);
+        $this->middleware('permission:transfer-note.create')->only(['create']);
+        $this->middleware('permission:transfer-note.create|transfer-note.edit')->only(['store']);
+        $this->middleware('permission:transfer-note.edit')->only(['edit']);
+        $this->middleware('permission:transfer-note.delete')->only(['destroy']);
+        $this->middleware('permission:transfer-note.status')->only(['status']);
+        $this->middleware('permission:transfer-note.print')->only(['print']);
+
         $this->transfer_note_service = $transfer_note_service;
         $this->business_service = $business_service;
         $this->product_service = $product_service;

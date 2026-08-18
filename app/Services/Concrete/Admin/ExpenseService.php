@@ -15,6 +15,7 @@ use App\Models\JournalEntry;
 use App\Models\JournalEntryDetail;
 use App\Models\PosRegisterSession;
 use App\Repository\Repository;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -23,6 +24,8 @@ use Yajra\DataTables\DataTables;
 
 class ExpenseService
 {
+    use Auditable;
+
     protected $model_expense;
     protected $with = [
         'business',
@@ -251,10 +254,14 @@ class ExpenseService
                     throw new Exception('Only pending expenses can be updated.');
                 }
 
+                $old_values = $expense->only(['amount', 'expense_category_id', 'payment_method', 'description']);
+
                 $data['updatedby_id'] = Auth::id();
                 $data['date_updated'] = now();
 
                 $expense->update($data);
+
+                $this->logActivity('expense', $expense->expense_id, 'updated', $old_values, $expense->only(['amount', 'expense_category_id', 'payment_method', 'description']));
             }
 
             //====================================
@@ -270,6 +277,8 @@ class ExpenseService
                 $data['date_created'] = now();
 
                 $expense = $this->model_expense->create($data);
+
+                $this->logActivity('expense', $expense->expense_id, 'created', null, $expense->only(['amount', 'expense_category_id', 'payment_method', 'description']));
             }
 
             // Quick actions (e.g. the POS "Add Expense" modal) save and post
@@ -353,6 +362,14 @@ class ExpenseService
             }
 
             DB::commit();
+
+            $this->logActivity(
+                'expense',
+                $expense->expense_id,
+                $new_status === Status::POSTED ? 'posted' : 'unposted',
+                ['status' => $old_status],
+                ['status' => $new_status]
+            );
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -381,6 +398,8 @@ class ExpenseService
             ]);
 
             DB::commit();
+
+            $this->logActivity('expense', $expense->expense_id, 'deleted', ['amount' => $expense->amount], null, 'Expense deleted/cancelled');
 
             return true;
         } catch (Exception $e) {

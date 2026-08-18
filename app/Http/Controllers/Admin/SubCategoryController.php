@@ -27,6 +27,12 @@ class SubCategoryController extends Controller
         CategoryService $category_service,
         SubCategoryService $sub_category_service
     ) {
+        $this->middleware('permission:sub-category.view')->only(['index', 'getData', 'byCategory', 'byBusiness']);
+        $this->middleware('permission:sub-category.create|sub-category.edit')->only(['store']);
+        $this->middleware('permission:sub-category.edit')->only(['edit']);
+        $this->middleware('permission:sub-category.delete')->only(['destroy']);
+        $this->middleware('permission:sub-category.status')->only(['status']);
+
         $this->business_service = $business_service;
         $this->category_service = $category_service;
         $this->sub_category_service = $sub_category_service;

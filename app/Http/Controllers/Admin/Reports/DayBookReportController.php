@@ -33,6 +33,8 @@ class DayBookReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.day-book.view');
+
         $this->day_book_report_service = $day_book_report_service;
         $this->business_service = $business_service;
         $this->document_send_log_service = $document_send_log_service;

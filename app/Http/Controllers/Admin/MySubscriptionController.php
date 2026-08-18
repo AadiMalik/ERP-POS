@@ -26,6 +26,8 @@ class MySubscriptionController extends Controller
 
     public function __construct(SubscriptionService $subscription_service, PaymentService $payment_service)
     {
+        $this->middleware('permission:my-subscription.manage')->only(['index', 'storeRenewalRequest', 'invoicePdf', 'storePayment']);
+
         $this->subscription_service = $subscription_service;
         $this->payment_service = $payment_service;
     }

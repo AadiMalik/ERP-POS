@@ -21,6 +21,11 @@ class JournalController extends Controller
 
     public function __construct(JournalService $journal_service)
     {
+        $this->middleware('permission:journal.view')->only(['index', 'getData']);
+        $this->middleware('permission:journal.create|journal.edit')->only(['store']);
+        $this->middleware('permission:journal.edit')->only(['edit']);
+        $this->middleware('permission:journal.delete')->only(['destroy']);
+
         $this->journal_service = $journal_service;
     }
 

@@ -15,6 +15,7 @@ use App\Models\Purchase;
 use App\Models\Supplier;
 use App\Models\SupplierPayment;
 use App\Repository\Repository;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -23,6 +24,8 @@ use Yajra\DataTables\DataTables;
 
 class SupplierPaymentService
 {
+    use Auditable;
+
     protected $model_supplier_payment;
     protected $with = [
         'business',
@@ -242,6 +245,8 @@ class SupplierPaymentService
                 $data['date_updated'] = now();
 
                 $payment->update($data);
+
+                $action = 'updated';
             }
 
             //====================================
@@ -257,9 +262,13 @@ class SupplierPaymentService
                 $data['date_created'] = now();
 
                 $payment = $this->model_supplier_payment->create($data);
+
+                $action = 'created';
             }
 
             DB::commit();
+
+            $this->logActivity('supplier_payment', $payment->supplier_payment_id, $action, null, ['amount' => $payment->amount, 'net_amount' => $payment->net_amount]);
 
             return $payment;
         } catch (Exception $e) {
@@ -374,6 +383,14 @@ class SupplierPaymentService
             }
 
             DB::commit();
+
+            $this->logActivity(
+                'supplier_payment',
+                $payment->supplier_payment_id,
+                $new_status === Status::POSTED ? 'posted' : 'unposted',
+                ['status' => $old_status],
+                ['status' => $new_status]
+            );
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -402,6 +419,8 @@ class SupplierPaymentService
             ]);
 
             DB::commit();
+
+            $this->logActivity('supplier_payment', $payment->supplier_payment_id, 'deleted');
 
             return true;
         } catch (Exception $e) {

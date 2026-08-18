@@ -46,6 +46,8 @@ class StockLedgerReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.stock-ledger.view');
+
         $this->stock_ledger_report_service = $stock_ledger_report_service;
         $this->business_service = $business_service;
         $this->warehouse_service = $warehouse_service;

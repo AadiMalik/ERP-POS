@@ -41,6 +41,10 @@
                                 Inventory
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
+                                data-bs-target="#notification">
+                                Notifications
+                            </button>
+                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#customer">
                                 Customer
                             </button>
@@ -100,6 +104,9 @@
                             </div>
                             <div class="tab-pane fade" id="inventory">
                                 @include('admin.setting.tabs.inventory')
+                            </div>
+                            <div class="tab-pane fade" id="notification">
+                                @include('admin.setting.tabs.notification')
                             </div>
                             <div class="tab-pane fade" id="customer">
                                 @include('admin.setting.tabs.customer')

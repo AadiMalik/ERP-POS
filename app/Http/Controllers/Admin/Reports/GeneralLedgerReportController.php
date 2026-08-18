@@ -38,6 +38,8 @@ class GeneralLedgerReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.general-ledger.view');
+
         $this->general_ledger_report_service = $general_ledger_report_service;
         $this->business_service = $business_service;
         $this->account_service = $account_service;

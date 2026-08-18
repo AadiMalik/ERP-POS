@@ -41,6 +41,14 @@ class SupplierPaymentController extends Controller
         AccountService $account_service,
         DocumentSendLogService $document_send_log_service
     ) {
+        $this->middleware('permission:supplier-payment.view')->only(['index', 'getData', 'details', 'supplierLedger', 'purchasesBySupplier']);
+        $this->middleware('permission:supplier-payment.create')->only(['create']);
+        $this->middleware('permission:supplier-payment.create|supplier-payment.edit')->only(['store']);
+        $this->middleware('permission:supplier-payment.edit')->only(['edit']);
+        $this->middleware('permission:supplier-payment.delete')->only(['destroy']);
+        $this->middleware('permission:supplier-payment.status')->only(['status']);
+        $this->middleware('permission:supplier-payment.print')->only(['print']);
+
         $this->supplier_payment_service = $supplier_payment_service;
         $this->business_service = $business_service;
         $this->supplier_service = $supplier_service;

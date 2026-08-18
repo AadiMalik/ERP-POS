@@ -7,6 +7,7 @@ use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\Supplier;
 use App\Repository\Repository;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,8 @@ use Yajra\DataTables\DataTables;
 
 class SupplierService
 {
+    use Auditable;
+
     protected $model_supplier;
     protected $with = [
         'business',
@@ -122,6 +125,9 @@ class SupplierService
                 if (!$supplier) {
                     throw new Exception('supplier not found');
                 }
+
+                $old_values = $supplier->only(['name', 'credit_limit', 'credit_days']);
+
                 $obj['account_id'] = session('accounting_setting.default_supplier_account_id') ?? null;
                 $obj['updatedby_id'] = Auth::user()->id;
                 $obj['date_updated'] = now();
@@ -130,7 +136,11 @@ class SupplierService
 
                 DB::commit();
 
-                return $this->model_supplier->find($supplier->supplier_id);
+                $updated = $this->model_supplier->find($supplier->supplier_id);
+
+                $this->logActivity('supplier', $supplier->supplier_id, 'updated', $old_values, $updated->only(['name', 'credit_limit', 'credit_days']));
+
+                return $updated;
             }
 
             //check limit
@@ -153,6 +163,8 @@ class SupplierService
 
             DB::commit();
 
+            $this->logActivity('supplier', $supplier->supplier_id, 'created', null, $supplier->only(['name', 'credit_limit', 'credit_days']));
+
             return $supplier;
         } catch (Exception $e) {
 
@@ -168,20 +180,28 @@ class SupplierService
     }
     public function status($supplier_id)
     {
-        return $this->model_supplier->update([
+        $result = $this->model_supplier->update([
             'status' => ($this->model_supplier->find($supplier_id)->status == Status::ACTIVE ? Status::INACTIVE : Status::ACTIVE),
             'updatedby_id' => Auth::id(),
             'date_updated' => now()
         ], $supplier_id);
+
+        $this->logActivity('supplier', $supplier_id, 'status_changed');
+
+        return $result;
     }
 
     public function delete($supplier_id)
     {
-        return $this->model_supplier->update([
+        $result = $this->model_supplier->update([
             'is_deleted' => 1,
             'deletedby_id' => Auth::id(),
             'date_deleted' => now()
         ], $supplier_id);
+
+        $this->logActivity('supplier', $supplier_id, 'deleted');
+
+        return $result;
     }
 
     public function getAll()

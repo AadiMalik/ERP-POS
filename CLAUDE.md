@@ -76,3 +76,36 @@ You are a Senior Software Engineer.
 - Do not remove code unless it is clearly obsolete or explicitly requested.
 - Do not introduce new dependencies unless necessary.
 - Prefer updating existing functions over creating new ones when appropriate.
+
+## Permissions & Access Control (MANDATORY)
+
+- Every module/CRUD screen must have its permissions defined in
+  `app/Support/Permissions/PermissionRegistry.php`, grouped under that module's key
+  (module → action → permission name/label/is_system). Never hardcode a permission
+  name string in a controller, route, or view that is not registered there first.
+- Whenever a new module or CRUD action is added: (1) add its permissions to
+  `PermissionRegistry`, (2) if the role should get it by default, add it to
+  `app/Support/Permissions/RoleDefaultPermissions.php`, (3) re-run
+  `php artisan db:seed --class=PermissionSeeder`. `PermissionSeeder` is the single
+  source of truth for permission rows going forward — do not create new ad-hoc
+  "seed permission" migrations.
+- `is_system = true` is reserved for platform-level, Super-Admin-only actions (raw
+  Permission CRUD, Package, Business, Subscription/Billing). Everything a Business
+  Admin should be able to manage for their own business must be `is_system = false`.
+  Default to `false` unless there is a clear platform-level reason not to.
+- Enforce every controller with constructor-level
+  `$this->middleware('permission:x')->only([...])` (see `WarehouseController` or
+  `ActivityLogController` for the pattern). If a single action (e.g. `store`) saves
+  both new and edited records, gate it with both permissions via Spatie's OR syntax:
+  `permission:module.create|module.edit`. Frontend hiding (sidebar `@can`, buttons)
+  is a UX layer only — server-side middleware is the source of truth and must never
+  be skipped.
+- Any new sidebar menu entry (`resources/views/layouts/sidebar.blade.php`) must be
+  wrapped in `@can`/`@canany` with the matching permission name(s).
+- Permission name strings, once shipped, are permanent — never rename or repurpose
+  an existing permission name; add a new one instead.
+- The global "Super Admin" and "Business Admin" roles (`business_id = null`) are
+  seeder-managed templates: `PermissionSeeder` fully re-syncs their permissions on
+  every run via `RoleDefaultPermissions`. Do not rely on manually editing those two
+  roles for a one-off restriction — clone them into a business-scoped custom role
+  instead via the Role Create screen.

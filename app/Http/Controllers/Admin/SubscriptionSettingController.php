@@ -30,6 +30,7 @@ class SubscriptionSettingController extends Controller
         $data = [
             'default_grace_period_days' => $request->default_grace_period_days ?? 7,
             'reminder_thresholds_days' => $thresholds ?: [30, 15, 7, 3, 1],
+            'expiry_alert_days_before' => $request->expiry_alert_days_before ?? 5,
             'restrict_access_in_grace_period' => $request->boolean('restrict_access_in_grace_period'),
             'invoice_prefix' => $request->invoice_prefix ?: 'SUB-INV',
         ];

@@ -36,6 +36,8 @@ class ExpenseReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.expense-report.view');
+
         $this->expense_report_service = $expense_report_service;
         $this->business_service = $business_service;
         $this->account_service = $account_service;

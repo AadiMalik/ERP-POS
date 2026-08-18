@@ -30,6 +30,12 @@ class ProductVariationUnitConversionController extends Controller
         UnitService $unit_service,
         ProductVariationUnitConversionService $product_variation_unit_conversion_service
     ) {
+        $this->middleware('permission:unit-conversion.view')->only(['index', 'getData', 'byBusiness', 'byProduct', 'byVariation']);
+        $this->middleware('permission:unit-conversion.create|unit-conversion.edit')->only(['store']);
+        $this->middleware('permission:unit-conversion.edit')->only(['edit']);
+        $this->middleware('permission:unit-conversion.delete')->only(['destroy']);
+        $this->middleware('permission:unit-conversion.status')->only(['status']);
+
         $this->business_service = $business_service;
         $this->product_service = $product_service;
         $this->unit_service = $unit_service;

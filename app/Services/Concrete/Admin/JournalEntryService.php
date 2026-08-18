@@ -8,6 +8,7 @@ use App\Enums\Status;
 use App\Models\JournalEntry;
 use App\Models\JournalEntryDetail;
 use App\Repository\Repository;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,8 @@ use Yajra\DataTables\DataTables;
 
 class JournalEntryService
 {
+      use Auditable;
+
       protected $model_journal_entry;
       protected $model_journal_entry_details;
       protected $with = [
@@ -193,6 +196,14 @@ class JournalEntryService
 
                   DB::commit();
 
+                  $this->logActivity(
+                        'journal_entry',
+                        $journal_entry->journal_entry_id,
+                        !empty($obj['journal_entry_id']) ? 'updated' : 'created',
+                        null,
+                        ['entry_no' => $journal_entry->entry_no, 'status' => $journal_entry->status]
+                  );
+
                   return true;
             } catch (Exception $e) {
 
@@ -231,11 +242,15 @@ class JournalEntryService
 
       public function delete($journal_entry_id)
       {
-            return $this->model_journal_entry->update([
+            $result = $this->model_journal_entry->update([
                   'is_deleted' => 1,
                   'deletedby_id' => Auth::id(),
                   'date_deleted' => now()
             ], $journal_entry_id);
+
+            $this->logActivity('journal_entry', $journal_entry_id, 'deleted');
+
+            return $result;
       }
 
       public function getAll()

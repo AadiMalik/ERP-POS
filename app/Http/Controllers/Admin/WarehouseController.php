@@ -28,6 +28,13 @@ class WarehouseController extends Controller
         BusinessService $business_service,
         BranchService $branch_service
     ) {
+        $this->middleware('permission:warehouse.view')->only(['index', 'getData', 'byBusiness', 'byBranch']);
+        $this->middleware('permission:warehouse.create')->only(['create']);
+        $this->middleware('permission:warehouse.create|warehouse.edit')->only(['store']);
+        $this->middleware('permission:warehouse.edit')->only(['edit']);
+        $this->middleware('permission:warehouse.delete')->only(['destroy']);
+        $this->middleware('permission:warehouse.status')->only(['status']);
+
         $this->warehouse_service = $warehouse_service;
         $this->business_service = $business_service;
         $this->branch_service = $branch_service;

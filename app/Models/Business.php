@@ -152,4 +152,9 @@ class Business extends Model
         return $this->hasOne(PraSetting::class, 'business_id', 'business_id');
     }
 
+    public function notificationSetting()
+    {
+        return $this->hasOne(NotificationSetting::class, 'business_id', 'business_id');
+    }
+
 }

@@ -4,7 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Enums\RoleNames;
 use App\Http\Controllers\Controller;
+use App\Models\LoginHistory;
+use App\Models\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
@@ -55,6 +60,10 @@ class LoginController extends Controller
      */
     protected function authenticated($request, $user)
     {
+        $this->recordLogin($request, $user, 'success');
+
+        $user->update(['last_login_at' => now()]);
+
         $role = $user->getRoleNames()->first();
 
         if (in_array($role, $this->pos_only_roles, true) && $user->can('pos.access')) {
@@ -62,6 +71,61 @@ class LoginController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * AuthenticatesUsers is a trait, not a parent class - `parent::` cannot
+     * reach the trait's own sendFailedLoginResponse() once it's overridden
+     * here, so its ValidationException behavior is replicated directly
+     * instead (matches vendor/laravel/ui/auth-backend/AuthenticatesUsers.php).
+     */
+    protected function sendFailedLoginResponse(Request $request)
+    {
+        $this->recordLogin($request, User::where('email', $request->input($this->username()))->first(), 'failed', $request->input($this->username()));
+
+        throw ValidationException::withMessages([
+            $this->username() => [trans('auth.failed')],
+        ]);
+    }
+
+    protected function recordLogin(Request $request, ?User $user, string $status, ?string $email = null)
+    {
+        LoginHistory::create([
+            'login_history_id' => generateUuid(),
+            'user_id'          => $user->id ?? null,
+            'business_id'      => $user->business_id ?? null,
+            'branch_id'        => $user->branch_id ?? null,
+            'email'            => $user->email ?? $email,
+            'ip_address'       => $request->ip(),
+            'user_agent'       => $request->userAgent(),
+            'device'           => parseUserAgentDevice($request->userAgent()),
+            'status'           => $status,
+            'login_at'         => now(),
+        ]);
+    }
+
+    public function logout(Request $request)
+    {
+        $user_id = Auth::id();
+
+        if ($user_id) {
+            LoginHistory::where('user_id', $user_id)
+                ->whereNull('logout_at')
+                ->latest('login_at')
+                ->limit(1)
+                ->update(['logout_at' => now()]);
+        }
+
+        $this->guard()->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        if ($response = $this->loggedOut($request)) {
+            return $response;
+        }
+
+        return redirect('/login');
     }
 
     protected function loggedOut($request)

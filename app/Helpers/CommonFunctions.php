@@ -463,6 +463,53 @@ function generateCustomerCode($business_id = null)
     return $prefix . str_pad($next_number, 4, '0', STR_PAD_LEFT);
 }
 
+/**
+ * Lightweight OS/Browser label parsed from the User-Agent header, used by
+ * LoginHistory/ActivityLog device tracking. Not a full UA-parsing library
+ * (no new dependency) - just enough to show something readable like
+ * "Windows / Chrome" in the admin UI.
+ */
+function parseUserAgentDevice(?string $user_agent): ?string
+{
+    if (blank($user_agent)) {
+        return null;
+    }
+
+    $os_patterns = [
+        'Windows' => '/windows/i',
+        'Mac OS'  => '/macintosh|mac os x/i',
+        'iOS'     => '/iphone|ipad|ipod/i',
+        'Android' => '/android/i',
+        'Linux'   => '/linux/i',
+    ];
+
+    $browser_patterns = [
+        'Edge'    => '/edg/i',
+        'Chrome'  => '/chrome|crios/i',
+        'Firefox' => '/firefox|fxios/i',
+        'Safari'  => '/safari/i',
+        'Opera'   => '/opr|opera/i',
+    ];
+
+    $os = 'Unknown OS';
+    foreach ($os_patterns as $label => $pattern) {
+        if (preg_match($pattern, $user_agent)) {
+            $os = $label;
+            break;
+        }
+    }
+
+    $browser = 'Unknown Browser';
+    foreach ($browser_patterns as $label => $pattern) {
+        if (preg_match($pattern, $user_agent)) {
+            $browser = $label;
+            break;
+        }
+    }
+
+    return $os . ' / ' . $browser;
+}
+
 function applyRoleScope(
     Builder $query,
     array $allowed_roles = [],

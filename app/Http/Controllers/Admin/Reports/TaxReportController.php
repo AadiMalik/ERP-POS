@@ -37,6 +37,8 @@ class TaxReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.tax-report.view');
+
         $this->tax_report_service = $tax_report_service;
         $this->business_service = $business_service;
         $this->classifier = $classifier;

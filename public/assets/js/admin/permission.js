@@ -15,7 +15,7 @@ editRecord({
         var data = data.Data;
         $("#id").val(data.id);
         $("#name").val(data.name);
-        if (data.is_system_only == 1) {
+        if (data.is_system == 1) {
             $("#toggleSwitch2").prop("checked", true);
         } else {
             $("#toggleSwitch2").prop("checked", false);

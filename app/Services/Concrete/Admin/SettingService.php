@@ -15,6 +15,7 @@ use App\Models\CustomerSetting;
 use App\Models\EmailSetting;
 use App\Models\FbrSetting;
 use App\Models\InventorySetting;
+use App\Models\NotificationSetting;
 use App\Models\SmsSetting;
 use App\Models\PosSetting;
 use App\Models\PraSetting;
@@ -47,12 +48,14 @@ class SettingService
     protected $model_pos_setting;
     protected $model_pra_setting;
     protected $model_thermal_print_setting;
+    protected $model_notification_setting;
     protected $expense_category_service;
 
     public function __construct(ExpenseCategoryService $expense_category_service)
     {
         $this->expense_category_service = $expense_category_service;
         $this->model_business = new Repository(new Business());
+        $this->model_notification_setting = new Repository(new NotificationSetting());
         $this->model_business_setting = new Repository(new BusinessSetting());
         $this->model_accounting_setting = new Repository(new AccountingSetting());
         $this->model_customer_setting = new Repository(new CustomerSetting());
@@ -93,6 +96,27 @@ class SettingService
     public function getInventorySetting($business_id)
     {
         return $this->model_inventory_setting->getModel()::firstOrCreate(['business_id' => $business_id]);
+    }
+
+    public function getNotificationSetting($business_id)
+    {
+        // firstOrCreate() does not reflect DB column defaults back onto the in-memory
+        // model after an insert (see getBarcodeSetting() above), so every default is
+        // spelled out explicitly - otherwise a freshly created setting would render
+        // as all-disabled/blank on the Notification Setting tab.
+        return $this->model_notification_setting->getModel()::firstOrCreate(
+            ['business_id' => $business_id],
+            [
+                'payment_due_alert_enabled' => true,
+                'payment_due_days_before' => 3,
+                'credit_limit_alert_enabled' => true,
+                'credit_limit_threshold_percent' => 100,
+                'supplier_payment_reminder_enabled' => true,
+                'supplier_payment_reminder_days_before' => 3,
+                'order_status_alert_enabled' => true,
+                'sound_enabled' => true,
+            ]
+        );
     }
 
     public function getBarcodeSetting($business_id)
@@ -303,6 +327,27 @@ class SettingService
     public function updateInventorySetting(array $obj)
     {
         $model = $this->model_inventory_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+
+        return $setting;
+    }
+
+    public function updateNotificationSetting(array $obj)
+    {
+        $model = $this->model_notification_setting->getModel();
 
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']

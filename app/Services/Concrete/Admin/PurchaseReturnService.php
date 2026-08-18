@@ -21,6 +21,7 @@ use App\Models\PurchaseDetail;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnDetail;
 use App\Repository\Repository;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,8 @@ use Yajra\DataTables\DataTables;
 
 class PurchaseReturnService
 {
+    use Auditable;
+
     protected $model_purchase_return;
     protected $model_purchase_return_details;
     protected $with = [
@@ -720,6 +723,14 @@ class PurchaseReturnService
             }
 
             DB::commit();
+
+            $this->logActivity(
+                'purchase_return',
+                $purchase_return->purchase_return_id,
+                $new_status === Status::APPROVED ? 'approved' : 'status_changed',
+                ['status' => $old_status],
+                ['status' => $new_status]
+            );
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -748,6 +759,8 @@ class PurchaseReturnService
             ]);
 
             DB::commit();
+
+            $this->logActivity('purchase_return', $purchase_return->purchase_return_id, 'deleted');
 
             return true;
         } catch (Exception $e) {

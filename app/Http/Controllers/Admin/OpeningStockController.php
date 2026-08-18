@@ -38,6 +38,14 @@ class OpeningStockController extends Controller
         UnitService $unit_service,
         DocumentSendLogService $document_send_log_service
     ) {
+        $this->middleware('permission:opening-stock.view')->only(['index', 'getData', 'details']);
+        $this->middleware('permission:opening-stock.create')->only(['create']);
+        $this->middleware('permission:opening-stock.create|opening-stock.edit')->only(['store']);
+        $this->middleware('permission:opening-stock.edit')->only(['edit']);
+        $this->middleware('permission:opening-stock.delete')->only(['destroy']);
+        $this->middleware('permission:opening-stock.status')->only(['status']);
+        $this->middleware('permission:opening-stock.print')->only(['print']);
+
         $this->opening_stock_service = $opening_stock_service;
         $this->business_service = $business_service;
         $this->product_service = $product_service;

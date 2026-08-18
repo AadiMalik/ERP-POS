@@ -41,6 +41,8 @@ class PurchaseReturnDetailReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.purchase-return-detail.view');
+
         $this->purchase_return_detail_report_service = $purchase_return_detail_report_service;
         $this->business_service = $business_service;
         $this->supplier_service = $supplier_service;

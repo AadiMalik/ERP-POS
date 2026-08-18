@@ -43,6 +43,12 @@ class VoucherController extends Controller
         OrderTypeService $order_type_service,
         BranchService $branch_service
     ) {
+        $this->middleware('permission:voucher.view')->only(['index', 'getData']);
+        $this->middleware('permission:voucher.create|voucher.edit')->only(['store']);
+        $this->middleware('permission:voucher.edit')->only(['edit']);
+        $this->middleware('permission:voucher.delete')->only(['destroy']);
+        $this->middleware('permission:voucher.status')->only(['status']);
+
         $this->voucher_service = $voucher_service;
         $this->business_service = $business_service;
         $this->product_service = $product_service;

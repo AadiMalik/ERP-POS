@@ -39,6 +39,8 @@ class CashBankLedgerReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.cash-bank-ledger.view');
+
         $this->cash_bank_ledger_report_service = $cash_bank_ledger_report_service;
         $this->business_service = $business_service;
         $this->account_service = $account_service;

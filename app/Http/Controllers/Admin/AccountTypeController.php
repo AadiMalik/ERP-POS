@@ -22,6 +22,12 @@ class AccountTypeController extends Controller
         AccountTypeService  $account_type_service,
         BusinessService $business_service
     ) {
+        $this->middleware('permission:account-type.view')->only(['index', 'getData', 'byBusiness', 'template']);
+        $this->middleware('permission:account-type.create|account-type.edit')->only(['store']);
+        $this->middleware('permission:account-type.edit')->only(['edit']);
+        $this->middleware('permission:account-type.delete')->only(['destroy']);
+        $this->middleware('permission:account-type.reset')->only(['reset']);
+
         $this->account_type_service = $account_type_service;
         $this->business_service = $business_service;
     }

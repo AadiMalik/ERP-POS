@@ -22,6 +22,12 @@ class BusinessController extends Controller
 
     public function __construct(BusinessService $business_service, PackageService $package_service)
     {
+        $this->middleware('permission:business.view')->only(['index', 'getData']);
+        $this->middleware('permission:business.create')->only(['create']);
+        $this->middleware('permission:business.edit')->only(['edit']);
+        $this->middleware('permission:business.create|business.edit')->only(['store']);
+        $this->middleware('permission:business.delete')->only(['destroy']);
+
         $this->business_service = $business_service;
         $this->package_service = $package_service;
     }

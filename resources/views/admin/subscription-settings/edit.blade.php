@@ -20,6 +20,11 @@
                             <label class="fw-semibold">Invoice Number Prefix</label>
                             <input type="text" class="form-control" name="invoice_prefix" value="{{ $setting->invoice_prefix }}">
                         </div>
+                        <div class="col-md-6">
+                            <label class="fw-semibold">Subscription Expiry Alert (days before expiry)</label>
+                            <input type="number" min="0" class="form-control" name="expiry_alert_days_before" value="{{ $setting->expiry_alert_days_before ?? 5 }}">
+                            <small class="text-muted">In-app bell alert sent to the Business Admin and Super Admin this many days before a subscription expires.</small>
+                        </div>
                         <div class="col-md-6 d-flex align-items-end">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="restrict_access_in_grace_period" id="restrictAccess" value="1" {{ $setting->restrict_access_in_grace_period ? 'checked' : '' }}>

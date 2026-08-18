@@ -35,6 +35,8 @@ class ProductVariationStockTransactionController extends Controller
         ProductVariationBatchService $product_variation_batch_service,
         ProductVariationStockTransactionService $product_variation_stock_transaction_service
     ) {
+        $this->middleware('permission:stock-transaction.view');
+
         $this->business_service = $business_service;
         $this->product_service = $product_service;
         $this->warehouse_service = $warehouse_service;

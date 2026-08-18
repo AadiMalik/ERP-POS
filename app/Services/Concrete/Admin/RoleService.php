@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use App\Enums\RoleNames;
 use App\Models\Role;
+use App\Support\Permissions\RoleDefaultPermissions;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -247,33 +248,7 @@ class RoleService
                     ]
                 );
 
-                if ($role['name'] === RoleNames::POSMANAGER) {
-                    $savedRole->syncPermissions([
-                        'pos.access',
-                        'pos.register.close',
-                        'pos.register.report.view',
-                        'order.create',
-                        'order.edit',
-                        'order.discount.apply',
-                        'order.coupon.apply',
-                        'order.price.change',
-                        'order.hold',
-                        'order.cancel_void',
-                        'order.refund.process',
-                        'order.payment.credit',
-                        'order.customer.change',
-                        'order.reopen',
-                        'expense.access',
-                        'expense.view',
-                    ]);
-                } elseif ($role['name'] === RoleNames::ORDERTAKER) {
-                    $savedRole->syncPermissions([
-                        'pos.access',
-                        'order.create',
-                        'order.hold',
-                        'expense.access',
-                    ]);
-                }
+                $savedRole->syncPermissions(RoleDefaultPermissions::defaultsForRole($role['name']));
             }
 
             return true;

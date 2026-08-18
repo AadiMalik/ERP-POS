@@ -35,6 +35,14 @@ class StockTakingController extends Controller
         WarehouseService $warehouse_service,
         DocumentSendLogService $document_send_log_service
     ) {
+        $this->middleware('permission:stock-taking.view')->only(['index', 'getData', 'details', 'systemStock']);
+        $this->middleware('permission:stock-taking.create')->only(['create']);
+        $this->middleware('permission:stock-taking.create|stock-taking.edit')->only(['store']);
+        $this->middleware('permission:stock-taking.edit')->only(['edit']);
+        $this->middleware('permission:stock-taking.delete')->only(['destroy']);
+        $this->middleware('permission:stock-taking.status')->only(['status']);
+        $this->middleware('permission:stock-taking.print')->only(['print']);
+
         $this->stock_taking_service = $stock_taking_service;
         $this->business_service = $business_service;
         $this->product_service = $product_service;

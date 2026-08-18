@@ -26,6 +26,13 @@ class SupplierController extends Controller
         SupplierService $supplier_service,
         BusinessService $business_service
     ) {
+        $this->middleware('permission:supplier.view')->only(['index', 'getData', 'byBusiness']);
+        $this->middleware('permission:supplier.create')->only(['create']);
+        $this->middleware('permission:supplier.create|supplier.edit')->only(['store']);
+        $this->middleware('permission:supplier.edit')->only(['edit']);
+        $this->middleware('permission:supplier.delete')->only(['destroy']);
+        $this->middleware('permission:supplier.status')->only(['status']);
+
         $this->supplier_service = $supplier_service;
         $this->business_service = $business_service;
     }

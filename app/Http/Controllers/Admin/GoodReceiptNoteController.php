@@ -38,6 +38,14 @@ class GoodReceiptNoteController extends Controller
         WarehouseService $warehouse_service,
         DocumentSendLogService $document_send_log_service
     ) {
+        $this->middleware('permission:good-receipt-note.view')->only(['index', 'getData', 'details', 'getPurchaseDetails']);
+        $this->middleware('permission:good-receipt-note.create')->only(['create']);
+        $this->middleware('permission:good-receipt-note.create|good-receipt-note.edit')->only(['store']);
+        $this->middleware('permission:good-receipt-note.edit')->only(['edit']);
+        $this->middleware('permission:good-receipt-note.delete')->only(['destroy']);
+        $this->middleware('permission:good-receipt-note.status')->only(['status']);
+        $this->middleware('permission:good-receipt-note.print')->only(['print']);
+
         $this->grn_service = $grn_service;
         $this->purchase_service = $purchase_service;
         $this->business_service = $business_service;

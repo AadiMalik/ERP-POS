@@ -32,6 +32,8 @@ class BalanceSheetReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.balance-sheet.view');
+
         $this->balance_sheet_report_service = $balance_sheet_report_service;
         $this->business_service = $business_service;
         $this->document_send_log_service = $document_send_log_service;

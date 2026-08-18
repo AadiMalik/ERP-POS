@@ -16,6 +16,7 @@ class SubscriptionSetting extends Model
         'subscription_setting_id',
         'default_grace_period_days',
         'reminder_thresholds_days',
+        'expiry_alert_days_before',
         'restrict_access_in_grace_period',
         'restricted_route_names',
         'invoice_prefix',
@@ -40,6 +41,7 @@ class SubscriptionSetting extends Model
         return static::where('is_deleted', 0)->first() ?? new static([
             'default_grace_period_days' => 7,
             'reminder_thresholds_days' => [30, 15, 7, 3, 1],
+            'expiry_alert_days_before' => 5,
             'restrict_access_in_grace_period' => true,
             'restricted_route_names' => [],
             'invoice_prefix' => 'SUB-INV',

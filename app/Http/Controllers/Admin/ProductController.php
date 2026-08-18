@@ -37,6 +37,13 @@ class ProductController extends Controller
         UnitService $unit_service,
         BarcodeService $barcode_service
     ) {
+        $this->middleware('permission:product.view')->only(['index', 'getData', 'byBusiness', 'byBrand', 'byCategory', 'variations', 'byProduct', 'getImages']);
+        $this->middleware('permission:product.create')->only(['create', 'uploadImages']);
+        $this->middleware('permission:product.create|product.edit')->only(['store']);
+        $this->middleware('permission:product.edit')->only(['edit', 'variationStatus', 'setDefaultImage', 'saveImageSorting', 'backfillBarcodes']);
+        $this->middleware('permission:product.delete')->only(['destroy', 'variationDestroy', 'deleteImage']);
+        $this->middleware('permission:product.status')->only(['status']);
+
         $this->product_service = $product_service;
         $this->business_service = $business_service;
         $this->category_service = $category_service;

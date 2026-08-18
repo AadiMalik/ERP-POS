@@ -19,6 +19,12 @@ class PackageController extends Controller
 
     public function __construct(PackageService $package_service)
     {
+        $this->middleware('permission:package.view')->only(['index', 'show', 'getData']);
+        $this->middleware('permission:package.create')->only(['create']);
+        $this->middleware('permission:package.edit')->only(['edit']);
+        $this->middleware('permission:package.create|package.edit')->only(['store']);
+        $this->middleware('permission:package.delete')->only(['destroy']);
+
         $this->package_service = $package_service;
     }
 

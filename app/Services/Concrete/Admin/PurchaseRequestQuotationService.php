@@ -9,6 +9,7 @@ use App\Models\PurchaseRequestQuotation;
 use App\Models\PurchaseRequestQuotationDetail;
 use App\Repository\Repository;
 use App\Jobs\SendPurchaseRequestQuotationJob;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +18,8 @@ use Yajra\DataTables\DataTables;
 
 class PurchaseRequestQuotationService
 {
+    use Auditable;
+
     protected $model_purchase_request_quotation;
     protected $model_purchase_request_quotation_details;
     protected $with = [
@@ -285,21 +288,33 @@ class PurchaseRequestQuotationService
 
     public function status($obj)
     {
-        return $this->model_purchase_request_quotation->update([
+        $result = $this->model_purchase_request_quotation->update([
             'status' => $obj['status'],
             'updatedby_id' => Auth::user()->id,
             'date_updated' => now()
         ], $obj['purchase_request_quotation_id']);
+
+        $action = in_array($obj['status'], [Status::SELECTED, Status::REJECTED], true)
+            ? ($obj['status'] === Status::SELECTED ? 'approved' : 'rejected')
+            : 'status_changed';
+
+        $this->logActivity('purchase_request_quotation', $obj['purchase_request_quotation_id'], $action, null, ['status' => $obj['status']]);
+
+        return $result;
     }
 
     public function delete($purchase_request_quotation_id)
     {
-        return $this->model_purchase_request_quotation->update([
+        $result = $this->model_purchase_request_quotation->update([
             'is_deleted' => 1,
             'status' => Status::REJECTED,
             'deletedby_id' => Auth::id(),
             'date_deleted' => now()
         ], $purchase_request_quotation_id);
+
+        $this->logActivity('purchase_request_quotation', $purchase_request_quotation_id, 'deleted');
+
+        return $result;
     }
 
     public function getAll()

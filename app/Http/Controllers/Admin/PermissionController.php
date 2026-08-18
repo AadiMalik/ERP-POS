@@ -16,6 +16,10 @@ class PermissionController extends Controller
     protected $permission_service;
     public function __construct(PermissionService  $permission_service)
     {
+        $this->middleware('permission:permission.view')->only(['index', 'getData', 'edit']);
+        $this->middleware('permission:permission.create|permission.edit')->only(['store']);
+        $this->middleware('permission:permission.delete')->only(['destroy']);
+
         $this->permission_service = $permission_service;
     }
     public function index()
@@ -42,7 +46,7 @@ class PermissionController extends Controller
             $obj = [
                 'id' => $request->id,
                 'name' => $request->name,
-                'is_system_only' => ($request->is_system_only=='on')?1:0,
+                'is_system' => ($request->is_system=='on')?1:0,
             ];
 
             $permission = $this->permission_service->save($obj);

@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
 
         $schedule->command('subscriptions:process-lifecycle')->dailyAt('01:00');
+        $schedule->command('notifications:check-alerts')->hourly();
     }
 
     /**

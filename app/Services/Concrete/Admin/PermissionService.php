@@ -29,8 +29,8 @@ class PermissionService
         $datatable = $this->model_permission->getModel()::query();
 
         $data = DataTables::of($datatable)
-            ->addColumn('is_system_only', function ($item) {
-                if ($item->is_system_only == 0) {
+            ->addColumn('is_system', function ($item) {
+                if ($item->is_system == 0) {
                     return 'NO';
                 } else {
                     return 'YES';
@@ -52,7 +52,7 @@ class PermissionService
 
                 return $action_column;
             })
-            ->rawColumns(['is_system_only', 'action'])
+            ->rawColumns(['is_system', 'action'])
             ->make(true);
         return $data;
     }
@@ -87,7 +87,7 @@ class PermissionService
     {
         $permissions = $this->model_permission->all();
         if (getRoleName() == RoleNames::BUSINESSADMIN) {
-            $permissions = $permissions->where('is_system_only', 0);
+            $permissions = $permissions->where('is_system', 0);
         }
         return $permissions;
     }

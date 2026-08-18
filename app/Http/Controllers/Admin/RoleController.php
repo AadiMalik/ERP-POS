@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
+use App\Enums\RoleNames;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\PermissionService;
 use App\Services\Concrete\Admin\RoleService;
+use App\Support\Permissions\PermissionRegistry;
 use App\Traits\ResponseAPI;
 use Exception;
 use Illuminate\Http\Request;
@@ -25,6 +27,12 @@ class RoleController extends Controller
         PermissionService $permission_service,
         BusinessService $business_service
     ) {
+        $this->middleware('permission:role.view')->only(['index', 'getData', 'byBusiness']);
+        $this->middleware('permission:role.create')->only(['create']);
+        $this->middleware('permission:role.edit')->only(['edit']);
+        $this->middleware('permission:role.create|role.edit')->only(['store']);
+        $this->middleware('permission:role.reset')->only(['reset']);
+
         $this->role_service = $role_service;
         $this->permission_service = $permission_service;
         $this->business_service = $business_service;
@@ -41,9 +49,9 @@ class RoleController extends Controller
 
     public function create()
     {
-        $permissions = $this->permission_service->getAll();
+        $groupedPermissions = PermissionRegistry::grouped(getRoleName() == RoleNames::BUSINESSADMIN);
         $business = $this->business_service->getAll();
-        return view('admin.roles.create', compact('permissions', 'business'));
+        return view('admin.roles.create', compact('groupedPermissions', 'business'));
     }
 
     public function store(Request $request)
@@ -84,9 +92,9 @@ class RoleController extends Controller
     public function edit($id)
     {
         $role = $this->role_service->getByid($id);
-        $permissions = $this->permission_service->getAll();
+        $groupedPermissions = PermissionRegistry::grouped(getRoleName() == RoleNames::BUSINESSADMIN);
         $business = $this->business_service->getAll();
-        return view('admin.roles.create', compact('role', 'permissions','business'));
+        return view('admin.roles.create', compact('role', 'groupedPermissions', 'business'));
     }
 
     public function reset()

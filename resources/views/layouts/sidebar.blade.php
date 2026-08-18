@@ -66,35 +66,45 @@
             </a>
         </li>
         <!-- Business -->
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fa fa-store"></i>
-                <div data-i18n="Business Manage.">Business Manage.</div>
-            </a>
+        @canany(['package.view', 'business.view', 'branch.view', 'setting.manage'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-store"></i>
+                    <div data-i18n="Business Manage.">Business Manage.</div>
+                </a>
 
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ url('/admin/packages') }}" class="menu-link">
-                        <div data-i18n="Package">Packages</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/business') }}" class="menu-link">
-                        <div data-i18n="Business">Business</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/branch') }}" class="menu-link">
-                        <div data-i18n="Branch">Branch</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/business-setting') }}" class="menu-link">
-                        <div data-i18n="Business Setting">Business Setting</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+                <ul class="menu-sub">
+                    @can('package.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/packages') }}" class="menu-link">
+                                <div data-i18n="Package">Packages</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('business.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/business') }}" class="menu-link">
+                                <div data-i18n="Business">Business</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('branch.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/branch') }}" class="menu-link">
+                                <div data-i18n="Branch">Branch</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('setting.manage')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/business-setting') }}" class="menu-link">
+                                <div data-i18n="Business Setting">Business Setting</div>
+                            </a>
+                        </li>
+                    @endcan
+                </ul>
+            </li>
+        @endcanany
         @if (getRoleName() == \App\Enums\RoleNames::SUPERADMIN)
             <!-- Subscriptions & Billing -->
             <li class="menu-item">
@@ -128,390 +138,577 @@
             </li>
         @else
             <!-- My Subscription -->
-            <li class="menu-item">
-                <a href="{{ route('my-subscription.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons fa fa-credit-card"></i>
-                    <div data-i18n="My Subscription">My Subscription</div>
-                </a>
-            </li>
+            @can('my-subscription.manage')
+                <li class="menu-item">
+                    <a href="{{ route('my-subscription.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons fa fa-credit-card"></i>
+                        <div data-i18n="My Subscription">My Subscription</div>
+                    </a>
+                </li>
+            @endcan
         @endif
         <!-- Users -->
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fa fa-users"></i>
-                <div data-i18n="Users Management">Users Management</div>
-            </a>
+        @canany(['permission.view', 'role.view', 'user.view'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-users"></i>
+                    <div data-i18n="Users Management">Users Management</div>
+                </a>
 
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ url('/admin/permissions') }}" class="menu-link">
-                        <div data-i18n="Permissions">Permissions</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/roles') }}" class="menu-link">
-                        <div data-i18n="Roles">Roles</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/users') }}" class="menu-link">
-                        <div data-i18n="Admin Users">Admin Users</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+                <ul class="menu-sub">
+                    @can('permission.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/permissions') }}" class="menu-link">
+                                <div data-i18n="Permissions">Permissions</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('role.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/roles') }}" class="menu-link">
+                                <div data-i18n="Roles">Roles</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('user.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/users') }}" class="menu-link">
+                                <div data-i18n="Admin Users">Admin Users</div>
+                            </a>
+                        </li>
+                    @endcan
+                </ul>
+            </li>
+        @endcanany
 
         <!-- Inventory -->
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fa fa-box"></i>
-                <div data-i18n="Inventory">Inventory</div>
-            </a>
+        @canany(['unit.view', 'warehouse.view', 'brand.view', 'category.view', 'sub-category.view', 'product.view',
+            'unit-conversion.view', 'batch.view', 'stock.view', 'stock-transaction.view', 'opening-stock.view',
+            'stock-taking.view', 'transfer-note.view', 'reports.stock-ledger.view'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-box"></i>
+                    <div data-i18n="Inventory">Inventory</div>
+                </a>
 
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ url('/admin/unit') }}" class="menu-link">
-                        <div data-i18n="Unit">Units</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/warehouse') }}" class="menu-link">
-                        <div data-i18n="Warehouse">Warehouse</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/brands') }}" class="menu-link">
-                        <div data-i18n="Brands">Brands</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/category') }}" class="menu-link">
-                        <div data-i18n="Categories">Categories</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/sub-category') }}" class="menu-link">
-                        <div data-i18n="Sub Categories">Sub Categories</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/product') }}" class="menu-link">
-                        <div data-i18n="Products">Products</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/product-variation-unit-conversion') }}" class="menu-link">
-                        <div data-i18n="Unit Conversion">Unit Conversion</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/product-variation-batch') }}" class="menu-link">
-                        <div data-i18n="Batches">Batches</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/product-variation-stock') }}" class="menu-link">
-                        <div data-i18n="Stock">Stock</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/product-variation-stock-transaction') }}" class="menu-link">
-                        <div data-i18n="Transactions">Transactions</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/opening-stock') }}" class="menu-link">
-                        <div data-i18n="Opening Stock">Opening Stock</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/stock-taking') }}" class="menu-link">
-                        <div data-i18n="Stock Taking">Stock Taking</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/transfer-note') }}" class="menu-link">
-                        <div data-i18n="Transfer Note">Transfer Note</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div data-i18n="Stock Reports">Reports</div>
-                    </a>
-                    <ul class="menu-sub">
+                <ul class="menu-sub">
+                    @can('unit.view')
                         <li class="menu-item">
-                            <a href="{{ url('/admin/reports/stock-ledger') }}" class="menu-link">
-                                <div data-i18n="Stock Ledger">Stock Ledger &amp; Movement</div>
+                            <a href="{{ url('/admin/unit') }}" class="menu-link">
+                                <div data-i18n="Unit">Units</div>
                             </a>
                         </li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
+                    @endcan
+                    @can('warehouse.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/warehouse') }}" class="menu-link">
+                                <div data-i18n="Warehouse">Warehouse</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('brand.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/brands') }}" class="menu-link">
+                                <div data-i18n="Brands">Brands</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('category.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/category') }}" class="menu-link">
+                                <div data-i18n="Categories">Categories</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('sub-category.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/sub-category') }}" class="menu-link">
+                                <div data-i18n="Sub Categories">Sub Categories</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('product.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/product') }}" class="menu-link">
+                                <div data-i18n="Products">Products</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('unit-conversion.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/product-variation-unit-conversion') }}" class="menu-link">
+                                <div data-i18n="Unit Conversion">Unit Conversion</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('batch.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/product-variation-batch') }}" class="menu-link">
+                                <div data-i18n="Batches">Batches</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('stock.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/product-variation-stock') }}" class="menu-link">
+                                <div data-i18n="Stock">Stock</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('stock-transaction.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/product-variation-stock-transaction') }}" class="menu-link">
+                                <div data-i18n="Transactions">Transactions</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('opening-stock.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/opening-stock') }}" class="menu-link">
+                                <div data-i18n="Opening Stock">Opening Stock</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('stock-taking.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/stock-taking') }}" class="menu-link">
+                                <div data-i18n="Stock Taking">Stock Taking</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('transfer-note.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/transfer-note') }}" class="menu-link">
+                                <div data-i18n="Transfer Note">Transfer Note</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('reports.stock-ledger.view')
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Stock Reports">Reports</div>
+                            </a>
+                            <ul class="menu-sub">
+                                <li class="menu-item">
+                                    <a href="{{ url('/admin/reports/stock-ledger') }}" class="menu-link">
+                                        <div data-i18n="Stock Ledger">Stock Ledger &amp; Movement</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    @endcan
+                </ul>
+            </li>
+        @endcanany
 
         {{-- Accounting --}}
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fa fa-box"></i>
-                <div data-i18n="Accounting">Accounting</div>
-            </a>
+        @canany(['account-type.view', 'account-sub-type.view', 'journal.view', 'account.view', 'journal-entry.view',
+            'reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
+            'reports.journal-register.view', 'reports.account-ledger.view', 'reports.account-balance.view',
+            'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view',
+            'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.expense-report.view',
+            'reports.tax-report.view', 'reports.equity-report.view'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-box"></i>
+                    <div data-i18n="Accounting">Accounting</div>
+                </a>
 
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ url('/admin/account-type') }}" class="menu-link">
-                        <div data-i18n="Account Types">Account Types</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/account-sub-type') }}" class="menu-link">
-                        <div data-i18n="Account Sub Types">Account Sub Types</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/journal') }}" class="menu-link">
-                        <div data-i18n="Journals">Journals</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/account') }}" class="menu-link">
-                        <div data-i18n="Accounts">Accounts</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/journal-entry') }}" class="menu-link">
-                        <div data-i18n="Journal Entries">Journal Entries</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div data-i18n="Accounting Reports">Reports</div>
-                    </a>
-                    <ul class="menu-sub">
+                <ul class="menu-sub">
+                    @can('account-type.view')
                         <li class="menu-item">
-                            <a href="{{ url('/admin/reports/accounts-payable') }}" class="menu-link">
-                                <div data-i18n="Accounts Payable">Accounts Payable</div>
+                            <a href="{{ url('/admin/account-type') }}" class="menu-link">
+                                <div data-i18n="Account Types">Account Types</div>
                             </a>
                         </li>
+                    @endcan
+                    @can('account-sub-type.view')
                         <li class="menu-item">
-                            <a href="{{ url('/admin/reports/general-ledger') }}" class="menu-link">
-                                <div data-i18n="General Ledger">General Ledger</div>
+                            <a href="{{ url('/admin/account-sub-type') }}" class="menu-link">
+                                <div data-i18n="Account Sub Types">Account Sub Types</div>
                             </a>
                         </li>
+                    @endcan
+                    @can('journal.view')
                         <li class="menu-item">
-                            <a href="{{ url('/admin/reports/trial-balance') }}" class="menu-link">
-                                <div data-i18n="Trial Balance">Trial Balance</div>
+                            <a href="{{ url('/admin/journal') }}" class="menu-link">
+                                <div data-i18n="Journals">Journals</div>
                             </a>
                         </li>
+                    @endcan
+                    @can('account.view')
                         <li class="menu-item">
-                            <a href="{{ url('/admin/reports/journal-register') }}" class="menu-link">
-                                <div data-i18n="Journal Register">Journal Register</div>
+                            <a href="{{ url('/admin/account') }}" class="menu-link">
+                                <div data-i18n="Accounts">Accounts</div>
                             </a>
                         </li>
+                    @endcan
+                    @can('journal-entry.view')
                         <li class="menu-item">
-                            <a href="{{ url('/admin/reports/account-ledger') }}" class="menu-link">
-                                <div data-i18n="Account Ledger">Account Ledger</div>
+                            <a href="{{ url('/admin/journal-entry') }}" class="menu-link">
+                                <div data-i18n="Journal Entries">Journal Entries</div>
                             </a>
                         </li>
+                    @endcan
+                    @canany(['reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
+                        'reports.journal-register.view', 'reports.account-ledger.view', 'reports.account-balance.view',
+                        'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view',
+                        'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.expense-report.view',
+                        'reports.tax-report.view', 'reports.equity-report.view'])
                         <li class="menu-item">
-                            <a href="{{ url('/admin/reports/account-balance') }}" class="menu-link">
-                                <div data-i18n="Account Balance">Account Balance</div>
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Accounting Reports">Reports</div>
                             </a>
+                            <ul class="menu-sub">
+                                @can('reports.accounts-payable.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/accounts-payable') }}" class="menu-link">
+                                            <div data-i18n="Accounts Payable">Accounts Payable</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.general-ledger.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/general-ledger') }}" class="menu-link">
+                                            <div data-i18n="General Ledger">General Ledger</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.trial-balance.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/trial-balance') }}" class="menu-link">
+                                            <div data-i18n="Trial Balance">Trial Balance</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.journal-register.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/journal-register') }}" class="menu-link">
+                                            <div data-i18n="Journal Register">Journal Register</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.account-ledger.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/account-ledger') }}" class="menu-link">
+                                            <div data-i18n="Account Ledger">Account Ledger</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.account-balance.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/account-balance') }}" class="menu-link">
+                                            <div data-i18n="Account Balance">Account Balance</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.day-book.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/day-book') }}" class="menu-link">
+                                            <div data-i18n="Day Book">Day Book</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.profit-loss.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/profit-loss') }}" class="menu-link">
+                                            <div data-i18n="Profit & Loss">Profit & Loss</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.balance-sheet.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/balance-sheet') }}" class="menu-link">
+                                            <div data-i18n="Balance Sheet">Balance Sheet</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.cash-bank-ledger.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/cash-bank-ledger') }}" class="menu-link">
+                                            <div data-i18n="Cash & Bank Ledger">Cash & Bank Ledger</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.income-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/income-report') }}" class="menu-link">
+                                            <div data-i18n="Income Report">Income Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.expense-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/expense-report') }}" class="menu-link">
+                                            <div data-i18n="Expense Report">Expense Report (By Account)</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.tax-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/tax-report') }}" class="menu-link">
+                                            <div data-i18n="Tax Reports">Tax Reports</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.equity-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/equity-report') }}" class="menu-link">
+                                            <div data-i18n="Equity Report">Equity Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                            </ul>
                         </li>
-                        <li class="menu-item">
-                            <a href="{{ url('/admin/reports/day-book') }}" class="menu-link">
-                                <div data-i18n="Day Book">Day Book</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url('/admin/reports/profit-loss') }}" class="menu-link">
-                                <div data-i18n="Profit & Loss">Profit & Loss</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url('/admin/reports/balance-sheet') }}" class="menu-link">
-                                <div data-i18n="Balance Sheet">Balance Sheet</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url('/admin/reports/cash-bank-ledger') }}" class="menu-link">
-                                <div data-i18n="Cash & Bank Ledger">Cash & Bank Ledger</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url('/admin/reports/income-report') }}" class="menu-link">
-                                <div data-i18n="Income Report">Income Report</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url('/admin/reports/expense-report') }}" class="menu-link">
-                                <div data-i18n="Expense Report">Expense Report (By Account)</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url('/admin/reports/tax-report') }}" class="menu-link">
-                                <div data-i18n="Tax Reports">Tax Reports</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="{{ url('/admin/reports/equity-report') }}" class="menu-link">
-                                <div data-i18n="Equity Report">Equity Report</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
+                    @endcanany
+                </ul>
+            </li>
+        @endcanany
 
         {{-- Expense --}}
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fa fa-receipt"></i>
-                <div data-i18n="Expense">Expense</div>
-            </a>
+        @canany(['expense-category.manage', 'expense.view', 'admin-expense.manage', 'reports.expense-detail-report.view'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-receipt"></i>
+                    <div data-i18n="Expense">Expense</div>
+                </a>
 
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ url('/admin/expense-category') }}" class="menu-link">
-                        <div data-i18n="Expense Category">Expense Category</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/expense') }}" class="menu-link">
-                        <div data-i18n="Expense Detail (POS)">Expense Detail (POS)</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/admin-expense') }}" class="menu-link">
-                        <div data-i18n="Admin Expenses">Admin Expenses</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/reports/expense-detail-report') }}" class="menu-link">
-                        <div data-i18n="Expense Reports">Expense Reports</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+                <ul class="menu-sub">
+                    @can('expense-category.manage')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/expense-category') }}" class="menu-link">
+                                <div data-i18n="Expense Category">Expense Category</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('expense.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/expense') }}" class="menu-link">
+                                <div data-i18n="Expense Detail (POS)">Expense Detail (POS)</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('admin-expense.manage')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/admin-expense') }}" class="menu-link">
+                                <div data-i18n="Admin Expenses">Admin Expenses</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('reports.expense-detail-report.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/expense-detail-report') }}" class="menu-link">
+                                <div data-i18n="Expense Reports">Expense Reports</div>
+                            </a>
+                        </li>
+                    @endcan
+                </ul>
+            </li>
+        @endcanany
+
+        {{-- Notifications --}}
+        @can('notification.view')
+            <li class="menu-item">
+                <a href="{{ url('/admin/notifications') }}" class="menu-link">
+                    <i class="menu-icon tf-icons fa fa-bell"></i>
+                    <div data-i18n="Notifications">Notifications</div>
+                </a>
+            </li>
+        @endcan
+
+        {{-- Audit & Security --}}
+        @canany(['activity-log.view', 'login-history.view'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-shield-alt"></i>
+                    <div data-i18n="Audit & Security">Audit &amp; Security</div>
+                </a>
+
+                <ul class="menu-sub">
+                    @can('activity-log.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/activity-log') }}" class="menu-link">
+                                <div data-i18n="Activity Log">Activity Log</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('login-history.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/login-history') }}" class="menu-link">
+                                <div data-i18n="Login History">Login History</div>
+                            </a>
+                        </li>
+                    @endcan
+                </ul>
+            </li>
+        @endcanany
 
         {{-- Procurement --}}
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fa fa-shopping-cart"></i>
-                <div data-i18n="Procurement">Procurement</div>
-            </a>
+        @canany(['supplier.view', 'purchase-request.view', 'purchase-request-quotation.view', 'purchase.view',
+            'good-receipt-note.view', 'purchase-return.view', 'supplier-payment.view',
+            'reports.supplier-ledger.view', 'reports.supplier-aging.view', 'reports.supplier-payment-history.view',
+            'reports.purchase-return-summary.view', 'reports.purchase-return-detail.view'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-shopping-cart"></i>
+                    <div data-i18n="Procurement">Procurement</div>
+                </a>
 
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ url('/admin/supplier') }}" class="menu-link">
-                        <div data-i18n="Suppliers">Suppliers</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/purchase-request') }}" class="menu-link">
-                        <div data-i18n="Purchase Requests">Purchase Requests</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/purchase-request-quotation') }}" class="menu-link">
-                        <div data-i18n="Purchase Request Quotations">Quotations</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/purchase') }}" class="menu-link">
-                        <div data-i18n="Purchases">Purchases</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/good-receipt-note') }}" class="menu-link">
-                        <div data-i18n="Goods Receipt Notes">Goods Receipt Notes</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/purchase-return') }}" class="menu-link">
-                        <div data-i18n="Purchase Returns">Purchase Returns</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/supplier-payment') }}" class="menu-link">
-                        <div data-i18n="Supplier Payments">Supplier Payments</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div data-i18n="Purchase Reports">Reports</div>
-                    </a>
-                    <ul class="menu-sub">
+                <ul class="menu-sub">
+                    @can('supplier.view')
                         <li class="menu-item">
-                            <a href="{{ url('/admin/reports/supplier-ledger') }}" class="menu-link">
-                                <div data-i18n="Supplier Ledger">Supplier Ledger</div>
+                            <a href="{{ url('/admin/supplier') }}" class="menu-link">
+                                <div data-i18n="Suppliers">Suppliers</div>
                             </a>
                         </li>
+                    @endcan
+                    @can('purchase-request.view')
                         <li class="menu-item">
-                            <a href="{{ url('/admin/reports/supplier-aging') }}" class="menu-link">
-                                <div data-i18n="Supplier Aging">Supplier Aging</div>
+                            <a href="{{ url('/admin/purchase-request') }}" class="menu-link">
+                                <div data-i18n="Purchase Requests">Purchase Requests</div>
                             </a>
                         </li>
+                    @endcan
+                    @can('purchase-request-quotation.view')
                         <li class="menu-item">
-                            <a href="{{ url('/admin/reports/supplier-payment-history') }}" class="menu-link">
-                                <div data-i18n="Supplier Payment History">Supplier Payment History</div>
+                            <a href="{{ url('/admin/purchase-request-quotation') }}" class="menu-link">
+                                <div data-i18n="Purchase Request Quotations">Quotations</div>
                             </a>
                         </li>
+                    @endcan
+                    @can('purchase.view')
                         <li class="menu-item">
-                            <a href="{{ url('/admin/reports/purchase-return-summary') }}" class="menu-link">
-                                <div data-i18n="Purchase Return Summary">Purchase Return Summary</div>
+                            <a href="{{ url('/admin/purchase') }}" class="menu-link">
+                                <div data-i18n="Purchases">Purchases</div>
                             </a>
                         </li>
+                    @endcan
+                    @can('good-receipt-note.view')
                         <li class="menu-item">
-                            <a href="{{ url('/admin/reports/purchase-return-detail') }}" class="menu-link">
-                                <div data-i18n="Purchase Return Detail">Purchase Return Detail</div>
+                            <a href="{{ url('/admin/good-receipt-note') }}" class="menu-link">
+                                <div data-i18n="Goods Receipt Notes">Goods Receipt Notes</div>
                             </a>
                         </li>
-                    </ul>
-                </li>
+                    @endcan
+                    @can('purchase-return.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/purchase-return') }}" class="menu-link">
+                                <div data-i18n="Purchase Returns">Purchase Returns</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('supplier-payment.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/supplier-payment') }}" class="menu-link">
+                                <div data-i18n="Supplier Payments">Supplier Payments</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @canany(['reports.supplier-ledger.view', 'reports.supplier-aging.view',
+                        'reports.supplier-payment-history.view', 'reports.purchase-return-summary.view',
+                        'reports.purchase-return-detail.view'])
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Purchase Reports">Reports</div>
+                            </a>
+                            <ul class="menu-sub">
+                                @can('reports.supplier-ledger.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/supplier-ledger') }}" class="menu-link">
+                                            <div data-i18n="Supplier Ledger">Supplier Ledger</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.supplier-aging.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/supplier-aging') }}" class="menu-link">
+                                            <div data-i18n="Supplier Aging">Supplier Aging</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.supplier-payment-history.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/supplier-payment-history') }}" class="menu-link">
+                                            <div data-i18n="Supplier Payment History">Supplier Payment History</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.purchase-return-summary.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/purchase-return-summary') }}" class="menu-link">
+                                            <div data-i18n="Purchase Return Summary">Purchase Return Summary</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.purchase-return-detail.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/purchase-return-detail') }}" class="menu-link">
+                                            <div data-i18n="Purchase Return Detail">Purchase Return Detail</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                            </ul>
+                        </li>
+                    @endcanany
 
-            </ul>
-        </li>
+                </ul>
+            </li>
+        @endcanany
 
         {{-- Orders (centralized - shared by POS, Website, Mobile App, API) --}}
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fa fa-receipt"></i>
-                <div data-i18n="Orders">Orders</div>
-            </a>
+        @canany(['pos.access', 'order-type.view', 'order-source.view', 'payment-method.view', 'discount.view', 'voucher.view'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-receipt"></i>
+                    <div data-i18n="Orders">Orders</div>
+                </a>
 
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="{{ url('/admin/order') }}" class="menu-link">
-                        <div data-i18n="Orders">Orders</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/order-type') }}" class="menu-link">
-                        <div data-i18n="Order Types">Order Types</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/order-source') }}" class="menu-link">
-                        <div data-i18n="Order Sources">Order Sources</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/payment-method') }}" class="menu-link">
-                        <div data-i18n="Payment Methods">Payment Methods</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/discount') }}" class="menu-link">
-                        <div data-i18n="Discounts">Discounts</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="{{ url('/admin/voucher') }}" class="menu-link">
-                        <div data-i18n="Vouchers">Vouchers</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+                <ul class="menu-sub">
+                    @can('pos.access')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/order') }}" class="menu-link">
+                                <div data-i18n="Orders">Orders</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('order-type.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/order-type') }}" class="menu-link">
+                                <div data-i18n="Order Types">Order Types</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('order-source.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/order-source') }}" class="menu-link">
+                                <div data-i18n="Order Sources">Order Sources</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('payment-method.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/payment-method') }}" class="menu-link">
+                                <div data-i18n="Payment Methods">Payment Methods</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('discount.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/discount') }}" class="menu-link">
+                                <div data-i18n="Discounts">Discounts</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('voucher.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/voucher') }}" class="menu-link">
+                                <div data-i18n="Vouchers">Vouchers</div>
+                            </a>
+                        </li>
+                    @endcan
+                </ul>
+            </li>
+        @endcanany
 
         {{-- POS (operational interface only) --}}
         @can('pos.access')

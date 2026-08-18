@@ -41,6 +41,14 @@ class PurchaseRequestController extends Controller
         UnitService $unit_service,
         DocumentSendLogService $document_send_log_service
     ) {
+        $this->middleware('permission:purchase-request.view')->only(['index', 'getData', 'byBusiness', 'details']);
+        $this->middleware('permission:purchase-request.create')->only(['create']);
+        $this->middleware('permission:purchase-request.create|purchase-request.edit')->only(['store']);
+        $this->middleware('permission:purchase-request.edit')->only(['edit', 'sendQuotation']);
+        $this->middleware('permission:purchase-request.delete')->only(['destroy']);
+        $this->middleware('permission:purchase-request.status')->only(['status']);
+        $this->middleware('permission:purchase-request.print')->only(['print']);
+
         $this->purchase_request_service = $purchase_request_service;
         $this->product_service = $product_service;
         $this->business_service = $business_service;

@@ -20,6 +20,12 @@ class UnitController extends Controller
 
     public function __construct(UnitService $unit_service)
     {
+        $this->middleware('permission:unit.view')->only(['index', 'getData']);
+        $this->middleware('permission:unit.create|unit.edit')->only(['store']);
+        $this->middleware('permission:unit.edit')->only(['edit']);
+        $this->middleware('permission:unit.delete')->only(['destroy']);
+        $this->middleware('permission:unit.status')->only(['status']);
+
         $this->unit_service = $unit_service;
     }
 

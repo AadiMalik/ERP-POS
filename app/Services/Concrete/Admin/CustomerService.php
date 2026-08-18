@@ -7,6 +7,7 @@ use App\Models\AccountingSetting;
 use App\Models\CustomerProfile;
 use App\Models\JournalEntryDetail;
 use App\Repository\Repository;
+use App\Traits\Auditable;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -20,6 +21,8 @@ use Illuminate\Support\Facades\Auth;
  */
 class CustomerService
 {
+    use Auditable;
+
     protected $model_customer;
     protected $with = [
         'user',
@@ -68,10 +71,16 @@ class CustomerService
         ], fn ($value) => !is_null($value));
 
         if ($profile) {
+            $old_values = $profile->only(['credit_limit', 'credit_days']);
+
             $fields['updatedby_id'] = Auth::id();
             $fields['date_updated'] = now();
 
             $profile->update($fields);
+
+            if (($old_values['credit_limit'] ?? null) != ($fields['credit_limit'] ?? $old_values['credit_limit'] ?? null)) {
+                $this->logActivity('customer', $profile->customer_profile_id, 'updated', $old_values, $profile->only(['credit_limit', 'credit_days']), 'Customer credit terms updated');
+            }
 
             return $profile;
         }
@@ -85,7 +94,11 @@ class CustomerService
         $fields['createdby_id'] = Auth::id();
         $fields['date_created'] = now();
 
-        return CustomerProfile::create($fields);
+        $profile = CustomerProfile::create($fields);
+
+        $this->logActivity('customer', $profile->customer_profile_id, 'created', null, $profile->only(['credit_limit', 'credit_days']));
+
+        return $profile;
     }
 
     public function getAllActive($business_id = null)

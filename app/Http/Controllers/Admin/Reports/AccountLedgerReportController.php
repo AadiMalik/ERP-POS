@@ -35,6 +35,8 @@ class AccountLedgerReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.account-ledger.view');
+
         $this->account_ledger_report_service = $account_ledger_report_service;
         $this->business_service = $business_service;
         $this->account_service = $account_service;

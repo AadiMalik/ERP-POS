@@ -26,6 +26,9 @@ class ProductVariationStockController extends Controller
         WarehouseService $warehouse_service,
         ProductVariationStockService $product_variation_stock_service
     ) {
+        $this->middleware('permission:stock.view')->only(['index', 'getData', 'byWarehouse', 'byBusiness', 'byProduct', 'byVariation', 'history']);
+        $this->middleware('permission:stock.status')->only(['status']);
+
         $this->business_service = $business_service;
         $this->product_service = $product_service;
         $this->warehouse_service = $warehouse_service;

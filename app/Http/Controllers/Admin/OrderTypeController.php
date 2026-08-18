@@ -22,6 +22,12 @@ class OrderTypeController extends Controller
 
     public function __construct(OrderTypeService $order_type_service, BusinessService $business_service)
     {
+        $this->middleware('permission:order-type.view')->only(['index', 'getData']);
+        $this->middleware('permission:order-type.create|order-type.edit')->only(['store']);
+        $this->middleware('permission:order-type.edit')->only(['edit']);
+        $this->middleware('permission:order-type.delete')->only(['destroy']);
+        $this->middleware('permission:order-type.status')->only(['status']);
+
         $this->order_type_service = $order_type_service;
         $this->business_service = $business_service;
     }

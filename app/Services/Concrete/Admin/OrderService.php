@@ -29,8 +29,11 @@ use App\Models\ProductVariation;
 use App\Models\ProductVariationStock;
 use App\Models\ProductVariationStockTransaction;
 use App\Models\ProductVariationUnitConversion;
+use App\Models\NotificationSetting;
 use App\Models\Voucher;
 use App\Repository\Repository;
+use App\Traits\Auditable;
+use App\Traits\Notifiable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -55,6 +58,9 @@ use Yajra\DataTables\DataTables;
  */
 class OrderService
 {
+    use Auditable;
+    use Notifiable;
+
     protected $model_order;
     protected $model_order_detail;
     protected $model_order_payment;
@@ -1064,6 +1070,35 @@ class OrderService
             'changedby_id' => Auth::id(),
             'date_created' => now(),
         ]);
+
+        $action = $from_status === null ? 'created' : ($to_status === Status::POSTED ? 'posted' : 'status_changed');
+
+        $this->logActivity(
+            'order',
+            $order_id,
+            $action,
+            $from_status !== null ? ['status' => $from_status] : null,
+            ['status' => $to_status],
+            $reason ?? ('Order status changed to ' . $to_status)
+        );
+
+        $business_id = Auth::user()?->business_id;
+        $notification_setting = $business_id ? NotificationSetting::where('business_id', $business_id)->first() : null;
+
+        if (!$notification_setting || $notification_setting->order_status_alert_enabled) {
+            $this->notify(
+                'order_status',
+                null,
+                null,
+                'Order Status Updated',
+                $reason ?? ('Order status changed to ' . $to_status),
+                'order',
+                $order_id,
+                route('order.show', $order_id),
+                ['from_status' => $from_status, 'to_status' => $to_status],
+                $to_status
+            );
+        }
     }
 
     /**
@@ -1627,11 +1662,15 @@ class OrderService
             throw new Exception('Posted orders cannot be deleted. Void the order instead.');
         }
 
-        return $this->model_order->update([
+        $result = $this->model_order->update([
             'is_deleted' => 1,
             'deletedby_id' => Auth::id(),
             'date_deleted' => now(),
         ], $order_id);
+
+        $this->logActivity('order', $order_id, 'deleted', ['status' => $order->status], null, 'Order deleted');
+
+        return $result;
     }
 
     public function searchProducts($obj)

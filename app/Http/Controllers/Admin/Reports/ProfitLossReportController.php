@@ -32,6 +32,8 @@ class ProfitLossReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.profit-loss.view');
+
         $this->profit_loss_report_service = $profit_loss_report_service;
         $this->business_service = $business_service;
         $this->document_send_log_service = $document_send_log_service;

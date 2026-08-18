@@ -35,6 +35,8 @@ class TrialBalanceReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.trial-balance.view');
+
         $this->trial_balance_report_service = $trial_balance_report_service;
         $this->business_service = $business_service;
         $this->account_type_service = $account_type_service;

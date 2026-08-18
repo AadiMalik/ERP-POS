@@ -38,7 +38,7 @@
     @include('admin.partials.datatable', [
         'columns' => "
                                                         {data: 'name' , name: 'name'},
-                                                        {data: 'is_system_only' , name: 'is_system_only', 'sortable': false , searchable: false},
+                                                        {data: 'is_system' , name: 'is_system', 'sortable': false , searchable: false},
                                                         {data: 'action' , name: 'action' , 'sortable': false , searchable: false},",
         'route' => 'permissions/data',
         'buttons' => false,

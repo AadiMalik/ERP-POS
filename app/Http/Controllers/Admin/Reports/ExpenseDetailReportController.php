@@ -30,6 +30,8 @@ class ExpenseDetailReportController extends Controller
         ExpenseCategoryService $expense_category_service,
         PosRegisterSessionService $pos_register_session_service
     ) {
+        $this->middleware('permission:reports.expense-detail-report.view');
+
         $this->expense_detail_report_service = $expense_detail_report_service;
         $this->business_service = $business_service;
         $this->branch_service = $branch_service;

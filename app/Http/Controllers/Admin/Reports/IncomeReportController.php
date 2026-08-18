@@ -36,6 +36,8 @@ class IncomeReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.income-report.view');
+
         $this->income_report_service = $income_report_service;
         $this->business_service = $business_service;
         $this->account_service = $account_service;

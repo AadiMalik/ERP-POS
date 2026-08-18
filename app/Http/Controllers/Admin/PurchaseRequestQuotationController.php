@@ -38,6 +38,14 @@ class PurchaseRequestQuotationController extends Controller
         SupplierService $supplier_service,
         DocumentSendLogService $document_send_log_service
     ) {
+        $this->middleware('permission:purchase-request-quotation.view')->only(['index', 'getData', 'byBusiness', 'details', 'getRecievedQuotationByPRId', 'selectedByPurchaseRequest', 'byPurchaseRequest']);
+        $this->middleware('permission:purchase-request-quotation.create')->only(['create']);
+        $this->middleware('permission:purchase-request-quotation.create|purchase-request-quotation.edit')->only(['store']);
+        $this->middleware('permission:purchase-request-quotation.edit')->only(['edit']);
+        $this->middleware('permission:purchase-request-quotation.delete')->only(['destroy']);
+        $this->middleware('permission:purchase-request-quotation.status')->only(['status']);
+        $this->middleware('permission:purchase-request-quotation.print')->only(['print']);
+
         $this->purchase_request_quotation_service = $purchase_request_quotation_service;
         $this->purchase_request_service = $purchase_request_service;
         $this->product_service = $product_service;

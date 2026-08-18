@@ -30,6 +30,8 @@ class BarcodeController extends Controller
         BarcodeGeneratorService $barcode_generator,
         QrCodeGeneratorService $qr_generator
     ) {
+        $this->middleware('permission:barcode.manage');
+
         $this->barcode_service = $barcode_service;
         $this->setting_service = $setting_service;
         $this->barcode_generator = $barcode_generator;

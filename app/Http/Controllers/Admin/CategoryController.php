@@ -22,6 +22,12 @@ class CategoryController extends Controller
 
     public function __construct(BusinessService $business_service, CategoryService $category_service)
     {
+        $this->middleware('permission:category.view')->only(['index', 'getData', 'byBusiness']);
+        $this->middleware('permission:category.create|category.edit')->only(['store']);
+        $this->middleware('permission:category.edit')->only(['edit']);
+        $this->middleware('permission:category.delete')->only(['destroy']);
+        $this->middleware('permission:category.status')->only(['status']);
+
         $this->business_service = $business_service;
         $this->category_service = $category_service;
     }

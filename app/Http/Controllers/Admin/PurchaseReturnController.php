@@ -35,6 +35,14 @@ class PurchaseReturnController extends Controller
         WarehouseService $warehouse_service,
         DocumentSendLogService $document_send_log_service
     ) {
+        $this->middleware('permission:purchase-return.view')->only(['index', 'getData', 'details', 'sourceLines']);
+        $this->middleware('permission:purchase-return.create')->only(['create']);
+        $this->middleware('permission:purchase-return.create|purchase-return.edit')->only(['store']);
+        $this->middleware('permission:purchase-return.edit')->only(['edit']);
+        $this->middleware('permission:purchase-return.delete')->only(['destroy']);
+        $this->middleware('permission:purchase-return.approve')->only(['status']);
+        $this->middleware('permission:purchase-return.print')->only(['print']);
+
         $this->purchase_return_service = $purchase_return_service;
         $this->business_service = $business_service;
         $this->supplier_service = $supplier_service;

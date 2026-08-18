@@ -35,6 +35,8 @@ class SupplierLedgerReportController extends Controller
         DocumentSendLogService $document_send_log_service,
         PrintSettingResolverService $print_setting_resolver
     ) {
+        $this->middleware('permission:reports.supplier-ledger.view');
+
         $this->supplier_ledger_report_service = $supplier_ledger_report_service;
         $this->business_service = $business_service;
         $this->supplier_service = $supplier_service;

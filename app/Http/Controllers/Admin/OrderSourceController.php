@@ -22,6 +22,12 @@ class OrderSourceController extends Controller
 
     public function __construct(OrderSourceService $order_source_service, BusinessService $business_service)
     {
+        $this->middleware('permission:order-source.view')->only(['index', 'getData']);
+        $this->middleware('permission:order-source.create|order-source.edit')->only(['store']);
+        $this->middleware('permission:order-source.edit')->only(['edit']);
+        $this->middleware('permission:order-source.delete')->only(['destroy']);
+        $this->middleware('permission:order-source.status')->only(['status']);
+
         $this->order_source_service = $order_source_service;
         $this->business_service = $business_service;
     }
