@@ -91,6 +91,11 @@
                         <!-- /Logo -->
                         <h4 class="mb-2">Welcome to {{env('APP_NAME')}}! 👋</h4>
                         <p class="mb-4">Please sign-in to your account and start the adventure</p>
+                        @if (session('success'))
+                            <div class="alert alert-success" role="alert">
+                                {{ session('success') }}
+                            </div>
+                        @endif
                         <form method="POST" class="mb-3" action="{{ route('login') }}">
                             @csrf
                             <div class="mb-3">

@@ -10,31 +10,24 @@
     </div>
 
     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-        <!-- Search -->
-        <div class="navbar-nav align-items-center">
-            <div class="nav-item d-flex align-items-center">
+        <!-- Global Search -->
+        <div class="navbar-nav align-items-center global-search-wrapper" id="globalSearchWrapper">
+            <div class="nav-item d-flex align-items-center w-100">
                 <i class="fa fa-search fs-4 lh-0"></i>
                 <input
                     type="text"
+                    id="globalSearchInput"
                     class="form-control border-0 shadow-none"
-                    placeholder="Search..."
-                    aria-label="Search..." />
+                    placeholder="Search suppliers, products, orders, purchases..."
+                    aria-label="Global search"
+                    autocomplete="off"
+                    data-search-url="{{ route('search.global') }}" />
             </div>
+            <div id="globalSearchDropdown" class="global-search-dropdown d-none"></div>
         </div>
-        <!-- /Search -->
+        <!-- /Global Search -->
 
         <ul class="navbar-nav flex-row align-items-center ms-auto">
-            <!-- Place this tag where you want the button to render. -->
-            <li class="nav-item lh-1 me-3">
-                <a
-                    class="github-button"
-                    href="https://github.com/themeselection/sneat-html-admin-template-free"
-                    data-icon="octicon-star"
-                    data-size="large"
-                    data-show-count="true"
-                    aria-label="Star themeselection/sneat-html-admin-template-free on GitHub">Star</a>
-            </li>
-
             <!-- Notifications -->
             @can('notification.view')
                 <li class="nav-item navbar-dropdown dropdown-notifications dropdown me-3">
@@ -98,7 +91,7 @@
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="{{ url('admin/profile') }}">
                             <i class="fa fa-user me-2"></i>
                             <span class="align-middle">My Profile</span>
                         </a>
@@ -140,6 +133,80 @@
 </nav>
 
 <!-- / Navbar -->
+
+    <style>
+        .global-search-wrapper {
+            position: relative;
+        }
+        .global-search-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 380px;
+            max-width: 90vw;
+            max-height: 460px;
+            overflow-y: auto;
+            background: var(--bs-body-bg, #fff);
+            border: 1px solid var(--bs-border-color, rgba(0, 0, 0, .1));
+            border-radius: .5rem;
+            box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .15);
+            z-index: 1090;
+            padding: .5rem 0;
+        }
+        .global-search-dropdown .search-group-label {
+            padding: .4rem 1rem .2rem;
+            font-size: .7rem;
+            font-weight: 600;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--bs-secondary-color, #8592a3);
+        }
+        .global-search-dropdown .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            padding: .5rem 1rem;
+            color: inherit;
+            text-decoration: none;
+        }
+        .global-search-dropdown .search-result-item:hover,
+        .global-search-dropdown .search-result-item.active {
+            background: var(--bs-tertiary-bg, rgba(0, 0, 0, .04));
+        }
+        .global-search-dropdown .search-result-item i {
+            width: 18px;
+            text-align: center;
+            color: var(--bs-secondary-color, #8592a3);
+            flex-shrink: 0;
+        }
+        .global-search-dropdown .search-result-text {
+            flex-grow: 1;
+            min-width: 0;
+        }
+        .global-search-dropdown .search-result-title {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .global-search-dropdown .search-result-subtitle {
+            font-size: .78rem;
+            color: var(--bs-secondary-color, #8592a3);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .global-search-dropdown .search-more-note {
+            padding: .25rem 1rem .5rem;
+            font-size: .75rem;
+            color: var(--bs-secondary-color, #8592a3);
+        }
+        .global-search-dropdown .search-state-message {
+            padding: 1.5rem 1rem;
+            text-align: center;
+            color: var(--bs-secondary-color, #8592a3);
+        }
+    </style>
 
 @can('notification.view')
     @push('js')

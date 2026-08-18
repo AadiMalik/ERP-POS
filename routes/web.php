@@ -107,6 +107,16 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting'], 'prefix
         Route::post('change-password', [App\Http\Controllers\Admin\UserController::class, 'updatePassword']);
     });
 
+    //my profile (self-service - every authenticated user manages their own record, no permission gate)
+    Route::group(['prefix' => 'profile'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::post('/', [App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
+        Route::post('password', [App\Http\Controllers\Admin\ProfileController::class, 'updatePassword'])->name('profile.password.update');
+    });
+
+    //global header search (each result group is gated by that module's own .view permission, not a separate one)
+    Route::get('search/global', [App\Http\Controllers\Admin\SearchController::class, 'globalSearch'])->name('search.global');
+
     ////////////////////// Inventory ///////////////////////////
     //warehouse
     Route::resource('warehouse', App\Http\Controllers\Admin\WarehouseController::class);
