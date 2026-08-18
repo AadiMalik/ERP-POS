@@ -3,42 +3,47 @@
 namespace App\Http\Controllers;
 
 use App\Enums\RoleNames;
-use App\Services\Concrete\Admin\SubscriptionService;
+use App\Services\Concrete\Admin\Dashboard\DashboardAccessService;
+use App\Services\Concrete\Admin\Dashboard\DashboardService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
-    protected SubscriptionService $subscription_service;
+    protected DashboardAccessService $access_service;
+    protected DashboardService $dashboard_service;
 
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(SubscriptionService $subscription_service)
+    public function __construct(DashboardAccessService $access_service, DashboardService $dashboard_service)
     {
         $this->middleware('auth');
-        $this->subscription_service = $subscription_service;
+        $this->access_service = $access_service;
+        $this->dashboard_service = $dashboard_service;
     }
 
     /**
-     * Show the application dashboard. Super Admin lands on the
-     * Subscription & Billing dashboard; every other user gets the regular
-     * home page with their business's subscription card at the top.
+     * Show the Business Dashboard. Super Admin lands on the Subscription &
+     * Billing dashboard instead; every other role gets the scope-resolved
+     * dashboard (or a restricted placeholder if their role/permissions
+     * don't grant access) via DashboardAccessService/DashboardService.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
+    public function index(Request $request)
     {
         if (getRoleName() == RoleNames::SUPERADMIN) {
             return redirect()->route('subscriptions.dashboard');
         }
 
-        $business = Auth::user()->business;
-        $subscription = $business ? $this->subscription_service->getCurrentSubscription($business) : null;
-        $display_status = $subscription ? $this->subscription_service->computeDisplayStatus($subscription) : null;
+        $scope = $this->access_service->resolveScope($request);
 
-        return view('home', compact('subscription', 'display_status'));
+        if (!$scope['allowed']) {
+            return view('home', ['restricted' => true]);
+        }
+
+        return view('home', $this->dashboard_service->build($scope));
     }
 }

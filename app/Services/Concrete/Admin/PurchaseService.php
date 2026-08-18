@@ -172,6 +172,81 @@ class PurchaseService
             ->make(true);
     }
 
+    /**
+     * Filter/scope builder for dashboard purchase queries - mirrors getData()'s
+     * $wh shape but takes an injectable allow_roles (defaulting to the same
+     * Business Admin-only list getData() uses) so the dashboard can widen
+     * purchase visibility to every Tier-1 role without touching getData()'s
+     * own ACL.
+     */
+    protected function applyDashboardFilters($query, array $obj)
+    {
+        $wh = [];
+
+        if (isset($obj['business_id']) && $obj['business_id'] != 0 && $obj['business_id'] != "") {
+            $wh[] = ['business_id', $obj['business_id']];
+        }
+        if (isset($obj['branch_id']) && $obj['branch_id'] != 0 && $obj['branch_id'] != "") {
+            $wh[] = ['branch_id', $obj['branch_id']];
+        }
+        if (!empty($obj['start_date'])) {
+            $wh[] = ['purchase_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+        }
+        if (!empty($obj['end_date'])) {
+            $wh[] = ['purchase_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+        }
+
+        $query->where($wh)->where('is_deleted', 0);
+
+        $allow_roles = $obj['allow_roles'] ?? [RoleNames::SUPERADMIN, RoleNames::BUSINESSADMIN];
+
+        return applyRoleScope($query, $allow_roles);
+    }
+
+    /**
+     * Dashboard-shaped purchase summary for a filter set - total count and
+     * total amount.
+     */
+    public function getDashboardSummary(array $obj): array
+    {
+        $base = fn () => $this->applyDashboardFilters($this->model_purchase->getModel()::query(), $obj);
+
+        return [
+            'total_purchases' => $base()->count(),
+            'total_purchase_amount' => (float) $base()->sum('total'),
+        ];
+    }
+
+    /**
+     * Most recent purchases for a dashboard's filter set.
+     */
+    public function getRecent(array $obj, int $limit = 8)
+    {
+        return $this->applyDashboardFilters(
+            $this->model_purchase->getModel()::with($this->with),
+            $obj
+        )
+            ->orderByDesc('purchase_date')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Daily purchase totals for a dashboard's filter set - powers the
+     * purchase trend chart. Mirrors OrderService::getDailyTrend() exactly,
+     * reusing applyDashboardFilters() like every other dashboard aggregate.
+     */
+    public function getDailyTrend(array $obj): array
+    {
+        return $this->applyDashboardFilters($this->model_purchase->getModel()::query(), $obj)
+            ->selectRaw('DATE(purchase_date) as day, SUM(total) as total')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->pluck('total', 'day')
+            ->map(fn ($v) => (float) $v)
+            ->all();
+    }
+
     public function save($obj)
     {
         DB::beginTransaction();

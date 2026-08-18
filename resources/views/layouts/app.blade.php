@@ -96,6 +96,11 @@
     </script>
     @include('layouts/js')
     @yield('js')
+    {{-- Additive to @yield('js') (a different registry): lets multiple
+         dashboard partials each push their own deferred chart script
+         without clobbering home.blade.php's own @section('js'). Placed
+         after layouts/js so ApexCharts/config.js are always loaded first. --}}
+    @stack('js')
 </body>
 
 </html>

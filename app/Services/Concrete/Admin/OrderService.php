@@ -192,7 +192,10 @@ class OrderService
             }
         }
 
-        $allow_roles = [
+        // Dashboard callers may inject a wider allow_roles (e.g. every Tier-1
+        // dashboard role) via $obj without touching this default, which
+        // still gates the POS Order History page and the Admin Order List.
+        $allow_roles = $obj['allow_roles'] ?? [
             RoleNames::SUPERADMIN,
             RoleNames::BUSINESSADMIN,
             RoleNames::BRANCHADMIN,
@@ -350,6 +353,90 @@ class OrderService
             'by_status' => $by_status,
             'by_payment_method' => $by_payment_method,
         ];
+    }
+
+    /**
+     * Dashboard-shaped sales summary: extends getHistorySummary()'s
+     * total_orders/total_sales with by_order_type and by_order_source
+     * groupings (mirroring its existing by_payment_method shape). Reuses
+     * applyHistoryFilters() so role/branch/date scoping - including Order
+     * Taker's forced-today lock - applies exactly as it does everywhere else.
+     */
+    public function getDashboardSummary(array $obj): array
+    {
+        $summary = $this->getHistorySummary($obj);
+
+        $base = fn () => $this->applyHistoryFilters($this->model_order->getModel()::query(), $obj);
+
+        $by_order_type = $base()
+            ->with('orderType')
+            ->get(['order_id', 'order_type_id', 'total'])
+            ->groupBy(fn ($order) => $order->orderType->name ?? 'Unknown')
+            ->map(fn ($orders) => (float) $orders->sum('total'));
+
+        $by_order_source = $base()
+            ->with('orderSource')
+            ->get(['order_id', 'order_source_id', 'total'])
+            ->groupBy(fn ($order) => $order->orderSource->name ?? 'Unknown')
+            ->map(fn ($orders) => (float) $orders->sum('total'));
+
+        return array_merge($summary, [
+            'by_order_type' => $by_order_type,
+            'by_order_source' => $by_order_source,
+        ]);
+    }
+
+    /**
+     * Daily sales totals for a dashboard's filter set - powers the sales
+     * trend chart. Reuses applyHistoryFilters() like every other dashboard
+     * aggregate.
+     */
+    public function getDailyTrend(array $obj): array
+    {
+        return $this->applyHistoryFilters($this->model_order->getModel()::query(), $obj)
+            ->selectRaw('DATE(order_date) as day, SUM(total) as total')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->pluck('total', 'day')
+            ->map(fn ($v) => (float) $v)
+            ->all();
+    }
+
+    /**
+     * Top-selling products for a dashboard's filter set, ranked by quantity
+     * sold. The in-scope order IDs come from applyHistoryFilters() used as a
+     * subquery, so this stays in lockstep with every other filter/scope rule
+     * without duplicating them.
+     */
+    public function getTopSellingProducts(array $obj, int $limit = 8)
+    {
+        $orderIds = $this->applyHistoryFilters($this->model_order->getModel()::query(), $obj)
+            ->select('order_id');
+
+        return OrderDetail::query()
+            ->whereIn('order_id', $orderIds)
+            ->select('product_id', 'product_variation_id')
+            ->selectRaw('SUM(quantity) as total_quantity, SUM(subtotal) as total_revenue')
+            ->groupBy('product_id', 'product_variation_id')
+            ->with(['product:product_id,name', 'productVariation:product_variation_id,name'])
+            ->orderByDesc('total_quantity')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Most recent orders for a dashboard's filter set - same filter/scope
+     * rules as getData(), just a plain limited list instead of a DataTable.
+     */
+    public function getRecent(array $obj, int $limit = 8)
+    {
+        return $this->applyHistoryFilters(
+            $this->model_order->getModel()::with($this->with),
+            $obj
+        )
+            ->orderByDesc('order_date')
+            ->limit($limit)
+            ->get();
     }
 
     public function getById($order_id)
