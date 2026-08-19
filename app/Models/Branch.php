@@ -43,6 +43,11 @@ class Branch extends Model
         return $this->belongsTo(Business::class, 'business_id');
     }
 
+    public function employees()
+    {
+        return $this->hasMany(Employee::class, 'branch_id', 'branch_id');
+    }
+
     public function createdby()
     {
         return $this->belongsTo(User::class, 'createdby_id');

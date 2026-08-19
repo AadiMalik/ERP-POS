@@ -45,6 +45,11 @@ class Department extends Model
         return $this->hasMany(Designation::class, 'department_id', 'department_id');
     }
 
+    public function employees()
+    {
+        return $this->hasMany(Employee::class, 'department_id', 'department_id');
+    }
+
     public function createdby()
     {
         return $this->belongsTo(User::class, 'createdby_id');

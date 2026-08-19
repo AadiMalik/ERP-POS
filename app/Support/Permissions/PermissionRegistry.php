@@ -472,6 +472,73 @@ class PermissionRegistry
                 'advance_apply'      => ['name' => 'ess.advance.apply', 'label' => 'Request Advance', 'is_system' => false],
             ]],
 
+            // ---- HRM & Payroll Reports ----
+            // 'hrm-reports' covers organizational/attendance/leave/lifecycle reports
+            // (non-financial) - granted to Reporting Analyst as well as HR Manager.
+            // 'payroll-reports' covers salary/payroll-run/cost reports (financial) -
+            // granted to HR Manager only, deliberately withheld from Reporting Analyst.
+            // See CLAUDE.md and RoleDefaultPermissions for the reasoning.
+
+            'hrm-reports' => ['label' => 'HRM Reports', 'actions' => [
+                'employee_master' => ['name' => 'reports.employee-master-report.view', 'label' => 'Employee Master Report', 'is_system' => false],
+                'employee_directory' => ['name' => 'reports.employee-directory-report.view', 'label' => 'Employee Directory Report', 'is_system' => false],
+                'employee_joining' => ['name' => 'reports.employee-joining-report.view', 'label' => 'Employee Joining Report', 'is_system' => false],
+                'employee_exit' => ['name' => 'reports.employee-exit-report.view', 'label' => 'Employee Exit Report', 'is_system' => false],
+                'department_wise_employee' => ['name' => 'reports.department-wise-employee-report.view', 'label' => 'Department-wise Employee Report', 'is_system' => false],
+                'designation_wise_employee' => ['name' => 'reports.designation-wise-employee-report.view', 'label' => 'Designation-wise Employee Report', 'is_system' => false],
+                'branch_wise_employee' => ['name' => 'reports.branch-wise-employee-report.view', 'label' => 'Branch-wise Employee Report', 'is_system' => false],
+                'employee_status' => ['name' => 'reports.employee-status-report.view', 'label' => 'Employee Status Report', 'is_system' => false],
+                'attendance_summary' => ['name' => 'reports.attendance-summary-report.view', 'label' => 'Attendance Summary Report', 'is_system' => false],
+                'daily_attendance' => ['name' => 'reports.daily-attendance-report.view', 'label' => 'Daily Attendance Report', 'is_system' => false],
+                'monthly_attendance' => ['name' => 'reports.monthly-attendance-report.view', 'label' => 'Monthly Attendance Report', 'is_system' => false],
+                'attendance_register' => ['name' => 'reports.attendance-register.view', 'label' => 'Attendance Register', 'is_system' => false],
+                'late_attendance' => ['name' => 'reports.late-attendance-report.view', 'label' => 'Late Attendance Report', 'is_system' => false],
+                'early_checkout' => ['name' => 'reports.early-checkout-report.view', 'label' => 'Early Checkout Report', 'is_system' => false],
+                'absent_employees' => ['name' => 'reports.absent-employees-report.view', 'label' => 'Absent Employees Report', 'is_system' => false],
+                'missing_checkin_checkout' => ['name' => 'reports.missing-checkin-checkout-report.view', 'label' => 'Missing Check-In/Check-Out Report', 'is_system' => false],
+                'overtime' => ['name' => 'reports.overtime-report.view', 'label' => 'Overtime Report', 'is_system' => false],
+                'shift_wise_attendance' => ['name' => 'reports.shift-wise-attendance-report.view', 'label' => 'Shift-wise Attendance Report', 'is_system' => false],
+                'shift_assignment' => ['name' => 'reports.shift-assignment-report.view', 'label' => 'Shift Assignment Report', 'is_system' => false],
+                'leave_summary' => ['name' => 'reports.leave-summary-report.view', 'label' => 'Leave Summary Report', 'is_system' => false],
+                'employee_leave_history' => ['name' => 'reports.employee-leave-history-report.view', 'label' => 'Employee Leave History Report', 'is_system' => false],
+                'leave_type_wise' => ['name' => 'reports.leave-type-wise-report.view', 'label' => 'Leave Type-wise Report', 'is_system' => false],
+                'department_wise_leave' => ['name' => 'reports.department-wise-leave-report.view', 'label' => 'Department-wise Leave Report', 'is_system' => false],
+                'pending_leave_approval' => ['name' => 'reports.pending-leave-approval-report.view', 'label' => 'Pending Leave Approval Report', 'is_system' => false],
+                'leave_approval_status' => ['name' => 'reports.leave-approval-status-report.view', 'label' => 'Leave Approval Status Report', 'is_system' => false],
+                'leave_balance' => ['name' => 'reports.leave-balance-report.view', 'label' => 'Leave Balance Report', 'is_system' => false],
+                'salary_structure' => ['name' => 'reports.salary-structure-report.view', 'label' => 'Salary Structure Report', 'is_system' => false],
+                'salary_component' => ['name' => 'reports.salary-component-report.view', 'label' => 'Salary Component Report', 'is_system' => false],
+                'deduction' => ['name' => 'reports.deduction-report.view', 'label' => 'Deduction Report', 'is_system' => false],
+                'employee_advance' => ['name' => 'reports.employee-advance-report.view', 'label' => 'Employee Advance Report', 'is_system' => false],
+                'advance_recovery' => ['name' => 'reports.advance-recovery-report.view', 'label' => 'Advance Recovery Report', 'is_system' => false],
+                'employee_ledger' => ['name' => 'reports.employee-ledger-report.view', 'label' => 'Employee Ledger Report', 'is_system' => false],
+                'resignation' => ['name' => 'reports.resignation-report.view', 'label' => 'Resignation Report', 'is_system' => false],
+                'termination' => ['name' => 'reports.termination-report.view', 'label' => 'Termination Report', 'is_system' => false],
+                'employee_clearance' => ['name' => 'reports.employee-clearance-report.view', 'label' => 'Employee Clearance Report', 'is_system' => false],
+                'asset_allocation' => ['name' => 'reports.asset-allocation-report.view', 'label' => 'Asset Allocation Report', 'is_system' => false],
+                'employee_asset_return' => ['name' => 'reports.employee-asset-return-report.view', 'label' => 'Employee Asset Return Report', 'is_system' => false],
+                'employee_document' => ['name' => 'reports.employee-document-report.view', 'label' => 'Employee Document Report', 'is_system' => false],
+                'employee_lifecycle' => ['name' => 'reports.employee-lifecycle-report.view', 'label' => 'Employee Lifecycle Report', 'is_system' => false],
+                'hr_dashboard' => ['name' => 'reports.hr-dashboard-report.view', 'label' => 'HR Dashboard Report', 'is_system' => false],
+            ]],
+
+            'payroll-reports' => ['label' => 'Payroll Reports', 'actions' => [
+                'payroll_summary' => ['name' => 'reports.payroll-summary-report.view', 'label' => 'Payroll Summary Report', 'is_system' => false],
+                'employee_wise_payroll' => ['name' => 'reports.employee-wise-payroll-report.view', 'label' => 'Employee-wise Payroll Report', 'is_system' => false],
+                'department_wise_payroll' => ['name' => 'reports.department-wise-payroll-report.view', 'label' => 'Department-wise Payroll Report', 'is_system' => false],
+                'branch_wise_payroll' => ['name' => 'reports.branch-wise-payroll-report.view', 'label' => 'Branch-wise Payroll Report', 'is_system' => false],
+                'monthly_payroll_register' => ['name' => 'reports.monthly-payroll-register.view', 'label' => 'Monthly Payroll Register', 'is_system' => false],
+                'payroll_cost' => ['name' => 'reports.payroll-cost-report.view', 'label' => 'Payroll Cost Report', 'is_system' => false],
+                'pending_payroll' => ['name' => 'reports.pending-payroll-report.view', 'label' => 'Pending Payroll Report', 'is_system' => false],
+                'salary_slip' => ['name' => 'reports.salary-slip-report.view', 'label' => 'Salary Slip Report', 'is_system' => false],
+                'payroll_disbursement' => ['name' => 'reports.payroll-disbursement-report.view', 'label' => 'Payroll Payment/Disbursement Report', 'is_system' => false],
+                'attendance_payroll_comparison' => ['name' => 'reports.attendance-payroll-comparison-report.view', 'label' => 'Employee Attendance & Payroll Comparison Report', 'is_system' => false],
+                'leave_payroll_impact' => ['name' => 'reports.leave-payroll-impact-report.view', 'label' => 'Leave & Payroll Impact Report', 'is_system' => false],
+                'employee_cost' => ['name' => 'reports.employee-cost-report.view', 'label' => 'Employee Cost Report', 'is_system' => false],
+                'department_payroll_cost' => ['name' => 'reports.department-payroll-cost-report.view', 'label' => 'Department Payroll Cost Report', 'is_system' => false],
+                'branch_payroll_cost' => ['name' => 'reports.branch-payroll-cost-report.view', 'label' => 'Branch Payroll Cost Report', 'is_system' => false],
+            ]],
+
             // ---- Already-seeded modules (existing permission names, kept exactly as-is) ----
 
             'pos' => ['label' => 'POS', 'actions' => [
@@ -670,6 +737,7 @@ class PermissionRegistry
             'leave-request', 'salary-component', 'salary-structure', 'payroll', 'payslip',
             'employee-advance', 'employee-deduction', 'employee-ledger', 'employee-exit',
             'employee-clearance', 'asset', 'asset-allocation',
+            'hrm-reports', 'payroll-reports',
         ];
     }
 }

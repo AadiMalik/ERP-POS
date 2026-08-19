@@ -131,7 +131,7 @@ class RoleDefaultPermissions
                         'leave-type', 'leave-request', 'salary-component', 'salary-structure',
                         'payroll', 'payslip', 'employee-advance', 'employee-deduction',
                         'employee-ledger', 'employee-exit', 'employee-clearance',
-                        'asset', 'asset-allocation',
+                        'asset', 'asset-allocation', 'hrm-reports', 'payroll-reports',
                     ]),
                     ['dashboard.view', 'branch.view']
                 );
@@ -140,8 +140,11 @@ class RoleDefaultPermissions
                 return PermissionRegistry::namesForModules(['ess']);
 
             case RoleNames::REPORTINGANALYST:
+                // hrm-reports (organizational/attendance/leave) is included here, but
+                // payroll-reports (salary/payroll-run/cost data) deliberately is not -
+                // see PermissionRegistry's "HRM & Payroll Reports" comment.
                 return array_merge(
-                    PermissionRegistry::namesForModules(['reports']),
+                    PermissionRegistry::namesForModules(['reports', 'hrm-reports']),
                     ['dashboard.view']
                 );
 

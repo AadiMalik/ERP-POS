@@ -81,6 +81,16 @@ class Employee extends Model
         return $this->hasMany(EmployeeDocument::class, 'employee_id', 'employee_id')->where('is_deleted', 0);
     }
 
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'employee_id', 'employee_id');
+    }
+
+    public function leaveRequests()
+    {
+        return $this->hasMany(LeaveRequest::class, 'employee_id', 'employee_id');
+    }
+
     public function business()
     {
         return $this->belongsTo(Business::class, 'business_id');

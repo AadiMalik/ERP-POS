@@ -36,6 +36,11 @@ class Designation extends Model
         return $this->belongsTo(Department::class, 'department_id', 'department_id');
     }
 
+    public function employees()
+    {
+        return $this->hasMany(Employee::class, 'designation_id', 'designation_id');
+    }
+
     public function business()
     {
         return $this->belongsTo(Business::class, 'business_id');

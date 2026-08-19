@@ -571,7 +571,34 @@
         @canany(['department.view', 'designation.view', 'shift.view', 'employee.view', 'attendance.view',
             'leave-type.view', 'leave-request.view', 'salary-component.view', 'salary-structure.view',
             'payroll.view', 'employee-advance.view', 'employee-deduction.view', 'employee-ledger.view',
-            'employee-exit.view', 'asset.view', 'asset-allocation.view'])
+            'employee-exit.view', 'asset.view', 'asset-allocation.view',
+            'reports.employee-master-report.view', 'reports.employee-directory-report.view',
+            'reports.employee-joining-report.view', 'reports.employee-exit-report.view',
+            'reports.department-wise-employee-report.view', 'reports.designation-wise-employee-report.view',
+            'reports.branch-wise-employee-report.view', 'reports.employee-status-report.view',
+            'reports.attendance-summary-report.view', 'reports.daily-attendance-report.view',
+            'reports.monthly-attendance-report.view', 'reports.attendance-register.view',
+            'reports.late-attendance-report.view', 'reports.early-checkout-report.view',
+            'reports.absent-employees-report.view', 'reports.missing-checkin-checkout-report.view',
+            'reports.overtime-report.view', 'reports.shift-wise-attendance-report.view',
+            'reports.shift-assignment-report.view', 'reports.leave-summary-report.view',
+            'reports.employee-leave-history-report.view', 'reports.leave-type-wise-report.view',
+            'reports.department-wise-leave-report.view', 'reports.pending-leave-approval-report.view',
+            'reports.leave-approval-status-report.view', 'reports.leave-balance-report.view',
+            'reports.salary-structure-report.view', 'reports.salary-component-report.view',
+            'reports.deduction-report.view', 'reports.employee-advance-report.view',
+            'reports.advance-recovery-report.view', 'reports.employee-ledger-report.view',
+            'reports.payroll-summary-report.view', 'reports.employee-wise-payroll-report.view',
+            'reports.department-wise-payroll-report.view', 'reports.branch-wise-payroll-report.view',
+            'reports.monthly-payroll-register.view', 'reports.payroll-cost-report.view',
+            'reports.pending-payroll-report.view', 'reports.salary-slip-report.view',
+            'reports.payroll-disbursement-report.view', 'reports.resignation-report.view',
+            'reports.termination-report.view', 'reports.employee-clearance-report.view',
+            'reports.asset-allocation-report.view', 'reports.employee-asset-return-report.view',
+            'reports.employee-document-report.view', 'reports.employee-lifecycle-report.view',
+            'reports.attendance-payroll-comparison-report.view', 'reports.leave-payroll-impact-report.view',
+            'reports.employee-cost-report.view', 'reports.department-payroll-cost-report.view',
+            'reports.branch-payroll-cost-report.view', 'reports.hr-dashboard-report.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons fa fa-users-cog"></i>
@@ -579,6 +606,13 @@
                 </a>
 
                 <ul class="menu-sub">
+                    @can('reports.hr-dashboard-report.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/reports/hr-dashboard-report') }}" class="menu-link">
+                                <div data-i18n="HR Dashboard">HR Dashboard</div>
+                            </a>
+                        </li>
+                    @endcan
                     @can('employee.view')
                         <li class="menu-item">
                             <a href="{{ url('/admin/employee') }}" class="menu-link">
@@ -691,6 +725,412 @@
                             </a>
                         </li>
                     @endcan
+                    @canany(['reports.employee-master-report.view', 'reports.employee-directory-report.view',
+                        'reports.employee-joining-report.view', 'reports.employee-exit-report.view',
+                        'reports.department-wise-employee-report.view', 'reports.designation-wise-employee-report.view',
+                        'reports.branch-wise-employee-report.view', 'reports.employee-status-report.view',
+                        'reports.attendance-summary-report.view', 'reports.daily-attendance-report.view',
+                        'reports.monthly-attendance-report.view', 'reports.attendance-register.view',
+                        'reports.late-attendance-report.view', 'reports.early-checkout-report.view',
+                        'reports.absent-employees-report.view', 'reports.missing-checkin-checkout-report.view',
+                        'reports.overtime-report.view', 'reports.shift-wise-attendance-report.view',
+                        'reports.shift-assignment-report.view', 'reports.leave-summary-report.view',
+                        'reports.employee-leave-history-report.view', 'reports.leave-type-wise-report.view',
+                        'reports.department-wise-leave-report.view', 'reports.pending-leave-approval-report.view',
+                        'reports.leave-approval-status-report.view', 'reports.leave-balance-report.view',
+                        'reports.salary-structure-report.view', 'reports.salary-component-report.view',
+                        'reports.deduction-report.view', 'reports.employee-advance-report.view',
+                        'reports.advance-recovery-report.view', 'reports.employee-ledger-report.view',
+                        'reports.payroll-summary-report.view', 'reports.employee-wise-payroll-report.view',
+                        'reports.department-wise-payroll-report.view', 'reports.branch-wise-payroll-report.view',
+                        'reports.monthly-payroll-register.view', 'reports.payroll-cost-report.view',
+                        'reports.pending-payroll-report.view', 'reports.salary-slip-report.view',
+                        'reports.payroll-disbursement-report.view', 'reports.resignation-report.view',
+                        'reports.termination-report.view', 'reports.employee-clearance-report.view',
+                        'reports.asset-allocation-report.view', 'reports.employee-asset-return-report.view',
+                        'reports.employee-document-report.view', 'reports.employee-lifecycle-report.view',
+                        'reports.attendance-payroll-comparison-report.view', 'reports.leave-payroll-impact-report.view',
+                        'reports.employee-cost-report.view', 'reports.department-payroll-cost-report.view',
+                        'reports.branch-payroll-cost-report.view'])
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="HR Reports">Reports</div>
+                            </a>
+                            <ul class="menu-sub">
+                                @can('reports.employee-master-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-master-report') }}" class="menu-link">
+                                            <div data-i18n="Employee Master Report">Employee Master Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.employee-directory-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-directory-report') }}" class="menu-link">
+                                            <div data-i18n="Employee Directory Report">Employee Directory Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.employee-joining-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-joining-report') }}" class="menu-link">
+                                            <div data-i18n="Employee Joining Report">Employee Joining Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.employee-exit-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-exit-report') }}" class="menu-link">
+                                            <div data-i18n="Employee Exit Report">Employee Exit Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.department-wise-employee-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/department-wise-employee-report') }}" class="menu-link">
+                                            <div data-i18n="Department-wise Employee Report">Department-wise Employee Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.designation-wise-employee-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/designation-wise-employee-report') }}" class="menu-link">
+                                            <div data-i18n="Designation-wise Employee Report">Designation-wise Employee Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.branch-wise-employee-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/branch-wise-employee-report') }}" class="menu-link">
+                                            <div data-i18n="Branch-wise Employee Report">Branch-wise Employee Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.employee-status-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-status-report') }}" class="menu-link">
+                                            <div data-i18n="Employee Status Report">Employee Status Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.attendance-summary-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/attendance-summary-report') }}" class="menu-link">
+                                            <div data-i18n="Attendance Summary Report">Attendance Summary Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.daily-attendance-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/daily-attendance-report') }}" class="menu-link">
+                                            <div data-i18n="Daily Attendance Report">Daily Attendance Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.monthly-attendance-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/monthly-attendance-report') }}" class="menu-link">
+                                            <div data-i18n="Monthly Attendance Report">Monthly Attendance Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.attendance-register.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/attendance-register') }}" class="menu-link">
+                                            <div data-i18n="Attendance Register">Attendance Register</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.late-attendance-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/late-attendance-report') }}" class="menu-link">
+                                            <div data-i18n="Late Attendance Report">Late Attendance Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.early-checkout-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/early-checkout-report') }}" class="menu-link">
+                                            <div data-i18n="Early Checkout Report">Early Checkout Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.absent-employees-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/absent-employees-report') }}" class="menu-link">
+                                            <div data-i18n="Absent Employees Report">Absent Employees Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.missing-checkin-checkout-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/missing-checkin-checkout-report') }}" class="menu-link">
+                                            <div data-i18n="Missing Check-In/Check-Out Report">Missing Check-In/Check-Out Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.overtime-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/overtime-report') }}" class="menu-link">
+                                            <div data-i18n="Overtime Report">Overtime Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.shift-wise-attendance-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/shift-wise-attendance-report') }}" class="menu-link">
+                                            <div data-i18n="Shift-wise Attendance Report">Shift-wise Attendance Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.shift-assignment-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/shift-assignment-report') }}" class="menu-link">
+                                            <div data-i18n="Shift Assignment Report">Shift Assignment Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.leave-summary-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/leave-summary-report') }}" class="menu-link">
+                                            <div data-i18n="Leave Summary Report">Leave Summary Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.employee-leave-history-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-leave-history-report') }}" class="menu-link">
+                                            <div data-i18n="Employee Leave History Report">Employee Leave History Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.leave-type-wise-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/leave-type-wise-report') }}" class="menu-link">
+                                            <div data-i18n="Leave Type-wise Report">Leave Type-wise Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.department-wise-leave-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/department-wise-leave-report') }}" class="menu-link">
+                                            <div data-i18n="Department-wise Leave Report">Department-wise Leave Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.pending-leave-approval-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/pending-leave-approval-report') }}" class="menu-link">
+                                            <div data-i18n="Pending Leave Approval Report">Pending Leave Approval Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.leave-approval-status-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/leave-approval-status-report') }}" class="menu-link">
+                                            <div data-i18n="Leave Approval Status Report">Leave Approval Status Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.leave-balance-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/leave-balance-report') }}" class="menu-link">
+                                            <div data-i18n="Leave Balance Report">Leave Balance Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.salary-structure-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/salary-structure-report') }}" class="menu-link">
+                                            <div data-i18n="Salary Structure Report">Salary Structure Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.salary-component-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/salary-component-report') }}" class="menu-link">
+                                            <div data-i18n="Salary Component Report">Salary Component Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.deduction-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/deduction-report') }}" class="menu-link">
+                                            <div data-i18n="Deduction Report">Deduction Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.employee-advance-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-advance-report') }}" class="menu-link">
+                                            <div data-i18n="Employee Advance Report">Employee Advance Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.advance-recovery-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/advance-recovery-report') }}" class="menu-link">
+                                            <div data-i18n="Advance Recovery Report">Advance Recovery Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.employee-ledger-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-ledger-report') }}" class="menu-link">
+                                            <div data-i18n="Employee Ledger Report">Employee Ledger Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.payroll-summary-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/payroll-summary-report') }}" class="menu-link">
+                                            <div data-i18n="Payroll Summary Report">Payroll Summary Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.employee-wise-payroll-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-wise-payroll-report') }}" class="menu-link">
+                                            <div data-i18n="Employee-wise Payroll Report">Employee-wise Payroll Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.department-wise-payroll-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/department-wise-payroll-report') }}" class="menu-link">
+                                            <div data-i18n="Department-wise Payroll Report">Department-wise Payroll Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.branch-wise-payroll-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/branch-wise-payroll-report') }}" class="menu-link">
+                                            <div data-i18n="Branch-wise Payroll Report">Branch-wise Payroll Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.monthly-payroll-register.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/monthly-payroll-register') }}" class="menu-link">
+                                            <div data-i18n="Monthly Payroll Register">Monthly Payroll Register</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.payroll-cost-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/payroll-cost-report') }}" class="menu-link">
+                                            <div data-i18n="Payroll Cost Report">Payroll Cost Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.pending-payroll-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/pending-payroll-report') }}" class="menu-link">
+                                            <div data-i18n="Pending Payroll Report">Pending Payroll Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.salary-slip-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/salary-slip-report') }}" class="menu-link">
+                                            <div data-i18n="Salary Slip Report">Salary Slip Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.payroll-disbursement-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/payroll-disbursement-report') }}" class="menu-link">
+                                            <div data-i18n="Payroll Payment/Disbursement Report">Payroll Payment/Disbursement Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.resignation-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/resignation-report') }}" class="menu-link">
+                                            <div data-i18n="Resignation Report">Resignation Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.termination-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/termination-report') }}" class="menu-link">
+                                            <div data-i18n="Termination Report">Termination Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.employee-clearance-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-clearance-report') }}" class="menu-link">
+                                            <div data-i18n="Employee Clearance Report">Employee Clearance Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.asset-allocation-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/asset-allocation-report') }}" class="menu-link">
+                                            <div data-i18n="Asset Allocation Report">Asset Allocation Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.employee-asset-return-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-asset-return-report') }}" class="menu-link">
+                                            <div data-i18n="Employee Asset Return Report">Employee Asset Return Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.employee-document-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-document-report') }}" class="menu-link">
+                                            <div data-i18n="Employee Document Report">Employee Document Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.employee-lifecycle-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-lifecycle-report') }}" class="menu-link">
+                                            <div data-i18n="Employee Lifecycle Report">Employee Lifecycle Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.attendance-payroll-comparison-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/attendance-payroll-comparison-report') }}" class="menu-link">
+                                            <div data-i18n="Attendance & Payroll Comparison Report">Attendance & Payroll Comparison Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.leave-payroll-impact-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/leave-payroll-impact-report') }}" class="menu-link">
+                                            <div data-i18n="Leave & Payroll Impact Report">Leave & Payroll Impact Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.employee-cost-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/employee-cost-report') }}" class="menu-link">
+                                            <div data-i18n="Employee Cost Report">Employee Cost Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.department-payroll-cost-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/department-payroll-cost-report') }}" class="menu-link">
+                                            <div data-i18n="Department Payroll Cost Report">Department Payroll Cost Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('reports.branch-payroll-cost-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/branch-payroll-cost-report') }}" class="menu-link">
+                                            <div data-i18n="Branch Payroll Cost Report">Branch Payroll Cost Report</div>
+                                        </a>
+                                    </li>
+                                @endcan
+                            </ul>
+                        </li>
+                    @endcanany
                 </ul>
             </li>
         @endcanany

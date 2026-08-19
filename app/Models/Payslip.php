@@ -45,6 +45,11 @@ class Payslip extends Model
         return $this->belongsTo(Employee::class, 'employee_id', 'employee_id');
     }
 
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id', 'branch_id');
+    }
+
     public function items()
     {
         return $this->hasMany(PayslipItem::class, 'payslip_id', 'payslip_id');

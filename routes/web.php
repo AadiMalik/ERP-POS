@@ -233,6 +233,96 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     });
     }); // end module:hrm (resignation/clearance/asset/ESS)
 
+    ////////////////////// HRM & Payroll Reports ///////////////////////////
+    Route::group(['middleware' => ['module:hrm']], function () {
+        Route::group(['prefix' => 'reports'], function () {
+            foreach ([
+                'employee-master-report' => App\Http\Controllers\Admin\Reports\Hrm\Employee\EmployeeMasterReportController::class,
+                'employee-directory-report' => App\Http\Controllers\Admin\Reports\Hrm\Employee\EmployeeDirectoryReportController::class,
+                'employee-joining-report' => App\Http\Controllers\Admin\Reports\Hrm\Employee\EmployeeJoiningReportController::class,
+                'employee-exit-report' => App\Http\Controllers\Admin\Reports\Hrm\Employee\EmployeeExitReportController::class,
+                'department-wise-employee-report' => App\Http\Controllers\Admin\Reports\Hrm\Employee\DepartmentWiseEmployeeReportController::class,
+                'designation-wise-employee-report' => App\Http\Controllers\Admin\Reports\Hrm\Employee\DesignationWiseEmployeeReportController::class,
+                'branch-wise-employee-report' => App\Http\Controllers\Admin\Reports\Hrm\Employee\BranchWiseEmployeeReportController::class,
+                'employee-status-report' => App\Http\Controllers\Admin\Reports\Hrm\Employee\EmployeeStatusReportController::class,
+                'attendance-summary-report' => App\Http\Controllers\Admin\Reports\Hrm\Attendance\AttendanceSummaryReportController::class,
+                'daily-attendance-report' => App\Http\Controllers\Admin\Reports\Hrm\Attendance\DailyAttendanceReportController::class,
+                'monthly-attendance-report' => App\Http\Controllers\Admin\Reports\Hrm\Attendance\MonthlyAttendanceReportController::class,
+                'attendance-register' => App\Http\Controllers\Admin\Reports\Hrm\Attendance\AttendanceRegisterReportController::class,
+                'late-attendance-report' => App\Http\Controllers\Admin\Reports\Hrm\Attendance\LateAttendanceReportController::class,
+                'early-checkout-report' => App\Http\Controllers\Admin\Reports\Hrm\Attendance\EarlyCheckoutReportController::class,
+                'absent-employees-report' => App\Http\Controllers\Admin\Reports\Hrm\Attendance\AbsentEmployeesReportController::class,
+                'missing-checkin-checkout-report' => App\Http\Controllers\Admin\Reports\Hrm\Attendance\MissingCheckinCheckoutReportController::class,
+                'overtime-report' => App\Http\Controllers\Admin\Reports\Hrm\Attendance\OvertimeReportController::class,
+                'shift-wise-attendance-report' => App\Http\Controllers\Admin\Reports\Hrm\Attendance\ShiftWiseAttendanceReportController::class,
+                'shift-assignment-report' => App\Http\Controllers\Admin\Reports\Hrm\Attendance\ShiftAssignmentReportController::class,
+                'leave-summary-report' => App\Http\Controllers\Admin\Reports\Hrm\Leave\LeaveSummaryReportController::class,
+                'employee-leave-history-report' => App\Http\Controllers\Admin\Reports\Hrm\Leave\EmployeeLeaveHistoryReportController::class,
+                'leave-type-wise-report' => App\Http\Controllers\Admin\Reports\Hrm\Leave\LeaveTypeWiseReportController::class,
+                'department-wise-leave-report' => App\Http\Controllers\Admin\Reports\Hrm\Leave\DepartmentWiseLeaveReportController::class,
+                'pending-leave-approval-report' => App\Http\Controllers\Admin\Reports\Hrm\Leave\PendingLeaveApprovalReportController::class,
+                'leave-approval-status-report' => App\Http\Controllers\Admin\Reports\Hrm\Leave\LeaveApprovalStatusReportController::class,
+                'leave-balance-report' => App\Http\Controllers\Admin\Reports\Hrm\Leave\LeaveBalanceReportController::class,
+                'salary-structure-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\SalaryStructureReportController::class,
+                'salary-component-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\SalaryComponentReportController::class,
+                'deduction-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\DeductionReportController::class,
+                'employee-advance-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\EmployeeAdvanceReportController::class,
+                'advance-recovery-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\AdvanceRecoveryReportController::class,
+                'employee-ledger-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\EmployeeLedgerReportController::class,
+                'resignation-report' => App\Http\Controllers\Admin\Reports\Hrm\Lifecycle\ResignationReportController::class,
+                'termination-report' => App\Http\Controllers\Admin\Reports\Hrm\Lifecycle\TerminationReportController::class,
+                'employee-clearance-report' => App\Http\Controllers\Admin\Reports\Hrm\Lifecycle\EmployeeClearanceReportController::class,
+                'asset-allocation-report' => App\Http\Controllers\Admin\Reports\Hrm\Lifecycle\AssetAllocationReportController::class,
+                'employee-asset-return-report' => App\Http\Controllers\Admin\Reports\Hrm\Lifecycle\EmployeeAssetReturnReportController::class,
+                'employee-document-report' => App\Http\Controllers\Admin\Reports\Hrm\Lifecycle\EmployeeDocumentReportController::class,
+                'employee-lifecycle-report' => App\Http\Controllers\Admin\Reports\Hrm\Lifecycle\EmployeeLifecycleReportController::class,
+            ] as $key => $controller) {
+                Route::group(['prefix' => $key], function () use ($key, $controller) {
+                    Route::get('/', [$controller, 'index']);
+                    Route::post('data', [$controller, 'data']);
+                    Route::get('print', [$controller, 'print'])->name("reports.{$key}.print");
+                    Route::get('pdf', [$controller, 'pdf'])->name("reports.{$key}.pdf");
+                    Route::get('export', [$controller, 'export'])->name("reports.{$key}.export");
+                    Route::get('export-csv', [$controller, 'exportCsv'])->name("reports.{$key}.export-csv");
+                });
+            }
+
+            // Standalone widget report - no data/print/pdf/export, doesn't fit the tabular shape above.
+            Route::get('hr-dashboard-report', [App\Http\Controllers\Admin\Reports\Hrm\HrDashboardReportController::class, 'index'])
+                ->name('reports.hr-dashboard-report.view');
+        });
+    }); // end module:hrm (HRM reports)
+
+    Route::group(['middleware' => ['module:payroll']], function () {
+        Route::group(['prefix' => 'reports'], function () {
+            foreach ([
+                'payroll-summary-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\PayrollSummaryReportController::class,
+                'employee-wise-payroll-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\EmployeeWisePayrollReportController::class,
+                'department-wise-payroll-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\DepartmentWisePayrollReportController::class,
+                'branch-wise-payroll-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\BranchWisePayrollReportController::class,
+                'monthly-payroll-register' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\MonthlyPayrollRegisterController::class,
+                'payroll-cost-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\PayrollCostReportController::class,
+                'pending-payroll-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\PendingPayrollReportController::class,
+                'salary-slip-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\SalarySlipReportController::class,
+                'payroll-disbursement-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\PayrollDisbursementReportController::class,
+                'attendance-payroll-comparison-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\AttendancePayrollComparisonReportController::class,
+                'leave-payroll-impact-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\LeavePayrollImpactReportController::class,
+                'employee-cost-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\EmployeeCostReportController::class,
+                'department-payroll-cost-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\DepartmentPayrollCostReportController::class,
+                'branch-payroll-cost-report' => App\Http\Controllers\Admin\Reports\Hrm\PayrollFinance\BranchPayrollCostReportController::class,
+            ] as $key => $controller) {
+                Route::group(['prefix' => $key], function () use ($key, $controller) {
+                    Route::get('/', [$controller, 'index']);
+                    Route::post('data', [$controller, 'data']);
+                    Route::get('print', [$controller, 'print'])->name("reports.{$key}.print");
+                    Route::get('pdf', [$controller, 'pdf'])->name("reports.{$key}.pdf");
+                    Route::get('export', [$controller, 'export'])->name("reports.{$key}.export");
+                    Route::get('export-csv', [$controller, 'exportCsv'])->name("reports.{$key}.export-csv");
+                });
+            }
+        });
+    }); // end module:payroll (Payroll reports)
+
     ////////////////////// Inventory ///////////////////////////
     //warehouse
     Route::resource('warehouse', App\Http\Controllers\Admin\WarehouseController::class);

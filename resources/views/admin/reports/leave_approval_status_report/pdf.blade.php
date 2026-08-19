@@ -1,0 +1,84 @@
+@php
+    $business = Auth::user()->business;
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve(Auth::user()->business_id);
+@endphp
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 11px;
+            color: #222;
+        }
+
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table.data-table th,
+        table.data-table td {
+            border: 1px solid #ccc;
+            padding: 4px 6px;
+        }
+
+        table.data-table th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    @include('admin.partials.print.pdf_header', [
+        'business' => $business,
+        'branch' => null,
+        'title' => 'Leave Approval Status Report',
+        'doc_no' => '',
+        'doc_date' => localDate(now()),
+        'reference' => [],
+        'print_config' => $print_config,
+    ])
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Employee Code</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Leave Type</th>
+                <th>Approver</th>
+                <th>Approved/Rejected On</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($rows as $row)
+                <tr>
+                    <td>{{ $row->employee?->employee_code }}</td>
+                    <td>{{ $row->employee?->user?->name }}</td>
+                    <td>{{ $row->employee?->department?->name }}</td>
+                    <td>{{ $row->leaveType?->name }}</td>
+                    <td>{{ $row->approver?->name }}</td>
+                    <td>{{ $row->approved_at ? localDate($row->approved_at) : '-' }}</td>
+                    <td>{{ ucfirst($row->status) }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="7" class="text-center">No records found</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+</body>
+
+</html>

@@ -29,4 +29,9 @@ class SalaryComponent extends Model
         'date_updated',
         'date_deleted',
     ];
+
+    public function structureItems()
+    {
+        return $this->hasMany(EmployeeSalaryStructureItem::class, 'salary_component_id', 'salary_component_id');
+    }
 }
