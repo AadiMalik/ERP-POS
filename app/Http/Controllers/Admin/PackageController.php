@@ -88,37 +88,14 @@ class PackageController extends Controller
                 'order',
                 'duration_type',
                 'duration_days',
-                'max_branches',
-                'max_users',
-                'max_customers',
-                'max_warehouses',
-                'max_categories',
-                'max_products',
-                'max_suppliers',
-                'max_purchase_orders',
-                'max_purchases',
-                'max_sales',
-                'max_transfers',
-                'max_expenses',
-                'max_vouchers'
             ]);
 
             $obj['status'] = $request->status ?? 1;
 
-            $obj['is_pos_enabled'] =
-                $request->is_pos_enabled ? 1 : 0;
-
-            $obj['is_inventory_enabled'] =
-                $request->is_inventory_enabled ? 1 : 0;
-
-            $obj['is_accounting_enabled'] =
-                $request->is_accounting_enabled ? 1 : 0;
-
-            $obj['is_hrm_enabled'] =
-                $request->is_hrm_enabled ? 1 : 0;
-
-            $obj['is_payroll_enabled'] =
-                $request->is_payroll_enabled ? 1 : 0;
+            // Module access + limits are stored per-key in package_modules
+            // (see SubscriptionModuleRegistry) - the legacy is_*_enabled /
+            // max_* columns on `packages` are no longer written to.
+            $obj['modules'] = $request->input('modules', []);
 
             $package = $this->package_service->save($obj);
 

@@ -621,6 +621,16 @@ function checkPackageLimit($type)
     return app(\App\Services\Concrete\Admin\FeatureLimitService::class)->check($type);
 }
 
+/**
+ * Whether a SubscriptionModuleRegistry module key is available to the
+ * current user's business/package - used to gate sidebar/menu entries
+ * alongside the existing @can permission checks. Super Admin always passes.
+ */
+function businessModuleEnabled($moduleKey)
+{
+    return app(\App\Services\Concrete\Admin\FeatureLimitService::class)->hasModule($moduleKey);
+}
+
 function numberToWord($num = '')
 {
     $num    = (string) ((int) $num);

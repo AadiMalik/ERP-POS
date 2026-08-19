@@ -652,8 +652,14 @@ class PermissionRegistry
      * Modules grouped for the Role UI. When $businessAdminOnly is true, every
      * is_system permission (and any module left with no remaining actions)
      * is filtered out.
+     *
+     * When $enabledModuleKeys is given (package-aware filtering - see
+     * SubscriptionModuleRegistry::enabledPermissionModuleKeysFor()), any
+     * module key not in that list is also stripped, so a Business Admin
+     * only ever sees permissions for modules their subscription package
+     * actually includes.
      */
-    public static function grouped(bool $businessAdminOnly = false): array
+    public static function grouped(bool $businessAdminOnly = false, ?array $enabledModuleKeys = null): array
     {
         $modules = self::modules();
 
@@ -668,6 +674,10 @@ class PermissionRegistry
                     unset($modules[$key]);
                 }
             }
+        }
+
+        if ($enabledModuleKeys !== null) {
+            $modules = array_intersect_key($modules, array_flip($enabledModuleKeys));
         }
 
         return $modules;

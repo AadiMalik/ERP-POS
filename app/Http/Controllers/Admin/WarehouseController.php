@@ -34,6 +34,7 @@ class WarehouseController extends Controller
         $this->middleware('permission:warehouse.edit')->only(['edit']);
         $this->middleware('permission:warehouse.delete')->only(['destroy']);
         $this->middleware('permission:warehouse.status')->only(['status']);
+        $this->middleware('module:warehouse');
 
         $this->warehouse_service = $warehouse_service;
         $this->business_service = $business_service;

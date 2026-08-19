@@ -53,6 +53,8 @@ class OrderController extends Controller
         DocumentSendLogService $document_send_log_service,
         ThermalPrintSettingResolverService $thermal_print_setting_resolver
     ) {
+        $this->middleware('module:order');
+
         $this->order_service = $order_service;
         $this->business_service = $business_service;
         $this->branch_service = $branch_service;

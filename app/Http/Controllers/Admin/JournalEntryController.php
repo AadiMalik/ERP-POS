@@ -44,6 +44,7 @@ class JournalEntryController extends Controller
         $this->middleware('permission:journal-entry.delete')->only(['destroy']);
         $this->middleware('permission:journal-entry.print')->only(['print']);
         $this->middleware('permission:journal-entry.post')->only(['status']);
+        $this->middleware('module:journal-entry');
 
         $this->journal_entry_service = $journal_entry_service;
         $this->journal_service = $journal_service;

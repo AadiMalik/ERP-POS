@@ -19,6 +19,11 @@
         </div>
 
 
+        @php
+            $moduleState = isset($package) ? $package->modules->keyBy('module_key') : collect();
+            $moduleGroups = \App\Support\Subscription\SubscriptionModuleRegistry::grouped();
+        @endphp
+
         <form action="{{ url('admin/packages') }}" method="POST">
 
             @csrf
@@ -114,79 +119,6 @@
 
                     </div>
 
-                    {{-- Limits --}}
-                    @php
-                    $fields = [
-                    'max_branches',
-                    'max_users',
-                    'max_customers',
-                    'max_warehouses',
-                    'max_categories',
-                    'max_products',
-                    'max_suppliers',
-                    'max_purchase_orders',
-                    'max_purchases',
-                    'max_sales',
-                    'max_transfers',
-                    'max_expenses',
-                    'max_vouchers',
-                    ];
-                    @endphp
-
-                    @foreach ($fields as $field)
-                    <div class="col-md-4 mb-3">
-
-                        <label class="form-label">
-                            {{ ucwords(str_replace('_', ' ', $field)) }}
-                        </label>
-
-                        <input type="number" class="form-control" name="{{ $field }}"
-                            value="{{ $package->$field ?? '' }}">
-
-                    </div>
-                    @endforeach
-
-
-                    {{-- Modules --}}
-
-                    @php
-                    $modules = [
-                    'is_pos_enabled' => 'POS',
-                    'is_inventory_enabled' => 'Inventory',
-                    'is_accounting_enabled' => 'Accounting',
-                    'is_hrm_enabled' => 'HRM',
-                    'is_payroll_enabled' => 'Payroll',
-                    ];
-                    @endphp
-
-                    <div class="col-md-12">
-
-                        <h6>
-                            Enabled Modules
-                        </h6>
-
-                    </div>
-
-                    @foreach ($modules as $key => $label)
-                    <div class="col-md-3 mb-3">
-
-                        <div class="form-check">
-
-                            <input type="checkbox" class="form-check-input" name="{{ $key }}"
-                                id="{{ $key }}" {{ isset($package) && $package->$key ? 'checked' : '' }}>
-
-                            <label class="form-check-label" for="{{ $key }}">
-
-                                {{ $label }}
-
-                            </label>
-
-                        </div>
-
-                    </div>
-                    @endforeach
-
-
                     {{-- Description --}}
                     <div class="col-md-12 mb-3">
 
@@ -199,6 +131,69 @@
                     </div>
 
                 </div>
+            </div>
+
+            <div class="card-header bg-white border-top border-bottom">
+                <h5 class="mb-0">Module &amp; Limits</h5>
+                <small class="text-muted">Enable the modules this package includes. Limited modules get a numeric
+                    cap (default {{ 5 }}) unless marked Unlimited.</small>
+            </div>
+
+            <div class="card-body">
+                @foreach ($moduleGroups as $category => $modules)
+                    <h6 class="mt-3 mb-2 border-bottom pb-2">{{ $category }}</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-sm align-middle module-limit-table">
+                            <thead>
+                                <tr>
+                                    <th>Module</th>
+                                    <th style="width:100px">Enabled</th>
+                                    <th style="width:160px">Limit</th>
+                                    <th style="width:110px">Unlimited</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($modules as $key => $meta)
+                                    @php
+                                        $moduleRow = $moduleState->get($key);
+                                        $enabled = $moduleRow ? $moduleRow->is_enabled : ($meta['default_enabled'] ?? true);
+                                        $unlimited = $moduleRow ? $moduleRow->is_unlimited : false;
+                                        $limit = $moduleRow && !$unlimited ? $moduleRow->limit_value : ($meta['default_limit'] ?? 5);
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $meta['label'] }}</td>
+                                        <td>
+                                            <div class="form-check form-switch">
+                                                <input type="checkbox" class="form-check-input module-enable-toggle"
+                                                    name="modules[{{ $key }}][enabled]" value="1"
+                                                    {{ $enabled ? 'checked' : '' }}>
+                                            </div>
+                                        </td>
+                                        @if ($meta['type'] === 'limited')
+                                            <td class="module-limit-cell">
+                                                <input type="number" min="0" step="1"
+                                                    class="form-control form-control-sm module-limit-input"
+                                                    name="modules[{{ $key }}][limit]" value="{{ $limit }}">
+                                            </td>
+                                            <td class="module-unlimited-cell">
+                                                @if ($meta['unlimited_allowed'] ?? false)
+                                                    <div class="form-check">
+                                                        <input type="checkbox"
+                                                            class="form-check-input module-unlimited-toggle"
+                                                            name="modules[{{ $key }}][unlimited]" value="1"
+                                                            {{ $unlimited ? 'checked' : '' }}>
+                                                    </div>
+                                                @endif
+                                            </td>
+                                        @else
+                                            <td colspan="2" class="text-muted small">&mdash;</td>
+                                        @endif
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endforeach
             </div>
 
             <div class="card-footer border-top">
@@ -224,4 +219,21 @@
     );
 </script>
 @endif
+<script>
+    function refreshModuleRow($row) {
+        var enabled = $row.find('.module-enable-toggle').is(':checked');
+        var unlimited = $row.find('.module-unlimited-toggle').is(':checked');
+
+        $row.find('.module-unlimited-cell').toggleClass('opacity-50 pe-none', !enabled);
+        $row.find('.module-limit-input').toggleClass('opacity-50 pe-none', !enabled || unlimited);
+    }
+
+    $(document).on('change', '.module-enable-toggle, .module-unlimited-toggle', function() {
+        refreshModuleRow($(this).closest('tr'));
+    });
+
+    $('.module-limit-table tbody tr').each(function() {
+        refreshModuleRow($(this));
+    });
+</script>
 @endsection

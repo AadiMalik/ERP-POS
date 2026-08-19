@@ -9,6 +9,7 @@ use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\PermissionService;
 use App\Services\Concrete\Admin\RoleService;
 use App\Support\Permissions\PermissionRegistry;
+use App\Support\Subscription\SubscriptionModuleRegistry;
 use App\Traits\ResponseAPI;
 use Exception;
 use Illuminate\Http\Request;
@@ -49,7 +50,11 @@ class RoleController extends Controller
 
     public function create()
     {
-        $groupedPermissions = PermissionRegistry::grouped(getRoleName() == RoleNames::BUSINESSADMIN);
+        $isBusinessAdmin = getRoleName() == RoleNames::BUSINESSADMIN;
+        $enabledModuleKeys = $isBusinessAdmin
+            ? SubscriptionModuleRegistry::enabledPermissionModuleKeysFor(Auth::user()->business)
+            : null;
+        $groupedPermissions = PermissionRegistry::grouped($isBusinessAdmin, $enabledModuleKeys);
         $business = $this->business_service->getAll();
         return view('admin.roles.create', compact('groupedPermissions', 'business'));
     }
@@ -82,7 +87,15 @@ class RoleController extends Controller
             ];
 
             $role = $this->role_service->save($obj);
-            $role->syncPermissions($request->permissions);
+
+            $permissions = $request->permissions ?? [];
+
+            if (getRoleName() == RoleNames::BUSINESSADMIN) {
+                $enabledModuleKeys = SubscriptionModuleRegistry::enabledPermissionModuleKeysFor(Auth::user()->business);
+                $permissions = array_intersect($permissions, PermissionRegistry::namesForModules($enabledModuleKeys));
+            }
+
+            $role->syncPermissions($permissions);
             return redirect('admin/roles')->with('success', Message::SAVE);
         } catch (Exception $e) {
             return redirect()->back()->withInput()->with('error', $e->getMessage());
@@ -92,7 +105,11 @@ class RoleController extends Controller
     public function edit($id)
     {
         $role = $this->role_service->getByid($id);
-        $groupedPermissions = PermissionRegistry::grouped(getRoleName() == RoleNames::BUSINESSADMIN);
+        $isBusinessAdmin = getRoleName() == RoleNames::BUSINESSADMIN;
+        $enabledModuleKeys = $isBusinessAdmin
+            ? SubscriptionModuleRegistry::enabledPermissionModuleKeysFor(Auth::user()->business)
+            : null;
+        $groupedPermissions = PermissionRegistry::grouped($isBusinessAdmin, $enabledModuleKeys);
         $business = $this->business_service->getAll();
         return view('admin.roles.create', compact('role', 'groupedPermissions', 'business'));
     }

@@ -30,6 +30,7 @@ class AccountController extends Controller
         $this->middleware('permission:account.create|account.edit')->only(['storeParent', 'storeChild']);
         $this->middleware('permission:account.delete')->only(['destroy']);
         $this->middleware('permission:account.status')->only(['status']);
+        $this->middleware('module:account');
 
         $this->account_service = $account_service;
         $this->account_type_service = $account_type_service;

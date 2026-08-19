@@ -43,6 +43,7 @@ class ProductController extends Controller
         $this->middleware('permission:product.edit')->only(['edit', 'variationStatus', 'setDefaultImage', 'saveImageSorting', 'backfillBarcodes']);
         $this->middleware('permission:product.delete')->only(['destroy', 'variationDestroy', 'deleteImage']);
         $this->middleware('permission:product.status')->only(['status']);
+        $this->middleware('module:product');
 
         $this->product_service = $product_service;
         $this->business_service = $business_service;

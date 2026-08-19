@@ -45,6 +45,7 @@ class GoodReceiptNoteController extends Controller
         $this->middleware('permission:good-receipt-note.delete')->only(['destroy']);
         $this->middleware('permission:good-receipt-note.status')->only(['status']);
         $this->middleware('permission:good-receipt-note.print')->only(['print']);
+        $this->middleware('module:good-receipt-note');
 
         $this->grn_service = $grn_service;
         $this->purchase_service = $purchase_service;

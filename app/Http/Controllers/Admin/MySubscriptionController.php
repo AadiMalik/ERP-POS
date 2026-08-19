@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Package;
 use App\Models\SubscriptionInvoice;
 use App\Models\SubscriptionRenewalRequest;
+use App\Services\Concrete\Admin\FeatureLimitService;
 use App\Services\Concrete\Admin\PaymentService;
 use App\Services\Concrete\Admin\SubscriptionService;
+use App\Support\Subscription\SubscriptionModuleRegistry;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,13 +25,18 @@ class MySubscriptionController extends Controller
 {
     protected SubscriptionService $subscription_service;
     protected PaymentService $payment_service;
+    protected FeatureLimitService $feature_limit_service;
 
-    public function __construct(SubscriptionService $subscription_service, PaymentService $payment_service)
-    {
+    public function __construct(
+        SubscriptionService $subscription_service,
+        PaymentService $payment_service,
+        FeatureLimitService $feature_limit_service
+    ) {
         $this->middleware('permission:my-subscription.manage')->only(['index', 'storeRenewalRequest', 'invoicePdf', 'storePayment']);
 
         $this->subscription_service = $subscription_service;
         $this->payment_service = $payment_service;
+        $this->feature_limit_service = $feature_limit_service;
     }
 
     public function index()
@@ -47,7 +54,9 @@ class MySubscriptionController extends Controller
             ->orderByDesc('date_created')
             ->get();
 
-        $packages = Package::where('status', 1)->where('is_deleted', 0)->orderBy('order')->get();
+        $packages = Package::with('modules')->where('status', 1)->where('is_deleted', 0)->orderBy('order')->get();
+
+        $moduleUsage = $this->buildModuleUsage($business);
 
         return view('admin.my-subscription.index', compact(
             'business',
@@ -56,8 +65,45 @@ class MySubscriptionController extends Controller
             'open_request',
             'invoices',
             'renewal_requests',
-            'packages'
+            'packages',
+            'moduleUsage'
         ));
+    }
+
+    /**
+     * Per-category, per-module usage summary for the "Modules & Usage"
+     * section - {label, enabled, used, limit, unlimited, remaining, percent}
+     * grouped by SubscriptionModuleRegistry category. Read-only (Phase 1) -
+     * does not block anything, just informs the Business Admin.
+     */
+    protected function buildModuleUsage($business): array
+    {
+        $business->loadMissing('package.modules');
+
+        $summary = [];
+
+        foreach (SubscriptionModuleRegistry::grouped() as $category => $modules) {
+            foreach ($modules as $key => $meta) {
+                $enabled = $this->feature_limit_service->hasModule($key, $business);
+                $row = [
+                    'label' => $meta['label'],
+                    'type' => $meta['type'],
+                    'enabled' => $enabled,
+                ];
+
+                if ($meta['type'] === 'limited') {
+                    $usage = $this->feature_limit_service->usage($key, $business);
+                    $row = array_merge($row, $usage);
+                    $row['percent'] = ($usage['unlimited'] || !$usage['limit'])
+                        ? 0
+                        : min(100, (int) round(($usage['used'] / $usage['limit']) * 100));
+                }
+
+                $summary[$category][$key] = $row;
+            }
+        }
+
+        return $summary;
     }
 
     public function storeRenewalRequest(Request $request)

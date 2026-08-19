@@ -64,4 +64,43 @@ class Package extends Model
     {
         return $this->belongsTo(User::class, 'deletedby_id');
     }
+
+    public function modules()
+    {
+        return $this->hasMany(PackageModule::class, 'package_id', 'package_id');
+    }
+
+    /**
+     * Whether the given SubscriptionModuleRegistry module key is enabled on
+     * this package. Relies on `modules` being loaded (eager-load with
+     * `Package::with('modules')` at the call site to avoid N+1).
+     */
+    public function moduleEnabled(string $moduleKey): bool
+    {
+        $module = $this->modules->firstWhere('module_key', $moduleKey);
+
+        return $module ? $module->is_enabled : false;
+    }
+
+    /**
+     * The configured limit for the given module key, or null when unlimited
+     * or when the module has no package_modules row.
+     */
+    public function moduleLimit(string $moduleKey): ?int
+    {
+        $module = $this->modules->firstWhere('module_key', $moduleKey);
+
+        if (!$module || $module->is_unlimited) {
+            return null;
+        }
+
+        return $module->limit_value;
+    }
+
+    public function moduleIsUnlimited(string $moduleKey): bool
+    {
+        $module = $this->modules->firstWhere('module_key', $moduleKey);
+
+        return $module ? (bool) $module->is_unlimited : false;
+    }
 }

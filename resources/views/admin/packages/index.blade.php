@@ -42,6 +42,9 @@
             );
         </script>
     @endif
+    <script>
+        const MODULE_REGISTRY = @json(\App\Support\Subscription\SubscriptionModuleRegistry::grouped());
+    </script>
     @include('admin.partials.datatable', [
         'columns' => "
                             {data:'name',name:'name'},
@@ -102,24 +105,6 @@
                 '#v_duration_type': item.duration_type,
                 '#v_duration': item.duration_days,
                 '#v_order': item.order,
-                '#v_branches': item.max_branches,
-                '#v_users': item.max_users,
-                '#v_customers': item.max_customers,
-                '#v_warehouses': item.max_warehouses,
-                '#v_categories': item.max_categories,
-                '#v_products': item.max_products,
-                '#v_suppliers': item.max_suppliers,
-                '#v_purchase_orders': item.max_purchase_orders,
-                '#v_purchases': item.max_purchases,
-                '#v_sales': item.max_sales,
-                '#v_transfers': item.max_transfers,
-                '#v_expenses': item.max_expenses,
-                '#v_vouchers': item.max_vouchers,
-                '#v_pos': getStatus(item.is_pos_enabled),
-                '#v_inventory': getStatus(item.is_inventory_enabled),
-                '#v_accounting': getStatus(item.is_accounting_enabled),
-                '#v_hrm': getStatus(item.is_hrm_enabled),
-                '#v_payroll': getStatus(item.is_payroll_enabled)
             };
             Object.entries(fields).forEach(
                 ([key, value]) => {
@@ -134,10 +119,39 @@
                     Inactive
                 </span>`
             );
+
+            renderModuleSummary(item.modules ?? []);
         }
 
         function getStatus(value) {
             return value ? 'Enabled' : 'Disabled';
+        }
+
+        function renderModuleSummary(modules) {
+            const byKey = {};
+            modules.forEach(m => byKey[m.module_key] = m);
+
+            let html = '';
+            Object.entries(MODULE_REGISTRY).forEach(([category, categoryModules]) => {
+                html += `<h6 class="mt-3">${category}</h6><div class="row">`;
+                Object.entries(categoryModules).forEach(([key, meta]) => {
+                    const row = byKey[key];
+                    const enabled = row ? row.is_enabled : (meta.default_enabled ?? true);
+                    let limitText = '';
+                    if (meta.type === 'limited') {
+                        limitText = row && row.is_unlimited
+                            ? 'Unlimited'
+                            : `Limit: ${row ? (row.limit_value ?? 0) : (meta.default_limit ?? 5)}`;
+                    }
+                    const badge = enabled
+                        ? '<span class="badge bg-label-success">Enabled</span>'
+                        : '<span class="badge bg-label-secondary">Disabled</span>';
+                    html += `<div class="col-md-4 mb-1">${meta.label} ${badge} ${limitText ? `<span class="text-muted">(${limitText})</span>` : ''}</div>`;
+                });
+                html += '</div>';
+            });
+
+            $('#v_modules').html(html);
         }
     </script>
 @endsection

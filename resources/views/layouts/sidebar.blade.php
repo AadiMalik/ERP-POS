@@ -243,6 +243,7 @@
         @endcanany
 
         <!-- Inventory -->
+        @if (businessModuleEnabled('inventory'))
         @canany(['unit.view', 'warehouse.view', 'brand.view', 'category.view', 'sub-category.view', 'product.view',
             'unit-conversion.view', 'batch.view', 'stock.view', 'stock-transaction.view', 'opening-stock.view',
             'stock-taking.view', 'transfer-note.view', 'reports.stock-ledger.view'])
@@ -361,8 +362,10 @@
                 </ul>
             </li>
         @endcanany
+        @endif
 
         {{-- Accounting --}}
+        @if (businessModuleEnabled('accounting'))
         @canany(['account-type.view', 'account-sub-type.view', 'journal.view', 'account.view', 'journal-entry.view',
             'recurring-transaction.view',
             'reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
@@ -533,8 +536,10 @@
                 </ul>
             </li>
         @endcanany
+        @endif
 
         {{-- Expense --}}
+        @if (businessModuleEnabled('accounting'))
         @canany(['expense-category.manage', 'expense.view', 'admin-expense.manage', 'reports.expense-detail-report.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -574,8 +579,10 @@
                 </ul>
             </li>
         @endcanany
+        @endif
 
         {{-- HR & Payroll --}}
+        @if (businessModuleEnabled('hrm') || businessModuleEnabled('payroll'))
         @canany(['department.view', 'designation.view', 'shift.view', 'employee.view', 'attendance.view',
             'leave-type.view', 'leave-request.view', 'salary-component.view', 'salary-structure.view',
             'payroll.view', 'employee-advance.view', 'employee-deduction.view', 'employee-ledger.view',
@@ -1142,6 +1149,7 @@
                 </ul>
             </li>
         @endcanany
+        @endif
 
         {{-- Notifications --}}
         @can('notification.view')
@@ -1181,6 +1189,7 @@
         @endcanany
 
         {{-- Procurement --}}
+        @if (businessModuleEnabled('inventory'))
         @canany(['supplier.view', 'purchase-request.view', 'purchase-request-quotation.view', 'purchase.view',
             'good-receipt-note.view', 'purchase-return.view', 'supplier-payment.view',
             'reports.supplier-ledger.view', 'reports.supplier-aging.view', 'reports.supplier-payment-history.view',
@@ -1291,8 +1300,10 @@
                 </ul>
             </li>
         @endcanany
+        @endif
 
         {{-- Orders (centralized - shared by POS, Website, Mobile App, API) --}}
+        @if (businessModuleEnabled('pos'))
         @canany(['pos.access', 'order-type.view', 'order-source.view', 'payment-method.view', 'discount.view', 'voucher.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -1346,8 +1357,10 @@
                 </ul>
             </li>
         @endcanany
+        @endif
 
         {{-- POS (operational interface only) --}}
+        @if (businessModuleEnabled('pos'))
         @can('pos.access')
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -1374,6 +1387,7 @@
                 </ul>
             </li>
         @endcan
+        @endif
     </ul>
 </aside>
 <!-- / Menu -->

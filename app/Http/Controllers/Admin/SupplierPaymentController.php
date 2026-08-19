@@ -48,6 +48,7 @@ class SupplierPaymentController extends Controller
         $this->middleware('permission:supplier-payment.delete')->only(['destroy']);
         $this->middleware('permission:supplier-payment.status')->only(['status']);
         $this->middleware('permission:supplier-payment.print')->only(['print']);
+        $this->middleware('module:supplier-payment');
 
         $this->supplier_payment_service = $supplier_payment_service;
         $this->business_service = $business_service;

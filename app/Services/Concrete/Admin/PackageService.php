@@ -3,8 +3,11 @@
 namespace App\Services\Concrete\Admin;
 
 use App\Models\Package;
+use App\Models\PackageModule;
 use App\Repository\Repository;
+use App\Support\Subscription\SubscriptionModuleRegistry;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
 class PackageService
@@ -62,21 +65,68 @@ class PackageService
 
     public function save($obj)
     {
-        if (!empty($obj['package_id'])) {
-            $obj['updatedby_id'] = Auth::user()->id;
-            $obj['date_updated'] = now();
-            $this->model_package->update($obj, $obj['package_id']);
-            return $this->model_package->find($obj['package_id']);
+        $modules = $obj['modules'] ?? [];
+        unset($obj['modules']);
+
+        return DB::transaction(function () use ($obj, $modules) {
+            if (!empty($obj['package_id'])) {
+                $obj['updatedby_id'] = Auth::user()->id;
+                $obj['date_updated'] = now();
+                $this->model_package->update($obj, $obj['package_id']);
+                $package = $this->model_package->find($obj['package_id']);
+            } else {
+                $obj['package_id'] = generateUuid();
+                $obj['createdby_id'] = Auth::user()->id;
+                $obj['date_created'] = now();
+                $package = $this->model_package->create($obj);
+            }
+
+            $this->saveModules($package->package_id, $modules);
+
+            return $package;
+        });
+    }
+
+    /**
+     * Upserts one package_modules row per SubscriptionModuleRegistry entry
+     * from the submitted `modules[<key>][enabled|limit|unlimited]` matrix.
+     * Any module missing from $modules (e.g. a feature-only module whose
+     * checkbox was left unchecked, so it never posted) is treated as
+     * disabled.
+     */
+    protected function saveModules(string $packageId, array $modules)
+    {
+        foreach (SubscriptionModuleRegistry::modules() as $key => $meta) {
+            if ($meta['type'] === 'core') {
+                continue;
+            }
+
+            $submitted = $modules[$key] ?? [];
+            $isEnabled = !empty($submitted['enabled']);
+            $unlimitedAllowed = $meta['unlimited_allowed'] ?? false;
+            $isUnlimited = $unlimitedAllowed && !empty($submitted['unlimited']);
+            $limitValue = null;
+
+            if ($meta['type'] === 'limited' && !$isUnlimited) {
+                $limitValue = isset($submitted['limit']) && $submitted['limit'] !== ''
+                    ? max(0, (int) $submitted['limit'])
+                    : ($meta['default_limit'] ?? 5);
+            }
+
+            PackageModule::updateOrCreate(
+                ['package_id' => $packageId, 'module_key' => $key],
+                [
+                    'is_enabled' => $isEnabled,
+                    'is_unlimited' => $isUnlimited,
+                    'limit_value' => $limitValue,
+                ]
+            );
         }
-        $obj['package_id'] = generateUuid();
-        $obj['createdby_id'] = Auth::user()->id;
-        $obj['date_created'] = now();
-        return $this->model_package->create($obj);
     }
 
     public function getById($package_id)
     {
-        return $this->model_package->find($package_id);
+        return $this->model_package->find($package_id)->load('modules');
     }
 
     public function delete($package_id)

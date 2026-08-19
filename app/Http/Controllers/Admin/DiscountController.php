@@ -28,6 +28,7 @@ class DiscountController extends Controller
         $this->middleware('permission:discount.edit')->only(['edit']);
         $this->middleware('permission:discount.delete')->only(['destroy']);
         $this->middleware('permission:discount.status')->only(['status']);
+        $this->middleware('module:discount');
 
         $this->discount_service = $discount_service;
         $this->business_service = $business_service;

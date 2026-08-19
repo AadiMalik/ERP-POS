@@ -48,6 +48,7 @@ class AdminExpenseController extends Controller
         SettingService $setting_service
     ) {
         $this->middleware('permission:admin-expense.manage');
+        $this->middleware('module:admin-expense');
 
         $this->expense_service = $expense_service;
         $this->expense_category_service = $expense_category_service;

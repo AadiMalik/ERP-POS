@@ -48,6 +48,7 @@ class VoucherController extends Controller
         $this->middleware('permission:voucher.edit')->only(['edit']);
         $this->middleware('permission:voucher.delete')->only(['destroy']);
         $this->middleware('permission:voucher.status')->only(['status']);
+        $this->middleware('module:voucher');
 
         $this->voucher_service = $voucher_service;
         $this->business_service = $business_service;

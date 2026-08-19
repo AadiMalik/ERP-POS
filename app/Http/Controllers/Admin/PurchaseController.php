@@ -51,6 +51,7 @@ class PurchaseController extends Controller
         $this->middleware('permission:purchase.delete')->only(['destroy']);
         $this->middleware('permission:purchase.status')->only(['status']);
         $this->middleware('permission:purchase.print')->only(['print']);
+        $this->middleware('module:purchase');
 
         $this->purchase_service = $purchase_service;
         $this->purchase_request_service = $purchase_request_service;
