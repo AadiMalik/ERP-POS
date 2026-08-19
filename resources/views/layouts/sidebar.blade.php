@@ -364,6 +364,7 @@
 
         {{-- Accounting --}}
         @canany(['account-type.view', 'account-sub-type.view', 'journal.view', 'account.view', 'journal-entry.view',
+            'recurring-transaction.view',
             'reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
             'reports.journal-register.view', 'reports.account-ledger.view', 'reports.account-balance.view',
             'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view',
@@ -408,6 +409,13 @@
                         <li class="menu-item">
                             <a href="{{ url('/admin/journal-entry') }}" class="menu-link">
                                 <div data-i18n="Journal Entries">Journal Entries</div>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('recurring-transaction.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/recurring-transaction') }}" class="menu-link">
+                                <div data-i18n="Recurring Transactions">Recurring Transactions</div>
                             </a>
                         </li>
                     @endcan

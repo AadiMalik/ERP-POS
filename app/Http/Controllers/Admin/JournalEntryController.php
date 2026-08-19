@@ -43,6 +43,7 @@ class JournalEntryController extends Controller
         $this->middleware('permission:journal-entry.create|journal-entry.edit')->only(['store']);
         $this->middleware('permission:journal-entry.delete')->only(['destroy']);
         $this->middleware('permission:journal-entry.print')->only(['print']);
+        $this->middleware('permission:journal-entry.post')->only(['status']);
 
         $this->journal_entry_service = $journal_entry_service;
         $this->journal_service = $journal_service;
@@ -176,6 +177,26 @@ class JournalEntryController extends Controller
     {
         $journal_entry_detail = $this->journal_entry_service->getDetailsById($request->journal_entry_id);
         return $this->success(Message::SUCCESS, $journal_entry_detail);
+    }
+
+    public function status(Request $request)
+    {
+        $rules = [
+            'journal_entry_id' => 'required|exists:journal_entries,journal_entry_id',
+            'status'           => 'required|in:pending,posted',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        try {
+            $this->journal_entry_service->changeStatus($request->journal_entry_id, $request->status);
+            return $this->success(Message::STATUS, []);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
     }
 
     public function destroy($journal_entry_id)

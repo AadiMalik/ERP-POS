@@ -14,6 +14,8 @@ class Expense extends Model
     public $incrementing = false;
     protected $fillable = [
         'expense_id',
+        'recurring_transaction_id',
+        'recurring_transaction_run_id',
         'business_id',
         'branch_id',
         'expense_category_id',

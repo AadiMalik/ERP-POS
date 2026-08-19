@@ -19,6 +19,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('subscriptions:process-lifecycle')->dailyAt('01:00');
         $schedule->command('notifications:check-alerts')->hourly();
+        $schedule->command('recurring-transactions:process')->hourly();
     }
 
     /**

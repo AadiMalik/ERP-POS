@@ -122,7 +122,7 @@ class JournalEntryService
                   ->make(true);
       }
 
-      public function save($obj)
+      public function save($obj, string $status = 'posted')
       {
             DB::beginTransaction();
 
@@ -143,10 +143,10 @@ class JournalEntryService
                               'description'  => $obj['description'],
                               'business_id'  => $obj['business_id'],
                               'branch_id'    => $obj['branch_id'],
-                              'status'       => 'posted',
+                              'status'       => $status,
                               'updatedby_id' => Auth::user()->id,
                               'date_updated' => now(),
-                              'date_posted'  => now(),
+                              'date_posted'  => $status === 'posted' ? now() : null,
                         ]);
 
                         // Purani details remove
@@ -161,6 +161,8 @@ class JournalEntryService
 
                         $journal_entry = $this->model_journal_entry->create([
                               'journal_entry_id' => generateUuid(),
+                              'recurring_transaction_id'     => $obj['recurring_transaction_id'] ?? null,
+                              'recurring_transaction_run_id' => $obj['recurring_transaction_run_id'] ?? null,
                               'journal_id'       => $obj['journal_id'],
                               'entry_no'         => $obj['entry_no'],
                               'entry_date'       => $obj['entry_date'],
@@ -168,9 +170,9 @@ class JournalEntryService
                               'description'      => $obj['description'],
                               'business_id'      => $obj['business_id'],
                               'branch_id'        => $obj['branch_id'],
-                              'status'           => 'posted',
+                              'status'           => $status,
                               'createdby_id'     => Auth::user()->id,
-                              'date_posted'      => now(),
+                              'date_posted'      => $status === 'posted' ? now() : null,
                               'date_created'     => now(),
                         ]);
                   }
@@ -238,6 +240,35 @@ class JournalEntryService
                   ];
             }
             return $data;
+      }
+
+      /**
+       * Move a journal entry between pending/posted. Only needed today for
+       * recurring-generated entries saved with auto_post=false (see
+       * App\Support\Recurring\Generators\JournalEntryRecurringGenerator) - the
+       * manual Create/Edit screen always posts immediately via save().
+       */
+      public function changeStatus($journal_entry_id, string $status)
+      {
+            $journal_entry = $this->model_journal_entry->getModel()::findOrFail($journal_entry_id);
+            $old_status = $journal_entry->status;
+
+            $journal_entry->update([
+                  'status'       => $status,
+                  'updatedby_id' => Auth::id(),
+                  'date_updated' => now(),
+                  'date_posted'  => $status === 'posted' ? now() : null,
+            ]);
+
+            $this->logActivity(
+                  'journal_entry',
+                  $journal_entry_id,
+                  $status === 'posted' ? 'posted' : 'unposted',
+                  ['status' => $old_status],
+                  ['status' => $status]
+            );
+
+            return $journal_entry;
       }
 
       public function delete($journal_entry_id)

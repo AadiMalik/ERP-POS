@@ -67,7 +67,7 @@ class RoleDefaultPermissions
             case RoleNames::FINANCEMANAGER:
                 return array_merge(
                     PermissionRegistry::namesForModules([
-                        'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry',
+                        'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction',
                         'expense', 'expense-category', 'admin-expense', 'supplier-payment',
                     ]),
                     [
@@ -112,7 +112,7 @@ class RoleDefaultPermissions
             case RoleNames::ACCOUNTANT:
                 return array_merge(
                     PermissionRegistry::namesForModulesExcludingActions(
-                        ['account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'expense', 'expense-category', 'admin-expense'],
+                        ['account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction', 'expense', 'expense-category', 'admin-expense'],
                         ['delete']
                     ),
                     [

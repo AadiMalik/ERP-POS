@@ -13,6 +13,7 @@ class  Status
     const REJECTED = 'rejected';
     const PENDING = 'pending';
     const POSTED = 'posted';
+    const PAUSED = 'paused';
     const COMPLETED = 'completed';
     const QUOTATION_SENT = 'quotation sent';
     const QUOTATION_RECEIVED = 'quotation received';

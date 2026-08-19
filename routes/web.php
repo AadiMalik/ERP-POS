@@ -489,9 +489,23 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('data', [App\Http\Controllers\Admin\JournalEntryController::class, 'getData'])->name('journal-entry-data');
         Route::get('entry-no', [App\Http\Controllers\Admin\JournalEntryController::class, 'getEntryNo'])->name('journal-entry.entry-no');
         Route::get('detail', [App\Http\Controllers\Admin\JournalEntryController::class, 'detail'])->name('journal-entry.detail');
+        Route::post('change-status', [App\Http\Controllers\Admin\JournalEntryController::class, 'status'])->name('journal-entry.change-status');
         Route::get('{journal_entry_id}/print', [App\Http\Controllers\Admin\JournalEntryController::class, 'print'])->name('journal-entry.print');
     });
     Route::resource('journal-entry', App\Http\Controllers\Admin\JournalEntryController::class);
+
+    //recurring transactions
+    Route::resource('recurring-transaction', App\Http\Controllers\Admin\RecurringTransactionController::class);
+    Route::group(['prefix' => 'recurring-transaction'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'getData']);
+        Route::post('preview-next-run', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'previewNextRun'])->name('recurring-transaction.preview-next-run');
+        Route::post('pause/{recurring_transaction_id}', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'pause'])->name('recurring-transaction.pause');
+        Route::post('resume/{recurring_transaction_id}', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'resume'])->name('recurring-transaction.resume');
+        Route::post('cancel/{recurring_transaction_id}', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'cancel'])->name('recurring-transaction.cancel');
+        Route::post('run-now/{recurring_transaction_id}', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'runNow'])->name('recurring-transaction.run-now');
+        Route::get('{recurring_transaction_id}/history', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'history'])->name('recurring-transaction.history');
+        Route::post('{recurring_transaction_id}/history/data', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'historyData'])->name('recurring-transaction.history-data');
+    });
 
     //supplier
     Route::resource('supplier', App\Http\Controllers\Admin\SupplierController::class);

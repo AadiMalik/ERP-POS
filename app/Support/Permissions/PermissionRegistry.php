@@ -195,6 +195,19 @@ class PermissionRegistry
                 'edit'   => ['name' => 'journal-entry.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'journal-entry.delete', 'label' => 'Delete', 'is_system' => false],
                 'print'  => ['name' => 'journal-entry.print', 'label' => 'Print', 'is_system' => false],
+                'post'   => ['name' => 'journal-entry.post', 'label' => 'Post / Unpost', 'is_system' => false],
+            ]],
+
+            'recurring-transaction' => ['label' => 'Recurring Transactions', 'actions' => [
+                'view'         => ['name' => 'recurring-transaction.view', 'label' => 'View', 'is_system' => false],
+                'create'       => ['name' => 'recurring-transaction.create', 'label' => 'Create', 'is_system' => false],
+                'edit'         => ['name' => 'recurring-transaction.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'       => ['name' => 'recurring-transaction.delete', 'label' => 'Delete', 'is_system' => false],
+                'pause'        => ['name' => 'recurring-transaction.pause', 'label' => 'Pause', 'is_system' => false],
+                'resume'       => ['name' => 'recurring-transaction.resume', 'label' => 'Resume', 'is_system' => false],
+                'cancel'       => ['name' => 'recurring-transaction.cancel', 'label' => 'Cancel', 'is_system' => false],
+                'run_now'      => ['name' => 'recurring-transaction.run-now', 'label' => 'Run Now', 'is_system' => false],
+                'view_history' => ['name' => 'recurring-transaction.view-history', 'label' => 'View Execution History', 'is_system' => false],
             ]],
 
             'supplier' => ['label' => 'Suppliers', 'actions' => [
@@ -727,7 +740,7 @@ class PermissionRegistry
         return [
             'dashboard', 'warehouse', 'brand', 'category', 'sub-category', 'unit', 'product',
             'barcode', 'unit-conversion', 'batch', 'stock', 'stock-transaction',
-            'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry',
+            'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction',
             'supplier', 'order-type', 'payment-method', 'order-source', 'discount', 'voucher',
             'purchase-request', 'purchase-request-quotation', 'purchase', 'good-receipt-note',
             'purchase-return', 'opening-stock', 'stock-taking', 'transfer-note', 'supplier-payment',

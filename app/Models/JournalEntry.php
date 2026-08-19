@@ -14,6 +14,8 @@ class JournalEntry extends Model
     public $incrementing = false;
     protected $fillable = [
         'journal_entry_id',
+        'recurring_transaction_id',
+        'recurring_transaction_run_id',
         'journal_id',
         'business_id',
         'branch_id',
