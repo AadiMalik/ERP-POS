@@ -19,6 +19,8 @@ class SubscriptionRenewalRequestController extends Controller
 
     public function __construct(SubscriptionService $subscription_service)
     {
+        $this->middleware('permission:subscription.manage');
+
         $this->subscription_service = $subscription_service;
     }
 

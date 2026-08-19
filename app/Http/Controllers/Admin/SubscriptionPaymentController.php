@@ -18,6 +18,8 @@ class SubscriptionPaymentController extends Controller
 
     public function __construct(PaymentService $payment_service)
     {
+        $this->middleware('permission:subscription.manage');
+
         $this->payment_service = $payment_service;
     }
 

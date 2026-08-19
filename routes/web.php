@@ -324,6 +324,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     }); // end module:payroll (Payroll reports)
 
     ////////////////////// Inventory ///////////////////////////
+    Route::group(['middleware' => ['module:inventory']], function () {
     //warehouse
     Route::resource('warehouse', App\Http\Controllers\Admin\WarehouseController::class);
     Route::group(['prefix' => 'warehouse'], function () {
@@ -436,7 +437,9 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('by-product/{product_id}', [App\Http\Controllers\Admin\ProductVariationStockTransactionController::class, 'byProduct']);
         Route::get('by-variation/{product_variation_id}', [App\Http\Controllers\Admin\ProductVariationStockTransactionController::class, 'byVariation']);
     });
+    }); // end module:inventory (catalog & warehousing)
 
+    Route::group(['middleware' => ['module:accounting']], function () {
     //Account Types
     Route::resource('account-type', App\Http\Controllers\Admin\AccountTypeController::class);
     Route::group(['prefix' => 'account-type'], function () {
@@ -506,7 +509,9 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('{recurring_transaction_id}/history', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'history'])->name('recurring-transaction.history');
         Route::post('{recurring_transaction_id}/history/data', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'historyData'])->name('recurring-transaction.history-data');
     });
+    }); // end module:accounting (chart of accounts, journals, recurring)
 
+    Route::group(['middleware' => ['module:inventory']], function () {
     //supplier
     Route::resource('supplier', App\Http\Controllers\Admin\SupplierController::class);
     Route::group(['prefix' => 'supplier'], function () {
@@ -514,6 +519,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\SupplierController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\SupplierController::class, 'byBusiness']);
     });
+    }); // end module:inventory (supplier master)
 
     ////////////////////// Orders (centralized) ///////////////////////////
     //order type
@@ -544,14 +550,17 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\DiscountController::class, 'status']);
     });
 
+    Route::group(['middleware' => ['module:accounting']], function () {
     //voucher
     Route::resource('voucher', App\Http\Controllers\Admin\VoucherController::class);
     Route::group(['prefix' => 'voucher'], function () {
         Route::post('data', [App\Http\Controllers\Admin\VoucherController::class, 'getData']);
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\VoucherController::class, 'status']);
     });
+    }); // end module:accounting (voucher)
 
     ////////////////////// POS (operational interface only) ///////////////////////////
+    Route::group(['middleware' => ['module:pos']], function () {
     Route::group(['middleware' => ['permission:pos.access']], function () {
         //pos register
         Route::resource('pos-register', App\Http\Controllers\Admin\PosRegisterController::class);
@@ -572,6 +581,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         });
         Route::get('pos-register-session', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'index']);
     });
+    }); // end module:pos (register & session)
 
     //order (centralized - shared by POS, Website, Mobile App, API)
     Route::group(['middleware' => ['permission:pos.access']], function () {
@@ -598,6 +608,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::resource('order', App\Http\Controllers\Admin\OrderController::class)->except(['create', 'edit']);
     });
 
+    Route::group(['middleware' => ['module:pos']], function () {
     //pos screen
     Route::group(['middleware' => ['permission:pos.access']], function () {
         Route::get('order-history', [App\Http\Controllers\Admin\OrderController::class, 'history'])->name('order.history');
@@ -608,7 +619,9 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('pos-screen/quick-customer', [App\Http\Controllers\Admin\PosScreenController::class, 'quickCreateCustomer'])->name('pos-screen.quick-customer');
         Route::post('pos-screen/quick-expense', [App\Http\Controllers\Admin\PosScreenController::class, 'quickCreateExpense'])->name('pos-screen.quick-expense');
     });
+    }); // end module:pos (pos screen)
 
+    Route::group(['middleware' => ['module:inventory']], function () {
     //purchase request
     Route::resource('purchase-request', App\Http\Controllers\Admin\PurchaseRequestController::class);
     Route::group(['prefix' => 'purchase-request'], function () {
@@ -703,6 +716,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('purchases-by-supplier/{supplier_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'purchasesBySupplier']);
         Route::get('{supplier_payment_id}/print', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'print'])->name('supplier-payment.print');
     });
+    }); // end module:inventory (procurement & stock)
 
     //expense detail (POS + Admin, any session/OT)
     Route::resource('expense', App\Http\Controllers\Admin\ExpenseController::class);
@@ -712,12 +726,14 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('details/{expense_id}', [App\Http\Controllers\Admin\ExpenseController::class, 'details']);
     });
 
+    Route::group(['middleware' => ['module:accounting']], function () {
     //admin expense (business/daily expenses, no POS session or OT)
     Route::resource('admin-expense', App\Http\Controllers\Admin\AdminExpenseController::class);
     Route::group(['prefix' => 'admin-expense'], function () {
         Route::post('data', [App\Http\Controllers\Admin\AdminExpenseController::class, 'getData']);
         Route::post('change-status', [App\Http\Controllers\Admin\AdminExpenseController::class, 'status']);
     });
+    }); // end module:accounting (admin expense)
 
     //audit & security - activity log
     Route::get('activity-log', [App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('activity-log.index');
@@ -737,6 +753,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
 
     //procurement reports
     Route::group(['prefix' => 'reports'], function () {
+        Route::group(['middleware' => ['module:inventory']], function () {
         Route::group(['prefix' => 'supplier-ledger'], function () {
             Route::get('/', [App\Http\Controllers\Admin\Reports\SupplierLedgerReportController::class, 'index']);
             Route::post('data', [App\Http\Controllers\Admin\Reports\SupplierLedgerReportController::class, 'data']);
@@ -799,7 +816,9 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('export', [App\Http\Controllers\Admin\Reports\StockLedgerReportController::class, 'export'])->name('reports.stock-ledger.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\StockLedgerReportController::class, 'exportCsv'])->name('reports.stock-ledger.export-csv');
         });
+        }); // end module:inventory (procurement reports)
 
+        Route::group(['middleware' => ['module:accounting']], function () {
         //accounting reports
         Route::group(['prefix' => 'general-ledger'], function () {
             Route::get('/', [App\Http\Controllers\Admin\Reports\GeneralLedgerReportController::class, 'index']);
@@ -921,6 +940,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('export', [App\Http\Controllers\Admin\Reports\BalanceSheetReportController::class, 'export'])->name('reports.balance-sheet.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\BalanceSheetReportController::class, 'exportCsv'])->name('reports.balance-sheet.export-csv');
         });
+        }); // end module:accounting (financial reports)
     });
 
     //Setting

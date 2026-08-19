@@ -6,12 +6,16 @@ use App\Enums\RoleNames;
 use App\Models\Branch;
 use App\Models\Business;
 use App\Models\Category;
+use App\Models\CustomerProfile;
+use App\Models\Expense;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseRequest;
 use App\Models\Supplier;
 use App\Models\TransferNote;
 use App\Models\User;
+use App\Models\Voucher;
 use App\Models\Warehouse;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -115,12 +119,6 @@ class FeatureLimitService
         return (bool) ($business->package->{$column} ?? false);
     }
 
-    /**
-     * customers/sales/expenses/vouchers have no backing model in this
-     * codebase yet (no Customer/Sale/Expense/Voucher entity exists), so they
-     * are non-fatal stubs (always "available") rather than a real count.
-     * transfers is wired to a genuine live count against TransferNote.
-     */
     protected function limitMap(Business $business): array
     {
         $business_id = $business->business_id;
@@ -136,7 +134,7 @@ class FeatureLimitService
             ],
             'customers' => [
                 'column' => 'max_customers',
-                'count' => 0,
+                'count' => CustomerProfile::where('business_id', $business_id)->where('is_deleted', 0)->count(),
             ],
             'warehouses' => [
                 'column' => 'max_warehouses',
@@ -164,7 +162,7 @@ class FeatureLimitService
             ],
             'sales' => [
                 'column' => 'max_sales',
-                'count' => 0,
+                'count' => Order::where('business_id', $business_id)->where('status', 'posted')->where('is_deleted', 0)->count(),
             ],
             'transfers' => [
                 'column' => 'max_transfers',
@@ -172,11 +170,11 @@ class FeatureLimitService
             ],
             'expenses' => [
                 'column' => 'max_expenses',
-                'count' => 0,
+                'count' => Expense::where('business_id', $business_id)->where('is_deleted', 0)->count(),
             ],
             'vouchers' => [
                 'column' => 'max_vouchers',
-                'count' => 0,
+                'count' => Voucher::where('business_id', $business_id)->where('is_deleted', 0)->count(),
             ],
         ];
     }

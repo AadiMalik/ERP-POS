@@ -21,6 +21,8 @@ class SubscriptionInvoiceController extends Controller
 
     public function __construct(InvoiceService $invoice_service)
     {
+        $this->middleware('permission:subscription.manage');
+
         $this->invoice_service = $invoice_service;
     }
 

@@ -55,8 +55,8 @@ class PermissionRegistry
             ]],
 
             'subscription' => ['label' => 'Subscriptions & Billing', 'actions' => [
-                // Already fully enforced via the `superadmin` route-group middleware.
-                // Registered here only so it appears in the Role UI/seeder for completeness.
+                // Enforced via constructor middleware on every Subscription*
+                // controller, in addition to the `superadmin` route-group middleware.
                 'manage' => ['name' => 'subscription.manage', 'label' => 'Manage', 'is_system' => true],
             ]],
 

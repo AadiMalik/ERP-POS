@@ -27,6 +27,8 @@ class SubscriptionController extends Controller
         PackageService $package_service,
         SubscriptionMetricsService $metrics_service
     ) {
+        $this->middleware('permission:subscription.manage');
+
         $this->subscription_service = $subscription_service;
         $this->package_service = $package_service;
         $this->metrics_service = $metrics_service;

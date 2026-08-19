@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Auth;
 
 class SubscriptionSettingController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:subscription.manage');
+    }
+
     public function edit()
     {
         $setting = SubscriptionSetting::current();
