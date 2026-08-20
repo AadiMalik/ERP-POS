@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Hrm;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\Hrm\ShiftService;
 use App\Traits\ResponseAPI;
@@ -15,6 +16,7 @@ use Illuminate\Validation\Rule;
 class ShiftController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $shift_service;
 
@@ -25,8 +27,15 @@ class ShiftController extends Controller
         $this->middleware('permission:shift.create|shift.edit')->only(['store']);
         $this->middleware('permission:shift.edit')->only(['edit']);
         $this->middleware('permission:shift.delete')->only(['destroy']);
+        $this->middleware('permission:shift.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:shift.export')->only(['export']);
 
         $this->shift_service = $shift_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'shift';
     }
 
     public function index()

@@ -5,12 +5,19 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div></div>
-            @can('asset.create')
-            <a href="{{ url('admin/asset/create') }}" class="btn btn-primary rounded-pill">
-                <i class="fa fa-plus"></i>
-                Add New
-            </a>
-            @endcan
+            <div class="d-flex gap-2">
+                @include('admin.partials.import-export-buttons', [
+                    'importExportModule' => 'asset',
+                    'importExportLabel' => 'Assets',
+                    'importExportRefreshFn' => 'initDataTableasset_table',
+                ])
+                @can('asset.create')
+                <a href="{{ url('admin/asset/create') }}" class="btn btn-primary rounded-pill">
+                    <i class="fa fa-plus"></i>
+                    Add New
+                </a>
+                @endcan
+            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive p-4">
@@ -30,6 +37,7 @@
             </div>
         </div>
     </div>
+    @include('admin.partials.import-export-modal')
 </div>
 @endsection
 @section('js')

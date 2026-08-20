@@ -11,6 +11,11 @@
                 </button>
             </div>
             <div class="d-flex gap-2">
+                @include('admin.partials.import-export-buttons', [
+                    'importExportModule' => 'attendance',
+                    'importExportLabel' => 'Attendance',
+                    'importExportRefreshFn' => 'initDataTableattendance_table',
+                ])
                 @can('attendance.report.view')
                 <a href="{{ url('admin/attendance/report') }}" class="btn btn-outline-primary rounded-pill">
                     <i class="fa fa-chart-bar"></i>
@@ -76,6 +81,7 @@
             </div>
         </div>
     </div>
+    @include('admin.partials.import-export-modal')
 </div>
 @endsection
 @section('js')

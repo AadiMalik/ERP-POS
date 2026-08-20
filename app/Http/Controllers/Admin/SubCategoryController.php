@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\CategoryService;
 use App\Services\Concrete\Admin\SubCategoryService;
@@ -17,6 +18,7 @@ use Illuminate\Validation\Rule;
 class SubCategoryController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $business_service;
     protected $category_service;
@@ -32,10 +34,17 @@ class SubCategoryController extends Controller
         $this->middleware('permission:sub-category.edit')->only(['edit']);
         $this->middleware('permission:sub-category.delete')->only(['destroy']);
         $this->middleware('permission:sub-category.status')->only(['status']);
+        $this->middleware('permission:sub-category.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:sub-category.export')->only(['export']);
 
         $this->business_service = $business_service;
         $this->category_service = $category_service;
         $this->sub_category_service = $sub_category_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'sub-category';
     }
 
     public function index()

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\Message;
 use App\Enums\PaymentMethod;
 use App\Enums\Status;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Models\Purchase;
 use App\Services\Concrete\Admin\AccountService;
@@ -25,6 +26,7 @@ use Illuminate\Validation\Rule;
 class SupplierPaymentController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $supplier_payment_service;
     protected $business_service;
@@ -48,6 +50,8 @@ class SupplierPaymentController extends Controller
         $this->middleware('permission:supplier-payment.delete')->only(['destroy']);
         $this->middleware('permission:supplier-payment.status')->only(['status']);
         $this->middleware('permission:supplier-payment.print')->only(['print']);
+        $this->middleware('permission:supplier-payment.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:supplier-payment.export')->only(['export']);
         $this->middleware('module:supplier-payment');
 
         $this->supplier_payment_service = $supplier_payment_service;
@@ -56,6 +60,11 @@ class SupplierPaymentController extends Controller
         $this->setting_service = $setting_service;
         $this->account_service = $account_service;
         $this->document_send_log_service = $document_send_log_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'supplier-payment';
     }
 
     public function index()

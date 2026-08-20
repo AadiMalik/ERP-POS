@@ -99,12 +99,16 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\BranchController::class, 'byBusiness'])->name('branch-by-business');
     });
     //users
-    Route::resource('users', App\Http\Controllers\Admin\UserController::class);
+    Route::resource('users', App\Http\Controllers\Admin\UserController::class)->except(['show']);
     Route::group(['prefix' => 'users'], function () {
         Route::post('data', [App\Http\Controllers\Admin\UserController::class, 'getData'])->name('users-data');
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\UserController::class, 'status']);
         Route::get('change-password/{id}', [App\Http\Controllers\Admin\UserController::class, 'changePassword']);
         Route::post('change-password', [App\Http\Controllers\Admin\UserController::class, 'updatePassword']);
+        Route::get('import/sample', [App\Http\Controllers\Admin\UserController::class, 'importSample'])->name('user-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\UserController::class, 'importPreview'])->name('user-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\UserController::class, 'importConfirm'])->name('user-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\UserController::class, 'export'])->name('user-export');
     });
 
     //my profile (self-service - every authenticated user manages their own record, no permission gate)
@@ -121,26 +125,46 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     ////////////////////// HRM & Payroll ///////////////////////////
     Route::group(['middleware' => ['module:hrm']], function () {
     //departments
-    Route::resource('department', App\Http\Controllers\Admin\Hrm\DepartmentController::class);
+    Route::resource('department', App\Http\Controllers\Admin\Hrm\DepartmentController::class)->except(['show']);
     Route::post('department/data', [App\Http\Controllers\Admin\Hrm\DepartmentController::class, 'getData'])->name('department-data');
+    Route::get('department/import/sample', [App\Http\Controllers\Admin\Hrm\DepartmentController::class, 'importSample'])->name('department-import-sample');
+    Route::post('department/import/preview', [App\Http\Controllers\Admin\Hrm\DepartmentController::class, 'importPreview'])->name('department-import-preview');
+    Route::post('department/import/confirm', [App\Http\Controllers\Admin\Hrm\DepartmentController::class, 'importConfirm'])->name('department-import-confirm');
+    Route::get('department/export', [App\Http\Controllers\Admin\Hrm\DepartmentController::class, 'export'])->name('department-export');
     //designations
-    Route::resource('designation', App\Http\Controllers\Admin\Hrm\DesignationController::class);
+    Route::resource('designation', App\Http\Controllers\Admin\Hrm\DesignationController::class)->except(['show']);
     Route::post('designation/data', [App\Http\Controllers\Admin\Hrm\DesignationController::class, 'getData'])->name('designation-data');
+    Route::get('designation/import/sample', [App\Http\Controllers\Admin\Hrm\DesignationController::class, 'importSample'])->name('designation-import-sample');
+    Route::post('designation/import/preview', [App\Http\Controllers\Admin\Hrm\DesignationController::class, 'importPreview'])->name('designation-import-preview');
+    Route::post('designation/import/confirm', [App\Http\Controllers\Admin\Hrm\DesignationController::class, 'importConfirm'])->name('designation-import-confirm');
+    Route::get('designation/export', [App\Http\Controllers\Admin\Hrm\DesignationController::class, 'export'])->name('designation-export');
     //shifts
-    Route::resource('shift', App\Http\Controllers\Admin\Hrm\ShiftController::class);
+    Route::resource('shift', App\Http\Controllers\Admin\Hrm\ShiftController::class)->except(['show']);
     Route::post('shift/data', [App\Http\Controllers\Admin\Hrm\ShiftController::class, 'getData'])->name('shift-data');
+    Route::get('shift/import/sample', [App\Http\Controllers\Admin\Hrm\ShiftController::class, 'importSample'])->name('shift-import-sample');
+    Route::post('shift/import/preview', [App\Http\Controllers\Admin\Hrm\ShiftController::class, 'importPreview'])->name('shift-import-preview');
+    Route::post('shift/import/confirm', [App\Http\Controllers\Admin\Hrm\ShiftController::class, 'importConfirm'])->name('shift-import-confirm');
+    Route::get('shift/export', [App\Http\Controllers\Admin\Hrm\ShiftController::class, 'export'])->name('shift-export');
     //employees
-    Route::resource('employee', App\Http\Controllers\Admin\Hrm\EmployeeController::class);
+    Route::resource('employee', App\Http\Controllers\Admin\Hrm\EmployeeController::class)->except(['show']);
     Route::group(['prefix' => 'employee'], function () {
         Route::post('data', [App\Http\Controllers\Admin\Hrm\EmployeeController::class, 'getData'])->name('employee-data');
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\Hrm\EmployeeController::class, 'status']);
         Route::post('{employee_id}/documents', [App\Http\Controllers\Admin\Hrm\EmployeeController::class, 'storeDocument'])->name('employee.documents.store');
+        Route::get('import/sample', [App\Http\Controllers\Admin\Hrm\EmployeeController::class, 'importSample'])->name('employee-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\Hrm\EmployeeController::class, 'importPreview'])->name('employee-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\Hrm\EmployeeController::class, 'importConfirm'])->name('employee-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\Hrm\EmployeeController::class, 'export'])->name('employee-export');
     });
     Route::delete('employee-document/{employee_document_id}', [App\Http\Controllers\Admin\Hrm\EmployeeController::class, 'destroyDocument']);
     //attendance
     Route::get('attendance/report', [App\Http\Controllers\Admin\Hrm\AttendanceController::class, 'report'])->name('attendance.report');
-    Route::resource('attendance', App\Http\Controllers\Admin\Hrm\AttendanceController::class);
+    Route::resource('attendance', App\Http\Controllers\Admin\Hrm\AttendanceController::class)->except(['show']);
     Route::post('attendance/data', [App\Http\Controllers\Admin\Hrm\AttendanceController::class, 'getData'])->name('attendance-data');
+    Route::get('attendance/import/sample', [App\Http\Controllers\Admin\Hrm\AttendanceController::class, 'importSample'])->name('attendance-import-sample');
+    Route::post('attendance/import/preview', [App\Http\Controllers\Admin\Hrm\AttendanceController::class, 'importPreview'])->name('attendance-import-preview');
+    Route::post('attendance/import/confirm', [App\Http\Controllers\Admin\Hrm\AttendanceController::class, 'importConfirm'])->name('attendance-import-confirm');
+    Route::get('attendance/export', [App\Http\Controllers\Admin\Hrm\AttendanceController::class, 'export'])->name('attendance-export');
     //leave types
     Route::resource('leave-type', App\Http\Controllers\Admin\Hrm\LeaveTypeController::class);
     Route::post('leave-type/data', [App\Http\Controllers\Admin\Hrm\LeaveTypeController::class, 'getData'])->name('leave-type-data');
@@ -157,9 +181,13 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     Route::post('salary-structure/{employee_id}', [App\Http\Controllers\Admin\Hrm\EmployeeSalaryStructureController::class, 'store'])->name('salary-structure.store');
     Route::delete('salary-structure-version/{employee_salary_structure_id}', [App\Http\Controllers\Admin\Hrm\EmployeeSalaryStructureController::class, 'destroy']);
     //employee advances
-    Route::resource('employee-advance', App\Http\Controllers\Admin\Hrm\EmployeeAdvanceController::class);
+    Route::resource('employee-advance', App\Http\Controllers\Admin\Hrm\EmployeeAdvanceController::class)->except(['show']);
     Route::post('employee-advance/data', [App\Http\Controllers\Admin\Hrm\EmployeeAdvanceController::class, 'getData'])->name('employee-advance-data');
     Route::post('employee-advance/{employee_advance_id}/decide', [App\Http\Controllers\Admin\Hrm\EmployeeAdvanceController::class, 'decide'])->name('employee-advance.decide');
+    Route::get('employee-advance/import/sample', [App\Http\Controllers\Admin\Hrm\EmployeeAdvanceController::class, 'importSample'])->name('employee-advance-import-sample');
+    Route::post('employee-advance/import/preview', [App\Http\Controllers\Admin\Hrm\EmployeeAdvanceController::class, 'importPreview'])->name('employee-advance-import-preview');
+    Route::post('employee-advance/import/confirm', [App\Http\Controllers\Admin\Hrm\EmployeeAdvanceController::class, 'importConfirm'])->name('employee-advance-import-confirm');
+    Route::get('employee-advance/export', [App\Http\Controllers\Admin\Hrm\EmployeeAdvanceController::class, 'export'])->name('employee-advance-export');
     //employee deductions
     Route::resource('employee-deduction', App\Http\Controllers\Admin\Hrm\EmployeeDeductionController::class);
     Route::post('employee-deduction/data', [App\Http\Controllers\Admin\Hrm\EmployeeDeductionController::class, 'getData'])->name('employee-deduction-data');
@@ -194,15 +222,23 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     Route::post('employee-exit/{employee_exit_id}/finalize', [App\Http\Controllers\Admin\Hrm\EmployeeExitController::class, 'finalize'])->name('employee-exit.finalize');
     Route::post('exit-clearance/{exit_clearance_id}/decide', [App\Http\Controllers\Admin\Hrm\EmployeeExitController::class, 'clear'])->name('exit-clearance.decide');
     //assets
-    Route::resource('asset', App\Http\Controllers\Admin\Hrm\AssetController::class);
+    Route::resource('asset', App\Http\Controllers\Admin\Hrm\AssetController::class)->except(['show']);
     Route::post('asset/data', [App\Http\Controllers\Admin\Hrm\AssetController::class, 'getData'])->name('asset-data');
     Route::post('asset/change-status/{id}', [App\Http\Controllers\Admin\Hrm\AssetController::class, 'status']);
+    Route::get('asset/import/sample', [App\Http\Controllers\Admin\Hrm\AssetController::class, 'importSample'])->name('asset-import-sample');
+    Route::post('asset/import/preview', [App\Http\Controllers\Admin\Hrm\AssetController::class, 'importPreview'])->name('asset-import-preview');
+    Route::post('asset/import/confirm', [App\Http\Controllers\Admin\Hrm\AssetController::class, 'importConfirm'])->name('asset-import-confirm');
+    Route::get('asset/export', [App\Http\Controllers\Admin\Hrm\AssetController::class, 'export'])->name('asset-export');
     //asset allocation
     Route::get('asset-allocation', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'index'])->name('asset-allocation.index');
     Route::post('asset-allocation/data', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'getData'])->name('asset-allocation-data');
     Route::get('asset-allocation/create', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'create'])->name('asset-allocation.create');
     Route::post('asset-allocation', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'store'])->name('asset-allocation.store');
     Route::post('asset-allocation/{asset_allocation_id}/return', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'returnAsset'])->name('asset-allocation.return');
+    Route::get('asset-allocation/import/sample', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'importSample'])->name('asset-allocation-import-sample');
+    Route::post('asset-allocation/import/preview', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'importPreview'])->name('asset-allocation-import-preview');
+    Route::post('asset-allocation/import/confirm', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'importConfirm'])->name('asset-allocation-import-confirm');
+    Route::get('asset-allocation/export', [App\Http\Controllers\Admin\Hrm\AssetAllocationController::class, 'export'])->name('asset-allocation-export');
 
     //////////////////// Employee Self-Service (ESS) ////////////////////
     Route::group(['prefix' => 'ess'], function () {
@@ -326,36 +362,52 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     ////////////////////// Inventory ///////////////////////////
     Route::group(['middleware' => ['module:inventory']], function () {
     //warehouse
-    Route::resource('warehouse', App\Http\Controllers\Admin\WarehouseController::class);
+    Route::resource('warehouse', App\Http\Controllers\Admin\WarehouseController::class)->except(['show']);
     Route::group(['prefix' => 'warehouse'], function () {
         Route::post('data', [App\Http\Controllers\Admin\WarehouseController::class, 'getData'])->name('warehouse-data');
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\WarehouseController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\WarehouseController::class, 'byBusiness'])->name('warehouse-by-business');
         Route::get('by-branch/{branch_id}', [App\Http\Controllers\Admin\WarehouseController::class, 'byBranch'])->name('warehouse-by-branch');
+        Route::get('import/sample', [App\Http\Controllers\Admin\WarehouseController::class, 'importSample'])->name('warehouse-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\WarehouseController::class, 'importPreview'])->name('warehouse-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\WarehouseController::class, 'importConfirm'])->name('warehouse-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\WarehouseController::class, 'export'])->name('warehouse-export');
     });
 
     //brand
-    Route::resource('brands', App\Http\Controllers\Admin\BrandController::class);
+    Route::resource('brands', App\Http\Controllers\Admin\BrandController::class)->except(['show']);
     Route::group(['prefix' => 'brands'], function () {
         Route::post('data', [App\Http\Controllers\Admin\BrandController::class, 'getData'])->name('brands-data');
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\BrandController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\BrandController::class, 'byBusiness'])->name('brand-by-business');
+        Route::get('import/sample', [App\Http\Controllers\Admin\BrandController::class, 'importSample'])->name('brand-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\BrandController::class, 'importPreview'])->name('brand-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\BrandController::class, 'importConfirm'])->name('brand-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\BrandController::class, 'export'])->name('brand-export');
     });
 
     //category
-    Route::resource('category', App\Http\Controllers\Admin\CategoryController::class);
+    Route::resource('category', App\Http\Controllers\Admin\CategoryController::class)->except(['show']);
     Route::group(['prefix' => 'category'], function () {
         Route::post('data', [App\Http\Controllers\Admin\CategoryController::class, 'getData'])->name('category-data');
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\CategoryController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\CategoryController::class, 'byBusiness'])->name('category-by-business');
+        Route::get('import/sample', [App\Http\Controllers\Admin\CategoryController::class, 'importSample'])->name('category-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\CategoryController::class, 'importPreview'])->name('category-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\CategoryController::class, 'importConfirm'])->name('category-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\CategoryController::class, 'export'])->name('category-export');
     });
 
     //sub-category
-    Route::resource('sub-category', App\Http\Controllers\Admin\SubCategoryController::class);
+    Route::resource('sub-category', App\Http\Controllers\Admin\SubCategoryController::class)->except(['show']);
     Route::group(['prefix' => 'sub-category'], function () {
         Route::post('data', [App\Http\Controllers\Admin\SubCategoryController::class, 'getData'])->name('sub_category-data');
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\SubCategoryController::class, 'status']);
         Route::get('by-category/{category_id}', [App\Http\Controllers\Admin\SubCategoryController::class, 'byCategory'])->name('sub-category-by-category');
+        Route::get('import/sample', [App\Http\Controllers\Admin\SubCategoryController::class, 'importSample'])->name('sub-category-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\SubCategoryController::class, 'importPreview'])->name('sub-category-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\SubCategoryController::class, 'importConfirm'])->name('sub-category-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\SubCategoryController::class, 'export'])->name('sub-category-export');
     });
 
     //unit
@@ -366,11 +418,15 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     });
 
     //product
-    Route::resource('product', App\Http\Controllers\Admin\ProductController::class);
+    Route::resource('product', App\Http\Controllers\Admin\ProductController::class)->except(['show']);
     Route::group(['prefix' => 'product'], function () {
         Route::post('data', [App\Http\Controllers\Admin\ProductController::class, 'getData'])->name('product-data');
         Route::post('change-status/{product_id}', [App\Http\Controllers\Admin\ProductController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\ProductController::class, 'byBusiness'])->name('product-by-business');
+        Route::get('import/sample', [App\Http\Controllers\Admin\ProductController::class, 'importSample'])->name('product-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\ProductController::class, 'importPreview'])->name('product-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\ProductController::class, 'importConfirm'])->name('product-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\ProductController::class, 'export'])->name('product-export');
         // variations
         Route::get('variation-by-product/{product_id}', [App\Http\Controllers\Admin\ProductController::class, 'byProduct']);
         Route::get('variations/{product_id}', [App\Http\Controllers\Admin\ProductController::class, 'variations'])->name('product-variations');
@@ -459,11 +515,15 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     });
 
     //Expense Categories
-    Route::resource('expense-category', App\Http\Controllers\Admin\ExpenseCategoryController::class);
+    Route::resource('expense-category', App\Http\Controllers\Admin\ExpenseCategoryController::class)->except(['show']);
     Route::group(['prefix' => 'expense-category'], function () {
         Route::post('data', [App\Http\Controllers\Admin\ExpenseCategoryController::class, 'getData']);
         Route::post('reset', [App\Http\Controllers\Admin\ExpenseCategoryController::class, 'reset']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\ExpenseCategoryController::class, 'byBusiness']);
+        Route::get('import/sample', [App\Http\Controllers\Admin\ExpenseCategoryController::class, 'importSample'])->name('expense-category-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\ExpenseCategoryController::class, 'importPreview'])->name('expense-category-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\ExpenseCategoryController::class, 'importConfirm'])->name('expense-category-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\ExpenseCategoryController::class, 'export'])->name('expense-category-export');
     });
 
     //account
@@ -494,11 +554,15 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('detail', [App\Http\Controllers\Admin\JournalEntryController::class, 'detail'])->name('journal-entry.detail');
         Route::post('change-status', [App\Http\Controllers\Admin\JournalEntryController::class, 'status'])->name('journal-entry.change-status');
         Route::get('{journal_entry_id}/print', [App\Http\Controllers\Admin\JournalEntryController::class, 'print'])->name('journal-entry.print');
+        Route::get('import/sample', [App\Http\Controllers\Admin\JournalEntryController::class, 'importSample'])->name('journal-entry-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\JournalEntryController::class, 'importPreview'])->name('journal-entry-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\JournalEntryController::class, 'importConfirm'])->name('journal-entry-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\JournalEntryController::class, 'export'])->name('journal-entry-export');
     });
-    Route::resource('journal-entry', App\Http\Controllers\Admin\JournalEntryController::class);
+    Route::resource('journal-entry', App\Http\Controllers\Admin\JournalEntryController::class)->except(['show']);
 
     //recurring transactions
-    Route::resource('recurring-transaction', App\Http\Controllers\Admin\RecurringTransactionController::class);
+    Route::resource('recurring-transaction', App\Http\Controllers\Admin\RecurringTransactionController::class)->except(['show']);
     Route::group(['prefix' => 'recurring-transaction'], function () {
         Route::post('data', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'getData']);
         Route::post('preview-next-run', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'previewNextRun'])->name('recurring-transaction.preview-next-run');
@@ -508,16 +572,24 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('run-now/{recurring_transaction_id}', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'runNow'])->name('recurring-transaction.run-now');
         Route::get('{recurring_transaction_id}/history', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'history'])->name('recurring-transaction.history');
         Route::post('{recurring_transaction_id}/history/data', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'historyData'])->name('recurring-transaction.history-data');
+        Route::get('import/sample', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'importSample'])->name('recurring-transaction-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'importPreview'])->name('recurring-transaction-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'importConfirm'])->name('recurring-transaction-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\RecurringTransactionController::class, 'export'])->name('recurring-transaction-export');
     });
     }); // end module:accounting (chart of accounts, journals, recurring)
 
     Route::group(['middleware' => ['module:inventory']], function () {
     //supplier
-    Route::resource('supplier', App\Http\Controllers\Admin\SupplierController::class);
+    Route::resource('supplier', App\Http\Controllers\Admin\SupplierController::class)->except(['show']);
     Route::group(['prefix' => 'supplier'], function () {
         Route::post('data', [App\Http\Controllers\Admin\SupplierController::class, 'getData']);
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\SupplierController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\SupplierController::class, 'byBusiness']);
+        Route::get('import/sample', [App\Http\Controllers\Admin\SupplierController::class, 'importSample'])->name('supplier-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\SupplierController::class, 'importPreview'])->name('supplier-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\SupplierController::class, 'importConfirm'])->name('supplier-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\SupplierController::class, 'export'])->name('supplier-export');
     });
     }); // end module:inventory (supplier master)
 
@@ -544,18 +616,26 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     });
 
     //discount
-    Route::resource('discount', App\Http\Controllers\Admin\DiscountController::class);
+    Route::resource('discount', App\Http\Controllers\Admin\DiscountController::class)->except(['show']);
     Route::group(['prefix' => 'discount'], function () {
         Route::post('data', [App\Http\Controllers\Admin\DiscountController::class, 'getData']);
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\DiscountController::class, 'status']);
+        Route::get('import/sample', [App\Http\Controllers\Admin\DiscountController::class, 'importSample'])->name('discount-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\DiscountController::class, 'importPreview'])->name('discount-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\DiscountController::class, 'importConfirm'])->name('discount-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\DiscountController::class, 'export'])->name('discount-export');
     });
 
     Route::group(['middleware' => ['module:accounting']], function () {
     //voucher
-    Route::resource('voucher', App\Http\Controllers\Admin\VoucherController::class);
+    Route::resource('voucher', App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
     Route::group(['prefix' => 'voucher'], function () {
         Route::post('data', [App\Http\Controllers\Admin\VoucherController::class, 'getData']);
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\VoucherController::class, 'status']);
+        Route::get('import/sample', [App\Http\Controllers\Admin\VoucherController::class, 'importSample'])->name('voucher-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\VoucherController::class, 'importPreview'])->name('voucher-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\VoucherController::class, 'importConfirm'])->name('voucher-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\VoucherController::class, 'export'])->name('voucher-export');
     });
     }); // end module:accounting (voucher)
 
@@ -604,6 +684,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('filter-options/{business_id}', [App\Http\Controllers\Admin\OrderController::class, 'filterOptions']);
             Route::get('details/{order_id}', [App\Http\Controllers\Admin\OrderController::class, 'details']);
             Route::get('{order_id}/print', [App\Http\Controllers\Admin\OrderController::class, 'print'])->name('order.print');
+            Route::get('export', [App\Http\Controllers\Admin\OrderController::class, 'export'])->name('order-export');
         });
         Route::resource('order', App\Http\Controllers\Admin\OrderController::class)->except(['create', 'edit']);
     });
@@ -623,7 +704,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
 
     Route::group(['middleware' => ['module:inventory']], function () {
     //purchase request
-    Route::resource('purchase-request', App\Http\Controllers\Admin\PurchaseRequestController::class);
+    Route::resource('purchase-request', App\Http\Controllers\Admin\PurchaseRequestController::class)->except(['show']);
     Route::group(['prefix' => 'purchase-request'], function () {
         Route::post('data', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'getData']);
         Route::post('change-status', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'status']);
@@ -631,6 +712,10 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('send-quotation',[App\Http\Controllers\Admin\PurchaseRequestController::class,'sendQuotation']);
         Route::get('details/{purchase_request_id}', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'details']);
         Route::get('{purchase_request_id}/print', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'print'])->name('purchase-request.print');
+        Route::get('import/sample', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'importSample'])->name('purchase-request-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'importPreview'])->name('purchase-request-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'importConfirm'])->name('purchase-request-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\PurchaseRequestController::class, 'export'])->name('purchase-request-export');
     });
 
     //purchase
@@ -678,12 +763,16 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     });
 
     //opening stock
-    Route::resource('opening-stock', App\Http\Controllers\Admin\OpeningStockController::class);
+    Route::resource('opening-stock', App\Http\Controllers\Admin\OpeningStockController::class)->except(['show']);
     Route::group(['prefix' => 'opening-stock'], function () {
         Route::post('data', [App\Http\Controllers\Admin\OpeningStockController::class, 'getData']);
         Route::post('change-status', [App\Http\Controllers\Admin\OpeningStockController::class, 'status']);
         Route::get('details/{opening_stock_id}', [App\Http\Controllers\Admin\OpeningStockController::class, 'details']);
         Route::get('{opening_stock_id}/print', [App\Http\Controllers\Admin\OpeningStockController::class, 'print'])->name('opening-stock.print');
+        Route::get('import/sample', [App\Http\Controllers\Admin\OpeningStockController::class, 'importSample'])->name('opening-stock-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\OpeningStockController::class, 'importPreview'])->name('opening-stock-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\OpeningStockController::class, 'importConfirm'])->name('opening-stock-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\OpeningStockController::class, 'export'])->name('opening-stock-export');
     });
 
     //stock taking
@@ -697,17 +786,21 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     });
 
     //transfer note
-    Route::resource('transfer-note', App\Http\Controllers\Admin\TransferNoteController::class);
+    Route::resource('transfer-note', App\Http\Controllers\Admin\TransferNoteController::class)->except(['show']);
     Route::group(['prefix' => 'transfer-note'], function () {
         Route::post('data', [App\Http\Controllers\Admin\TransferNoteController::class, 'getData']);
         Route::post('change-status', [App\Http\Controllers\Admin\TransferNoteController::class, 'status']);
         Route::get('details/{transfer_note_id}', [App\Http\Controllers\Admin\TransferNoteController::class, 'details']);
         Route::get('source-stock/{warehouse_id}', [App\Http\Controllers\Admin\TransferNoteController::class, 'sourceStock']);
         Route::get('{transfer_note_id}/print', [App\Http\Controllers\Admin\TransferNoteController::class, 'print'])->name('transfer-note.print');
+        Route::get('import/sample', [App\Http\Controllers\Admin\TransferNoteController::class, 'importSample'])->name('transfer-note-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\TransferNoteController::class, 'importPreview'])->name('transfer-note-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\TransferNoteController::class, 'importConfirm'])->name('transfer-note-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\TransferNoteController::class, 'export'])->name('transfer-note-export');
     });
 
     //supplier payment
-    Route::resource('supplier-payment', App\Http\Controllers\Admin\SupplierPaymentController::class);
+    Route::resource('supplier-payment', App\Http\Controllers\Admin\SupplierPaymentController::class)->except(['show']);
     Route::group(['prefix' => 'supplier-payment'], function () {
         Route::post('data', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'getData']);
         Route::post('change-status', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'status']);
@@ -715,23 +808,35 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('ledger/{supplier_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'supplierLedger']);
         Route::get('purchases-by-supplier/{supplier_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'purchasesBySupplier']);
         Route::get('{supplier_payment_id}/print', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'print'])->name('supplier-payment.print');
+        Route::get('import/sample', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'importSample'])->name('supplier-payment-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'importPreview'])->name('supplier-payment-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'importConfirm'])->name('supplier-payment-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'export'])->name('supplier-payment-export');
     });
     }); // end module:inventory (procurement & stock)
 
     //expense detail (POS + Admin, any session/OT)
-    Route::resource('expense', App\Http\Controllers\Admin\ExpenseController::class);
+    Route::resource('expense', App\Http\Controllers\Admin\ExpenseController::class)->except(['show']);
     Route::group(['prefix' => 'expense'], function () {
         Route::post('data', [App\Http\Controllers\Admin\ExpenseController::class, 'getData']);
         Route::post('change-status', [App\Http\Controllers\Admin\ExpenseController::class, 'status']);
         Route::get('details/{expense_id}', [App\Http\Controllers\Admin\ExpenseController::class, 'details']);
+        Route::get('import/sample', [App\Http\Controllers\Admin\ExpenseController::class, 'importSample'])->name('expense-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\ExpenseController::class, 'importPreview'])->name('expense-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\ExpenseController::class, 'importConfirm'])->name('expense-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\ExpenseController::class, 'export'])->name('expense-export');
     });
 
     Route::group(['middleware' => ['module:accounting']], function () {
     //admin expense (business/daily expenses, no POS session or OT)
-    Route::resource('admin-expense', App\Http\Controllers\Admin\AdminExpenseController::class);
+    Route::resource('admin-expense', App\Http\Controllers\Admin\AdminExpenseController::class)->except(['show']);
     Route::group(['prefix' => 'admin-expense'], function () {
         Route::post('data', [App\Http\Controllers\Admin\AdminExpenseController::class, 'getData']);
         Route::post('change-status', [App\Http\Controllers\Admin\AdminExpenseController::class, 'status']);
+        Route::get('import/sample', [App\Http\Controllers\Admin\AdminExpenseController::class, 'importSample'])->name('admin-expense-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\AdminExpenseController::class, 'importPreview'])->name('admin-expense-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\AdminExpenseController::class, 'importConfirm'])->name('admin-expense-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\AdminExpenseController::class, 'export'])->name('admin-expense-export');
     });
     }); // end module:accounting (admin expense)
 

@@ -72,13 +72,18 @@ class ActivityLogService
                     'posted'   => 'primary',
                     'unposted' => 'warning',
                     'approved' => 'success',
+                    'exported' => 'secondary',
+                    'import_completed' => 'success',
+                    'import_completed_with_errors' => 'warning',
+                    'import_failed' => 'danger',
                     'rejected' => 'danger',
                     'login'    => 'secondary',
                     'logout'   => 'secondary',
                 ];
                 $color = $colors[$item->action] ?? 'secondary';
+                $label = ucfirst(str_replace('_', ' ', $item->action ?? ''));
 
-                return "<span class='badge bg-{$color}'>" . ucfirst($item->action ?? '') . "</span>";
+                return "<span class='badge bg-{$color}'>{$label}</span>";
             })
             ->addColumn('causer', function ($item) {
                 return $item->causer->name ?? 'System';

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
 use App\Enums\RoleNames;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\BrandService;
 use App\Services\Concrete\Admin\BusinessService;
@@ -17,6 +18,7 @@ use Illuminate\Validation\Rule;
 class BrandController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $business_service;
     protected $brand_service;
@@ -28,9 +30,16 @@ class BrandController extends Controller
         $this->middleware('permission:brand.edit')->only(['edit']);
         $this->middleware('permission:brand.delete')->only(['destroy']);
         $this->middleware('permission:brand.status')->only(['status']);
+        $this->middleware('permission:brand.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:brand.export')->only(['export']);
 
         $this->business_service = $business_service;
         $this->brand_service = $brand_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'brand';
     }
 
     public function index()

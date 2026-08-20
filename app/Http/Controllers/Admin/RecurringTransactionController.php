@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\Message;
 use App\Enums\RecurringFrequency;
 use App\Enums\RecurringTransactionType;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\AccountService;
 use App\Services\Concrete\Admin\BranchService;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\Validator;
 class RecurringTransactionController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $recurring_transaction_service;
     protected $business_service;
@@ -47,6 +49,8 @@ class RecurringTransactionController extends Controller
         $this->middleware('permission:recurring-transaction.resume')->only(['resume']);
         $this->middleware('permission:recurring-transaction.cancel')->only(['cancel']);
         $this->middleware('permission:recurring-transaction.run-now')->only(['runNow']);
+        $this->middleware('permission:recurring-transaction.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:recurring-transaction.export')->only(['export']);
 
         $this->recurring_transaction_service = $recurring_transaction_service;
         $this->business_service = $business_service;
@@ -54,6 +58,11 @@ class RecurringTransactionController extends Controller
         $this->expense_category_service = $expense_category_service;
         $this->account_service = $account_service;
         $this->journal_service = $journal_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'recurring-transaction';
     }
 
     public function index()

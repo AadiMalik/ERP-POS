@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\BranchService;
 use App\Services\Concrete\Admin\BusinessService;
@@ -21,6 +22,7 @@ use Illuminate\Validation\Rule;
 class VoucherController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $voucher_service;
     protected $business_service;
@@ -48,6 +50,8 @@ class VoucherController extends Controller
         $this->middleware('permission:voucher.edit')->only(['edit']);
         $this->middleware('permission:voucher.delete')->only(['destroy']);
         $this->middleware('permission:voucher.status')->only(['status']);
+        $this->middleware('permission:voucher.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:voucher.export')->only(['export']);
         $this->middleware('module:voucher');
 
         $this->voucher_service = $voucher_service;
@@ -57,6 +61,11 @@ class VoucherController extends Controller
         $this->customer_service = $customer_service;
         $this->order_type_service = $order_type_service;
         $this->branch_service = $branch_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'voucher';
     }
 
     public function index()

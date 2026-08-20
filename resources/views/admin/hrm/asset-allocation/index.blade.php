@@ -12,12 +12,19 @@
                     @endforeach
                 </select>
             </div>
-            @can('asset-allocation.create')
-            <a href="{{ url('admin/asset-allocation/create') }}" class="btn btn-primary rounded-pill">
-                <i class="fa fa-plus"></i>
-                Issue Asset
-            </a>
-            @endcan
+            <div class="d-flex gap-2">
+                @include('admin.partials.import-export-buttons', [
+                    'importExportModule' => 'asset-allocation',
+                    'importExportLabel' => 'Asset Allocation',
+                    'importExportRefreshFn' => 'initDataTableasset_allocation_table',
+                ])
+                @can('asset-allocation.create')
+                <a href="{{ url('admin/asset-allocation/create') }}" class="btn btn-primary rounded-pill">
+                    <i class="fa fa-plus"></i>
+                    Issue Asset
+                </a>
+                @endcan
+            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive p-4">
@@ -37,6 +44,7 @@
             </div>
         </div>
     </div>
+    @include('admin.partials.import-export-modal')
 </div>
 @endsection
 @section('js')

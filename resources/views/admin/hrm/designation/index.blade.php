@@ -10,12 +10,19 @@
                     Filters
                 </button>
             </div>
-            @can('designation.create')
-            <a href="{{ url('admin/designation/create') }}" class="btn btn-primary rounded-pill">
-                <i class="fa fa-plus"></i>
-                Add New
-            </a>
-            @endcan
+            <div class="d-flex gap-2">
+                @include('admin.partials.import-export-buttons', [
+                    'importExportModule' => 'designation',
+                    'importExportLabel' => 'Designations',
+                    'importExportRefreshFn' => 'initDataTabledesignation_table',
+                ])
+                @can('designation.create')
+                <a href="{{ url('admin/designation/create') }}" class="btn btn-primary rounded-pill">
+                    <i class="fa fa-plus"></i>
+                    Add New
+                </a>
+                @endcan
+            </div>
         </div>
         <div class="card-body">
             <div id="filterSection" class="card-body border-bottom" style="display:none;">
@@ -49,6 +56,7 @@
                 </table>
             </div>
         </div>
+        @include('admin.partials.import-export-modal')
     </div>
 </div>
 @endsection

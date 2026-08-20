@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\DiscountService;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 class DiscountController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $discount_service;
     protected $business_service;
@@ -28,10 +30,17 @@ class DiscountController extends Controller
         $this->middleware('permission:discount.edit')->only(['edit']);
         $this->middleware('permission:discount.delete')->only(['destroy']);
         $this->middleware('permission:discount.status')->only(['status']);
+        $this->middleware('permission:discount.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:discount.export')->only(['export']);
         $this->middleware('module:discount');
 
         $this->discount_service = $discount_service;
         $this->business_service = $business_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'discount';
     }
 
     public function index()

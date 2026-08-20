@@ -21,6 +21,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="{{ asset('public/assets/js/universal.js') }}"></script>
+<script src="{{ asset('public/assets/js/admin/import-export.js') }}"></script>
 <script src="{{ asset('public/assets/js/admin/global-date-filter.js') }}"></script>
 <script src="{{ asset('public/assets/js/admin/barcode-scanner.js') }}"></script>
 <script src="{{ asset('public/assets/js/admin/global-search.js') }}"></script>

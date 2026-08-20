@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\CategoryService;
 use App\Services\Concrete\Admin\BusinessService;
@@ -16,6 +17,7 @@ use Illuminate\Validation\Rule;
 class CategoryController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $business_service;
     protected $category_service;
@@ -27,9 +29,16 @@ class CategoryController extends Controller
         $this->middleware('permission:category.edit')->only(['edit']);
         $this->middleware('permission:category.delete')->only(['destroy']);
         $this->middleware('permission:category.status')->only(['status']);
+        $this->middleware('permission:category.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:category.export')->only(['export']);
 
         $this->business_service = $business_service;
         $this->category_service = $category_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'category';
     }
 
     public function index()

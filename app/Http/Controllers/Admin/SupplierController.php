@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\SupplierService;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Session;
 class SupplierController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $supplier_service;
     protected $business_service;
@@ -32,10 +34,18 @@ class SupplierController extends Controller
         $this->middleware('permission:supplier.edit')->only(['edit']);
         $this->middleware('permission:supplier.delete')->only(['destroy']);
         $this->middleware('permission:supplier.status')->only(['status']);
+        $this->middleware('permission:supplier.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:supplier.export')->only(['export']);
 
         $this->supplier_service = $supplier_service;
         $this->business_service = $business_service;
     }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'supplier';
+    }
+
     public function index()
     {
         $business = $this->business_service->getAllActive();

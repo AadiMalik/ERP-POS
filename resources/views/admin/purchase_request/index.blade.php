@@ -16,10 +16,18 @@
                     </button>
 
                 </div>
-                <a href="{{ url('admin/purchase-request/create') }}" class="btn btn-primary rounded-pill">
-                    <i class="fa fa-plus"></i>
-                    Add New
-                </a>
+                <div class="d-flex gap-2">
+                    @include('admin.partials.import-export-buttons', [
+                        'importExportModule' => 'purchase-request',
+                        'importExportLabel' => 'Purchase Requests',
+                        'importExportRefreshFn' => 'initDataTablepurchase_request_table',
+                        'importExportExportParamsSelector' => '#business_id',
+                    ])
+                    <a href="{{ url('admin/purchase-request/create') }}" class="btn btn-primary rounded-pill">
+                        <i class="fa fa-plus"></i>
+                        Add New
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <div id="filterSection" class="card-body border-bottom" style="display:none;">
@@ -118,6 +126,7 @@
             </div>
 
             @include('admin/purchase_request/model/send')
+            @include('admin.partials.import-export-modal')
         </div>
     @endsection
     @section('js')

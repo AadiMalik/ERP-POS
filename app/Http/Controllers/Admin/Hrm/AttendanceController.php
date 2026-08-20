@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Hrm;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Services\Concrete\Admin\Hrm\AttendanceService;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 class AttendanceController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $attendance_service;
     protected $employee_service;
@@ -27,9 +29,16 @@ class AttendanceController extends Controller
         $this->middleware('permission:attendance.edit')->only(['edit']);
         $this->middleware('permission:attendance.delete')->only(['destroy']);
         $this->middleware('permission:attendance.report.view')->only(['report']);
+        $this->middleware('permission:attendance.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:attendance.export')->only(['export']);
 
         $this->attendance_service = $attendance_service;
         $this->employee_service = $employee_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'attendance';
     }
 
     public function index()

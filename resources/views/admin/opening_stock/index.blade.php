@@ -16,10 +16,18 @@
                     </button>
 
                 </div>
-                <a href="{{ url('admin/opening-stock/create') }}" class="btn btn-primary rounded-pill">
-                    <i class="fa fa-plus"></i>
-                    Add New
-                </a>
+                <div class="d-flex gap-2">
+                    @include('admin.partials.import-export-buttons', [
+                        'importExportModule' => 'opening-stock',
+                        'importExportLabel' => 'Opening Stock',
+                        'importExportRefreshFn' => 'initDataTableopening_stock_table',
+                        'importExportExportParamsSelector' => '#business_id',
+                    ])
+                    <a href="{{ url('admin/opening-stock/create') }}" class="btn btn-primary rounded-pill">
+                        <i class="fa fa-plus"></i>
+                        Add New
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <div id="filterSection" class="card-body border-bottom" style="display:none;">
@@ -89,6 +97,7 @@
                 </div>
             </div>
         </div>
+        @include('admin.partials.import-export-modal')
     </div>
 @endsection
 @section('js')

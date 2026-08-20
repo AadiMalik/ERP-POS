@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\RoleNames;
 use App\Enums\Message;
 use App\Enums\Status;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\PosRegister;
@@ -29,6 +30,7 @@ use Illuminate\Support\Facades\Validator;
 class OrderController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $order_service;
     protected $business_service;
@@ -54,6 +56,7 @@ class OrderController extends Controller
         ThermalPrintSettingResolverService $thermal_print_setting_resolver
     ) {
         $this->middleware('module:order');
+        $this->middleware('permission:order.export')->only(['export']);
 
         $this->order_service = $order_service;
         $this->business_service = $business_service;
@@ -65,6 +68,11 @@ class OrderController extends Controller
         $this->payment_method_service = $payment_method_service;
         $this->document_send_log_service = $document_send_log_service;
         $this->thermal_print_setting_resolver = $thermal_print_setting_resolver;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'order';
     }
 
     public function index()

@@ -20,6 +20,12 @@
                     </button>
                 </div>
                 <div class="d-flex gap-2">
+                    @include('admin.partials.import-export-buttons', [
+                        'importExportModule' => 'expense-category',
+                        'importExportLabel' => 'Expense Categories',
+                        'importExportRefreshFn' => 'initDataTableexpense_category_table',
+                        'importExportExportParamsSelector' => '#filter_business_id',
+                    ])
                     <button type="button" id="resetExpenseCategory" class="btn rounded-pill btn-info">
                         <i class="fa fa-refresh"></i>
                         Reset to Defaults
@@ -80,6 +86,7 @@
             </div>
         </div>
         @include('admin.expense_category.model.create')
+        @include('admin.partials.import-export-modal')
     </div>
     <!-- ========== table components end ========== -->
 @endsection

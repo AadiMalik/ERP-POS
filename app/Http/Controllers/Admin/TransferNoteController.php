@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
 use App\Enums\Status;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Traits\ResponseAPI;
 use App\Services\Concrete\Admin\BusinessService;
@@ -22,6 +23,7 @@ use Illuminate\Validation\Rule;
 class TransferNoteController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $transfer_note_service;
     protected $business_service;
@@ -45,6 +47,8 @@ class TransferNoteController extends Controller
         $this->middleware('permission:transfer-note.delete')->only(['destroy']);
         $this->middleware('permission:transfer-note.status')->only(['status']);
         $this->middleware('permission:transfer-note.print')->only(['print']);
+        $this->middleware('permission:transfer-note.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:transfer-note.export')->only(['export']);
 
         $this->transfer_note_service = $transfer_note_service;
         $this->business_service = $business_service;
@@ -52,6 +56,11 @@ class TransferNoteController extends Controller
         $this->warehouse_service = $warehouse_service;
         $this->unit_service = $unit_service;
         $this->document_send_log_service = $document_send_log_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'transfer-note';
     }
 
     public function index()

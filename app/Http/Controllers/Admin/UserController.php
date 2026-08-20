@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
 use App\Enums\RoleNames;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Services\Concrete\Admin\BranchService;
@@ -21,6 +22,7 @@ use Illuminate\Validation\Rule;
 class UserController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $user_service;
     protected $role_service;
@@ -42,12 +44,19 @@ class UserController extends Controller
         $this->middleware('permission:user.delete')->only(['destroy']);
         $this->middleware('permission:user.status')->only(['status']);
         $this->middleware('permission:user.change-password')->only(['changePassword', 'updatePassword']);
+        $this->middleware('permission:user.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:user.export')->only(['export']);
 
         $this->user_service = $user_service;
         $this->role_service = $role_service;
         $this->business_service = $business_service;
         $this->branch_service = $branch_service;
         $this->customer_service = $customer_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'user';
     }
 
     public function index()

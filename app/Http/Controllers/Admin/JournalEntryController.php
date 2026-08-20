@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\AccountService;
 use App\Services\Concrete\Admin\BranchService;
@@ -21,6 +22,7 @@ use Illuminate\Validation\Rule;
 class JournalEntryController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $journal_entry_service;
     protected $journal_service;
@@ -44,6 +46,8 @@ class JournalEntryController extends Controller
         $this->middleware('permission:journal-entry.delete')->only(['destroy']);
         $this->middleware('permission:journal-entry.print')->only(['print']);
         $this->middleware('permission:journal-entry.post')->only(['status']);
+        $this->middleware('permission:journal-entry.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:journal-entry.export')->only(['export']);
         $this->middleware('module:journal-entry');
 
         $this->journal_entry_service = $journal_entry_service;
@@ -52,6 +56,11 @@ class JournalEntryController extends Controller
         $this->business_service = $business_service;
         $this->branch_service = $branch_service;
         $this->document_send_log_service = $document_send_log_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'journal-entry';
     }
 
     public function index()

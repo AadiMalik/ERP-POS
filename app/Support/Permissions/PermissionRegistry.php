@@ -79,6 +79,8 @@ class PermissionRegistry
                 'delete'          => ['name' => 'user.delete', 'label' => 'Delete', 'is_system' => false],
                 'status'          => ['name' => 'user.status', 'label' => 'Change Status', 'is_system' => false],
                 'change_password' => ['name' => 'user.change-password', 'label' => 'Change Password', 'is_system' => false],
+                'import' => ['name' => 'user.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'user.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'warehouse' => ['label' => 'Warehouse', 'actions' => [
@@ -87,6 +89,8 @@ class PermissionRegistry
                 'edit'   => ['name' => 'warehouse.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'warehouse.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'warehouse.status', 'label' => 'Change Status', 'is_system' => false],
+                'import' => ['name' => 'warehouse.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'warehouse.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'brand' => ['label' => 'Brands', 'actions' => [
@@ -95,6 +99,8 @@ class PermissionRegistry
                 'edit'   => ['name' => 'brand.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'brand.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'brand.status', 'label' => 'Change Status', 'is_system' => false],
+                'import' => ['name' => 'brand.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'brand.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'category' => ['label' => 'Categories', 'actions' => [
@@ -103,6 +109,8 @@ class PermissionRegistry
                 'edit'   => ['name' => 'category.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'category.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'category.status', 'label' => 'Change Status', 'is_system' => false],
+                'import' => ['name' => 'category.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'category.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'sub-category' => ['label' => 'Sub Categories', 'actions' => [
@@ -111,6 +119,8 @@ class PermissionRegistry
                 'edit'   => ['name' => 'sub-category.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'sub-category.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'sub-category.status', 'label' => 'Change Status', 'is_system' => false],
+                'import' => ['name' => 'sub-category.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'sub-category.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'unit' => ['label' => 'Units', 'actions' => [
@@ -127,6 +137,8 @@ class PermissionRegistry
                 'edit'   => ['name' => 'product.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'product.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'product.status', 'label' => 'Change Status', 'is_system' => false],
+                'import' => ['name' => 'product.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'product.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'barcode' => ['label' => 'Barcode / QR Code', 'actions' => [
@@ -196,6 +208,8 @@ class PermissionRegistry
                 'delete' => ['name' => 'journal-entry.delete', 'label' => 'Delete', 'is_system' => false],
                 'print'  => ['name' => 'journal-entry.print', 'label' => 'Print', 'is_system' => false],
                 'post'   => ['name' => 'journal-entry.post', 'label' => 'Post / Unpost', 'is_system' => false],
+                'import' => ['name' => 'journal-entry.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'journal-entry.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'recurring-transaction' => ['label' => 'Recurring Transactions', 'actions' => [
@@ -208,6 +222,8 @@ class PermissionRegistry
                 'cancel'       => ['name' => 'recurring-transaction.cancel', 'label' => 'Cancel', 'is_system' => false],
                 'run_now'      => ['name' => 'recurring-transaction.run-now', 'label' => 'Run Now', 'is_system' => false],
                 'view_history' => ['name' => 'recurring-transaction.view-history', 'label' => 'View Execution History', 'is_system' => false],
+                'import'       => ['name' => 'recurring-transaction.import', 'label' => 'Import', 'is_system' => false],
+                'export'       => ['name' => 'recurring-transaction.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'supplier' => ['label' => 'Suppliers', 'actions' => [
@@ -216,6 +232,8 @@ class PermissionRegistry
                 'edit'   => ['name' => 'supplier.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'supplier.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'supplier.status', 'label' => 'Change Status', 'is_system' => false],
+                'import' => ['name' => 'supplier.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'supplier.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'order-type' => ['label' => 'Order Types', 'actions' => [
@@ -248,6 +266,8 @@ class PermissionRegistry
                 'edit'   => ['name' => 'discount.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'discount.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'discount.status', 'label' => 'Change Status', 'is_system' => false],
+                'import' => ['name' => 'discount.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'discount.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'voucher' => ['label' => 'Vouchers', 'actions' => [
@@ -256,6 +276,8 @@ class PermissionRegistry
                 'edit'   => ['name' => 'voucher.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'voucher.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'voucher.status', 'label' => 'Change Status', 'is_system' => false],
+                'import' => ['name' => 'voucher.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'voucher.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'purchase-request' => ['label' => 'Purchase Requests', 'actions' => [
@@ -265,6 +287,8 @@ class PermissionRegistry
                 'delete' => ['name' => 'purchase-request.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'purchase-request.status', 'label' => 'Change Status', 'is_system' => false],
                 'print'  => ['name' => 'purchase-request.print', 'label' => 'Print', 'is_system' => false],
+                'import' => ['name' => 'purchase-request.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'purchase-request.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'purchase-request-quotation' => ['label' => 'Purchase Request Quotations', 'actions' => [
@@ -310,6 +334,8 @@ class PermissionRegistry
                 'delete' => ['name' => 'opening-stock.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'opening-stock.status', 'label' => 'Change Status', 'is_system' => false],
                 'print'  => ['name' => 'opening-stock.print', 'label' => 'Print', 'is_system' => false],
+                'import' => ['name' => 'opening-stock.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'opening-stock.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'stock-taking' => ['label' => 'Stock Taking', 'actions' => [
@@ -328,6 +354,8 @@ class PermissionRegistry
                 'delete' => ['name' => 'transfer-note.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'transfer-note.status', 'label' => 'Change Status', 'is_system' => false],
                 'print'  => ['name' => 'transfer-note.print', 'label' => 'Print', 'is_system' => false],
+                'import' => ['name' => 'transfer-note.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'transfer-note.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'supplier-payment' => ['label' => 'Supplier Payments', 'actions' => [
@@ -337,6 +365,8 @@ class PermissionRegistry
                 'delete' => ['name' => 'supplier-payment.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'supplier-payment.status', 'label' => 'Change Status', 'is_system' => false],
                 'print'  => ['name' => 'supplier-payment.print', 'label' => 'Print', 'is_system' => false],
+                'import' => ['name' => 'supplier-payment.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'supplier-payment.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'setting' => ['label' => 'Settings', 'actions' => [
@@ -350,6 +380,8 @@ class PermissionRegistry
                 'create' => ['name' => 'department.create', 'label' => 'Create', 'is_system' => false],
                 'edit'   => ['name' => 'department.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'department.delete', 'label' => 'Delete', 'is_system' => false],
+                'import' => ['name' => 'department.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'department.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'designation' => ['label' => 'Designations', 'actions' => [
@@ -357,6 +389,8 @@ class PermissionRegistry
                 'create' => ['name' => 'designation.create', 'label' => 'Create', 'is_system' => false],
                 'edit'   => ['name' => 'designation.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'designation.delete', 'label' => 'Delete', 'is_system' => false],
+                'import' => ['name' => 'designation.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'designation.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'shift' => ['label' => 'Shifts', 'actions' => [
@@ -364,6 +398,8 @@ class PermissionRegistry
                 'create' => ['name' => 'shift.create', 'label' => 'Create', 'is_system' => false],
                 'edit'   => ['name' => 'shift.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'shift.delete', 'label' => 'Delete', 'is_system' => false],
+                'import' => ['name' => 'shift.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'shift.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'employee' => ['label' => 'Employees', 'actions' => [
@@ -373,6 +409,8 @@ class PermissionRegistry
                 'delete'   => ['name' => 'employee.delete', 'label' => 'Delete', 'is_system' => false],
                 'status'   => ['name' => 'employee.status', 'label' => 'Change Status', 'is_system' => false],
                 'document' => ['name' => 'employee.document', 'label' => 'Manage Documents', 'is_system' => false],
+                'import'   => ['name' => 'employee.import', 'label' => 'Import', 'is_system' => false],
+                'export'   => ['name' => 'employee.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'attendance' => ['label' => 'Attendance', 'actions' => [
@@ -381,6 +419,8 @@ class PermissionRegistry
                 'edit'        => ['name' => 'attendance.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete'      => ['name' => 'attendance.delete', 'label' => 'Delete', 'is_system' => false],
                 'report_view' => ['name' => 'attendance.report.view', 'label' => 'View Report', 'is_system' => false],
+                'import'      => ['name' => 'attendance.import', 'label' => 'Import', 'is_system' => false],
+                'export'      => ['name' => 'attendance.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'leave-type' => ['label' => 'Leave Types', 'actions' => [
@@ -433,6 +473,8 @@ class PermissionRegistry
                 'edit'    => ['name' => 'employee-advance.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete'  => ['name' => 'employee-advance.delete', 'label' => 'Delete', 'is_system' => false],
                 'approve' => ['name' => 'employee-advance.approve', 'label' => 'Approve / Reject', 'is_system' => false],
+                'import'  => ['name' => 'employee-advance.import', 'label' => 'Import', 'is_system' => false],
+                'export'  => ['name' => 'employee-advance.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'employee-deduction' => ['label' => 'Employee Deductions', 'actions' => [
@@ -465,6 +507,8 @@ class PermissionRegistry
                 'edit'   => ['name' => 'asset.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'asset.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'asset.status', 'label' => 'Change Status', 'is_system' => false],
+                'import' => ['name' => 'asset.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'asset.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'asset-allocation' => ['label' => 'Asset Allocation', 'actions' => [
@@ -472,6 +516,8 @@ class PermissionRegistry
                 'create' => ['name' => 'asset-allocation.create', 'label' => 'Issue', 'is_system' => false],
                 'edit'   => ['name' => 'asset-allocation.edit', 'label' => 'Return / Update', 'is_system' => false],
                 'delete' => ['name' => 'asset-allocation.delete', 'label' => 'Delete', 'is_system' => false],
+                'import' => ['name' => 'asset-allocation.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'asset-allocation.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'ess' => ['label' => 'Employee Self Service', 'actions' => [
@@ -572,6 +618,7 @@ class PermissionRegistry
                 'payment_credit'  => ['name' => 'order.payment.credit', 'label' => 'Credit Payment', 'is_system' => false],
                 'customer_change' => ['name' => 'order.customer.change', 'label' => 'Change Customer', 'is_system' => false],
                 'reopen'          => ['name' => 'order.reopen', 'label' => 'Reopen', 'is_system' => false],
+                'export'          => ['name' => 'order.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'expense' => ['label' => 'Expense (POS)', 'actions' => [
@@ -582,14 +629,20 @@ class PermissionRegistry
                 'post'        => ['name' => 'expense.post', 'label' => 'Post', 'is_system' => false],
                 'delete'      => ['name' => 'expense.delete', 'label' => 'Delete', 'is_system' => false],
                 'report_view' => ['name' => 'expense.report.view', 'label' => 'View Report', 'is_system' => false],
+                'import'      => ['name' => 'expense.import', 'label' => 'Import', 'is_system' => false],
+                'export'      => ['name' => 'expense.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'expense-category' => ['label' => 'Expense Category', 'actions' => [
                 'manage' => ['name' => 'expense-category.manage', 'label' => 'Manage', 'is_system' => false],
+                'import' => ['name' => 'expense-category.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'expense-category.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'admin-expense' => ['label' => 'Admin Expenses', 'actions' => [
                 'manage' => ['name' => 'admin-expense.manage', 'label' => 'Manage', 'is_system' => false],
+                'import' => ['name' => 'admin-expense.import', 'label' => 'Import', 'is_system' => false],
+                'export' => ['name' => 'admin-expense.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
             'activity-log' => ['label' => 'Activity Log', 'actions' => [

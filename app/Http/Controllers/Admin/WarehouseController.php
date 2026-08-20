@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Enums\Message;
 use App\Enums\RoleNames;
@@ -18,6 +19,7 @@ use Illuminate\Validation\Rule;
 class WarehouseController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $warehouse_service;
     protected $business_service;
@@ -34,11 +36,18 @@ class WarehouseController extends Controller
         $this->middleware('permission:warehouse.edit')->only(['edit']);
         $this->middleware('permission:warehouse.delete')->only(['destroy']);
         $this->middleware('permission:warehouse.status')->only(['status']);
+        $this->middleware('permission:warehouse.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:warehouse.export')->only(['export']);
         $this->middleware('module:warehouse');
 
         $this->warehouse_service = $warehouse_service;
         $this->business_service = $business_service;
         $this->branch_service = $branch_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'warehouse';
     }
 
     public function index()

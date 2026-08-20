@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\AccountService;
 use App\Services\Concrete\Admin\BusinessService;
@@ -17,6 +18,7 @@ use Illuminate\Validation\Rule;
 class ExpenseCategoryController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $expense_category_service;
     protected $business_service;
@@ -28,10 +30,17 @@ class ExpenseCategoryController extends Controller
         AccountService $account_service
     ) {
         $this->middleware('permission:expense-category.manage');
+        $this->middleware('permission:expense-category.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:expense-category.export')->only(['export']);
 
         $this->expense_category_service = $expense_category_service;
         $this->business_service = $business_service;
         $this->account_service = $account_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'expense-category';
     }
 
     public function index()

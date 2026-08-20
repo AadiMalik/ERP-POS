@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Models\ProductVariation;
 use App\Services\Concrete\Admin\BarcodeService;
@@ -21,6 +22,7 @@ use Illuminate\Validation\Rule;
 class ProductController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $product_service;
     protected $business_service;
@@ -43,6 +45,8 @@ class ProductController extends Controller
         $this->middleware('permission:product.edit')->only(['edit', 'variationStatus', 'setDefaultImage', 'saveImageSorting', 'backfillBarcodes']);
         $this->middleware('permission:product.delete')->only(['destroy', 'variationDestroy', 'deleteImage']);
         $this->middleware('permission:product.status')->only(['status']);
+        $this->middleware('permission:product.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:product.export')->only(['export']);
         $this->middleware('module:product');
 
         $this->product_service = $product_service;
@@ -52,6 +56,12 @@ class ProductController extends Controller
         $this->unit_service = $unit_service;
         $this->barcode_service = $barcode_service;
     }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'product';
+    }
+
     public function index()
     {
         $businesses = $this->business_service->getAllActive();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\Message;
 use App\Enums\PaymentMethod;
 use App\Enums\Status;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\AccountService;
 use App\Services\Concrete\Admin\BranchService;
@@ -31,6 +32,7 @@ use Illuminate\Validation\Rule;
 class AdminExpenseController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $expense_service;
     protected $expense_category_service;
@@ -48,6 +50,8 @@ class AdminExpenseController extends Controller
         SettingService $setting_service
     ) {
         $this->middleware('permission:admin-expense.manage');
+        $this->middleware('permission:admin-expense.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:admin-expense.export')->only(['export']);
         $this->middleware('module:admin-expense');
 
         $this->expense_service = $expense_service;
@@ -56,6 +60,11 @@ class AdminExpenseController extends Controller
         $this->branch_service = $branch_service;
         $this->account_service = $account_service;
         $this->setting_service = $setting_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'admin-expense';
     }
 
     public function index()

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Hrm;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\Hrm\AssetAllocationService;
 use App\Services\Concrete\Admin\Hrm\AssetService;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 class AssetAllocationController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $asset_allocation_service;
     protected $asset_service;
@@ -25,10 +27,17 @@ class AssetAllocationController extends Controller
         $this->middleware('permission:asset-allocation.view')->only(['index', 'getData']);
         $this->middleware('permission:asset-allocation.create')->only(['create', 'store']);
         $this->middleware('permission:asset-allocation.edit')->only(['returnAsset']);
+        $this->middleware('permission:asset-allocation.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:asset-allocation.export')->only(['export']);
 
         $this->asset_allocation_service = $asset_allocation_service;
         $this->asset_service = $asset_service;
         $this->employee_service = $employee_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'asset-allocation';
     }
 
     public function index()

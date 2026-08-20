@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
 use App\Enums\Status;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Traits\ResponseAPI;
 use App\Services\Concrete\Admin\BusinessService;
@@ -22,6 +23,7 @@ use Illuminate\Validation\Rule;
 class OpeningStockController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $opening_stock_service;
     protected $business_service;
@@ -45,6 +47,8 @@ class OpeningStockController extends Controller
         $this->middleware('permission:opening-stock.delete')->only(['destroy']);
         $this->middleware('permission:opening-stock.status')->only(['status']);
         $this->middleware('permission:opening-stock.print')->only(['print']);
+        $this->middleware('permission:opening-stock.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:opening-stock.export')->only(['export']);
 
         $this->opening_stock_service = $opening_stock_service;
         $this->business_service = $business_service;
@@ -52,6 +56,11 @@ class OpeningStockController extends Controller
         $this->warehouse_service = $warehouse_service;
         $this->unit_service = $unit_service;
         $this->document_send_log_service = $document_send_log_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'opening-stock';
     }
 
     public function index()

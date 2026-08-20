@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Hrm;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\Hrm\DepartmentService;
 use App\Services\Concrete\Admin\Hrm\DesignationService;
@@ -16,6 +17,7 @@ use Illuminate\Validation\Rule;
 class DesignationController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $designation_service;
     protected $department_service;
@@ -27,9 +29,16 @@ class DesignationController extends Controller
         $this->middleware('permission:designation.create|designation.edit')->only(['store']);
         $this->middleware('permission:designation.edit')->only(['edit']);
         $this->middleware('permission:designation.delete')->only(['destroy']);
+        $this->middleware('permission:designation.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:designation.export')->only(['export']);
 
         $this->designation_service = $designation_service;
         $this->department_service = $department_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'designation';
     }
 
     public function index()

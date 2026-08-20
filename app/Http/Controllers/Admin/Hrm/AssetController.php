@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Hrm;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\Hrm\AssetService;
 use App\Traits\ResponseAPI;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 class AssetController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $asset_service;
 
@@ -25,8 +27,15 @@ class AssetController extends Controller
         $this->middleware('permission:asset.edit')->only(['edit']);
         $this->middleware('permission:asset.delete')->only(['destroy']);
         $this->middleware('permission:asset.status')->only(['status']);
+        $this->middleware('permission:asset.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:asset.export')->only(['export']);
 
         $this->asset_service = $asset_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'asset';
     }
 
     public function index()

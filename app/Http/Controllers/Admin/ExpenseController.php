@@ -6,6 +6,7 @@ use App\Enums\Message;
 use App\Enums\PaymentMethod;
 use App\Enums\RoleNames;
 use App\Enums\Status;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Concrete\Admin\AccountService;
@@ -26,6 +27,7 @@ use Illuminate\Validation\Rule;
 class ExpenseController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $expense_service;
     protected $expense_category_service;
@@ -49,6 +51,8 @@ class ExpenseController extends Controller
         $this->middleware('permission:expense.create|expense.edit')->only(['store']);
         $this->middleware('permission:expense.edit')->only(['edit', 'status']);
         $this->middleware('permission:expense.delete')->only(['destroy']);
+        $this->middleware('permission:expense.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:expense.export')->only(['export']);
 
         $this->expense_service = $expense_service;
         $this->expense_category_service = $expense_category_service;
@@ -57,6 +61,11 @@ class ExpenseController extends Controller
         $this->account_service = $account_service;
         $this->setting_service = $setting_service;
         $this->pos_register_session_service = $pos_register_session_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'expense';
     }
 
     public function index()

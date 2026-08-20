@@ -16,8 +16,15 @@
                 </button>
 
             </div>
-            <a href="javascript:void(0)" id="createNewDiscount" class="btn rounded-pill btn-primary">
-                <i class="icon-base fa fa-plus mr-5"></i>Add New</a>
+            <div class="d-flex gap-2">
+                @include('admin.partials.import-export-buttons', [
+                    'importExportModule' => 'discount',
+                    'importExportLabel' => 'Discounts',
+                    'importExportRefreshFn' => 'initDataTablepos_discount_table',
+                ])
+                <a href="javascript:void(0)" id="createNewDiscount" class="btn rounded-pill btn-primary">
+                    <i class="icon-base fa fa-plus mr-5"></i>Add New</a>
+            </div>
         </div>
         <div class="card-body">
             <div id="filterSection" class="card-body border-bottom" style="display:none;">
@@ -56,6 +63,7 @@
         </div>
     </div>
     @include('admin.discount.model.create')
+    @include('admin.partials.import-export-modal')
 </div>
 <!-- ========== table components end ========== -->
 @endsection

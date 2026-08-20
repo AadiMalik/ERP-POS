@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Hrm;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\Hrm\DepartmentService;
 use App\Traits\ResponseAPI;
@@ -15,6 +16,7 @@ use Illuminate\Validation\Rule;
 class DepartmentController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $department_service;
 
@@ -25,9 +27,16 @@ class DepartmentController extends Controller
         $this->middleware('permission:department.create|department.edit')->only(['store']);
         $this->middleware('permission:department.edit')->only(['edit']);
         $this->middleware('permission:department.delete')->only(['destroy']);
+        $this->middleware('permission:department.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:department.export')->only(['export']);
         $this->middleware('module:department');
 
         $this->department_service = $department_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'department';
     }
 
     public function index()

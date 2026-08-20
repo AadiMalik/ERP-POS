@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Hrm;
 
 use App\Enums\EmployeeStatus;
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\Hrm\DepartmentService;
 use App\Services\Concrete\Admin\Hrm\DesignationService;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 class EmployeeController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $employee_service;
     protected $department_service;
@@ -36,11 +38,18 @@ class EmployeeController extends Controller
         $this->middleware('permission:employee.delete')->only(['destroy']);
         $this->middleware('permission:employee.status')->only(['status']);
         $this->middleware('permission:employee.document')->only(['storeDocument', 'destroyDocument']);
+        $this->middleware('permission:employee.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:employee.export')->only(['export']);
 
         $this->employee_service = $employee_service;
         $this->department_service = $department_service;
         $this->designation_service = $designation_service;
         $this->shift_service = $shift_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'employee';
     }
 
     public function index()

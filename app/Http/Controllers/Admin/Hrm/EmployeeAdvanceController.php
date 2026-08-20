@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Hrm;
 
 use App\Enums\Message;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\Hrm\EmployeeAdvanceService;
 use App\Services\Concrete\Admin\Hrm\EmployeeService;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 class EmployeeAdvanceController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $employee_advance_service;
     protected $employee_service;
@@ -25,9 +27,16 @@ class EmployeeAdvanceController extends Controller
         $this->middleware('permission:employee-advance.create|employee-advance.edit')->only(['store']);
         $this->middleware('permission:employee-advance.approve')->only(['decide']);
         $this->middleware('permission:employee-advance.delete')->only(['destroy']);
+        $this->middleware('permission:employee-advance.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:employee-advance.export')->only(['export']);
 
         $this->employee_advance_service = $employee_advance_service;
         $this->employee_service = $employee_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'employee-advance';
     }
 
     public function index()

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
 use App\Enums\Status;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\DocumentSendLogService;
@@ -23,6 +24,7 @@ use Illuminate\Validation\Rule;
 class PurchaseRequestController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $purchase_request_service;
     protected $business_service;
@@ -48,6 +50,8 @@ class PurchaseRequestController extends Controller
         $this->middleware('permission:purchase-request.delete')->only(['destroy']);
         $this->middleware('permission:purchase-request.status')->only(['status']);
         $this->middleware('permission:purchase-request.print')->only(['print']);
+        $this->middleware('permission:purchase-request.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:purchase-request.export')->only(['export']);
 
         $this->purchase_request_service = $purchase_request_service;
         $this->product_service = $product_service;
@@ -56,6 +60,11 @@ class PurchaseRequestController extends Controller
         $this->warehouse_service = $warehouse_service;
         $this->unit_service = $unit_service;
         $this->document_send_log_service = $document_send_log_service;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'purchase-request';
     }
 
     public function index()
