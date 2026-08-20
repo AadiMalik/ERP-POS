@@ -269,19 +269,20 @@
 @endsection
 
 @section('js')
-    <script>
-        @if (session('error'))
-            <
-            script >
-                errorMessage(
-                    "{{ session('error') }}"
-                );
-    </script>
+    @if ($errors->any())
+        <script>
+            errorMessage("{{ $errors->first() }}");
+        </script>
+    @endif
+    @if (session('error'))
+        <script>
+            errorMessage("{{ session('error') }}");
+        </script>
     @endif
     <script>
-        $(ducument).ready(function() {
+        $(document).ready(function() {
             $('#packageSelect').select2();
-        })
+        });
         (function() {
             const pkgSelect = document.getElementById('packageSelect');
             const noPackageMsg = document.getElementById('noPackageMsg');

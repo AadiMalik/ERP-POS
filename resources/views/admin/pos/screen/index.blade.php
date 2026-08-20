@@ -526,19 +526,31 @@
             <div id="posReportsSummary" class="d-none">
                 <hr>
                 <h6>Session Summary</h6>
-                <table class="table table-sm" id="posReportsSummaryTable">
-                    <tbody>
-                        <tr><th>Opening Cash</th><td class="text-end" id="repOpeningCash">0.00</td></tr>
-                        <tr><th>Cash Sales</th><td class="text-end" id="repCashSales">0.00</td></tr>
-                        <tr><th>Cash In</th><td class="text-end" id="repCashIn">0.00</td></tr>
-                        <tr><th>Cash Out</th><td class="text-end" id="repCashOut">0.00</td></tr>
-                        <tr><th>Expenses</th><td class="text-end" id="repExpenses">0.00</td></tr>
-                        <tr><th>Total Orders</th><td class="text-end" id="repTotalOrders">0</td></tr>
-                        <tr><th>Total Sales</th><td class="text-end" id="repTotalSales">0.00</td></tr>
-                        <tr class="fw-bold"><th>Expected Cash</th><td class="text-end" id="repExpectedCash">0.00</td></tr>
-                        <tr><th>Actual Cash</th><td class="text-end" id="repActualCash">0.00</td></tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-sm" id="posReportsSummaryTable">
+                        <thead>
+                            <tr><th>Detail</th><th class="text-end">Orders</th><th class="text-end">Amount</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr class="fw-bold"><td>Total</td><td class="text-end" id="repTotalOrders">0</td><td class="text-end" id="repTotalSales">0.00</td></tr>
+                        </tbody>
+                        <tbody id="repPaymentRows"></tbody>
+                        <tbody id="repSourceRows"></tbody>
+                        <tbody>
+                            <tr><td>Discount</td><td class="text-end" id="repDiscountOrderCount">0</td><td class="text-end" id="repTotalDiscount">0.00</td></tr>
+                            <tr><td>Tax</td><td class="text-end" id="repTaxOrderCount">0</td><td class="text-end" id="repTotalTax">0.00</td></tr>
+                            <tr><td>Opening Amount</td><td class="text-end">-</td><td class="text-end" id="repOpeningCash">0.00</td></tr>
+                            <tr><td>Cash In</td><td class="text-end">-</td><td class="text-end" id="repCashIn">0.00</td></tr>
+                            <tr><td>Cash Out</td><td class="text-end">-</td><td class="text-end" id="repCashOut">0.00</td></tr>
+                            <tr><td>Expenses</td><td class="text-end">-</td><td class="text-end" id="repExpenses">0.00</td></tr>
+                            <tr class="fw-bold"><td>Cash Amount</td><td class="text-end">-</td><td class="text-end" id="repExpectedCash">0.00</td></tr>
+                            <tr><td>Actual</td><td class="text-end">-</td><td class="text-end" id="repActualCash">0.00</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="printSessionSummaryBtn">
+                    <i class="fa fa-print"></i> Thermal Print
+                </button>
             </div>
         </div>
     </div>
@@ -561,6 +573,7 @@
                 'session_open' => url('admin/pos-register-session/open'),
                 'session_close' => url('admin/pos-register-session/close'),
                 'session_summary' => url('admin/pos-register-session/summary'),
+                'session_summary_print' => url('admin/pos-register-session/summary'),
                 'session_cash_movement' => url('admin/pos-register-session/cash-movement'),
                 'session_my_history' => url('admin/pos-register-session/my-history'),
                 'search_products' => url('admin/order/search-products'),

@@ -158,7 +158,9 @@ class PosScreenController extends Controller
         $show_pos_actions = true;
 
         $pos_order_source_id = $this->resolvePosOrderSourceId($order_sources);
+        $business = $this->business_service->getById($business_id);
         $branch_name = optional($this->branch_service->getById($branch_id))->name;
+        $warehouse_name = optional($this->warehouse_service->getById($warehouse_id))->name;
 
         // Reorder entry point - order.show's Reorder button links here with
         // this query param; pos-screen.js reads it from POS_CONFIG on load
@@ -198,7 +200,9 @@ class PosScreenController extends Controller
             'is_fixed_context',
             'show_pos_actions',
             'pos_order_source_id',
+            'business',
             'branch_name',
+            'warehouse_name',
             'is_superadmin',
             'context_businesses',
             'context_branches',
@@ -261,7 +265,21 @@ class PosScreenController extends Controller
             ? collect()
             : $this->warehouse_service->getByBusiness($user->business_id);
 
-        return view('admin.pos.screen.select-context', compact('businesses', 'branches', 'warehouses', 'is_superadmin'));
+        // Header chrome - mirrors OrderController::history() so the shared
+        // layouts/pos-header partial renders identically here (real business
+        // logo/name, user menu, Switch to Admin Panel). No branch/warehouse is
+        // chosen yet, so those chips stay null; show_pos_actions is false
+        // because there is no POS session yet.
+        $is_fixed_context = in_array(getRoleName(), $this->fixed_context_roles, true);
+        $show_pos_actions = false;
+        $business = $is_superadmin ? null : $this->business_service->getById($user->business_id);
+        $branch_name = null;
+        $warehouse_name = null;
+
+        return view('admin.pos.screen.select-context', compact(
+            'businesses', 'branches', 'warehouses', 'is_superadmin',
+            'business', 'branch_name', 'warehouse_name', 'is_fixed_context', 'show_pos_actions'
+        ));
     }
 
     /**

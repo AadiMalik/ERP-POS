@@ -215,6 +215,10 @@ class PosRegisterSessionService
         $cash_order_count = 0;
         $void_amount = 0;
         $returned_amount = 0;
+        $multi_payment_order_count = 0;
+        $multi_payment_amount = 0;
+        $discount_order_count = 0;
+        $tax_order_count = 0;
 
         if (Schema::hasTable('order_payments') && Schema::hasTable('orders') && Schema::hasTable('payment_methods')) {
             $posted_orders = DB::table('orders')
@@ -266,23 +270,72 @@ class PosRegisterSessionService
                 ->select('payment_methods.payment_method_id', 'payment_methods.name', 'payment_methods.type', 'order_payments.amount', 'order_payments.order_id')
                 ->get();
 
-            $payment_method_totals = $payment_rows->groupBy('payment_method_id')->map(function ($rows) {
-                return [
-                    'payment_method_id' => $rows->first()->payment_method_id,
-                    'name' => $rows->first()->name,
-                    'type' => $rows->first()->type,
-                    'order_count' => $rows->pluck('order_id')->unique()->count(),
-                    'total' => (float) $rows->sum('amount'),
-                ];
-            })->values();
+            // Orders paid via more than one distinct payment method are pulled
+            // out of the per-method buckets entirely and counted once under a
+            // "Multi" bucket (by full order total, not by partial payment
+            // lines) - so Cash+Card+Bank+Wallet+Credit+Multi sums exactly to
+            // total_sales_amount without a split-payment order being counted
+            // under both its individual methods and Multi.
+            $orders_payment_method_counts = $payment_rows->groupBy('order_id')
+                ->map(function ($rows) {
+                    return $rows->pluck('payment_method_id')->unique()->count();
+                });
+            $multi_order_ids = $orders_payment_method_counts->filter(fn ($count) => $count > 1)->keys();
 
-            $cash_rows = $payment_rows->where('type', 'cash');
+            $single_method_rows = $payment_rows->whereNotIn('order_id', $multi_order_ids);
+
+            // Bucketed by payment_methods.type (not individual payment method)
+            // so two differently-named methods of the same type (e.g. "Visa"
+            // and "Mastercard", both type=card) collapse into one Card row,
+            // and the canonical types below always render - even at 0/0 - for
+            // a stable report layout regardless of what a business has
+            // configured.
+            $payment_type_labels = [
+                'cash' => 'Cash',
+                'card' => 'Card',
+                'bank' => 'Bank',
+                'wallet' => 'Wallet',
+                'credit' => 'Credit',
+            ];
+
+            $payment_method_totals = collect();
+            foreach ($payment_type_labels as $type_key => $label) {
+                $type_rows = $single_method_rows->where('type', $type_key);
+                $payment_method_totals->push([
+                    'type' => $type_key,
+                    'name' => $label,
+                    'order_count' => $type_rows->pluck('order_id')->unique()->count(),
+                    'total' => (float) $type_rows->sum('amount'),
+                ]);
+            }
+
+            // Any payment method typed 'other' (or a future type outside the
+            // fixed list above) still needs to be represented somewhere so
+            // the report never silently drops real money - shown only when
+            // actually used, appended after the fixed categories.
+            $other_rows = $single_method_rows->whereNotIn('type', array_keys($payment_type_labels));
+            if ($other_rows->count()) {
+                $payment_method_totals->push([
+                    'type' => 'other',
+                    'name' => 'Other',
+                    'order_count' => $other_rows->pluck('order_id')->unique()->count(),
+                    'total' => (float) $other_rows->sum('amount'),
+                ]);
+            }
+
+            $multi_payment_order_count = $multi_order_ids->count();
+            $multi_payment_amount = (float) $posted_orders->whereIn('order_id', $multi_order_ids)->sum('total');
+
+            $cash_rows = $single_method_rows->where('type', 'cash');
             $cash_sales = (float) $cash_rows->sum('amount');
             $cash_order_count = $cash_rows->pluck('order_id')->unique()->count();
 
-            $credit_rows = $payment_rows->where('type', 'credit');
+            $credit_rows = $single_method_rows->where('type', 'credit');
             $credit_amount = (float) $credit_rows->sum('amount');
             $credit_order_count = $credit_rows->pluck('order_id')->unique()->count();
+
+            $discount_order_count = $posted_orders->filter(fn ($o) => (float) $o->discount_amount > 0)->count();
+            $tax_order_count = $posted_orders->filter(fn ($o) => (float) $o->tax_amount > 0)->count();
 
             // No refund mechanism exists yet - kept at 0 until a later phase adds it.
             $cash_refunds = 0;
@@ -323,6 +376,8 @@ class PosRegisterSessionService
             'actual_cash' => $session->actual_cash,
             'cash_difference' => $session->cash_difference,
             'payment_method_totals' => $payment_method_totals,
+            'multi_payment_order_count' => $multi_payment_order_count,
+            'multi_payment_amount' => $multi_payment_amount,
 
             'total_orders' => $total_orders,
             'total_sales_amount' => $total_sales_amount,
@@ -336,6 +391,8 @@ class PosRegisterSessionService
             'cash_order_count' => $cash_order_count,
             'void_amount' => $void_amount,
             'returned_amount' => $returned_amount,
+            'discount_order_count' => $discount_order_count,
+            'tax_order_count' => $tax_order_count,
         ];
     }
 

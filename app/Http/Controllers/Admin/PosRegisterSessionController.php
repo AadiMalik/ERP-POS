@@ -6,6 +6,7 @@ use App\Enums\Message;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\PosRegisterSessionService;
+use App\Services\Concrete\Admin\ThermalPrintSettingResolverService;
 use App\Traits\ResponseAPI;
 use Exception;
 use Illuminate\Http\Request;
@@ -18,11 +19,16 @@ class PosRegisterSessionController extends Controller
 
     protected $pos_register_session_service;
     protected $business_service;
+    protected $thermal_print_setting_resolver;
 
-    public function __construct(PosRegisterSessionService $pos_register_session_service, BusinessService $business_service)
-    {
+    public function __construct(
+        PosRegisterSessionService $pos_register_session_service,
+        BusinessService $business_service,
+        ThermalPrintSettingResolverService $thermal_print_setting_resolver
+    ) {
         $this->pos_register_session_service = $pos_register_session_service;
         $this->business_service = $business_service;
+        $this->thermal_print_setting_resolver = $thermal_print_setting_resolver;
     }
 
     public function index()
@@ -125,6 +131,38 @@ class PosRegisterSessionController extends Controller
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }
+    }
+
+    /**
+     * Thermal-print rendition of the same session summary as summary() -
+     * duplicates its authorization check (kept separate rather than shared,
+     * to avoid any risk to the working JSON endpoint) since it exposes the
+     * same sensitive session data as a printable HTML page instead of JSON.
+     */
+    public function printSummary($pos_register_session_id)
+    {
+        $session = \App\Models\PosRegisterSession::find($pos_register_session_id);
+
+        if (!$session) {
+            abort(404, 'This register session was not found.');
+        }
+
+        $user = Auth::user();
+        $same_business = getRoleName() == \App\Enums\RoleNames::SUPERADMIN || $user->business_id == $session->business_id;
+
+        if (
+            Auth::id() != $session->cashier_id
+            && (!$same_business || (!$user->can('pos.register.close') && !$user->can('pos.register.report.view')))
+        ) {
+            abort(403, 'You are not authorized to view this register session.');
+        }
+
+        $summary = $this->pos_register_session_service->getSummary($pos_register_session_id);
+        $thermal_config = $this->thermal_print_setting_resolver->resolve($session->business_id);
+        $business = $this->business_service->getById($session->business_id);
+        $printed_at = now();
+
+        return view('admin.pos.register-session.print.thermal-session-summary', compact('session', 'summary', 'thermal_config', 'business', 'printed_at'));
     }
 
     /**

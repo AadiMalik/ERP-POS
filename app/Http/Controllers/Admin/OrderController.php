@@ -430,6 +430,7 @@ class OrderController extends Controller
     {
         $is_superadmin = RoleNames::SUPERADMIN == getRoleName();
         $business_id = Auth::user()->business_id;
+        $business = $this->business_service->getById($business_id);
 
         $branches = $is_superadmin ? collect() : $this->branch_service->getAllActive();
         $cashiers = $is_superadmin ? collect() : User::where('business_id', $business_id)
@@ -464,6 +465,21 @@ class OrderController extends Controller
         $is_fixed_context = in_array($role, [RoleNames::ORDERTAKER, RoleNames::POSMANAGER], true);
         $is_order_taker = $role === RoleNames::ORDERTAKER;
 
+        // Header Branch/Warehouse chips - mirrors PosScreenController::resolveContext()
+        // so the shared POS header (layouts/pos-header.blade.php) shows the same
+        // context here as on the POS screen itself. Purely for display; this page's
+        // own Branch filter dropdown above is unaffected.
+        $branch_name = null;
+        $warehouse_name = null;
+        if ($is_fixed_context) {
+            $branch_name = optional($this->branch_service->getById(Auth::user()->branch_id))->name;
+        } else {
+            $context_branch_id = session('pos_context_branch_id');
+            $context_warehouse_id = session('pos_context_warehouse_id');
+            $branch_name = $context_branch_id ? optional($this->branch_service->getById($context_branch_id))->name : null;
+            $warehouse_name = $context_warehouse_id ? optional($this->warehouse_service->getById($context_warehouse_id))->name : null;
+        }
+
         // The POS header's live register-session actions (Cash In/Out, Close
         // Register, Reports offcanvas, Hold Orders) are only wired up by
         // pos-screen.js on the POS screen itself - keeping them off here
@@ -483,7 +499,10 @@ class OrderController extends Controller
             'is_superadmin',
             'is_fixed_context',
             'is_order_taker',
-            'show_pos_actions'
+            'show_pos_actions',
+            'business',
+            'branch_name',
+            'warehouse_name'
         ));
     }
 

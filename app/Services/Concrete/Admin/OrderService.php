@@ -479,6 +479,7 @@ class OrderService
                 'change_amount' => $order->change_amount,
                 'discount_id' => $order->discount_id,
                 'voucher_id' => $order->voucher_id,
+                'voucher_code' => optional($order->voucher)->code,
                 'voucher_discount_amount' => $order->voucher_discount_amount,
                 'notes' => $order->notes,
                 'delivery_address' => $order->delivery_address,

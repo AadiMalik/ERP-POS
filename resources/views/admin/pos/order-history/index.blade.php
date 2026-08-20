@@ -3,6 +3,7 @@
 @endphp
 @extends('layouts.pos')
 @section('css')
+    <link rel="stylesheet" href="{{ asset('public/assets/css/admin/pos-screen.css') }}">
     <style>
         /* Order History is a scrolling page inside the POS's fixed-height
            content wrapper (see layouts/pos.blade.php) - this wrapper owns
@@ -10,7 +11,43 @@
         .pos-oh-wrapper {
             height: 100%;
             overflow-y: auto;
-            padding: 1.25rem 1.25rem 2rem;
+            padding: clamp(0.85rem, 2vw, 1.25rem) clamp(0.85rem, 2vw, 1.25rem) 2rem;
+        }
+
+        .pos-oh-summary-tile {
+            border: 1px solid var(--pos-border, #eceef1);
+            border-left: 3px solid var(--pos-primary, #696cff);
+            border-radius: 0.5rem;
+            background: #fff;
+        }
+
+        .pos-oh-summary-tile .pos-oh-summary-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            color: var(--pos-muted, #8592a3);
+            font-weight: 700;
+        }
+
+        #odItemsBody td,
+        #odPaymentsBody td {
+            vertical-align: middle;
+        }
+
+        .pos-oh-modal-section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            color: var(--pos-muted, #8592a3);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 575.98px) {
+            .pos-oh-wrapper .card-header {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
         }
     </style>
 @endsection
@@ -43,26 +80,26 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-6 col-md-3">
-                        <div class="border rounded p-3 text-center">
-                            <div class="text-muted small">Total Orders</div>
+                        <div class="pos-oh-summary-tile p-3 text-center">
+                            <div class="pos-oh-summary-label">Total Orders</div>
                             <div class="fs-4 fw-bold" id="sumTotalOrders">0</div>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div class="border rounded p-3 text-center">
-                            <div class="text-muted small">Total Sales</div>
+                        <div class="pos-oh-summary-tile p-3 text-center">
+                            <div class="pos-oh-summary-label">Total Sales</div>
                             <div class="fs-4 fw-bold" id="sumTotalSales">0.00</div>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div class="border rounded p-3 text-center">
-                            <div class="text-muted small">Total Paid</div>
+                        <div class="pos-oh-summary-tile p-3 text-center">
+                            <div class="pos-oh-summary-label">Total Paid</div>
                             <div class="fs-4 fw-bold" id="sumTotalPaid">0.00</div>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
-                        <div class="border rounded p-3 text-center">
-                            <div class="text-muted small">Total Due</div>
+                        <div class="pos-oh-summary-tile p-3 text-center">
+                            <div class="pos-oh-summary-label">Total Due</div>
                             <div class="fs-4 fw-bold" id="sumTotalDue">0.00</div>
                         </div>
                     </div>
@@ -234,7 +271,7 @@
                         <div class="col-md-4"><strong>Payment Method:</strong> <span id="odPaymentMethod"></span></div>
                     </div>
 
-                    <h6>Items</h6>
+                    <h6 class="pos-oh-modal-section-title">Items</h6>
                     <div class="table-responsive mb-3">
                         <table class="table table-sm">
                             <thead>
@@ -251,7 +288,7 @@
                         </table>
                     </div>
 
-                    <h6>Payments</h6>
+                    <h6 class="pos-oh-modal-section-title">Payments</h6>
                     <div class="table-responsive mb-3">
                         <table class="table table-sm">
                             <thead>

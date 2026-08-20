@@ -57,6 +57,7 @@
     </div>
 @endsection
 @section('js')
+<script src="{{ asset('public/assets/js/admin/order-history.js') }}"></script>
     <script>
         $(document).ready(function() {
             $('.select2').select2();

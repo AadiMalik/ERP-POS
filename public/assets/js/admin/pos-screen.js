@@ -33,6 +33,7 @@
         },
         payment_mode: null, // null | 'single' | 'multi'
         selected_payment_method_id: null,
+        reports_viewed_session_id: null,
     };
 
     function can(perm) {
@@ -179,6 +180,13 @@
         $('#posReportsBtn').on('click', function () {
             loadPosReports();
             state.pos_reports_offcanvas.show();
+        });
+        $('#printSessionSummaryBtn').on('click', function () {
+            if (!state.reports_viewed_session_id) {
+                errorMessage('Select a session first.');
+                return;
+            }
+            window.open(URLS.session_summary_print + '/' + state.reports_viewed_session_id + '/print', '_blank');
         });
         $('#cashInBtn').on('click', function () { openCashMovementModal('in'); });
         $('#cashOutBtn').on('click', function () { openCashMovementModal('out'); });
@@ -1352,6 +1360,10 @@
             }
         }
 
+        if (state.payments && state.payments.length) {
+            payload.payments = state.payments;
+        }
+
         return payload;
     }
 
@@ -1520,15 +1532,47 @@
         ajaxRequest({ url: URLS.session_summary + '/' + pos_register_session_id })
             .then(function (response) {
                 var s = response.Data || {};
+                state.reports_viewed_session_id = pos_register_session_id;
+
+                $('#repTotalOrders').text(s.total_orders || 0);
+                $('#repTotalSales').text(money(s.total_sales_amount));
+
+                var $paymentRows = $('#repPaymentRows').empty();
+                (s.payment_method_totals || []).forEach(function (row) {
+                    $paymentRows.append(
+                        '<tr><td>' + escapeHtml(row.name) + '</td>' +
+                        '<td class="text-end">' + (row.order_count || 0) + '</td>' +
+                        '<td class="text-end">' + money(row.total) + '</td></tr>'
+                    );
+                });
+                if (s.multi_payment_order_count) {
+                    $paymentRows.append(
+                        '<tr><td>Multi</td><td class="text-end">' + s.multi_payment_order_count +
+                        '</td><td class="text-end">' + money(s.multi_payment_amount) + '</td></tr>'
+                    );
+                }
+
+                var $sourceRows = $('#repSourceRows').empty();
+                (s.order_source_totals || []).forEach(function (row) {
+                    $sourceRows.append(
+                        '<tr><td>' + escapeHtml(row.name) + '</td>' +
+                        '<td class="text-end">' + (row.order_count || 0) + '</td>' +
+                        '<td class="text-end">' + money(row.total) + '</td></tr>'
+                    );
+                });
+
+                $('#repDiscountOrderCount').text(s.discount_order_count || 0);
+                $('#repTotalDiscount').text(money(s.total_discount));
+                $('#repTaxOrderCount').text(s.tax_order_count || 0);
+                $('#repTotalTax').text(money(s.total_tax));
+
                 $('#repOpeningCash').text(money(s.opening_cash));
-                $('#repCashSales').text(money(s.cash_sales));
                 $('#repCashIn').text(money(s.cash_movements_in));
                 $('#repCashOut').text(money(s.cash_movements_out));
                 $('#repExpenses').text(money(s.total_expenses));
-                $('#repTotalOrders').text(s.total_orders || 0);
-                $('#repTotalSales').text(money(s.total_sales_amount));
                 $('#repExpectedCash').text(money(s.expected_cash));
                 $('#repActualCash').text(s.actual_cash != null ? money(s.actual_cash) : '-');
+
                 $('#posReportsSummary').removeClass('d-none');
             })
             .catch(function (err) {
@@ -1646,6 +1690,9 @@
         }
         if (header.discount_id) {
             $('#discount_id').val(header.discount_id).trigger('change');
+        }
+        if (header.voucher_code) {
+            $('#voucher_code').val(header.voucher_code);
         }
 
         state.payments = payments.map(function (p) {

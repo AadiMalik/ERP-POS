@@ -685,6 +685,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::post('open', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'open']);
             Route::post('close', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'close']);
             Route::get('summary/{pos_register_session_id}', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'summary']);
+            Route::get('summary/{pos_register_session_id}/print', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'printSummary'])->name('pos-register-session.summary.print');
             Route::post('cash-movement', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'addCashMovement']);
             Route::get('current', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'current']);
             Route::get('my-history', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'myHistory']);

@@ -30,24 +30,30 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
     min-height: 62px;
     z-index: 10;
+    flex: 0 0 auto;
+    /* navbar-expand (no breakpoint suffix) forces flex-wrap:nowrap permanently -
+       without this override, header content overflows/overlaps instead of
+       reflowing at narrow widths or high browser zoom. */
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
 }
 
 .pos-brand {
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    min-width: 0;
+    flex: 0 1 auto;
+    max-width: 100%;
 }
 
-.pos-brand-icon {
+.pos-brand-logo {
     width: 38px;
     height: 38px;
     border-radius: 0.6rem;
-    background: var(--pos-primary);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.05rem;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid var(--pos-border);
     flex: 0 0 auto;
 }
 
@@ -55,21 +61,64 @@
     display: flex;
     flex-direction: column;
     line-height: 1.2;
+    min-width: 0;
 }
 
 .pos-brand-name {
     font-weight: 700;
     font-size: 1rem;
     color: var(--pos-text);
+    overflow-wrap: anywhere;
 }
 
 .pos-brand-welcome {
     font-size: 0.72rem;
     color: var(--pos-muted);
+    white-space: nowrap;
+}
+
+.pos-context-cluster {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.pos-context-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--pos-bg);
+    border: 1px solid var(--pos-border);
+    color: var(--pos-text);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.5rem;
+    white-space: nowrap;
+}
+
+.pos-context-label {
+    color: var(--pos-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.6rem;
+}
+
+.pos-user-avatar {
+    width: 2rem;
+    height: 2rem;
+}
+
+.pos-user-avatar .avatar-initial {
+    background-color: var(--pos-primary);
+    font-size: 0.72rem;
+    letter-spacing: .02em;
 }
 
 .pos-header-actions {
     row-gap: 0.4rem;
+    min-width: 0;
 }
 
 .pos-header-btn {
@@ -1223,10 +1272,38 @@
     .pos-footer-actions .btn {
         flex: 1 1 auto;
     }
+
+    .pos-brand-welcome {
+        display: none;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .pos-context-chip {
+        font-size: 0.68rem;
+        padding: 0.28rem 0.5rem;
+    }
 }
 
 @media (max-width: 575.98px) {
     .product-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .pos-brand-name {
+        font-size: 0.88rem;
+    }
+
+    .pos-header-btn-label {
+        display: none;
+    }
+
+    .pos-header-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 }
