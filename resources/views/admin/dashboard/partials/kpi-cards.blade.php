@@ -26,17 +26,16 @@
     @foreach ($cards as $card)
         <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="{{ $card['route'] ?? '#' }}" class="text-decoration-none">
-                <div class="card h-100 dashboard-kpi-card">
+                <div class="card h-100 erp-kpi-card"
+                    style="--erp-kpi-color: var(--bs-{{ $card['color'] }}); --erp-kpi-color-rgb: var(--bs-{{ $card['color'] }}-rgb);">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
                             <div>
-                                <span class="text-muted d-block mb-1">{{ $card['label'] }}</span>
-                                <h4 class="mb-0 text-body">{{ $card['value'] }}</h4>
+                                <span class="erp-kpi-label text-muted">{{ $card['label'] }}</span>
+                                <h4 class="erp-kpi-value mb-0 text-body">{{ $card['value'] }}</h4>
                             </div>
-                            <div class="avatar flex-shrink-0">
-                                <span class="avatar-initial rounded bg-label-{{ $card['color'] }}">
-                                    <i class="fa {{ $card['icon'] }}"></i>
-                                </span>
+                            <div class="erp-kpi-icon">
+                                <i class="fa {{ $card['icon'] }}"></i>
                             </div>
                         </div>
                     </div>

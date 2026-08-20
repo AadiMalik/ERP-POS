@@ -1,16 +1,22 @@
 <?php
 
 /**
- * Built-in Theme / Appearance presets.
+ * Built-in Theme Style presets ("Theme / Appearance" in Business Settings).
  *
- * 'sneat_default' intentionally mirrors the application's current hardcoded
- * look (colors, skins, layout behavior) so that businesses which have never
- * opened the Theme setting tab keep rendering exactly as before.
+ * Each preset is a complete visual identity - colors, sidebar/header/footer
+ * behavior, and the full set of content_config axes (card shape, radius,
+ * shadow, table/button/form/filter styling, and animation level) - so
+ * switching styles changes the ERP's whole look, not just its accent color.
+ *
+ * 'sneat_default' (Style 1 - Smart Mart Modern) is the seeded default for
+ * every business that has not opened the Theme tab yet, and reproduces the
+ * reference Smart Mart ERP dashboard look (light sidebar, solid active pill,
+ * pastel gradient KPI cards, colorful charts).
  */
 return [
 
     'sneat_default' => [
-        'label'           => 'Sneat Default',
+        'label'           => 'Style 1 · Smart Mart Modern',
         'primary_color'   => '#696cff',
         'secondary_color' => '#8592a3',
         'accent_color'    => '#03c3ec',
@@ -20,12 +26,12 @@ return [
             'skin'               => 'light',
             'width'              => 'default',
             'collapsed_behavior' => 'expanded',
-            'position'           => 'static',
+            'position'           => 'fixed',
         ],
         'header_config'   => [
             'style'    => 'light',
-            'position' => 'static',
-            'type'     => 'detached',
+            'position' => 'sticky',
+            'type'     => 'full',
         ],
         'footer_config'   => [
             'visible' => true,
@@ -33,21 +39,22 @@ return [
             'style'   => 'light',
         ],
         'content_config'  => [
-            'background'            => 'default',
+            'background'            => 'light',
             'spacing'               => 'comfortable',
-            'card_style'            => 'shadow',
-            'border_radius'         => 'md',
-            'shadow_level'          => 'sm',
-            'table_style'           => 'default',
-            'button_style'          => 'default',
-            'form_style'            => 'default',
-            'filter_style'          => 'compact',
-            'content_display_style' => 'card',
+            'card_style'            => 'gradient',
+            'border_radius'         => 'lg',
+            'shadow_level'          => 'md',
+            'table_style'           => 'striped',
+            'button_style'          => 'rounded',
+            'form_style'            => 'rounded',
+            'filter_style'          => 'card',
+            'content_display_style' => 'dashboard',
+            'animation_level'       => 'rich',
         ],
     ],
 
     'corporate_blue' => [
-        'label'           => 'Corporate Blue',
+        'label'           => 'Style 2 · Corporate Blue',
         'primary_color'   => '#2563eb',
         'secondary_color' => '#64748b',
         'accent_color'    => '#0ea5e9',
@@ -80,11 +87,12 @@ return [
             'form_style'            => 'default',
             'filter_style'          => 'card',
             'content_display_style' => 'card',
+            'animation_level'       => 'subtle',
         ],
     ],
 
     'emerald_finance' => [
-        'label'           => 'Emerald Finance',
+        'label'           => 'Style 3 · Emerald Finance',
         'primary_color'   => '#0f9d58',
         'secondary_color' => '#6b7280',
         'accent_color'    => '#f59e0b',
@@ -117,11 +125,12 @@ return [
             'form_style'            => 'rounded',
             'filter_style'          => 'bordered',
             'content_display_style' => 'dashboard',
+            'animation_level'       => 'subtle',
         ],
     ],
 
     'slate_dark' => [
-        'label'           => 'Slate Dark',
+        'label'           => 'Style 4 · Slate Dark',
         'primary_color'   => '#7c8cf8',
         'secondary_color' => '#94a3b8',
         'accent_color'    => '#22d3ee',
@@ -130,7 +139,7 @@ return [
         'sidebar_config'  => [
             'skin'               => 'dark',
             'width'              => 'default',
-            'collapsed_behavior' => 'hover',
+            'collapsed_behavior' => 'expanded',
             'position'           => 'fixed',
         ],
         'header_config'   => [
@@ -154,11 +163,12 @@ return [
             'form_style'            => 'default',
             'filter_style'          => 'inline',
             'content_display_style' => 'card',
+            'animation_level'       => 'subtle',
         ],
     ],
 
     'sunset_amber' => [
-        'label'           => 'Sunset Amber',
+        'label'           => 'Style 5 · Sunset Amber',
         'primary_color'   => '#f97316',
         'secondary_color' => '#78716c',
         'accent_color'    => '#e11d48',
@@ -168,11 +178,11 @@ return [
             'skin'               => 'gradient',
             'width'              => 'default',
             'collapsed_behavior' => 'expanded',
-            'position'           => 'static',
+            'position'           => 'fixed',
         ],
         'header_config'   => [
             'style'    => 'colored',
-            'position' => 'static',
+            'position' => 'sticky',
             'type'     => 'detached',
         ],
         'footer_config'   => [
@@ -183,7 +193,7 @@ return [
         'content_config'  => [
             'background'            => 'default',
             'spacing'               => 'compact',
-            'card_style'            => 'shadow',
+            'card_style'            => 'gradient',
             'border_radius'         => 'lg',
             'shadow_level'          => 'md',
             'table_style'           => 'striped',
@@ -191,43 +201,7 @@ return [
             'form_style'            => 'rounded',
             'filter_style'          => 'collapsible',
             'content_display_style' => 'grid',
-        ],
-    ],
-
-    'minimal_gray' => [
-        'label'           => 'Minimal Gray',
-        'primary_color'   => '#4b5563',
-        'secondary_color' => '#9ca3af',
-        'accent_color'    => '#6366f1',
-        'font_family'     => "'Public Sans', sans-serif",
-        'font_size_base'  => 'sm',
-        'sidebar_config'  => [
-            'skin'               => 'light',
-            'width'              => 'compact',
-            'collapsed_behavior' => 'collapsed',
-            'position'           => 'static',
-        ],
-        'header_config'   => [
-            'style'    => 'light',
-            'position' => 'static',
-            'type'     => 'detached',
-        ],
-        'footer_config'   => [
-            'visible' => false,
-            'sticky'  => false,
-            'style'   => 'light',
-        ],
-        'content_config'  => [
-            'background'            => 'light',
-            'spacing'               => 'compact',
-            'card_style'            => 'flat',
-            'border_radius'         => 'none',
-            'shadow_level'          => 'none',
-            'table_style'           => 'compact',
-            'button_style'          => 'square',
-            'form_style'            => 'flat',
-            'filter_style'          => 'inline',
-            'content_display_style' => 'table',
+            'animation_level'       => 'rich',
         ],
     ],
 

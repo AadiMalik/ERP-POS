@@ -631,6 +631,21 @@ function businessModuleEnabled($moduleKey)
     return app(\App\Services\Concrete\Admin\FeatureLimitService::class)->hasModule($moduleKey);
 }
 
+/**
+ * Resolves the current request's full Theme/Appearance config: the
+ * "sneat_default" preset (Style 1 - Smart Mart Modern) as the base, with the
+ * business' saved ThemeSetting (hydrated into session by SettingMiddleware)
+ * overlaid on top. Centralizes the merge logic previously duplicated between
+ * layouts/app.blade.php and layouts/theme-vars.blade.php.
+ */
+function resolved_theme_setting(): array
+{
+    return array_replace_recursive(
+        config('theme_presets.sneat_default'),
+        session('theme_setting') ?: []
+    );
+}
+
 function numberToWord($num = '')
 {
     $num    = (string) ((int) $num);

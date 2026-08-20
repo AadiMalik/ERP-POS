@@ -155,6 +155,16 @@ body[data-footer-style="colored"] .bg-footer-theme {
     color: rgba(255, 255, 255, .9);
 }
 
+.content-footer.footer {
+    border-top: 1px solid rgba(0, 0, 0, .06);
+    font-size: .85rem;
+}
+
+body[data-footer-style="dark"] .content-footer.footer,
+body[data-footer-style="colored"] .content-footer.footer {
+    border-top-color: rgba(255, 255, 255, .08);
+}
+
 /* ---------------------------------------------------------------------
  * Content background & spacing
  * --------------------------------------------------------------------- */
@@ -202,6 +212,18 @@ body[data-card-style="shadow"] .card {
 body[data-card-style="bordered"] .card {
     box-shadow: none;
     border: 1px solid #d9dee3;
+}
+
+body[data-card-style="gradient"] .card {
+    box-shadow: var(--erp-shadow);
+    border: none;
+    background-image: linear-gradient(180deg, rgba(var(--erp-primary-rgb), .05) 0%, rgba(var(--erp-primary-rgb), 0) 55%);
+    background-color: #fff;
+}
+
+body[data-content-bg="dark"][data-card-style="gradient"] .card {
+    background-image: linear-gradient(180deg, rgba(var(--erp-primary-rgb), .14) 0%, rgba(var(--erp-primary-rgb), 0) 55%);
+    background-color: #232538;
 }
 
 /* ---------------------------------------------------------------------
@@ -315,4 +337,266 @@ body[data-content-style="grid"] .content-wrapper .row.g-2 {
 body[data-content-style="table"] .card-body {
     padding-top: .5rem;
     padding-bottom: .5rem;
+}
+
+/* ---------------------------------------------------------------------
+ * Header layout type - detached (card-floating) vs full width
+ * --------------------------------------------------------------------- */
+body[data-header-type="full"] .layout-navbar.navbar-detached {
+    width: 100% !important;
+    max-width: 100%;
+    margin: 0 !important;
+    border-radius: 0;
+    padding: .75rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, .06);
+}
+
+/* When the header is ALSO fixed/sticky, the vendor CSS already positions it
+   with left/right (left offset by the fixed sidebar's width, right:0) so the
+   browser can correctly compute its width. Forcing width:100% on top of that
+   left offset would push it past the viewport's right edge, taking the
+   POS/notifications/profile controls off-screen with it - so let width be
+   computed from left+right instead. */
+html.layout-navbar-fixed body[data-header-type="full"] .layout-navbar.navbar-detached {
+    width: auto !important;
+    max-width: none;
+}
+
+body[data-header-type="detached"] .layout-navbar.navbar-detached {
+    box-shadow: var(--erp-shadow);
+}
+
+/* ---------------------------------------------------------------------
+ * Animation level - hover lift / entrance motion, opt-out via "none"
+ * --------------------------------------------------------------------- */
+body[data-animation-level="none"] .card,
+body[data-animation-level="none"] .erp-kpi-card,
+body[data-animation-level="none"] .erp-widget-card,
+body[data-animation-level="none"] .erp-quick-action,
+body[data-animation-level="none"] .btn {
+    transition: none !important;
+    animation: none !important;
+}
+
+body[data-animation-level="none"] .card:hover,
+body[data-animation-level="none"] .erp-kpi-card:hover {
+    transform: none !important;
+}
+
+@keyframes erp-fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+body[data-animation-level="rich"] .erp-kpi-card,
+body[data-animation-level="rich"] .erp-widget-card {
+    animation: erp-fade-up .4s ease both;
+}
+
+body[data-animation-level="rich"] .erp-kpi-card:hover .erp-kpi-icon {
+    transform: scale(1.1) rotate(-4deg);
+}
+
+body[data-animation-level="rich"] .erp-quick-action:hover {
+    transform: translateY(-3px);
+}
+
+/* ---------------------------------------------------------------------
+ * Sidebar - group headers, active pill, scrolling polish (all skins)
+ * --------------------------------------------------------------------- */
+.layout-menu .menu-header {
+    margin-top: .5rem;
+}
+
+.layout-menu .menu-header-text {
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    opacity: .55;
+}
+
+.layout-menu .menu-inner {
+    scrollbar-width: thin;
+}
+
+.layout-wrapper:not(.layout-horizontal) .menu-inner .menu-item.active > .menu-link {
+    border-radius: .5rem;
+    margin-inline: .5rem;
+    width: calc(100% - 1rem);
+}
+
+.layout-wrapper:not(.layout-horizontal) .menu-inner .menu-item > .menu-link:hover {
+    background-color: rgba(var(--erp-primary-rgb), .08);
+    border-radius: .5rem;
+    margin-inline: .5rem;
+    width: calc(100% - 1rem);
+}
+
+body[data-sidebar-skin="dark"] .menu-header-text,
+body[data-sidebar-skin="gradient"] .menu-header-text {
+    color: rgba(255, 255, 255, .5) !important;
+}
+
+body[data-sidebar-skin="dark"] .menu-inner .menu-item > .menu-link:hover,
+body[data-sidebar-skin="gradient"] .menu-inner .menu-item > .menu-link:hover {
+    background-color: rgba(255, 255, 255, .08);
+}
+
+/* ---------------------------------------------------------------------
+ * Dashboard / My Dashboard shared component classes - theme-driven, no
+ * per-page inline colors. Used by home.blade.php, the dashboard partials,
+ * and the ESS "My Dashboard" view so both surfaces share one visual system.
+ * --------------------------------------------------------------------- */
+.erp-page-header {
+    background: linear-gradient(120deg, rgba(var(--erp-primary-rgb), .10) 0%, rgba(var(--erp-accent-rgb), .06) 100%);
+    border-radius: var(--erp-radius);
+    padding: 1.25rem 1.5rem;
+}
+
+body[data-content-bg="dark"] .erp-page-header {
+    background: linear-gradient(120deg, rgba(var(--erp-primary-rgb), .22) 0%, rgba(var(--erp-accent-rgb), .1) 100%);
+}
+
+.erp-kpi-card {
+    transition: transform .18s ease, box-shadow .18s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.erp-kpi-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--erp-kpi-color, var(--erp-primary)) 0%, rgba(var(--erp-primary-rgb), .2) 100%);
+}
+
+.erp-kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 .75rem 1.5rem rgba(var(--erp-primary-rgb), .15);
+}
+
+.erp-kpi-card .erp-kpi-label {
+    font-size: .78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    opacity: .65;
+    display: block;
+    margin-bottom: .35rem;
+}
+
+.erp-kpi-card .erp-kpi-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.erp-kpi-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--erp-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    background: rgba(var(--erp-kpi-color-rgb, var(--erp-primary-rgb)), .12);
+    color: var(--erp-kpi-color, var(--erp-primary));
+    transition: transform .2s ease;
+    flex-shrink: 0;
+}
+
+.erp-widget-card .erp-widget-stat {
+    text-align: center;
+}
+
+.erp-widget-card .erp-widget-stat .erp-widget-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: .4rem;
+    font-size: .85rem;
+}
+
+.erp-quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: 1rem .5rem;
+    border-radius: var(--erp-radius);
+    text-decoration: none;
+    background: rgba(var(--erp-primary-rgb), .06);
+    color: var(--erp-primary);
+    border: 1px solid rgba(var(--erp-primary-rgb), .12);
+    font-weight: 600;
+    font-size: .82rem;
+    transition: transform .18s ease, background-color .18s ease;
+    text-align: center;
+}
+
+.erp-quick-action:hover {
+    background: var(--erp-primary);
+    color: #fff;
+    text-decoration: none;
+}
+
+.erp-quick-action i {
+    font-size: 1.25rem;
+}
+
+.erp-status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .8rem;
+    font-weight: 500;
+}
+
+.erp-status-dot::before {
+    content: "";
+    width: .5rem;
+    height: .5rem;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+
+.erp-status-dot--success { color: var(--bs-success, #71dd37); }
+.erp-status-dot--info { color: var(--bs-info, #03c3ec); }
+.erp-status-dot--warning { color: var(--bs-warning, #ffab00); }
+.erp-status-dot--danger { color: var(--bs-danger, #ff3e1d); }
+.erp-status-dot--secondary { color: var(--erp-secondary, #8592a3); }
+
+/* ---------------------------------------------------------------------
+ * Empty states - shared look for "No X yet" placeholders across widgets
+ * --------------------------------------------------------------------- */
+.erp-empty-state {
+    text-align: center;
+    padding: 1.5rem .5rem;
+    color: var(--erp-secondary, #8592a3);
+}
+
+.erp-empty-state i {
+    font-size: 1.5rem;
+    opacity: .5;
+    margin-bottom: .5rem;
+    display: block;
+}
+
+/* ---------------------------------------------------------------------
+ * Responsive polish - keep KPI/Quick Action grids readable at small sizes
+ * --------------------------------------------------------------------- */
+@media (max-width: 575.98px) {
+    .erp-kpi-card .erp-kpi-value {
+        font-size: 1.2rem;
+    }
+
+    .erp-page-header {
+        padding: 1rem;
+    }
 }

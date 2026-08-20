@@ -7,6 +7,16 @@
         $tabs['payments'] = ['label' => 'Recent Payments'];
     }
     $firstTab = array_key_first($tabs);
+
+    $statusDotClass = function ($status) {
+        $status = strtolower((string) $status);
+        return match (true) {
+            in_array($status, ['completed', 'paid', 'active', 'approved']) => 'erp-status-dot--success',
+            in_array($status, ['processing', 'pending', 'partial']) => 'erp-status-dot--warning',
+            in_array($status, ['cancelled', 'due', 'rejected', 'failed']) => 'erp-status-dot--danger',
+            default => 'erp-status-dot--secondary',
+        };
+    };
 @endphp
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -42,7 +52,7 @@
                                 <td>{{ $order->branch->name ?? '-' }}</td>
                                 <td>{{ $order->user->name ?? 'Walk-in' }}</td>
                                 <td class="text-end">{{ currency($order->total) }}</td>
-                                <td><span class="badge bg-label-secondary">{{ ucfirst($order->status) }}</span></td>
+                                <td><span class="erp-status-dot {{ $statusDotClass($order->status) }}">{{ ucfirst($order->status) }}</span></td>
                                 <td><a href="{{ route('order.show', $order->order_id) }}" class="btn btn-icon btn-outline-primary btn-sm"><i class="fa fa-eye"></i></a></td>
                             </tr>
                         @empty
@@ -76,7 +86,7 @@
                                     <td>{{ $purchase->purchase_date ? localDate($purchase->purchase_date) : '-' }}</td>
                                     <td>{{ $purchase->supplier->name ?? '-' }}</td>
                                     <td class="text-end">{{ currency($purchase->total) }}</td>
-                                    <td><span class="badge bg-label-secondary">{{ ucfirst($purchase->status) }}</span></td>
+                                    <td><span class="erp-status-dot {{ $statusDotClass($purchase->status) }}">{{ ucfirst($purchase->status) }}</span></td>
                                     <td><a href="{{ route('purchase.show', $purchase->purchase_id) }}" class="btn btn-icon btn-outline-primary btn-sm"><i class="fa fa-eye"></i></a></td>
                                 </tr>
                             @empty
@@ -111,7 +121,7 @@
                                     <td>{{ $payment->payment_date ? localDate($payment->payment_date) : '-' }}</td>
                                     <td>{{ $payment->supplier->name ?? '-' }}</td>
                                     <td class="text-end">{{ currency($payment->net_amount ?? $payment->amount) }}</td>
-                                    <td><span class="badge bg-label-secondary">{{ ucfirst($payment->status) }}</span></td>
+                                    <td><span class="erp-status-dot {{ $statusDotClass($payment->status) }}">{{ ucfirst($payment->status) }}</span></td>
                                     <td><a href="{{ route('supplier-payment.edit', $payment->supplier_payment_id) }}" class="btn btn-icon btn-outline-primary btn-sm"><i class="fa fa-eye"></i></a></td>
                                 </tr>
                             @empty

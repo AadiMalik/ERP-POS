@@ -1,8 +1,5 @@
 @php
-    $theme = array_replace_recursive(
-        config('theme_presets.sneat_default'),
-        session('theme_setting') ?: []
-    );
+    $theme = resolved_theme_setting();
 
     $sidebar_theme = $theme['sidebar_config'] ?? [];
     $header_theme  = $theme['header_config'] ?? [];
@@ -29,7 +26,7 @@
     $layoutClasses = implode(' ', $layoutClasses);
 @endphp
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $layoutClasses }}">
 
 <head>
     <meta charset="utf-8">
@@ -47,8 +44,10 @@
 </head>
 
 <body
+    data-theme-style="{{ $theme['preset'] ?? 'sneat_default' }}"
     data-sidebar-skin="{{ $sidebar_theme['skin'] ?? 'light' }}"
     data-header-style="{{ $header_theme['style'] ?? 'light' }}"
+    data-header-type="{{ $header_theme['type'] ?? 'detached' }}"
     data-footer-style="{{ $footer_theme['style'] ?? 'light' }}"
     data-content-bg="{{ $content_theme['background'] ?? 'default' }}"
     data-content-spacing="{{ $content_theme['spacing'] ?? 'comfortable' }}"
@@ -58,6 +57,7 @@
     data-form-style="{{ $content_theme['form_style'] ?? 'default' }}"
     data-filter-style="{{ $content_theme['filter_style'] ?? 'compact' }}"
     data-content-style="{{ $content_theme['content_display_style'] ?? 'card' }}"
+    data-animation-level="{{ $content_theme['animation_level'] ?? 'subtle' }}"
 >
     <!-- ======== Preloader =========== -->
     <div id="preloader">

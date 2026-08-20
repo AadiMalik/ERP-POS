@@ -6,10 +6,7 @@
     computed by layouts/app.blade.php before this partial is included.
 --}}
 @php
-    $theme = $theme ?? array_replace_recursive(
-        config('theme_presets.sneat_default'),
-        session('theme_setting') ?: []
-    );
+    $theme = $theme ?? resolved_theme_setting();
 
     $sidebar = $theme['sidebar_config'] ?? [];
     $header  = $theme['header_config'] ?? [];

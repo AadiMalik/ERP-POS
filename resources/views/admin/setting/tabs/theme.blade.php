@@ -211,7 +211,7 @@
             <div class="col-md-3">
                 <label class="form-label">Card Style</label>
                 <select class="form-select" name="content_config[card_style]">
-                    @foreach (['flat' => 'Flat', 'shadow' => 'Shadow', 'bordered' => 'Bordered'] as $value => $label)
+                    @foreach (['flat' => 'Flat', 'shadow' => 'Shadow', 'bordered' => 'Bordered', 'gradient' => 'Gradient (colorful)'] as $value => $label)
                         <option value="{{ $value }}" {{ ($content_config['card_style'] ?? 'shadow') == $value ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
@@ -255,6 +255,15 @@
                         <option value="{{ $value }}" {{ ($content_config['form_style'] ?? 'default') == $value ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Animation Level</label>
+                <select class="form-select" name="content_config[animation_level]">
+                    @foreach (['none' => 'None', 'subtle' => 'Subtle (Default)', 'rich' => 'Rich'] as $value => $label)
+                        <option value="{{ $value }}" {{ ($content_config['animation_level'] ?? 'subtle') == $value ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+                <small class="text-muted">Hover lift, transitions and chart/card entrance motion.</small>
             </div>
         </div>
     </div>

@@ -764,7 +764,7 @@ class SettingController extends Controller
             'header_config.type'                => 'in:detached,full',
             'content_config.background'         => 'in:default,light,dark',
             'content_config.spacing'            => 'in:comfortable,compact',
-            'content_config.card_style'         => 'in:flat,shadow,bordered',
+            'content_config.card_style'         => 'in:flat,shadow,bordered,gradient',
             'content_config.border_radius'      => 'in:none,sm,md,lg',
             'content_config.shadow_level'       => 'in:none,sm,md,lg',
             'content_config.table_style'        => 'in:default,striped,bordered,borderless,compact',
@@ -772,6 +772,7 @@ class SettingController extends Controller
             'content_config.form_style'         => 'in:default,rounded,flat',
             'content_config.filter_style'       => 'in:compact,card,bordered,inline,collapsible',
             'content_config.content_display_style' => 'in:card,table,grid,dashboard',
+            'content_config.animation_level'    => 'in:none,subtle,rich',
         ];
 
         $rules = array_merge([

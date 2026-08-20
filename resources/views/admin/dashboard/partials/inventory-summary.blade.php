@@ -27,13 +27,13 @@
                     <p class="text-muted mb-2">No tracked products yet.</p>
                 @endif
                 @if ($inventory['low_stock_count'] > 0 || $inventory['out_of_stock_count'] > 0)
-                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                        <span class="badge bg-label-warning"><i class="fa fa-exclamation-triangle me-1"></i>{{ $inventory['low_stock_count'] }} Low Stock</span>
-                        <span class="badge bg-label-danger"><i class="fa fa-times-circle me-1"></i>{{ $inventory['out_of_stock_count'] }} Out of Stock</span>
+                    <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                        <span class="erp-status-dot erp-status-dot--warning">{{ $inventory['low_stock_count'] }} Low Stock</span>
+                        <span class="erp-status-dot erp-status-dot--danger">{{ $inventory['out_of_stock_count'] }} Out of Stock</span>
                     </div>
                     <a href="{{ url('admin/product-variation-stock') }}" class="btn btn-sm btn-outline-warning">Review Stock Levels</a>
                 @else
-                    <p class="text-success mb-0"><i class="fa fa-check-circle me-1"></i>All tracked products are sufficiently stocked.</p>
+                    <p class="erp-status-dot erp-status-dot--success mb-0">All tracked products are sufficiently stocked.</p>
                 @endif
             </div>
         </div>

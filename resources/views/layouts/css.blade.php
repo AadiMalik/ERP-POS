@@ -27,6 +27,20 @@
 <!-- Helpers -->
 <script src="{{ asset('public/assets/vendor/js/helpers.js') }}"></script>
 <script src="{{ asset('public/assets/js/config.js') }}"></script>
+@php
+    $__chart_theme = resolved_theme_setting();
+@endphp
+<script>
+    /* Keeps every ApexCharts instance (dashboard, reports, ...) in sync with
+       the business' selected Theme Style - config.js above ships static
+       template defaults, this overlays the resolved primary/secondary/accent
+       so charts never fall out of sync with the rest of the UI. Semantic
+       colors (success/warning/danger) stay fixed on purpose - status meaning
+       shouldn't shift with a brand color change. */
+    config.colors.primary = '{{ $__chart_theme['primary_color'] ?? '#696cff' }}';
+    config.colors.secondary = '{{ $__chart_theme['secondary_color'] ?? '#8592a3' }}';
+    config.colors.info = '{{ $__chart_theme['accent_color'] ?? '#03c3ec' }}';
+</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
     .select2-container {

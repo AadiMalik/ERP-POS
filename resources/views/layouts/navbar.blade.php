@@ -28,6 +28,13 @@
         <!-- /Global Search -->
 
         <ul class="navbar-nav flex-row align-items-center ms-auto">
+            @canAccess('pos.access')
+                <li class="nav-item me-3 d-none d-md-block">
+                    <a href="{{ url('admin/pos-screen') }}" class="btn btn-primary btn-sm">
+                        <i class="fa fa-cash-register me-1"></i> POS
+                    </a>
+                </li>
+            @endcanAccess
             <!-- Notifications -->
             @can('notification.view')
                 <li class="nav-item navbar-dropdown dropdown-notifications dropdown me-3">
@@ -135,8 +142,14 @@
 <!-- / Navbar -->
 
     <style>
+        .navbar-nav-right {
+            flex-wrap: nowrap;
+        }
         .global-search-wrapper {
             position: relative;
+            flex: 1 1 auto;
+            max-width: 480px;
+            min-width: 160px;
         }
         .global-search-dropdown {
             position: absolute;

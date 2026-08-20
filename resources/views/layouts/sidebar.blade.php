@@ -58,6 +58,9 @@
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Main</span>
+        </li>
         <!-- Dashboard -->
         <li class="menu-item">
             <a href="{{ url('/home') }}" class="menu-link">
@@ -126,6 +129,9 @@
                 </ul>
             </li>
         @endcanAccessAny
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Business</span>
+        </li>
         <!-- Business -->
         @canAccessAny(['package.view', 'business.view', 'branch.view', 'setting.manage'])
             <li class="menu-item">
@@ -364,6 +370,9 @@
         @endcanAccessAny
         @endif
 
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Accounting</span>
+        </li>
         {{-- Accounting --}}
         @if (businessModuleEnabled('accounting'))
         @canAccessAny(['account-type.view', 'account-sub-type.view', 'journal.view', 'account.view', 'journal-entry.view',
@@ -581,6 +590,9 @@
         @endcanAccessAny
         @endif
 
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">HRM</span>
+        </li>
         {{-- HR & Payroll --}}
         @canAccessAny(['department.view', 'designation.view', 'shift.view', 'employee.view', 'attendance.view',
             'leave-type.view', 'leave-request.view', 'salary-component.view', 'salary-structure.view',
@@ -1149,6 +1161,9 @@
             </li>
         @endcanAccessAny
 
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">System</span>
+        </li>
         {{-- Notifications --}}
         @canAccess('notification.view')
             <li class="menu-item">
@@ -1186,6 +1201,9 @@
             </li>
         @endcanAccessAny
 
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Procurement & Sales</span>
+        </li>
         {{-- Procurement --}}
         @if (businessModuleEnabled('inventory'))
         @canAccessAny(['supplier.view', 'purchase-request.view', 'purchase-request-quotation.view', 'purchase.view',
@@ -1382,6 +1400,10 @@
                 </ul>
             </li>
         @endcanAccess
+    <br>
+    <br>
+    <br>
+    <br>
     </ul>
 </aside>
 <!-- / Menu -->

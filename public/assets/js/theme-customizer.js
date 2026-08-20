@@ -97,8 +97,10 @@
             setVar('--erp-sidebar-width', SIDEBAR_WIDTH_MAP[sidebar.width] || null);
         }
 
+        setAttr(body, 'data-theme-style', theme.preset);
         setAttr(body, 'data-sidebar-skin', sidebar.skin);
         setAttr(body, 'data-header-style', header.style);
+        setAttr(body, 'data-header-type', header.type);
         setAttr(body, 'data-footer-style', footer.style);
         setAttr(body, 'data-content-bg', content.background);
         setAttr(body, 'data-content-spacing', content.spacing);
@@ -108,6 +110,13 @@
         setAttr(body, 'data-form-style', content.form_style);
         setAttr(body, 'data-filter-style', content.filter_style);
         setAttr(body, 'data-content-style', content.content_display_style);
+        setAttr(body, 'data-animation-level', content.animation_level);
+
+        if (window.config && window.config.colors) {
+            if (theme.primary_color) { window.config.colors.primary = theme.primary_color; }
+            if (theme.secondary_color) { window.config.colors.secondary = theme.secondary_color; }
+            if (theme.accent_color) { window.config.colors.info = theme.accent_color; }
+        }
     }
 
     window.applyThemeToDOM = applyThemeToDOM;
