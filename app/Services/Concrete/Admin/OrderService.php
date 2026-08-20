@@ -1228,6 +1228,8 @@ class OrderService
                 throw new Exception('Accounting is not enabled for this business. Please configure Accounting Settings before completing sales.');
             }
 
+            app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($order->business_id, now());
+
             if (empty($accounting_setting->default_sale_account_id)) {
                 throw new Exception('Sale Account is not configured in Accounting Settings.');
             }

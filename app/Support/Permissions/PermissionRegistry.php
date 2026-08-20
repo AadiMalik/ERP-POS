@@ -226,6 +226,38 @@ class PermissionRegistry
                 'export'       => ['name' => 'recurring-transaction.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
+            // ---- Accounting Automation, Budgeting & Financial Period Management ----
+            // Advanced Accounting Mode screens - see CommonFunctions::businessAccountingAdvancedModeEnabled().
+            // Simple-mode business owners never see these; the two Simple-mode
+            // settings (Accounting Period Closing, Budgeting) ride on the
+            // existing setting.manage permission on the Accounting Settings tab.
+
+            'fiscal-year' => ['label' => 'Fiscal Years', 'actions' => [
+                'view'   => ['name' => 'fiscal-year.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'fiscal-year.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'fiscal-year.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'fiscal-year.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
+            'accounting-period' => ['label' => 'Accounting Periods', 'actions' => [
+                'view'   => ['name' => 'accounting-period.view', 'label' => 'View', 'is_system' => false],
+                'open'   => ['name' => 'accounting-period.open', 'label' => 'Open', 'is_system' => false],
+                'close'  => ['name' => 'accounting-period.close', 'label' => 'Close', 'is_system' => false],
+                'reopen' => ['name' => 'accounting-period.reopen', 'label' => 'Reopen', 'is_system' => false],
+            ]],
+
+            'period-closing-rule' => ['label' => 'Period Closing Rules', 'actions' => [
+                'manage' => ['name' => 'period-closing-rule.manage', 'label' => 'Manage', 'is_system' => false],
+            ]],
+
+            'budget' => ['label' => 'Budgets', 'actions' => [
+                'view'     => ['name' => 'budget.view', 'label' => 'View', 'is_system' => false],
+                'create'   => ['name' => 'budget.create', 'label' => 'Create', 'is_system' => false],
+                'edit'     => ['name' => 'budget.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'   => ['name' => 'budget.delete', 'label' => 'Delete', 'is_system' => false],
+                'generate' => ['name' => 'budget.generate', 'label' => 'Generate / Regenerate', 'is_system' => false],
+            ]],
+
             'supplier' => ['label' => 'Suppliers', 'actions' => [
                 'view'   => ['name' => 'supplier.view', 'label' => 'View', 'is_system' => false],
                 'create' => ['name' => 'supplier.create', 'label' => 'Create', 'is_system' => false],
@@ -976,6 +1008,9 @@ class PermissionRegistry
                 'balance_sheet_pdf' => ['name' => 'reports.balance-sheet.pdf', 'label' => 'Balance Sheet - PDF', 'is_system' => false],
                 'balance_sheet_export' => ['name' => 'reports.balance-sheet.export', 'label' => 'Balance Sheet - Export (Excel)', 'is_system' => false],
                 'balance_sheet_export_csv' => ['name' => 'reports.balance-sheet.export-csv', 'label' => 'Balance Sheet - Export (CSV)', 'is_system' => false],
+                // Visible in both Simple and Advanced Accounting Mode - see
+                // BudgetVarianceReportController.
+                'budget_vs_actual' => ['name' => 'reports.budget-vs-actual.view', 'label' => 'Budget vs Actual', 'is_system' => false],
             ]],
         ];
     }

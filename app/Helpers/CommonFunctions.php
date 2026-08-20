@@ -632,6 +632,26 @@ function businessModuleEnabled($moduleKey)
 }
 
 /**
+ * Whether the current user's business has Advanced Accounting Mode turned
+ * on (accounting_settings.advanced_accounting_mode) - gates the Fiscal
+ * Years / Accounting Periods / Closing Rules / Budgets sidebar entries and
+ * their controllers, on top of the usual @can permission checks. This is a
+ * business-wide UX flag (does this business want to see debit/credit
+ * concepts at all), not a per-user permission - mirrors how
+ * enable_accounting already gates the whole Accounting module.
+ */
+function businessAccountingAdvancedModeEnabled(): bool
+{
+    $business_id = \Illuminate\Support\Facades\Auth::user()?->business_id;
+
+    if (!$business_id) {
+        return false;
+    }
+
+    return (bool) \App\Models\AccountingSetting::where('business_id', $business_id)->value('advanced_accounting_mode');
+}
+
+/**
  * Resolves the current request's full Theme/Appearance config: the
  * "sneat_default" preset (Style 1 - Smart Mart Modern) as the base, with the
  * business' saved ThemeSetting (hydrated into session by SettingMiddleware)

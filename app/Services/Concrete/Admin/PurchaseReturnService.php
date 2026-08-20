@@ -792,6 +792,8 @@ class PurchaseReturnService
             throw new Exception('Purchase Return Account is not configured in Accounting Settings. Please configure it before approving purchase returns.');
         }
 
+        app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($purchase_return->business_id, now());
+
         if (empty($purchase_return->supplier) || empty($purchase_return->supplier->account_id)) {
             throw new Exception('The supplier does not have a linked Chart of Account. Please configure it before approving purchase returns.');
         }

@@ -448,6 +448,8 @@ class StockTakingService
             throw new Exception('Inventory Account / Stock Adjustment Account is not configured in Accounting Settings. Please configure it before approving stock taking.');
         }
 
+        app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($stock_taking->business_id, now());
+
         $total_increase_value = 0;
         $total_decrease_value = 0;
 

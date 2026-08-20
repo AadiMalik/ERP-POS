@@ -429,6 +429,8 @@ class OpeningStockService
             throw new Exception('Inventory Account / Opening Stock Account is not configured in Accounting Settings. Please configure it before approving opening stock.');
         }
 
+        app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($opening_stock->business_id, now());
+
         $journal = Journal::where('short', 'OSV')->where('is_deleted', 0)->first();
 
         if (!$journal) {

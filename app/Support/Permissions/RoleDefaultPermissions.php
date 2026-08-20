@@ -73,6 +73,7 @@ class RoleDefaultPermissions
                     PermissionRegistry::namesForModules([
                         'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction',
                         'expense', 'expense-category', 'admin-expense', 'supplier-payment',
+                        'fiscal-year', 'accounting-period', 'period-closing-rule', 'budget',
                     ]),
                     array_merge(
                         ['dashboard.view'],
@@ -81,7 +82,8 @@ class RoleDefaultPermissions
                             'account-balance', 'day-book', 'cash-bank-ledger', 'income-report',
                             'expense-report', 'expense-detail-report', 'tax-report', 'equity-report',
                             'profit-loss', 'balance-sheet', 'accounts-payable',
-                        ])
+                        ]),
+                        ['reports.budget-vs-actual.view']
                     )
                 );
 
@@ -115,7 +117,10 @@ class RoleDefaultPermissions
             case RoleNames::ACCOUNTANT:
                 return array_merge(
                     PermissionRegistry::namesForModulesExcludingActions(
-                        ['account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction', 'expense', 'expense-category', 'admin-expense'],
+                        [
+                            'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction', 'expense', 'expense-category', 'admin-expense',
+                            'fiscal-year', 'accounting-period', 'period-closing-rule', 'budget',
+                        ],
                         ['delete']
                     ),
                     array_merge(
@@ -123,7 +128,8 @@ class RoleDefaultPermissions
                         self::formatVariants([
                             'general-ledger', 'trial-balance', 'journal-register',
                             'account-ledger', 'account-balance', 'day-book',
-                        ])
+                        ]),
+                        ['reports.budget-vs-actual.view']
                     )
                 );
 

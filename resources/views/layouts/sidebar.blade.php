@@ -377,11 +377,12 @@
         @if (businessModuleEnabled('accounting'))
         @canAccessAny(['account-type.view', 'account-sub-type.view', 'journal.view', 'account.view', 'journal-entry.view',
             'recurring-transaction.view',
+            'fiscal-year.view', 'accounting-period.view', 'period-closing-rule.manage', 'budget.view',
             'reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
             'reports.journal-register.view', 'reports.account-ledger.view', 'reports.account-balance.view',
             'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view',
             'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.expense-report.view',
-            'reports.tax-report.view', 'reports.equity-report.view'])
+            'reports.tax-report.view', 'reports.equity-report.view', 'reports.budget-vs-actual.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons fa fa-box"></i>
@@ -431,11 +432,43 @@
                             </a>
                         </li>
                     @endcanAccess
+                    {{-- Advanced Accounting Mode - hidden by default, see
+                         CommonFunctions::businessAccountingAdvancedModeEnabled() --}}
+                    @if (businessAccountingAdvancedModeEnabled())
+                        @canAccess('fiscal-year.view')
+                            <li class="menu-item">
+                                <a href="{{ url('/admin/fiscal-year') }}" class="menu-link">
+                                    <div data-i18n="Fiscal Years">Fiscal Years</div>
+                                </a>
+                            </li>
+                        @endcanAccess
+                        @canAccess('accounting-period.view')
+                            <li class="menu-item">
+                                <a href="{{ url('/admin/accounting-period') }}" class="menu-link">
+                                    <div data-i18n="Accounting Periods">Accounting Periods</div>
+                                </a>
+                            </li>
+                        @endcanAccess
+                        @canAccess('period-closing-rule.manage')
+                            <li class="menu-item">
+                                <a href="{{ url('/admin/period-closing-rule') }}" class="menu-link">
+                                    <div data-i18n="Closing Rules">Closing Rules</div>
+                                </a>
+                            </li>
+                        @endcanAccess
+                        @canAccess('budget.view')
+                            <li class="menu-item">
+                                <a href="{{ url('/admin/budget') }}" class="menu-link">
+                                    <div data-i18n="Budgets">Budgets</div>
+                                </a>
+                            </li>
+                        @endcanAccess
+                    @endif
                     @canAccessAny(['reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
                         'reports.journal-register.view', 'reports.account-ledger.view', 'reports.account-balance.view',
                         'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view',
                         'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.expense-report.view',
-                        'reports.tax-report.view', 'reports.equity-report.view'])
+                        'reports.tax-report.view', 'reports.equity-report.view', 'reports.budget-vs-actual.view'])
                         <li class="menu-item">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
                                 <div data-i18n="Accounting Reports">Reports</div>
@@ -536,6 +569,15 @@
                                     <li class="menu-item">
                                         <a href="{{ url('/admin/reports/equity-report') }}" class="menu-link">
                                             <div data-i18n="Equity Report">Equity Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                {{-- Visible in both Simple and Advanced Accounting Mode -
+                                     read-only, speaks "budget/actual/variance" not debit/credit. --}}
+                                @canAccess('reports.budget-vs-actual.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/budget-vs-actual') }}" class="menu-link">
+                                            <div data-i18n="Budget vs Actual">Budget vs Actual</div>
                                         </a>
                                     </li>
                                 @endcanAccess

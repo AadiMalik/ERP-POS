@@ -579,6 +579,34 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     });
     }); // end module:accounting (chart of accounts, journals, recurring)
 
+    Route::group(['middleware' => ['module:accounting']], function () {
+    // Fiscal Years (Advanced Accounting Mode)
+    Route::resource('fiscal-year', App\Http\Controllers\Admin\Accounting\FiscalYearController::class)->except(['show']);
+    Route::post('fiscal-year/data', [App\Http\Controllers\Admin\Accounting\FiscalYearController::class, 'getData'])->name('fiscal-year-data');
+
+    // Accounting Periods (Advanced Accounting Mode)
+    Route::group(['prefix' => 'accounting-period'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\Accounting\AccountingPeriodController::class, 'index'])->name('accounting-period.index');
+        Route::post('data', [App\Http\Controllers\Admin\Accounting\AccountingPeriodController::class, 'getData'])->name('accounting-period-data');
+        Route::get('{accounting_period_id}/issues', [App\Http\Controllers\Admin\Accounting\AccountingPeriodController::class, 'issues'])->name('accounting-period.issues');
+        Route::post('{accounting_period_id}/open', [App\Http\Controllers\Admin\Accounting\AccountingPeriodController::class, 'open'])->name('accounting-period.open');
+        Route::post('{accounting_period_id}/close', [App\Http\Controllers\Admin\Accounting\AccountingPeriodController::class, 'close'])->name('accounting-period.close');
+        Route::post('{accounting_period_id}/reopen', [App\Http\Controllers\Admin\Accounting\AccountingPeriodController::class, 'reopen'])->name('accounting-period.reopen');
+    });
+
+    // Period Closing Rules (Advanced Accounting Mode)
+    Route::get('period-closing-rule', [App\Http\Controllers\Admin\Accounting\PeriodClosingRuleController::class, 'edit'])->name('period-closing-rule.edit');
+    Route::post('period-closing-rule', [App\Http\Controllers\Admin\Accounting\PeriodClosingRuleController::class, 'update'])->name('period-closing-rule.update');
+
+    // Budgets (Advanced Accounting Mode)
+    Route::resource('budget', App\Http\Controllers\Admin\Accounting\BudgetController::class)->except(['show']);
+    Route::group(['prefix' => 'budget'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\Accounting\BudgetController::class, 'getData'])->name('budget-data');
+        Route::post('{budget_id}/generate', [App\Http\Controllers\Admin\Accounting\BudgetController::class, 'generate'])->name('budget.generate');
+        Route::post('{budget_id}/line', [App\Http\Controllers\Admin\Accounting\BudgetController::class, 'saveLine'])->name('budget.save-line');
+    });
+    }); // end module:accounting (fiscal years, accounting periods, closing rules, budgets)
+
     Route::group(['middleware' => ['module:inventory']], function () {
     //supplier
     Route::resource('supplier', App\Http\Controllers\Admin\SupplierController::class)->except(['show']);
@@ -1051,6 +1079,11 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('pdf', [App\Http\Controllers\Admin\Reports\BalanceSheetReportController::class, 'pdf'])->name('reports.balance-sheet.pdf');
             Route::get('export', [App\Http\Controllers\Admin\Reports\BalanceSheetReportController::class, 'export'])->name('reports.balance-sheet.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\BalanceSheetReportController::class, 'exportCsv'])->name('reports.balance-sheet.export-csv');
+        });
+
+        Route::group(['prefix' => 'budget-vs-actual'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\BudgetVarianceReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\BudgetVarianceReportController::class, 'data']);
         });
         }); // end module:accounting (financial reports)
     });

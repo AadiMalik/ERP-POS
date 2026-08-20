@@ -529,6 +529,8 @@ class GrnService
             throw new Exception('Purchase Account is not configured in Accounting Settings. Please configure it before approving GRNs.');
         }
 
+        app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($grn->business_id, now());
+
         if (empty($grn->supplier) || empty($grn->supplier->account_id)) {
             throw new Exception('The supplier does not have a linked Chart of Account. Please configure it before approving GRNs.');
         }

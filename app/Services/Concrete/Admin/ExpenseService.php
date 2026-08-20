@@ -431,6 +431,8 @@ class ExpenseService
             throw new Exception('Accounting is not enabled for this business. Please configure Accounting Settings before posting expenses.');
         }
 
+        app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($expense->business_id, now());
+
         if (empty($expense->expense_account_id)) {
             throw new Exception('No Expense Account is configured. Please link an account to this expense category, or set a default expense account in Accounting Settings.');
         }

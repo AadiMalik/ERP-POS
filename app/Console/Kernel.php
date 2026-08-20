@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
 
         $schedule->command('subscriptions:process-lifecycle')->dailyAt('01:00');
+        $schedule->command('accounting-periods:process')->dailyAt('02:00')->withoutOverlapping();
         $schedule->command('notifications:check-alerts')->hourly();
         $schedule->command('recurring-transactions:process')->hourly();
     }

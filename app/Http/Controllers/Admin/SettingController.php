@@ -171,6 +171,12 @@ class SettingController extends Controller
             'currency_position' => 'required|in:before,after',
             'decimal_points'    => 'required|integer|min:0|max:6',
             'aging_basis'       => 'nullable|in:due_date,invoice_date',
+
+            'period_closing_mode'      => 'nullable|in:monthly,yearly,manual',
+            'budgeting_mode'           => 'nullable|in:auto,manual',
+            'budget_growth_percent'    => 'nullable|numeric|min:-100|max:1000',
+            'advanced_accounting_mode' => 'nullable|boolean',
+            'fiscal_year_start_month'  => 'nullable|integer|min:1|max:12',
         ];
 
         $validate = Validator::make($request->all(), $rules);

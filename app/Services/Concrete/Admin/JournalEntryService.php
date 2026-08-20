@@ -124,6 +124,10 @@ class JournalEntryService
 
       public function save($obj, string $status = 'posted')
       {
+            if ($status === Status::POSTED) {
+                  app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($obj['business_id'] ?? null, $obj['entry_date'] ?? null);
+            }
+
             DB::beginTransaction();
 
             try {
@@ -252,6 +256,10 @@ class JournalEntryService
       {
             $journal_entry = $this->model_journal_entry->getModel()::findOrFail($journal_entry_id);
             $old_status = $journal_entry->status;
+
+            if ($status === Status::POSTED) {
+                  app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+            }
 
             $journal_entry->update([
                   'status'       => $status,

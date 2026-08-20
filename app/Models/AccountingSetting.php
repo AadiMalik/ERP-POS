@@ -12,6 +12,11 @@ class AccountingSetting extends Model
     protected $fillable = [
         'business_id',
         'enable_accounting',
+        'period_closing_mode',
+        'budgeting_mode',
+        'budget_growth_percent',
+        'advanced_accounting_mode',
+        'fiscal_year_start_month',
         'default_cash_account_id',
         'default_bank_account_id',
         'default_discount_account_id',

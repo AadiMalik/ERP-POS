@@ -451,6 +451,8 @@ class SupplierPaymentService
             throw new Exception('Accounting is not enabled for this business. Please configure Accounting Settings before posting supplier payments.');
         }
 
+        app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($payment->business_id, now());
+
         $supplier = Supplier::find($payment->supplier_id);
 
         if (empty($supplier) || empty($supplier->account_id)) {

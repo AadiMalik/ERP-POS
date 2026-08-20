@@ -59,6 +59,9 @@ class ActivityLogController extends Controller
             'voucher'                 => 'Vouchers',
             'asset-allocation'        => 'Asset Allocation',
             'order'                   => 'Orders',
+            'fiscal-year'             => 'Fiscal Year',
+            'accounting-period'       => 'Accounting Period',
+            'budget'                  => 'Budget',
         ];
         $actions = [
             'created'                       => 'Created',

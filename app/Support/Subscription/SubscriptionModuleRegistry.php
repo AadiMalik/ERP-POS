@@ -95,6 +95,9 @@ class SubscriptionModuleRegistry
             'journal-entry'      => ['label' => 'Journal Entries', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'recurring-transaction' => ['label' => 'Recurring Transactions', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'voucher'            => ['label' => 'Vouchers', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'fiscal-year'        => ['label' => 'Fiscal Years', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
+            'accounting-period'  => ['label' => 'Accounting Periods', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
+            'budget'             => ['label' => 'Budgeting', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
 
             // ---- Expenses ----
             'expense'          => ['label' => 'Expense Details', 'category' => 'Expenses', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],

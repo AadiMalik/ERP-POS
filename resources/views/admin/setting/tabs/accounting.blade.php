@@ -86,6 +86,68 @@
         </div>
         <div class="col-md-12">
             <hr>
+            <h4>Accounting Automation & Budgeting</h4>
+            <p class="text-muted">
+                Simple, hands-off settings for non-accountants. Everything else -
+                creating periods, closing them, generating budgets, and
+                calculating Budget vs Actual - happens automatically in the
+                background. Accountants can turn on Advanced Accounting Mode
+                below for full manual control.
+            </p>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label>Accounting Period Closing</label>
+            <select class="form-select" name="period_closing_mode">
+                <option value="manual" {{ $accounting_setting->period_closing_mode == 'manual' ? 'selected' : '' }}>
+                    Manual (an accountant opens/closes periods by hand)
+                </option>
+                <option value="monthly" {{ $accounting_setting->period_closing_mode == 'monthly' ? 'selected' : '' }}>
+                    Monthly (auto-close every month if there are no pending items)
+                </option>
+                <option value="yearly" {{ $accounting_setting->period_closing_mode == 'yearly' ? 'selected' : '' }}>
+                    Yearly (auto-close every fiscal year if there are no pending items)
+                </option>
+            </select>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label>Fiscal Year Starts In</label>
+            <select class="form-select" name="fiscal_year_start_month">
+                @foreach (['January','February','March','April','May','June','July','August','September','October','November','December'] as $i => $month)
+                    <option value="{{ $i + 1 }}" {{ (int) $accounting_setting->fiscal_year_start_month === $i + 1 ? 'selected' : '' }}>
+                        {{ $month }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label>Budgeting</label>
+            <select class="form-select" name="budgeting_mode" id="budgetingModeSelect">
+                <option value="manual" {{ $accounting_setting->budgeting_mode == 'manual' ? 'selected' : '' }}>
+                    Manual (create budgets by hand)
+                </option>
+                <option value="auto" {{ $accounting_setting->budgeting_mode == 'auto' ? 'selected' : '' }}>
+                    Automatic (generate from last year's actuals + growth %)
+                </option>
+            </select>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label>Budget Growth % (used when Budgeting is Automatic)</label>
+            <input type="number" step="0.01" class="form-control" name="budget_growth_percent"
+                value="{{ $accounting_setting->budget_growth_percent }}">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label>Advanced Accounting Mode</label>
+            <select class="form-select" name="advanced_accounting_mode">
+                <option value="0" {{ !$accounting_setting->advanced_accounting_mode ? 'selected' : '' }}>
+                    Off (hide Fiscal Years, Periods, and Budget screens)
+                </option>
+                <option value="1" {{ $accounting_setting->advanced_accounting_mode ? 'selected' : '' }}>
+                    On (show full manual accounting controls for accountants)
+                </option>
+            </select>
+        </div>
+        <div class="col-md-12">
+            <hr>
             <div class="text-end">
                 <button type="button" class="btn btn-primary"
                     onclick="saveSetting('#accountingSettingForm','{{ url('admin/setting/accounting') }}')">
