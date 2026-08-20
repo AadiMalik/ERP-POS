@@ -319,6 +319,9 @@
                     <a href="#" id="odPrintBtn" target="_blank" class="btn btn-outline-secondary">
                         <i class="fa fa-print"></i> Print / Reprint
                     </a>
+                    <a href="#" id="odThermalPrintBtn" target="_blank" class="btn btn-outline-info">
+                        <i class="fa fa-receipt"></i> Thermal Print
+                    </a>
                     <a href="#" id="odReorderBtn" target="_blank" class="btn btn-outline-success">
                         <i class="fa fa-rotate-right"></i> Reorder
                     </a>

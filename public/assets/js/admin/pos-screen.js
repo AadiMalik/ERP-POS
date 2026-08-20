@@ -1609,8 +1609,14 @@
         });
     }
 
+    // Uses a plain $.ajax call (not the shared ajaxRequest() helper) because
+    // /admin/order/data is a Yajra DataTables endpoint - it responds with the
+    // raw {draw, recordsTotal, recordsFiltered, data} shape, not the
+    // {Success, Message, Data} envelope ajaxRequest() requires to resolve.
+    // Routing this through ajaxRequest() would always hit its rejection
+    // branch (no `Success` key) and silently return an empty list.
     function fetchHeldOrders(callback) {
-        ajaxRequest({
+        $.ajax({
             url: URLS.order_data,
             method: 'POST',
             data: {
@@ -1621,11 +1627,14 @@
                 cashier_id: state.session ? state.session.cashier_id : null,
                 business_id: CFG.business_id,
             },
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            },
         })
-            .then(function (response) {
-                callback(response.data || response.Data || []);
+            .done(function (response) {
+                callback((response && response.data) || []);
             })
-            .catch(function () {
+            .fail(function () {
                 callback([]);
             });
     }

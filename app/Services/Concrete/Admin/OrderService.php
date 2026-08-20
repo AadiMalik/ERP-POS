@@ -313,12 +313,17 @@ class OrderService
                     <i class='fa fa-print'></i>
                     </a>";
 
+                $thermalPrintButton = "<a class='btn btn-icon btn-outline-info mr-2' target='_blank'
+                    href='" . route('order.thermal-print', $item->order_id) . "' title='Thermal Print'>
+                    <i class='fa fa-receipt'></i>
+                    </a>";
+
                 $viewButton = "<a class='btn btn-icon btn-outline-primary mr-2'
                     href='" . route('order.show', $item->order_id) . "' title='View'>
                     <i class='fa fa-eye'></i>
                     </a>";
 
-                return $viewButton . $printButton;
+                return $viewButton . $printButton . $thermalPrintButton;
             })
             ->rawColumns(['business', 'branch', 'warehouse', 'register', 'cashier', 'customer', 'order_type', 'order_source', 'total', 'status', 'payment_status', 'action'])
             ->make(true);

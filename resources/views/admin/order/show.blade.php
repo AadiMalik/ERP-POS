@@ -11,6 +11,11 @@
                     <i class="fa fa-print"></i>
                     Print / Reprint
                 </a>
+                <a href="{{ route('order.thermal-print', $order->order_id) }}" target="_blank"
+                    class="btn btn-outline-info">
+                    <i class="fa fa-receipt"></i>
+                    Thermal Print
+                </a>
                 <a href="{{ route('pos-screen') }}?reorder_from={{ $order->order_id }}" target="_blank"
                     class="btn btn-outline-success">
                     <i class="fa fa-rotate-right"></i>

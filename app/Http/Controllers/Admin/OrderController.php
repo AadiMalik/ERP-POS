@@ -389,6 +389,46 @@ class OrderController extends Controller
         return view('admin.order.print.print', compact('order', 'printed_at'));
     }
 
+    /**
+     * Explicit Thermal Print action - available in addition to print() (which
+     * only renders the thermal layout when the business has "Enable Thermal
+     * Receipt Printing" switched on). This action always renders the same
+     * centralized admin.order.print.thermal view/ThermalPrintConfig used by
+     * print() and the POS screen, so POS Order History and the Admin Orders
+     * page share one thermal-printing implementation regardless of the
+     * order's originating source (POS, Website, Mobile App, API, ...).
+     */
+    public function thermalPrint($order_id)
+    {
+        $this->assertOrderAccessible($order_id);
+
+        $order = $this->order_service->getById($order_id);
+
+        if (!$order) {
+            abort(404);
+        }
+
+        try {
+            $this->document_send_log_service->log(
+                $order->business_id,
+                'order',
+                $order_id,
+                'print',
+                null,
+                'sent',
+                null,
+                Auth::id()
+            );
+        } catch (Exception $e) {
+            Log::warning('Thermal print audit log failed: ' . $e->getMessage());
+        }
+
+        $printed_at = now();
+        $thermal_config = $this->thermal_print_setting_resolver->resolve($order->business_id);
+
+        return view('admin.order.print.thermal', compact('order', 'thermal_config', 'printed_at'));
+    }
+
     public function searchProducts(Request $request)
     {
         try {

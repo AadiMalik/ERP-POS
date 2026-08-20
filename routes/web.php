@@ -715,6 +715,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('filter-options/{business_id}', [App\Http\Controllers\Admin\OrderController::class, 'filterOptions']);
             Route::get('details/{order_id}', [App\Http\Controllers\Admin\OrderController::class, 'details']);
             Route::get('{order_id}/print', [App\Http\Controllers\Admin\OrderController::class, 'print'])->name('order.print');
+            Route::get('{order_id}/thermal-print', [App\Http\Controllers\Admin\OrderController::class, 'thermalPrint'])->name('order.thermal-print');
             Route::get('export', [App\Http\Controllers\Admin\OrderController::class, 'export'])->name('order-export');
         });
         Route::resource('order', App\Http\Controllers\Admin\OrderController::class)->except(['create', 'edit']);

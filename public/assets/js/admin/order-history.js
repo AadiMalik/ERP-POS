@@ -98,6 +98,7 @@ function openOrderDetailModal(rowData) {
     $('#odPaymentMethod').text(rowData.payment_method || '-');
 
     $('#odPrintBtn').attr('href', ORDER_HISTORY_URLS.print + '/' + rowData.order_id + '/print');
+    $('#odThermalPrintBtn').attr('href', ORDER_HISTORY_URLS.print + '/' + rowData.order_id + '/thermal-print');
     $('#odReorderBtn').attr('href', ORDER_HISTORY_URLS.pos_screen + '?reorder_from=' + rowData.order_id);
 
     $('#odItemsBody').html('<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>');
