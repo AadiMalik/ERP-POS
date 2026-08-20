@@ -21,6 +21,20 @@
                     <i class="fa fa-rotate-right"></i>
                     Reorder
                 </a>
+                @if (in_array($order->status, ['posted', 'returned']))
+                    <button type="button" class="btn btn-outline-dark view-jv-btn"
+                        data-source-type="{{ \App\Enums\JournalSourceTypes::POS_SALE }}"
+                        data-source-id="{{ $order->order_id }}">
+                        <i class="fa fa-book"></i>
+                        View JV
+                    </button>
+                    <button type="button" class="btn btn-outline-dark stock-consumption-btn"
+                        data-reference-type="{{ \App\Enums\ReferenceType::SALE }}"
+                        data-reference-id="{{ $order->order_id }}">
+                        <i class="fa fa-cubes"></i>
+                        Stock Consumption
+                    </button>
+                @endif
                 <a href="{{ url('admin/order') }}" class="btn btn-outline-primary">
                     <i class="fa fa-arrow-left"></i>
                     Back

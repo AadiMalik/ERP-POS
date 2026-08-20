@@ -58,6 +58,7 @@
                             <select name="role_id" id="role_id" class="form-control" required style="height: 40px;">
                                 <option value="">--Select Role--</option>
                                 @foreach ($roles as $item)
+                                    @continue($item->name === RoleNames::USER)
                                     <option value="{{ $item->id }}" data-role="{{ $item->name }}"
                                         {{ old('role_id', isset($user)?$user->roles->first()->id :'') == $item->id ? 'selected' : '' }}>
                                         {{ $item->name ?? '' }}</option>

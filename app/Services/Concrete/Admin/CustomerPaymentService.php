@@ -8,12 +8,12 @@ use App\Enums\PaymentMethod;
 use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\AccountingSetting;
+use App\Models\CustomerPayment;
+use App\Models\CustomerProfile;
 use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\JournalEntryDetail;
-use App\Models\Purchase;
-use App\Models\Supplier;
-use App\Models\SupplierPayment;
+use App\Models\Order;
 use App\Repository\Repository;
 use App\Traits\Auditable;
 use Carbon\Carbon;
@@ -22,23 +22,22 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
-class SupplierPaymentService
+class CustomerPaymentService
 {
     use Auditable;
 
-    protected $model_supplier_payment;
+    protected $model_customer_payment;
     protected $with = [
         'business',
         'branch',
-        'supplier',
-        'supplier.account',
-        'purchase',
+        'user',
+        'order',
         'paymentAccount',
     ];
 
     public function __construct()
     {
-        $this->model_supplier_payment = new Repository(new SupplierPayment());
+        $this->model_customer_payment = new Repository(new CustomerPayment());
     }
 
     public function getData($obj)
@@ -55,8 +54,8 @@ class SupplierPaymentService
         if (isset($obj['branch_id']) && $obj['branch_id'] != 0 && $obj['branch_id'] != "") {
             $wh[] = ['branch_id', $obj['branch_id']];
         }
-        if (isset($obj['supplier_id']) && $obj['supplier_id'] != 0 && $obj['supplier_id'] != "") {
-            $wh[] = ['supplier_id', $obj['supplier_id']];
+        if (isset($obj['user_id']) && $obj['user_id'] != 0 && $obj['user_id'] != "") {
+            $wh[] = ['user_id', $obj['user_id']];
         }
         if (isset($obj['payment_method']) && $obj['payment_method'] != 0 && $obj['payment_method'] != "") {
             $wh[] = ['payment_method', $obj['payment_method']];
@@ -73,10 +72,10 @@ class SupplierPaymentService
 
         $allow_roles = [
             RoleNames::SUPERADMIN,
-            RoleNames::BUSINESSADMIN
+            RoleNames::BUSINESSADMIN,
         ];
 
-        $datatable = $this->model_supplier_payment->getModel()::with($this->with)
+        $datatable = $this->model_customer_payment->getModel()::with($this->with)
             ->where($wh)
             ->where('is_deleted', 0)
             ->orderBy('payment_date', $orderBy);
@@ -84,15 +83,13 @@ class SupplierPaymentService
 
         return DataTables::of($datatable)
             ->addColumn('payment_date', function ($item) {
-                return !empty($item->payment_date)
-                    ? localDate($item->payment_date)
-                    : 'N/A';
+                return !empty($item->payment_date) ? localDate($item->payment_date) : 'N/A';
             })
-            ->addColumn('supplier', function ($item) {
-                return ($item->supplier->code ?? '') . ' ' . ($item->supplier->name ?? '');
+            ->addColumn('customer', function ($item) {
+                return $item->user->name ?? '';
             })
-            ->addColumn('purchase_no', function ($item) {
-                return $item->purchase->purchase_no ?? '';
+            ->addColumn('order_no', function ($item) {
+                return $item->order_id ? ($item->order->order_id ?? $item->order_id) : 'On Account';
             })
             ->addColumn('business', function ($item) {
                 return $item->business->name ?? '';
@@ -121,7 +118,7 @@ class SupplierPaymentService
                 ];
 
                 $html = "<select class='form-select form-select-sm change-status'
-                data-id='{$item->supplier_payment_id}'>";
+                data-id='{$item->customer_payment_id}'>";
 
                 foreach ($statuses as $value => $label) {
                     $selected = $item->status == $value ? 'selected' : '';
@@ -136,8 +133,8 @@ class SupplierPaymentService
 
                 $editButton = $item->status === Status::PENDING
                     ? "<a class='btn btn-icon btn-outline-primary mr-2'
-                        href='" . route('supplier-payment.edit', $item->supplier_payment_id) . "'
-                        id='editSupplierPayment'>
+                        href='" . route('customer-payment.edit', $item->customer_payment_id) . "'
+                        id='editCustomerPayment'>
                         <i class='fa fa-pencil'></i>
                         </a>"
                     : "<button type='button' class='btn btn-icon btn-outline-primary mr-2' disabled
@@ -146,28 +143,28 @@ class SupplierPaymentService
                         </button>";
 
                 $viewJvButton = $item->status === Status::POSTED
-                    ? "<button type='button' class='btn btn-icon btn-outline-dark mr-2 view-jv-btn'
-                        data-source-type='" . JournalSourceTypes::SUPPLIER_PAYMENT . "' data-source-id='{$item->supplier_payment_id}' title='View JV'>
+                    ? "<button type='button' class='btn btn-icon btn-outline-secondary mr-2 view-jv-btn'
+                        data-source-type='" . JournalSourceTypes::CUSTOMER_PAYMENT . "' data-source-id='{$item->customer_payment_id}' title='View JV'>
                         <i class='fa fa-book'></i>
                         </button>"
                     : '';
 
                 $printButton = "<a class='btn btn-icon btn-outline-secondary mr-2' target='_blank'
-                    href='" . route('supplier-payment.print', $item->supplier_payment_id) . "' title='Print'>
+                    href='" . route('customer-payment.print', $item->customer_payment_id) . "' title='Print'>
                     <i class='fa fa-print'></i>
                     </a>";
 
                 $deleteButton = $item->status !== Status::CANCELLED
                     ? "<a class='btn btn-icon btn-outline-danger'
-                    id='deleteSupplierPayment'
-                    data-id='{$item->supplier_payment_id}'>
+                    id='deleteCustomerPayment'
+                    data-id='{$item->customer_payment_id}'>
                     <i class='fa fa-trash'></i>
                     </a>"
                     : '';
 
                 return $editButton . $viewJvButton . $printButton . $deleteButton;
             })
-            ->rawColumns(['business', 'branch', 'supplier', 'purchase_no', 'payment_method', 'amount', 'net_amount', 'status', 'action'])
+            ->rawColumns(['business', 'branch', 'customer', 'order_no', 'payment_method', 'amount', 'net_amount', 'status', 'action'])
             ->make(true);
     }
 
@@ -176,22 +173,31 @@ class SupplierPaymentService
         DB::beginTransaction();
 
         try {
-            $supplier = Supplier::where('supplier_id', $obj['supplier_id'])
+            $customer_user_id = $obj['user_id'] ?? null;
+
+            if (empty($customer_user_id)) {
+                throw new Exception('Selected customer not found.');
+            }
+
+            $profile = CustomerProfile::where('user_id', $customer_user_id)
+                ->where('business_id', $obj['business_id'])
                 ->where('is_deleted', 0)
                 ->first();
 
-            if (!$supplier) {
-                throw new Exception('Selected supplier not found.');
+            if (!$profile) {
+                throw new Exception('Selected customer does not have a profile for this business.');
             }
 
-            if (!empty($obj['purchase_id'])) {
-                $purchase = Purchase::where('purchase_id', $obj['purchase_id'])
-                    ->where('supplier_id', $obj['supplier_id'])
+            $order = null;
+
+            if (!empty($obj['order_id'])) {
+                $order = Order::where('order_id', $obj['order_id'])
+                    ->where('user_id', $customer_user_id)
                     ->where('is_deleted', 0)
                     ->first();
 
-                if (!$purchase) {
-                    throw new Exception('The selected purchase does not belong to the selected supplier.');
+                if (!$order) {
+                    throw new Exception('The selected order does not belong to the selected customer.');
                 }
             }
 
@@ -214,22 +220,43 @@ class SupplierPaymentService
                 throw new Exception('Tax and discount amount cannot exceed the payment amount.');
             }
 
+            // Order-targeted payments may never exceed that order's
+            // remaining due - excess is rejected outright (no partial
+            // on-account carry-over for a single submission).
+            if ($order) {
+                $remaining_due = round((float) $order->total - (float) $order->paid_amount, 3);
+
+                // On update, exclude this payment's own previously-posted
+                // amount from "already applied" so re-saving the same
+                // payment isn't rejected against its own prior contribution.
+                if (!empty($obj['customer_payment_id'])) {
+                    $existing = $this->model_customer_payment->getModel()::find($obj['customer_payment_id']);
+                    if ($existing && $existing->status === Status::POSTED && $existing->order_id === $order->order_id) {
+                        $remaining_due += (float) $existing->amount;
+                    }
+                }
+
+                if ($amount > $remaining_due + 0.001) {
+                    throw new Exception('Payment amount (' . currency($amount) . ') exceeds the order\'s remaining due (' . currency(max($remaining_due, 0)) . ').');
+                }
+            }
+
             $data = [
-                'business_id'         => $obj['business_id'],
-                'branch_id'           => $obj['branch_id'] ?? null,
-                'supplier_id'         => $obj['supplier_id'],
-                'purchase_id'         => $obj['purchase_id'] ?? null,
-                'payment_date'        => $obj['payment_date'],
-                'payment_method'      => $obj['payment_method'],
-                'payment_account_id'  => $payment_account_id,
-                'supplier_account_id' => $supplier->account_id,
-                'reference_no'        => $obj['reference_no'] ?? null,
-                'cheque_date'         => $obj['cheque_date'] ?? null,
-                'amount'              => $amount,
-                'tax_amount'          => $tax_amount,
-                'discount_amount'     => $discount_amount,
-                'net_amount'          => $net_amount,
-                'remarks'             => $obj['remarks'] ?? null,
+                'business_id'          => $obj['business_id'],
+                'branch_id'            => $obj['branch_id'] ?? null,
+                'user_id'              => $customer_user_id,
+                'order_id'             => $order->order_id ?? null,
+                'payment_date'         => $obj['payment_date'],
+                'payment_method'       => $obj['payment_method'],
+                'payment_account_id'   => $payment_account_id,
+                'customer_account_id'  => $profile->account_id,
+                'reference_no'         => $obj['reference_no'] ?? null,
+                'cheque_date'          => $obj['cheque_date'] ?? null,
+                'amount'               => $amount,
+                'tax_amount'           => $tax_amount,
+                'discount_amount'      => $discount_amount,
+                'net_amount'           => $net_amount,
+                'remarks'              => $obj['remarks'] ?? null,
             ];
 
             if (!empty($obj['attachment'])) {
@@ -240,12 +267,12 @@ class SupplierPaymentService
             // Update
             //====================================
 
-            if (!empty($obj['supplier_payment_id'])) {
+            if (!empty($obj['customer_payment_id'])) {
 
-                $payment = $this->model_supplier_payment->getModel()::findOrFail($obj['supplier_payment_id']);
+                $payment = $this->model_customer_payment->getModel()::findOrFail($obj['customer_payment_id']);
 
                 if ($payment->status !== Status::PENDING) {
-                    throw new Exception('Only pending supplier payments can be updated.');
+                    throw new Exception('Only pending customer payments can be updated.');
                 }
 
                 $data['updatedby_id'] = Auth::id();
@@ -262,20 +289,20 @@ class SupplierPaymentService
 
             else {
 
-                $data['supplier_payment_id'] = generateUuid();
-                $data['payment_no'] = $obj['payment_no'] ?? generateSupplierPaymentNo($obj['business_id']);
+                $data['customer_payment_id'] = generateUuid();
+                $data['payment_no'] = $obj['payment_no'] ?? generateCustomerPaymentNo($obj['business_id']);
                 $data['status'] = Status::PENDING;
                 $data['createdby_id'] = Auth::id();
                 $data['date_created'] = now();
 
-                $payment = $this->model_supplier_payment->create($data);
+                $payment = $this->model_customer_payment->create($data);
 
                 $action = 'created';
             }
 
             DB::commit();
 
-            $this->logActivity('supplier_payment', $payment->supplier_payment_id, $action, null, ['amount' => $payment->amount, 'net_amount' => $payment->net_amount]);
+            $this->logActivity('customer_payment', $payment->customer_payment_id, $action, null, ['amount' => $payment->amount, 'net_amount' => $payment->net_amount]);
 
             return $payment;
         } catch (Exception $e) {
@@ -286,26 +313,26 @@ class SupplierPaymentService
         }
     }
 
-    public function getById($supplier_payment_id)
+    public function getById($customer_payment_id)
     {
-        return $this->model_supplier_payment->getModel()::with($this->with)->find($supplier_payment_id);
+        return $this->model_customer_payment->getModel()::with($this->with)->find($customer_payment_id);
     }
 
-    public function getDetails($supplier_payment_id)
+    public function getDetails($customer_payment_id)
     {
-        $payment = $this->model_supplier_payment->getModel()::with($this->with)->findOrFail($supplier_payment_id);
+        $payment = $this->model_customer_payment->getModel()::with($this->with)->findOrFail($customer_payment_id);
 
         return [
-            'supplier_payment_id' => $payment->supplier_payment_id,
+            'customer_payment_id' => $payment->customer_payment_id,
             'business_id'         => $payment->business_id,
             'branch_id'           => $payment->branch_id,
-            'supplier_id'         => $payment->supplier_id,
-            'purchase_id'         => $payment->purchase_id,
+            'user_id'             => $payment->user_id,
+            'order_id'            => $payment->order_id,
             'payment_no'          => $payment->payment_no,
             'payment_date'        => $payment->payment_date,
             'payment_method'      => $payment->payment_method,
             'payment_account_id'  => $payment->payment_account_id,
-            'supplier_account_id' => $payment->supplier_account_id,
+            'customer_account_id' => $payment->customer_account_id,
             'reference_no'        => $payment->reference_no,
             'cheque_date'         => $payment->cheque_date,
             'amount'              => $payment->amount,
@@ -318,55 +345,12 @@ class SupplierPaymentService
         ];
     }
 
-    /**
-     * Live supplier payable balance, computed from posted JournalEntryDetail
-     * rows (never a stored column). Every supplier currently shares the same
-     * COA account_id (see Supplier model note), and every posting here also
-     * tags supplier_id on its offsetting cash/discount/tax lines for
-     * reporting traceability - so both account_id (to isolate the shared
-     * payable account from unrelated lines) and supplier_id (to isolate this
-     * supplier from every other supplier posted to that same account) must
-     * be filtered together, or the debit/credit legs of every transaction
-     * cancel each other out to zero.
-     */
-    public function getSupplierLedger($supplier_id, $business_id = null)
-    {
-        $business_id = $business_id ?? Auth::user()->business_id;
-
-        $supplier = Supplier::find($supplier_id);
-
-        if (!$supplier || empty($supplier->account_id)) {
-            return [
-                'balance'     => 0,
-                'type'        => '',
-                'raw_balance' => 0,
-            ];
-        }
-
-        $totals = JournalEntryDetail::join('journal_entries', 'journal_entries.journal_entry_id', '=', 'journal_entry_details.journal_entry_id')
-            ->where('journal_entry_details.supplier_id', $supplier_id)
-            ->where('journal_entry_details.account_id', $supplier->account_id)
-            ->where('journal_entries.business_id', $business_id)
-            ->where('journal_entries.is_deleted', 0)
-            ->where('journal_entries.status', Status::POSTED)
-            ->selectRaw('COALESCE(SUM(journal_entry_details.credit),0) as total_credit, COALESCE(SUM(journal_entry_details.debit),0) as total_debit')
-            ->first();
-
-        $balance = (float) ($totals->total_credit ?? 0) - (float) ($totals->total_debit ?? 0);
-
-        return [
-            'balance'     => round(abs($balance), 3),
-            'type'        => $balance > 0 ? 'Cr' : ($balance < 0 ? 'Dr' : ''),
-            'raw_balance' => $balance,
-        ];
-    }
-
     public function status($obj)
     {
         DB::beginTransaction();
 
         try {
-            $payment = $this->model_supplier_payment->getModel()::with($this->with)->findOrFail($obj['supplier_payment_id']);
+            $payment = $this->model_customer_payment->getModel()::with($this->with)->findOrFail($obj['customer_payment_id']);
             $old_status = $payment->status;
             $new_status = $obj['status'];
 
@@ -392,8 +376,8 @@ class SupplierPaymentService
             DB::commit();
 
             $this->logActivity(
-                'supplier_payment',
-                $payment->supplier_payment_id,
+                'customer_payment',
+                $payment->customer_payment_id,
                 $new_status === Status::POSTED ? 'posted' : 'unposted',
                 ['status' => $old_status],
                 ['status' => $new_status]
@@ -407,12 +391,12 @@ class SupplierPaymentService
         return $payment;
     }
 
-    public function delete($supplier_payment_id)
+    public function delete($customer_payment_id)
     {
         DB::beginTransaction();
 
         try {
-            $payment = $this->model_supplier_payment->getModel()::with($this->with)->findOrFail($supplier_payment_id);
+            $payment = $this->model_customer_payment->getModel()::with($this->with)->findOrFail($customer_payment_id);
 
             if ($payment->status === Status::POSTED) {
                 $this->reversePosting($payment);
@@ -427,7 +411,7 @@ class SupplierPaymentService
 
             DB::commit();
 
-            $this->logActivity('supplier_payment', $payment->supplier_payment_id, 'deleted');
+            $this->logActivity('customer_payment', $payment->customer_payment_id, 'deleted');
 
             return true;
         } catch (Exception $e) {
@@ -438,13 +422,18 @@ class SupplierPaymentService
     }
 
     /**
-     * Auto-post a CPV/BPV Journal Voucher when a Supplier Payment is posted.
-     * Idempotent: a no-op if an active voucher already exists for this payment.
+     * Auto-post a CRV/BRV Journal Voucher when a Customer Payment is posted,
+     * mirroring SupplierPaymentService::applyPosting(). If the payment
+     * targets a specific order, that order's paid_amount is incremented in
+     * the same transaction (capped at the order total) so every existing
+     * "due = total - paid_amount" call site (OrderService::getData(), the
+     * order show view, validateCreditLimit(), etc.) stays correct without
+     * any changes there.
      */
-    protected function applyPosting(SupplierPayment $payment)
+    protected function applyPosting(CustomerPayment $payment)
     {
-        $existing = JournalEntry::where('source_type', JournalSourceTypes::SUPPLIER_PAYMENT)
-            ->where('source_id', $payment->supplier_payment_id)
+        $existing = JournalEntry::where('source_type', JournalSourceTypes::CUSTOMER_PAYMENT)
+            ->where('source_id', $payment->customer_payment_id)
             ->where('is_deleted', 0)
             ->exists();
 
@@ -455,15 +444,13 @@ class SupplierPaymentService
         $accounting_setting = AccountingSetting::where('business_id', $payment->business_id)->first();
 
         if (!$accounting_setting || !$accounting_setting->enable_accounting) {
-            throw new Exception('Accounting is not enabled for this business. Please configure Accounting Settings before posting supplier payments.');
+            throw new Exception('Accounting is not enabled for this business. Please configure Accounting Settings before posting customer payments.');
         }
 
-        app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($payment->business_id, now());
+        app(AccountingPeriodService::class)->assertPostable($payment->business_id, now());
 
-        $supplier = Supplier::find($payment->supplier_id);
-
-        if (empty($supplier) || empty($supplier->account_id)) {
-            throw new Exception('The selected supplier does not have a linked Chart of Account. Please configure it before posting this payment.');
+        if (empty($payment->customer_account_id)) {
+            throw new Exception('The selected customer does not have a linked Chart of Account. Please configure it before posting this payment.');
         }
 
         if (empty($payment->payment_account_id)) {
@@ -478,12 +465,12 @@ class SupplierPaymentService
             throw new Exception('Withholding Tax Account is not configured in Accounting Settings.');
         }
 
-        $short = $payment->payment_method === PaymentMethod::CASH ? 'CPV' : 'BPV';
+        $short = $payment->payment_method === PaymentMethod::CASH ? 'CRV' : 'BRV';
 
         $journal = Journal::where('short', $short)->where('is_deleted', 0)->first();
 
         if (!$journal) {
-            throw new Exception('No "' . $short . '" journal category found. Please configure it before posting supplier payments.');
+            throw new Exception('No "' . $short . '" journal category found. Please configure it before posting customer payments.');
         }
 
         $entry_no = generateJVNum($journal->journal_id);
@@ -496,9 +483,9 @@ class SupplierPaymentService
             'entry_no'         => $entry_no,
             'reference_no'     => $payment->payment_no,
             'entry_date'       => now(),
-            'description'      => 'Auto-generated ' . $short . ' for supplier payment ' . $payment->payment_no,
-            'source_type'      => JournalSourceTypes::SUPPLIER_PAYMENT,
-            'source_id'        => $payment->supplier_payment_id,
+            'description'      => 'Auto-generated ' . $short . ' for customer payment ' . $payment->payment_no,
+            'source_type'      => JournalSourceTypes::CUSTOMER_PAYMENT,
+            'source_id'        => $payment->customer_payment_id,
             'status'           => Status::POSTED,
             'postedby_id'      => Auth::id(),
             'date_posted'      => now(),
@@ -509,21 +496,21 @@ class SupplierPaymentService
         JournalEntryDetail::create([
             'journal_entry_detail_id' => generateUuid(),
             'journal_entry_id'        => $journal_entry->journal_entry_id,
-            'account_id'              => $supplier->account_id,
-            'debit'                   => $payment->amount,
+            'account_id'              => $payment->payment_account_id,
+            'debit'                   => $payment->net_amount,
             'credit'                  => 0,
-            'supplier_id'             => $payment->supplier_id,
-            'description'             => 'Supplier Payment - ' . $payment->payment_no,
+            'user_id'                 => $payment->user_id,
+            'description'             => 'Customer Payment - ' . $payment->payment_no,
         ]);
 
         JournalEntryDetail::create([
             'journal_entry_detail_id' => generateUuid(),
             'journal_entry_id'        => $journal_entry->journal_entry_id,
-            'account_id'              => $payment->payment_account_id,
+            'account_id'              => $payment->customer_account_id,
             'debit'                   => 0,
-            'credit'                  => $payment->net_amount,
-            'supplier_id'             => $payment->supplier_id,
-            'description'             => 'Supplier Payment - ' . $payment->payment_no,
+            'credit'                  => $payment->amount,
+            'user_id'                 => $payment->user_id,
+            'description'             => 'Customer Payment - ' . $payment->payment_no,
         ]);
 
         if ($payment->discount_amount > 0) {
@@ -531,10 +518,10 @@ class SupplierPaymentService
                 'journal_entry_detail_id' => generateUuid(),
                 'journal_entry_id'        => $journal_entry->journal_entry_id,
                 'account_id'              => $accounting_setting->default_discount_account_id,
-                'debit'                   => 0,
-                'credit'                  => $payment->discount_amount,
-                'supplier_id'             => $payment->supplier_id,
-                'description'             => 'Discount Received - ' . $payment->payment_no,
+                'debit'                   => $payment->discount_amount,
+                'credit'                  => 0,
+                'user_id'                 => $payment->user_id,
+                'description'             => 'Discount Given - ' . $payment->payment_no,
             ]);
         }
 
@@ -543,22 +530,31 @@ class SupplierPaymentService
                 'journal_entry_detail_id' => generateUuid(),
                 'journal_entry_id'        => $journal_entry->journal_entry_id,
                 'account_id'              => $accounting_setting->default_withholding_tax_account_id,
-                'debit'                   => 0,
-                'credit'                  => $payment->tax_amount,
-                'supplier_id'             => $payment->supplier_id,
+                'debit'                   => $payment->tax_amount,
+                'credit'                  => 0,
+                'user_id'                 => $payment->user_id,
                 'description'             => 'Withholding Tax - ' . $payment->payment_no,
             ]);
+        }
+
+        if (!empty($payment->order_id)) {
+            $order = Order::where('order_id', $payment->order_id)->first();
+
+            if ($order) {
+                $applied = min((float) $payment->amount, max((float) $order->total - (float) $order->paid_amount, 0));
+                $order->update(['paid_amount' => (float) $order->paid_amount + $applied]);
+            }
         }
     }
 
     /**
-     * Reverse the CPV/BPV Journal Voucher created when a Supplier Payment was
-     * posted. Idempotent: a no-op if nothing active remains to reverse.
+     * Reverse the CRV/BRV Journal Voucher created when a Customer Payment
+     * was posted, and the order.paid_amount increment applied alongside it.
      */
-    protected function reversePosting(SupplierPayment $payment)
+    protected function reversePosting(CustomerPayment $payment)
     {
-        $journal_entry = JournalEntry::where('source_type', JournalSourceTypes::SUPPLIER_PAYMENT)
-            ->where('source_id', $payment->supplier_payment_id)
+        $journal_entry = JournalEntry::where('source_type', JournalSourceTypes::CUSTOMER_PAYMENT)
+            ->where('source_id', $payment->customer_payment_id)
             ->where('is_deleted', 0)
             ->first();
 
@@ -569,11 +565,20 @@ class SupplierPaymentService
                 'date_deleted' => now(),
             ]);
         }
+
+        if (!empty($payment->order_id)) {
+            $order = Order::where('order_id', $payment->order_id)->first();
+
+            if ($order) {
+                $applied = min((float) $payment->amount, (float) $order->paid_amount);
+                $order->update(['paid_amount' => max((float) $order->paid_amount - $applied, 0)]);
+            }
+        }
     }
 
     public function getByBusiness($business_id)
     {
-        return $this->model_supplier_payment->getModel()::with($this->with)
+        return $this->model_customer_payment->getModel()::with($this->with)
             ->where('business_id', $business_id)
             ->where('is_deleted', 0)
             ->get();

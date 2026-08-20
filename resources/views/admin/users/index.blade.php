@@ -63,6 +63,7 @@
                                 <option value="">--All Roles--</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                     @foreach ($roles as $item)
+                                        @continue($item->name === RoleNames::USER)
                                         <option value="{{ $item->id }}">{{ $item->name ?? '' }}</option>
                                     @endforeach
                                 @endif

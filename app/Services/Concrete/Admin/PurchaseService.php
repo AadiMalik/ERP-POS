@@ -154,7 +154,14 @@ class PurchaseService
                         <i class='fa fa-pencil'></i>
                         </button>";
 
-                return $editButton . "
+                $viewJvButton = in_array($item->status, [Status::APPROVED, Status::COMPLETED])
+                    ? "<button type='button' class='btn btn-icon btn-outline-dark mr-2 view-jv-btn'
+                        data-source-type='" . JournalSourceTypes::PURCHASE . "' data-source-id='{$item->purchase_id}' title='View JV'>
+                        <i class='fa fa-book'></i>
+                        </button>"
+                    : '';
+
+                return $editButton . $viewJvButton . "
                     <a class='btn btn-icon btn-outline-secondary mr-2' target='_blank'
                     href='" . route('purchase.print', $item->purchase_id) . "' title='Print'>
                     <i class='fa fa-print'></i>

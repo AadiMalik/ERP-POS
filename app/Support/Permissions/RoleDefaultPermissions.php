@@ -47,9 +47,9 @@ class RoleDefaultPermissions
                 return PermissionRegistry::namesForModulesExcludingActions(
                     ['warehouse', 'brand', 'category', 'sub-category', 'unit', 'product', 'barcode',
                      'unit-conversion', 'batch', 'stock', 'stock-transaction', 'opening-stock',
-                     'stock-taking', 'transfer-note', 'supplier', 'purchase-request',
+                     'stock-taking', 'transfer-note', 'supplier', 'customer', 'purchase-request',
                      'purchase-request-quotation', 'purchase', 'good-receipt-note', 'purchase-return',
-                     'supplier-payment', 'order-type', 'payment-method', 'order-source', 'discount',
+                     'supplier-payment', 'customer-payment', 'order-type', 'payment-method', 'order-source', 'discount',
                      'voucher', 'order', 'pos', 'expense', 'expense-category', 'admin-expense'],
                     ['delete']
                 );
@@ -72,7 +72,7 @@ class RoleDefaultPermissions
                 return array_merge(
                     PermissionRegistry::namesForModules([
                         'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction',
-                        'expense', 'expense-category', 'admin-expense', 'supplier-payment',
+                        'expense', 'expense-category', 'admin-expense', 'supplier-payment', 'customer-payment',
                         'fiscal-year', 'accounting-period', 'period-closing-rule', 'budget',
                     ]),
                     array_merge(
@@ -81,7 +81,7 @@ class RoleDefaultPermissions
                             'general-ledger', 'trial-balance', 'journal-register', 'account-ledger',
                             'account-balance', 'day-book', 'cash-bank-ledger', 'income-report',
                             'expense-report', 'expense-detail-report', 'tax-report', 'equity-report',
-                            'profit-loss', 'balance-sheet', 'accounts-payable',
+                            'profit-loss', 'balance-sheet', 'accounts-payable', 'accounts-receivable',
                         ]),
                         ['reports.budget-vs-actual.view']
                     )
@@ -89,7 +89,7 @@ class RoleDefaultPermissions
 
             case RoleNames::SALEMANAGER:
                 return array_merge(
-                    PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'discount', 'voucher', 'order', 'pos']),
+                    PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'discount', 'voucher', 'order', 'pos', 'customer', 'customer-payment']),
                     ['dashboard.view']
                 );
 

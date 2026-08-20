@@ -53,19 +53,17 @@ class UserService
             $role_id = $obj['role_id'];
         }
 
-        // Customer role - resolved once per call so a "Role = Customer"
-        // filter can be scoped through customer_profiles.business_id
-        // instead of users.business_id (which stays null for accounts
-        // created via OTP self-registration on the website/mobile app).
-        $customer_role_id = Role::where('name', RoleNames::USER)->whereNull('business_id')->value('id');
-        $is_customer_filter = $role_id && $customer_role_id && (int) $role_id === (int) $customer_role_id;
-
         $datatable = $this->model_user->getModel()::with([
             'business',
             'branch',
             'roles'
         ])->where($wh)
-            ->where('is_deleted', 0);
+            ->where('is_deleted', 0)
+            // Customers are managed exclusively through the dedicated
+            // Customer module now (CustomerController) - never listed here.
+            ->whereDoesntHave('roles', function ($q) {
+                $q->where('name', RoleNames::USER);
+            });
 
         if ($role_id) {
             $datatable->whereHas('roles', function ($q) use ($role_id) {
@@ -73,21 +71,10 @@ class UserService
             });
         }
 
-        if ($is_customer_filter) {
-            $target_business_id = $business_id_filter
-                ?? (getRoleName() != RoleNames::SUPERADMIN ? Auth::user()->business_id : null);
-
-            if ($target_business_id) {
-                $datatable->whereHas('customerProfiles', function ($q) use ($target_business_id) {
-                    $q->where('business_id', $target_business_id)->where('is_deleted', 0);
-                });
-            }
-        } else {
-            if ($business_id_filter) {
-                $datatable->where('business_id', $business_id_filter);
-            }
-            $datatable = applyRoleScope($datatable);
+        if ($business_id_filter) {
+            $datatable->where('business_id', $business_id_filter);
         }
+        $datatable = applyRoleScope($datatable);
 
         return DataTables::of($datatable)
 

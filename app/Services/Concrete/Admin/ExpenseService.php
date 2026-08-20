@@ -163,6 +163,13 @@ class ExpenseService
                         <i class='fa fa-pencil'></i>
                         </button>";
 
+                $viewJvButton = $item->status === Status::POSTED
+                    ? "<button type='button' class='btn btn-icon btn-outline-dark mr-2 view-jv-btn'
+                        data-source-type='" . JournalSourceTypes::EXPENSE . "' data-source-id='{$item->expense_id}' title='View JV'>
+                        <i class='fa fa-book'></i>
+                        </button>"
+                    : '';
+
                 $deleteButton = $item->status !== Status::CANCELLED
                     ? "<a class='btn btn-icon btn-outline-danger'
                     id='deleteExpense'
@@ -171,7 +178,7 @@ class ExpenseService
                     </a>"
                     : '';
 
-                return $editButton . $deleteButton;
+                return $editButton . $viewJvButton . $deleteButton;
             })
             ->rawColumns(['category', 'user', 'session', 'branch', 'business', 'source', 'amount', 'status', 'action'])
             ->make(true);

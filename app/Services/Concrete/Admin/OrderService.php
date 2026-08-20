@@ -323,7 +323,14 @@ class OrderService
                     <i class='fa fa-eye'></i>
                     </a>";
 
-                return $viewButton . $printButton . $thermalPrintButton;
+                $viewJvButton = in_array($item->status, ['posted', 'returned'])
+                    ? "<button type='button' class='btn btn-icon btn-outline-dark mr-2 view-jv-btn'
+                        data-source-type='" . \App\Enums\JournalSourceTypes::POS_SALE . "' data-source-id='{$item->order_id}' title='View JV'>
+                        <i class='fa fa-book'></i>
+                        </button>"
+                    : '';
+
+                return $viewButton . $viewJvButton . $printButton . $thermalPrintButton;
             })
             ->rawColumns(['business', 'branch', 'warehouse', 'register', 'cashier', 'customer', 'order_type', 'order_source', 'total', 'status', 'payment_status', 'action'])
             ->make(true);

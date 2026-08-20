@@ -1360,6 +1360,33 @@
         @endcanAccessAny
         @endif
 
+        {{-- Customers (business-scoped Customer CRUD + Customer Payments) --}}
+        @canAccessAny(['customer.view', 'customer-payment.view'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-users"></i>
+                    <div data-i18n="Customers">Customers</div>
+                </a>
+
+                <ul class="menu-sub">
+                    @canAccess('customer.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/customer') }}" class="menu-link">
+                                <div data-i18n="Customers">Customers</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('customer-payment.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/customer-payment') }}" class="menu-link">
+                                <div data-i18n="Customer Payments">Customer Payments</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                </ul>
+            </li>
+        @endcanAccessAny
+
         {{-- Orders (centralized - shared by POS, Website, Mobile App, API) --}}
         @canAccessAny(['pos.access', 'order-type.view', 'order-source.view', 'payment-method.view', 'discount.view', 'voucher.view'])
             <li class="menu-item">

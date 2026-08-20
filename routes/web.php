@@ -111,6 +111,26 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('export', [App\Http\Controllers\Admin\UserController::class, 'export'])->name('user-export');
     });
 
+    //customer (ungated by any module: middleware - core CRM data, mirrors 'users')
+    // 'update' is excluded (like 'show'): edits are submitted via POST to
+    // store(), same as SupplierController; this also avoids colliding with
+    // the unrelated 'customer.update' route name already used by
+    // SettingController::updateCustomerSetting().
+    Route::resource('customer', App\Http\Controllers\Admin\CustomerController::class)->except(['show', 'update']);
+    Route::group(['prefix' => 'customer'], function () {
+        Route::get('{user_id}/show', [App\Http\Controllers\Admin\CustomerController::class, 'show'])->name('customer.show');
+        Route::post('data', [App\Http\Controllers\Admin\CustomerController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\CustomerController::class, 'status']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\CustomerController::class, 'byBusiness']);
+    });
+
+    //generic "View JV" / "Stock Consumption Details" popups - reused from Orders,
+    //Purchases, Customer/Supplier Payments, Expenses, etc. Ungated by any
+    //module: middleware (must work regardless of which optional modules are
+    //enabled); business-scoping is enforced inside each controller.
+    Route::post('journal-voucher/view', [App\Http\Controllers\Admin\JournalVoucherViewController::class, 'show'])->name('journal-voucher.view');
+    Route::post('stock-consumption/view', [App\Http\Controllers\Admin\StockConsumptionViewController::class, 'show'])->name('stock-consumption.view');
+
     //my profile (self-service - every authenticated user manages their own record, no permission gate)
     Route::group(['prefix' => 'profile'], function () {
         Route::get('/', [App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');
@@ -611,6 +631,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     //supplier
     Route::resource('supplier', App\Http\Controllers\Admin\SupplierController::class)->except(['show']);
     Route::group(['prefix' => 'supplier'], function () {
+        Route::get('{supplier_id}/show', [App\Http\Controllers\Admin\SupplierController::class, 'show'])->name('supplier.show');
         Route::post('data', [App\Http\Controllers\Admin\SupplierController::class, 'getData']);
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\SupplierController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\SupplierController::class, 'byBusiness']);
@@ -720,6 +741,20 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         });
         Route::resource('order', App\Http\Controllers\Admin\OrderController::class)->except(['create', 'edit']);
     });
+
+    //customer payment (settles credit orders - paired with Orders/POS, mirrors
+    //how supplier-payment sits next to Purchases under module:inventory)
+    Route::group(['middleware' => ['module:pos']], function () {
+        Route::resource('customer-payment', App\Http\Controllers\Admin\CustomerPaymentController::class)->except(['show', 'update']);
+        Route::group(['prefix' => 'customer-payment'], function () {
+            Route::post('data', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'getData']);
+            Route::post('change-status', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'status']);
+            Route::get('details/{customer_payment_id}', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'details']);
+            Route::get('ledger/{user_id}', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'customerLedger']);
+            Route::get('orders-by-customer/{user_id}', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'ordersByCustomer']);
+            Route::get('{customer_payment_id}/print', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'print'])->name('customer-payment.print');
+        });
+    }); // end module:pos (customer payment)
 
     Route::group(['middleware' => ['module:pos']], function () {
     //pos screen

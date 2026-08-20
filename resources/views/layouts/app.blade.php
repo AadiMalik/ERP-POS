@@ -85,6 +85,8 @@
             <!-- / Layout page -->
         </div>
         @include('admin.partials.custom_date_modal')
+        @include('admin.partials.view-jv-modal')
+        @include('admin.partials.stock-consumption-modal')
         <!-- Overlay -->
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>

@@ -31,8 +31,17 @@ class CustomerProfile extends Model
         'state',
         'country',
 
+        'shipping_address',
+        'shipping_city',
+        'shipping_state',
+        'shipping_country',
+
         'credit_limit',
         'credit_days',
+        'opening_balance',
+        'opening_balance_type',
+        'payment_terms',
+        'notes',
 
         'is_walkin',
         'loyalty_points',

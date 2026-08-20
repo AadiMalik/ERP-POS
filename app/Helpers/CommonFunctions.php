@@ -19,6 +19,7 @@ use App\Models\StockTaking;
 use App\Models\Supplier;
 use App\Models\Expense;
 use App\Models\SupplierPayment;
+use App\Models\CustomerPayment;
 use App\Models\TransferNote;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -390,6 +391,27 @@ function generateSupplierPaymentNo($business_id = null)
 
     return sprintf(
         'SP-%04d',
+        $next_number
+    );
+}
+
+function generateCustomerPaymentNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $customer_payment = CustomerPayment::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($customer_payment) {
+        $next_number = (int) substr($customer_payment->payment_no, strrpos($customer_payment->payment_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'CP-%04d',
         $next_number
     );
 }

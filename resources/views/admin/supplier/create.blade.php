@@ -175,6 +175,35 @@ use App\Enums\RoleNames;
                                             value="{{ old('credit_days', $supplier->credit_days ?? 0) }}">
                                     </div>
 
+                                    <div class="col-md-6">
+                                        <label class="fw-semibold">Payment Terms</label>
+                                        <input type="text" class="form-control" name="payment_terms"
+                                            placeholder="e.g. Net 30, Due on Receipt"
+                                            value="{{ old('payment_terms', $supplier->payment_terms ?? '') }}">
+                                    </div>
+
+                                    @if (!isset($supplier))
+                                        <div class="col-md-3">
+                                            <label class="fw-semibold">Opening Balance</label>
+                                            <input type="number" step="0.01" class="form-control" name="opening_balance"
+                                                value="{{ old('opening_balance', 0) }}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="fw-semibold">Balance Type</label>
+                                            <select class="form-select" name="opening_balance_type">
+                                                <option value="Cr">Credit (We Owe Supplier)</option>
+                                                <option value="Dr">Debit (Advance to Supplier)</option>
+                                            </select>
+                                        </div>
+                                    @else
+                                        <div class="col-md-6">
+                                            <label class="fw-semibold">Opening Balance</label>
+                                            <input type="text" class="form-control" disabled
+                                                value="{{ currency($supplier->opening_balance ?? 0) }} {{ $supplier->opening_balance_type ?? '' }}">
+                                            <small class="text-muted">Opening balance can only be set at creation.</small>
+                                        </div>
+                                    @endif
+
                                 </div>
                             </div>
                         </div>

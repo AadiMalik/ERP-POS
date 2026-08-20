@@ -28,7 +28,7 @@ class SupplierController extends Controller
         SupplierService $supplier_service,
         BusinessService $business_service
     ) {
-        $this->middleware('permission:supplier.view')->only(['index', 'getData', 'byBusiness']);
+        $this->middleware('permission:supplier.view')->only(['index', 'getData', 'byBusiness', 'show']);
         $this->middleware('permission:supplier.create')->only(['create']);
         $this->middleware('permission:supplier.create|supplier.edit')->only(['store']);
         $this->middleware('permission:supplier.edit')->only(['edit']);
@@ -120,9 +120,16 @@ class SupplierController extends Controller
             'credit_limit' => $request->credit_limit ?? null,
             'credit_days' => $request->credit_days ?? null,
             'balance' => $request->balance ?? null,
+            'payment_terms' => $request->payment_terms ?? null,
             'description' => $request->description ?? null,
             'status' => $request->status ?? 'active',
         ];
+
+        // Opening balance only applies on create - never re-applied on update.
+        if (empty($request->supplier_id)) {
+            $obj['opening_balance'] = $request->opening_balance ?? 0;
+            $obj['opening_balance_type'] = $request->opening_balance_type ?? null;
+        }
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
@@ -194,5 +201,19 @@ class SupplierController extends Controller
                 Message::ERROR
             );
         }
+    }
+
+    public function show($supplier_id)
+    {
+        $business_id = getRoleName() !== \App\Enums\RoleNames::SUPERADMIN
+            ? Auth::user()->business_id
+            : request('business_id');
+
+        $supplier = $this->supplier_service->getById($supplier_id);
+        $history = $business_id ? $this->supplier_service->getSupplierHistory($supplier_id, $business_id) : ['invoices' => collect(), 'payments' => collect()];
+        $timeline = $business_id ? $this->supplier_service->getSupplierTimeline($supplier_id, $business_id) : collect();
+        $ledger = app(\App\Services\Concrete\Admin\SupplierPaymentService::class)->getSupplierLedger($supplier_id, $business_id);
+
+        return view('admin.supplier.show', compact('supplier', 'history', 'timeline', 'ledger'));
     }
 }
