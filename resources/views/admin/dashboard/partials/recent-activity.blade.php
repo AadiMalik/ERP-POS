@@ -112,7 +112,7 @@
                                     <td>{{ $payment->supplier->name ?? '-' }}</td>
                                     <td class="text-end">{{ currency($payment->net_amount ?? $payment->amount) }}</td>
                                     <td><span class="badge bg-label-secondary">{{ ucfirst($payment->status) }}</span></td>
-                                    <td><a href="{{ route('supplier-payment.show', $payment->supplier_payment_id) }}" class="btn btn-icon btn-outline-primary btn-sm"><i class="fa fa-eye"></i></a></td>
+                                    <td><a href="{{ route('supplier-payment.edit', $payment->supplier_payment_id) }}" class="btn btn-icon btn-outline-primary btn-sm"><i class="fa fa-eye"></i></a></td>
                                 </tr>
                             @empty
                                 <tr>

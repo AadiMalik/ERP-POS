@@ -61,7 +61,11 @@ class RoleDefaultPermissions
                         'unit-conversion', 'batch', 'stock', 'stock-transaction', 'opening-stock',
                         'stock-taking', 'transfer-note',
                     ]),
-                    ['dashboard.view', 'reports.stock-ledger.view']
+                    [
+                        'dashboard.view',
+                        'reports.stock-ledger.view', 'reports.stock-ledger.print', 'reports.stock-ledger.pdf',
+                        'reports.stock-ledger.export', 'reports.stock-ledger.export-csv',
+                    ]
                 );
 
             case RoleNames::FINANCEMANAGER:
@@ -70,17 +74,15 @@ class RoleDefaultPermissions
                         'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction',
                         'expense', 'expense-category', 'admin-expense', 'supplier-payment',
                     ]),
-                    [
-                        'dashboard.view',
-                        'reports.general-ledger.view', 'reports.trial-balance.view',
-                        'reports.journal-register.view', 'reports.account-ledger.view',
-                        'reports.account-balance.view', 'reports.day-book.view',
-                        'reports.cash-bank-ledger.view', 'reports.income-report.view',
-                        'reports.expense-report.view', 'reports.expense-detail-report.view',
-                        'reports.tax-report.view', 'reports.equity-report.view',
-                        'reports.profit-loss.view', 'reports.balance-sheet.view',
-                        'reports.accounts-payable.view',
-                    ]
+                    array_merge(
+                        ['dashboard.view'],
+                        self::formatVariants([
+                            'general-ledger', 'trial-balance', 'journal-register', 'account-ledger',
+                            'account-balance', 'day-book', 'cash-bank-ledger', 'income-report',
+                            'expense-report', 'expense-detail-report', 'tax-report', 'equity-report',
+                            'profit-loss', 'balance-sheet', 'accounts-payable',
+                        ])
+                    )
                 );
 
             case RoleNames::SALEMANAGER:
@@ -95,12 +97,13 @@ class RoleDefaultPermissions
                         'supplier', 'purchase-request', 'purchase-request-quotation', 'purchase',
                         'good-receipt-note', 'purchase-return', 'supplier-payment',
                     ]),
-                    [
-                        'dashboard.view',
-                        'reports.supplier-ledger.view', 'reports.supplier-aging.view',
-                        'reports.accounts-payable.view', 'reports.supplier-payment-history.view',
-                        'reports.purchase-return-summary.view', 'reports.purchase-return-detail.view',
-                    ]
+                    array_merge(
+                        ['dashboard.view'],
+                        self::formatVariants([
+                            'supplier-ledger', 'supplier-aging', 'accounts-payable',
+                            'supplier-payment-history', 'purchase-return-summary', 'purchase-return-detail',
+                        ])
+                    )
                 );
 
             case RoleNames::MARKITINGMANAGER:
@@ -115,12 +118,13 @@ class RoleDefaultPermissions
                         ['account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction', 'expense', 'expense-category', 'admin-expense'],
                         ['delete']
                     ),
-                    [
-                        'dashboard.view',
-                        'reports.general-ledger.view', 'reports.trial-balance.view',
-                        'reports.journal-register.view', 'reports.account-ledger.view',
-                        'reports.account-balance.view', 'reports.day-book.view',
-                    ]
+                    array_merge(
+                        ['dashboard.view'],
+                        self::formatVariants([
+                            'general-ledger', 'trial-balance', 'journal-register',
+                            'account-ledger', 'account-balance', 'day-book',
+                        ])
+                    )
                 );
 
             case RoleNames::HRMANAGER:
@@ -183,5 +187,23 @@ class RoleDefaultPermissions
             default:
                 return [];
         }
+    }
+
+    /**
+     * Expands a list of `reports.<slug>` names into their full view/print/
+     * pdf/export/export-csv permission bundle - used by role templates that
+     * hand-pick individual reports (rather than a whole hrm-reports/
+     * payroll-reports/reports module via PermissionRegistry::namesForModules())
+     * so the role gets full access to each named report, not just `.view`.
+     */
+    private static function formatVariants(array $reportSlugs): array
+    {
+        $names = [];
+        foreach ($reportSlugs as $slug) {
+            foreach (['view', 'print', 'pdf', 'export', 'export-csv'] as $format) {
+                $names[] = "reports.{$slug}.{$format}";
+            }
+        }
+        return $names;
     }
 }

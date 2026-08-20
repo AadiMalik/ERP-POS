@@ -37,6 +37,10 @@ class EquityReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.equity-report.view');
+        $this->middleware('permission:reports.equity-report.print')->only(['print']);
+        $this->middleware('permission:reports.equity-report.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.equity-report.export')->only(['export']);
+        $this->middleware('permission:reports.equity-report.export-csv')->only(['exportCsv']);
 
         $this->equity_report_service = $equity_report_service;
         $this->business_service = $business_service;

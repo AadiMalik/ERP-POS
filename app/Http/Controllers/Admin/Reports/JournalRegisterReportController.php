@@ -37,6 +37,10 @@ class JournalRegisterReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.journal-register.view');
+        $this->middleware('permission:reports.journal-register.print')->only(['print']);
+        $this->middleware('permission:reports.journal-register.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.journal-register.export')->only(['export']);
+        $this->middleware('permission:reports.journal-register.export-csv')->only(['exportCsv']);
 
         $this->journal_register_report_service = $journal_register_report_service;
         $this->business_service = $business_service;

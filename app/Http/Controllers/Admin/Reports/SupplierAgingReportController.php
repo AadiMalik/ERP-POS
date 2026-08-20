@@ -36,6 +36,10 @@ class SupplierAgingReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.supplier-aging.view');
+        $this->middleware('permission:reports.supplier-aging.print')->only(['print']);
+        $this->middleware('permission:reports.supplier-aging.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.supplier-aging.export')->only(['export']);
+        $this->middleware('permission:reports.supplier-aging.export-csv')->only(['exportCsv']);
 
         $this->supplier_aging_report_service = $supplier_aging_report_service;
         $this->business_service = $business_service;

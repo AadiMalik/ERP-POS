@@ -14,6 +14,7 @@ use App\Models\Supplier;
 use App\Models\SupplierPayment;
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Services\Concrete\Admin\AccessControlService;
 use App\Traits\ResponseAPI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,15 +22,20 @@ use Illuminate\Support\Facades\Auth;
 /**
  * Global header search - aggregates a lightweight, permission-scoped preview
  * of matching records across modules. Each module is gated by that module's
- * own existing `.view` (or equivalent) permission from PermissionRegistry -
- * search itself is not a separate permission, it only ever surfaces records
- * the current user could already open directly.
+ * own existing `.view` (or equivalent) permission from PermissionRegistry,
+ * combined with the business's package/module access via AccessControlService
+ * - search itself is not a separate permission, it only ever surfaces
+ * records the current user could already open directly.
  */
 class SearchController extends Controller
 {
     use ResponseAPI;
 
     const RESULTS_PER_MODULE = 5;
+
+    public function __construct(private AccessControlService $access_control_service)
+    {
+    }
 
     public function globalSearch(Request $request)
     {
@@ -39,40 +45,39 @@ class SearchController extends Controller
             return $this->success(Message::SUCCESS, ['groups' => [], 'total' => 0]);
         }
 
-        $user = Auth::user();
         $groups = [];
 
-        if ($user->can('pos.access')) {
+        if ($this->access_control_service->allows('pos.access')) {
             $groups[] = $this->searchOrders($term);
             $groups[] = $this->searchOrderPayments($term);
         }
 
-        if ($user->can('user.view')) {
+        if ($this->access_control_service->allows('user.view')) {
             $groups[] = $this->searchUsers($term, true);  // customers
             $groups[] = $this->searchUsers($term, false); // employees / staff
         }
 
-        if ($user->can('supplier.view')) {
+        if ($this->access_control_service->allows('supplier.view')) {
             $groups[] = $this->searchSuppliers($term);
         }
 
-        if ($user->can('product.view')) {
+        if ($this->access_control_service->allows('product.view')) {
             $groups[] = $this->searchProducts($term);
         }
 
-        if ($user->can('purchase.view')) {
+        if ($this->access_control_service->allows('purchase.view')) {
             $groups[] = $this->searchPurchases($term);
         }
 
-        if ($user->can('warehouse.view')) {
+        if ($this->access_control_service->allows('warehouse.view')) {
             $groups[] = $this->searchWarehouses($term);
         }
 
-        if ($user->can('supplier-payment.view')) {
+        if ($this->access_control_service->allows('supplier-payment.view')) {
             $groups[] = $this->searchSupplierPayments($term);
         }
 
-        if ($user->can('expense.view')) {
+        if ($this->access_control_service->allows('expense.view')) {
             $groups[] = $this->searchExpenses($term);
         }
 

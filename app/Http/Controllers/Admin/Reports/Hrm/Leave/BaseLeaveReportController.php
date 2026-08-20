@@ -29,6 +29,10 @@ abstract class BaseLeaveReportController extends Controller
         protected DocumentSendLogService $document_send_log_service
     ) {
         $this->middleware('permission:' . $this->permissionName());
+        $this->middleware('permission:' . str_replace('.view', '.print', $this->permissionName()))->only(['print']);
+        $this->middleware('permission:' . str_replace('.view', '.pdf', $this->permissionName()))->only(['pdf']);
+        $this->middleware('permission:' . str_replace('.view', '.export', $this->permissionName()))->only(['export']);
+        $this->middleware('permission:' . str_replace('.view', '.export-csv', $this->permissionName()))->only(['exportCsv']);
     }
 
     abstract protected function permissionName(): string;

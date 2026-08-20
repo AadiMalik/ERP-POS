@@ -16,18 +16,26 @@
                     </button>
                 </div>
                 <div class="d-flex gap-2">
+                    @canAccess('reports.purchase-return-summary.print')
                     <a href="javascript:void(0);" id="btn_print" target="_blank" class="btn btn-outline-secondary">
                         <i class="fa fa-print"></i> Print
                     </a>
+                    @endcanAccess
+                    @canAccess('reports.purchase-return-summary.pdf')
                     <a href="javascript:void(0);" id="btn_pdf" target="_blank" class="btn btn-outline-danger">
                         <i class="fa fa-file-pdf"></i> PDF
                     </a>
+                    @endcanAccess
+                    @canAccess('reports.purchase-return-summary.export')
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
                         <i class="fa fa-file-excel"></i> Excel
                     </a>
+                    @endcanAccess
+                    @canAccess('reports.purchase-return-summary.export-csv')
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
                         <i class="fa fa-file-text"></i> CSV
                     </a>
+                    @endcanAccess
                 </div>
             </div>
             <div class="card-body">

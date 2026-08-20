@@ -73,42 +73,66 @@
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
+                        @canAccess('pos.access')
                         <div class="col-6 col-md-3 col-lg-2">
                             <a href="{{ route('order.index') }}" class="btn btn-outline-primary w-100"><i class="fa fa-shopping-cart me-1"></i> Orders</a>
                         </div>
+                        @endcanAccess
+                        @canAccess('purchase.view')
                         <div class="col-6 col-md-3 col-lg-2">
                             <a href="{{ route('purchase.index') }}" class="btn btn-outline-primary w-100"><i class="fa fa-truck me-1"></i> Purchases</a>
                         </div>
+                        @endcanAccess
+                        @canAccess('user.view')
                         <div class="col-6 col-md-3 col-lg-2">
                             <a href="{{ route('users.index') }}" class="btn btn-outline-primary w-100"><i class="fa fa-users me-1"></i> Customers</a>
                         </div>
+                        @endcanAccess
+                        @canAccess('supplier.view')
                         <div class="col-6 col-md-3 col-lg-2">
                             <a href="{{ route('supplier.index') }}" class="btn btn-outline-primary w-100"><i class="fa fa-industry me-1"></i> Suppliers</a>
                         </div>
+                        @endcanAccess
+                        @canAccess('product.view')
                         <div class="col-6 col-md-3 col-lg-2">
                             <a href="{{ route('product.index') }}" class="btn btn-outline-primary w-100"><i class="fa fa-box me-1"></i> Products</a>
                         </div>
+                        @endcanAccess
+                        @canAccess('stock.view')
                         <div class="col-6 col-md-3 col-lg-2">
                             <a href="{{ url('admin/product-variation-stock') }}" class="btn btn-outline-primary w-100"><i class="fa fa-warehouse me-1"></i> Inventory</a>
                         </div>
+                        @endcanAccess
+                        @canAccess('transfer-note.view')
                         <div class="col-6 col-md-3 col-lg-2">
                             <a href="{{ route('transfer-note.index') }}" class="btn btn-outline-primary w-100"><i class="fa fa-exchange-alt me-1"></i> Transfers</a>
                         </div>
+                        @endcanAccess
+                        @canAccess('account.view')
                         <div class="col-6 col-md-3 col-lg-2">
                             <a href="{{ url('admin/account') }}" class="btn btn-outline-primary w-100"><i class="fa fa-sitemap me-1"></i> Accounts</a>
                         </div>
+                        @endcanAccess
+                        @canAccess('journal-entry.view')
                         <div class="col-6 col-md-3 col-lg-2">
                             <a href="{{ route('journal-entry.index') }}" class="btn btn-outline-primary w-100"><i class="fa fa-book me-1"></i> Ledgers</a>
                         </div>
+                        @endcanAccess
+                        @canAccess('supplier-payment.view')
                         <div class="col-6 col-md-3 col-lg-2">
                             <a href="{{ route('supplier-payment.index') }}" class="btn btn-outline-primary w-100"><i class="fa fa-money-check-alt me-1"></i> Payments</a>
                         </div>
+                        @endcanAccess
+                        @canAccess('reports.balance-sheet.view', 'accounting')
                         <div class="col-6 col-md-3 col-lg-2">
                             <a href="{{ url('admin/reports/balance-sheet') }}" class="btn btn-outline-primary w-100"><i class="fa fa-chart-bar me-1"></i> Reports</a>
                         </div>
+                        @endcanAccess
+                        @canAccess('my-subscription.manage')
                         <div class="col-6 col-md-3 col-lg-2">
                             <a href="{{ route('my-subscription.index') }}" class="btn btn-outline-primary w-100"><i class="fa fa-crown me-1"></i> Subscription</a>
                         </div>
+                        @endcanAccess
                     </div>
                 </div>
             </div>

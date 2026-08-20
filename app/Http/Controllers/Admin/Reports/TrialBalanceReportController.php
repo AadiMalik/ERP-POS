@@ -36,6 +36,10 @@ class TrialBalanceReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.trial-balance.view');
+        $this->middleware('permission:reports.trial-balance.print')->only(['print']);
+        $this->middleware('permission:reports.trial-balance.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.trial-balance.export')->only(['export']);
+        $this->middleware('permission:reports.trial-balance.export-csv')->only(['exportCsv']);
 
         $this->trial_balance_report_service = $trial_balance_report_service;
         $this->business_service = $business_service;

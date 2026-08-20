@@ -31,6 +31,10 @@ class ExpenseDetailReportController extends Controller
         PosRegisterSessionService $pos_register_session_service
     ) {
         $this->middleware('permission:reports.expense-detail-report.view');
+        $this->middleware('permission:reports.expense-detail-report.print')->only(['print']);
+        $this->middleware('permission:reports.expense-detail-report.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.expense-detail-report.export')->only(['export']);
+        $this->middleware('permission:reports.expense-detail-report.export-csv')->only(['exportCsv']);
 
         $this->expense_detail_report_service = $expense_detail_report_service;
         $this->business_service = $business_service;

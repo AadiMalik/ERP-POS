@@ -17,15 +17,21 @@
                 </div>
                 @if ($lifecycle)
                     <div class="d-flex gap-2">
+                        @canAccess('reports.employee-lifecycle-report.print')
                         <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary">
                             <i class="fa fa-print"></i> Print
                         </a>
+                        @endcanAccess
+                        @canAccess('reports.employee-lifecycle-report.pdf')
                         <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger">
                             <i class="fa fa-file-pdf"></i> PDF
                         </a>
+                        @endcanAccess
+                        @canAccess('reports.employee-lifecycle-report.export')
                         <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
                             <i class="fa fa-file-excel"></i> Excel
                         </a>
+                        @endcanAccess
                     </div>
                 @endif
             </div>

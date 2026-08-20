@@ -37,6 +37,10 @@ class ExpenseReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.expense-report.view');
+        $this->middleware('permission:reports.expense-report.print')->only(['print']);
+        $this->middleware('permission:reports.expense-report.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.expense-report.export')->only(['export']);
+        $this->middleware('permission:reports.expense-report.export-csv')->only(['exportCsv']);
 
         $this->expense_report_service = $expense_report_service;
         $this->business_service = $business_service;

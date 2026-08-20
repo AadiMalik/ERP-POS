@@ -36,6 +36,10 @@ class AccountsPayableReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.accounts-payable.view');
+        $this->middleware('permission:reports.accounts-payable.print')->only(['print']);
+        $this->middleware('permission:reports.accounts-payable.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.accounts-payable.export')->only(['export']);
+        $this->middleware('permission:reports.accounts-payable.export-csv')->only(['exportCsv']);
 
         $this->accounts_payable_report_service = $accounts_payable_report_service;
         $this->business_service = $business_service;

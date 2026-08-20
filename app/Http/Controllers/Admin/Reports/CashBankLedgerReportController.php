@@ -40,6 +40,10 @@ class CashBankLedgerReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.cash-bank-ledger.view');
+        $this->middleware('permission:reports.cash-bank-ledger.print')->only(['print']);
+        $this->middleware('permission:reports.cash-bank-ledger.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.cash-bank-ledger.export')->only(['export']);
+        $this->middleware('permission:reports.cash-bank-ledger.export-csv')->only(['exportCsv']);
 
         $this->cash_bank_ledger_report_service = $cash_bank_ledger_report_service;
         $this->business_service = $business_service;

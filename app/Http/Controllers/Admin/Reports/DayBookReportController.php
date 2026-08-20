@@ -34,6 +34,10 @@ class DayBookReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.day-book.view');
+        $this->middleware('permission:reports.day-book.print')->only(['print']);
+        $this->middleware('permission:reports.day-book.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.day-book.export')->only(['export']);
+        $this->middleware('permission:reports.day-book.export-csv')->only(['exportCsv']);
 
         $this->day_book_report_service = $day_book_report_service;
         $this->business_service = $business_service;

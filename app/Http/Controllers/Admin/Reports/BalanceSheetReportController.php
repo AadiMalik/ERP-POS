@@ -33,6 +33,10 @@ class BalanceSheetReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.balance-sheet.view');
+        $this->middleware('permission:reports.balance-sheet.print')->only(['print']);
+        $this->middleware('permission:reports.balance-sheet.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.balance-sheet.export')->only(['export']);
+        $this->middleware('permission:reports.balance-sheet.export-csv')->only(['exportCsv']);
 
         $this->balance_sheet_report_service = $balance_sheet_report_service;
         $this->business_service = $business_service;

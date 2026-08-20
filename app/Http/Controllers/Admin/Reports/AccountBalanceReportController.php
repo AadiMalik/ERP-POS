@@ -36,6 +36,10 @@ class AccountBalanceReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.account-balance.view');
+        $this->middleware('permission:reports.account-balance.print')->only(['print']);
+        $this->middleware('permission:reports.account-balance.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.account-balance.export')->only(['export']);
+        $this->middleware('permission:reports.account-balance.export-csv')->only(['exportCsv']);
 
         $this->account_balance_report_service = $account_balance_report_service;
         $this->business_service = $business_service;

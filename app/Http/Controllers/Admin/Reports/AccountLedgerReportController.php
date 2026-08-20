@@ -36,6 +36,10 @@ class AccountLedgerReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.account-ledger.view');
+        $this->middleware('permission:reports.account-ledger.print')->only(['print']);
+        $this->middleware('permission:reports.account-ledger.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.account-ledger.export')->only(['export']);
+        $this->middleware('permission:reports.account-ledger.export-csv')->only(['exportCsv']);
 
         $this->account_ledger_report_service = $account_ledger_report_service;
         $this->business_service = $business_service;

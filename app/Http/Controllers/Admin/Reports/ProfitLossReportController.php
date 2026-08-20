@@ -33,6 +33,10 @@ class ProfitLossReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.profit-loss.view');
+        $this->middleware('permission:reports.profit-loss.print')->only(['print']);
+        $this->middleware('permission:reports.profit-loss.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.profit-loss.export')->only(['export']);
+        $this->middleware('permission:reports.profit-loss.export-csv')->only(['exportCsv']);
 
         $this->profit_loss_report_service = $profit_loss_report_service;
         $this->business_service = $business_service;

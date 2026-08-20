@@ -36,6 +36,10 @@ class SupplierLedgerReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.supplier-ledger.view');
+        $this->middleware('permission:reports.supplier-ledger.print')->only(['print']);
+        $this->middleware('permission:reports.supplier-ledger.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.supplier-ledger.export')->only(['export']);
+        $this->middleware('permission:reports.supplier-ledger.export-csv')->only(['exportCsv']);
 
         $this->supplier_ledger_report_service = $supplier_ledger_report_service;
         $this->business_service = $business_service;

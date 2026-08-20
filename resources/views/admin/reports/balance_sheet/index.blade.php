@@ -13,18 +13,26 @@
                     As of: {{ localDate($result['as_of_date']) }}
                 </div>
                 <div class="d-flex gap-2">
+                    @canAccess('reports.balance-sheet.print')
                     <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary">
                         <i class="fa fa-print"></i> Print
                     </a>
+                    @endcanAccess
+                    @canAccess('reports.balance-sheet.pdf')
                     <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger">
                         <i class="fa fa-file-pdf"></i> PDF
                     </a>
+                    @endcanAccess
+                    @canAccess('reports.balance-sheet.export')
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
                         <i class="fa fa-file-excel"></i> Excel
                     </a>
+                    @endcanAccess
+                    @canAccess('reports.balance-sheet.export-csv')
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
                         <i class="fa fa-file-text"></i> CSV
                     </a>
+                    @endcanAccess
                 </div>
             </div>
             <div class="card-body">

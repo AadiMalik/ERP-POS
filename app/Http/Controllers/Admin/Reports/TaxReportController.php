@@ -38,6 +38,10 @@ class TaxReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.tax-report.view');
+        $this->middleware('permission:reports.tax-report.print')->only(['print']);
+        $this->middleware('permission:reports.tax-report.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.tax-report.export')->only(['export']);
+        $this->middleware('permission:reports.tax-report.export-csv')->only(['exportCsv']);
 
         $this->tax_report_service = $tax_report_service;
         $this->business_service = $business_service;

@@ -42,6 +42,10 @@ class PurchaseReturnDetailReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.purchase-return-detail.view');
+        $this->middleware('permission:reports.purchase-return-detail.print')->only(['print']);
+        $this->middleware('permission:reports.purchase-return-detail.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.purchase-return-detail.export')->only(['export']);
+        $this->middleware('permission:reports.purchase-return-detail.export-csv')->only(['exportCsv']);
 
         $this->purchase_return_detail_report_service = $purchase_return_detail_report_service;
         $this->business_service = $business_service;

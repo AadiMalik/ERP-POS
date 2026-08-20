@@ -594,6 +594,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     }); // end module:inventory (supplier master)
 
     ////////////////////// Orders (centralized) ///////////////////////////
+    Route::group(['middleware' => ['module:pos']], function () {
     //order type
     Route::resource('order-type', App\Http\Controllers\Admin\OrderTypeController::class);
     Route::group(['prefix' => 'order-type'], function () {
@@ -625,6 +626,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('import/confirm', [App\Http\Controllers\Admin\DiscountController::class, 'importConfirm'])->name('discount-import-confirm');
         Route::get('export', [App\Http\Controllers\Admin\DiscountController::class, 'export'])->name('discount-export');
     });
+    }); // end module:pos (order-type/payment-method/order-source/discount)
 
     Route::group(['middleware' => ['module:accounting']], function () {
     //voucher
@@ -664,7 +666,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     }); // end module:pos (register & session)
 
     //order (centralized - shared by POS, Website, Mobile App, API)
-    Route::group(['middleware' => ['permission:pos.access']], function () {
+    Route::group(['middleware' => ['module:pos', 'permission:pos.access']], function () {
         // Registered before the resource route below so these literal paths
         // (e.g. GET order/search-products) are matched before the
         // resource's GET order/{order} (show) wildcard would otherwise
@@ -815,7 +817,11 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     });
     }); // end module:inventory (procurement & stock)
 
-    //expense detail (POS + Admin, any session/OT)
+    Route::group(['middleware' => ['module:accounting']], function () {
+    //expense detail (POS + Admin, any session/OT) - package-gated by
+    // `accounting` per SubscriptionModuleRegistry's `expense` entry (its
+    // parent module), not `pos` - it's usable from the POS screen but its
+    // subscription toggle lives under Accounting alongside admin-expense.
     Route::resource('expense', App\Http\Controllers\Admin\ExpenseController::class)->except(['show']);
     Route::group(['prefix' => 'expense'], function () {
         Route::post('data', [App\Http\Controllers\Admin\ExpenseController::class, 'getData']);
@@ -826,6 +832,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('import/confirm', [App\Http\Controllers\Admin\ExpenseController::class, 'importConfirm'])->name('expense-import-confirm');
         Route::get('export', [App\Http\Controllers\Admin\ExpenseController::class, 'export'])->name('expense-export');
     });
+    }); // end module:accounting (expense)
 
     Route::group(['middleware' => ['module:accounting']], function () {
     //admin expense (business/daily expenses, no POS session or OT)

@@ -36,6 +36,10 @@ class SupplierPaymentHistoryReportController extends Controller
         PrintSettingResolverService $print_setting_resolver
     ) {
         $this->middleware('permission:reports.supplier-payment-history.view');
+        $this->middleware('permission:reports.supplier-payment-history.print')->only(['print']);
+        $this->middleware('permission:reports.supplier-payment-history.pdf')->only(['pdf']);
+        $this->middleware('permission:reports.supplier-payment-history.export')->only(['export']);
+        $this->middleware('permission:reports.supplier-payment-history.export-csv')->only(['exportCsv']);
 
         $this->supplier_payment_history_report_service = $supplier_payment_history_report_service;
         $this->business_service = $business_service;
