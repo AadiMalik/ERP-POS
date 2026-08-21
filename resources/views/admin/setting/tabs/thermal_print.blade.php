@@ -98,6 +98,7 @@
         'date_time' => 'Local Date & Time',
         'order_source' => 'Order Source',
         'order_taker_name' => 'Order Taker Name',
+        'sale_type' => 'Sale Type',
     ] as $key => $label)
                         <div class="col-md-6">
                             <div class="form-check">
@@ -113,14 +114,15 @@
 
             <div class="thermal-field-group">
                 <h6>Item Table Columns</h6>
-                <p class="text-muted mb-2" style="font-size: 12px;">Product name is always shown; these columns are
-                    optional.</p>
+                <p class="text-muted mb-2" style="font-size: 12px;">Product name and Variation name are always shown;
+                    these columns are optional.</p>
                 <div class="row g-2">
                     @foreach ([
         'quantity' => 'Quantity',
         'unit' => 'Unit',
         'unit_price' => 'Unit Price',
         'line_total' => 'Line Total',
+        'item_sale_type' => 'Sale Type',
     ] as $key => $label)
                         <div class="col-md-6">
                             <div class="form-check">

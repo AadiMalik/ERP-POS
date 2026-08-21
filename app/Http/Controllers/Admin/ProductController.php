@@ -42,7 +42,7 @@ class ProductController extends Controller
         BarcodeService $barcode_service,
         SaleTypeService $sale_type_service
     ) {
-        $this->middleware('permission:product.view')->only(['index', 'getData', 'byBusiness', 'byBrand', 'byCategory', 'variations', 'byProduct', 'getImages']);
+        $this->middleware('permission:product.view')->only(['index', 'getData', 'byBusiness', 'byBrand', 'byCategory', 'variations', 'byProduct', 'getImages', 'variationPriceHistory']);
         $this->middleware('permission:product.create')->only(['create', 'uploadImages']);
         $this->middleware('permission:product.create|product.edit')->only(['store']);
         $this->middleware('permission:product.edit')->only(['edit', 'variationStatus', 'setDefaultImage', 'saveImageSorting', 'backfillBarcodes']);
@@ -313,6 +313,18 @@ class ProductController extends Controller
         try {
             $variations = $this->product_service->getVariations($product_id);
             return $this->success(Message::SUCCESS, $variations);
+        } catch (Exception $e) {
+            return $this->error(
+                Message::ERROR
+            );
+        }
+    }
+
+    public function variationPriceHistory($product_variation_id)
+    {
+        try {
+            $history = $this->product_service->getVariationPriceHistory($product_variation_id);
+            return $this->success(Message::SUCCESS, $history);
         } catch (Exception $e) {
             return $this->error(
                 Message::ERROR

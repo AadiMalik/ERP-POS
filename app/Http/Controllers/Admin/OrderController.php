@@ -254,9 +254,13 @@ class OrderController extends Controller
         }
 
         if (!empty($obj['products']) && !Auth::user()->can('order.price.change')) {
+            // Only strip the manual price override here - picking a per-line
+            // Sale Type is independently gated by pos_setting.allow_mixed_sale_types
+            // (enforced in OrderService::saveLinesAndComputeTotals()), not by
+            // this permission, so a cashier without price-change rights must
+            // still be able to mark a single item Wholesale/etc.
             foreach ($obj['products'] as $index => $line) {
                 unset($obj['products'][$index]['unit_price']);
-                unset($obj['products'][$index]['sale_type_id']);
             }
         }
 

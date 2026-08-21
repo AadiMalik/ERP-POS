@@ -136,22 +136,16 @@
                                         <div id="creditLimitHint" class="pos-field-floating-hint d-none"></div>
                                     </div>
 
-                                    <div class="pos-field pos-field-saletype pos-pill-group" data-select-target="sale_type_id">
-                                        <span class="pos-field-label">Sale Type</span>
-                                        <select class="d-none" id="sale_type_id">
-                                            @foreach ($sale_types as $item)
-                                                <option value="{{ $item->sale_type_id }}" {{ $item->is_default ? 'selected' : '' }}>
-                                                    {{ $item->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <div class="pos-pill-buttons" id="saleTypePills">
-                                            @foreach ($sale_types as $item)
-                                                <button type="button" class="pos-pill {{ $item->is_default ? 'active' : '' }}"
-                                                    data-value="{{ $item->sale_type_id }}">{{ $item->name }}</button>
-                                            @endforeach
-                                        </div>
-                                    </div>
+                                    {{-- Order-level Sale Type control lives in .pos-cart-header, next to
+                                         Clear Cart, for prominence - #sale_type_id here is the single
+                                         source of truth the cart-header pills (#saleTypePills) drive. --}}
+                                    <select class="d-none" id="sale_type_id">
+                                        @foreach ($sale_types as $item)
+                                            <option value="{{ $item->sale_type_id }}" {{ $item->is_default ? 'selected' : '' }}>
+                                                {{ $item->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
 
                                     <div class="pos-field pos-field-delivery d-none" id="deliveryAddressWrap">
                                         <label class="pos-field-label" for="delivery_address">Delivery Address <span class="text-danger">*</span></label>
@@ -233,11 +227,32 @@
                         <div class="pos-cart-header">
                             <h6 class="mb-0">Cart <span class="pos-cart-count" id="cartItemCount">(0 Items)</span></h6>
                             <div class="d-flex align-items-center gap-2">
+                                {{-- Order-level Sale Type - prominent, right next to Clear Cart, so
+                                     it applies immediately to every item currently in the cart (see
+                                     repriceCartForSaleType() in pos-screen.js) and to anything added
+                                     afterward. --}}
+                                <div class="pos-cart-saletype pos-pill-group" data-select-target="sale_type_id">
+                                    <div class="pos-pill-buttons" id="saleTypePills">
+                                        @foreach ($sale_types as $item)
+                                            <button type="button" class="pos-pill {{ $item->is_default ? 'active' : '' }}"
+                                                data-value="{{ $item->sale_type_id }}">{{ $item->name }}</button>
+                                        @endforeach
+                                    </div>
+                                </div>
                                 <span class="pos-cart-order-no d-none" id="cartOrderNoBadge"></span>
                                 <button type="button" class="btn btn-sm pos-clear-cart-btn d-none" id="clearCartBtn">
                                     <i class="fa fa-trash"></i> Clear
                                 </button>
                             </div>
+                        </div>
+                        <div class="pos-cart-columns">
+                            <span class="pos-cart-col-items">Items</span>
+                            <span class="pos-cart-col-price">Price</span>
+                            @if ($pos_setting->enable_discount && in_array($pos_setting->discount_level, ['line', 'both']))
+                                <span class="pos-cart-col-discount">Discount</span>
+                            @endif
+                            <span class="pos-cart-col-qty">Qty</span>
+                            <span class="pos-cart-col-total">Total</span>
                         </div>
                         <div class="pos-cart-scroll">
                             <div id="cartRows" class="pos-cart-lines">

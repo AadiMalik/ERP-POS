@@ -452,6 +452,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('variations/{product_id}', [App\Http\Controllers\Admin\ProductController::class, 'variations'])->name('product-variations');
         Route::post('variation/status/{variation_id}', [App\Http\Controllers\Admin\ProductController::class, 'variationStatus']);
         Route::delete('variation/delete/{variation_id}', [App\Http\Controllers\Admin\ProductController::class, 'variationDestroy']);
+        Route::get('variation-price-history/{product_variation_id}', [App\Http\Controllers\Admin\ProductController::class, 'variationPriceHistory']);
         // images
         Route::get('images/{productId}', [App\Http\Controllers\Admin\ProductController::class, 'getImages']);
         Route::post('image/upload', [App\Http\Controllers\Admin\ProductController::class, 'uploadImages']);

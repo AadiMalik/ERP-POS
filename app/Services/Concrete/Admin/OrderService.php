@@ -853,6 +853,14 @@ class OrderService
         // Sale Type server-side regardless of what the client sent.
         $allow_mixed_sale_types = (bool) ($pos_setting->allow_mixed_sale_types ?? true);
 
+        // Master switch for manual price editing - when off, a manually sent
+        // unit_price is ignored server-side even if the controller let it
+        // through (e.g. a stale/tampered request), so this is the
+        // authoritative enforcement point, same as allow_mixed_sale_types
+        // above. The order.price.change permission is what gates the price
+        // field being editable in the UI in the first place.
+        $allow_price_change_in_cart = (bool) ($pos_setting->allow_price_change_in_cart ?? false);
+
         // Each line is priced by whichever Sale Type applies to it (its own
         // override, else the order's default) - group variation IDs by that
         // sale type first so VariationPricingService is called once per
@@ -914,7 +922,7 @@ class OrderService
             // keeps authorization in controllers). Any other line is priced by
             // the VariationPricingService result computed above, keyed by this
             // line's own Sale Type (or the order's default Sale Type).
-            $manual_override = isset($line['unit_price']) && (float) $line['unit_price'] > 0;
+            $manual_override = $allow_price_change_in_cart && isset($line['unit_price']) && (float) $line['unit_price'] > 0;
 
             $unit_price = $manual_override
                 ? (float) $line['unit_price']

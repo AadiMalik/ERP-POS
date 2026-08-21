@@ -33,6 +33,7 @@ class PosSetting extends Model
         'show_product_image',
         'enable_hold_order',
         'allow_mixed_sale_types',
+        'allow_price_change_in_cart',
 
         'createdby_id',
         'updatedby_id',

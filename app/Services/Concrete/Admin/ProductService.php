@@ -583,6 +583,28 @@ class ProductService
             ->get();
     }
 
+    /**
+     * Read-only audit trail for a variation's per-sale-type prices - rows are
+     * written by savePricingForVariation() (and the import path's mirror of
+     * it) whenever a price actually changes, so this just surfaces them.
+     */
+    public function getVariationPriceHistory($product_variation_id)
+    {
+        return ProductVariationPriceHistory::with('saleType:sale_type_id,name', 'changedby:id,name')
+            ->where('product_variation_id', $product_variation_id)
+            ->orderByDesc('date_created')
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'date_created' => $row->date_created ? localDateTime($row->date_created) : '-',
+                    'sale_type_name' => $row->saleType->name ?? '-',
+                    'old_price' => $row->old_price !== null ? currency($row->old_price) : '-',
+                    'new_price' => currency($row->new_price),
+                    'changed_by' => $row->changedby->name ?? '-',
+                ];
+            });
+    }
+
     public function variationStatus($product_variation_id)
     {
         return $this->model_product_variation->update([

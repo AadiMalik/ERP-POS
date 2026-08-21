@@ -29,12 +29,14 @@ return [
         'date_time'            => true,
         'order_source'         => false,
         'order_taker_name'     => true,
+        'sale_type'            => true,
 
-        // Item table columns (product name itself is always shown)
+        // Item table columns (product name + variation name are always shown)
         'quantity'              => true,
         'unit'                  => true,
         'unit_price'            => true,
         'line_total'            => true,
+        'item_sale_type'        => true,
 
         // Totals
         'subtotal'              => true,

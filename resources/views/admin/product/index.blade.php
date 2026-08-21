@@ -147,6 +147,37 @@
             </div>
         </div>
 
+        {{-- variation price history modal --}}
+        <div class="modal fade" id="priceHistoryModal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5>Price History</h5>
+                        <button class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Sale Type</th>
+                                        <th>Old Price</th>
+                                        <th>New Price</th>
+                                        <th>Changed By</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="priceHistoryTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
         {{-- images modal --}}
         <div class="modal fade" id="imageModal" tabindex="-1">
             <div class="modal-dialog modal-lg">
@@ -403,6 +434,33 @@
             });
         });
 
+
+        //variation price history
+        $(document).on('click', '.view-price-history', function() {
+            let product_variation_id = $(this).data('id');
+
+            ajaxRequest({
+                url: url_local + '/admin/product/variation-price-history/' + product_variation_id,
+                method: 'GET'
+            }).then((res) => {
+                let rows = '';
+
+                (res.Data || []).forEach(function(item) {
+                    rows += `<tr>
+                        <td>${item.date_created}</td>
+                        <td>${item.sale_type_name}</td>
+                        <td>${item.old_price}</td>
+                        <td>${item.new_price}</td>
+                        <td>${item.changed_by}</td>
+                    </tr>`;
+                });
+
+                $('#priceHistoryTableBody').html(rows || '<tr><td colspan="5" class="text-center">No price changes recorded yet.</td></tr>');
+                $('#priceHistoryModal').modal('show');
+            }).catch((err) => {
+                errorMessage(err.Message);
+            });
+        });
 
         //product images
 

@@ -99,6 +99,13 @@
     font-weight: 600;
 }
 
+.thermal-receipt .tr-item-variation,
+.thermal-receipt .tr-item-saletype {
+    font-weight: 400;
+    font-size: 8.5px;
+    color: #333;
+}
+
 .thermal-receipt .tr-totals {
     width: 100%;
     margin-top: 1mm;

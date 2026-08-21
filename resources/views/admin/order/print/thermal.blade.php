@@ -43,6 +43,8 @@
     if ($thermal_config->isVisible('line_total')) {
         $item_columns[] = 'line_total';
     }
+
+    $show_item_sale_type = $thermal_config->isVisible('item_sale_type');
 @endphp
 @extends('layouts.print')
 
@@ -98,7 +100,7 @@
             <hr class="tr-divider">
         @endif
 
-        @if ($thermal_config->isVisible('customer_name') || $thermal_config->isVisible('order_type') || $thermal_config->isVisible('order_no') || $thermal_config->isVisible('date_time') || $thermal_config->isVisible('order_source') || $thermal_config->isVisible('order_taker_name'))
+        @if ($thermal_config->isVisible('customer_name') || $thermal_config->isVisible('order_type') || $thermal_config->isVisible('order_no') || $thermal_config->isVisible('date_time') || $thermal_config->isVisible('order_source') || $thermal_config->isVisible('order_taker_name') || $thermal_config->isVisible('sale_type'))
             <div class="tr-meta">
                 @if ($thermal_config->isVisible('order_no'))
                     <div class="tr-row">
@@ -132,6 +134,13 @@
                     <div class="tr-row">
                         <span class="tr-label">Source:</span>
                         <span class="tr-value">{{ $order->orderSource->name }}</span>
+                    </div>
+                @endif
+
+                @if ($thermal_config->isVisible('sale_type') && !empty($order->saleType->name))
+                    <div class="tr-row">
+                        <span class="tr-label">Sale Type:</span>
+                        <span class="tr-value">{{ $order->saleType->name }}</span>
                     </div>
                 @endif
 
@@ -176,7 +185,15 @@
             <tbody>
                 @forelse ($order->details as $detail)
                     <tr>
-                        <td class="tr-item-name">{{ $detail->product->name ?? 'N/A' }}</td>
+                        <td class="tr-item-name">
+                            {{ $detail->product->name ?? 'N/A' }}
+                            @if (!empty($detail->productVariation->name))
+                                <br><span class="tr-item-variation">{{ $detail->productVariation->name }}</span>
+                            @endif
+                            @if ($show_item_sale_type && !empty(($detail->saleType->name ?? $order->saleType->name ?? null)))
+                                <br><span class="tr-item-saletype">{{ $detail->saleType->name ?? $order->saleType->name }}</span>
+                            @endif
+                        </td>
                         @if (in_array('quantity', $item_columns))
                             <td class="text-right">{{ decimal($detail->quantity) }}</td>
                         @endif

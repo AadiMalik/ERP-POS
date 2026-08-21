@@ -465,6 +465,7 @@ class SettingController extends Controller
             'show_product_image'       => 'nullable|boolean',
             'enable_hold_order'        => 'nullable|boolean',
             'allow_mixed_sale_types'   => 'nullable|boolean',
+            'allow_price_change_in_cart' => 'nullable|boolean',
         ];
 
         $validate = Validator::make($request->all(), $rules);

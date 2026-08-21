@@ -41,6 +41,14 @@
         return !!PERM[perm];
     }
 
+    // Price editing needs both the business-level master switch (POS
+    // Settings -> Allow Price Change in Cart) and the per-user permission -
+    // the setting can veto everyone regardless of permission, matching
+    // OrderService::saveLinesAndComputeTotals()'s server-side enforcement.
+    function canChangePrice() {
+        return !!SETTING.allow_price_change_in_cart && can('order.price.change');
+    }
+
     function money(v) {
         v = parseFloat(v || 0);
         if (isNaN(v)) v = 0;
@@ -267,6 +275,11 @@
 
             if (!line.manual_override) {
                 repriceLineForSaleType(line);
+            } else {
+                // Price stays as manually entered, but the row still needs to
+                // re-render so the select reflects the new value and the
+                // "different from order" indicator (see renderCart()) updates.
+                renderCart();
             }
         });
 
@@ -1084,7 +1097,7 @@
             var unitCell = '<span class="text-muted">' + escapeHtml(line.unit_name || '') + '</span>' +
                 manualOverrideBadge(line);
 
-            var priceCell = can('order.price.change')
+            var priceCell = canChangePrice()
                 ? '<input type="number" step="0.01" min="0" class="line-price" value="' + line.unit_price + '">'
                 : money(line.unit_price);
 
@@ -1093,8 +1106,16 @@
                     '<input type="number" step="0.01" min="0" max="100" class="line-discount" value="' + line.discount + '"><span>%</span></div>'
                 : '<div class="cart-line-discount"></div>';
 
+            // "Order default" (line.sale_type_id === null) always matches the
+            // order - only a line with its own override that differs from
+            // the order's current Sale Type is flagged as mixed.
+            var orderSaleTypeId = $('#sale_type_id').val();
+            var isOverride = !!line.sale_type_id && line.sale_type_id !== orderSaleTypeId;
+
             var saleTypeCell = showLineSaleType
-                ? '<select class="line-sale-type form-select form-select-sm">' + saleTypeOptionsHtml(line.sale_type_id) + '</select>'
+                ? '<select class="line-sale-type' + (isOverride ? ' line-sale-type-override' : '') + '"' +
+                    (isOverride ? ' title="Priced under a different Sale Type than the order"' : '') + '>' +
+                    saleTypeOptionsHtml(line.sale_type_id) + '</select>'
                 : '';
 
             var imgHtml = line.image
@@ -1141,7 +1162,7 @@
 
         line.quantity = parseFloat($row.find('.line-qty').val()) || 0;
 
-        if (can('order.price.change')) {
+        if (canChangePrice()) {
             var newPrice = parseFloat($row.find('.line-price').val()) || 0;
             if (newPrice !== line.unit_price) {
                 line.manual_override = true;

@@ -98,6 +98,10 @@
                                           data-is-manual='{{ $var->barcode_is_manual ? 1 : 0 }}'>
                                           <i class='fa fa-barcode'></i>
                                     </a>
+                                    <a class='btn btn-outline-primary view-price-history' title="Price History"
+                                          data-id='{{ $var->product_variation_id }}'>
+                                          <i class='fa fa-clock-rotate-left'></i>
+                                    </a>
                                     <a class='btn btn-outline-danger delete-variation' title="Delete"
                                           data-id='{{ $var->product_variation_id }}'>
                                           <i class='fa fa-trash'></i>

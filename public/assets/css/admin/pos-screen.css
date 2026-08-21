@@ -856,6 +856,74 @@
     color: #fff;
 }
 
+/* Order-level Sale Type pills, compacted to fit the dark cart header next
+   to Clear Cart - same .pos-pill-group/.pos-pill wiring as everywhere else,
+   just themed for a dark background instead of the light toolbar. */
+.pos-cart-saletype .pos-pill-buttons {
+    height: auto;
+    gap: 0.25rem;
+}
+
+.pos-cart-saletype .pos-pill {
+    background: rgba(255, 255, 255, .12);
+    border-color: rgba(255, 255, 255, .3);
+    color: #fff;
+    font-size: 0.68rem;
+    padding: 0.22rem 0.55rem;
+}
+
+.pos-cart-saletype .pos-pill:hover {
+    border-color: #fff;
+}
+
+.pos-cart-saletype .pos-pill.active {
+    background: #fff;
+    border-color: #fff;
+    color: var(--pos-primary);
+}
+
+/* Column header row above the cart lines - grid-column indices mirror
+   .cart-line's own grid-template-columns exactly, so labels line up with
+   their cells regardless of whether the Discount column is present. */
+.pos-cart-columns {
+    display: grid;
+    grid-template-columns: 34px 1fr 56px 60px 88px 50px 20px;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--pos-muted);
+    background: #f9f9fc;
+    border-bottom: 1px solid var(--pos-border);
+}
+
+.pos-cart-col-items {
+    grid-column: 2;
+}
+
+.pos-cart-col-price {
+    grid-column: 3;
+    text-align: right;
+}
+
+.pos-cart-col-discount {
+    grid-column: 4;
+    text-align: right;
+}
+
+.pos-cart-col-qty {
+    grid-column: 5;
+    text-align: center;
+}
+
+.pos-cart-col-total {
+    grid-column: 6;
+    text-align: right;
+}
+
 .pos-cart-scroll {
     flex: 1 1 auto;
     min-height: 0;
@@ -931,6 +999,40 @@
     gap: 0.4rem;
     font-size: 0.68rem;
     color: var(--pos-muted);
+}
+
+/* Per-line Sale Type override - compact pill-style select so a mixed-type
+   cart doesn't look cluttered next to the unit/qty meta text. */
+.line-sale-type {
+    margin-top: 0.15rem;
+    height: 20px;
+    font-size: 0.64rem;
+    font-weight: 600;
+    color: var(--pos-text);
+    background: #f3f3f7;
+    border: 1px solid var(--pos-border);
+    border-radius: 1rem;
+    padding: 0 1.2rem 0 0.5rem;
+    max-width: 100%;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='6'%3E%3Cpath d='M0 0l4 6 4-6z' fill='%23888'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.45rem center;
+}
+
+.line-sale-type:hover,
+.line-sale-type:focus {
+    border-color: var(--pos-primary);
+    outline: none;
+}
+
+/* Flagged when the cashier picked a Sale Type different from the current
+   order-level one - an amber accent is enough to read as "different" at a
+   glance without adding another badge/label to an already tight row. */
+.line-sale-type-override {
+    background-color: #fff7e6;
+    border-color: var(--pos-warning, #f5a623);
+    color: #9a6700;
 }
 
 .cart-line-price {

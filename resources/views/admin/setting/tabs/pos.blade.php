@@ -92,6 +92,13 @@
         </div>
 
         <div class="col-md-3 mb-3">
+            <label class="d-block">Allow Price Change in Cart</label>
+            <input type="checkbox" class="form-check-input" name="allow_price_change_in_cart" value="1"
+                {{ $pos_setting->allow_price_change_in_cart ? 'checked' : '' }}>
+            <small class="text-muted d-block">When off, no cashier can edit a line's price in the cart. When on, the "Change Price" permission decides who can.</small>
+        </div>
+
+        <div class="col-md-3 mb-3">
             <label class="d-block">Auto Print Invoice</label>
             <input type="checkbox" class="form-check-input" name="auto_print_invoice" value="1"
                 {{ $pos_setting->auto_print_invoice ? 'checked' : '' }}>
@@ -151,32 +158,36 @@
     </div>
 </form>
 
-<hr>
+@can('sale-type.view')
+    <hr>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h5 class="mb-0">Sale Types</h5>
-        <small class="text-muted">Only the sale types you keep Active here appear on Product Variations and in POS.</small>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h5 class="mb-0">Sale Types</h5>
+            <small class="text-muted">Only the sale types you keep Active here appear on Product Variations and in POS.</small>
+        </div>
+        @can('sale-type.create')
+            <button type="button" id="createNewSaleType" class="btn rounded-pill btn-primary">
+                <i class="icon-base fa fa-plus mr-5"></i>Add Sale Type
+            </button>
+        @endcan
     </div>
-    <button type="button" id="createNewSaleType" class="btn rounded-pill btn-primary">
-        <i class="icon-base fa fa-plus mr-5"></i>Add Sale Type
-    </button>
-</div>
 
-<div class="table-responsive">
-    <table class="table" id="saleTypeTable">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Code</th>
-                <th>Default</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="saleTypeTableBody"></tbody>
-    </table>
-</div>
+    <div class="table-responsive">
+        <table class="table" id="saleTypeTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Default</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="saleTypeTableBody"></tbody>
+        </table>
+    </div>
+@endcan
 
 <div class="modal fade" id="saleTypeModal" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog">
@@ -223,29 +234,49 @@
 
 @push('js')
 <script>
+    // Row-level actions are rendered client-side (see renderSaleTypeRows()
+    // below), so - unlike a Blade permission check on a static button - these
+    // have to be read into JS explicitly. Server-side middleware on
+    // SaleTypeController is still the real enforcement; this only keeps the
+    // UI from offering actions a "User does not have the right permissions."
+    // error would immediately reject.
+    var canEditSaleType = @json(auth()->user()->can('sale-type.edit'));
+    var canDeleteSaleType = @json(auth()->user()->can('sale-type.delete'));
+    var canStatusSaleType = @json(auth()->user()->can('sale-type.status'));
+
     function renderSaleTypeRows(sale_types) {
         let rows = '';
 
         (sale_types || []).forEach(function (item) {
             let checked = item.status === 'active' ? 'checked' : '';
 
+            let statusCell = canStatusSaleType
+                ? `<div class="form-check form-switch mb-0">
+                        <input class="form-check-input statusSaleType" type="checkbox" data-id="${item.sale_type_id}" ${checked}>
+                    </div>`
+                : `<span class="badge ${item.status === 'active' ? 'bg-label-success' : 'bg-label-secondary'}">${item.status === 'active' ? 'Active' : 'Inactive'}</span>`;
+
+            let actionCell = '';
+            if (canEditSaleType) {
+                actionCell += `<a class="btn btn-icon btn-outline-primary mr-2" id="editSaleType" href="javascript:void(0)" data-id="${item.sale_type_id}">
+                        <i class="fa fa-pencil"></i>
+                    </a>`;
+            }
+            if (canDeleteSaleType) {
+                actionCell += `<a class="btn btn-icon btn-outline-danger" id="deleteSaleType" data-id="${item.sale_type_id}">
+                        <i class="fa fa-trash"></i>
+                    </a>`;
+            }
+            if (!actionCell) {
+                actionCell = '<span class="text-muted">-</span>';
+            }
+
             rows += `<tr>
                 <td>${item.name}</td>
                 <td>${item.code}</td>
                 <td>${item.is_default == 1 ? '<span class="badge bg-label-primary">Default</span>' : '-'}</td>
-                <td>
-                    <div class="form-check form-switch mb-0">
-                        <input class="form-check-input statusSaleType" type="checkbox" data-id="${item.sale_type_id}" ${checked}>
-                    </div>
-                </td>
-                <td>
-                    <a class="btn btn-icon btn-outline-primary mr-2" id="editSaleType" href="javascript:void(0)" data-id="${item.sale_type_id}">
-                        <i class="fa fa-pencil"></i>
-                    </a>
-                    <a class="btn btn-icon btn-outline-danger" id="deleteSaleType" data-id="${item.sale_type_id}">
-                        <i class="fa fa-trash"></i>
-                    </a>
-                </td>
+                <td>${statusCell}</td>
+                <td>${actionCell}</td>
             </tr>`;
         });
 
@@ -253,6 +284,9 @@
     }
 
     function loadSaleTypes() {
+        if (!$('#saleTypeTableBody').length) {
+            return;
+        }
         ajaxRequest({ url: url_local + '/admin/sale-type/list' }).then(function (response) {
             renderSaleTypeRows(response.Data);
         });
