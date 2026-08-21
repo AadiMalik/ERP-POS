@@ -34,6 +34,7 @@
         payment_mode: null, // null | 'single' | 'multi'
         selected_payment_method_id: null,
         reports_viewed_session_id: null,
+        default_sale_type_id: null,
     };
 
     function can(perm) {
@@ -107,6 +108,8 @@
         if ($('#changeBranchModal').length) {
             state.change_branch_modal = new bootstrap.Modal(document.getElementById('changeBranchModal'));
         }
+
+        state.default_sale_type_id = $('#sale_type_id').val() || null;
 
         renderPaymentMethodTiles();
         selectDefaultPaymentMethod();
@@ -255,6 +258,18 @@
             updateLineFromRow(key, $(this).closest('.cart-line'));
         });
 
+        $('#cartRows').on('change', '.line-sale-type', function () {
+            var key = $(this).closest('.cart-line').data('key');
+            var line = state.cart.find(function (l) { return l.line_key === key; });
+            if (!line) return;
+
+            line.sale_type_id = $(this).val() || null;
+
+            if (!line.manual_override) {
+                repriceLineForSaleType(line);
+            }
+        });
+
         $('#cartRows').on('click', '.line-remove', function () {
             var key = $(this).closest('.cart-line').data('key');
             state.cart = state.cart.filter(function (l) { return l.line_key !== key; });
@@ -313,8 +328,10 @@
             $select.val($(this).data('value')).trigger('change');
         });
 
-        $('#order_type_id, #order_source_id, #paymentMethodSelect').on('change', syncPillsFromSelect);
+        $('#order_type_id, #order_source_id, #sale_type_id, #paymentMethodSelect').on('change', syncPillsFromSelect);
         syncPillsFromSelect();
+
+        $('#sale_type_id').on('change', repriceCartForSaleType);
 
         $('#order_type_id').on('change', updateDeliveryAddressVisibility);
         updateDeliveryAddressVisibility();
@@ -638,7 +655,7 @@
     function searchProducts(term, isScan) {
         ajaxRequest({
             url: URLS.search_products,
-            data: { business_id: CFG.business_id, term: term },
+            data: { business_id: CFG.business_id, branch_id: CFG.branch_id, sale_type_id: $('#sale_type_id').val(), term: term },
         })
             .then(function (response) {
                 var results = response.Data || [];
@@ -674,13 +691,14 @@
             var product_name = (item.product && item.product.name) || '';
             var variation_name = item.name || '';
             var unit_name = primaryUnitOf(item).name;
+            var displayPrice = item.resolved_price !== undefined ? item.resolved_price : item.sale_price;
 
             var $row = $(
                 '<a href="javascript:void(0);" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">' +
                     '<span>' + escapeHtml(product_name) + (variation_name ? ' - ' + escapeHtml(variation_name) : '') +
                         '<small class="text-muted d-block">' + escapeHtml(item.sku || '') + ' ' + escapeHtml(item.barcode || '') + '</small>' +
                     '</span>' +
-                    '<span class="fw-bold">' + money(item.sale_price) + ' / ' + escapeHtml(unit_name) + '</span>' +
+                    '<span class="fw-bold">' + money(displayPrice) + ' / ' + escapeHtml(unit_name) + '</span>' +
                 '</a>'
             );
 
@@ -757,13 +775,94 @@
             unit_id: unit_id,
             unit_name: primary.name,
             quantity: quantity,
-            unit_price: pv.sale_price || 0,
-            discount: 0,
+            // resolved_price/resolved_discount_percentage come from
+            // VariationPricingService via searchProducts()/getProductsByCategory()
+            // (see OrderService::applyResolvedPricing()), resolved against the
+            // currently selected #sale_type_id - sale_price/0 are the fallback
+            // for any caller that hasn't gone through that resolution.
+            unit_price: (pv.resolved_price !== undefined ? pv.resolved_price : pv.sale_price) || 0,
+            discount: pv.resolved_discount_percentage || 0,
+            // null = inherits the order-level Sale Type (re-priced whenever it
+            // changes); set only when the cashier overrides this one line's
+            // Sale Type (see .line-sale-type, allowed only when
+            // pos_setting.allow_mixed_sale_types is on).
+            sale_type_id: null,
+            manual_override: false,
             notes: '',
             image: overrides.image || null,
         });
 
         renderCart();
+    }
+
+    // Re-resolves every cart line that inherits the order-level Sale Type
+    // (line.sale_type_id is null) against the newly selected Sale Type.
+    // Lines the cashier has already hand-edited (manual_override) or given
+    // their own Sale Type override are left untouched.
+    function repriceCartForSaleType() {
+        var saleTypeId = $('#sale_type_id').val();
+
+        var variationIds = state.cart
+            .filter(function (l) { return !l.manual_override && !l.sale_type_id; })
+            .map(function (l) { return l.product_variation_id; });
+
+        if (!variationIds.length) {
+            return;
+        }
+
+        ajaxRequest({
+            url: URLS.resolve_prices,
+            method: 'POST',
+            data: {
+                sale_type_id: saleTypeId,
+                product_variation_ids: variationIds,
+            },
+        })
+            .then(function (response) {
+                var resolved = response.Data || {};
+
+                state.cart.forEach(function (line) {
+                    if (line.manual_override || line.sale_type_id) return;
+
+                    var r = resolved[line.product_variation_id];
+                    if (!r) return;
+
+                    line.unit_price = r.price;
+                    line.discount = r.discount_percentage;
+                });
+
+                renderCart();
+            })
+            .catch(function () {
+                // Re-pricing failure shouldn't block the cashier - the cart
+                // keeps its previous prices and the server re-resolves
+                // authoritatively again at save time anyway.
+            });
+    }
+
+    // Re-resolves a single line against its own Sale Type override - used
+    // when the cashier picks a per-line Sale Type different from the
+    // order-level default (see .line-sale-type in renderCart()).
+    function repriceLineForSaleType(line) {
+        ajaxRequest({
+            url: URLS.resolve_prices,
+            method: 'POST',
+            data: {
+                sale_type_id: line.sale_type_id || $('#sale_type_id').val(),
+                product_variation_ids: [line.product_variation_id],
+            },
+        })
+            .then(function (response) {
+                var r = (response.Data || {})[line.product_variation_id];
+                if (!r || line.manual_override) return;
+
+                line.unit_price = r.price;
+                line.discount = r.discount_percentage;
+                renderCart();
+            })
+            .catch(function () {
+                // Same rationale as repriceCartForSaleType() above.
+            });
     }
 
     // ==============================
@@ -774,7 +873,7 @@
 
         ajaxRequest({
             url: URLS.products_by_category,
-            data: { business_id: CFG.business_id, category_id: category_id || '' },
+            data: { business_id: CFG.business_id, branch_id: CFG.branch_id, sale_type_id: $('#sale_type_id').val(), category_id: category_id || '' },
         })
             .then(function (response) {
                 renderProductGrid(response.Data || []);
@@ -813,6 +912,8 @@
                 ? '<span class="product-card-variations-badge">' + variations.length + ' options</span>'
                 : '';
 
+            var firstDisplayPrice = firstVariation.resolved_price !== undefined ? firstVariation.resolved_price : firstVariation.sale_price;
+
             $card.html(
                 '<div class="product-card-img-wrap">' + imgHtml + badgeHtml + '</div>' +
                 '<div class="product-card-body">' +
@@ -820,7 +921,7 @@
                     '<div class="product-card-name">' + escapeHtml(product.name || '') + '</div>' +
                     '<div class="product-card-sku">' + escapeHtml(firstVariation.sku || '') + '</div>' +
                     '<div class="product-card-footer">' +
-                        '<span class="product-card-price">' + money(firstVariation.sale_price) + '</span>' +
+                        '<span class="product-card-price">' + money(firstDisplayPrice) + '</span>' +
                         '<span class="product-card-unit">' + escapeHtml(unitName) + '</span>' +
                     '</div>' +
                 '</div>'
@@ -851,6 +952,8 @@
             sku: variation.sku,
             barcode: variation.barcode,
             sale_price: variation.sale_price,
+            resolved_price: variation.resolved_price,
+            resolved_discount_percentage: variation.resolved_discount_percentage,
             base_unit_id: variation.base_unit_id,
             unit: variation.unit,
             sale_unit_id: variation.sale_unit_id,
@@ -931,7 +1034,7 @@
                     '<div class="product-card-name">' + escapeHtml(pv.name || product.name || '') + '</div>' +
                     (pv.sku ? '<div class="product-card-sku">' + escapeHtml(pv.sku) + '</div>' : '') +
                     '<div class="product-card-footer">' +
-                        '<span class="product-card-price">' + money(pv.sale_price) + '</span>' +
+                        '<span class="product-card-price">' + money(pv.resolved_price !== undefined ? pv.resolved_price : pv.sale_price) + '</span>' +
                         '<span class="product-card-unit">' + escapeHtml(unitName) + '</span>' +
                     '</div>' +
                 '</div>'
@@ -939,6 +1042,20 @@
 
             $grid.append($card);
         });
+    }
+
+    // Small inline "Manual" badge when the cashier has hand-edited a line's
+    // price, so it's clear that line no longer follows Sale Type pricing.
+    function manualOverrideBadge(line) {
+        return line.manual_override ? ' <span class="badge bg-label-warning">Manual</span>' : '';
+    }
+
+    function saleTypeOptionsHtml(selectedId) {
+        var html = '<option value="">Order default</option>';
+        (CFG.sale_types || []).forEach(function (st) {
+            html += '<option value="' + st.sale_type_id + '"' + (st.sale_type_id === selectedId ? ' selected' : '') + '>' + escapeHtml(st.name) + '</option>';
+        });
+        return html;
     }
 
     function renderCart() {
@@ -950,6 +1067,7 @@
         updateCartOrderBadge();
 
         var showLineDiscount = SETTING.enable_discount && ['line', 'both'].includes(SETTING.discount_level);
+        var showLineSaleType = !!SETTING.allow_mixed_sale_types && (CFG.sale_types || []).length > 1;
 
         if (!state.cart.length) {
             $rows.append(
@@ -963,7 +1081,8 @@
         }
 
         state.cart.forEach(function (line) {
-            var unitCell = '<span class="text-muted">' + escapeHtml(line.unit_name || '') + '</span>';
+            var unitCell = '<span class="text-muted">' + escapeHtml(line.unit_name || '') + '</span>' +
+                manualOverrideBadge(line);
 
             var priceCell = can('order.price.change')
                 ? '<input type="number" step="0.01" min="0" class="line-price" value="' + line.unit_price + '">'
@@ -973,6 +1092,10 @@
                 ? '<div class="cart-line-discount">' +
                     '<input type="number" step="0.01" min="0" max="100" class="line-discount" value="' + line.discount + '"><span>%</span></div>'
                 : '<div class="cart-line-discount"></div>';
+
+            var saleTypeCell = showLineSaleType
+                ? '<select class="line-sale-type form-select form-select-sm">' + saleTypeOptionsHtml(line.sale_type_id) + '</select>'
+                : '';
 
             var imgHtml = line.image
                 ? '<img class="cart-line-img" src="' + line.image + '" alt="">'
@@ -984,6 +1107,7 @@
                 '<div class="cart-line-info">' +
                     '<div class="cart-line-name">' + escapeHtml(line.product_name) + (line.variation_name ? ' - ' + escapeHtml(line.variation_name) : '') + '</div>' +
                     '<div class="cart-line-meta">' + unitCell + '</div>' +
+                    saleTypeCell +
                 '</div>' +
                 '<div class="cart-line-price">' + priceCell + '</div>' +
                 discountCell +
@@ -1018,7 +1142,11 @@
         line.quantity = parseFloat($row.find('.line-qty').val()) || 0;
 
         if (can('order.price.change')) {
-            line.unit_price = parseFloat($row.find('.line-price').val()) || 0;
+            var newPrice = parseFloat($row.find('.line-price').val()) || 0;
+            if (newPrice !== line.unit_price) {
+                line.manual_override = true;
+            }
+            line.unit_price = newPrice;
         }
 
         var $discountInput = $row.find('.line-discount');
@@ -1086,19 +1214,16 @@
             $(this).find('.line-total').text(money(t.total));
         });
 
+        // Order-level discount/voucher amounts are only known authoritatively
+        // from the server response after store() - see renderFromServerOrder().
+        // This local preview shows 0.00 for it until then, same as before.
         var orderDiscount = 0;
-        var $discountSelect = $('#discount_id');
-        if ($discountSelect.length && $discountSelect.val()) {
-            // Purely a visual placeholder - eligibility/value is authoritative
-            // only from the server response after store().
-            orderDiscount = 0;
-        }
-
         var totalDiscount = lineDiscount + orderDiscount;
         var total = subtotal - totalDiscount + tax;
 
         $('#sumSubtotal').text(money(subtotal));
-        $('#sumDiscount').text(money(totalDiscount));
+        $('#sumItemDiscount').text(money(lineDiscount));
+        $('#sumOrderDiscount').text(money(orderDiscount));
         $('#sumTax').text(money(tax));
         $('#sumTotal').text(money(total));
 
@@ -1323,11 +1448,22 @@
                 notes: line.notes || null,
             };
 
-            if (can('order.price.change')) {
+            // unit_price is only sent when the cashier actually edited the
+            // price field - otherwise the server's VariationPricingService
+            // resolves it fresh from this line's Sale Type. Always sending
+            // line.unit_price here (even when it's just whatever the last
+            // price-resolution response filled in) would make the server
+            // treat every line as a manual override.
+            if (can('order.price.change') && line.manual_override) {
                 item.unit_price = line.unit_price;
             }
             if (SETTING.enable_discount && ['line', 'both'].includes(SETTING.discount_level)) {
                 item.discount = line.discount;
+            }
+            // Only sent when the cashier overrode this one line's Sale Type -
+            // otherwise it inherits the order-level sale_type_id below.
+            if (line.sale_type_id) {
+                item.sale_type_id = line.sale_type_id;
             }
 
             return item;
@@ -1341,9 +1477,14 @@
             customer_id: $('#customer_id').val(),
             order_type_id: $('#order_type_id').val(),
             order_source_id: $('#order_source_id').val(),
+            sale_type_id: $('#sale_type_id').val(),
             delivery_address: $('#delivery_address').val(),
             products: products,
         };
+
+        if (can('order.price.override-minimum') && $('#overrideMinPriceCheck').is(':checked')) {
+            payload.override_minimum_price = true;
+        }
 
         if (state.order_id) {
             payload.order_id = state.order_id;
@@ -1368,8 +1509,14 @@
     }
 
     function renderFromServerOrder(order) {
+        var itemDiscount = (order.details || []).reduce(function (sum, d) {
+            return sum + (parseFloat(d.discount_amount) || 0);
+        }, 0);
+        var orderDiscount = Math.max(0, (parseFloat(order.discount_amount) || 0) - itemDiscount);
+
         $('#sumSubtotal').text(money(order.subtotal));
-        $('#sumDiscount').text(money(order.discount_amount));
+        $('#sumItemDiscount').text(money(itemDiscount));
+        $('#sumOrderDiscount').text(money(orderDiscount));
         $('#sumTax').text(money(order.tax_amount));
         $('#sumTotal').text(money(order.total));
         recalcPayments(parseFloat(order.total) || 0);
@@ -1453,6 +1600,8 @@
                         quantity: d.quantity,
                         unit_price: d.unit_price,
                         discount: d.discount,
+                        sale_type_id: d.sale_type_id || null,
+                        manual_override: false,
                         notes: d.notes || '',
                     });
                 });
@@ -1464,6 +1613,9 @@
                 }
                 if (header.order_type_id) {
                     $('#order_type_id').val(header.order_type_id).trigger('change');
+                }
+                if (header.sale_type_id) {
+                    $('#sale_type_id').val(header.sale_type_id).trigger('change');
                 }
 
                 // Payments/discount/voucher are intentionally NOT carried
@@ -1682,6 +1834,8 @@
                 quantity: d.quantity,
                 unit_price: d.unit_price,
                 discount: d.discount,
+                sale_type_id: d.sale_type_id || null,
+                manual_override: false,
                 notes: d.notes || '',
             });
         });
@@ -1696,6 +1850,13 @@
         }
         if (header.order_source_id) {
             $('#order_source_id').val(header.order_source_id).trigger('change');
+        }
+        if (header.sale_type_id) {
+            // Restores a held order's exact saved prices - set without
+            // triggering repriceCartForSaleType() (that would overwrite them
+            // with freshly-resolved current prices instead).
+            $('#sale_type_id').val(header.sale_type_id);
+            syncPillsFromSelect();
         }
         if (header.discount_id) {
             $('#discount_id').val(header.discount_id).trigger('change');
@@ -1800,6 +1961,11 @@
         $('#voucher_code').val('');
         $('#discount_id').val('').trigger('change');
         $('#delivery_address').val('');
+        $('#sale_type_id').val(state.default_sale_type_id);
+        syncPillsFromSelect();
+        if ($('#overrideMinPriceCheck').length) {
+            $('#overrideMinPriceCheck').prop('checked', false);
+        }
         renderCart();
         renderPayments();
         selectDefaultPaymentMethod();

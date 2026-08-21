@@ -167,6 +167,8 @@
                                 <th>Order Type</th>
                                 <th>Order Source</th>
                                 <th>Total</th>
+                                <th>Payment Method</th>
+                                <th>Sale Type</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -194,6 +196,8 @@
                         {data:'order_type',name:'order_type',sortable:false},
                         {data:'order_source',name:'order_source',sortable:false},
                         {data:'total',name:'total'},
+                        {data:'payment_method',name:'payment_method',sortable:false},
+                        {data:'sale_type',name:'sale_type',sortable:false},
                         {data:'status',name:'status',sortable:false},
                         {data:'action',name:'action',sortable:false}",
         'route' => 'order/data',

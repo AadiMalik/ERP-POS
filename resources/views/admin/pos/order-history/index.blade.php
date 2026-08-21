@@ -237,6 +237,7 @@
                                 <th>Order Status</th>
                                 <th>Payment Status</th>
                                 <th>Payment Method</th>
+                                <th>Sale Type</th>
                                 <th>Total</th>
                                 <th>Paid</th>
                                 <th>Due</th>
@@ -354,6 +355,7 @@
                         {data:'status',name:'status',sortable:false},
                         {data:'payment_status',name:'payment_status',sortable:false},
                         {data:'payment_method',name:'payment_method',sortable:false},
+                        {data:'sale_type',name:'sale_type',sortable:false},
                         {data:'total',name:'total'},
                         {data:'paid_amount',name:'paid_amount',sortable:false},
                         {data:'due_amount',name:'due_amount',sortable:false},

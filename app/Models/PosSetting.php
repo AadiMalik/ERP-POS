@@ -32,6 +32,7 @@ class PosSetting extends Model
         'auto_print_invoice',
         'show_product_image',
         'enable_hold_order',
+        'allow_mixed_sale_types',
 
         'createdby_id',
         'updatedby_id',

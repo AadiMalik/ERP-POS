@@ -11,6 +11,7 @@ use App\Services\Concrete\Admin\BrandService;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CategoryService;
 use App\Services\Concrete\Admin\ProductService;
+use App\Services\Concrete\Admin\SaleTypeService;
 use App\Services\Concrete\Admin\UnitService;
 use App\Traits\ResponseAPI;
 use Exception;
@@ -30,6 +31,7 @@ class ProductController extends Controller
     protected $brand_service;
     protected $unit_service;
     protected $barcode_service;
+    protected $sale_type_service;
 
     public function __construct(
         ProductService $product_service,
@@ -37,7 +39,8 @@ class ProductController extends Controller
         CategoryService $category_service,
         BrandService $brand_service,
         UnitService $unit_service,
-        BarcodeService $barcode_service
+        BarcodeService $barcode_service,
+        SaleTypeService $sale_type_service
     ) {
         $this->middleware('permission:product.view')->only(['index', 'getData', 'byBusiness', 'byBrand', 'byCategory', 'variations', 'byProduct', 'getImages']);
         $this->middleware('permission:product.create')->only(['create', 'uploadImages']);
@@ -55,6 +58,7 @@ class ProductController extends Controller
         $this->brand_service = $brand_service;
         $this->unit_service = $unit_service;
         $this->barcode_service = $barcode_service;
+        $this->sale_type_service = $sale_type_service;
     }
 
     protected function importExportModuleKey(): string
@@ -79,7 +83,8 @@ class ProductController extends Controller
         $categories = $this->category_service->getAllActive();
         $brands = $this->brand_service->getAllActive();
         $units = $this->unit_service->getAllActive();
-        return view('admin.product.create', compact('businesses', 'categories', 'brands', 'units'));
+        $sale_types = $this->sale_type_service->getAllActive();
+        return view('admin.product.create', compact('businesses', 'categories', 'brands', 'units', 'sale_types'));
     }
 
     public function store(Request $request)
@@ -141,6 +146,13 @@ class ProductController extends Controller
             'variations.*.purchase_price' => 'nullable|min:0',
             'variations.*.sale_price' => 'required|min:0',
             'variations.*.minimum_stock' => 'nullable|min:0',
+            'variations.*.minimum_selling_price' => 'nullable|numeric|min:0',
+            'variations.*.discount_percentage' => 'nullable|numeric|min:0|max:100',
+            'variations.*.discount_apply_all' => 'nullable|boolean',
+            'variations.*.discount_sale_type_ids' => 'nullable|array',
+            'variations.*.discount_sale_type_ids.*' => 'exists:sale_types,sale_type_id',
+            'variations.*.prices' => 'nullable|array',
+            'variations.*.prices.*' => 'nullable|numeric|min:0',
             'features' => 'nullable|array',
             'features.*.name' => 'required_with:features',
             'features.*.description' => 'required_with:features',
@@ -200,7 +212,8 @@ class ProductController extends Controller
         $categories = $this->category_service->getAllActive();
         $brands = $this->brand_service->getAllActive();
         $units = $this->unit_service->getAllActive();
-        return view('admin.product.create', compact('product', 'businesses', 'categories', 'brands', 'units'));
+        $sale_types = $this->sale_type_service->getAllActive();
+        return view('admin.product.create', compact('product', 'businesses', 'categories', 'brands', 'units', 'sale_types'));
     }
 
     public function status($product_id)

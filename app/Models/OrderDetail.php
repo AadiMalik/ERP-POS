@@ -23,6 +23,8 @@ class OrderDetail extends Model
         'conversion_factor',
         'base_quantity',
         'unit_price',
+        'sale_type_id',
+        'final_unit_price',
         'discount',
         'discount_amount',
         'tax',
@@ -58,5 +60,10 @@ class OrderDetail extends Model
     public function unit()
     {
         return $this->belongsTo(Unit::class, 'unit_id');
+    }
+
+    public function saleType()
+    {
+        return $this->belongsTo(SaleType::class, 'sale_type_id', 'sale_type_id');
     }
 }

@@ -29,6 +29,9 @@ class ProductVariation extends Model
         'sale_unit_id',
         'purchase_price',
         'sale_price',
+        'minimum_selling_price',
+        'discount_percentage',
+        'discount_apply_all',
         'minimum_stock',
         'track_batch',
         'track_expiry',
@@ -47,6 +50,21 @@ class ProductVariation extends Model
     public function attributes()
     {
         return $this->hasMany(ProductVariationAttribute::class, 'product_variation_id', 'product_variation_id');
+    }
+
+    public function prices()
+    {
+        return $this->hasMany(ProductVariationPrice::class, 'product_variation_id', 'product_variation_id');
+    }
+
+    public function discountSaleTypes()
+    {
+        return $this->belongsToMany(SaleType::class, 'product_variation_discount_sale_types', 'product_variation_id', 'sale_type_id');
+    }
+
+    public function priceHistories()
+    {
+        return $this->hasMany(ProductVariationPriceHistory::class, 'product_variation_id', 'product_variation_id');
     }
 
     public function productVariationUnitConversion() {

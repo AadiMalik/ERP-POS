@@ -141,6 +141,14 @@ class PermissionRegistry
                 'export' => ['name' => 'product.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
+            'sale-type' => ['label' => 'Sale Types', 'actions' => [
+                'view'   => ['name' => 'sale-type.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'sale-type.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'sale-type.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'sale-type.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'sale-type.status', 'label' => 'Change Status', 'is_system' => false],
+            ]],
+
             'barcode' => ['label' => 'Barcode / QR Code', 'actions' => [
                 'manage' => ['name' => 'barcode.manage', 'label' => 'Manage', 'is_system' => false],
             ]],
@@ -877,6 +885,7 @@ class PermissionRegistry
                 'discount_apply'  => ['name' => 'order.discount.apply', 'label' => 'Apply Discount', 'is_system' => false],
                 'coupon_apply'    => ['name' => 'order.coupon.apply', 'label' => 'Apply Coupon', 'is_system' => false],
                 'price_change'    => ['name' => 'order.price.change', 'label' => 'Change Price', 'is_system' => false],
+                'price_override_minimum' => ['name' => 'order.price.override-minimum', 'label' => 'Override Minimum Selling Price', 'is_system' => false],
                 'hold'            => ['name' => 'order.hold', 'label' => 'Hold', 'is_system' => false],
                 'cancel_void'     => ['name' => 'order.cancel_void', 'label' => 'Cancel / Void', 'is_system' => false],
                 'refund_process'  => ['name' => 'order.refund.process', 'label' => 'Process Refund', 'is_system' => false],
@@ -1171,7 +1180,7 @@ class PermissionRegistry
             'dashboard', 'warehouse', 'brand', 'category', 'sub-category', 'unit', 'product',
             'barcode', 'unit-conversion', 'batch', 'stock', 'stock-transaction',
             'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction',
-            'supplier', 'customer', 'order-type', 'payment-method', 'order-source', 'discount', 'voucher',
+            'supplier', 'customer', 'order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher',
             'purchase-request', 'purchase-request-quotation', 'purchase', 'good-receipt-note',
             'purchase-return', 'opening-stock', 'stock-taking', 'transfer-note', 'supplier-payment', 'customer-payment',
             'pos', 'order', 'expense', 'expense-category', 'admin-expense',

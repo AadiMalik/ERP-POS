@@ -10,6 +10,8 @@ use App\Models\ProductFeature;
 use App\Models\ProductImage;
 use App\Models\ProductVariation;
 use App\Models\ProductVariationAttribute;
+use App\Models\ProductVariationPrice;
+use App\Models\ProductVariationPriceHistory;
 use App\Repository\Repository;
 use Carbon\Carbon;
 use Exception;
@@ -37,6 +39,8 @@ class ProductService
         'productVariations.purchaseUnit:unit_id,name',
         'productVariations.saleUnit:unit_id,name',
         'productVariations.attributes:product_variation_attribute_id,product_variation_id,name,value',
+        'productVariations.prices',
+        'productVariations.discountSaleTypes:sale_types.sale_type_id,name',
         'productFeatures'
     ];
 
@@ -236,6 +240,9 @@ class ProductService
                             'purchase_price' => $variation['purchase_price'],
                             'sale_price' => $variation['sale_price'],
                             'minimum_stock' => $variation['minimum_stock'],
+                            'minimum_selling_price' => $variation['minimum_selling_price'] ?? null,
+                            'discount_percentage' => $variation['discount_percentage'] ?? 0,
+                            'discount_apply_all' => array_key_exists('discount_apply_all', $variation) ? (bool) $variation['discount_apply_all'] : true,
                             'business_id' => $obj['business_id'],
                             'updatedby_id' => Auth::id(),
                             'date_updated' => now(),
@@ -248,6 +255,8 @@ class ProductService
                             $variation['barcode'] ?? null,
                             $variation['barcode_type'] ?? null
                         );
+
+                        $this->savePricingForVariation($product_variation_id, $obj['business_id'], $variation);
                     }
 
                     // =========================
@@ -271,6 +280,9 @@ class ProductService
                             'purchase_price' => $variation['purchase_price'],
                             'sale_price' => $variation['sale_price'],
                             'minimum_stock' => $variation['minimum_stock'],
+                            'minimum_selling_price' => $variation['minimum_selling_price'] ?? null,
+                            'discount_percentage' => $variation['discount_percentage'] ?? 0,
+                            'discount_apply_all' => array_key_exists('discount_apply_all', $variation) ? (bool) $variation['discount_apply_all'] : true,
                             'createdby_id' => Auth::id(),
                             'date_created' => now(),
                         ]);
@@ -280,6 +292,8 @@ class ProductService
                             $variation['barcode'] ?? null,
                             $variation['barcode_type'] ?? null
                         );
+
+                        $this->savePricingForVariation($product_variation_id, $obj['business_id'], $variation);
 
                         $requestVariationIds[] = $product_variation_id;
                     }
@@ -326,6 +340,9 @@ class ProductService
                         'product_variation_id',
                         $deletedVariationIds
                     )->delete();
+
+                    ProductVariationPrice::whereIn('product_variation_id', $deletedVariationIds)->delete();
+                    DB::table('product_variation_discount_sale_types')->whereIn('product_variation_id', $deletedVariationIds)->delete();
                 }
                 // =========================    
 
@@ -385,6 +402,9 @@ class ProductService
                     'purchase_price' => $variation['purchase_price'],
                     'sale_price' => $variation['sale_price'],
                     'minimum_stock' => $variation['minimum_stock'],
+                    'minimum_selling_price' => $variation['minimum_selling_price'] ?? null,
+                    'discount_percentage' => $variation['discount_percentage'] ?? 0,
+                    'discount_apply_all' => array_key_exists('discount_apply_all', $variation) ? (bool) $variation['discount_apply_all'] : true,
                     'business_id' => $obj['business_id'],
                     'createdby_id' => Auth::id(),
                     'date_created' => now(),
@@ -395,6 +415,8 @@ class ProductService
                     $variation['barcode'] ?? null,
                     $variation['barcode_type'] ?? null
                 );
+
+                $this->savePricingForVariation($product_variation_id, $obj['business_id'], $variation);
 
                 foreach (($variation['attributes'] ?? []) as $name => $value) {
 
@@ -417,6 +439,77 @@ class ProductService
             DB::rollBack();
 
             throw $e;
+        }
+    }
+
+    /**
+     * Persists a variation's per-sale-type prices and "Apply Discount On"
+     * sale types - both are delete-and-recreate child rows (same pattern as
+     * ProductVariationAttribute), keyed off $variation['prices'] (assoc
+     * array sale_type_id => price) and $variation['discount_sale_type_ids']
+     * (only read when discount_apply_all is false). Diffs old vs new price
+     * per sale type and logs a ProductVariationPriceHistory row for each one
+     * that actually changed, so price changes stay auditable.
+     */
+    protected function savePricingForVariation($product_variation_id, $business_id, array $variation)
+    {
+        $prices = $variation['prices'] ?? [];
+
+        $existing_prices = ProductVariationPrice::where('product_variation_id', $product_variation_id)
+            ->pluck('price', 'sale_type_id');
+
+        ProductVariationPrice::where('product_variation_id', $product_variation_id)->delete();
+
+        foreach ($prices as $sale_type_id => $price) {
+            if ($sale_type_id === '' || $price === null || $price === '') {
+                continue;
+            }
+
+            $price = (float) $price;
+
+            ProductVariationPrice::create([
+                'product_variation_price_id' => generateUuid(),
+                'business_id' => $business_id,
+                'product_variation_id' => $product_variation_id,
+                'sale_type_id' => $sale_type_id,
+                'price' => $price,
+                'createdby_id' => Auth::id(),
+                'date_created' => now(),
+            ]);
+
+            $old_price = $existing_prices->has($sale_type_id) ? (float) $existing_prices->get($sale_type_id) : null;
+
+            if ($old_price !== null && abs($old_price - $price) < 0.0001) {
+                continue;
+            }
+
+            ProductVariationPriceHistory::create([
+                'product_variation_price_history_id' => generateUuid(),
+                'business_id' => $business_id,
+                'product_variation_id' => $product_variation_id,
+                'sale_type_id' => $sale_type_id,
+                'old_price' => $old_price,
+                'new_price' => $price,
+                'changedby_id' => Auth::id(),
+                'date_created' => now(),
+            ]);
+        }
+
+        DB::table('product_variation_discount_sale_types')->where('product_variation_id', $product_variation_id)->delete();
+
+        $discount_apply_all = array_key_exists('discount_apply_all', $variation) ? (bool) $variation['discount_apply_all'] : true;
+
+        if (!$discount_apply_all) {
+            foreach (($variation['discount_sale_type_ids'] ?? []) as $sale_type_id) {
+                if (empty($sale_type_id)) {
+                    continue;
+                }
+
+                DB::table('product_variation_discount_sale_types')->insert([
+                    'product_variation_id' => $product_variation_id,
+                    'sale_type_id' => $sale_type_id,
+                ]);
+            }
         }
     }
 

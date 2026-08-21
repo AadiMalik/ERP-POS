@@ -675,7 +675,17 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('import/confirm', [App\Http\Controllers\Admin\DiscountController::class, 'importConfirm'])->name('discount-import-confirm');
         Route::get('export', [App\Http\Controllers\Admin\DiscountController::class, 'export'])->name('discount-export');
     });
-    }); // end module:pos (order-type/payment-method/order-source/discount)
+    //sale type (managed inline from POS Settings, no dedicated index page)
+    Route::group(['prefix' => 'sale-type'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\SaleTypeController::class, 'getData']);
+        Route::get('list', [App\Http\Controllers\Admin\SaleTypeController::class, 'list']);
+        Route::post('/', [App\Http\Controllers\Admin\SaleTypeController::class, 'store']);
+        Route::get('{sale_type_id}/edit', [App\Http\Controllers\Admin\SaleTypeController::class, 'edit']);
+        Route::post('change-status/{sale_type_id}', [App\Http\Controllers\Admin\SaleTypeController::class, 'status']);
+        Route::delete('{sale_type_id}', [App\Http\Controllers\Admin\SaleTypeController::class, 'destroy']);
+    });
+
+    }); // end module:pos (order-type/payment-method/order-source/sale-type/discount)
 
     Route::group(['middleware' => ['module:accounting']], function () {
     //voucher
@@ -733,6 +743,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::post('void', [App\Http\Controllers\Admin\OrderController::class, 'void'])->middleware('permission:order.cancel_void');
             Route::get('search-products', [App\Http\Controllers\Admin\OrderController::class, 'searchProducts']);
             Route::get('products-by-category', [App\Http\Controllers\Admin\OrderController::class, 'productsByCategory']);
+            Route::post('resolve-prices', [App\Http\Controllers\Admin\OrderController::class, 'resolvePrices']);
             Route::get('filter-options/{business_id}', [App\Http\Controllers\Admin\OrderController::class, 'filterOptions']);
             Route::get('details/{order_id}', [App\Http\Controllers\Admin\OrderController::class, 'details']);
             Route::get('{order_id}/print', [App\Http\Controllers\Admin\OrderController::class, 'print'])->name('order.print');

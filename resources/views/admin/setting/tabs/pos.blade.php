@@ -85,6 +85,13 @@
         </div>
 
         <div class="col-md-3 mb-3">
+            <label class="d-block">Allow Mixed Sale Types</label>
+            <input type="checkbox" class="form-check-input" name="allow_mixed_sale_types" value="1"
+                {{ $pos_setting->allow_mixed_sale_types ? 'checked' : '' }}>
+            <small class="text-muted d-block">Let a cashier set a different Sale Type per cart item instead of the whole order sharing one.</small>
+        </div>
+
+        <div class="col-md-3 mb-3">
             <label class="d-block">Auto Print Invoice</label>
             <input type="checkbox" class="form-check-input" name="auto_print_invoice" value="1"
                 {{ $pos_setting->auto_print_invoice ? 'checked' : '' }}>
@@ -143,3 +150,177 @@
         </div>
     </div>
 </form>
+
+<hr>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h5 class="mb-0">Sale Types</h5>
+        <small class="text-muted">Only the sale types you keep Active here appear on Product Variations and in POS.</small>
+    </div>
+    <button type="button" id="createNewSaleType" class="btn rounded-pill btn-primary">
+        <i class="icon-base fa fa-plus mr-5"></i>Add Sale Type
+    </button>
+</div>
+
+<div class="table-responsive">
+    <table class="table" id="saleTypeTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Code</th>
+                <th>Default</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="saleTypeTableBody"></tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="saleTypeModal" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="saleTypeModalHeading"></h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="sale_type_form" name="sale_type_form">
+                <div class="modal-body">
+                    <input type="hidden" name="sale_type_id" id="sale_type_id">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="sale_type_name" name="name" placeholder="e.g. Retail" required>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Code <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="sale_type_code" name="code" placeholder="e.g. RETAIL" required>
+                        </div>
+                        <div class="col-md-6 mb-3 d-flex align-items-end">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sale_type_is_default" name="is_default" value="1">
+                                <label class="form-check-label" for="sale_type_is_default">Set as Default</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Status</label>
+                            <select id="sale_type_status" name="status" class="form-select">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" id="saveBtn" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('js')
+<script>
+    function renderSaleTypeRows(sale_types) {
+        let rows = '';
+
+        (sale_types || []).forEach(function (item) {
+            let checked = item.status === 'active' ? 'checked' : '';
+
+            rows += `<tr>
+                <td>${item.name}</td>
+                <td>${item.code}</td>
+                <td>${item.is_default == 1 ? '<span class="badge bg-label-primary">Default</span>' : '-'}</td>
+                <td>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input statusSaleType" type="checkbox" data-id="${item.sale_type_id}" ${checked}>
+                    </div>
+                </td>
+                <td>
+                    <a class="btn btn-icon btn-outline-primary mr-2" id="editSaleType" href="javascript:void(0)" data-id="${item.sale_type_id}">
+                        <i class="fa fa-pencil"></i>
+                    </a>
+                    <a class="btn btn-icon btn-outline-danger" id="deleteSaleType" data-id="${item.sale_type_id}">
+                        <i class="fa fa-trash"></i>
+                    </a>
+                </td>
+            </tr>`;
+        });
+
+        $('#saleTypeTableBody').html(rows || '<tr><td colspan="5" class="text-center">No sale types yet.</td></tr>');
+    }
+
+    function loadSaleTypes() {
+        ajaxRequest({ url: url_local + '/admin/sale-type/list' }).then(function (response) {
+            renderSaleTypeRows(response.Data);
+        });
+    }
+
+    $(document).ready(function () {
+        loadSaleTypes();
+    });
+
+    $('#createNewSaleType').click(function () {
+        $('#sale_type_form')[0].reset();
+        $('#sale_type_id').val('');
+        $('#sale_type_status').val('active');
+        $('#saveBtn').show();
+        $('#saleTypeModalHeading').html('Add Sale Type');
+        $('#saleTypeModal').modal('show');
+    });
+
+    editRecord({
+        buttonClass: '#editSaleType',
+        url: url_local + '/admin/sale-type',
+        onSuccess: function (response) {
+            let data = response.Data;
+            $('#sale_type_id').val(data.sale_type_id);
+            $('#sale_type_name').val(data.name);
+            $('#sale_type_code').val(data.code);
+            $('#sale_type_is_default').prop('checked', data.is_default == 1);
+            $('#sale_type_status').val(data.status);
+            $('#saleTypeModalHeading').html('Edit Sale Type');
+            $('#saveBtn').show();
+            $('#saleTypeModal').modal('show');
+        }
+    });
+
+    saveRecord({
+        formId: '#sale_type_form',
+        url: url_local + '/admin/sale-type',
+        modalId: '#saleTypeModal',
+        tableCallback: function () {
+            loadSaleTypes();
+        },
+        beforeSubmit: function () {
+            if ($('#sale_type_name').val() == '') {
+                errorMessage('Please Enter Name');
+                return false;
+            }
+            if ($('#sale_type_code').val() == '') {
+                errorMessage('Please Enter Code');
+                return false;
+            }
+            return true;
+        }
+    });
+
+    updateStatus({
+        buttonClass: '.statusSaleType',
+        url: url_local + '/admin/sale-type/change-status',
+        tableCallback: function () {
+            loadSaleTypes();
+        }
+    });
+
+    deleteRecord({
+        buttonClass: '#deleteSaleType',
+        url: url_local + '/admin/sale-type',
+        tableCallback: function () {
+            loadSaleTypes();
+        }
+    });
+</script>
+@endpush

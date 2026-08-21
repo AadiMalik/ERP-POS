@@ -24,6 +24,7 @@ class Order extends Model
         'user_id',
         'order_type_id',
         'order_source_id',
+        'sale_type_id',
         'order_date',
         'sale_date',
         'subtotal',
@@ -98,6 +99,11 @@ class Order extends Model
         return $this->belongsTo(OrderSource::class, 'order_source_id');
     }
 
+    public function saleType()
+    {
+        return $this->belongsTo(SaleType::class, 'sale_type_id', 'sale_type_id');
+    }
+
     public function discount()
     {
         return $this->belongsTo(Discount::class, 'discount_id');
@@ -116,6 +122,11 @@ class Order extends Model
     public function payments()
     {
         return $this->hasMany(OrderPayment::class, 'order_id', 'order_id')->where('is_deleted', 0);
+    }
+
+    public function customerPayments()
+    {
+        return $this->hasMany(CustomerPayment::class, 'order_id', 'order_id')->where('is_deleted', 0);
     }
 
     public function statusHistory()

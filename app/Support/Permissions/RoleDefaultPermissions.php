@@ -89,7 +89,7 @@ class RoleDefaultPermissions
 
             case RoleNames::SALEMANAGER:
                 return array_merge(
-                    PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'discount', 'voucher', 'order', 'pos', 'customer', 'customer-payment']),
+                    PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'pos', 'customer', 'customer-payment']),
                     ['dashboard.view']
                 );
 
@@ -171,6 +171,7 @@ class RoleDefaultPermissions
                     'order.discount.apply',
                     'order.coupon.apply',
                     'order.price.change',
+                    'order.price.override-minimum',
                     'order.hold',
                     'order.cancel_void',
                     'order.refund.process',

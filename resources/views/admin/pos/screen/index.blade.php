@@ -136,6 +136,23 @@
                                         <div id="creditLimitHint" class="pos-field-floating-hint d-none"></div>
                                     </div>
 
+                                    <div class="pos-field pos-field-saletype pos-pill-group" data-select-target="sale_type_id">
+                                        <span class="pos-field-label">Sale Type</span>
+                                        <select class="d-none" id="sale_type_id">
+                                            @foreach ($sale_types as $item)
+                                                <option value="{{ $item->sale_type_id }}" {{ $item->is_default ? 'selected' : '' }}>
+                                                    {{ $item->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <div class="pos-pill-buttons" id="saleTypePills">
+                                            @foreach ($sale_types as $item)
+                                                <button type="button" class="pos-pill {{ $item->is_default ? 'active' : '' }}"
+                                                    data-value="{{ $item->sale_type_id }}">{{ $item->name }}</button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
                                     <div class="pos-field pos-field-delivery d-none" id="deliveryAddressWrap">
                                         <label class="pos-field-label" for="delivery_address">Delivery Address <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control form-control-sm" id="delivery_address" placeholder="Enter address">
@@ -232,10 +249,20 @@
                         </div>
                     </div>
 
+                    @if ($permissions['order.price.override-minimum'] ?? false)
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="overrideMinPriceCheck">
+                            <label class="form-check-label" for="overrideMinPriceCheck">
+                                Allow price below Minimum Selling Price
+                            </label>
+                        </div>
+                    @endif
+
                     {{-- ---- Rows 2-5: Subtotal / Discount / Tax / Total ---- --}}
                     <div class="pos-totals-card">
                         <div class="pos-totals-row"><span>Subtotal</span><span id="sumSubtotal">0.00</span></div>
-                        <div class="pos-totals-row"><span>Discount</span><span id="sumDiscount">0.00</span></div>
+                        <div class="pos-totals-row"><span>Item Discounts</span><span id="sumItemDiscount">0.00</span></div>
+                        <div class="pos-totals-row"><span>Order Discount</span><span id="sumOrderDiscount">0.00</span></div>
                         <div class="pos-totals-row"><span>Tax</span><span id="sumTax">0.00</span></div>
                         <div class="pos-totals-row pos-grand-total"><span>Total</span><span id="sumTotal">0.00</span></div>
                     </div>
@@ -562,6 +589,7 @@
             'branch_id' => $branch_id,
             'pos_setting' => $pos_setting,
             'payment_methods' => $payment_methods,
+            'sale_types' => $sale_types,
             'tax_rates_setting' => [
                 'overall_tax_rate' => $business_setting->overall_tax_rate,
                 'card_tax_rate' => $business_setting->card_tax_rate,
@@ -578,6 +606,7 @@
                 'session_my_history' => url('admin/pos-register-session/my-history'),
                 'search_products' => url('admin/order/search-products'),
                 'products_by_category' => url('admin/order/products-by-category'),
+                'resolve_prices' => url('admin/order/resolve-prices'),
                 'order_store' => url('admin/order'),
                 'order_hold' => url('admin/order/hold'),
                 'order_resume' => url('admin/order/resume'),

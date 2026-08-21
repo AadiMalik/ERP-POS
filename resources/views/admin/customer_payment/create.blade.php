@@ -33,7 +33,7 @@
                                         <option value="">--Select Business--</option>
                                         @foreach ($business as $item)
                                             <option value="{{ $item->business_id }}"
-                                                {{ old('business_id', $customer_payment->business_id ?? '') == $item->business_id ? 'selected' : '' }}>
+                                                {{ old('business_id', $customer_payment->business_id ?? ($prefill_order->business_id ?? '')) == $item->business_id ? 'selected' : '' }}>
                                                 {{ $item->code }} - {{ $item->name }}
                                             </option>
                                         @endforeach
@@ -180,6 +180,8 @@
         var isEditMode = {{ isset($customer_payment) ? 'true' : 'false' }};
         var editCustomerId = "{{ $customer_payment->user_id ?? '' }}";
         var editOrderId = "{{ $customer_payment->order_id ?? '' }}";
+        var prefillCustomerId = "{{ $prefill_order->user_id ?? '' }}";
+        var prefillOrderId = "{{ $prefill_order->order_id ?? '' }}";
 
         $(function() {
             if ($.fn.select2) {
@@ -194,6 +196,10 @@
             if (isEditMode && editCustomerId) {
                 loadCustomerLedger(editCustomerId);
                 loadOrdersByCustomer(editCustomerId, editOrderId);
+            } else if (!isEditMode && prefillCustomerId) {
+                $('#user_id').val(prefillCustomerId).trigger('change');
+                loadCustomerLedger(prefillCustomerId);
+                loadOrdersByCustomer(prefillCustomerId, prefillOrderId);
             }
 
             calculateNetPayment();

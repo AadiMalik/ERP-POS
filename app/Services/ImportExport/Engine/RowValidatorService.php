@@ -50,6 +50,15 @@ class RowValidatorService
 
                 return ['error' => null, 'value' => $date->format('Y-m-d')];
 
+            case 'datetime':
+                try {
+                    $datetime = Carbon::parse((string) $value);
+                } catch (Throwable $e) {
+                    return ['error' => $this->error($col, $value, 'is not a valid date/time.'), 'value' => null];
+                }
+
+                return ['error' => null, 'value' => $datetime->format('Y-m-d H:i:s')];
+
             case 'boolean':
                 $normalized = strtolower(trim((string) $value));
                 $truthy = ['1', 'true', 'yes', 'active', 'y'];

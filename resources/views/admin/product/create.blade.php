@@ -476,6 +476,60 @@ use App\Enums\RoleNames;
                         </div>
                         <div class="col-12">
                             <hr>
+                            <label class="form-label fw-semibold">Selling Prices</label>
+                            <small class="text-muted d-block mb-2">
+                                One price per Sale Type your business uses (configured in POS Settings). Falls back
+                                to the Sale Price above for any Sale Type left blank.
+                            </small>
+                            <div class="row g-3" id="modalVariationPricesContainer">
+                                @foreach ($sale_types as $sale_type)
+                                    <div class="col-md-4">
+                                        <label class="form-label">{{ $sale_type->name }} Price</label>
+                                        <input type="number" step="0.01" min="0" class="form-control modal-variation-price"
+                                            data-sale-type-id="{{ $sale_type->sale_type_id }}" placeholder="Same as Sale Price">
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <hr>
+                            <label class="form-label fw-semibold">Discount</label>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Discount %</label>
+                                    <input type="number" step="0.01" min="0" max="100" class="form-control"
+                                        id="modalVariationDiscountPercentage" value="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Minimum Selling Price</label>
+                                    <input type="number" step="0.01" min="0" class="form-control"
+                                        id="modalVariationMinSellingPrice" placeholder="No floor">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label d-block">Apply Discount On</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="modalVariationDiscountApplyAll" checked>
+                                        <label class="form-check-label" for="modalVariationDiscountApplyAll">All Sale Types</label>
+                                    </div>
+                                </div>
+                                <div class="col-12" id="modalVariationDiscountSaleTypesWrap" style="display:none;">
+                                    <div class="d-flex flex-wrap gap-3">
+                                        @foreach ($sale_types as $sale_type)
+                                            <div class="form-check">
+                                                <input class="form-check-input modal-variation-discount-sale-type" type="checkbox"
+                                                    id="modalDiscountSaleType_{{ $sale_type->sale_type_id }}"
+                                                    value="{{ $sale_type->sale_type_id }}">
+                                                <label class="form-check-label" for="modalDiscountSaleType_{{ $sale_type->sale_type_id }}">
+                                                    {{ $sale_type->name }}
+                                                </label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <hr>
                             <label class="form-label fw-semibold">Attributes</label>
                             <div class="d-flex gap-2 mb-2">
                                 <input type="text" class="form-control form-control-sm" id="modalAttrKey"
@@ -560,6 +614,11 @@ use App\Enums\RoleNames;
         sale_unit_id: "{{$var->sale_unit_id ?? 0}}",
         track_batch: {{$var->track_batch ? 'true' : 'false'}},
         track_expiry: {{$var->track_expiry ? 'true' : 'false'}},
+        prices: @json($var->prices->pluck('price', 'sale_type_id')),
+        discount_percentage: {{ $var->discount_percentage ?? 0 }},
+        minimum_selling_price: {{ $var->minimum_selling_price !== null ? $var->minimum_selling_price : 'null' }},
+        discount_apply_all: {{ $var->discount_apply_all ? 'true' : 'false' }},
+        discount_sale_type_ids: @json($var->discountSaleTypes->pluck('sale_type_id')),
         attributes: @json(
         $var->attributes->pluck('value', 'name')
     )
@@ -722,6 +781,21 @@ use App\Enums\RoleNames;
         const trackBatch = document.getElementById('modalVariationTrackBatch').checked;
         const trackExpiry = document.getElementById('modalVariationTrackExpiry').checked;
 
+        const prices = {};
+        document.querySelectorAll('.modal-variation-price').forEach(el => {
+            if (el.value !== '') {
+                prices[el.dataset.saleTypeId] = parseFloat(el.value) || 0;
+            }
+        });
+
+        const discountPercentage = parseFloat(document.getElementById('modalVariationDiscountPercentage').value) || 0;
+        const minSellingPriceRaw = document.getElementById('modalVariationMinSellingPrice').value;
+        const minimumSellingPrice = minSellingPriceRaw !== '' ? parseFloat(minSellingPriceRaw) : null;
+        const discountApplyAll = document.getElementById('modalVariationDiscountApplyAll').checked;
+        const discountSaleTypeIds = discountApplyAll ? [] : Array.from(
+            document.querySelectorAll('.modal-variation-discount-sale-type:checked')
+        ).map(el => el.value);
+
         const attrElements = document.querySelectorAll('#modalAttrContainer .attribute-badge');
         const attributes = {};
         attrElements.forEach(el => {
@@ -764,6 +838,11 @@ use App\Enums\RoleNames;
             sale_unit_id: saleUnit,
             track_batch: trackBatch,
             track_expiry: trackExpiry,
+            prices: prices,
+            discount_percentage: discountPercentage,
+            minimum_selling_price: minimumSellingPrice,
+            discount_apply_all: discountApplyAll,
+            discount_sale_type_ids: discountSaleTypeIds,
             attributes: attributes
         };
 
@@ -806,6 +885,22 @@ use App\Enums\RoleNames;
         document.getElementById('modalVariationMinStock').value = variation.minimum_stock || 0;
         document.getElementById('modalVariationTrackBatch').checked = variation.track_batch || false;
         document.getElementById('modalVariationTrackExpiry').checked = variation.track_expiry || false;
+
+        document.querySelectorAll('.modal-variation-price').forEach(el => {
+            const price = (variation.prices || {})[el.dataset.saleTypeId];
+            el.value = price !== undefined && price !== null ? price : '';
+        });
+        document.getElementById('modalVariationDiscountPercentage').value = variation.discount_percentage || 0;
+        document.getElementById('modalVariationMinSellingPrice').value =
+            variation.minimum_selling_price !== undefined && variation.minimum_selling_price !== null
+                ? variation.minimum_selling_price : '';
+        const applyAll = variation.discount_apply_all !== false;
+        document.getElementById('modalVariationDiscountApplyAll').checked = applyAll;
+        document.getElementById('modalVariationDiscountSaleTypesWrap').style.display = applyAll ? 'none' : '';
+        const discountSaleTypeIds = variation.discount_sale_type_ids || [];
+        document.querySelectorAll('.modal-variation-discount-sale-type').forEach(el => {
+            el.checked = discountSaleTypeIds.includes(el.value);
+        });
 
         const container = document.getElementById('modalAttrContainer');
         container.innerHTML = '';
@@ -867,6 +962,12 @@ use App\Enums\RoleNames;
         document.getElementById('modalVariationMinStock').value = '0';
         document.getElementById('modalVariationTrackBatch').checked = false;
         document.getElementById('modalVariationTrackExpiry').checked = false;
+        document.querySelectorAll('.modal-variation-price').forEach(el => el.value = '');
+        document.getElementById('modalVariationDiscountPercentage').value = '0';
+        document.getElementById('modalVariationMinSellingPrice').value = '';
+        document.getElementById('modalVariationDiscountApplyAll').checked = true;
+        document.querySelectorAll('.modal-variation-discount-sale-type').forEach(el => el.checked = false);
+        document.getElementById('modalVariationDiscountSaleTypesWrap').style.display = 'none';
         document.getElementById('modalAttrContainer').innerHTML = '';
         document.getElementById('modalAttrKey').value = '';
         document.getElementById('modalAttrValue').value = '';
@@ -1011,6 +1112,10 @@ use App\Enums\RoleNames;
     });
 
     document.getElementById('saveVariationBtn').addEventListener('click', saveVariationFromModal);
+
+    document.getElementById('modalVariationDiscountApplyAll').addEventListener('change', function() {
+        document.getElementById('modalVariationDiscountSaleTypesWrap').style.display = this.checked ? 'none' : '';
+    });
 
     // --- Form Submit ---
     document.getElementById('productForm').addEventListener('submit', function(e) {

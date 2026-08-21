@@ -15,6 +15,7 @@ use App\Services\Concrete\Admin\CommonService;
 use App\Services\Concrete\Admin\CustomerService;
 use App\Models\Order;
 use App\Services\Concrete\Admin\PrintSettingResolverService;
+use App\Services\Concrete\Admin\SaleTypeService;
 use App\Services\Concrete\Admin\SettingService;
 use App\Services\Concrete\Admin\ThermalPrintSettingResolverService;
 use App\Support\Print\ThermalPrintConfig;
@@ -35,6 +36,7 @@ class SettingController extends Controller
     protected $print_setting_resolver;
     protected $customer_service;
     protected $thermal_print_setting_resolver;
+    protected $sale_type_service;
 
     public function __construct(
         BusinessService $business_service,
@@ -43,7 +45,8 @@ class SettingController extends Controller
         CommonService $common_service,
         PrintSettingResolverService $print_setting_resolver,
         CustomerService $customer_service,
-        ThermalPrintSettingResolverService $thermal_print_setting_resolver
+        ThermalPrintSettingResolverService $thermal_print_setting_resolver,
+        SaleTypeService $sale_type_service
     ) {
         $this->middleware('permission:setting.manage');
 
@@ -54,6 +57,7 @@ class SettingController extends Controller
         $this->print_setting_resolver = $print_setting_resolver;
         $this->customer_service = $customer_service;
         $this->thermal_print_setting_resolver = $thermal_print_setting_resolver;
+        $this->sale_type_service = $sale_type_service;
     }
 
     public function index()
@@ -77,6 +81,7 @@ class SettingController extends Controller
         $pra_setting = $this->setting_service->getPraSetting(Auth::user()->business_id);
         $thermal_print_setting = $this->setting_service->getThermalPrintSetting(Auth::user()->business_id);
         $pos_customers = $this->customer_service->getAllActive(Auth::user()->business_id);
+        $sale_types = $this->sale_type_service->getAll(Auth::user()->business_id);
         $theme_presets = config('theme_presets');
         $timezones = $this->common_service->getAllTimezone();
         $email_mailer = EmailProvider::getoptions();
@@ -104,6 +109,7 @@ class SettingController extends Controller
             'pra_setting',
             'thermal_print_setting',
             'pos_customers',
+            'sale_types',
             'theme_presets',
             'timezones',
             'email_mailer',
@@ -458,6 +464,7 @@ class SettingController extends Controller
             'auto_print_invoice'       => 'nullable|boolean',
             'show_product_image'       => 'nullable|boolean',
             'enable_hold_order'        => 'nullable|boolean',
+            'allow_mixed_sale_types'   => 'nullable|boolean',
         ];
 
         $validate = Validator::make($request->all(), $rules);

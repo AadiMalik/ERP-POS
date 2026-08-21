@@ -69,15 +69,28 @@ class CustomerPaymentController extends Controller
         return $this->customer_payment_service->getData($request->all());
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        // Lets the Order Details page's "Add Payment" button land here with the
+        // customer + order already selected, without duplicating any of
+        // CustomerPaymentService::save()'s due-amount logic.
+        $prefill_order = $request->filled('order_id')
+            ? Order::where('order_id', $request->query('order_id'))->where('is_deleted', 0)->first()
+            : null;
+
+        // A Super Admin has no business_id of their own - when landing here via
+        // a prefilled order, scope the customer/account dropdowns to that
+        // order's business (not Auth::user()->business_id) so the customer is
+        // actually selectable.
+        $business_id = $prefill_order->business_id ?? Auth::user()->business_id;
+
         $business = $this->business_service->getAll();
-        $customers = $this->customer_service->getAllActive();
-        $accounting_setting = $this->setting_service->getAccountingSetting(Auth::user()->business_id);
-        $accounts = $this->account_service->getChildByBusiness(Auth::user()->business_id);
+        $customers = $this->customer_service->getAllActive($business_id);
+        $accounting_setting = $this->setting_service->getAccountingSetting($business_id);
+        $accounts = $this->account_service->getChildByBusiness($business_id);
         $payment_no = generateCustomerPaymentNo();
 
-        return view('admin.customer_payment.create', compact('business', 'customers', 'accounting_setting', 'accounts', 'payment_no'));
+        return view('admin.customer_payment.create', compact('business', 'customers', 'accounting_setting', 'accounts', 'payment_no', 'prefill_order'));
     }
 
     public function edit($customer_payment_id)

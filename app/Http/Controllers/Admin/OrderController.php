@@ -164,7 +164,13 @@ class OrderController extends Controller
             abort(404);
         }
 
-        return view('admin.order.show', compact('order'));
+        $sale_type_badge = $this->order_service->formatSaleTypeBadge($order->details);
+
+        foreach ($order->details as $detail) {
+            $detail->setAttribute('sale_type_label', $this->order_service->resolveSaleTypeLabel($detail));
+        }
+
+        return view('admin.order.show', compact('order', 'sale_type_badge'));
     }
 
     /**
@@ -250,11 +256,16 @@ class OrderController extends Controller
         if (!empty($obj['products']) && !Auth::user()->can('order.price.change')) {
             foreach ($obj['products'] as $index => $line) {
                 unset($obj['products'][$index]['unit_price']);
+                unset($obj['products'][$index]['sale_type_id']);
             }
         }
 
         if (!empty($obj['customer_id']) && !Auth::user()->can('order.customer.change')) {
             $obj['customer_id'] = null;
+        }
+
+        if (!empty($obj['override_minimum_price']) && !Auth::user()->can('order.price.override-minimum')) {
+            $obj['override_minimum_price'] = false;
         }
 
         try {
@@ -444,6 +455,21 @@ class OrderController extends Controller
         try {
             $products = $this->order_service->getProductsByCategory($request->all());
             return $this->success(Message::FETCH, $products);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * Re-prices an already-known set of cart lines against a given Sale Type -
+     * used by the POS screen when the order-level Sale Type changes, or a
+     * line's own Sale Type is overridden, without re-running product search.
+     */
+    public function resolvePrices(Request $request)
+    {
+        try {
+            $resolved = $this->order_service->resolvePrices($request->all());
+            return $this->success(Message::FETCH, $resolved);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }

@@ -30,6 +30,7 @@ use App\Models\ProductVariationStock;
 use App\Models\ProductVariationStockTransaction;
 use App\Models\ProductVariationUnitConversion;
 use App\Models\NotificationSetting;
+use App\Models\SaleType;
 use App\Models\Voucher;
 use App\Repository\Repository;
 use App\Traits\Auditable;
@@ -75,26 +76,31 @@ class OrderService
         'user',
         'orderType',
         'orderSource',
+        'saleType',
         'discount',
         'voucher',
         'details',
         'details.product',
         'details.productVariation',
         'details.unit',
+        'details.saleType',
         'payments',
         'payments.paymentMethod',
+        'customerPayments',
     ];
 
     protected $discount_service;
     protected $voucher_service;
     protected $customer_service;
     protected $stock_service;
+    protected $pricing_engine;
 
     public function __construct(
         DiscountService $discount_service,
         VoucherService $voucher_service,
         CustomerService $customer_service,
-        ProductVariationStockService $stock_service
+        ProductVariationStockService $stock_service,
+        VariationPricingService $pricing_engine
     ) {
         $this->model_order = new Repository(new Order());
         $this->model_order_detail = new Repository(new OrderDetail());
@@ -104,6 +110,7 @@ class OrderService
         $this->voucher_service = $voucher_service;
         $this->customer_service = $customer_service;
         $this->stock_service = $stock_service;
+        $this->pricing_engine = $pricing_engine;
     }
 
     /**
@@ -295,6 +302,9 @@ class OrderService
 
                 return '<span class="badge ' . $badge . '">' . $label . '</span>';
             })
+            ->addColumn('sale_type', function ($item) {
+                return $this->formatSaleTypeBadge($item->details);
+            })
             ->addColumn('status', function ($item) {
                 $badges = [
                     'draft' => 'bg-label-secondary',
@@ -332,8 +342,33 @@ class OrderService
 
                 return $viewButton . $viewJvButton . $printButton . $thermalPrintButton;
             })
-            ->rawColumns(['business', 'branch', 'warehouse', 'register', 'cashier', 'customer', 'order_type', 'order_source', 'total', 'status', 'payment_status', 'action'])
+            ->rawColumns(['business', 'branch', 'warehouse', 'register', 'cashier', 'customer', 'order_type', 'order_source', 'total', 'status', 'payment_status', 'sale_type', 'action'])
             ->make(true);
+    }
+
+    /**
+     * Renders the order-list/order-detail "Sale Type" badge: the single sale
+     * type if every line used the same one, otherwise "Mixed" - never stored
+     * redundantly on the order itself, always derived from order_details.
+     */
+    public function formatSaleTypeBadge($details): string
+    {
+        $labels = collect($details)->map(fn ($detail) => $this->resolveSaleTypeLabel($detail))->filter()->unique();
+
+        if ($labels->isEmpty()) {
+            return '-';
+        }
+
+        if ($labels->count() > 1) {
+            return '<span class="badge bg-label-dark">Mixed</span>';
+        }
+
+        return '<span class="badge bg-label-secondary">' . $labels->first() . '</span>';
+    }
+
+    public function resolveSaleTypeLabel($detail): ?string
+    {
+        return $detail->saleType->name ?? null;
     }
 
     /**
@@ -479,6 +514,7 @@ class OrderService
                 'customer_id' => $order->user_id,
                 'order_type_id' => $order->order_type_id,
                 'order_source_id' => $order->order_source_id,
+                'sale_type_id' => $order->sale_type_id,
                 'order_date' => $order->order_date,
                 'sale_date' => $order->sale_date,
                 'subtotal' => $order->subtotal,
@@ -518,6 +554,9 @@ class OrderService
                 'conversion_factor' => $detail->conversion_factor,
                 'base_quantity' => $detail->base_quantity,
                 'unit_price' => $detail->unit_price,
+                'sale_type_id' => $detail->sale_type_id,
+                'sale_type_name' => $detail->saleType->name ?? '',
+                'final_unit_price' => $detail->final_unit_price,
                 'discount' => $detail->discount,
                 'discount_amount' => $detail->discount_amount,
                 'tax' => $detail->tax,
@@ -614,6 +653,14 @@ class OrderService
                 throw new Exception('order_source_id is required to identify the originating sales channel.');
             }
 
+            // Order-level default Sale Type - falls back to the business's
+            // default Sale Type (see SaleTypeService::seedDefaults()) when the
+            // client doesn't send one.
+            $sale_type_id = $obj['sale_type_id'] ?? SaleType::where('business_id', $business_id)
+                ->where('is_default', 1)
+                ->where('is_deleted', 0)
+                ->value('sale_type_id');
+
             // "Delivery" order types are identified by the default seeded
             // code (OrderTypeService::$default_types) rather than a dedicated
             // flag column - see OrderService class docblock context. A
@@ -646,6 +693,7 @@ class OrderService
                     'user_id' => $user_id,
                     'order_type_id' => $order_type_id,
                     'order_source_id' => $order_source_id,
+                    'sale_type_id' => $sale_type_id,
                     'sale_date' => $sale_date->format('Y-m-d'),
                     'notes' => $obj['notes'] ?? null,
                     'delivery_address' => $obj['delivery_address'] ?? null,
@@ -677,6 +725,7 @@ class OrderService
                     'user_id' => $user_id,
                     'order_type_id' => $order_type_id,
                     'order_source_id' => $order_source_id,
+                    'sale_type_id' => $sale_type_id,
                     'order_date' => now(),
                     'sale_date' => $sale_date->format('Y-m-d'),
                     'notes' => $obj['notes'] ?? null,
@@ -799,6 +848,38 @@ class OrderService
 
         $products = $obj['products'] ?? [];
 
+        // Whether a line may price under a different Sale Type than the
+        // order's default - when off, every line is forced onto the order's
+        // Sale Type server-side regardless of what the client sent.
+        $allow_mixed_sale_types = (bool) ($pos_setting->allow_mixed_sale_types ?? true);
+
+        // Each line is priced by whichever Sale Type applies to it (its own
+        // override, else the order's default) - group variation IDs by that
+        // sale type first so VariationPricingService is called once per
+        // distinct sale type instead of once per line.
+        $variation_ids_by_sale_type = [];
+
+        foreach ($products as $line) {
+            if ((float) ($line['quantity'] ?? 0) <= 0 || empty($line['product_variation_id'])) {
+                continue;
+            }
+
+            $line_sale_type_id = $allow_mixed_sale_types ? ($line['sale_type_id'] ?? $order->sale_type_id) : $order->sale_type_id;
+            $variation_ids_by_sale_type[$line_sale_type_id ?? ''][] = $line['product_variation_id'];
+        }
+
+        $resolved_prices = [];
+
+        foreach ($variation_ids_by_sale_type as $sale_type_id => $variation_ids) {
+            $sale_type_id = $sale_type_id === '' ? null : $sale_type_id;
+
+            foreach ($this->pricing_engine->resolveBulk($variation_ids, $sale_type_id) as $variation_id => $result) {
+                $resolved_prices[$variation_id . '|' . $sale_type_id] = $result;
+            }
+        }
+
+        $allow_below_minimum = !empty($obj['override_minimum_price']);
+
         foreach ($products as $line) {
             $quantity = (float) ($line['quantity'] ?? 0);
 
@@ -809,6 +890,8 @@ class OrderService
             $has_line = true;
 
             $variation = ProductVariation::findOrFail($line['product_variation_id']);
+            $line_sale_type_id = $allow_mixed_sale_types ? ($line['sale_type_id'] ?? $order->sale_type_id) : $order->sale_type_id;
+            $resolved = $resolved_prices[$variation->product_variation_id . '|' . $line_sale_type_id] ?? null;
 
             $conversion_factor = 1;
             $unit_id = $line['unit_id'] ?? $variation->base_unit_id;
@@ -828,17 +911,40 @@ class OrderService
             // caller (controller) is responsible for only allowing that when the
             // cashier holds the order.price.change permission; the service itself
             // does not perform permission checks (this codebase's convention
-            // keeps authorization in controllers).
-            $unit_price = isset($line['unit_price']) && (float) $line['unit_price'] > 0
+            // keeps authorization in controllers). Any other line is priced by
+            // the VariationPricingService result computed above, keyed by this
+            // line's own Sale Type (or the order's default Sale Type).
+            $manual_override = isset($line['unit_price']) && (float) $line['unit_price'] > 0;
+
+            $unit_price = $manual_override
                 ? (float) $line['unit_price']
-                : (float) $variation->sale_price;
+                : (float) ($resolved['price'] ?? $variation->sale_price);
 
             $line_subtotal = round($base_quantity * $unit_price, 3);
 
-            $discount_percent = $line_discount_allowed ? max(0, min(100, (float) ($line['discount'] ?? 0))) : 0;
+            // The line's own discount % defaults to whatever the pricing engine
+            // resolved for this Sale Type (0 if the variation's discount
+            // doesn't apply to it) - an authorized user can still send a
+            // different value, exactly as before this feature existed.
+            $default_discount = $resolved['discount_percentage'] ?? 0.0;
+            $discount_percent = $line_discount_allowed
+                ? max(0, min(100, (float) ($line['discount'] ?? $default_discount)))
+                : 0;
             $line_discount_amount = round($line_subtotal * $discount_percent / 100, 3);
 
             $taxable = $line_subtotal - $line_discount_amount;
+
+            $minimum_selling_price = $resolved['minimum_selling_price'] ?? $variation->minimum_selling_price;
+            $net_unit_price = $base_quantity > 0 ? $taxable / $base_quantity : $unit_price;
+
+            if (!$allow_below_minimum && $minimum_selling_price !== null && $this->pricing_engine->isBelowFloor((float) $minimum_selling_price, $net_unit_price)) {
+                throw new Exception(sprintf(
+                    'The price for "%s" (%s) is below its minimum selling price of %s.',
+                    $variation->name ?: $variation->sku,
+                    currency($net_unit_price),
+                    currency($minimum_selling_price)
+                ));
+            }
 
             $line_tax_amount = round($taxable * $tax_percent / 100, 3);
             $line_total = $taxable + $line_tax_amount;
@@ -858,6 +964,8 @@ class OrderService
                 'conversion_factor' => $conversion_factor,
                 'base_quantity' => $base_quantity,
                 'unit_price' => $unit_price,
+                'sale_type_id' => $line_sale_type_id,
+                'final_unit_price' => round($net_unit_price, 3),
                 'discount' => $discount_percent,
                 'discount_amount' => $line_discount_amount,
                 'tax' => $tax_percent,
@@ -1709,7 +1817,49 @@ class OrderService
             });
         }
 
-        return $query->limit(30)->get();
+        $variations = $query->limit(30)->get();
+
+        $this->applyResolvedPricing($variations, $obj);
+
+        return $variations;
+    }
+
+    /**
+     * Re-resolves prices for an already-known list of variation IDs against a
+     * given Sale Type - used by the POS screen to re-price the current cart
+     * when the order-level Sale Type changes, or to price a single line when
+     * the cashier overrides that line's Sale Type, without re-running product
+     * search.
+     */
+    public function resolvePrices($obj)
+    {
+        return $this->pricing_engine->resolveBulk($obj['product_variation_ids'] ?? [], $obj['sale_type_id'] ?? null);
+    }
+
+    /**
+     * Attaches resolved_price/resolved_discount_percentage/minimum_selling_price
+     * onto each ProductVariation in the given collection, using
+     * VariationPricingService so POS search/browse previews the exact same
+     * price the eventual save() will stamp. Client (pos-screen.js) falls back
+     * to sale_price if these are ever absent.
+     */
+    protected function applyResolvedPricing($variations, array $obj): void
+    {
+        if ($variations->isEmpty()) {
+            return;
+        }
+
+        $sale_type_id = $obj['sale_type_id'] ?? null;
+
+        $resolved = $this->pricing_engine->resolveBulk($variations->pluck('product_variation_id')->all(), $sale_type_id);
+
+        foreach ($variations as $variation) {
+            $r = $resolved[$variation->product_variation_id] ?? null;
+
+            $variation->setAttribute('resolved_price', $r['price'] ?? (float) $variation->sale_price);
+            $variation->setAttribute('resolved_discount_percentage', $r['discount_percentage'] ?? 0.0);
+            $variation->setAttribute('minimum_selling_price', $r['minimum_selling_price'] ?? $variation->minimum_selling_price);
+        }
     }
 
     /**
@@ -1740,6 +1890,11 @@ class OrderService
             $query->where('category_id', $category_id);
         }
 
-        return $query->orderBy('name')->limit(60)->get();
+        $products = $query->orderBy('name')->limit(60)->get();
+
+        $all_variations = $products->flatMap(fn ($product) => $product->productVariations);
+        $this->applyResolvedPricing($all_variations, $obj);
+
+        return $products;
     }
 }

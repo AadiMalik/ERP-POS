@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\Message;
 use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Http\Controllers\Controller;
@@ -20,6 +21,7 @@ use App\Services\Concrete\Admin\OrderSourceService;
 use App\Services\Concrete\Admin\OrderTypeService;
 use App\Services\Concrete\Admin\PaymentMethodService;
 use App\Services\Concrete\Admin\PosRegisterSessionService;
+use App\Services\Concrete\Admin\SaleTypeService;
 use App\Services\Concrete\Admin\UserService;
 use App\Services\Concrete\Admin\WarehouseService;
 use App\Traits\ResponseAPI;
@@ -46,6 +48,7 @@ class PosScreenController extends Controller
         'order.discount.apply',
         'order.coupon.apply',
         'order.price.change',
+        'order.price.override-minimum',
         'order.hold',
         'order.cancel_void',
         'order.refund.process',
@@ -77,6 +80,7 @@ class PosScreenController extends Controller
     protected $expense_category_service;
     protected $expense_service;
     protected $pos_register_session_service;
+    protected $sale_type_service;
 
     public function __construct(
         CustomerService $customer_service,
@@ -91,7 +95,8 @@ class PosScreenController extends Controller
         UserService $user_service,
         ExpenseCategoryService $expense_category_service,
         ExpenseService $expense_service,
-        PosRegisterSessionService $pos_register_session_service
+        PosRegisterSessionService $pos_register_session_service,
+        SaleTypeService $sale_type_service
     ) {
         $this->customer_service = $customer_service;
         $this->order_type_service = $order_type_service;
@@ -106,6 +111,7 @@ class PosScreenController extends Controller
         $this->expense_category_service = $expense_category_service;
         $this->expense_service = $expense_service;
         $this->pos_register_session_service = $pos_register_session_service;
+        $this->sale_type_service = $sale_type_service;
     }
 
     /**
@@ -140,6 +146,7 @@ class PosScreenController extends Controller
         $payment_methods = $this->payment_method_service->getAllActive($business_id);
         $customers = $this->customer_service->getAllActive($business_id);
         $discounts = $this->discount_service->getAllActive($business_id);
+        $sale_types = $this->sale_type_service->getAllActive($business_id);
         $categories = $this->category_service->getByBusiness($business_id);
         $expense_categories = $this->expense_category_service->getActiveByBusiness($business_id);
 
@@ -160,7 +167,11 @@ class PosScreenController extends Controller
         $pos_order_source_id = $this->resolvePosOrderSourceId($order_sources);
         $business = $this->business_service->getById($business_id);
         $branch_name = optional($this->branch_service->getById($branch_id))->name;
-        $warehouse_name = optional($this->warehouse_service->getById($warehouse_id))->name;
+        // Warehouse is optional on the context picker (a manual-mode register
+        // already fixes its own warehouse) - Repository::find() uses
+        // findOrFail(), so an empty $warehouse_id must be short-circuited here
+        // rather than passed through and turning into a 404.
+        $warehouse_name = $warehouse_id ? optional($this->warehouse_service->getById($warehouse_id))->name : null;
 
         // Reorder entry point - order.show's Reorder button links here with
         // this query param; pos-screen.js reads it from POS_CONFIG on load
@@ -193,6 +204,7 @@ class PosScreenController extends Controller
             'payment_methods',
             'customers',
             'discounts',
+            'sale_types',
             'categories',
             'expense_categories',
             'registers',
@@ -289,15 +301,12 @@ class PosScreenController extends Controller
     public function contextOptions($business_id)
     {
         try {
-            return response()->json([
-                'Status' => true,
-                'Data' => [
-                    'branches' => $this->branch_service->getByBusiness($business_id),
-                    'warehouses' => $this->warehouse_service->getByBusiness($business_id),
-                ],
+            return $this->success(Message::FETCH, [
+                'branches' => $this->branch_service->getByBusiness($business_id),
+                'warehouses' => $this->warehouse_service->getByBusiness($business_id),
             ]);
         } catch (Exception $e) {
-            return response()->json(['Status' => false, 'Message' => $e->getMessage()], 422);
+            return $this->error($e->getMessage());
         }
     }
 

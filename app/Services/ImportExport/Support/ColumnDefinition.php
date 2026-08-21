@@ -12,7 +12,7 @@ class ColumnDefinition
     /**
      * @param string $key Excel header text (exact match, case-insensitive on read)
      * @param string $attribute Model attribute name this column maps to
-     * @param string $type string|integer|decimal|date|boolean|enum|relation
+     * @param string $type string|integer|decimal|date|datetime|boolean|enum|relation
      * @param bool|callable $required
      * @param array $enumValues Allowed values for type=enum
      * @param RelationSpec|null $relation

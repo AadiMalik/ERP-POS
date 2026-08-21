@@ -7,6 +7,9 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\ProductVariationAttribute;
+use App\Models\ProductVariationPrice;
+use App\Models\ProductVariationPriceHistory;
+use App\Models\SaleType;
 use App\Models\SubCategory;
 use App\Models\Unit;
 use App\Services\Concrete\Admin\BarcodeService;
@@ -17,6 +20,8 @@ use App\Services\ImportExport\Support\ImportContext;
 use App\Services\ImportExport\Support\RelationSpec;
 use App\Services\ImportExport\Support\ResolvedRow;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ProductImportExportDefinition extends AbstractImportExportDefinition
@@ -108,13 +113,49 @@ class ProductImportExportDefinition extends AbstractImportExportDefinition
         ];
     }
 
+    /**
+     * The business's currently-configured active Sale Types - drives the
+     * dynamic per-sale-type price columns below, so the import/export sheet
+     * always matches whatever Sale Types are presently active in POS
+     * Settings (see SaleTypeService).
+     */
+    protected function activeSaleTypes()
+    {
+        return SaleType::where('business_id', Auth::user()->business_id ?? null)
+            ->where('status', 'active')
+            ->where('is_deleted', 0)
+            ->orderBy('sort_order')
+            ->get();
+    }
+
+    protected function priceColumnAttribute(string $saleTypeId): string
+    {
+        return 'price_sale_type__' . $saleTypeId;
+    }
+
     public function childDefinition(): ?ChildTableDefinition
     {
+        $priceColumns = $this->activeSaleTypes()->map(function ($sale_type) {
+            return new ColumnDefinition(
+                key: $sale_type->name . ' Price',
+                attribute: $this->priceColumnAttribute($sale_type->sale_type_id),
+                type: 'decimal',
+                required: false,
+                sampleValues: ['', ''],
+                exportAccessor: function ($variation) use ($sale_type) {
+                    $row = $variation->prices->firstWhere('sale_type_id', $sale_type->sale_type_id);
+
+                    return $row ? $row->price : '';
+                },
+                notes: 'Optional - falls back to Sale Price when left blank.',
+            );
+        })->all();
+
         return new ChildTableDefinition(
             modelClass: ProductVariation::class,
             primaryKey: 'product_variation_id',
             foreignKeyAttribute: 'product_id',
-            columns: [
+            columns: array_merge([
                 new ColumnDefinition(
                     key: 'Variation Name',
                     attribute: 'name',
@@ -184,6 +225,38 @@ class ProductImportExportDefinition extends AbstractImportExportDefinition
                     sampleValues: ['', ''],
                 ),
                 new ColumnDefinition(
+                    key: 'Minimum Selling Price',
+                    attribute: 'minimum_selling_price',
+                    type: 'decimal',
+                    required: false,
+                    sampleValues: ['', ''],
+                    notes: 'Optional hard price floor for this variation - the final price after any discount cannot fall below it without the order.price.override-minimum permission.',
+                ),
+                new ColumnDefinition(
+                    key: 'Discount Percentage',
+                    attribute: 'discount_percentage',
+                    type: 'decimal',
+                    required: false,
+                    sampleValues: ['', ''],
+                    notes: 'Auto-applied at POS add-to-cart time, per the sale types selected in "Apply Discount On".',
+                ),
+                new ColumnDefinition(
+                    key: 'Discount Apply To',
+                    attribute: 'discount_apply_to',
+                    type: 'string',
+                    required: false,
+                    sampleValues: ['All', ''],
+                    exportAccessor: function ($variation) {
+                        if ($variation->discount_apply_all) {
+                            return 'All';
+                        }
+
+                        return $variation->discountSaleTypes->pluck('code')->implode(',');
+                    },
+                    notes: 'Comma-separated Sale Type codes this variation\'s discount applies to (e.g. RETAIL,WHOLESALE), or "All" / blank for every active Sale Type.',
+                ),
+            ], $priceColumns, [
+                new ColumnDefinition(
                     key: 'Attributes',
                     attribute: 'attributes',
                     type: 'string',
@@ -191,7 +264,7 @@ class ProductImportExportDefinition extends AbstractImportExportDefinition
                     sampleValues: ['Color:Red;Size:M', ''],
                     notes: 'Encode as Key:Value pairs separated by semicolons, e.g. Color:Red;Size:M.',
                 ),
-            ],
+            ]),
             minChildren: 1,
             deleteExistingOnUpdate: false,
         );
@@ -262,6 +335,9 @@ class ProductImportExportDefinition extends AbstractImportExportDefinition
                 ->whereRaw('LOWER(sku) = ?', [mb_strtolower($sku)])
                 ->first();
 
+            $discountApplyToRaw = trim((string) ($child->attributes['discount_apply_to'] ?? ''));
+            $discountApplyAll = $discountApplyToRaw === '' || strtolower($discountApplyToRaw) === 'all';
+
             $variationData = [
                 'name' => $child->attributes['name'],
                 'sku' => $sku,
@@ -271,6 +347,9 @@ class ProductImportExportDefinition extends AbstractImportExportDefinition
                 'purchase_price' => $child->attributes['purchase_price'],
                 'sale_price' => $child->attributes['sale_price'],
                 'minimum_stock' => $child->attributes['minimum_stock'] ?? 0,
+                'minimum_selling_price' => $child->attributes['minimum_selling_price'] ?? null,
+                'discount_percentage' => $child->attributes['discount_percentage'] ?? 0,
+                'discount_apply_all' => $discountApplyAll,
                 'business_id' => $businessId,
             ];
 
@@ -290,6 +369,8 @@ class ProductImportExportDefinition extends AbstractImportExportDefinition
 
             $barcodeService->generateForVariation($variation, $child->attributes['barcode'] ?? null);
 
+            $this->savePricingFromImport($variation, $businessId, $child->attributes, $discountApplyAll, $discountApplyToRaw, $ctx);
+
             ProductVariationAttribute::where('product_variation_id', $variation->product_variation_id)->delete();
 
             foreach ($this->parseAttributes($child->attributes['attributes'] ?? null) as $name => $value) {
@@ -305,6 +386,75 @@ class ProductImportExportDefinition extends AbstractImportExportDefinition
         }
 
         return ['model' => $product, 'created' => $created];
+    }
+
+    /**
+     * Mirrors ProductService::savePricingForVariation() - writes the
+     * per-sale-type price columns (see childDefinition()'s dynamic
+     * $priceColumns) and the "Discount Apply To" column into
+     * product_variation_prices / product_variation_discount_sale_types,
+     * logging a ProductVariationPriceHistory row for every sale type whose
+     * price actually changed.
+     */
+    protected function savePricingFromImport(ProductVariation $variation, ?string $businessId, array $attributes, bool $discountApplyAll, string $discountApplyToRaw, ImportContext $ctx): void
+    {
+        $saleTypes = $this->activeSaleTypes();
+
+        $existingPrices = ProductVariationPrice::where('product_variation_id', $variation->product_variation_id)
+            ->pluck('price', 'sale_type_id');
+
+        ProductVariationPrice::where('product_variation_id', $variation->product_variation_id)->delete();
+
+        foreach ($saleTypes as $sale_type) {
+            $value = $attributes[$this->priceColumnAttribute($sale_type->sale_type_id)] ?? null;
+
+            if ($value === null || $value === '') {
+                continue;
+            }
+
+            $price = (float) $value;
+
+            ProductVariationPrice::create([
+                'product_variation_price_id' => generateUuid(),
+                'business_id' => $businessId,
+                'product_variation_id' => $variation->product_variation_id,
+                'sale_type_id' => $sale_type->sale_type_id,
+                'price' => $price,
+                'createdby_id' => $ctx->userId,
+                'date_created' => now(),
+            ]);
+
+            $oldPrice = $existingPrices->has($sale_type->sale_type_id) ? (float) $existingPrices->get($sale_type->sale_type_id) : null;
+
+            if ($oldPrice !== null && abs($oldPrice - $price) < 0.0001) {
+                continue;
+            }
+
+            ProductVariationPriceHistory::create([
+                'product_variation_price_history_id' => generateUuid(),
+                'business_id' => $businessId,
+                'product_variation_id' => $variation->product_variation_id,
+                'sale_type_id' => $sale_type->sale_type_id,
+                'old_price' => $oldPrice,
+                'new_price' => $price,
+                'changedby_id' => $ctx->userId,
+                'date_created' => now(),
+            ]);
+        }
+
+        DB::table('product_variation_discount_sale_types')->where('product_variation_id', $variation->product_variation_id)->delete();
+
+        if (!$discountApplyAll) {
+            $codes = array_filter(array_map('trim', explode(',', $discountApplyToRaw)));
+            $matched = $saleTypes->whereIn('code', $codes);
+
+            foreach ($matched as $sale_type) {
+                DB::table('product_variation_discount_sale_types')->insert([
+                    'product_variation_id' => $variation->product_variation_id,
+                    'sale_type_id' => $sale_type->sale_type_id,
+                ]);
+            }
+        }
     }
 
     /**
@@ -383,6 +533,8 @@ class ProductImportExportDefinition extends AbstractImportExportDefinition
             'productVariations.purchaseUnit',
             'productVariations.saleUnit',
             'productVariations.attributes',
+            'productVariations.prices',
+            'productVariations.discountSaleTypes',
         ];
     }
 }
