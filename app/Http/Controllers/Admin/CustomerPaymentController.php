@@ -11,6 +11,7 @@ use App\Services\Concrete\Admin\AccountService;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CustomerPaymentService;
 use App\Services\Concrete\Admin\CustomerService;
+use App\Services\Concrete\Admin\OrderService;
 use App\Services\Concrete\Admin\SettingService;
 use App\Traits\ResponseAPI;
 use Exception;
@@ -29,17 +30,20 @@ class CustomerPaymentController extends Controller
     protected $customer_service;
     protected $setting_service;
     protected $account_service;
+    protected $order_service;
 
     public function __construct(
         CustomerPaymentService $customer_payment_service,
         BusinessService $business_service,
         CustomerService $customer_service,
         SettingService $setting_service,
-        AccountService $account_service
+        AccountService $account_service,
+        OrderService $order_service
     ) {
         $this->middleware('permission:customer-payment.view')->only(['index', 'getData', 'details', 'customerLedger', 'ordersByCustomer']);
         $this->middleware('permission:customer-payment.create')->only(['create']);
         $this->middleware('permission:customer-payment.create|customer-payment.edit')->only(['store']);
+        $this->middleware('permission:customer-payment.create')->only(['quickReceive']);
         $this->middleware('permission:customer-payment.edit')->only(['edit']);
         $this->middleware('permission:customer-payment.delete')->only(['destroy']);
         $this->middleware('permission:customer-payment.status')->only(['status']);
@@ -50,6 +54,7 @@ class CustomerPaymentController extends Controller
         $this->customer_service = $customer_service;
         $this->setting_service = $setting_service;
         $this->account_service = $account_service;
+        $this->order_service = $order_service;
     }
 
     public function index()
@@ -115,7 +120,7 @@ class CustomerPaymentController extends Controller
             'user_id'        => ['required', Rule::exists('users', 'id')->where('is_deleted', 0)],
             'order_id'       => ['nullable', Rule::exists('orders', 'order_id')->where('is_deleted', 0)],
             'payment_date'   => ['required', 'date'],
-            'payment_method' => ['required', 'in:' . PaymentMethod::CASH . ',' . PaymentMethod::BANK_TRANSFER . ',' . PaymentMethod::CHEQUE . ',' . PaymentMethod::ONLINE],
+            'payment_method' => ['required', 'in:' . PaymentMethod::CASH . ',' . PaymentMethod::BANK_TRANSFER . ',' . PaymentMethod::CHEQUE . ',' . PaymentMethod::ONLINE . ',' . PaymentMethod::CARD],
             'payment_account_id' => ['nullable', Rule::exists('accounts', 'account_id')->where('is_deleted', 0)],
             'reference_no'   => ['nullable', 'string', 'max:191'],
             'cheque_date'    => ['nullable', 'date'],
@@ -154,6 +159,73 @@ class CustomerPaymentController extends Controller
                 ->with('success', empty($request->customer_payment_id) ? Message::SAVE : Message::UPDATE);
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage())->withInput();
+        }
+    }
+
+    /**
+     * Quick "Receive Payment" against a specific order - used by the POS
+     * Order History detail modal (and reusable anywhere else a one-tap
+     * payment capture is needed) instead of the full Customer Payment
+     * create page. Creates the CustomerPayment via the existing save() then
+     * immediately posts it via the existing status() - both untouched, so
+     * overpay rejection, JV posting, and order.paid_amount bookkeeping are
+     * all inherited rather than re-implemented here.
+     */
+    public function quickReceive(Request $request)
+    {
+        $rules = [
+            'order_id'       => ['required', Rule::exists('orders', 'order_id')->where('is_deleted', 0)],
+            'amount'         => ['required', 'numeric', 'min:0.01'],
+            'payment_method' => ['required', 'in:' . PaymentMethod::CASH . ',' . PaymentMethod::BANK_TRANSFER . ',' . PaymentMethod::CHEQUE . ',' . PaymentMethod::ONLINE . ',' . PaymentMethod::CARD],
+            'reference_no'   => ['nullable', 'string', 'max:191'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        try {
+            $order = Order::where('order_id', $request->order_id)->where('is_deleted', 0)->firstOrFail();
+
+            if ($order->status === 'cancelled') {
+                throw new Exception('Cannot receive payment for a cancelled order.');
+            }
+
+            if (empty($order->user_id)) {
+                throw new Exception('This order has no customer to receive payment from.');
+            }
+
+            $due = round((float) $order->total - (float) $order->paid_amount, 3);
+
+            if ($due <= 0) {
+                throw new Exception('This order is already fully paid.');
+            }
+
+            $payment = $this->customer_payment_service->save([
+                'business_id'      => $order->business_id,
+                'branch_id'        => $order->branch_id,
+                'user_id'          => $order->user_id,
+                'order_id'         => $order->order_id,
+                'payment_date'     => now(),
+                'payment_method'   => $request->payment_method,
+                'reference_no'     => $request->reference_no,
+                'amount'           => $request->amount,
+                'tax_amount'       => 0,
+                'discount_amount'  => 0,
+                'remarks'          => 'Receive Payment',
+            ]);
+
+            $this->customer_payment_service->status([
+                'customer_payment_id' => $payment->customer_payment_id,
+                'status'               => Status::POSTED,
+            ]);
+
+            $details = $this->order_service->getDetails($order->order_id);
+
+            return $this->success(Message::SAVE, $details);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
         }
     }
 
@@ -213,9 +285,10 @@ class CustomerPaymentController extends Controller
             $orders = Order::where('user_id', $user_id)
                 ->where('status', '!=', 'cancelled')
                 ->where('is_deleted', 0)
-                ->get(['order_id', 'total', 'paid_amount'])
+                ->get(['order_id', 'daily_order_id', 'order_date', 'total', 'paid_amount'])
                 ->map(function ($order) {
                     $order->due_amount = round((float) $order->total - (float) $order->paid_amount, 3);
+                    $order->order_date = $order->order_date ? localDate($order->order_date) : null;
                     return $order;
                 })
                 ->filter(fn ($order) => $order->due_amount > 0)

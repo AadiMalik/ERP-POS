@@ -35,6 +35,8 @@
         selected_payment_method_id: null,
         reports_viewed_session_id: null,
         default_sale_type_id: null,
+        credit_payment_modal: null,
+        credit_payment_order_id: null,
     };
 
     function can(perm) {
@@ -47,6 +49,16 @@
     // OrderService::saveLinesAndComputeTotals()'s server-side enforcement.
     function canChangePrice() {
         return !!SETTING.allow_price_change_in_cart && can('order.price.change');
+    }
+
+    // Selling below a variation's Minimum Selling Price requires price
+    // editing to be enabled in the first place, the separate "Allow Price
+    // Below Minimum Selling Price" business setting to be on, AND the
+    // order.price.override-minimum permission - matches
+    // OrderService::saveLinesAndComputeTotals()'s server-side enforcement.
+    // Replaces the old per-sale #overrideMinPriceCheck checkbox.
+    function canOverrideMinPrice() {
+        return canChangePrice() && !!SETTING.allow_price_below_minimum && can('order.price.override-minimum');
     }
 
     function money(v) {
@@ -110,6 +122,7 @@
         state.pos_reports_offcanvas = new bootstrap.Offcanvas(document.getElementById('posReportsOffcanvas'));
         state.product_picker_modal = new bootstrap.Modal(document.getElementById('productPickerModal'));
         state.add_customer_modal = new bootstrap.Modal(document.getElementById('addCustomerModal'));
+        state.credit_payment_modal = new bootstrap.Modal(document.getElementById('creditPaymentModal'), { backdrop: 'static', keyboard: false });
         if ($('#addExpenseModal').length) {
             state.add_expense_modal = new bootstrap.Modal(document.getElementById('addExpenseModal'));
         }
@@ -344,6 +357,13 @@
         $('#order_type_id, #order_source_id, #sale_type_id, #paymentMethodSelect').on('change', syncPillsFromSelect);
         syncPillsFromSelect();
 
+        // The visible #saleTypeSelect drives the hidden #sale_type_id (the
+        // field the rest of the screen reads from) - changing it reprices
+        // and force-syncs every cart line (see repriceCartForSaleType()).
+        $('#saleTypeSelect').on('change', function () {
+            $('#sale_type_id').val($(this).val()).trigger('change');
+        });
+
         $('#sale_type_id').on('change', repriceCartForSaleType);
 
         $('#order_type_id').on('change', updateDeliveryAddressVisibility);
@@ -391,6 +411,10 @@
             state.add_customer_modal.show();
         });
         $('#addCustomerSubmitBtn').on('click', submitAddCustomer);
+
+        // ---- Credit Payment modal (shown after a Credit-type sale completes) ----
+        $('#creditPaymentSaveBtn').on('click', function () { submitCreditInfo(true); });
+        $('#creditPaymentSkipBtn').on('click', function () { submitCreditInfo(false); });
 
         // ---- Product search: scan button just re-focuses the input (the
         // scanner itself is a keyboard-wedge device that types into it) ----
@@ -441,6 +465,11 @@
                 $(this).toggleClass('active', String($(this).data('value')) === String(value));
             });
         });
+
+        // #saleTypeSelect isn't a pill group, but it needs the same
+        // sync-on-every-#sale_type_id-change treatment (see all call sites
+        // of this function), so it's kept in step here too.
+        $('#saleTypeSelect').val($('#sale_type_id').val());
     }
 
     // "Delivery" order types are identified by the seeded order_types.code
@@ -480,6 +509,7 @@
                     .attr('value', customer.user_id)
                     .attr('data-credit-limit', customer.credit_limit || 0)
                     .attr('data-walkin', customer.is_walkin ? 1 : 0)
+                    .attr('data-credit-days', customer.credit_days || 0)
                     .attr('data-phone', customer.phone || '')
                     .attr('data-email', customer.email || '')
                     .text(customer.name || '');
@@ -795,6 +825,11 @@
             // for any caller that hasn't gone through that resolution.
             unit_price: (pv.resolved_price !== undefined ? pv.resolved_price : pv.sale_price) || 0,
             discount: pv.resolved_discount_percentage || 0,
+            // Set by OrderService::applyResolvedPricing() (search/browse) or
+            // by repriceCartForSaleType()/repriceLineForSaleType() - used for
+            // the client-side below-minimum-price validation (see
+            // updateLineFromRow()/canOverrideMinPrice()).
+            minimum_selling_price: pv.minimum_selling_price !== undefined ? pv.minimum_selling_price : null,
             // null = inherits the order-level Sale Type (re-priced whenever it
             // changes); set only when the cashier overrides this one line's
             // Sale Type (see .line-sale-type, allowed only when
@@ -808,16 +843,15 @@
         renderCart();
     }
 
-    // Re-resolves every cart line that inherits the order-level Sale Type
-    // (line.sale_type_id is null) against the newly selected Sale Type.
-    // Lines the cashier has already hand-edited (manual_override) or given
-    // their own Sale Type override are left untouched.
+    // Changing the order-level Sale Type (via #saleTypeSelect) force-syncs
+    // every line currently in the cart to it - including lines the cashier
+    // had manually priced or given their own per-line Sale Type override -
+    // so the whole cart always reflects one consistent, current Sale Type
+    // until a cashier explicitly re-overrides an individual line again.
     function repriceCartForSaleType() {
         var saleTypeId = $('#sale_type_id').val();
 
-        var variationIds = state.cart
-            .filter(function (l) { return !l.manual_override && !l.sale_type_id; })
-            .map(function (l) { return l.product_variation_id; });
+        var variationIds = state.cart.map(function (l) { return l.product_variation_id; });
 
         if (!variationIds.length) {
             return;
@@ -835,13 +869,14 @@
                 var resolved = response.Data || {};
 
                 state.cart.forEach(function (line) {
-                    if (line.manual_override || line.sale_type_id) return;
-
                     var r = resolved[line.product_variation_id];
                     if (!r) return;
 
+                    line.sale_type_id = null;
+                    line.manual_override = false;
                     line.unit_price = r.price;
                     line.discount = r.discount_percentage;
+                    line.minimum_selling_price = r.minimum_selling_price;
                 });
 
                 renderCart();
@@ -871,6 +906,7 @@
 
                 line.unit_price = r.price;
                 line.discount = r.discount_percentage;
+                line.minimum_selling_price = r.minimum_selling_price;
                 renderCart();
             })
             .catch(function () {
@@ -1094,12 +1130,22 @@
         }
 
         state.cart.forEach(function (line) {
-            var unitCell = '<span class="text-muted">' + escapeHtml(line.unit_name || '') + '</span>' +
-                manualOverrideBadge(line);
+            // Preferred display format: Product Name (Variation) - Unit -
+            // Sale Type. Name/Variation/Unit are combined into one static
+            // line; Sale Type stays the interactive .line-sale-type <select>
+            // right after it (saleTypeCell below) so mixed-sale-type
+            // overrides keep working.
+            var lineDesc = escapeHtml(line.product_name);
+            if (line.variation_name) {
+                lineDesc += ' (' + escapeHtml(line.variation_name) + ')';
+            }
+            if (line.unit_name) {
+                lineDesc += ' - ' + escapeHtml(line.unit_name);
+            }
 
-            var priceCell = canChangePrice()
+            var priceCell = (canChangePrice()
                 ? '<input type="number" step="0.01" min="0" class="line-price" value="' + line.unit_price + '">'
-                : money(line.unit_price);
+                : money(line.unit_price)) + manualOverrideBadge(line);
 
             var discountCell = showLineDiscount
                 ? '<div class="cart-line-discount">' +
@@ -1126,8 +1172,7 @@
             $row.html(
                 imgHtml +
                 '<div class="cart-line-info">' +
-                    '<div class="cart-line-name">' + escapeHtml(line.product_name) + (line.variation_name ? ' - ' + escapeHtml(line.variation_name) : '') + '</div>' +
-                    '<div class="cart-line-meta">' + unitCell + '</div>' +
+                    '<div class="cart-line-name">' + lineDesc + '</div>' +
                     saleTypeCell +
                 '</div>' +
                 '<div class="cart-line-price">' + priceCell + '</div>' +
@@ -1162,17 +1207,34 @@
 
         line.quantity = parseFloat($row.find('.line-qty').val()) || 0;
 
+        var $discountInput = $row.find('.line-discount');
+        var discountPercent = $discountInput.length ? (parseFloat($discountInput.val()) || 0) : (line.discount || 0);
+
         if (canChangePrice()) {
             var newPrice = parseFloat($row.find('.line-price').val()) || 0;
+
+            // UX-only floor check, mirroring the server's authoritative one
+            // in OrderService::saveLinesAndComputeTotals() (net_unit_price =
+            // unit_price * (1 - discount/100), quantity cancels out). The
+            // server always re-validates regardless of what the client does.
+            if (!canOverrideMinPrice() && line.minimum_selling_price !== null && line.minimum_selling_price !== undefined) {
+                var netPrice = newPrice * (1 - discountPercent / 100);
+                if (netPrice < line.minimum_selling_price - 0.0005) {
+                    errorMessage('Price for "' + line.product_name + '" cannot be below its minimum selling price of ' + money(line.minimum_selling_price) + '.');
+                    $row.find('.line-price').val(line.unit_price);
+                    recalcLocal();
+                    return;
+                }
+            }
+
             if (newPrice !== line.unit_price) {
                 line.manual_override = true;
             }
             line.unit_price = newPrice;
         }
 
-        var $discountInput = $row.find('.line-discount');
         if ($discountInput.length) {
-            line.discount = parseFloat($discountInput.val()) || 0;
+            line.discount = discountPercent;
         }
 
         recalcLocal();
@@ -1372,6 +1434,70 @@
         $('#creditCustomerText').text('Customer: ' + name + (limit > 0 ? ' · Credit limit: ' + money(limit) : ''));
     }
 
+    // True when any tendered payment (single or multi-pay) uses a
+    // credit-type PaymentMethod - matches the type === 'credit' check
+    // OrderService::post() already uses for its JV generation.
+    function hasCreditPayment() {
+        return state.payments.some(function (p) {
+            var m = (CFG.payment_methods || []).find(function (x) { return x.payment_method_id === p.payment_method_id; });
+            return m && m.type === 'credit';
+        });
+    }
+
+    // Shown after a Credit-type sale completes - due date/note are optional
+    // (see submitCreditInfo()), the customer itself is already guaranteed
+    // non-walk-in before checkout starts (see completeSale()'s hard gate).
+    function showCreditPaymentModal(order) {
+        var $opt = $('#customer_id').find(':selected');
+        var creditDays = parseInt($opt.data('credit-days'), 10) || 0;
+        var orderDate = order.order_date ? new Date(order.order_date) : new Date();
+
+        state.credit_payment_order_id = order.order_id;
+        $('#creditCustomerName').text($.trim($opt.text()));
+        $('#creditNote').val('');
+
+        if (!isNaN(orderDate.getTime())) {
+            orderDate.setDate(orderDate.getDate() + creditDays);
+            $('#creditDueDate').val(orderDate.toISOString().slice(0, 10));
+        } else {
+            $('#creditDueDate').val('');
+        }
+
+        state.credit_payment_modal.show();
+    }
+
+    // saveFields=false is the "Skip" path - still records nothing but still
+    // completes the reset-for-new-sale flow (see completeSale()).
+    function submitCreditInfo(saveFields) {
+        var order_id = state.credit_payment_order_id;
+
+        function finish() {
+            state.credit_payment_order_id = null;
+            state.credit_payment_modal.hide();
+            resetForNewSale();
+        }
+
+        if (!saveFields || !order_id) {
+            finish();
+            return;
+        }
+
+        ajaxRequest({
+            url: URLS.order_credit_info,
+            method: 'POST',
+            data: {
+                order_id: order_id,
+                due_date: $('#creditDueDate').val() || null,
+                notes: $('#creditNote').val() || null,
+            },
+        })
+            .then(finish)
+            .catch(function (err) {
+                errorMessage(err.Message || 'Unable to save credit payment details.');
+                finish();
+            });
+    }
+
     function renderPayments() {
         var $wrap = $('#paymentRows');
         $wrap.empty();
@@ -1503,7 +1629,7 @@
             products: products,
         };
 
-        if (can('order.price.override-minimum') && $('#overrideMinPriceCheck').is(':checked')) {
+        if (canOverrideMinPrice()) {
             payload.override_minimum_price = true;
         }
 
@@ -1774,7 +1900,7 @@
                 );
 
                 $item.on('click', function () {
-                    resumeOrder(row.order_id);
+                    resumeOrder(row.order_id, row.raw_status);
                 });
 
                 $list.append($item);
@@ -1796,7 +1922,11 @@
                 draw: 1,
                 start: 0,
                 length: 50,
-                status: 'hold',
+                // Both statuses are editable/resumable from POS - 'draft'
+                // covers orders left stuck mid-checkout (e.g. completeSale()'s
+                // store-then-complete second step failed), which used to be
+                // invisible here even though they're fully recoverable.
+                status: ['draft', 'hold'],
                 cashier_id: state.session ? state.session.cashier_id : null,
                 business_id: CFG.business_id,
             },
@@ -1812,11 +1942,22 @@
             });
     }
 
-    function resumeOrder(order_id) {
+    function resumeOrder(order_id, status) {
         ajaxRequest({ url: URLS.order_details + '/' + order_id })
             .then(function (response) {
                 var data = response.Data;
                 loadCartFromDetails(data);
+
+                // OrderService::resume() only guards a hold -> draft
+                // transition and throws otherwise - an order that's already
+                // 'draft' (e.g. left stuck mid-checkout) just needs loading
+                // into the cart for editing, no status transition.
+                if (status !== 'hold') {
+                    successMessage('Order loaded for editing.');
+                    state.held_orders_offcanvas.hide();
+                    loadHeldOrdersCount();
+                    return;
+                }
 
                 ajaxRequest({ url: URLS.order_resume, method: 'POST', data: { order_id: order_id } })
                     .then(function () {
@@ -1927,6 +2068,14 @@
             return;
         }
 
+        // Hard gate: a credit sale must be tied to a real customer, not the
+        // walk-in one, so it can actually be tracked/recovered on their
+        // ledger. Checked before any request is sent.
+        if (hasCreditPayment() && $('#customer_id').find(':selected').data('walkin') == 1) {
+            errorMessage('Select a real customer before completing a credit sale.');
+            return;
+        }
+
         var payload = buildStorePayload('draft');
 
         ajaxRequest({ url: URLS.order_store, method: 'POST', data: payload })
@@ -1959,7 +2108,11 @@
                             window.open(URLS.order_print + '/' + posted.order_id + '/print', '_blank');
                         }
 
-                        resetForNewSale();
+                        if (hasCreditPayment()) {
+                            showCreditPaymentModal(posted);
+                        } else {
+                            resetForNewSale();
+                        }
                     })
                     .catch(function (err) {
                         errorMessage(err.Message || 'Unable to complete sale.');
@@ -1984,9 +2137,6 @@
         $('#delivery_address').val('');
         $('#sale_type_id').val(state.default_sale_type_id);
         syncPillsFromSelect();
-        if ($('#overrideMinPriceCheck').length) {
-            $('#overrideMinPriceCheck').prop('checked', false);
-        }
         renderCart();
         renderPayments();
         selectDefaultPaymentMethod();

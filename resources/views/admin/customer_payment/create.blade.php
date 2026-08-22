@@ -77,6 +77,7 @@
                                 <label>Payment Method <span class="text-danger">*</span></label>
                                 <select class="form-control" name="payment_method" id="payment_method">
                                     <option value="cash" {{ old('payment_method', $customer_payment->payment_method ?? 'cash') == 'cash' ? 'selected' : '' }}>Cash</option>
+                                    <option value="card" {{ old('payment_method', $customer_payment->payment_method ?? '') == 'card' ? 'selected' : '' }}>Card</option>
                                     <option value="bank_transfer" {{ old('payment_method', $customer_payment->payment_method ?? '') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
                                     <option value="cheque" {{ old('payment_method', $customer_payment->payment_method ?? '') == 'cheque' ? 'selected' : '' }}>Cheque</option>
                                     <option value="online" {{ old('payment_method', $customer_payment->payment_method ?? '') == 'online' ? 'selected' : '' }}>Online Payment</option>
@@ -281,9 +282,12 @@
                     let html = '<option value="">--Advance / On Account--</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, order) {
+                            let label = (order.daily_order_id || order.order_id) +
+                                (order.order_date ? ' - ' + order.order_date : '') +
+                                ' - Due: ' + decimal(order.due_amount);
                             html += `
                         <option value="${order.order_id}" data-due="${order.due_amount}">
-                            ${order.order_id} (Due: ${decimal(order.due_amount)})
+                            ${label}
                         </option>
                     `;
                         });

@@ -8,4 +8,5 @@ class PaymentMethod
     const BANK_TRANSFER = 'bank_transfer';
     const CHEQUE = 'cheque';
     const ONLINE = 'online';
+    const CARD = 'card';
 }

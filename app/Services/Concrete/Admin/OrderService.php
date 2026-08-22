@@ -153,8 +153,16 @@ class OrderService
         if (isset($obj['order_source_id']) && $obj['order_source_id'] != 0 && $obj['order_source_id'] != "") {
             $wh[] = ['order_source_id', $obj['order_source_id']];
         }
-        if (isset($obj['status']) && $obj['status'] != 0 && $obj['status'] != "") {
-            $wh[] = ['status', $obj['status']];
+        if (isset($obj['status']) && $obj['status'] !== '' && $obj['status'] !== []) {
+            // The POS Held Orders list needs both 'draft' and 'hold' at once
+            // (see fetchHeldOrders() in pos-screen.js) - every other caller
+            // still sends a single scalar status, which keeps the original
+            // exact-match behavior via $wh below.
+            if (is_array($obj['status'])) {
+                $query->whereIn('status', $obj['status']);
+            } elseif ($obj['status'] != 0) {
+                $wh[] = ['status', $obj['status']];
+            }
         }
         // Order Takers may only ever browse today's sales - whatever date
         // range the client sends (or omits) is ignored and today is forced
@@ -275,11 +283,7 @@ class OrderService
                 return currency(max(($item->total ?? 0) - ($item->paid_amount ?? 0), 0));
             })
             ->addColumn('payment_method', function ($item) {
-                $names = $item->payments->map(function ($payment) {
-                    return $payment->paymentMethod->name ?? null;
-                })->filter()->unique();
-
-                return $names->isNotEmpty() ? $names->implode(', ') : '-';
+                return $this->resolvePaymentMethodLabel($item);
             })
             ->addColumn('payment_status', function ($item) {
                 $due = max(($item->total ?? 0) - ($item->paid_amount ?? 0), 0);
@@ -317,7 +321,14 @@ class OrderService
                 $badge = $badges[$item->status] ?? 'bg-label-secondary';
                 return '<span class="badge ' . $badge . '">' . ucfirst($item->status) . '</span>';
             })
-            ->addColumn('action', function ($item) {
+            // Raw (non-badge) status value, alongside the HTML-badge 'status'
+            // column above - needed by callers like the POS Held Orders list
+            // (pos-screen.js fetchHeldOrders()) that need the actual status
+            // string, not a rendered badge.
+            ->addColumn('raw_status', function ($item) {
+                return $item->status;
+            })
+            ->addColumn('action', function ($item) use ($obj) {
                 $printButton = "<a class='btn btn-icon btn-outline-secondary mr-2' target='_blank'
                     href='" . route('order.print', $item->order_id) . "' title='Print'>
                     <i class='fa fa-print'></i>
@@ -332,6 +343,14 @@ class OrderService
                     href='" . route('order.show', $item->order_id) . "' title='View'>
                     <i class='fa fa-eye'></i>
                     </a>";
+
+                // POS Order History only ever needs View + Thermal Print -
+                // the normal Print and JV buttons stay for the main Admin
+                // Order List (which shares this same getData() endpoint but
+                // never sends context=pos).
+                if (($obj['context'] ?? null) === 'pos') {
+                    return $viewButton . $thermalPrintButton;
+                }
 
                 $viewJvButton = in_array($item->status, ['posted', 'returned'])
                     ? "<button type='button' class='btn btn-icon btn-outline-dark mr-2 view-jv-btn'
@@ -369,6 +388,49 @@ class OrderService
     public function resolveSaleTypeLabel($detail): ?string
     {
         return $detail->saleType->name ?? null;
+    }
+
+    /**
+     * Order-level "payment method" label shown across the Order List/POS
+     * Order History table, the Order Detail modal, and Order Show:
+     * - "Partial" while due > 0 (a credit order that hasn't received its
+     *   full total yet - regardless of whether it's received any money at
+     *   all so far).
+     * - the single method name if every payment received (POS-time
+     *   order_payments + later posted customer_payments) used the same one.
+     * - "Multi Payment" once due <= 0 but more than one distinct method
+     *   contributed (e.g. Cash at checkout + Card via a later Receive
+     *   Payment, or two separate Receive Payments in different methods).
+     * Credit-type order_payments lines are excluded - they're a due
+     * placeholder recorded at sale time, not money actually received,
+     * exactly like post() already treats them for paid_amount.
+     */
+    public function resolvePaymentMethodLabel(Order $order): string
+    {
+        $due = round((float) ($order->total ?? 0) - (float) ($order->paid_amount ?? 0), 3);
+
+        $labels = collect();
+
+        foreach ($order->payments as $payment) {
+            $method = $payment->paymentMethod;
+            if ($method && $method->type !== 'credit') {
+                $labels->push($method->name);
+            }
+        }
+
+        foreach ($order->customerPayments as $payment) {
+            if ($payment->status === Status::POSTED) {
+                $labels->push(ucwords(str_replace('_', ' ', $payment->payment_method)));
+            }
+        }
+
+        $labels = $labels->filter()->unique();
+
+        if ($due > 0.001) {
+            return 'Partial';
+        }
+
+        return $labels->count() > 1 ? 'Multi Payment' : ($labels->first() ?? '-');
     }
 
     /**
@@ -524,12 +586,15 @@ class OrderService
                 'tax_amount' => $order->tax_amount,
                 'total' => $order->total,
                 'paid_amount' => $order->paid_amount,
+                'due_amount' => round(max((float) $order->total - (float) $order->paid_amount, 0), 3),
+                'payment_method_label' => $this->resolvePaymentMethodLabel($order),
                 'change_amount' => $order->change_amount,
                 'discount_id' => $order->discount_id,
                 'voucher_id' => $order->voucher_id,
                 'voucher_code' => optional($order->voucher)->code,
                 'voucher_discount_amount' => $order->voucher_discount_amount,
                 'notes' => $order->notes,
+                'due_date' => $order->due_date,
                 'delivery_address' => $order->delivery_address,
                 'status' => $order->status,
                 'fbr_invoice_number' => $order->fbr_invoice_number,
@@ -539,6 +604,7 @@ class OrderService
             ],
             'details' => [],
             'payments' => [],
+            'customer_payments' => [],
         ];
 
         foreach ($order->details as $detail) {
@@ -575,6 +641,26 @@ class OrderService
                 'payment_method_name' => $payment->paymentMethod->name ?? '',
                 'amount' => $payment->amount,
                 'reference_no' => $payment->reference_no,
+            ];
+        }
+
+        // Later settlements against this order (Receive Payment / Customer
+        // Payment) - running "paid to date"/"remaining balance" mirrors the
+        // same logic already used in admin/order/show.blade.php's Payment
+        // History panel, just computed here so the POS Order Detail modal
+        // (which only has this endpoint to work with) can render it too.
+        $running_paid = 0;
+        foreach ($order->customerPayments->sortBy('payment_date')->values() as $payment) {
+            $running_paid += $payment->status === Status::POSTED ? (float) $payment->net_amount : 0;
+            $data['customer_payments'][] = [
+                'customer_payment_id' => $payment->customer_payment_id,
+                'payment_date' => $payment->payment_date,
+                'payment_method' => ucwords(str_replace('_', ' ', $payment->payment_method)),
+                'reference_no' => $payment->reference_no,
+                'status' => $payment->status,
+                'amount' => $payment->net_amount,
+                'paid_to_date' => round($running_paid, 3),
+                'remaining_due' => round(max((float) $order->total - $running_paid, 0), 3),
             ];
         }
 
@@ -886,7 +972,17 @@ class OrderService
             }
         }
 
-        $allow_below_minimum = !empty($obj['override_minimum_price']);
+        // Selling below the Minimum Selling Price requires price editing to
+        // be enabled ($allow_price_change_in_cart, computed above) AND the
+        // separate allow_price_below_minimum business setting to be on -
+        // matches canOverrideMinPrice() in pos-screen.js. The
+        // override_minimum_price flag itself is already zeroed by the
+        // controller when the acting user lacks order.price.override-minimum
+        // (OrderController::store()), so this is the final authoritative AND
+        // of all three conditions.
+        $allow_below_minimum = $allow_price_change_in_cart
+            && (bool) ($pos_setting->allow_price_below_minimum ?? false)
+            && !empty($obj['override_minimum_price']);
 
         foreach ($products as $line) {
             $quantity = (float) ($line['quantity'] ?? 0);
@@ -1155,6 +1251,29 @@ class OrderService
         }
 
         return $this->transitionStatus($order_id, ['draft', 'hold'], 'cancelled', 'Order cancelled');
+    }
+
+    /**
+     * Records the optional due_date/note from the POS Credit Payment popup
+     * (shown after a Credit-type sale completes) - a plain field update,
+     * deliberately kept separate from post()'s JV-generating transaction.
+     */
+    public function updateCreditInfo(array $obj)
+    {
+        $order = $this->model_order->getModel()::findOrFail($obj['order_id']);
+
+        if ($order->business_id !== (Auth::user()->business_id ?? null)) {
+            throw new Exception('Order not found.');
+        }
+
+        $order->update([
+            'due_date' => $obj['due_date'] ?? null,
+            'notes' => $obj['notes'] ?? $order->notes,
+            'updatedby_id' => Auth::id(),
+            'date_updated' => now(),
+        ]);
+
+        return $order;
     }
 
     protected function transitionStatus($order_id, array $from_allowed, $to_status, $note)

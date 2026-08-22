@@ -53,7 +53,15 @@ class PaymentMethodController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', function ($attribute, $value, $fail) {
+                // "Partial"/"Multi Payment" are computed order-level labels
+                // (OrderService::resolvePaymentMethodLabel()), never a real,
+                // selectable payment method - reserved so POS never offers
+                // them as a tender option.
+                if (in_array(strtolower(trim($value)), ['partial', 'multi payment'], true)) {
+                    $fail('This name is reserved by the system and cannot be used for a payment method.');
+                }
+            }],
             'code' => [
                 'required',
                 'string',

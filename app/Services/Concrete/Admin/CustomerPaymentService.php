@@ -89,7 +89,7 @@ class CustomerPaymentService
                 return $item->user->name ?? '';
             })
             ->addColumn('order_no', function ($item) {
-                return $item->order_id ? ($item->order->order_id ?? $item->order_id) : 'On Account';
+                return $item->order_id ? ($item->order->daily_order_id ?? $item->order_id) : 'On Account';
             })
             ->addColumn('business', function ($item) {
                 return $item->business->name ?? '';

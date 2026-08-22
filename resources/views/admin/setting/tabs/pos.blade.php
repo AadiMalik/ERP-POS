@@ -99,6 +99,13 @@
         </div>
 
         <div class="col-md-3 mb-3">
+            <label class="d-block">Allow Price Below Minimum Selling Price</label>
+            <input type="checkbox" class="form-check-input" name="allow_price_below_minimum" value="1"
+                {{ $pos_setting->allow_price_below_minimum ? 'checked' : '' }}>
+            <small class="text-muted d-block">Only takes effect when Allow Price Change in Cart is also on. When on, cashiers with the "Override Minimum Selling Price" permission can sell below a variation's minimum price; when off, no one can.</small>
+        </div>
+
+        <div class="col-md-3 mb-3">
             <label class="d-block">Auto Print Invoice</label>
             <input type="checkbox" class="form-check-input" name="auto_print_invoice" value="1"
                 {{ $pos_setting->auto_print_invoice ? 'checked' : '' }}>

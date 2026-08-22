@@ -97,7 +97,6 @@ function openOrderDetailModal(rowData) {
     $('#odPaymentStatus').html(rowData.payment_status || '-');
     $('#odPaymentMethod').text(rowData.payment_method || '-');
 
-    $('#odPrintBtn').attr('href', ORDER_HISTORY_URLS.print + '/' + rowData.order_id + '/print');
     $('#odThermalPrintBtn').attr('href', ORDER_HISTORY_URLS.print + '/' + rowData.order_id + '/thermal-print');
     $('#odReorderBtn').attr('href', ORDER_HISTORY_URLS.pos_screen + '?reorder_from=' + rowData.order_id);
 
@@ -119,10 +118,13 @@ function openOrderDetailModal(rowData) {
         });
 }
 
+var currentOrderDetail = { order_id: null, due_amount: 0 };
+
 function renderOrderDetail(data) {
     var header = data.header || {};
     var details = data.details || [];
     var payments = data.payments || [];
+    var customerPayments = data.customer_payments || [];
 
     var $items = $('#odItemsBody').empty();
     if (!details.length) {
@@ -157,7 +159,26 @@ function renderOrderDetail(data) {
         });
     }
 
-    var due = Math.max((parseFloat(header.total) || 0) - (parseFloat(header.paid_amount) || 0), 0);
+    var $customerPayments = $('#odCustomerPaymentsBody').empty();
+    if (!customerPayments.length) {
+        $customerPayments.append('<tr><td colspan="5" class="text-center text-muted">No payments received yet</td></tr>');
+    } else {
+        customerPayments.forEach(function (payment) {
+            $customerPayments.append(
+                '<tr>' +
+                    '<td>' + escapeHtml(payment.payment_date || '-') + '</td>' +
+                    '<td>' + escapeHtml(payment.payment_method) + '</td>' +
+                    '<td>' + escapeHtml(payment.status) + '</td>' +
+                    '<td class="text-end">' + money(payment.amount) + '</td>' +
+                    '<td class="text-end">' + money(payment.remaining_due) + '</td>' +
+                '</tr>'
+            );
+        });
+    }
+
+    var due = header.due_amount !== undefined
+        ? (parseFloat(header.due_amount) || 0)
+        : Math.max((parseFloat(header.total) || 0) - (parseFloat(header.paid_amount) || 0), 0);
 
     $('#odSubtotal').text(money(header.subtotal));
     $('#odDiscount').text(money(header.discount_amount));
@@ -165,7 +186,72 @@ function renderOrderDetail(data) {
     $('#odTotal').text(money(header.total));
     $('#odPaid').text(money(header.paid_amount));
     $('#odDue').text(money(due));
+
+    currentOrderDetail = { order_id: header.order_id, due_amount: due };
+    $('#odReceivePaymentBtn').toggleClass('d-none', !(CAN_RECEIVE_PAYMENT && due > 0));
 }
+
+/* =========================================================
+   Receive Payment - quick capture against the currently open
+   order's remaining due, via admin/customer-payment/receive
+   (create + auto-post in one call). Mirrors the same due-amount
+   cap already enforced server-side in CustomerPaymentService::save().
+   ========================================================= */
+$('#odReceivePaymentBtn').click(function () {
+    if (!currentOrderDetail.order_id) {
+        return;
+    }
+
+    $('#rpOrderNo').text($('#odOrderNo').text());
+    $('#rpDueAmount').text(money(currentOrderDetail.due_amount));
+    $('#rpAmount').val(money(currentOrderDetail.due_amount));
+    $('#rpPaymentMethod').val('cash');
+    $('#rpReferenceNo').val('');
+
+    var modalEl = document.getElementById('receivePaymentModal');
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+});
+
+$('#rpSubmitBtn').click(function () {
+    var amount = decimal($('#rpAmount').val() || 0);
+    var due = decimal(currentOrderDetail.due_amount || 0);
+
+    if (!currentOrderDetail.order_id) {
+        return;
+    }
+    if (amount <= 0) {
+        errorMessage('Payment amount must be greater than zero.');
+        return;
+    }
+    if (amount > due) {
+        errorMessage('Payment amount exceeds the order\'s remaining due.');
+        return;
+    }
+
+    var $btn = $(this).prop('disabled', true);
+
+    ajaxRequest({
+        url: ORDER_HISTORY_URLS.receive_payment,
+        method: 'POST',
+        data: {
+            order_id: currentOrderDetail.order_id,
+            amount: amount,
+            payment_method: $('#rpPaymentMethod').val(),
+            reference_no: $('#rpReferenceNo').val()
+        }
+    }).then(function (response) {
+        successMessage(response.Message || 'Payment received.');
+        bootstrap.Modal.getInstance(document.getElementById('receivePaymentModal')).hide();
+        renderOrderDetail(response.Data || {});
+        if (window.order_history_table) {
+            order_history_table.ajax.reload(null, false);
+        }
+    }).catch(function (err) {
+        errorMessage(err.Message || 'Unable to receive payment.');
+    }).then(function () {
+        $btn.prop('disabled', false);
+    });
+});
 
 /* =========================================================
    Sales Summary panel - aggregate totals for the currently

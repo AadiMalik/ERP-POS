@@ -39,6 +39,7 @@ class Order extends Model
         'voucher_id',
         'voucher_discount_amount',
         'notes',
+        'due_date',
         'delivery_address',
         'status',
         'fbr_invoice_number',

@@ -122,7 +122,7 @@
                                             <select class="form-select form-select-sm select2" id="customer_id">
                                                 @foreach ($customers as $item)
                                                     <option value="{{ $item->user_id }}" data-credit-limit="{{ $item->credit_limit ?? 0 }}"
-                                                        data-walkin="{{ $item->is_walkin ? 1 : 0 }}"
+                                                        data-walkin="{{ $item->is_walkin ? 1 : 0 }}" data-credit-days="{{ $item->credit_days ?? 0 }}"
                                                         data-phone="{{ $item->user->phone ?? '' }}" data-email="{{ $item->user->email ?? '' }}"
                                                         {{ $item->is_walkin ? 'selected' : '' }}>
                                                         {{ $item->user->name ?? '' }}{{ $item->is_walkin ? ' (Walk-in)' : '' }}
@@ -138,7 +138,7 @@
 
                                     {{-- Order-level Sale Type control lives in .pos-cart-header, next to
                                          Clear Cart, for prominence - #sale_type_id here is the single
-                                         source of truth the cart-header pills (#saleTypePills) drive. --}}
+                                         source of truth the cart-header dropdown (#saleTypeSelect) drives. --}}
                                     <select class="d-none" id="sale_type_id">
                                         @foreach ($sale_types as $item)
                                             <option value="{{ $item->sale_type_id }}" {{ $item->is_default ? 'selected' : '' }}>
@@ -227,17 +227,17 @@
                         <div class="pos-cart-header">
                             <h6 class="mb-0">Cart <span class="pos-cart-count" id="cartItemCount">(0 Items)</span></h6>
                             <div class="d-flex align-items-center gap-2">
-                                {{-- Order-level Sale Type - prominent, right next to Clear Cart, so
-                                     it applies immediately to every item currently in the cart (see
-                                     repriceCartForSaleType() in pos-screen.js) and to anything added
-                                     afterward. --}}
-                                <div class="pos-cart-saletype pos-pill-group" data-select-target="sale_type_id">
-                                    <div class="pos-pill-buttons" id="saleTypePills">
+                                {{-- Order-level Sale Type - compact dropdown right next to Clear
+                                     Cart, so it applies immediately to every item currently in the
+                                     cart (see repriceCartForSaleType() in pos-screen.js) and to
+                                     anything added afterward. Drives the hidden #sale_type_id select
+                                     that the rest of the screen (pricing, payload) reads from. --}}
+                                <div class="pos-cart-saletype">
+                                    <select id="saleTypeSelect" class="form-select form-select-sm" title="Sale Type">
                                         @foreach ($sale_types as $item)
-                                            <button type="button" class="pos-pill {{ $item->is_default ? 'active' : '' }}"
-                                                data-value="{{ $item->sale_type_id }}">{{ $item->name }}</button>
+                                            <option value="{{ $item->sale_type_id }}" {{ $item->is_default ? 'selected' : '' }}>{{ $item->name }}</option>
                                         @endforeach
-                                    </div>
+                                    </select>
                                 </div>
                                 <span class="pos-cart-order-no d-none" id="cartOrderNoBadge"></span>
                                 <button type="button" class="btn btn-sm pos-clear-cart-btn d-none" id="clearCartBtn">
@@ -247,12 +247,12 @@
                         </div>
                         <div class="pos-cart-columns">
                             <span class="pos-cart-col-items">Items</span>
-                            <span class="pos-cart-col-price">Price</span>
+                            <span class="pos-cart-col-price">Price ({{ session('accounting_setting.currency_symbol', 'Rs') }})</span>
                             @if ($pos_setting->enable_discount && in_array($pos_setting->discount_level, ['line', 'both']))
                                 <span class="pos-cart-col-discount">Discount</span>
                             @endif
                             <span class="pos-cart-col-qty">Qty</span>
-                            <span class="pos-cart-col-total">Total</span>
+                            <span class="pos-cart-col-total">Total ({{ session('accounting_setting.currency_symbol', 'Rs') }})</span>
                         </div>
                         <div class="pos-cart-scroll">
                             <div id="cartRows" class="pos-cart-lines">
@@ -264,22 +264,13 @@
                         </div>
                     </div>
 
-                    @if ($permissions['order.price.override-minimum'] ?? false)
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="overrideMinPriceCheck">
-                            <label class="form-check-label" for="overrideMinPriceCheck">
-                                Allow price below Minimum Selling Price
-                            </label>
-                        </div>
-                    @endif
-
                     {{-- ---- Rows 2-5: Subtotal / Discount / Tax / Total ---- --}}
                     <div class="pos-totals-card">
                         <div class="pos-totals-row"><span>Subtotal</span><span id="sumSubtotal">0.00</span></div>
                         <div class="pos-totals-row"><span>Item Discounts</span><span id="sumItemDiscount">0.00</span></div>
                         <div class="pos-totals-row"><span>Order Discount</span><span id="sumOrderDiscount">0.00</span></div>
                         <div class="pos-totals-row"><span>Tax</span><span id="sumTax">0.00</span></div>
-                        <div class="pos-totals-row pos-grand-total"><span>Total</span><span id="sumTotal">0.00</span></div>
+                        <div class="pos-totals-row pos-grand-total"><span>Total ({{ session('accounting_setting.currency_symbol', 'Rs') }})</span><span id="sumTotal">0.00</span></div>
                     </div>
                 </div>
             </div>
@@ -405,6 +396,41 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="addCustomerSubmitBtn">Save Customer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ================= Credit Payment Modal ================= --}}
+    {{-- Shown after a Credit-type sale completes (see completeSale() in
+         pos-screen.js) - due date/note are optional and can be skipped, the
+         customer itself is already guaranteed non-walk-in before checkout
+         even starts. JV generation for the credit sale already happened
+         automatically in OrderService::post() - this only records optional
+         follow-up info on the order (due_date/notes). --}}
+    <div class="modal fade" id="creditPaymentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Credit Sale - Customer Payment Details</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Customer</label>
+                        <div class="form-control-plaintext fw-bold" id="creditCustomerName"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Due Date</label>
+                        <input type="date" class="form-control" id="creditDueDate">
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label">Note</label>
+                        <textarea class="form-control" id="creditNote" rows="2" placeholder="Optional reference note"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" id="creditPaymentSkipBtn">Skip</button>
+                    <button type="button" class="btn btn-primary" id="creditPaymentSaveBtn">Save</button>
                 </div>
             </div>
         </div>
@@ -626,6 +652,7 @@
                 'order_hold' => url('admin/order/hold'),
                 'order_resume' => url('admin/order/resume'),
                 'order_complete' => url('admin/order/complete'),
+                'order_credit_info' => url('admin/order/credit-info'),
                 'order_details' => url('admin/order/details'),
                 'order_data' => url('admin/order/data'),
                 'order_print' => url('admin/order'),

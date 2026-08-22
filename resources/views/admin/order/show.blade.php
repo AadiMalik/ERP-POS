@@ -86,6 +86,12 @@
                         </span>
                     </div>
                     <div class="col-md-3">
+                        <strong>Payment Method:</strong><br>
+                        <span class="badge {{ $payment_method_label === 'Partial' ? 'bg-label-warning' : 'bg-label-info' }}">
+                            {{ $payment_method_label }}
+                        </span>
+                    </div>
+                    <div class="col-md-3">
                         <strong>Paid Amount:</strong><br>
                         {{ currency($order->paid_amount ?? 0) }}
                     </div>
@@ -293,7 +299,7 @@
                     @if ($due > 0)
                         <a href="{{ route('customer-payment.create') }}?order_id={{ $order->order_id }}" class="btn btn-sm btn-primary">
                             <i class="fa fa-plus"></i>
-                            Add Payment
+                            Receive Payment
                         </a>
                     @endif
                 @endcan

@@ -34,6 +34,7 @@ class PosSetting extends Model
         'enable_hold_order',
         'allow_mixed_sale_types',
         'allow_price_change_in_cart',
+        'allow_price_below_minimum',
 
         'createdby_id',
         'updatedby_id',

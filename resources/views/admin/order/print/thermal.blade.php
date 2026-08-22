@@ -34,9 +34,6 @@
     if ($thermal_config->isVisible('quantity')) {
         $item_columns[] = 'quantity';
     }
-    if ($thermal_config->isVisible('unit')) {
-        $item_columns[] = 'unit';
-    }
     if ($thermal_config->isVisible('unit_price')) {
         $item_columns[] = 'unit_price';
     }
@@ -44,6 +41,10 @@
         $item_columns[] = 'line_total';
     }
 
+    // Unit is no longer its own column - it's folded into the item
+    // description below (Product Name (Variation) - Unit - Sale Type),
+    // still gated by the same visibility toggle.
+    $show_item_unit = $thermal_config->isVisible('unit');
     $show_item_sale_type = $thermal_config->isVisible('item_sale_type');
 @endphp
 @extends('layouts.print')
@@ -171,40 +172,45 @@
                     @if (in_array('quantity', $item_columns))
                         <th class="text-right">Qty</th>
                     @endif
-                    @if (in_array('unit', $item_columns))
-                        <th>Unit</th>
-                    @endif
                     @if (in_array('unit_price', $item_columns))
-                        <th class="text-right">Price</th>
+                        <th class="text-right">Price ({{ session('accounting_setting.currency_symbol', 'Rs') }})</th>
                     @endif
                     @if (in_array('line_total', $item_columns))
-                        <th class="text-right">Total</th>
+                        <th class="text-right">Total ({{ session('accounting_setting.currency_symbol', 'Rs') }})</th>
                     @endif
                 </tr>
             </thead>
             <tbody>
                 @forelse ($order->details as $detail)
+                    @php
+                        // Preferred format: Product Name (Variation) - Unit -
+                        // Sale Type, only including parts that are actually
+                        // enabled/available - see $item_columns/$show_item_*
+                        // above.
+                        $desc_parts = [$detail->product->name ?? 'N/A'];
+                        if (!empty($detail->productVariation->name)) {
+                            $desc_parts[0] .= ' (' . $detail->productVariation->name . ')';
+                        }
+                        if ($show_item_unit && !empty($detail->unit->name)) {
+                            $desc_parts[] = $detail->unit->name;
+                        }
+                        if ($show_item_sale_type) {
+                            $line_sale_type = $detail->saleType->name ?? $order->saleType->name ?? null;
+                            if (!empty($line_sale_type)) {
+                                $desc_parts[] = $line_sale_type;
+                            }
+                        }
+                    @endphp
                     <tr>
-                        <td class="tr-item-name">
-                            {{ $detail->product->name ?? 'N/A' }}
-                            @if (!empty($detail->productVariation->name))
-                                <br><span class="tr-item-variation">{{ $detail->productVariation->name }}</span>
-                            @endif
-                            @if ($show_item_sale_type && !empty(($detail->saleType->name ?? $order->saleType->name ?? null)))
-                                <br><span class="tr-item-saletype">{{ $detail->saleType->name ?? $order->saleType->name }}</span>
-                            @endif
-                        </td>
+                        <td class="tr-item-name">{{ implode(' - ', $desc_parts) }}</td>
                         @if (in_array('quantity', $item_columns))
                             <td class="text-right">{{ decimal($detail->quantity) }}</td>
                         @endif
-                        @if (in_array('unit', $item_columns))
-                            <td>{{ $detail->unit->name ?? 'N/A' }}</td>
-                        @endif
                         @if (in_array('unit_price', $item_columns))
-                            <td class="text-right">{{ currency($detail->unit_price) }}</td>
+                            <td class="text-right">{{ currency($detail->unit_price, false) }}</td>
                         @endif
                         @if (in_array('line_total', $item_columns))
-                            <td class="text-right">{{ currency($detail->total) }}</td>
+                            <td class="text-right">{{ currency($detail->total, false) }}</td>
                         @endif
                     </tr>
                 @empty

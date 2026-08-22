@@ -165,12 +165,13 @@ class OrderController extends Controller
         }
 
         $sale_type_badge = $this->order_service->formatSaleTypeBadge($order->details);
+        $payment_method_label = $this->order_service->resolvePaymentMethodLabel($order);
 
         foreach ($order->details as $detail) {
             $detail->setAttribute('sale_type_label', $this->order_service->resolveSaleTypeLabel($detail));
         }
 
-        return view('admin.order.show', compact('order', 'sale_type_badge'));
+        return view('admin.order.show', compact('order', 'sale_type_badge', 'payment_method_label'));
     }
 
     /**
@@ -340,6 +341,33 @@ class OrderController extends Controller
         try {
             $order = $this->order_service->post($request->all());
             return $this->success(Message::SUCCESS, $order);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * Records the optional due_date/note captured by the POS Credit Payment
+     * popup (shown after a Credit-type sale completes) onto the order. Kept
+     * deliberately separate from complete()/post() - JV generation for
+     * credit sales already happens there unconditionally, and this endpoint
+     * must never touch that transaction.
+     */
+    public function updateCreditInfo(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'order_id' => 'required|exists:orders,order_id',
+            'due_date' => 'nullable|date',
+            'notes' => 'nullable|string',
+        ]);
+
+        if ($validate->fails()) {
+            return $this->error($validate->errors()->first());
+        }
+
+        try {
+            $order = $this->order_service->updateCreditInfo($request->all());
+            return $this->success(Message::UPDATE, $order);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }

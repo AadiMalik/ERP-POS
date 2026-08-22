@@ -856,30 +856,34 @@
     color: #fff;
 }
 
-/* Order-level Sale Type pills, compacted to fit the dark cart header next
-   to Clear Cart - same .pos-pill-group/.pos-pill wiring as everywhere else,
-   just themed for a dark background instead of the light toolbar. */
-.pos-cart-saletype .pos-pill-buttons {
-    height: auto;
-    gap: 0.25rem;
-}
-
-.pos-cart-saletype .pos-pill {
-    background: rgba(255, 255, 255, .12);
-    border-color: rgba(255, 255, 255, .3);
+/* Order-level Sale Type dropdown, compacted to fit the dark cart header
+   next to Clear Cart, themed for a dark background instead of the light
+   toolbar. Drives the hidden #sale_type_id select (see pos-screen.js). */
+.pos-cart-saletype select {
+    background-color: rgba(255, 255, 255, .15);
+    border: 1px solid rgba(255, 255, 255, .3);
     color: #fff;
-    font-size: 0.68rem;
-    padding: 0.22rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.25rem 1.6rem 0.25rem 0.55rem;
+    border-radius: 0.5rem;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 0.6rem;
 }
 
-.pos-cart-saletype .pos-pill:hover {
+.pos-cart-saletype select:hover,
+.pos-cart-saletype select:focus {
+    background-color: rgba(255, 255, 255, .25);
     border-color: #fff;
+    color: #fff;
+    outline: none;
+    box-shadow: none;
 }
 
-.pos-cart-saletype .pos-pill.active {
-    background: #fff;
-    border-color: #fff;
-    color: var(--pos-primary);
+.pos-cart-saletype select option {
+    color: #212529;
 }
 
 /* Column header row above the cart lines - grid-column indices mirror
@@ -907,6 +911,8 @@
 .pos-cart-col-price {
     grid-column: 3;
     text-align: right;
+    white-space: nowrap;
+    font-size: 0.6rem;
 }
 
 .pos-cart-col-discount {
@@ -922,6 +928,8 @@
 .pos-cart-col-total {
     grid-column: 6;
     text-align: right;
+    white-space: nowrap;
+    font-size: 0.6rem;
 }
 
 .pos-cart-scroll {
@@ -991,14 +999,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.cart-line-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.68rem;
-    color: var(--pos-muted);
 }
 
 /* Per-line Sale Type override - compact pill-style select so a mixed-type

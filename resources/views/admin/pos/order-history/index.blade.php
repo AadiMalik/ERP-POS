@@ -303,6 +303,22 @@
                         </table>
                     </div>
 
+                    <h6 class="pos-oh-modal-section-title">Payment History</h6>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Method</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Amount</th>
+                                    <th class="text-end">Remaining Due</th>
+                                </tr>
+                            </thead>
+                            <tbody id="odCustomerPaymentsBody"></tbody>
+                        </table>
+                    </div>
+
                     <div class="row justify-content-end">
                         <div class="col-md-5">
                             <table class="table table-sm table-borderless mb-0">
@@ -317,9 +333,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <a href="#" id="odPrintBtn" target="_blank" class="btn btn-outline-secondary">
-                        <i class="fa fa-print"></i> Print / Reprint
-                    </a>
+                    <button type="button" id="odReceivePaymentBtn" class="btn btn-primary d-none">
+                        <i class="fa fa-money-bill"></i> Receive Payment
+                    </button>
                     <a href="#" id="odThermalPrintBtn" target="_blank" class="btn btn-outline-info">
                         <i class="fa fa-receipt"></i> Thermal Print
                     </a>
@@ -331,16 +347,61 @@
             </div>
         </div>
     </div>
+
+    {{-- Receive Payment - quick capture against a credit order's remaining
+         due, without leaving the POS or navigating to the full Admin
+         Customer Payment page. Backed by admin/customer-payment/receive,
+         which auto-posts immediately (create + post in one call) so the
+         due amount/payment method update right away. --}}
+    <div class="modal fade" id="receivePaymentModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Receive Payment - <span id="rpOrderNo"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info py-2 mb-3">
+                        Remaining Due: <strong id="rpDueAmount">0.00</strong>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Amount <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="rpAmount">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method <span class="text-danger">*</span></label>
+                        <select class="form-select" id="rpPaymentMethod">
+                            <option value="cash">Cash</option>
+                            <option value="card">Card</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="cheque">Cheque</option>
+                            <option value="online">Online Payment</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reference No.</label>
+                        <input type="text" class="form-control" id="rpReferenceNo">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="rpSubmitBtn" class="btn btn-primary">Receive Payment</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('js')
     <script>
         var IS_ORDER_TAKER = @json($is_order_taker);
+        var CAN_RECEIVE_PAYMENT = @json(auth()->user()->can('customer-payment.create'));
         var ORDER_HISTORY_URLS = {
             details: "{{ url('admin/order/details') }}",
             print: "{{ url('admin/order') }}",
             pos_screen: "{{ route('pos-screen') }}",
             summary: "{{ url('admin/order/history-summary') }}",
-            summary_print: "{{ route('order.history-summary.print') }}"
+            summary_print: "{{ route('order.history-summary.print') }}",
+            receive_payment: "{{ url('admin/customer-payment/receive') }}"
         };
     </script>
     <script src="{{ asset('public/assets/js/admin/order-history.js') }}"></script>
@@ -366,6 +427,6 @@
         'class' => 'order_history_table',
         'variable' => 'order_history_table',
         'params' =>
-            "daily_order_id:$('#daily_order_id').val(),sale_date_start:$('#sale_date_start').val(),sale_date_end:$('#sale_date_end').val(),customer_id:$('#customer_id').val(),order_type_id:$('#order_type_id').val(),status:$('#status').val(),payment_status:$('#payment_status').val(),payment_method_id:$('#payment_method_id').val(),cashier_id:$('#cashier_id').val(),branch_id:$('#branch_id').val()",
+            "daily_order_id:$('#daily_order_id').val(),sale_date_start:$('#sale_date_start').val(),sale_date_end:$('#sale_date_end').val(),customer_id:$('#customer_id').val(),order_type_id:$('#order_type_id').val(),status:$('#status').val(),payment_status:$('#payment_status').val(),payment_method_id:$('#payment_method_id').val(),cashier_id:$('#cashier_id').val(),branch_id:$('#branch_id').val(),context:'pos'",
     ])
 @endsection

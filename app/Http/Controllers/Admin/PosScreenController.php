@@ -405,6 +405,7 @@ class PosScreenController extends Controller
                 'email' => $customer->email,
                 'credit_limit' => $profile->credit_limit ?? 0,
                 'is_walkin' => $profile->is_walkin ?? 0,
+                'credit_days' => $profile->credit_days ?? 0,
             ]);
         } catch (Exception $e) {
             return $this->error($e->getMessage());

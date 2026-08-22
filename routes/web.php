@@ -741,6 +741,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::post('reopen', [App\Http\Controllers\Admin\OrderController::class, 'reopen'])->middleware('permission:order.reopen');
             Route::post('cancel', [App\Http\Controllers\Admin\OrderController::class, 'cancel']);
             Route::post('complete', [App\Http\Controllers\Admin\OrderController::class, 'complete']);
+            Route::post('credit-info', [App\Http\Controllers\Admin\OrderController::class, 'updateCreditInfo']);
             Route::post('void', [App\Http\Controllers\Admin\OrderController::class, 'void'])->middleware('permission:order.cancel_void');
             Route::get('search-products', [App\Http\Controllers\Admin\OrderController::class, 'searchProducts']);
             Route::get('products-by-category', [App\Http\Controllers\Admin\OrderController::class, 'productsByCategory']);
@@ -760,6 +761,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::resource('customer-payment', App\Http\Controllers\Admin\CustomerPaymentController::class)->except(['show', 'update']);
         Route::group(['prefix' => 'customer-payment'], function () {
             Route::post('data', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'getData']);
+            Route::post('receive', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'quickReceive']);
             Route::post('change-status', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'status']);
             Route::get('details/{customer_payment_id}', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'details']);
             Route::get('ledger/{user_id}', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'customerLedger']);
