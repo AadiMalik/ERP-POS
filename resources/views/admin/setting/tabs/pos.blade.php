@@ -109,6 +109,7 @@
             <label class="d-block">Auto Print Invoice</label>
             <input type="checkbox" class="form-check-input" name="auto_print_invoice" value="1"
                 {{ $pos_setting->auto_print_invoice ? 'checked' : '' }}>
+            <small class="text-muted d-block">When on, the receipt is sent straight to the configured printer right after checkout - no print dialog or manual click.</small>
         </div>
 
         <div class="col-md-3 mb-3">

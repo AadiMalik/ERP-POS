@@ -10,10 +10,16 @@
 </head>
 
 <body>
+    {{-- ?auto=1: loaded inside a hidden iframe right after a POS sale
+         (see silentPrintReceipt() in pos-screen.js), which itself calls
+         window.print() once the iframe finishes loading - so the toolbar
+         is pointless here and is skipped entirely. --}}
+    @unless(request()->boolean('auto'))
     <div class="print-toolbar no-print">
         <button type="button" onclick="window.print()">Print</button>
         <button type="button" onclick="window.close()">Close</button>
     </div>
+    @endunless
 
     <div class="print-page @yield('page_class')">
         @yield('content')

@@ -437,8 +437,20 @@
         });
 
         $('#paidAmountInput').on('input', function () {
-            if (!state.payments.length) return;
-            state.payments[0].amount = parseFloat($(this).val()) || 0;
+            var amount = parseFloat($(this).val()) || 0;
+
+            // A resumed Hold/Draft order with no saved payments leaves
+            // state.payments empty and no method pre-selected (see
+            // loadCartFromDetails()) - typing an amount here before picking
+            // a tile must still land in state.payments instead of being
+            // silently dropped, otherwise completeSale()'s total check sees
+            // 0 entered even though this field shows the full amount.
+            if (!state.payments.length) {
+                state.payments = [{ payment_method_id: state.selected_payment_method_id || '', amount: amount, reference_no: '' }];
+            } else {
+                state.payments[0].amount = amount;
+            }
+
             recalcPayments();
         });
 
@@ -2045,7 +2057,13 @@
             activatePaymentUI(null, true);
             renderPayments();
         } else {
-            resetPaymentSelection();
+            // Hold orders are typically saved before any payment is taken -
+            // default to Cash + full total the same way a brand-new sale
+            // does (selectDefaultPaymentMethod()) instead of leaving the
+            // payment method unselected, which left state.payments empty
+            // and made a directly-typed Paid Amount silently not count
+            // toward completeSale()'s total check.
+            selectDefaultPaymentMethod();
         }
     }
 
@@ -2084,10 +2102,16 @@
                 state.order_id = order.order_id;
                 renderFromServerOrder(order);
 
-                var total = parseFloat(order.total) || 0;
-                var entered = state.payments.reduce(function (sum, p) { return sum + (parseFloat(p.amount) || 0); }, 0);
+                // Rounded to cents (not just a tiny epsilon subtracted) so
+                // float accumulation across lines/payments can't push an
+                // exact "Paid Amount = Total" a fraction of a cent under -
+                // and the 0.01 tolerance matches OrderService::post()'s own
+                // cash_required/applied_total checks, so a payment the
+                // server will accept never gets rejected here first.
+                var total = Math.round((parseFloat(order.total) || 0) * 100) / 100;
+                var entered = Math.round(state.payments.reduce(function (sum, p) { return sum + (parseFloat(p.amount) || 0); }, 0) * 100) / 100;
 
-                if (entered + 0.004 < total) {
+                if (entered + 0.01 < total) {
                     errorMessage('Payment amount does not cover the total. Please adjust payments.');
                     return;
                 }
@@ -2105,7 +2129,7 @@
                         successMessage('Sale completed.');
 
                         if (SETTING.auto_print_invoice) {
-                            window.open(URLS.order_print + '/' + posted.order_id + '/print', '_blank');
+                            silentPrintReceipt(posted.order_id);
                         }
 
                         if (hasCreditPayment()) {
@@ -2122,6 +2146,116 @@
             .catch(function (err) {
                 errorMessage(err.Message || 'Unable to save order.');
             });
+    }
+
+    // ==============================
+    // SILENT RECEIPT PRINT
+    // ==============================
+    // Prints the order's receipt (thermal or A4, per the business's existing
+    // print/order_print resolution) directly to the configured printer via
+    // a hidden iframe + auto window.print() - no new tab/popup, no toolbar,
+    // no manual "Print"/"OK" click. Never blocks the POS: any failure just
+    // shows a notification so the cashier can move on to the next sale.
+    function silentPrintReceipt(orderId) {
+        if (!orderId) {
+            return;
+        }
+
+        var iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        iframe.setAttribute('aria-hidden', 'true');
+
+        var cleaned = false;
+        var cleanupTimer = null;
+
+        function cleanup() {
+            if (cleaned) {
+                return;
+            }
+            cleaned = true;
+            if (cleanupTimer) {
+                clearTimeout(cleanupTimer);
+            }
+            if (iframe.parentNode) {
+                iframe.parentNode.removeChild(iframe);
+            }
+        }
+
+        var printed = false;
+
+        iframe.onload = function () {
+            // Assigning src on an already-inserted iframe makes it load
+            // about:blank first, which also fires onload - guard so the
+            // receipt is only ever sent to the printer once.
+            if (printed) {
+                return;
+            }
+            printed = true;
+
+            var win = null;
+            var doc = null;
+            try {
+                win = iframe.contentWindow;
+                doc = iframe.contentDocument || (win && win.document);
+            } catch (e) {
+                win = null;
+                doc = null;
+            }
+
+            if (!win || !doc) {
+                errorMessage('Receipt could not be prepared for printing.');
+                cleanup();
+                return;
+            }
+
+            // The receipt view (thermal or A4) always renders a .print-page
+            // element; its absence means the request hit an error page
+            // (order not found, server error, etc.) instead of a receipt -
+            // notify instead of printing a broken page.
+            if (!doc.querySelector('.print-page')) {
+                errorMessage('Receipt could not be generated for the printer. The sale was still completed - reprint from Order History if needed.');
+                cleanup();
+                return;
+            }
+
+            try {
+                win.addEventListener('afterprint', cleanup);
+            } catch (e) {
+                // Some browsers don't support afterprint on iframe windows;
+                // the fallback timeout below still cleans up.
+            }
+
+            try {
+                win.focus();
+                win.print();
+            } catch (e) {
+                errorMessage('Unable to send the receipt to the thermal printer. Please check the printer connection.');
+                cleanup();
+                return;
+            }
+
+            // Fallback cleanup in case afterprint never fires (e.g. the
+            // printer is offline and the browser doesn't emit the event).
+            // Long enough that on a non-kiosk-printing browser (native print
+            // dialog still visible) this doesn't yank the iframe - and the
+            // dialog with it - out from under a cashier who pauses on it.
+            cleanupTimer = setTimeout(cleanup, 60000);
+        };
+
+        iframe.onerror = function () {
+            errorMessage('Receipt could not be generated. The order was placed, but printing failed.');
+            cleanup();
+        };
+
+        // Set src before inserting into the DOM so the browser navigates
+        // straight to the receipt instead of loading about:blank first.
+        iframe.src = URLS.order_print + '/' + orderId + '/print?auto=1';
+        document.body.appendChild(iframe);
     }
 
     // ==============================
