@@ -135,6 +135,11 @@ class Order extends Model
         return $this->hasMany(OrderStatusHistory::class, 'order_id', 'order_id');
     }
 
+    public function orderReturns()
+    {
+        return $this->hasMany(OrderReturn::class, 'order_id', 'order_id')->where('is_deleted', 0);
+    }
+
     public function createdby()
     {
         return $this->belongsTo(User::class, 'createdby_id');

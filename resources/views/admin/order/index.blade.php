@@ -180,6 +180,30 @@
             </div>
         </div>
         @include('admin.partials.import-export-modal')
+
+        <!-- Cancel Order modal -->
+        <div class="modal fade" id="cancelOrderModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cancel Order</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="cancel_order_id">
+                        <p class="mb-2">This order will be marked as Cancelled. This action is recorded in the order's status history.</p>
+                        <div class="mb-3">
+                            <label class="form-label">Cancellation Reason <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="cancel_order_reason" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-danger" id="confirmCancelOrder">Cancel Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 @section('js')

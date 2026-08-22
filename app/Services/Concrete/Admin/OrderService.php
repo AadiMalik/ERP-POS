@@ -359,7 +359,28 @@ class OrderService
                         </button>"
                     : '';
 
-                return $viewButton . $viewJvButton . $printButton . $thermalPrintButton;
+                // Only Draft/Hold orders can be cancelled (a posted order must
+                // be voided instead - see OrderService::cancel()); permission
+                // itself is enforced server-side by the order/cancel route
+                // middleware, this is just visibility, same as every other
+                // action button in this column.
+                $cancelButton = in_array($item->status, ['draft', 'hold'], true)
+                    ? "<button type='button' class='btn btn-icon btn-outline-danger mr-2 cancel-order-btn'
+                        data-id='{$item->order_id}' title='Cancel Order'>
+                        <i class='fa fa-ban'></i>
+                        </button>"
+                    : '';
+
+                // Only a fully posted (completed) sale is eligible for a
+                // Return - see OrderReturnService::save()/getSourceLines().
+                $returnButton = $item->status === 'posted'
+                    ? "<a class='btn btn-icon btn-outline-warning mr-2'
+                        href='" . url('admin/order-return/create') . "?order_id={$item->order_id}' title='Return Order'>
+                        <i class='fa fa-rotate-left'></i>
+                        </a>"
+                    : '';
+
+                return $viewButton . $viewJvButton . $cancelButton . $returnButton . $printButton . $thermalPrintButton;
             })
             ->rawColumns(['business', 'branch', 'warehouse', 'register', 'cashier', 'customer', 'order_type', 'order_source', 'total', 'status', 'payment_status', 'sale_type', 'action'])
             ->make(true);
@@ -1238,8 +1259,15 @@ class OrderService
         return $this->transitionStatus($order_id, ['cancelled'], 'draft', 'Order reopened');
     }
 
-    public function cancel($order_id)
+    public function cancel($obj)
     {
+        $order_id = $obj['order_id'] ?? null;
+        $reason = trim($obj['reason'] ?? '');
+
+        if ($reason === '') {
+            throw new Exception('A cancellation reason is required.');
+        }
+
         $order = $this->model_order->getModel()::findOrFail($order_id);
 
         if ($order->status === Status::POSTED) {
@@ -1250,7 +1278,7 @@ class OrderService
             throw new Exception('Only draft or held orders can be cancelled.');
         }
 
-        return $this->transitionStatus($order_id, ['draft', 'hold'], 'cancelled', 'Order cancelled');
+        return $this->transitionStatus($order_id, ['draft', 'hold'], 'cancelled', $reason);
     }
 
     /**

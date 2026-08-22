@@ -313,8 +313,17 @@ class OrderController extends Controller
 
     public function cancel(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:orders,order_id',
+            'reason' => 'required|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationResponse($validator->errors()->first());
+        }
+
         try {
-            $order = $this->order_service->cancel($request->order_id);
+            $order = $this->order_service->cancel($request->all());
             return $this->success(Message::UPDATE, $order);
         } catch (Exception $e) {
             return $this->error($e->getMessage());

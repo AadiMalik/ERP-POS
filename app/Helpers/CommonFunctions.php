@@ -13,6 +13,7 @@ use App\Models\Voucher;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
+use App\Models\OrderReturn;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestQuotation;
 use App\Models\StockTaking;
@@ -307,6 +308,27 @@ function generatePurchaseReturnNo($business_id = null)
 
     return sprintf(
         'PRTN-%04d',
+        $next_number
+    );
+}
+
+function generateOrderReturnNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $order_return = OrderReturn::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($order_return) {
+        $next_number = (int) substr($order_return->order_return_no, strrpos($order_return->order_return_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'SRTN-%04d',
         $next_number
     );
 }

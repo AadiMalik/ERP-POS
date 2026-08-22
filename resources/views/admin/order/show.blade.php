@@ -35,6 +35,13 @@
                         Stock Consumption
                     </button>
                 @endif
+                @if ($order->status === 'posted' && (\Illuminate\Support\Facades\Auth::user()->can('order-return.create') ?? false))
+                    <a href="{{ url('admin/order-return/create') }}?order_id={{ $order->order_id }}"
+                        class="btn btn-outline-warning">
+                        <i class="fa fa-rotate-left"></i>
+                        Return Order
+                    </a>
+                @endif
                 <a href="{{ url('admin/order') }}" class="btn btn-outline-primary">
                     <i class="fa fa-arrow-left"></i>
                     Back
@@ -356,6 +363,54 @@
                 </table>
             </div>
         </div>
+
+        @if ($order->orderReturns->isNotEmpty())
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Returns</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Return No.</th>
+                                <th>Return Date</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($order->orderReturns as $order_return)
+                                <tr>
+                                    <td>{{ $order_return->order_return_no }}</td>
+                                    <td>{{ $order_return->order_return_date ? localDate($order_return->order_return_date) : 'N/A' }}</td>
+                                    <td>{{ currency($order_return->total) }}</td>
+                                    <td>
+                                        @php
+                                            $return_badges = [
+                                                'pending' => 'bg-label-warning',
+                                                'approved' => 'bg-label-success',
+                                                'cancelled' => 'bg-label-dark',
+                                            ];
+                                        @endphp
+                                        <span class="badge {{ $return_badges[$order_return->status] ?? 'bg-label-secondary' }}">
+                                            {{ ucfirst($order_return->status) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a class="btn btn-icon btn-outline-secondary" target="_blank"
+                                            href="{{ route('order-return.print', $order_return->order_return_id) }}" title="Print">
+                                            <i class="fa fa-print"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
 
         <div class="card mb-4">
             <div class="card-header">

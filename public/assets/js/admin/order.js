@@ -115,3 +115,31 @@ $('#business_id').on('change', function () {
         errorMessage(err.Message ?? 'Something went wrong.');
     });
 });
+
+$(document).on('click', '.cancel-order-btn', function () {
+    $('#cancel_order_id').val($(this).data('id'));
+    $('#cancel_order_reason').val('');
+    $('#cancelOrderModal').modal('show');
+});
+
+$('#confirmCancelOrder').click(function () {
+    let order_id = $('#cancel_order_id').val();
+    let reason = $('#cancel_order_reason').val();
+
+    if (!reason || !reason.trim()) {
+        errorMessage('A cancellation reason is required.');
+        return;
+    }
+
+    ajaxRequest({
+        url: url_local + '/admin/order/cancel',
+        method: 'POST',
+        data: { order_id: order_id, reason: reason },
+    }).then(function (response) {
+        successMessage(response.Message);
+        $('#cancelOrderModal').modal('hide');
+        initDataTableorder_table();
+    }).catch(function (err) {
+        errorMessage(err.Message || 'Unable to cancel order.');
+    });
+});

@@ -1388,7 +1388,7 @@
         @endcanAccessAny
 
         {{-- Orders (centralized - shared by POS, Website, Mobile App, API) --}}
-        @canAccessAny(['pos.access', 'order-type.view', 'order-source.view', 'payment-method.view', 'discount.view', 'voucher.view'])
+        @canAccessAny(['pos.access', 'order-return.view', 'order-type.view', 'order-source.view', 'payment-method.view', 'discount.view', 'voucher.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons fa fa-receipt"></i>
@@ -1400,6 +1400,13 @@
                         <li class="menu-item">
                             <a href="{{ url('/admin/order') }}" class="menu-link">
                                 <div data-i18n="Orders">Orders</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('order-return.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/order-return') }}" class="menu-link">
+                                <div data-i18n="Order Returns">Order Returns</div>
                             </a>
                         </li>
                     @endcanAccess

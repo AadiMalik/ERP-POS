@@ -739,7 +739,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::post('hold', [App\Http\Controllers\Admin\OrderController::class, 'hold']);
             Route::post('resume', [App\Http\Controllers\Admin\OrderController::class, 'resume']);
             Route::post('reopen', [App\Http\Controllers\Admin\OrderController::class, 'reopen'])->middleware('permission:order.reopen');
-            Route::post('cancel', [App\Http\Controllers\Admin\OrderController::class, 'cancel']);
+            Route::post('cancel', [App\Http\Controllers\Admin\OrderController::class, 'cancel'])->middleware('permission:order.cancel_void');
             Route::post('complete', [App\Http\Controllers\Admin\OrderController::class, 'complete']);
             Route::post('credit-info', [App\Http\Controllers\Admin\OrderController::class, 'updateCreditInfo']);
             Route::post('void', [App\Http\Controllers\Admin\OrderController::class, 'void'])->middleware('permission:order.cancel_void');
@@ -754,6 +754,18 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         });
         Route::resource('order', App\Http\Controllers\Admin\OrderController::class)->except(['create', 'edit']);
     });
+
+    //order return (sale return)
+    Route::group(['middleware' => ['module:pos']], function () {
+        Route::resource('order-return', App\Http\Controllers\Admin\OrderReturnController::class);
+        Route::group(['prefix' => 'order-return'], function () {
+            Route::post('data', [App\Http\Controllers\Admin\OrderReturnController::class, 'getData']);
+            Route::post('change-status', [App\Http\Controllers\Admin\OrderReturnController::class, 'status']);
+            Route::get('details/{order_return_id}', [App\Http\Controllers\Admin\OrderReturnController::class, 'details']);
+            Route::get('source-lines/{order_id}', [App\Http\Controllers\Admin\OrderReturnController::class, 'sourceLines']);
+            Route::get('{order_return_id}/print', [App\Http\Controllers\Admin\OrderReturnController::class, 'print'])->name('order-return.print');
+        });
+    }); // end module:pos (order return)
 
     //customer payment (settles credit orders - paired with Orders/POS, mirrors
     //how supplier-payment sits next to Purchases under module:inventory)

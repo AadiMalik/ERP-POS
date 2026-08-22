@@ -50,7 +50,7 @@ class RoleDefaultPermissions
                      'stock-taking', 'transfer-note', 'supplier', 'customer', 'purchase-request',
                      'purchase-request-quotation', 'purchase', 'good-receipt-note', 'purchase-return',
                      'supplier-payment', 'customer-payment', 'order-type', 'payment-method', 'order-source', 'discount',
-                     'voucher', 'order', 'pos', 'expense', 'expense-category', 'admin-expense'],
+                     'voucher', 'order', 'order-return', 'pos', 'expense', 'expense-category', 'admin-expense'],
                     ['delete']
                 );
 
@@ -89,7 +89,7 @@ class RoleDefaultPermissions
 
             case RoleNames::SALEMANAGER:
                 return array_merge(
-                    PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'pos', 'customer', 'customer-payment']),
+                    PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment']),
                     ['dashboard.view']
                 );
 
@@ -178,6 +178,11 @@ class RoleDefaultPermissions
                     'order.payment.credit',
                     'order.customer.change',
                     'order.reopen',
+                    'order-return.view',
+                    'order-return.create',
+                    'order-return.edit',
+                    'order-return.approve',
+                    'order-return.print',
                     'expense.access',
                     'expense.view',
                 ];

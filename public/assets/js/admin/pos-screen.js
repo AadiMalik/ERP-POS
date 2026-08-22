@@ -313,6 +313,12 @@
         $('#clearCartBtn').on('click', function () {
             if (!state.cart.length) return;
             state.cart = [];
+            // Explicit "start a new sale" gesture - must also drop order_id,
+            // otherwise the next Hold/Pay would silently update (overwrite)
+            // whatever order was held/being-edited before this cart was
+            // cleared, instead of creating a genuinely new one.
+            state.order_id = null;
+            state.order_daily_id = null;
             renderCart();
         });
 
@@ -1211,6 +1217,15 @@
         } else {
             $badge.addClass('d-none').text('');
         }
+
+        // Hold button reflects whether this cart is still a fresh order or an
+        // already-held/draft one being continued - clicking it either way
+        // just saves the current cart to the same order_id (see holdOrder()).
+        var $holdBtn = $('#holdOrderBtn');
+        if ($holdBtn.length) {
+            var label = state.order_id ? 'Update Hold' : 'Hold';
+            $holdBtn.html('<i class="fa fa-pause"></i> ' + label + ' <span class="pos-key-hint">(F6)</span>');
+        }
     }
 
     function updateLineFromRow(key, $row) {
@@ -1704,8 +1719,20 @@
 
         ajaxRequest({ url: URLS.order_store, method: 'POST', data: payload })
             .then(function (response) {
-                successMessage('Order held.');
-                resetForNewSale();
+                var order = response.Data || {};
+
+                // Keep the cart open on this same order (create-vs-update in
+                // OrderService::save() is keyed off order_id) rather than
+                // resetting to a blank sale - otherwise the cashier has no way
+                // to keep adjusting this held order without going through the
+                // Held Orders panel first, and a second Hold click with no
+                // order_id would silently create a duplicate order instead of
+                // updating this one.
+                state.order_id = order.order_id || state.order_id;
+                state.order_daily_id = order.daily_order_id || state.order_daily_id;
+
+                successMessage('Order held' + (state.order_daily_id ? ' (#' + state.order_daily_id + ')' : '') + '. Keep editing to update it, or use Clear Cart to start a new sale.');
+                renderCart();
                 loadHeldOrdersCount();
             })
             .catch(function (err) {

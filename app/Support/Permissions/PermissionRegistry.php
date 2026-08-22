@@ -895,6 +895,15 @@ class PermissionRegistry
                 'export'          => ['name' => 'order.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
+            'order-return' => ['label' => 'Order Returns', 'actions' => [
+                'view'    => ['name' => 'order-return.view', 'label' => 'View', 'is_system' => false],
+                'create'  => ['name' => 'order-return.create', 'label' => 'Create', 'is_system' => false],
+                'edit'    => ['name' => 'order-return.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'  => ['name' => 'order-return.delete', 'label' => 'Delete', 'is_system' => false],
+                'approve' => ['name' => 'order-return.approve', 'label' => 'Approve', 'is_system' => false],
+                'print'   => ['name' => 'order-return.print', 'label' => 'Print', 'is_system' => false],
+            ]],
+
             'expense' => ['label' => 'Expense (POS)', 'actions' => [
                 'access'      => ['name' => 'expense.access', 'label' => 'Access', 'is_system' => false],
                 'view'        => ['name' => 'expense.view', 'label' => 'View', 'is_system' => false],
@@ -1183,7 +1192,7 @@ class PermissionRegistry
             'supplier', 'customer', 'order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher',
             'purchase-request', 'purchase-request-quotation', 'purchase', 'good-receipt-note',
             'purchase-return', 'opening-stock', 'stock-taking', 'transfer-note', 'supplier-payment', 'customer-payment',
-            'pos', 'order', 'expense', 'expense-category', 'admin-expense',
+            'pos', 'order', 'order-return', 'expense', 'expense-category', 'admin-expense',
             'activity-log', 'login-history', 'notification', 'reports', 'branch', 'user',
             'department', 'designation', 'shift', 'employee', 'attendance', 'leave-type',
             'leave-request', 'salary-component', 'salary-structure', 'payroll', 'payslip',
