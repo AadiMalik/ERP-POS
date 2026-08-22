@@ -214,6 +214,34 @@ class SupplierPaymentService
                 throw new Exception('Tax and discount amount cannot exceed the payment amount.');
             }
 
+            // Purchase-targeted payments may never exceed that purchase's
+            // remaining due - mirrors CustomerPaymentService::save()'s
+            // overpayment guard against Order.paid_amount. Purchase has no
+            // stored paid_amount column, so the remaining due is derived
+            // from the sum of this purchase's own posted SupplierPayments.
+            if (!empty($purchase)) {
+                $paid_so_far = (float) SupplierPayment::where('purchase_id', $purchase->purchase_id)
+                    ->where('status', Status::POSTED)
+                    ->where('is_deleted', 0)
+                    ->sum('amount');
+
+                // On update, exclude this payment's own previously-posted
+                // amount from "already applied" so re-saving the same
+                // payment isn't rejected against its own prior contribution.
+                if (!empty($obj['supplier_payment_id'])) {
+                    $existing = $this->model_supplier_payment->getModel()::find($obj['supplier_payment_id']);
+                    if ($existing && $existing->status === Status::POSTED && $existing->purchase_id === $purchase->purchase_id) {
+                        $paid_so_far -= (float) $existing->amount;
+                    }
+                }
+
+                $remaining_due = round((float) $purchase->total - $paid_so_far, 3);
+
+                if ($amount > $remaining_due + 0.001) {
+                    throw new Exception('Payment amount (' . currency($amount) . ') exceeds the purchase\'s remaining due (' . currency(max($remaining_due, 0)) . ').');
+                }
+            }
+
             $data = [
                 'business_id'         => $obj['business_id'],
                 'branch_id'           => $obj['branch_id'] ?? null,

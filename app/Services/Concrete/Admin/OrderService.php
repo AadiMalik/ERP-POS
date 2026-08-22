@@ -1673,12 +1673,12 @@ class OrderService
                 ]);
             }
 
-            // Stock sufficiency check - tracked products only. Runs as a
-            // separate pass before any decrement below, so a shortfall on
-            // any line aborts the whole sale (via the rollBack() in the
-            // catch below) before any earlier line's stock has been
-            // mutated. Mirrors TransferNoteService's insufficient-stock
-            // check style/messaging.
+            // Stock sufficiency check - tracked products only. This is a
+            // fast-fail UX pass only (unlocked read) so an obviously-doomed
+            // sale aborts early without taking any row locks; it is NOT the
+            // authoritative check under concurrency - the locked re-check
+            // inside the decrement loop below is what actually prevents
+            // overselling when two sales race for the same stock.
             foreach ($order->details as $detail) {
                 $product = $detail->product;
 
@@ -1706,10 +1706,19 @@ class OrderService
                     ->where('warehouse_id', $order->warehouse_id)
                     ->where('product_id', $detail->product_id)
                     ->where('product_variation_id', $detail->product_variation_id)
+                    ->lockForUpdate()
                     ->first();
 
                 $existing_qty = $stock->quantity ?? 0;
                 $existing_avg = $stock->avg_price ?? 0;
+
+                // Authoritative check, now that the row is locked - the
+                // earlier pre-check above is only a fast-fail optimization
+                // and can be stale under concurrent checkouts.
+                if ($detail->product && $detail->product->is_track_stock && (float) $detail->base_quantity > (float) $existing_qty) {
+                    throw new Exception('Insufficient stock for "' . ($detail->product->name ?? 'product') . '". Available: ' . $existing_qty . ', required: ' . $detail->base_quantity . '.');
+                }
+
                 $new_qty = $existing_qty - $detail->base_quantity;
                 $line_cost = round($detail->base_quantity * $existing_avg, 3);
                 $total_cost += $line_cost;

@@ -1,0 +1,75 @@
+@php
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve($result['customer']->business_id);
+    $customer_name = $result['customer']->company_name ?: ($result['customer']->user->name ?? 'N/A');
+@endphp
+@extends('layouts.print')
+
+@section('title', 'Customer Ledger - ' . $customer_name)
+
+@section('css')
+    @include('admin.partials.print.page_css', ['print_config' => $print_config])
+@endsection
+
+@section('content')
+    @include('admin.partials.print.header', [
+        'business' => $result['customer']->business,
+        'branch' => $result['customer']->branch,
+        'title' => 'Customer Ledger Report',
+        'doc_no' => $result['customer']->code,
+        'doc_date' => localDate(now()),
+        'reference' => [
+            'Customer' => $customer_name,
+            'Period' => (!empty($result['start_date']) ? localDate($result['start_date']) : 'Beginning') . ' to ' . (!empty($result['end_date']) ? localDate($result['end_date']) : 'Today'),
+        ],
+        'print_config' => $print_config,
+    ])
+
+    <table class="print-table">
+        <thead>
+            <tr>
+                <th>Document Date</th>
+                <th>Voucher Type</th>
+                <th>Voucher No.</th>
+                <th>Reference No.</th>
+                <th>Description</th>
+                <th class="text-right">Debit</th>
+                <th class="text-right">Credit</th>
+                <th class="text-right">Running Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="7"><strong>Opening Balance</strong></td>
+                <td class="text-right"><strong>{{ currency($result['opening_balance']) }} {{ $result['opening_balance_type'] }}</strong></td>
+            </tr>
+            @forelse ($result['rows'] as $row)
+                <tr>
+                    <td>{{ localDate($row->entry_date) }}</td>
+                    <td>{{ $row->voucher_name ?? $row->source_type ?? '' }}</td>
+                    <td>{{ $row->entry_no }}</td>
+                    <td>{{ $row->reference_no }}</td>
+                    <td>{{ $row->detail_description ?: $row->entry_description }}</td>
+                    <td class="text-right">{{ $row->debit > 0 ? currency($row->debit) : '' }}</td>
+                    <td class="text-right">{{ $row->credit > 0 ? currency($row->credit) : '' }}</td>
+                    <td class="text-right">{{ currency($row->running_balance) }} {{ $row->running_balance_type }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="8" class="text-center">No transactions found for the selected period</td>
+                </tr>
+            @endforelse
+            <tr>
+                <td colspan="5"><strong>Total</strong></td>
+                <td class="text-right"><strong>{{ currency($result['total_debit']) }}</strong></td>
+                <td class="text-right"><strong>{{ currency($result['total_credit']) }}</strong></td>
+                <td class="text-right"><strong>{{ currency($result['closing_balance']) }} {{ $result['closing_balance_type'] }}</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    @include('admin.partials.print.footer', [
+        'signatories' => ['Prepared By', 'Verified By'],
+        'print_config' => $print_config,
+    ])
+@endsection

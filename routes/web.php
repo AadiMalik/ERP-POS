@@ -736,13 +736,13 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::post('data', [App\Http\Controllers\Admin\OrderController::class, 'getData']);
             Route::post('history-summary', [App\Http\Controllers\Admin\OrderController::class, 'historySummary']);
             Route::get('history-summary/print', [App\Http\Controllers\Admin\OrderController::class, 'historySummaryPrint'])->name('order.history-summary.print');
-            Route::post('hold', [App\Http\Controllers\Admin\OrderController::class, 'hold']);
-            Route::post('resume', [App\Http\Controllers\Admin\OrderController::class, 'resume']);
+            Route::post('hold', [App\Http\Controllers\Admin\OrderController::class, 'hold'])->middleware('permission:order.hold');
+            Route::post('resume', [App\Http\Controllers\Admin\OrderController::class, 'resume'])->middleware('permission:order.hold');
             Route::post('reopen', [App\Http\Controllers\Admin\OrderController::class, 'reopen'])->middleware('permission:order.reopen');
-            Route::post('cancel', [App\Http\Controllers\Admin\OrderController::class, 'cancel'])->middleware('permission:order.cancel_void');
+            Route::post('cancel', [App\Http\Controllers\Admin\OrderController::class, 'cancel'])->middleware('permission:order.cancel');
             Route::post('complete', [App\Http\Controllers\Admin\OrderController::class, 'complete']);
             Route::post('credit-info', [App\Http\Controllers\Admin\OrderController::class, 'updateCreditInfo']);
-            Route::post('void', [App\Http\Controllers\Admin\OrderController::class, 'void'])->middleware('permission:order.cancel_void');
+            Route::post('void', [App\Http\Controllers\Admin\OrderController::class, 'void'])->middleware('permission:order.void');
             Route::get('search-products', [App\Http\Controllers\Admin\OrderController::class, 'searchProducts']);
             Route::get('products-by-category', [App\Http\Controllers\Admin\OrderController::class, 'productsByCategory']);
             Route::post('resolve-prices', [App\Http\Controllers\Admin\OrderController::class, 'resolvePrices']);
@@ -781,6 +781,40 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('{customer_payment_id}/print', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'print'])->name('customer-payment.print');
         });
     }); // end module:pos (customer payment)
+
+    //customer reports (ledger/aging/payment-history) - mirrors supplier
+    //reports' shape, but scoped to module:pos since these are Customer/POS-
+    //side reports, same deviation rationale as customer-payment above
+    Route::group(['middleware' => ['module:pos']], function () {
+        Route::group(['prefix' => 'reports'], function () {
+            Route::group(['prefix' => 'customer-ledger'], function () {
+                Route::get('/', [App\Http\Controllers\Admin\Reports\CustomerLedgerReportController::class, 'index']);
+                Route::post('data', [App\Http\Controllers\Admin\Reports\CustomerLedgerReportController::class, 'data']);
+                Route::get('print', [App\Http\Controllers\Admin\Reports\CustomerLedgerReportController::class, 'print'])->name('reports.customer-ledger.print');
+                Route::get('pdf', [App\Http\Controllers\Admin\Reports\CustomerLedgerReportController::class, 'pdf'])->name('reports.customer-ledger.pdf');
+                Route::get('export', [App\Http\Controllers\Admin\Reports\CustomerLedgerReportController::class, 'export'])->name('reports.customer-ledger.export');
+                Route::get('export-csv', [App\Http\Controllers\Admin\Reports\CustomerLedgerReportController::class, 'exportCsv'])->name('reports.customer-ledger.export-csv');
+            });
+
+            Route::group(['prefix' => 'customer-aging'], function () {
+                Route::get('/', [App\Http\Controllers\Admin\Reports\CustomerAgingReportController::class, 'index']);
+                Route::post('data', [App\Http\Controllers\Admin\Reports\CustomerAgingReportController::class, 'data']);
+                Route::get('print', [App\Http\Controllers\Admin\Reports\CustomerAgingReportController::class, 'print'])->name('reports.customer-aging.print');
+                Route::get('pdf', [App\Http\Controllers\Admin\Reports\CustomerAgingReportController::class, 'pdf'])->name('reports.customer-aging.pdf');
+                Route::get('export', [App\Http\Controllers\Admin\Reports\CustomerAgingReportController::class, 'export'])->name('reports.customer-aging.export');
+                Route::get('export-csv', [App\Http\Controllers\Admin\Reports\CustomerAgingReportController::class, 'exportCsv'])->name('reports.customer-aging.export-csv');
+            });
+
+            Route::group(['prefix' => 'customer-payment-history'], function () {
+                Route::get('/', [App\Http\Controllers\Admin\Reports\CustomerPaymentHistoryReportController::class, 'index']);
+                Route::post('data', [App\Http\Controllers\Admin\Reports\CustomerPaymentHistoryReportController::class, 'data']);
+                Route::get('print', [App\Http\Controllers\Admin\Reports\CustomerPaymentHistoryReportController::class, 'print'])->name('reports.customer-payment-history.print');
+                Route::get('pdf', [App\Http\Controllers\Admin\Reports\CustomerPaymentHistoryReportController::class, 'pdf'])->name('reports.customer-payment-history.pdf');
+                Route::get('export', [App\Http\Controllers\Admin\Reports\CustomerPaymentHistoryReportController::class, 'export'])->name('reports.customer-payment-history.export');
+                Route::get('export-csv', [App\Http\Controllers\Admin\Reports\CustomerPaymentHistoryReportController::class, 'exportCsv'])->name('reports.customer-payment-history.export-csv');
+            });
+        });
+    }); // end module:pos (customer reports)
 
     Route::group(['middleware' => ['module:pos']], function () {
     //pos screen

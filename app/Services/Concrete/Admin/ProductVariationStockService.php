@@ -56,7 +56,10 @@ class ProductVariationStockService
         }
         $allow_roles = [
             RoleNames::SUPERADMIN,
-            RoleNames::BUSINESSADMIN
+            RoleNames::BUSINESSADMIN,
+            RoleNames::INVENTORYMANAGER,
+            RoleNames::BRANCHADMIN,
+            RoleNames::POSMANAGER,
         ];
         $datatable = $this->model_product_variation_stock->getModel()::where($wh)
             ->with($this->with)

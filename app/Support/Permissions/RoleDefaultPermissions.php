@@ -90,7 +90,10 @@ class RoleDefaultPermissions
             case RoleNames::SALEMANAGER:
                 return array_merge(
                     PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment']),
-                    ['dashboard.view']
+                    array_merge(
+                        ['dashboard.view'],
+                        self::formatVariants(['customer-ledger', 'customer-aging', 'customer-payment-history'])
+                    )
                 );
 
             case RoleNames::PURCHASEMANAGER:
@@ -173,7 +176,9 @@ class RoleDefaultPermissions
                     'order.price.change',
                     'order.price.override-minimum',
                     'order.hold',
-                    'order.cancel_void',
+                    'order.cancel',
+                    'order.void',
+                    'order.delete',
                     'order.refund.process',
                     'order.payment.credit',
                     'order.customer.change',

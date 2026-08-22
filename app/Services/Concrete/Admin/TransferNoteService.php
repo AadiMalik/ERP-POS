@@ -74,7 +74,10 @@ class TransferNoteService
 
         $allow_roles = [
             RoleNames::SUPERADMIN,
-            RoleNames::BUSINESSADMIN
+            RoleNames::BUSINESSADMIN,
+            RoleNames::INVENTORYMANAGER,
+            RoleNames::BRANCHADMIN,
+            RoleNames::POSMANAGER,
         ];
 
         $datatable = $this->model_transfer_note->getModel()::with($this->with)
@@ -487,6 +490,7 @@ class TransferNoteService
                 ->where('warehouse_id', $transfer_note->source_warehouse_id)
                 ->where('product_id', $detail->product_id)
                 ->where('product_variation_id', $detail->product_variation_id)
+                ->lockForUpdate()
                 ->first();
 
             $source_available = $source_stock->quantity ?? 0;
@@ -531,6 +535,7 @@ class TransferNoteService
                 ->where('warehouse_id', $transfer_note->destination_warehouse_id)
                 ->where('product_id', $detail->product_id)
                 ->where('product_variation_id', $detail->product_variation_id)
+                ->lockForUpdate()
                 ->first();
 
             $destination_existing_qty = $destination_stock->quantity ?? 0;

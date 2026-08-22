@@ -57,6 +57,7 @@ class OrderController extends Controller
     ) {
         $this->middleware('module:order');
         $this->middleware('permission:order.export')->only(['export']);
+        $this->middleware('permission:order.delete')->only(['destroy']);
 
         $this->order_service = $order_service;
         $this->business_service = $business_service;
@@ -384,6 +385,15 @@ class OrderController extends Controller
 
     public function void(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:orders,order_id',
+            'reason' => 'required|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationResponse($validator->errors()->first());
+        }
+
         try {
             $order = $this->order_service->void($request->all());
             return $this->success(Message::UPDATE, $order);

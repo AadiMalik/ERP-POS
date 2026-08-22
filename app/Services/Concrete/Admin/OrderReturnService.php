@@ -119,7 +119,10 @@ class OrderReturnService
 
         $allow_roles = [
             RoleNames::SUPERADMIN,
-            RoleNames::BUSINESSADMIN
+            RoleNames::BUSINESSADMIN,
+            RoleNames::INVENTORYMANAGER,
+            RoleNames::BRANCHADMIN,
+            RoleNames::POSMANAGER,
         ];
 
         $datatable = $this->model_order_return->getModel()::with($this->with)
@@ -227,6 +230,26 @@ class OrderReturnService
             ->where('order_return_details.order_detail_id', $order_detail_id)
             ->where('order_returns.status', Status::APPROVED)
             ->where('order_returns.is_deleted', 0)
+            ->sum('order_return_details.return_quantity');
+    }
+
+    /**
+     * Sum of return_quantity across every OTHER pending-or-approved Order
+     * Return line for this order line, excluding $exclude_order_return_id.
+     * Used only at approval time to catch two returns raised concurrently
+     * against the same line while both were still pending - each may have
+     * individually passed save()'s APPROVED-only check (getAlreadyReturned
+     * Quantity above), so approving both would over-return the line unless
+     * this is re-checked at the moment of approval.
+     */
+    protected function getReturnedOrPendingQuantity($order_detail_id, $exclude_order_return_id)
+    {
+        return (float) OrderReturnDetail::query()
+            ->join('order_returns', 'order_returns.order_return_id', '=', 'order_return_details.order_return_id')
+            ->where('order_return_details.order_detail_id', $order_detail_id)
+            ->whereIn('order_returns.status', [Status::PENDING, Status::APPROVED])
+            ->where('order_returns.is_deleted', 0)
+            ->where('order_returns.order_return_id', '!=', $exclude_order_return_id)
             ->sum('order_return_details.return_quantity');
     }
 
@@ -547,6 +570,17 @@ class OrderReturnService
             $old_status = $order_return->status;
             $new_status = $obj['status'];
 
+            if ($new_status === Status::APPROVED && $old_status !== Status::APPROVED) {
+                foreach ($order_return->orderReturnDetails as $detail) {
+                    $ordered_quantity = (float) $detail->ordered_quantity;
+                    $conflicting = $this->getReturnedOrPendingQuantity($detail->order_detail_id, $order_return->order_return_id);
+
+                    if (($conflicting + (float) $detail->return_quantity) > $ordered_quantity + 0.0009) {
+                        throw new Exception('Cannot approve this return: "' . ($detail->product->name ?? 'a product') . '" has other pending or approved returns against the same order line that, combined with this return, would exceed the ordered quantity (' . $ordered_quantity . '). Please resolve the conflicting return(s) first.');
+                    }
+                }
+            }
+
             $order_return->update([
                 'status'       => $new_status,
                 'updatedby_id' => Auth::id(),
@@ -844,6 +878,7 @@ class OrderReturnService
                 ->where('warehouse_id', $order_return->warehouse_id)
                 ->where('product_id', $detail->product_id)
                 ->where('product_variation_id', $detail->product_variation_id)
+                ->lockForUpdate()
                 ->first();
 
             $existing_qty = $stock->quantity ?? 0;

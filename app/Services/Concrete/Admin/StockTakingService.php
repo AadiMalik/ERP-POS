@@ -74,7 +74,10 @@ class StockTakingService
 
         $allow_roles = [
             RoleNames::SUPERADMIN,
-            RoleNames::BUSINESSADMIN
+            RoleNames::BUSINESSADMIN,
+            RoleNames::INVENTORYMANAGER,
+            RoleNames::BRANCHADMIN,
+            RoleNames::POSMANAGER,
         ];
 
         $datatable = $this->model_stock_taking->getModel()::with($this->with)

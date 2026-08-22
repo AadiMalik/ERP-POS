@@ -887,7 +887,15 @@ class PermissionRegistry
                 'price_change'    => ['name' => 'order.price.change', 'label' => 'Change Price', 'is_system' => false],
                 'price_override_minimum' => ['name' => 'order.price.override-minimum', 'label' => 'Override Minimum Selling Price', 'is_system' => false],
                 'hold'            => ['name' => 'order.hold', 'label' => 'Hold', 'is_system' => false],
+                // 'order.cancel_void' is superseded by the separate 'cancel'/'void'
+                // actions below (cancel a draft vs. void a posted, accounted sale
+                // are different risk levels) - kept declared, never referenced by
+                // any route/controller going forward, per the permission-name
+                // immutability rule (names are never renamed/removed once shipped).
                 'cancel_void'     => ['name' => 'order.cancel_void', 'label' => 'Cancel / Void', 'is_system' => false],
+                'cancel'          => ['name' => 'order.cancel', 'label' => 'Cancel', 'is_system' => false],
+                'void'            => ['name' => 'order.void', 'label' => 'Void', 'is_system' => false],
+                'delete'          => ['name' => 'order.delete', 'label' => 'Delete', 'is_system' => false],
                 'refund_process'  => ['name' => 'order.refund.process', 'label' => 'Process Refund', 'is_system' => false],
                 'payment_credit'  => ['name' => 'order.payment.credit', 'label' => 'Credit Payment', 'is_system' => false],
                 'customer_change' => ['name' => 'order.customer.change', 'label' => 'Change Customer', 'is_system' => false],
@@ -967,6 +975,11 @@ class PermissionRegistry
                 'customer_ledger_pdf' => ['name' => 'reports.customer-ledger.pdf', 'label' => 'Customer Ledger - PDF', 'is_system' => false],
                 'customer_ledger_export' => ['name' => 'reports.customer-ledger.export', 'label' => 'Customer Ledger - Export (Excel)', 'is_system' => false],
                 'customer_ledger_export_csv' => ['name' => 'reports.customer-ledger.export-csv', 'label' => 'Customer Ledger - Export (CSV)', 'is_system' => false],
+                'customer_aging'           => ['name' => 'reports.customer-aging.view', 'label' => 'Customer Aging', 'is_system' => false],
+                'customer_aging_print' => ['name' => 'reports.customer-aging.print', 'label' => 'Customer Aging - Print', 'is_system' => false],
+                'customer_aging_pdf' => ['name' => 'reports.customer-aging.pdf', 'label' => 'Customer Aging - PDF', 'is_system' => false],
+                'customer_aging_export' => ['name' => 'reports.customer-aging.export', 'label' => 'Customer Aging - Export (Excel)', 'is_system' => false],
+                'customer_aging_export_csv' => ['name' => 'reports.customer-aging.export-csv', 'label' => 'Customer Aging - Export (CSV)', 'is_system' => false],
                 'accounts_receivable'      => ['name' => 'reports.accounts-receivable.view', 'label' => 'Accounts Receivable', 'is_system' => false],
                 'accounts_receivable_print' => ['name' => 'reports.accounts-receivable.print', 'label' => 'Accounts Receivable - Print', 'is_system' => false],
                 'accounts_receivable_pdf' => ['name' => 'reports.accounts-receivable.pdf', 'label' => 'Accounts Receivable - PDF', 'is_system' => false],

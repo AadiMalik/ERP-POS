@@ -1360,8 +1360,8 @@
         @endcanAccessAny
         @endif
 
-        {{-- Customers (business-scoped Customer CRUD + Customer Payments) --}}
-        @canAccessAny(['customer.view', 'customer-payment.view'])
+        {{-- Customers (business-scoped Customer CRUD + Customer Payments + Customer Reports) --}}
+        @canAccessAny(['customer.view', 'customer-payment.view', 'reports.customer-ledger.view', 'reports.customer-aging.view', 'reports.customer-payment-history.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons fa fa-users"></i>
@@ -1383,6 +1383,36 @@
                             </a>
                         </li>
                     @endcanAccess
+                    @canAccessAny(['reports.customer-ledger.view', 'reports.customer-aging.view', 'reports.customer-payment-history.view'])
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Reports">Reports</div>
+                            </a>
+                            <ul class="menu-sub">
+                                @canAccess('reports.customer-ledger.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/customer-ledger') }}" class="menu-link">
+                                            <div data-i18n="Customer Ledger">Customer Ledger</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.customer-aging.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/customer-aging') }}" class="menu-link">
+                                            <div data-i18n="Customer Aging">Customer Aging</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.customer-payment-history.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/customer-payment-history') }}" class="menu-link">
+                                            <div data-i18n="Customer Payment History">Customer Payment History</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                            </ul>
+                        </li>
+                    @endcanAccessAny
                 </ul>
             </li>
         @endcanAccessAny
