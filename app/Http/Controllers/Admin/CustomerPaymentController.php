@@ -40,7 +40,7 @@ class CustomerPaymentController extends Controller
         AccountService $account_service,
         OrderService $order_service
     ) {
-        $this->middleware('permission:customer-payment.view')->only(['index', 'getData', 'details', 'customerLedger', 'ordersByCustomer']);
+        $this->middleware('permission:customer-payment.view')->only(['index', 'getData', 'details', 'customerLedger', 'ordersByCustomer', 'serviceSalesByCustomer']);
         $this->middleware('permission:customer-payment.create')->only(['create']);
         $this->middleware('permission:customer-payment.create|customer-payment.edit')->only(['store']);
         $this->middleware('permission:customer-payment.create')->only(['quickReceive']);
@@ -119,6 +119,7 @@ class CustomerPaymentController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id'        => ['required', Rule::exists('users', 'id')->where('is_deleted', 0)],
             'order_id'       => ['nullable', Rule::exists('orders', 'order_id')->where('is_deleted', 0)],
+            'service_sale_id' => ['nullable', Rule::exists('service_sales', 'service_sale_id')->where('is_deleted', 0)],
             'payment_date'   => ['required', 'date'],
             'payment_method' => ['required', 'in:' . PaymentMethod::CASH . ',' . PaymentMethod::BANK_TRANSFER . ',' . PaymentMethod::CHEQUE . ',' . PaymentMethod::ONLINE . ',' . PaymentMethod::CARD],
             'payment_account_id' => ['nullable', Rule::exists('accounts', 'account_id')->where('is_deleted', 0)],
@@ -295,6 +296,20 @@ class CustomerPaymentController extends Controller
                 ->values();
 
             return $this->success(Message::SUCCESS, $orders);
+        } catch (Exception $e) {
+            return $this->error(Message::ERROR);
+        }
+    }
+
+    public function serviceSalesByCustomer($user_id)
+    {
+        try {
+            $service_sales = \App\Models\ServiceSale::where('customer_id', $user_id)
+                ->where('status', Status::APPROVED)
+                ->where('is_deleted', 0)
+                ->get(['service_sale_id', 'service_sale_no', 'total']);
+
+            return $this->success(Message::SUCCESS, $service_sales);
         } catch (Exception $e) {
             return $this->error(Message::ERROR);
         }

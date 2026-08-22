@@ -14,6 +14,7 @@ use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\JournalEntryDetail;
 use App\Models\Order;
+use App\Models\ServiceSale;
 use App\Repository\Repository;
 use App\Traits\Auditable;
 use Carbon\Carbon;
@@ -32,6 +33,7 @@ class CustomerPaymentService
         'branch',
         'user',
         'order',
+        'serviceSale',
         'paymentAccount',
     ];
 
@@ -89,7 +91,13 @@ class CustomerPaymentService
                 return $item->user->name ?? '';
             })
             ->addColumn('order_no', function ($item) {
-                return $item->order_id ? ($item->order->daily_order_id ?? $item->order_id) : 'On Account';
+                if ($item->order_id) {
+                    return $item->order->daily_order_id ?? $item->order_id;
+                }
+                if ($item->service_sale_id) {
+                    return $item->serviceSale->service_sale_no ?? $item->service_sale_id;
+                }
+                return 'On Account';
             })
             ->addColumn('business', function ($item) {
                 return $item->business->name ?? '';
@@ -201,6 +209,19 @@ class CustomerPaymentService
                 }
             }
 
+            $service_sale = null;
+
+            if (!empty($obj['service_sale_id'])) {
+                $service_sale = ServiceSale::where('service_sale_id', $obj['service_sale_id'])
+                    ->where('customer_id', $customer_user_id)
+                    ->where('is_deleted', 0)
+                    ->first();
+
+                if (!$service_sale) {
+                    throw new Exception('The selected service sale does not belong to the selected customer.');
+                }
+            }
+
             $accounting_setting = AccountingSetting::where('business_id', $obj['business_id'])->first();
 
             if (!empty($accounting_setting) && $accounting_setting->manual_payment_account_selection) {
@@ -241,11 +262,35 @@ class CustomerPaymentService
                 }
             }
 
+            // Service-Sale-targeted payments use the same derived-due guard
+            // as SupplierPaymentService's purchase_id branch - a Service Sale
+            // has no stored paid_amount column, unlike Order.
+            if ($service_sale) {
+                $paid_so_far = (float) CustomerPayment::where('service_sale_id', $service_sale->service_sale_id)
+                    ->where('status', Status::POSTED)
+                    ->where('is_deleted', 0)
+                    ->sum('amount');
+
+                if (!empty($obj['customer_payment_id'])) {
+                    $existing = $this->model_customer_payment->getModel()::find($obj['customer_payment_id']);
+                    if ($existing && $existing->status === Status::POSTED && $existing->service_sale_id === $service_sale->service_sale_id) {
+                        $paid_so_far -= (float) $existing->amount;
+                    }
+                }
+
+                $remaining_due = round((float) $service_sale->total - $paid_so_far, 3);
+
+                if ($amount > $remaining_due + 0.001) {
+                    throw new Exception('Payment amount (' . currency($amount) . ') exceeds the service sale\'s remaining due (' . currency(max($remaining_due, 0)) . ').');
+                }
+            }
+
             $data = [
                 'business_id'          => $obj['business_id'],
                 'branch_id'            => $obj['branch_id'] ?? null,
                 'user_id'              => $customer_user_id,
                 'order_id'             => $order->order_id ?? null,
+                'service_sale_id'      => $service_sale->service_sale_id ?? null,
                 'payment_date'         => $obj['payment_date'],
                 'payment_method'       => $obj['payment_method'],
                 'payment_account_id'   => $payment_account_id,
@@ -328,6 +373,7 @@ class CustomerPaymentService
             'branch_id'           => $payment->branch_id,
             'user_id'             => $payment->user_id,
             'order_id'            => $payment->order_id,
+            'service_sale_id'     => $payment->service_sale_id,
             'payment_no'          => $payment->payment_no,
             'payment_date'        => $payment->payment_date,
             'payment_method'      => $payment->payment_method,

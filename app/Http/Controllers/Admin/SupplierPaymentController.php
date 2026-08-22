@@ -43,7 +43,7 @@ class SupplierPaymentController extends Controller
         AccountService $account_service,
         DocumentSendLogService $document_send_log_service
     ) {
-        $this->middleware('permission:supplier-payment.view')->only(['index', 'getData', 'details', 'supplierLedger', 'purchasesBySupplier']);
+        $this->middleware('permission:supplier-payment.view')->only(['index', 'getData', 'details', 'supplierLedger', 'purchasesBySupplier', 'servicePurchasesBySupplier']);
         $this->middleware('permission:supplier-payment.create')->only(['create']);
         $this->middleware('permission:supplier-payment.create|supplier-payment.edit')->only(['store']);
         $this->middleware('permission:supplier-payment.edit')->only(['edit']);
@@ -117,6 +117,7 @@ class SupplierPaymentController extends Controller
         $validator = Validator::make($request->all(), [
             'supplier_id'    => ['required', Rule::exists('suppliers', 'supplier_id')->where('is_deleted', 0)],
             'purchase_id'    => ['nullable', Rule::exists('purchases', 'purchase_id')->where('is_deleted', 0)],
+            'service_purchase_id' => ['nullable', Rule::exists('service_purchases', 'service_purchase_id')->where('is_deleted', 0)],
             'payment_date'   => ['required', 'date'],
             'payment_method' => ['required', 'in:' . PaymentMethod::CASH . ',' . PaymentMethod::BANK_TRANSFER . ',' . PaymentMethod::CHEQUE . ',' . PaymentMethod::ONLINE],
             'payment_account_id' => ['nullable', Rule::exists('accounts', 'account_id')->where('is_deleted', 0)],
@@ -231,6 +232,20 @@ class SupplierPaymentController extends Controller
                 ->get(['purchase_id', 'purchase_no', 'total']);
 
             return $this->success(Message::SUCCESS, $purchases);
+        } catch (Exception $e) {
+            return $this->error(Message::ERROR);
+        }
+    }
+
+    public function servicePurchasesBySupplier($supplier_id)
+    {
+        try {
+            $service_purchases = \App\Models\ServicePurchase::where('supplier_id', $supplier_id)
+                ->where('status', Status::APPROVED)
+                ->where('is_deleted', 0)
+                ->get(['service_purchase_id', 'service_purchase_no', 'total']);
+
+            return $this->success(Message::SUCCESS, $service_purchases);
         } catch (Exception $e) {
             return $this->error(Message::ERROR);
         }

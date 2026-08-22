@@ -74,6 +74,12 @@
                                 </select>
                             </div>
                             <div class="col-md-3 mb-3">
+                                <label>Reference Service Sale (Optional)</label>
+                                <select class="form-control select2" name="service_sale_id" id="service_sale_id">
+                                    <option value="">--Advance / On Account--</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
                                 <label>Payment Method <span class="text-danger">*</span></label>
                                 <select class="form-control" name="payment_method" id="payment_method">
                                     <option value="cash" {{ old('payment_method', $customer_payment->payment_method ?? 'cash') == 'cash' ? 'selected' : '' }}>Cash</option>
@@ -181,6 +187,7 @@
         var isEditMode = {{ isset($customer_payment) ? 'true' : 'false' }};
         var editCustomerId = "{{ $customer_payment->user_id ?? '' }}";
         var editOrderId = "{{ $customer_payment->order_id ?? '' }}";
+        var editServiceSaleId = "{{ $customer_payment->service_sale_id ?? '' }}";
         var prefillCustomerId = "{{ $prefill_order->user_id ?? '' }}";
         var prefillOrderId = "{{ $prefill_order->order_id ?? '' }}";
 
@@ -197,10 +204,12 @@
             if (isEditMode && editCustomerId) {
                 loadCustomerLedger(editCustomerId);
                 loadOrdersByCustomer(editCustomerId, editOrderId);
+                loadServiceSalesByCustomer(editCustomerId, editServiceSaleId);
             } else if (!isEditMode && prefillCustomerId) {
                 $('#user_id').val(prefillCustomerId).trigger('change');
                 loadCustomerLedger(prefillCustomerId);
                 loadOrdersByCustomer(prefillCustomerId, prefillOrderId);
+                loadServiceSalesByCustomer(prefillCustomerId);
             }
 
             calculateNetPayment();
@@ -242,12 +251,26 @@
         $(document).on('change', '#user_id', function() {
             let userId = $(this).val();
             $('#order_id').html('<option value="">--Advance / On Account--</option>');
+            $('#service_sale_id').html('<option value="">--Advance / On Account--</option>');
             if (!userId) {
                 $('#customer_balance_display').val('--');
                 return;
             }
             loadCustomerLedger(userId);
             loadOrdersByCustomer(userId);
+            loadServiceSalesByCustomer(userId);
+        });
+
+        $(document).on('change', '#order_id', function() {
+            if ($(this).val()) {
+                $('#service_sale_id').val('').trigger('change.select2');
+            }
+        });
+
+        $(document).on('change', '#service_sale_id', function() {
+            if ($(this).val()) {
+                $('#order_id').val('').trigger('change.select2');
+            }
         });
 
         function loadCustomerLedger(userId) {
@@ -299,6 +322,33 @@
                 },
                 error: function() {
                     errorMessage('Unable to load orders for this customer.');
+                }
+            });
+        }
+
+        function loadServiceSalesByCustomer(userId, selectedServiceSaleId) {
+            $.ajax({
+                url: url_local + '/admin/customer-payment/service-sales-by-customer/' + userId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    let html = '<option value="">--Advance / On Account--</option>';
+                    if (response.Success && response.Data.length) {
+                        $.each(response.Data, function(_, serviceSale) {
+                            html += `
+                        <option value="${serviceSale.service_sale_id}">
+                            ${serviceSale.service_sale_no} (${decimal(serviceSale.total)})
+                        </option>
+                    `;
+                        });
+                    }
+                    $('#service_sale_id').html(html);
+                    if (selectedServiceSaleId) {
+                        $('#service_sale_id').val(selectedServiceSaleId).trigger('change');
+                    }
+                },
+                error: function() {
+                    errorMessage('Unable to load service sales for this customer.');
                 }
             });
         }

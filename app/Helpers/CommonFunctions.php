@@ -14,6 +14,10 @@ use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\OrderReturn;
+use App\Models\ServicePurchase;
+use App\Models\ServicePurchaseReturn;
+use App\Models\ServiceSale;
+use App\Models\ServiceSaleReturn;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestQuotation;
 use App\Models\StockTaking;
@@ -24,6 +28,7 @@ use App\Models\CustomerPayment;
 use App\Models\TransferNote;
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Services\Concrete\Admin\FeatureLimitService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -329,6 +334,90 @@ function generateOrderReturnNo($business_id = null)
 
     return sprintf(
         'SRTN-%04d',
+        $next_number
+    );
+}
+
+function generateServicePurchaseNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $service_purchase = ServicePurchase::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($service_purchase) {
+        $next_number = (int) substr($service_purchase->service_purchase_no, strrpos($service_purchase->service_purchase_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'SPO-%04d',
+        $next_number
+    );
+}
+
+function generateServicePurchaseReturnNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $service_purchase_return = ServicePurchaseReturn::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($service_purchase_return) {
+        $next_number = (int) substr($service_purchase_return->service_purchase_return_no, strrpos($service_purchase_return->service_purchase_return_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'SPRTN-%04d',
+        $next_number
+    );
+}
+
+function generateServiceSaleNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $service_sale = ServiceSale::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($service_sale) {
+        $next_number = (int) substr($service_sale->service_sale_no, strrpos($service_sale->service_sale_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'SSO-%04d',
+        $next_number
+    );
+}
+
+function generateServiceSaleReturnNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $service_sale_return = ServiceSaleReturn::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($service_sale_return) {
+        $next_number = (int) substr($service_sale_return->service_sale_return_no, strrpos($service_sale_return->service_sale_return_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'SSRTN-%04d',
         $next_number
     );
 }
@@ -662,7 +751,7 @@ function applyRoleScope(
  */
 function checkPackageLimit($type)
 {
-    return app(\App\Services\Concrete\Admin\FeatureLimitService::class)->check($type);
+    return app(FeatureLimitService::class)->check($type);
 }
 
 /**
@@ -672,7 +761,7 @@ function checkPackageLimit($type)
  */
 function businessModuleEnabled($moduleKey)
 {
-    return app(\App\Services\Concrete\Admin\FeatureLimitService::class)->hasModule($moduleKey);
+    return app(FeatureLimitService::class)->hasModule($moduleKey);
 }
 
 /**

@@ -49,7 +49,8 @@ class RoleDefaultPermissions
                      'unit-conversion', 'batch', 'stock', 'stock-transaction', 'opening-stock',
                      'stock-taking', 'transfer-note', 'supplier', 'customer', 'purchase-request',
                      'purchase-request-quotation', 'purchase', 'good-receipt-note', 'purchase-return',
-                     'supplier-payment', 'customer-payment', 'order-type', 'payment-method', 'order-source', 'discount',
+                     'supplier-payment', 'customer-payment', 'service-purchase', 'service-purchase-return',
+                     'service-sale', 'service-sale-return', 'order-type', 'payment-method', 'order-source', 'discount',
                      'voucher', 'order', 'order-return', 'pos', 'expense', 'expense-category', 'admin-expense'],
                     ['delete']
                 );
@@ -89,7 +90,7 @@ class RoleDefaultPermissions
 
             case RoleNames::SALEMANAGER:
                 return array_merge(
-                    PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment']),
+                    PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment', 'service-sale', 'service-sale-return']),
                     array_merge(
                         ['dashboard.view'],
                         self::formatVariants(['customer-ledger', 'customer-aging', 'customer-payment-history'])
@@ -101,6 +102,7 @@ class RoleDefaultPermissions
                     PermissionRegistry::namesForModules([
                         'supplier', 'purchase-request', 'purchase-request-quotation', 'purchase',
                         'good-receipt-note', 'purchase-return', 'supplier-payment',
+                        'service-purchase', 'service-purchase-return',
                     ]),
                     array_merge(
                         ['dashboard.view'],

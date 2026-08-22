@@ -377,6 +377,43 @@ class PermissionRegistry
                 'print'   => ['name' => 'purchase-return.print', 'label' => 'Print', 'is_system' => false],
             ]],
 
+            //=== Service Management (non-stock purchase/sale) ===
+            'service-purchase' => ['label' => 'Service Purchases', 'actions' => [
+                'view'   => ['name' => 'service-purchase.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'service-purchase.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'service-purchase.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'service-purchase.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'service-purchase.status', 'label' => 'Change Status', 'is_system' => false],
+                'print'  => ['name' => 'service-purchase.print', 'label' => 'Print', 'is_system' => false],
+            ]],
+
+            'service-purchase-return' => ['label' => 'Service Purchase Returns', 'actions' => [
+                'view'    => ['name' => 'service-purchase-return.view', 'label' => 'View', 'is_system' => false],
+                'create'  => ['name' => 'service-purchase-return.create', 'label' => 'Create', 'is_system' => false],
+                'edit'    => ['name' => 'service-purchase-return.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'  => ['name' => 'service-purchase-return.delete', 'label' => 'Delete', 'is_system' => false],
+                'approve' => ['name' => 'service-purchase-return.approve', 'label' => 'Approve', 'is_system' => false],
+                'print'   => ['name' => 'service-purchase-return.print', 'label' => 'Print', 'is_system' => false],
+            ]],
+
+            'service-sale' => ['label' => 'Service Sales', 'actions' => [
+                'view'   => ['name' => 'service-sale.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'service-sale.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'service-sale.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'service-sale.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'service-sale.status', 'label' => 'Change Status', 'is_system' => false],
+                'print'  => ['name' => 'service-sale.print', 'label' => 'Print', 'is_system' => false],
+            ]],
+
+            'service-sale-return' => ['label' => 'Service Sale Returns', 'actions' => [
+                'view'    => ['name' => 'service-sale-return.view', 'label' => 'View', 'is_system' => false],
+                'create'  => ['name' => 'service-sale-return.create', 'label' => 'Create', 'is_system' => false],
+                'edit'    => ['name' => 'service-sale-return.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'  => ['name' => 'service-sale-return.delete', 'label' => 'Delete', 'is_system' => false],
+                'approve' => ['name' => 'service-sale-return.approve', 'label' => 'Approve', 'is_system' => false],
+                'print'   => ['name' => 'service-sale-return.print', 'label' => 'Print', 'is_system' => false],
+            ]],
+
             'opening-stock' => ['label' => 'Opening Stock', 'actions' => [
                 'view'   => ['name' => 'opening-stock.view', 'label' => 'View', 'is_system' => false],
                 'create' => ['name' => 'opening-stock.create', 'label' => 'Create', 'is_system' => false],
@@ -1205,6 +1242,7 @@ class PermissionRegistry
             'supplier', 'customer', 'order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher',
             'purchase-request', 'purchase-request-quotation', 'purchase', 'good-receipt-note',
             'purchase-return', 'opening-stock', 'stock-taking', 'transfer-note', 'supplier-payment', 'customer-payment',
+            'service-purchase', 'service-purchase-return', 'service-sale', 'service-sale-return',
             'pos', 'order', 'order-return', 'expense', 'expense-category', 'admin-expense',
             'activity-log', 'login-history', 'notification', 'reports', 'branch', 'user',
             'department', 'designation', 'shift', 'employee', 'attendance', 'leave-type',

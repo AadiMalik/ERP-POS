@@ -778,6 +778,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('details/{customer_payment_id}', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'details']);
             Route::get('ledger/{user_id}', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'customerLedger']);
             Route::get('orders-by-customer/{user_id}', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'ordersByCustomer']);
+            Route::get('service-sales-by-customer/{user_id}', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'serviceSalesByCustomer']);
             Route::get('{customer_payment_id}/print', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'print'])->name('customer-payment.print');
         });
     }); // end module:pos (customer payment)
@@ -934,6 +935,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('details/{supplier_payment_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'details']);
         Route::get('ledger/{supplier_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'supplierLedger']);
         Route::get('purchases-by-supplier/{supplier_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'purchasesBySupplier']);
+        Route::get('service-purchases-by-supplier/{supplier_id}', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'servicePurchasesBySupplier']);
         Route::get('{supplier_payment_id}/print', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'print'])->name('supplier-payment.print');
         Route::get('import/sample', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'importSample'])->name('supplier-payment-import-sample');
         Route::post('import/preview', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'importPreview'])->name('supplier-payment-import-preview');
@@ -941,6 +943,51 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('export', [App\Http\Controllers\Admin\SupplierPaymentController::class, 'export'])->name('supplier-payment-export');
     });
     }); // end module:inventory (procurement & stock)
+
+    //service management - non-stock purchase/sale (gas cylinders, rentals,
+    //installation/delivery charges, etc). Gated on its own package module,
+    //independent of inventory/pos, since these transactions never touch stock.
+    Route::group(['middleware' => ['module:service-management']], function () {
+        //service purchase
+        Route::resource('service-purchase', App\Http\Controllers\Admin\ServicePurchaseController::class);
+        Route::group(['prefix' => 'service-purchase'], function () {
+            Route::post('data', [App\Http\Controllers\Admin\ServicePurchaseController::class, 'getData']);
+            Route::post('change-status', [App\Http\Controllers\Admin\ServicePurchaseController::class, 'status']);
+            Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\ServicePurchaseController::class, 'byBusiness']);
+            Route::get('details/{service_purchase_id}', [App\Http\Controllers\Admin\ServicePurchaseController::class, 'details']);
+            Route::get('{service_purchase_id}/print', [App\Http\Controllers\Admin\ServicePurchaseController::class, 'print'])->name('service-purchase.print');
+        });
+
+        //service purchase return
+        Route::resource('service-purchase-return', App\Http\Controllers\Admin\ServicePurchaseReturnController::class);
+        Route::group(['prefix' => 'service-purchase-return'], function () {
+            Route::post('data', [App\Http\Controllers\Admin\ServicePurchaseReturnController::class, 'getData']);
+            Route::post('change-status', [App\Http\Controllers\Admin\ServicePurchaseReturnController::class, 'status']);
+            Route::get('details/{service_purchase_return_id}', [App\Http\Controllers\Admin\ServicePurchaseReturnController::class, 'details']);
+            Route::get('source-lines/{service_purchase_id}', [App\Http\Controllers\Admin\ServicePurchaseReturnController::class, 'sourceLines']);
+            Route::get('{service_purchase_return_id}/print', [App\Http\Controllers\Admin\ServicePurchaseReturnController::class, 'print'])->name('service-purchase-return.print');
+        });
+
+        //service sale
+        Route::resource('service-sale', App\Http\Controllers\Admin\ServiceSaleController::class);
+        Route::group(['prefix' => 'service-sale'], function () {
+            Route::post('data', [App\Http\Controllers\Admin\ServiceSaleController::class, 'getData']);
+            Route::post('change-status', [App\Http\Controllers\Admin\ServiceSaleController::class, 'status']);
+            Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\ServiceSaleController::class, 'byBusiness']);
+            Route::get('details/{service_sale_id}', [App\Http\Controllers\Admin\ServiceSaleController::class, 'details']);
+            Route::get('{service_sale_id}/print', [App\Http\Controllers\Admin\ServiceSaleController::class, 'print'])->name('service-sale.print');
+        });
+
+        //service sale return
+        Route::resource('service-sale-return', App\Http\Controllers\Admin\ServiceSaleReturnController::class);
+        Route::group(['prefix' => 'service-sale-return'], function () {
+            Route::post('data', [App\Http\Controllers\Admin\ServiceSaleReturnController::class, 'getData']);
+            Route::post('change-status', [App\Http\Controllers\Admin\ServiceSaleReturnController::class, 'status']);
+            Route::get('details/{service_sale_return_id}', [App\Http\Controllers\Admin\ServiceSaleReturnController::class, 'details']);
+            Route::get('source-lines/{service_sale_id}', [App\Http\Controllers\Admin\ServiceSaleReturnController::class, 'sourceLines']);
+            Route::get('{service_sale_return_id}/print', [App\Http\Controllers\Admin\ServiceSaleReturnController::class, 'print'])->name('service-sale-return.print');
+        });
+    }); // end module:service-management
 
     Route::group(['middleware' => ['module:accounting']], function () {
     //expense detail (POS + Admin, any session/OT) - package-gated by

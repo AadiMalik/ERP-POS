@@ -18,6 +18,7 @@ class CustomerPayment extends Model
         'branch_id',
         'user_id',
         'order_id',
+        'service_sale_id',
 
         'payment_no',
         'payment_date',
@@ -59,6 +60,11 @@ class CustomerPayment extends Model
     public function order()
     {
         return $this->belongsTo(Order::class, 'order_id', 'order_id');
+    }
+
+    public function serviceSale()
+    {
+        return $this->belongsTo(ServiceSale::class, 'service_sale_id', 'service_sale_id');
     }
 
     public function paymentAccount()

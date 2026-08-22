@@ -86,6 +86,16 @@ class SubscriptionModuleRegistry
             'purchase-return'            => ['label' => 'Purchase Returns', 'category' => 'Purchases', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'supplier-payment'           => ['label' => 'Vendor / Supplier Payments', 'category' => 'Purchases', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
 
+            // ---- Service Management (non-stock purchase/sale: gas cylinders,
+            // decoration, rental/installation/delivery charges, etc). Its own
+            // umbrella, independent of inventory/pos, since these transactions
+            // never touch stock. ----
+            'service-management'      => ['label' => 'Service Management Module', 'category' => 'Service Management', 'type' => 'feature', 'parent' => null, 'default_enabled' => false],
+            'service-purchase'        => ['label' => 'Service Purchases', 'category' => 'Service Management', 'type' => 'limited', 'parent' => 'service-management', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'service-purchase-return' => ['label' => 'Service Purchase Returns', 'category' => 'Service Management', 'type' => 'limited', 'parent' => 'service-management', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'service-sale'            => ['label' => 'Service Sales', 'category' => 'Service Management', 'type' => 'limited', 'parent' => 'service-management', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'service-sale-return'     => ['label' => 'Service Sale Returns', 'category' => 'Service Management', 'type' => 'limited', 'parent' => 'service-management', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+
             // ---- Accounting (umbrella: is_accounting_enabled) ----
             'accounting'         => ['label' => 'Accounting Module', 'category' => 'Accounting', 'type' => 'feature', 'parent' => null, 'default_enabled' => false],
             'account-type'       => ['label' => 'Account Types', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],

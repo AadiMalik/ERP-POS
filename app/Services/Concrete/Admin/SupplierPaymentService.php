@@ -12,6 +12,7 @@ use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\JournalEntryDetail;
 use App\Models\Purchase;
+use App\Models\ServicePurchase;
 use App\Models\Supplier;
 use App\Models\SupplierPayment;
 use App\Repository\Repository;
@@ -33,6 +34,7 @@ class SupplierPaymentService
         'supplier',
         'supplier.account',
         'purchase',
+        'servicePurchase',
         'paymentAccount',
     ];
 
@@ -92,7 +94,7 @@ class SupplierPaymentService
                 return ($item->supplier->code ?? '') . ' ' . ($item->supplier->name ?? '');
             })
             ->addColumn('purchase_no', function ($item) {
-                return $item->purchase->purchase_no ?? '';
+                return $item->purchase->purchase_no ?? ($item->servicePurchase->service_purchase_no ?? '');
             })
             ->addColumn('business', function ($item) {
                 return $item->business->name ?? '';
@@ -195,6 +197,19 @@ class SupplierPaymentService
                 }
             }
 
+            $service_purchase = null;
+
+            if (!empty($obj['service_purchase_id'])) {
+                $service_purchase = ServicePurchase::where('service_purchase_id', $obj['service_purchase_id'])
+                    ->where('supplier_id', $obj['supplier_id'])
+                    ->where('is_deleted', 0)
+                    ->first();
+
+                if (!$service_purchase) {
+                    throw new Exception('The selected service purchase does not belong to the selected supplier.');
+                }
+            }
+
             $accounting_setting = AccountingSetting::where('business_id', $obj['business_id'])->first();
 
             if (!empty($accounting_setting) && $accounting_setting->manual_payment_account_selection) {
@@ -242,11 +257,35 @@ class SupplierPaymentService
                 }
             }
 
+            // Service-Purchase-targeted payments follow the exact same
+            // derived-due guard as regular purchases above - a Service
+            // Purchase has no stored paid_amount column either.
+            if (!empty($service_purchase)) {
+                $paid_so_far = (float) SupplierPayment::where('service_purchase_id', $service_purchase->service_purchase_id)
+                    ->where('status', Status::POSTED)
+                    ->where('is_deleted', 0)
+                    ->sum('amount');
+
+                if (!empty($obj['supplier_payment_id'])) {
+                    $existing = $this->model_supplier_payment->getModel()::find($obj['supplier_payment_id']);
+                    if ($existing && $existing->status === Status::POSTED && $existing->service_purchase_id === $service_purchase->service_purchase_id) {
+                        $paid_so_far -= (float) $existing->amount;
+                    }
+                }
+
+                $remaining_due = round((float) $service_purchase->total - $paid_so_far, 3);
+
+                if ($amount > $remaining_due + 0.001) {
+                    throw new Exception('Payment amount (' . currency($amount) . ') exceeds the service purchase\'s remaining due (' . currency(max($remaining_due, 0)) . ').');
+                }
+            }
+
             $data = [
                 'business_id'         => $obj['business_id'],
                 'branch_id'           => $obj['branch_id'] ?? null,
                 'supplier_id'         => $obj['supplier_id'],
                 'purchase_id'         => $obj['purchase_id'] ?? null,
+                'service_purchase_id' => $obj['service_purchase_id'] ?? null,
                 'payment_date'        => $obj['payment_date'],
                 'payment_method'      => $obj['payment_method'],
                 'payment_account_id'  => $payment_account_id,
@@ -329,6 +368,7 @@ class SupplierPaymentService
             'branch_id'           => $payment->branch_id,
             'supplier_id'         => $payment->supplier_id,
             'purchase_id'         => $payment->purchase_id,
+            'service_purchase_id' => $payment->service_purchase_id,
             'payment_no'          => $payment->payment_no,
             'payment_date'        => $payment->payment_date,
             'payment_method'      => $payment->payment_method,

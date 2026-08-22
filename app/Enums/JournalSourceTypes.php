@@ -22,6 +22,12 @@ class JournalSourceTypes
       const PURCHASE_QUOTATION = 'Purchase Quotation';
       const GOODS_RECEIPT = 'Goods Receipt';
 
+      // Service Management (non-stock purchase/sale)
+      const SERVICE_PURCHASE = 'Service Purchase';
+      const SERVICE_PURCHASE_RETURN = 'Service Purchase Return';
+      const SERVICE_SALE = 'Service Sale';
+      const SERVICE_SALE_RETURN = 'Service Sale Return';
+
       // Inventory
       const STOCK_ADJUSTMENT = 'Stock Adjustment';
       const STOCK_TRANSFER = 'Stock Transfer';

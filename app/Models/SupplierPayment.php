@@ -18,6 +18,7 @@ class SupplierPayment extends Model
         'branch_id',
         'supplier_id',
         'purchase_id',
+        'service_purchase_id',
 
         'payment_no',
         'payment_date',
@@ -59,6 +60,11 @@ class SupplierPayment extends Model
     public function purchase()
     {
         return $this->belongsTo(Purchase::class, 'purchase_id', 'purchase_id');
+    }
+
+    public function servicePurchase()
+    {
+        return $this->belongsTo(ServicePurchase::class, 'service_purchase_id', 'service_purchase_id');
     }
 
     public function paymentAccount()

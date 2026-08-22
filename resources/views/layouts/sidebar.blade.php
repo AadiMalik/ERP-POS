@@ -1360,6 +1360,50 @@
         @endcanAccessAny
         @endif
 
+        {{-- Service Management (non-stock purchase/sale: gas cylinders, rentals,
+             installation/delivery charges, etc) --}}
+        @if (businessModuleEnabled('service-management'))
+        @canAccessAny(['service-purchase.view', 'service-purchase-return.view', 'service-sale.view', 'service-sale-return.view'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-concierge-bell"></i>
+                    <div data-i18n="Service Management">Service Management</div>
+                </a>
+
+                <ul class="menu-sub">
+                    @canAccess('service-purchase.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/service-purchase') }}" class="menu-link">
+                                <div data-i18n="Service Purchases">Service Purchases</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('service-purchase-return.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/service-purchase-return') }}" class="menu-link">
+                                <div data-i18n="Service Purchase Returns">Service Purchase Returns</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('service-sale.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/service-sale') }}" class="menu-link">
+                                <div data-i18n="Service Sales">Service Sales</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('service-sale-return.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/service-sale-return') }}" class="menu-link">
+                                <div data-i18n="Service Sale Returns">Service Sale Returns</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                </ul>
+            </li>
+        @endcanAccessAny
+        @endif
+
         {{-- Customers (business-scoped Customer CRUD + Customer Payments + Customer Reports) --}}
         @canAccessAny(['customer.view', 'customer-payment.view', 'reports.customer-ledger.view', 'reports.customer-aging.view', 'reports.customer-payment-history.view'])
             <li class="menu-item">

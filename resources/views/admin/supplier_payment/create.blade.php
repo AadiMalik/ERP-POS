@@ -79,6 +79,12 @@
                                 </select>
                             </div>
                             <div class="col-md-3 mb-3">
+                                <label>Reference Service Purchase (Optional)</label>
+                                <select class="form-control select2" name="service_purchase_id" id="service_purchase_id">
+                                    <option value="">--Advance / Not Linked--</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
                                 <label>Payment Method <span class="text-danger">*</span></label>
                                 <select class="form-control" name="payment_method" id="payment_method">
                                     <option value="cash" {{ old('payment_method', $supplier_payment->payment_method ?? 'cash') == 'cash' ? 'selected' : '' }}>Cash</option>
@@ -185,6 +191,7 @@
         var isEditMode = {{ isset($supplier_payment) ? 'true' : 'false' }};
         var editSupplierId = "{{ $supplier_payment->supplier_id ?? '' }}";
         var editPurchaseId = "{{ $supplier_payment->purchase_id ?? '' }}";
+        var editServicePurchaseId = "{{ $supplier_payment->service_purchase_id ?? '' }}";
 
         // ======================================================
         // DOCUMENT READY
@@ -202,6 +209,7 @@
             if (isEditMode && editSupplierId) {
                 loadSupplierLedger(editSupplierId);
                 loadPurchasesBySupplier(editSupplierId, editPurchaseId);
+                loadServicePurchasesBySupplier(editSupplierId, editServicePurchaseId);
             }
 
             calculateNetPayment();
@@ -255,6 +263,7 @@
         $(document).on('change', '#supplier_id', function() {
             let supplierId = $(this).val();
             $('#purchase_id').html('<option value="">--Advance / Not Linked--</option>');
+            $('#service_purchase_id').html('<option value="">--Advance / Not Linked--</option>');
             if (!supplierId) {
                 $('#supplier_balance_display').val('--');
                 $('#supplier_coa_display').val('--');
@@ -262,6 +271,19 @@
             }
             loadSupplierLedger(supplierId);
             loadPurchasesBySupplier(supplierId);
+            loadServicePurchasesBySupplier(supplierId);
+        });
+
+        $(document).on('change', '#purchase_id', function() {
+            if ($(this).val()) {
+                $('#service_purchase_id').val('').trigger('change.select2');
+            }
+        });
+
+        $(document).on('change', '#service_purchase_id', function() {
+            if ($(this).val()) {
+                $('#purchase_id').val('').trigger('change.select2');
+            }
         });
 
         function loadSupplierLedger(supplierId) {
@@ -317,6 +339,33 @@
                 },
                 error: function() {
                     errorMessage('Unable to load purchases for this supplier.');
+                }
+            });
+        }
+
+        function loadServicePurchasesBySupplier(supplierId, selectedServicePurchaseId) {
+            $.ajax({
+                url: url_local + '/admin/supplier-payment/service-purchases-by-supplier/' + supplierId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    let html = '<option value="">--Advance / Not Linked--</option>';
+                    if (response.Success && response.Data.length) {
+                        $.each(response.Data, function(_, servicePurchase) {
+                            html += `
+                        <option value="${servicePurchase.service_purchase_id}">
+                            ${servicePurchase.service_purchase_no} (${currencyFormat(servicePurchase.total)})
+                        </option>
+                    `;
+                        });
+                    }
+                    $('#service_purchase_id').html(html);
+                    if (selectedServicePurchaseId) {
+                        $('#service_purchase_id').val(selectedServicePurchaseId).trigger('change');
+                    }
+                },
+                error: function() {
+                    errorMessage('Unable to load service purchases for this supplier.');
                 }
             });
         }
