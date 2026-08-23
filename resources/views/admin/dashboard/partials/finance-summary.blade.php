@@ -1,22 +1,9 @@
-@php
-    $marginPct = ($sales['total_sales'] ?? 0) > 0
-        ? round((($finance['net_profit'] ?? 0) / $sales['total_sales']) * 100, 1)
-        : 0;
-@endphp
 <div class="row">
-    <div class="col-lg-8 mb-4">
+    <div class="col-12 mb-4">
         <div class="card h-100">
             <div class="card-header"><h5 class="mb-0">Revenue, Expenses &amp; Profit Overview</h5></div>
             <div class="card-body">
                 <div id="expenseProfitChart"></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4 mb-4">
-        <div class="card h-100">
-            <div class="card-header"><h5 class="mb-0">Net Profit Margin</h5></div>
-            <div class="card-body">
-                <div id="profitMarginGauge"></div>
             </div>
         </div>
     </div>
@@ -156,18 +143,6 @@
             }).render();
         } catch (e) {
             console.error('Expense/Profit Overview chart failed to render:', e);
-        }
-
-        try {
-            new ApexCharts(document.querySelector('#profitMarginGauge'), {
-                series: [{{ $marginPct }}],
-                chart: { type: 'radialBar', height: 220 },
-                colors: [{{ $marginPct >= 0 ? 'config.colors.success' : 'config.colors.danger' }}],
-                plotOptions: { radialBar: { hollow: { size: '60%' }, dataLabels: { value: { formatter: function (val) { return val + '%'; } } } } },
-                labels: ['Margin'],
-            }).render();
-        } catch (e) {
-            console.error('Profit Margin gauge failed to render:', e);
         }
     })();
 </script>

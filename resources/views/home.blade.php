@@ -27,11 +27,16 @@
 
         @include('admin.dashboard.partials.kpi-cards')
 
-        @if (isset($parties) || isset($inventory) || isset($finance))
-            @include('admin.dashboard.partials.overview-widgets')
-        @endif
-
         @include('admin.dashboard.partials.sales-charts')
+
+        <div class="row">
+            <div class="col-lg-5 mb-4">
+                @include('admin.dashboard.partials.top-products-panel')
+            </div>
+            <div class="col-lg-7 mb-4">
+                @include('admin.dashboard.partials.recent-activity')
+            </div>
+        </div>
 
         @if (isset($purchases))
             @include('admin.dashboard.partials.purchase-charts')
@@ -41,10 +46,6 @@
             @include('admin.dashboard.partials.sales-purchase-comparison')
         @endif
 
-        @if (isset($inventory))
-            @include('admin.dashboard.partials.inventory-summary')
-        @endif
-
         @if (isset($finance))
             @include('admin.dashboard.partials.finance-summary')
         @endif
@@ -52,8 +53,6 @@
         @if (isset($parties))
             @include('admin.dashboard.partials.parties-summary')
         @endif
-
-        @include('admin.dashboard.partials.recent-activity')
 
         @if (Auth::user()->business_id && isset($subscription))
             <div class="row">

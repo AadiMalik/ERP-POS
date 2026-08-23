@@ -47,7 +47,7 @@
                     <tbody>
                         @forelse ($sales['recent_orders'] as $order)
                             <tr>
-                                <td>{{ $order->daily_order_id ?? substr($order->order_id, 0, 8) }}</td>
+                                <td><span class="erp-activity-avatar me-2"><i class="fa fa-receipt"></i></span>{{ $order->daily_order_id ?? substr($order->order_id, 0, 8) }}</td>
                                 <td>{{ $order->order_date ? localDate($order->order_date) : '-' }}</td>
                                 <td>{{ $order->branch->name ?? '-' }}</td>
                                 <td>{{ $order->user->name ?? 'Walk-in' }}</td>
@@ -82,7 +82,7 @@
                         <tbody>
                             @forelse ($purchases['recent_purchases'] as $purchase)
                                 <tr>
-                                    <td>{{ $purchase->purchase_no }}</td>
+                                    <td><span class="erp-activity-avatar me-2"><i class="fa fa-truck-loading"></i></span>{{ $purchase->purchase_no }}</td>
                                     <td>{{ $purchase->purchase_date ? localDate($purchase->purchase_date) : '-' }}</td>
                                     <td>{{ $purchase->supplier->name ?? '-' }}</td>
                                     <td class="text-end">{{ currency($purchase->total) }}</td>
@@ -117,7 +117,7 @@
                         <tbody>
                             @forelse ($finance['recent_payments'] as $payment)
                                 <tr>
-                                    <td>{{ $payment->payment_no }}</td>
+                                    <td><span class="erp-activity-avatar me-2"><i class="fa fa-money-check-alt"></i></span>{{ $payment->payment_no }}</td>
                                     <td>{{ $payment->payment_date ? localDate($payment->payment_date) : '-' }}</td>
                                     <td>{{ $payment->supplier->name ?? '-' }}</td>
                                     <td class="text-end">{{ currency($payment->net_amount ?? $payment->amount) }}</td>

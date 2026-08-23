@@ -506,6 +506,132 @@ body[data-content-bg="dark"] .erp-page-header {
     flex-shrink: 0;
 }
 
+/* Solid-gradient hero KPI variant - opt-in via an extra class so the base
+ * .erp-kpi-card (also used by the ESS "My Dashboard") keeps its original
+ * white-card look untouched. */
+.erp-kpi-card--gradient {
+    color: #fff;
+    background: linear-gradient(135deg, rgba(var(--erp-kpi-color-rgb, var(--erp-primary-rgb)), 1) 0%, rgba(var(--erp-kpi-color-rgb, var(--erp-primary-rgb)), .78) 100%);
+    border: none;
+}
+
+.erp-kpi-card--gradient::before {
+    display: none;
+}
+
+.erp-kpi-card--gradient:hover {
+    box-shadow: 0 .75rem 1.5rem rgba(var(--erp-kpi-color-rgb, var(--erp-primary-rgb)), .35);
+}
+
+.erp-kpi-card--gradient .erp-kpi-label {
+    color: #fff !important;
+    opacity: .85;
+}
+
+.erp-kpi-card--gradient .erp-kpi-value {
+    color: #fff !important;
+}
+
+.erp-kpi-card--gradient .erp-kpi-icon {
+    background: rgba(255, 255, 255, .2);
+    color: #fff;
+}
+
+/* Compact secondary stat strip - flat tinted chips for the KPIs that don't
+ * warrant a full hero card. */
+.erp-stat-chip {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .75rem .9rem;
+    border-radius: var(--erp-radius);
+    background: rgba(var(--erp-stat-color-rgb, var(--erp-primary-rgb)), .08);
+    height: 100%;
+}
+
+.erp-stat-chip .erp-stat-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .85rem;
+    flex-shrink: 0;
+    background: rgba(var(--erp-stat-color-rgb, var(--erp-primary-rgb)), .18);
+    color: var(--erp-stat-color, var(--erp-primary));
+}
+
+.erp-stat-chip .erp-stat-label {
+    font-size: .72rem;
+    color: var(--erp-secondary, #8592a3);
+    display: block;
+    line-height: 1.2;
+}
+
+.erp-stat-chip .erp-stat-value {
+    font-size: .95rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+/* Gauge cluster - stacked mini radialBar gauges in one card. */
+.erp-gauge-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.erp-gauge-row .erp-gauge-chart {
+    width: 76px;
+    height: 76px;
+    flex-shrink: 0;
+}
+
+.erp-gauge-row .erp-gauge-label {
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+/* Top Selling Products - flat colored progress-bar rows. */
+.erp-bar-row + .erp-bar-row {
+    margin-top: .9rem;
+}
+
+.erp-bar-row .erp-bar-row-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: .82rem;
+    margin-bottom: .3rem;
+}
+
+.erp-bar-row .erp-bar-track {
+    height: .5rem;
+    border-radius: 1rem;
+    background: rgba(var(--erp-primary-rgb), .1);
+    overflow: hidden;
+}
+
+.erp-bar-row .erp-bar-fill {
+    height: 100%;
+    border-radius: 1rem;
+    background: var(--erp-bar-color, var(--erp-primary));
+}
+
+/* Recent activity table row polish. */
+.erp-activity-avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    background: rgba(var(--erp-primary-rgb), .1);
+    color: var(--erp-primary);
+    flex-shrink: 0;
+}
+
 .erp-widget-card .erp-widget-stat {
     text-align: center;
 }

@@ -1,32 +1,44 @@
 @php
-    $cards = [];
+    $heroCards = [];
 
-    $cards[] = ['label' => 'Total Sales', 'value' => currency($sales['total_sales'] ?? 0), 'icon' => 'fa-cash-register', 'color' => 'primary', 'route' => route('order.history')];
-    $cards[] = ['label' => 'Total Orders', 'value' => number_format($sales['total_orders'] ?? 0), 'icon' => 'fa-receipt', 'color' => 'info', 'route' => route('order.index')];
+    $heroCards[] = ['label' => 'Total Sales', 'value' => currency($sales['total_sales'] ?? 0), 'icon' => 'fa-cash-register', 'color' => 'primary', 'route' => route('order.history')];
+    $heroCards[] = ['label' => 'Total Orders', 'value' => number_format($sales['total_orders'] ?? 0), 'icon' => 'fa-receipt', 'color' => 'info', 'route' => route('order.index')];
 
     if (isset($purchases)) {
-        $cards[] = ['label' => 'Total Purchases', 'value' => number_format($purchases['total_purchases'] ?? 0), 'icon' => 'fa-truck-loading', 'color' => 'secondary', 'route' => route('purchase.index')];
-        $cards[] = ['label' => 'Purchase Amount', 'value' => currency($purchases['total_purchase_amount'] ?? 0), 'icon' => 'fa-money-bill-wave', 'color' => 'warning', 'route' => route('purchase.index')];
-    }
-
-    if (isset($inventory)) {
-        $cards[] = ['label' => 'Stock Value', 'value' => currency($inventory['stock_value'] ?? 0), 'icon' => 'fa-warehouse', 'color' => 'success', 'route' => url('admin/product-variation-stock')];
+        $heroCards[] = ['label' => 'Total Purchases', 'value' => number_format($purchases['total_purchases'] ?? 0), 'icon' => 'fa-truck-loading', 'color' => 'warning', 'route' => route('purchase.index')];
     }
 
     if (isset($finance)) {
-        $cards[] = ['label' => 'Total Expenses', 'value' => currency($finance['total_expenses'] ?? 0), 'icon' => 'fa-file-invoice-dollar', 'color' => 'danger', 'route' => url('admin/reports/expense-report')];
-        $cards[] = ['label' => 'Gross Profit', 'value' => currency($finance['gross_profit'] ?? 0), 'icon' => 'fa-chart-line', 'color' => ($finance['gross_profit'] ?? 0) >= 0 ? 'success' : 'danger', 'route' => url('admin/reports/profit-loss')];
-        $cards[] = ['label' => 'Net Profit', 'value' => currency($finance['net_profit'] ?? 0), 'icon' => 'fa-sack-dollar', 'color' => ($finance['net_profit'] ?? 0) >= 0 ? 'success' : 'danger', 'route' => url('admin/reports/profit-loss')];
-        $cards[] = ['label' => 'Total Receivables', 'value' => currency($finance['receivables']['total'] ?? 0), 'icon' => 'fa-hand-holding-usd', 'color' => 'info', 'route' => route('users.index')];
-        $cards[] = ['label' => 'Total Payables', 'value' => currency($finance['payables']['total'] ?? 0), 'icon' => 'fa-file-invoice', 'color' => 'warning', 'route' => url('admin/reports/accounts-payable')];
-        $cards[] = ['label' => 'Cash/Bank Balance', 'value' => currency($finance['cash_bank_balance'] ?? 0), 'icon' => 'fa-university', 'color' => 'primary', 'route' => url('admin/reports/cash-bank-ledger')];
+        $heroCards[] = ['label' => 'Net Profit', 'value' => currency($finance['net_profit'] ?? 0), 'icon' => 'fa-sack-dollar', 'color' => ($finance['net_profit'] ?? 0) >= 0 ? 'success' : 'danger', 'route' => url('admin/reports/profit-loss')];
+    } elseif (isset($inventory)) {
+        $heroCards[] = ['label' => 'Stock Value', 'value' => currency($inventory['stock_value'] ?? 0), 'icon' => 'fa-warehouse', 'color' => 'success', 'route' => url('admin/product-variation-stock')];
+    }
+
+    $statChips = [];
+
+    if (isset($purchases)) {
+        $statChips[] = ['label' => 'Purchase Amount', 'value' => currency($purchases['total_purchase_amount'] ?? 0), 'icon' => 'fa-money-bill-wave', 'color' => 'warning'];
+    }
+
+    if (isset($inventory)) {
+        $statChips[] = ['label' => 'Stock Value', 'value' => currency($inventory['stock_value'] ?? 0), 'icon' => 'fa-warehouse', 'color' => 'success'];
+        $statChips[] = ['label' => 'Low Stock Items', 'value' => number_format($inventory['low_stock_count'] ?? 0), 'icon' => 'fa-exclamation-triangle', 'color' => 'warning'];
+        $statChips[] = ['label' => 'Out of Stock', 'value' => number_format($inventory['out_of_stock_count'] ?? 0), 'icon' => 'fa-times-circle', 'color' => 'danger'];
+    }
+
+    if (isset($finance)) {
+        $statChips[] = ['label' => 'Total Expenses', 'value' => currency($finance['total_expenses'] ?? 0), 'icon' => 'fa-file-invoice-dollar', 'color' => 'danger'];
+        $statChips[] = ['label' => 'Gross Profit', 'value' => currency($finance['gross_profit'] ?? 0), 'icon' => 'fa-chart-line', 'color' => ($finance['gross_profit'] ?? 0) >= 0 ? 'success' : 'danger'];
+        $statChips[] = ['label' => 'Total Receivables', 'value' => currency($finance['receivables']['total'] ?? 0), 'icon' => 'fa-hand-holding-usd', 'color' => 'info'];
+        $statChips[] = ['label' => 'Total Payables', 'value' => currency($finance['payables']['total'] ?? 0), 'icon' => 'fa-file-invoice', 'color' => 'warning'];
+        $statChips[] = ['label' => 'Cash/Bank Balance', 'value' => currency($finance['cash_bank_balance'] ?? 0), 'icon' => 'fa-university', 'color' => 'primary'];
     }
 @endphp
 <div class="row">
-    @foreach ($cards as $card)
-        <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
+    @foreach ($heroCards as $card)
+        <div class="col-sm-6 col-xl-3 mb-4">
             <a href="{{ $card['route'] ?? '#' }}" class="text-decoration-none">
-                <div class="card h-100 erp-kpi-card"
+                <div class="card h-100 erp-kpi-card erp-kpi-card--gradient"
                     style="--erp-kpi-color: var(--bs-{{ $card['color'] }}); --erp-kpi-color-rgb: var(--bs-{{ $card['color'] }}-rgb);">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start gap-2">
@@ -44,3 +56,19 @@
         </div>
     @endforeach
 </div>
+
+@if (!empty($statChips))
+    <div class="row">
+        @foreach ($statChips as $chip)
+            <div class="col-6 col-md-4 col-xl-2 mb-4">
+                <div class="erp-stat-chip" style="--erp-stat-color: var(--bs-{{ $chip['color'] }}); --erp-stat-color-rgb: var(--bs-{{ $chip['color'] }}-rgb);">
+                    <div class="erp-stat-icon"><i class="fa {{ $chip['icon'] }}"></i></div>
+                    <div>
+                        <span class="erp-stat-label">{{ $chip['label'] }}</span>
+                        <span class="erp-stat-value">{{ $chip['value'] }}</span>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+@endif

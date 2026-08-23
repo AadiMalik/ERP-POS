@@ -4,73 +4,45 @@
         $name = $row->product->name ?? 'Unknown Product';
         return $row->productVariation->name ? $name . ' - ' . $row->productVariation->name : $name;
     });
+
+    $gauges = [];
+    if (isset($finance)) {
+        $netMarginPct = ($sales['total_sales'] ?? 0) > 0 ? round((($finance['net_profit'] ?? 0) / $sales['total_sales']) * 100, 1) : 0;
+        $grossMarginPct = ($sales['total_sales'] ?? 0) > 0 ? round((($finance['gross_profit'] ?? 0) / $sales['total_sales']) * 100, 1) : 0;
+        $gauges[] = ['id' => 'netMarginGauge', 'label' => 'Net Margin', 'value' => $netMarginPct, 'color' => $netMarginPct >= 0 ? 'success' : 'danger'];
+        $gauges[] = ['id' => 'grossMarginGauge', 'label' => 'Gross Margin', 'value' => $grossMarginPct, 'color' => $grossMarginPct >= 0 ? 'info' : 'danger'];
+    }
+    if (isset($inventory)) {
+        $stockPct = ($inventory['total_products'] ?? 0) > 0 ? round((($inventory['in_stock_count'] ?? 0) / $inventory['total_products']) * 100, 1) : 0;
+        $gauges[] = ['id' => 'stockHealthGauge', 'label' => 'Stock Health', 'value' => $stockPct, 'color' => $stockPct >= 50 ? 'success' : 'warning'];
+    }
 @endphp
 <div class="row">
-    @if ($hasTrend)
-        <div class="col-lg-8 mb-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">Sales Trend</h5>
-                </div>
-                <div class="card-body">
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><h5 class="mb-0">Sales Trend</h5></div>
+            <div class="card-body">
+                @if ($hasTrend)
                     <div id="salesTrendChart"></div>
-                </div>
-            </div>
-        </div>
-    @endif
-    <div class="col-lg-{{ $hasTrend ? 4 : 12 }} mb-4">
-        <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Top Selling Products</h5>
-                <a href="{{ route('order.history') }}" class="btn btn-sm btn-outline-primary">View Sales</a>
-            </div>
-            <div class="card-body" style="max-height: 320px; overflow-y: auto;">
-                @forelse ($sales['top_products'] as $row)
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h6 class="mb-0">{{ $row->product->name ?? 'Unknown Product' }}</h6>
-                            <small class="text-muted">{{ $row->productVariation->name ?? '' }}</small>
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-semibold">{{ currency($row->total_revenue) }}</div>
-                            <small class="text-muted">{{ number_format($row->total_quantity, 0) }} sold</small>
-                        </div>
-                    </div>
-                @empty
-                    <p class="text-muted mb-0">No sales in the selected period.</p>
-                @endforelse
-            </div>
-        </div>
-    </div>
-</div>
-
-@if ($sales['top_products']->isNotEmpty())
-<div class="row">
-    <div class="col-lg-12 mb-4">
-        <div class="card">
-            <div class="card-header"><h5 class="mb-0">Top Selling Products (Revenue)</h5></div>
-            <div class="card-body">
-                <div id="topProductsChart"></div>
-            </div>
-        </div>
-    </div>
-</div>
-@endif
-
-<div class="row">
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-header"><h5 class="mb-0">Sales by Order Type</h5></div>
-            <div class="card-body">
-                @if (($sales['by_order_type'] ?? collect())->isNotEmpty())
-                    <div id="orderTypeChart"></div>
                 @else
-                    <p class="text-muted mb-0">No data for the selected period.</p>
+                    <p class="text-muted mb-0">No trend data for the selected period.</p>
                 @endif
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-4">
+    <div class="col-lg-3 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><h5 class="mb-0">Top Selling Products</h5></div>
+            <div class="card-body">
+                @if ($sales['top_products']->isNotEmpty())
+                    <div id="topProductsChart"></div>
+                @else
+                    <p class="text-muted mb-0">No sales in the selected period.</p>
+                @endif
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 mb-4">
         <div class="card h-100">
             <div class="card-header"><h5 class="mb-0">Sales by Payment Method</h5></div>
             <div class="card-body">
@@ -82,7 +54,37 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-4">
+    <div class="col-lg-2 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><h5 class="mb-0">Business Health</h5></div>
+            <div class="card-body">
+                @forelse ($gauges as $gauge)
+                    <div class="erp-gauge-row mb-2">
+                        <div id="{{ $gauge['id'] }}" class="erp-gauge-chart"></div>
+                        <span class="erp-gauge-label">{{ $gauge['label'] }}</span>
+                    </div>
+                @empty
+                    <p class="text-muted mb-0">No data available.</p>
+                @endforelse
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><h5 class="mb-0">Sales by Order Type</h5></div>
+            <div class="card-body">
+                @if (($sales['by_order_type'] ?? collect())->isNotEmpty())
+                    <div id="orderTypeChart"></div>
+                @else
+                    <p class="text-muted mb-0">No data for the selected period.</p>
+                @endif
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
         <div class="card h-100">
             <div class="card-header"><h5 class="mb-0">Sales by Order Source</h5></div>
             <div class="card-body">
@@ -126,14 +128,14 @@
             }
         @endif
 
-        function donutChart(elementId, data) {
+        function donutChart(elementId, data, height) {
             var el = document.querySelector(elementId);
             if (!el) { return; }
             try {
                 new ApexCharts(el, {
                     series: Object.values(data),
                     labels: Object.keys(data),
-                    chart: { type: 'donut', height: 260 },
+                    chart: { type: 'donut', height: height || 260 },
                     colors: chartColors,
                     legend: { position: 'bottom', labels: { colors: config.colors.headingColor } },
                     dataLabels: { enabled: true, formatter: function (val) { return val.toFixed(1) + '%'; } },
@@ -144,15 +146,15 @@
             }
         }
 
+        donutChart('#paymentMethodChart', @json($sales['by_payment_method'] ?? []), 240);
         donutChart('#orderTypeChart', @json($sales['by_order_type'] ?? []));
-        donutChart('#paymentMethodChart', @json($sales['by_payment_method'] ?? []));
         donutChart('#orderSourceChart', @json($sales['by_order_source'] ?? []));
 
         @if ($sales['top_products']->isNotEmpty())
             try {
                 new ApexCharts(document.querySelector('#topProductsChart'), {
                     series: [{ name: 'Revenue', data: @json($sales['top_products']->pluck('total_revenue')) }],
-                    chart: { type: 'bar', height: 280, toolbar: { show: false } },
+                    chart: { type: 'bar', height: 240, toolbar: { show: false } },
                     plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
                     colors: [config.colors.primary],
                     dataLabels: { enabled: false },
@@ -164,6 +166,25 @@
                 console.error('Top Products chart failed to render:', e);
             }
         @endif
+
+        function gauge(elementId, value, color) {
+            var el = document.querySelector(elementId);
+            if (!el) { return; }
+            try {
+                new ApexCharts(el, {
+                    series: [value],
+                    chart: { type: 'radialBar', height: 76, sparkline: { enabled: true } },
+                    colors: [color],
+                    plotOptions: { radialBar: { hollow: { size: '55%' }, track: { background: config.colors.borderColor }, dataLabels: { name: { show: false }, value: { offsetY: 5, fontSize: '11px', formatter: function (val) { return val + '%'; } } } } },
+                }).render();
+            } catch (e) {
+                console.error('Gauge ' + elementId + ' failed to render:', e);
+            }
+        }
+
+        @foreach ($gauges as $gauge)
+            gauge('#{{ $gauge['id'] }}', {{ $gauge['value'] }}, config.colors.{{ $gauge['color'] }});
+        @endforeach
     })();
 </script>
 @endpush
