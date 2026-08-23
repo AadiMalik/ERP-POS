@@ -997,6 +997,14 @@ class PermissionRegistry
                 'setting_manage'  => ['name' => 'notification-setting.manage', 'label' => 'Manage Notification Settings', 'is_system' => false],
             ]],
 
+            'documentation' => ['label' => 'Documentation', 'actions' => [
+                'view'           => ['name' => 'documentation.view', 'label' => 'View Documentation Portal', 'is_system' => false],
+                'business_view'  => ['name' => 'documentation.business.view', 'label' => 'View Business Documentation', 'is_system' => false],
+                'business_pdf'   => ['name' => 'documentation.business.pdf', 'label' => 'Download Business Documentation PDF', 'is_system' => false],
+                'developer_view' => ['name' => 'documentation.developer.view', 'label' => 'View Developer Documentation', 'is_system' => false],
+                'developer_pdf'  => ['name' => 'documentation.developer.pdf', 'label' => 'Download Developer Documentation PDF', 'is_system' => false],
+            ]],
+
             'reports' => ['label' => 'Reports', 'actions' => [
                 'supplier_ledger'          => ['name' => 'reports.supplier-ledger.view', 'label' => 'Supplier Ledger', 'is_system' => false],
                 'supplier_ledger_print' => ['name' => 'reports.supplier-ledger.print', 'label' => 'Supplier Ledger - Print', 'is_system' => false],
@@ -1280,7 +1288,7 @@ class PermissionRegistry
             'purchase-return', 'opening-stock', 'stock-taking', 'transfer-note', 'supplier-payment', 'customer-payment',
             'service-purchase', 'service-purchase-return', 'service-sale', 'service-sale-return',
             'pos', 'pos-register', 'order', 'order-return', 'expense', 'expense-category', 'admin-expense',
-            'activity-log', 'login-history', 'notification', 'reports', 'branch', 'user',
+            'activity-log', 'login-history', 'notification', 'documentation', 'reports', 'branch', 'user',
             'department', 'designation', 'shift', 'employee', 'attendance', 'leave-type',
             'leave-request', 'salary-component', 'salary-structure', 'payroll', 'payslip',
             'employee-advance', 'employee-deduction', 'employee-ledger', 'employee-exit',

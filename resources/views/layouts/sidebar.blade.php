@@ -1213,6 +1213,16 @@
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">System</span>
         </li>
+        {{-- Documentation --}}
+        @canAccess('documentation.view')
+            <li class="menu-item">
+                <a href="{{ route('documentation.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons fa fa-book"></i>
+                    <div data-i18n="Documentation">Documentation</div>
+                </a>
+            </li>
+        @endcanAccess
+
         {{-- Notifications --}}
         @canAccess('notification.view')
             <li class="menu-item">

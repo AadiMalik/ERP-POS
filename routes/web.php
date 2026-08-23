@@ -22,6 +22,8 @@ Auth::routes(['register' => false]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
+Route::get('/documentation', fn () => redirect()->route('documentation.index'));
+
 Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-change-password'], 'prefix' => 'admin'], function () {
     //permissions
     Route::resource('permissions', App\Http\Controllers\Admin\PermissionController::class);
@@ -514,7 +516,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('by-warehouse/{warehouse_id}', [App\Http\Controllers\Admin\ProductVariationStockTransactionController::class, 'byWarehouse']);
         Route::get('by-product/{product_id}', [App\Http\Controllers\Admin\ProductVariationStockTransactionController::class, 'byProduct']);
         Route::get('by-variation/{product_variation_id}', [App\Http\Controllers\Admin\ProductVariationStockTransactionController::class, 'byVariation']);
-        Route::delete('{product_variation_stock_transaction_id}', [App\Http\Controllers\Admin\ProductVariationStockTransactionController::class, 'destroy']);
+        Route::delete('{stock_transaction_id}', [App\Http\Controllers\Admin\ProductVariationStockTransactionController::class, 'destroy']);
     });
     }); // end module:inventory (catalog & warehousing)
 
@@ -1306,5 +1308,14 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('theme', [App\Http\Controllers\Admin\SettingController::class, 'updateThemeSetting'])->name('theme.update');
         Route::post('theme/preset', [App\Http\Controllers\Admin\SettingController::class, 'applyThemePreset'])->name('theme.preset');
         Route::post('notification', [App\Http\Controllers\Admin\SettingController::class, 'updateNotificationSetting'])->name('notification.update');
+    });
+
+    //Documentation
+    Route::group(['prefix' => 'documentation'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\DocumentationController::class, 'index'])->name('documentation.index');
+        Route::get('business-pdf', [App\Http\Controllers\Admin\DocumentationController::class, 'businessPdf'])->name('documentation.business.pdf');
+        Route::get('developer-pdf', [App\Http\Controllers\Admin\DocumentationController::class, 'developerPdf'])->name('documentation.developer.pdf');
+        Route::get('business/{section?}', [App\Http\Controllers\Admin\DocumentationController::class, 'business'])->name('documentation.business');
+        Route::get('developer/{section?}', [App\Http\Controllers\Admin\DocumentationController::class, 'developer'])->name('documentation.developer');
     });
 });

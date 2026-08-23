@@ -124,3 +124,43 @@ You are a Senior Software Engineer.
   This is separate from and in addition to per-action `permission:` middleware;
   never put package-tier checks inline in a controller constructor (it runs
   during CLI route introspection too, before any authenticated user exists).
+
+## Documentation (MANDATORY)
+
+- This project has two permanent documentation sets, served in-app at
+  `/documentation` (redirects to `admin/documentation`) via
+  `App\Http\Controllers\Admin\DocumentationController` +
+  `App\Services\Concrete\Admin\DocumentationService`, and downloadable as PDF from
+  the same portal:
+  - **Business Documentation** — `resources/docs/business/*.md` — business-friendly,
+    workflow-oriented, no technical jargon.
+  - **Developer Documentation** — `resources/docs/developer/*.md` — architecture,
+    schema, routes, permissions, "where is X / how does it connect".
+  - Section order/titles for both are defined in `DocumentationService::businessSections()`
+    / `developerSections()` — the manifest and the `.md` files must be added/edited
+    together.
+- **Documentation is mandatory and kept in sync with development, not written
+  after the fact.** Whenever a feature, module, database table/column, migration,
+  route, API, controller, service, repository, model, business rule, report,
+  setting, permission, integration, architecture decision, workflow, or other
+  user-visible or developer-relevant behavior is added, changed, or removed, update
+  the relevant Business and/or Developer Markdown file(s) **in the same task** —
+  do not leave it for a follow-up.
+- **Before implementing a change**, check the existing documentation for the area
+  being touched (`resources/docs/business/` and `resources/docs/developer/`) so the
+  update corrects/extends it rather than duplicating or contradicting it.
+- **Never document functionality that does not actually exist.** If existing
+  documentation conflicts with the real implementation, verify the code and fix the
+  documentation to match — the codebase is always the source of truth.
+- No separate "regenerate PDF" step exists or is needed — PDFs are rendered on
+  demand from the current Markdown via `Pdf::loadView('admin.documentation.pdf', ...)`
+  (same `barryvdh/laravel-dompdf` pattern as every report's `pdf()` action — see
+  `resources/docs/developer/06-reports-infrastructure.md`), so keeping the `.md`
+  files current is sufficient.
+- If a change adds a new module/CRUD (triggering the Permissions & Access Control
+  rules above), it also needs a new or updated Developer Documentation section
+  under [Modules, Controllers & Services](resources/docs/developer/03-modules-controllers-services.md)
+  and, if it's user-facing, a new or updated Business Documentation section.
+- After updating documentation content, verify the `/documentation` portal and its
+  PDF export still work for the affected audience (no missing section, no broken
+  internal reference) before considering the task done.
