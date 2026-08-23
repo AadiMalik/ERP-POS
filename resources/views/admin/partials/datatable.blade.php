@@ -39,6 +39,9 @@
             @isset($notordering)
             "ordering": false,
             @endisset
+            @isset($order)
+            order: {!! $order !!},
+            @endisset
             destroy : true,
             ajax: {
                 url: "{{$route}}",
@@ -113,25 +116,18 @@
             
             ],
             @endif
-            // columnDefs: [ {
-            //     orderable: false,
-            //     className: 'select-checkbox',
-            //     targets:   0
-            // },
-            // @isset($child)
-            // {
-            //     className: 'dt-control',
-            //     orderable: false,
-            //     data: null,
-            //     defaultContent: '',
-            //     targets: 1
-            // }
-            // @endisset
-            // ],
-            // select: {
-            //     style:    'multi',
-            //     selector: 'td:first-child'
-            // },
+            @isset($detail)
+            columnDefs: [
+                {
+                    targets: 0,
+                    orderable: false,
+                    searchable: false,
+                    className: 'dt-control text-center',
+                    data: null,
+                    defaultContent: '<i class="fa fa-chevron-down dt-control-icon" aria-hidden="true"></i>'
+                }
+            ],
+            @endisset
             columns:[
             {!! $columns !!}
             ]
@@ -139,56 +135,28 @@
         )
         if(localStorage.getItem('notification_filter') != null)
             localStorage.removeItem('notification_filter');
-    }
-    @isset($child)
-    $('.{{$class}} tbody').on('click', 'td.dt-control', function () {
-        var tr = $(this).closest('tr');
-        var row = {{$variable}}.row(tr);
-        
-        if (row.child.isShown()) {
-            // This row is already open - close it
-            row.child.hide();
-            tr.removeClass('shown');
-        } else {
-            // Open this row
-            console.log(row)
-            row.child(format(row.data())).show();
-            tr.addClass('shown');
-        }
-    });
-    function format ( rowData ) {
-        html = ''
-        let url = "{{route('datatable.damage-inventory.detail' , [':id',':ware'])}}";
-        url = url.replace(':id' , rowData.order_id)
-        url = url.replace(':ware' , rowData.warehouse_id)
-        $.ajax({
-            url: url,
-            async:false,
-            success:function(res){
-                result = ''
-                $.each(res , function(index , i){
-                    result += `<tr>`
-                        result += `<td>${i.product?i.product.product_name:'N/A'}</td>`
-                        result += `<td>${i.damage_quantity}</td>`
-                        result += `</tr>`
-                    })
-                    html += `<table>
-                        <thead>
-                            <tr>
-                                <th>Product Name</th>
-                                <th>Product Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${result}
-                        </tbody>
-                        
-                    </table>`
-                    
-                }
-            })
-            return html;
-        }
+
+        @isset($detail)
+        // Generic expandable detail row: the server pre-renders a hidden
+        // `row_detail` HTML field on every row (not part of the visible
+        // `columns` list) so no extra request is needed to expand it. Any
+        // element inside a row with the `dt-control` class (the leading
+        // toggle icon, or e.g. a "+N more" link inside a truncated column)
+        // opens the same detail row - keeps the main row compact while
+        // still surfacing all the data.
+        $('#{{$class}} tbody').off('click.dtDetail').on('click.dtDetail', '.dt-control', function () {
+            var tr = $(this).closest('tr');
+            var row = {{$variable}}.row(tr);
+
+            if (row.child.isShown()) {
+                row.child.hide();
+                tr.removeClass('shown');
+            } else {
+                row.child(row.data().row_detail || '<div class="dt-detail-empty text-muted">No additional details.</div>', 'dt-detail-row').show();
+                tr.addClass('shown');
+            }
+        });
         @endisset
+    }
     </script>
     

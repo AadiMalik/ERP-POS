@@ -600,3 +600,64 @@ body[data-content-bg="dark"] .erp-page-header {
         padding: 1rem;
     }
 }
+
+/* ---------------------------------------------------------------------
+ * DataTables expandable detail rows - reusable pattern for keeping wide
+ * or overflowing columns (e.g. Roles' Permissions, Orders' secondary
+ * columns) out of the main compact row. See admin/partials/datatable.blade.php.
+ * --------------------------------------------------------------------- */
+td.dt-control {
+    cursor: pointer;
+}
+
+.dt-control-icon {
+    transition: transform .15s ease-in-out;
+    color: var(--bs-primary, #696cff);
+}
+
+tr.shown .dt-control-icon {
+    transform: rotate(180deg);
+}
+
+a.dt-control {
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.dt-detail-panel {
+    padding: .75rem 1rem;
+    background: var(--bs-body-bg, #fff);
+}
+
+.dt-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: .5rem 1.5rem;
+}
+
+.dt-detail-item {
+    font-size: .8125rem;
+}
+
+.dt-detail-label {
+    font-weight: 600;
+    color: var(--erp-secondary, #8592a3);
+    margin-right: .375rem;
+}
+
+.dt-detail-scroll {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: .25rem;
+}
+
+.dt-detail-empty {
+    padding: .5rem 0;
+    font-size: .8125rem;
+}
+
+@media (max-width: 575.98px) {
+    .dt-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}

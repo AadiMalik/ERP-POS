@@ -27,6 +27,7 @@
                 <table id="role_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Role</th>
                             <th>Description</th>
                             <th>Permissions</th>
@@ -47,6 +48,7 @@
 @section('js')
     @include('admin.partials.datatable', [
         'columns' => "
+    {data: null , defaultContent: ''},
     {data: 'name' , name: 'name'},
     {data: 'description' , name: 'description'},
     {data: 'permissions' , name: 'permissions' , 'sortable': false , searchable: false},
@@ -57,6 +59,8 @@
         'pageLength' => 10,
         'class' => 'role_table',
         'variable' => 'role_table',
+        'detail' => true,
+        'order' => "[[1, 'asc']]",
     ])
 
     <script>

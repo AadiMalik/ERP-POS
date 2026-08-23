@@ -328,6 +328,37 @@ class OrderService
             ->addColumn('raw_status', function ($item) {
                 return $item->status;
             })
+            // Pre-rendered HTML for the expandable detail row (see
+            // admin/partials/datatable.blade.php's generic `detail` mode) -
+            // holds the secondary columns the Admin Order List keeps out of
+            // the main compact row (Business/Branch/Warehouse/Register/
+            // Cashier/Order Type/Order Source/Paid/Payment Method/Sale
+            // Type). Not part of the visible `columns` config, so it never
+            // affects other consumers of this same endpoint (e.g. POS Order
+            // History), which simply ignore this extra field.
+            ->addColumn('row_detail', function ($item) {
+                $rows = [
+                    'Sale Date' => $item->sale_date ? localDate($item->sale_date) : '-',
+                    'Business' => $item->business->name ?? '-',
+                    'Branch' => $item->branch->name ?? '-',
+                    'Warehouse' => $item->warehouse->name ?? '-',
+                    'Register' => $item->register->name ?? '-',
+                    'Cashier' => $item->cashier->name ?? '-',
+                    'Order Type' => $item->orderType->name ?? '-',
+                    'Order Source' => $item->orderSource->name ?? '-',
+                    'Paid' => currency($item->paid_amount ?? 0),
+                    'Payment Method' => $this->resolvePaymentMethodLabel($item),
+                    'Sale Type' => $this->formatSaleTypeBadge($item->details),
+                ];
+
+                $html = '<div class="dt-detail-panel"><div class="dt-detail-grid">';
+                foreach ($rows as $label => $value) {
+                    $html .= '<div class="dt-detail-item"><span class="dt-detail-label">' . $label . ':</span><span class="dt-detail-value">' . $value . '</span></div>';
+                }
+                $html .= '</div></div>';
+
+                return $html;
+            })
             ->addColumn('action', function ($item) use ($obj) {
                 $printButton = "<a class='btn btn-icon btn-outline-secondary mr-2' target='_blank'
                     href='" . route('order.print', $item->order_id) . "' title='Print'>
@@ -382,7 +413,7 @@ class OrderService
 
                 return $viewButton . $viewJvButton . $cancelButton . $returnButton . $printButton . $thermalPrintButton;
             })
-            ->rawColumns(['business', 'branch', 'warehouse', 'register', 'cashier', 'customer', 'order_type', 'order_source', 'total', 'status', 'payment_status', 'sale_type', 'action'])
+            ->rawColumns(['business', 'branch', 'warehouse', 'register', 'cashier', 'customer', 'order_type', 'order_source', 'total', 'status', 'payment_status', 'sale_type', 'action', 'row_detail'])
             ->make(true);
     }
 

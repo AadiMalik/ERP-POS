@@ -155,22 +155,12 @@
                     <table id="order_table" class="table datatables">
                         <thead>
                             <tr>
+                                <th></th>
                                 <th>Daily Order ID</th>
                                 <th>Order Date</th>
-                                <th>Sale Date</th>
-                                <th>Business</th>
-                                <th>Branch</th>
-                                <th>Warehouse</th>
-                                <th>Register</th>
-                                <th>Cashier</th>
                                 <th>Customer</th>
-                                <th>Order Type</th>
-                                <th>Order Source</th>
                                 <th>Total</th>
-                                <th>Paid</th>
                                 <th>Due</th>
-                                <th>Payment Method</th>
-                                <th>Sale Type</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -210,22 +200,12 @@
     <script src="{{ asset('public/assets/js/admin/order.js') }}"></script>
     @include('admin.partials.datatable', [
         'columns' => "
+                        {data: null , defaultContent: ''},
                         {data:'daily_order_id',name:'daily_order_id'},
                         {data:'order_date',name:'order_date'},
-                        {data:'sale_date',name:'sale_date',sortable:false},
-                        {data:'business',name:'business',sortable:false},
-                        {data:'branch',name:'branch',sortable:false},
-                        {data:'warehouse',name:'warehouse',sortable:false},
-                        {data:'register',name:'register',sortable:false},
-                        {data:'cashier',name:'cashier',sortable:false},
                         {data:'customer',name:'customer',sortable:false},
-                        {data:'order_type',name:'order_type',sortable:false},
-                        {data:'order_source',name:'order_source',sortable:false},
                         {data:'total',name:'total'},
-                        {data:'paid_amount',name:'paid_amount',sortable:false},
                         {data:'due_amount',name:'due_amount',sortable:false},
-                        {data:'payment_method',name:'payment_method',sortable:false},
-                        {data:'sale_type',name:'sale_type',sortable:false},
                         {data:'status',name:'status',sortable:false},
                         {data:'action',name:'action',sortable:false}",
         'route' => 'order/data',
@@ -234,6 +214,8 @@
         'class' => 'order_table',
         'variable' => 'order_table',
         'datefilter' => true,
+        'detail' => true,
+        'order' => "[[1, 'asc']]",
         'params' =>
             "order_id:$('#order_id').val(),daily_order_id:$('#daily_order_id').val(),business_id:$('#business_id').val(),branch_id:$('#branch_id').val(),warehouse_id:$('#warehouse_id').val(),register_id:$('#register_id').val(),cashier_id:$('#cashier_id').val(),customer_id:$('#customer_id').val(),order_type_id:$('#order_type_id').val(),order_source_id:$('#order_source_id').val(),payment_method_id:$('#payment_method_id').val(),status:$('#status').val(),sale_date_start:$('#sale_date_start').val(),sale_date_end:$('#sale_date_end').val()",
     ])

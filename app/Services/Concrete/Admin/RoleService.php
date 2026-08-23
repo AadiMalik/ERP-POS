@@ -62,18 +62,38 @@ class RoleService
                     return '-';
                 }
 
+                // Keep the main row compact: show a handful of badges and
+                // push the rest into the expandable detail row (row_detail
+                // below) instead of letting the cell/table grow unbounded.
+                $visible = $item->permissions->take(3);
+
                 $badges = '';
+                foreach ($visible as $permission) {
+                    $badges .= '<span class="badge bg-label-primary me-1 mb-1">' . $permission->name . '</span>';
+                }
 
-                foreach ($item->permissions as $permission) {
-
-                    $badges .= '
-                    <span class="badge bg-label-primary me-1 mb-1">
-                        ' . $permission->name . '
-                    </span>
-                ';
+                $remaining = $item->permissions->count() - $visible->count();
+                if ($remaining > 0) {
+                    $badges .= '<a href="javascript:void(0)" class="dt-control badge bg-label-secondary">+' . $remaining . ' more</a>';
                 }
 
                 return $badges;
+            })
+            ->addColumn('row_detail', function ($item) {
+
+                if ($item->permissions->isEmpty()) {
+                    return '<div class="dt-detail-empty text-muted">No permissions assigned.</div>';
+                }
+
+                $badges = '';
+                foreach ($item->permissions as $permission) {
+                    $badges .= '<span class="badge bg-label-primary me-1 mb-1">' . $permission->name . '</span>';
+                }
+
+                return '<div class="dt-detail-panel">'
+                    . '<div class="dt-detail-label mb-2">All Permissions (' . $item->permissions->count() . ')</div>'
+                    . '<div class="dt-detail-scroll">' . $badges . '</div>'
+                    . '</div>';
             })
             ->editColumn('business', function ($item) {
 
@@ -99,7 +119,7 @@ class RoleService
 
                 return $action_column;
             })
-            ->rawColumns(['permissions','business', 'description', 'action'])
+            ->rawColumns(['permissions', 'row_detail', 'business', 'description', 'action'])
             ->make(true);
         return $data;
     }
