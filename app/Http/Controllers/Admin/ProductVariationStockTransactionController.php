@@ -36,6 +36,7 @@ class ProductVariationStockTransactionController extends Controller
         ProductVariationStockTransactionService $product_variation_stock_transaction_service
     ) {
         $this->middleware('permission:stock-transaction.view');
+        $this->middleware('permission:stock-transaction.delete')->only(['destroy']);
 
         $this->business_service = $business_service;
         $this->product_service = $product_service;
@@ -61,11 +62,15 @@ class ProductVariationStockTransactionController extends Controller
     {
         return $this->product_variation_stock_transaction_service->getData($request->all());
     }
-    public function destroy($product_variation_stock_transaction_id)
+    public function destroy(Request $request, $product_variation_stock_transaction_id)
     {
+        if (empty(trim((string) $request->input('reason')))) {
+            return $this->error('A reason is required to delete this stock transaction.');
+        }
+
         try {
 
-            $this->product_variation_stock_transaction_service->delete($product_variation_stock_transaction_id);
+            $this->product_variation_stock_transaction_service->delete($product_variation_stock_transaction_id, $request->input('reason'));
 
             return $this->success(
                 Message::DELETE,
@@ -74,7 +79,7 @@ class ProductVariationStockTransactionController extends Controller
         } catch (Exception $e) {
 
             return $this->error(
-                Message::ERROR
+                $e->getMessage()
             );
         }
     }

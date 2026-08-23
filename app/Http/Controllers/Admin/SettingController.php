@@ -10,6 +10,7 @@ use App\Enums\SMSProvider;
 use App\Enums\WhatsappProvider;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\AccountService;
+use App\Services\Concrete\Admin\BranchService;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CommonService;
 use App\Services\Concrete\Admin\CustomerService;
@@ -37,6 +38,7 @@ class SettingController extends Controller
     protected $customer_service;
     protected $thermal_print_setting_resolver;
     protected $sale_type_service;
+    protected $branch_service;
 
     public function __construct(
         BusinessService $business_service,
@@ -46,7 +48,8 @@ class SettingController extends Controller
         PrintSettingResolverService $print_setting_resolver,
         CustomerService $customer_service,
         ThermalPrintSettingResolverService $thermal_print_setting_resolver,
-        SaleTypeService $sale_type_service
+        SaleTypeService $sale_type_service,
+        BranchService $branch_service
     ) {
         $this->middleware('permission:setting.manage');
 
@@ -58,11 +61,20 @@ class SettingController extends Controller
         $this->customer_service = $customer_service;
         $this->thermal_print_setting_resolver = $thermal_print_setting_resolver;
         $this->sale_type_service = $sale_type_service;
+        $this->branch_service = $branch_service;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $business =  $this->business_service->getAll();
+        $thermal_branches = $this->branch_service->getAllActive();
+        $thermal_branch_id = $request->query('thermal_branch_id') ?: null;
+        // Explicitly nullable (not empty()-defaulted) so "no row saved for
+        // this branch yet" (null) is distinguishable in the view from "this
+        // is the business default" (business default is always resolvable).
+        $thermal_print_setting = $thermal_branch_id
+            ? $this->setting_service->getBranchThermalPrintSetting(Auth::user()->business_id, $thermal_branch_id)
+            : $this->setting_service->getThermalPrintSetting(Auth::user()->business_id);
         $accounts =  $this->account_service->getAllChild();
         $business_setting = $this->setting_service->getBusinessSetting(Auth::user()->business_id);
         $accounting_setting = $this->setting_service->getAccountingSetting(Auth::user()->business_id);
@@ -79,7 +91,6 @@ class SettingController extends Controller
         $theme_setting = $this->setting_service->getThemeSetting(Auth::user()->business_id);
         $pos_setting = $this->setting_service->getPosSetting(Auth::user()->business_id);
         $pra_setting = $this->setting_service->getPraSetting(Auth::user()->business_id);
-        $thermal_print_setting = $this->setting_service->getThermalPrintSetting(Auth::user()->business_id);
         $pos_customers = $this->customer_service->getAllActive(Auth::user()->business_id);
         $sale_types = $this->sale_type_service->getAll(Auth::user()->business_id);
         $theme_presets = config('theme_presets');
@@ -108,6 +119,8 @@ class SettingController extends Controller
             'pos_setting',
             'pra_setting',
             'thermal_print_setting',
+            'thermal_branches',
+            'thermal_branch_id',
             'pos_customers',
             'sale_types',
             'theme_presets',
@@ -160,6 +173,7 @@ class SettingController extends Controller
             'default_expense_account_id'         => 'nullable|exists:accounts,account_id',
             'default_supplier_account_id'        => 'nullable|exists:accounts,account_id',
             'default_customer_account_id'        => 'nullable|exists:accounts,account_id',
+            'default_store_credit_account_id'    => 'nullable|exists:accounts,account_id',
             'default_carriage_account_id'        => 'nullable|exists:accounts,account_id',
             'default_round_off_account_id'       => 'nullable|exists:accounts,account_id',
             'default_purchase_return_account_id' => 'nullable|exists:accounts,account_id',
@@ -662,11 +676,12 @@ class SettingController extends Controller
         $obj = $request->only(['paper_width_mm', 'field_config', 'footer_config']);
         $obj['is_enabled'] = $request->has('is_enabled') ? 1 : 0;
         $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['branch_id'] = $request->branch_id ?: null;
 
         $setting = $this->setting_service->updateThermalPrintSetting($obj);
 
         if ($setting) {
-            $this->thermal_print_setting_resolver->forgetCache($obj['business_id']);
+            $this->thermal_print_setting_resolver->forgetCache($obj['business_id'], $obj['branch_id']);
         }
 
         return $setting

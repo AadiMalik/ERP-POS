@@ -19,6 +19,7 @@ use App\Services\Concrete\Admin\OrderSourceService;
 use App\Services\Concrete\Admin\OrderTypeService;
 use App\Services\Concrete\Admin\PaymentMethodService;
 use App\Services\Concrete\Admin\ThermalPrintSettingResolverService;
+use App\Services\Concrete\Admin\VoucherService;
 use App\Services\Concrete\Admin\WarehouseService;
 use App\Traits\ResponseAPI;
 use Exception;
@@ -42,6 +43,7 @@ class OrderController extends Controller
     protected $payment_method_service;
     protected $document_send_log_service;
     protected $thermal_print_setting_resolver;
+    protected $voucher_service;
 
     public function __construct(
         OrderService $order_service,
@@ -53,7 +55,8 @@ class OrderController extends Controller
         OrderSourceService $order_source_service,
         PaymentMethodService $payment_method_service,
         DocumentSendLogService $document_send_log_service,
-        ThermalPrintSettingResolverService $thermal_print_setting_resolver
+        ThermalPrintSettingResolverService $thermal_print_setting_resolver,
+        VoucherService $voucher_service
     ) {
         $this->middleware('module:order');
         $this->middleware('permission:order.export')->only(['export']);
@@ -69,6 +72,7 @@ class OrderController extends Controller
         $this->payment_method_service = $payment_method_service;
         $this->document_send_log_service = $document_send_log_service;
         $this->thermal_print_setting_resolver = $thermal_print_setting_resolver;
+        $this->voucher_service = $voucher_service;
     }
 
     protected function importExportModuleKey(): string
@@ -442,7 +446,7 @@ class OrderController extends Controller
         // identifiable from the original one.
         $printed_at = now();
 
-        $thermal_config = $this->thermal_print_setting_resolver->resolve($order->business_id);
+        $thermal_config = $this->thermal_print_setting_resolver->resolve($order->business_id, $order->branch_id);
 
         if ($thermal_config->isEnabled()) {
             return view('admin.order.print.thermal', compact('order', 'thermal_config', 'printed_at'));
@@ -486,7 +490,7 @@ class OrderController extends Controller
         }
 
         $printed_at = now();
-        $thermal_config = $this->thermal_print_setting_resolver->resolve($order->business_id);
+        $thermal_config = $this->thermal_print_setting_resolver->resolve($order->business_id, $order->branch_id);
 
         return view('admin.order.print.thermal', compact('order', 'thermal_config', 'printed_at'));
     }
@@ -496,6 +500,23 @@ class OrderController extends Controller
         try {
             $products = $this->order_service->searchProducts($request->all());
             return $this->success(Message::FETCH, $products);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function searchVouchers(Request $request)
+    {
+        $term = trim((string) $request->input('term'));
+
+        if ($term === '') {
+            return $this->success(Message::FETCH, []);
+        }
+
+        try {
+            $business_id = $request->business_id ?? Auth::user()->business_id;
+            $vouchers = $this->voucher_service->searchActive($term, $business_id);
+            return $this->success(Message::FETCH, $vouchers);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }
@@ -652,7 +673,7 @@ class OrderController extends Controller
 
         $filters = $request->query();
         $summary = $this->order_service->getHistorySummary($filters);
-        $thermal_config = $this->thermal_print_setting_resolver->resolve($business_id);
+        $thermal_config = $this->thermal_print_setting_resolver->resolve($business_id, $filters['branch_id'] ?? null);
         $business = $this->business_service->getById($business_id);
         $printed_at = now();
 

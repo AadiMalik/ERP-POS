@@ -95,7 +95,7 @@ class RoleController extends Controller
                 $permissions = array_intersect($permissions, PermissionRegistry::namesForModules($enabledModuleKeys));
             }
 
-            $role->syncPermissions($permissions);
+            $this->role_service->syncPermissions($role, $permissions);
             return redirect('admin/roles')->with('success', Message::SAVE);
         } catch (Exception $e) {
             return redirect()->back()->withInput()->with('error', $e->getMessage());

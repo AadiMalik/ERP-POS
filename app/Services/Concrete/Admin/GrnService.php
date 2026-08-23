@@ -583,6 +583,8 @@ class GrnService
             'description'             => 'GRN - ' . $grn->good_receipt_note_no,
         ]);
 
+        \App\Services\Concrete\Admin\JournalEntryService::assertBalanced($journal_entry->journal_entry_id);
+
         foreach ($grn->goodReceiptNoteDetails as $detail) {
             $conversion_factor = $detail->conversion_factor > 0 ? $detail->conversion_factor : 1;
             $quantity = $detail->received_quantity;
@@ -614,6 +616,7 @@ class GrnService
                 ->where('warehouse_id', $grn->warehouse_id)
                 ->where('product_id', $detail->product_id)
                 ->where('product_variation_id', $detail->product_variation_id)
+                ->lockForUpdate()
                 ->first();
 
             $existing_qty = $stock->quantity ?? 0;
@@ -685,6 +688,8 @@ class GrnService
             ->first();
 
         if ($journal_entry) {
+            app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+
             $journal_entry->update([
                 'is_deleted'   => 1,
                 'deletedby_id' => Auth::id(),

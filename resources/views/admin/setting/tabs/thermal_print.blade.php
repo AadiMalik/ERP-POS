@@ -1,6 +1,10 @@
 @php
-    $field_config = $thermal_print_setting->field_config ?? config('thermal_print_defaults.field_config');
-    $footer_config = $thermal_print_setting->footer_config ?? config('thermal_print_defaults.footer_config');
+    // $thermal_print_setting is null when a branch scope is selected that
+    // has no override saved yet - falls back to the same shipped defaults a
+    // brand-new business default row would use, so the form always renders
+    // a sensible starting point regardless of scope.
+    $field_config = optional($thermal_print_setting)->field_config ?? config('thermal_print_defaults.field_config');
+    $footer_config = optional($thermal_print_setting)->footer_config ?? config('thermal_print_defaults.footer_config');
 
     $field_check = function ($key) use ($field_config) {
         return !empty($field_config[$key] ?? false) ? 'checked' : '';
@@ -31,8 +35,37 @@
     }
 </style>
 
+@php
+    $thermal_current_branch_name = $thermal_branch_id
+        ? optional($thermal_branches->firstWhere('branch_id', $thermal_branch_id))->name
+        : null;
+@endphp
+
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <label class="form-label">Configuring</label>
+        <select class="form-select select2" id="thermalScopeSelect">
+            <option value="">Business Default</option>
+            @foreach ($thermal_branches as $branch)
+                <option value="{{ $branch->branch_id }}" {{ $thermal_branch_id === $branch->branch_id ? 'selected' : '' }}>
+                    Branch: {{ $branch->name }}
+                </option>
+            @endforeach
+        </select>
+        <small class="text-muted">
+            @if ($thermal_branch_id)
+                Editing {{ $thermal_current_branch_name }}'s own override.
+                {{ $thermal_print_setting ? '' : 'No override saved yet - this branch currently falls back to the business default; saving below creates one.' }}
+            @else
+                Editing the business-wide default, used by any branch without its own override.
+            @endif
+        </small>
+    </div>
+</div>
+
 <form id="thermalPrintSettingForm">
     @csrf
+    <input type="hidden" name="branch_id" id="thermal_branch_id_input" value="{{ $thermal_branch_id }}">
     <h4>Thermal Printer Invoice Settings</h4>
     <p class="text-muted">Configure a compact, thermal-width receipt layout for POS/order printing, and choose which
         fields appear on it. The preview on the right always reflects the exact layout that will print.</p>
@@ -46,7 +79,7 @@
                         <input type="hidden" name="is_enabled" value="0">
                         <input class="form-check-input" type="checkbox" role="switch" id="thermal_is_enabled"
                             name="is_enabled" value="1"
-                            {{ !empty($thermal_print_setting->is_enabled) ? 'checked' : '' }}>
+                            {{ !empty(optional($thermal_print_setting)->is_enabled) ? 'checked' : '' }}>
                         <label class="form-check-label" for="thermal_is_enabled">
                             Enable Thermal Receipt Printing
                         </label>
@@ -57,8 +90,8 @@
                 <div class="col-md-6">
                     <label class="form-label">Paper Width</label>
                     <select class="form-select select2" name="paper_width_mm">
-                        <option value="80" {{ ($thermal_print_setting->paper_width_mm ?? 80) == 80 ? 'selected' : '' }}>80mm</option>
-                        <option value="58" {{ ($thermal_print_setting->paper_width_mm ?? 80) == 58 ? 'selected' : '' }}>58mm</option>
+                        <option value="80" {{ (optional($thermal_print_setting)->paper_width_mm ?? 80) == 80 ? 'selected' : '' }}>80mm</option>
+                        <option value="58" {{ (optional($thermal_print_setting)->paper_width_mm ?? 80) == 58 ? 'selected' : '' }}>58mm</option>
                     </select>
                 </div>
             </div>
@@ -273,6 +306,28 @@
 
         $(document).ready(function() {
             refreshThermalPreview();
+
+            // Restore the Thermal Print tab after a scope-switch reload -
+            // this page has no other hash-based tab restoration, so this is
+            // the one tab that needs it (every other tab's settings don't
+            // require a full reload to switch scope).
+            if (window.location.search.indexOf('thermal_branch_id') !== -1) {
+                var tabEl = document.querySelector('[data-bs-target="#thermal_print"]');
+                if (tabEl && window.bootstrap) {
+                    new bootstrap.Tab(tabEl).show();
+                }
+            }
+        });
+
+        $(document).on('change', '#thermalScopeSelect', function() {
+            var branchId = $(this).val();
+            var url = new URL(window.location.href);
+            if (branchId) {
+                url.searchParams.set('thermal_branch_id', branchId);
+            } else {
+                url.searchParams.delete('thermal_branch_id');
+            }
+            window.location.href = url.toString();
         });
     </script>
 @endonce

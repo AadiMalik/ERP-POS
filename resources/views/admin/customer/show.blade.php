@@ -47,6 +47,19 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Store Credit Available</div>
+                    <div class="fw-semibold">
+                        {{ currency($ledger['store_credit_balance'] ?? 0) }}
+                        @if (($ledger['store_credit_balance'] ?? 0) > 0)
+                            <span class="badge bg-info">Redeemable at POS</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="card">

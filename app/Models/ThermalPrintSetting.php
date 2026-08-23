@@ -11,6 +11,7 @@ class ThermalPrintSetting extends Model
     public $timestamps = false;
     protected $fillable = [
         'business_id',
+        'branch_id',
         'is_enabled',
         'paper_width_mm',
         'field_config',
@@ -31,6 +32,11 @@ class ThermalPrintSetting extends Model
     public function business()
     {
         return $this->belongsTo(Business::class, 'business_id');
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id');
     }
 
     public function createdby()

@@ -59,10 +59,14 @@ class VariationPricingService
             $discount_applies = (bool) $variation->discount_apply_all
                 || (!empty($saleTypeId) && $variation->discountSaleTypes->pluck('sale_type_id')->contains($saleTypeId));
 
+            $minimum_selling_price = ($price_row && $price_row->minimum_selling_price !== null)
+                ? (float) $price_row->minimum_selling_price
+                : ($variation->minimum_selling_price !== null ? (float) $variation->minimum_selling_price : null);
+
             $results[$variation_id] = [
                 'price' => $price_row ? (float) $price_row->price : (float) $variation->sale_price,
                 'discount_percentage' => $discount_applies ? (float) $variation->discount_percentage : 0.0,
-                'minimum_selling_price' => $variation->minimum_selling_price !== null ? (float) $variation->minimum_selling_price : null,
+                'minimum_selling_price' => $minimum_selling_price,
             ];
         }
 

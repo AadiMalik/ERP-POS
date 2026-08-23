@@ -200,6 +200,8 @@ class JournalEntryService
                         ]);
                   }
 
+                  self::assertBalanced($journal_entry->journal_entry_id);
+
                   DB::commit();
 
                   $this->logActivity(
@@ -281,6 +283,10 @@ class JournalEntryService
 
       public function delete($journal_entry_id)
       {
+            $journal_entry = $this->model_journal_entry->getModel()::findOrFail($journal_entry_id);
+
+            app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+
             $result = $this->model_journal_entry->update([
                   'is_deleted' => 1,
                   'deletedby_id' => Auth::id(),
@@ -290,6 +296,24 @@ class JournalEntryService
             $this->logActivity('journal_entry', $journal_entry_id, 'deleted');
 
             return $result;
+      }
+
+      /**
+       * Re-sums a journal entry's detail rows and throws if debit != credit -
+       * the single authoritative balance check, called from every code path
+       * that writes JournalEntryDetail rows (manual save() below, the import
+       * path, and every automated posting method across the app) so the
+       * guarantee holds regardless of entry point.
+       */
+      public static function assertBalanced(string $journalEntryId): void
+      {
+            $totals = JournalEntryDetail::where('journal_entry_id', $journalEntryId)
+                  ->selectRaw('COALESCE(SUM(debit), 0) as total_debit, COALESCE(SUM(credit), 0) as total_credit')
+                  ->first();
+
+            if (abs((float) $totals->total_debit - (float) $totals->total_credit) > 0.01) {
+                  throw new Exception('Journal entry is not balanced: total debit (' . number_format((float) $totals->total_debit, 2) . ') must equal total credit (' . number_format((float) $totals->total_credit, 2) . ').');
+            }
       }
 
       public function getAll()

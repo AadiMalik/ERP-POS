@@ -9,6 +9,7 @@ use Yajra\DataTables\DataTables;
 use App\Enums\RoleNames;
 use App\Models\Role;
 use App\Support\Permissions\RoleDefaultPermissions;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,7 @@ use Illuminate\Support\Str;
 
 class RoleService
 {
+    use Auditable;
 
     protected $model_role;
     public function __construct()
@@ -130,7 +132,10 @@ class RoleService
     }
     public function save($obj)
     {
-        if (isset($obj['id']) && $obj['id'] > 0) {
+        $is_update = isset($obj['id']) && $obj['id'] > 0;
+        $old_values = $is_update ? $this->model_role->find($obj['id'])?->only(['name', 'business_id']) : null;
+
+        if ($is_update) {
             $this->model_role->update($obj, $obj['id']);
             $saved_obj = $this->model_role->find($obj['id']);
         } else {
@@ -140,7 +145,42 @@ class RoleService
         if (!$saved_obj)
             return false;
 
+        $this->logActivity(
+            'role',
+            (string) $saved_obj->id,
+            $is_update ? 'updated' : 'created',
+            $old_values,
+            $saved_obj->only(['name', 'business_id']),
+            $is_update ? 'Role updated' : 'Role created'
+        );
+
         return $saved_obj;
+    }
+
+    /**
+     * Syncs a role's permission set and audits the before/after diff. The
+     * actual syncPermissions() call must stay here (not inline in
+     * RoleController::store()) so the change is always logged - see
+     * Auditable's docblock on why logging stays explicit at the service
+     * layer.
+     */
+    public function syncPermissions(Role $role, array $permissions): Role
+    {
+        $old_permissions = $role->permissions()->pluck('name')->all();
+
+        $role->syncPermissions($permissions);
+
+        $this->logActivity(
+            'role',
+            (string) $role->id,
+            'permissions_synced',
+            ['permissions' => $old_permissions],
+            ['permissions' => $permissions],
+            'Role permissions updated',
+            $role->business_id
+        );
+
+        return $role;
     }
 
     public function getAll()

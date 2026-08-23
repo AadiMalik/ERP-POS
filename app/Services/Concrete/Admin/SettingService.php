@@ -25,6 +25,7 @@ use App\Models\ThemeSetting;
 use App\Models\ThermalPrintSetting;
 use App\Models\WhatsappSetting;
 use App\Repository\Repository;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +33,8 @@ use Yajra\DataTables\DataTables;
 
 class SettingService
 {
+    use Auditable;
+
     protected $model_business;
     protected $model_business_setting;
     protected $model_accounting_setting;
@@ -213,8 +216,11 @@ class SettingService
         // model after an insert, so every default is spelled out explicitly here -
         // otherwise a freshly created setting would read as blank in PHP even though
         // the DB row itself has the correct defaults (same lesson as getBarcodeSetting()).
+        // This is always the business DEFAULT row (branch_id IS NULL) - see
+        // getBranchThermalPrintSetting() for a branch-scoped override, which is
+        // never auto-created (only the business default lazily creates itself).
         return $this->model_thermal_print_setting->getModel()::firstOrCreate(
-            ['business_id' => $business_id],
+            ['business_id' => $business_id, 'branch_id' => null],
             [
                 'is_enabled' => false,
                 'paper_width_mm' => config('thermal_print_defaults.paper_width_mm'),
@@ -225,6 +231,41 @@ class SettingService
         );
     }
 
+    /**
+     * A specific branch's thermal print override, if one has been explicitly
+     * saved for it - null if none exists (the caller falls back to
+     * getThermalPrintSetting()'s business default). Deliberately does not
+     * auto-create a row just because a branch was asked about.
+     */
+    public function getBranchThermalPrintSetting($business_id, $branch_id)
+    {
+        if (empty($branch_id)) {
+            return null;
+        }
+
+        return $this->model_thermal_print_setting->getModel()::where('business_id', $business_id)
+            ->where('branch_id', $branch_id)
+            ->first();
+    }
+
+    /**
+     * Logs an old/new snapshot of a business/POS/accounting setting change -
+     * shared by every update*Setting() method below since they all follow
+     * the same firstOrNew()/fill()/save() shape.
+     */
+    private function auditSetting(string $type, $setting, ?array $old_values): void
+    {
+        $this->logActivity(
+            'setting',
+            (string) ($setting->getKey() ?? $setting->business_id),
+            $old_values === null ? 'created' : 'updated',
+            $old_values,
+            $setting->fresh()?->toArray(),
+            ucfirst(str_replace('_', ' ', $type)) . ' setting ' . ($old_values === null ? 'created' : 'updated'),
+            $setting->business_id ?? null
+        );
+    }
+
     public function updateBusinessSetting(array $obj)
     {
         $model = $this->model_business_setting->getModel();
@@ -232,6 +273,7 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id'],
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::user()->id;
@@ -242,6 +284,7 @@ class SettingService
         $setting->updatedby_id = Auth::user()->id;
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('business', $setting, $old_values);
 
         session([
             'business_setting' => $setting->fresh()->toArray(),
@@ -258,6 +301,7 @@ class SettingService
             'business_id' => $obj['business_id'],
         ]);
 
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
         $old_expense_account_id = $setting->default_expense_account_id;
 
         if (!$setting->exists) {
@@ -269,6 +313,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('accounting', $setting, $old_values);
 
         // Keep every Expense Category that hasn't had its account manually
         // overridden pointed at the current default - categories with a
@@ -289,6 +334,7 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -299,6 +345,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('customer', $setting, $old_values);
 
         return $setting;
     }
@@ -310,6 +357,7 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -320,6 +368,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('supplier', $setting, $old_values);
 
         return $setting;
     }
@@ -331,6 +380,7 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -341,6 +391,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('inventory', $setting, $old_values);
 
         return $setting;
     }
@@ -352,6 +403,7 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -362,6 +414,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('notification', $setting, $old_values);
 
         return $setting;
     }
@@ -373,6 +426,7 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -383,6 +437,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('barcode', $setting, $old_values);
 
         return $setting;
     }
@@ -394,6 +449,7 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -404,6 +460,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('email', $setting, $old_values);
 
         return $setting;
     }
@@ -415,6 +472,7 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -425,6 +483,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('sms', $setting, $old_values);
 
         return $setting;
     }
@@ -436,6 +495,7 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -446,6 +506,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('fbr', $setting, $old_values);
 
         return $setting;
     }
@@ -457,6 +518,7 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -467,6 +529,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('pos', $setting, $old_values);
 
         return $setting;
     }
@@ -478,6 +541,7 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -488,6 +552,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('pra', $setting, $old_values);
 
         return $setting;
     }
@@ -499,6 +564,7 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -509,6 +575,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('whatsapp', $setting, $old_values);
 
         return $setting;
     }
@@ -521,6 +588,7 @@ class SettingService
             'business_id' => $obj['business_id'],
             'document_type' => $obj['document_type'] ?? 'default',
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -531,6 +599,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('print', $setting, $old_values);
 
         return $setting;
     }
@@ -541,7 +610,9 @@ class SettingService
 
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id'],
+            'branch_id' => $obj['branch_id'] ?? null,
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -552,6 +623,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('thermal_print', $setting, $old_values);
 
         return $setting;
     }
@@ -563,6 +635,7 @@ class SettingService
         $setting = $model::firstOrNew([
             'business_id' => $obj['business_id']
         ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -573,6 +646,7 @@ class SettingService
         $setting->updatedby_id = Auth::id();
         $setting->date_updated = now();
         $setting->save();
+        $this->auditSetting('theme', $setting, $old_values);
 
         session([
             'theme_setting' => $setting->fresh()->toArray(),

@@ -26,6 +26,7 @@ class OrderReturn extends Model
         'tax_amount',
         'total',
         'refund_payment_method_id',
+        'pos_register_session_id',
         'reason',
         'description',
         'status',

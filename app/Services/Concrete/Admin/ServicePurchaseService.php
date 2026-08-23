@@ -468,6 +468,8 @@ class ServicePurchaseService
             'supplier_id'             => $service_purchase->supplier_id,
             'description'             => 'Service Purchase - ' . $service_purchase->service_purchase_no,
         ]);
+
+        \App\Services\Concrete\Admin\JournalEntryService::assertBalanced($journal_entry->journal_entry_id);
     }
 
     /**
@@ -482,6 +484,8 @@ class ServicePurchaseService
             ->first();
 
         if ($journal_entry) {
+            app(AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+
             $journal_entry->update([
                 'is_deleted'   => 1,
                 'deletedby_id' => Auth::id(),

@@ -27,16 +27,27 @@ class ThermalPrintSettingResolverService
         $this->setting_service = $setting_service;
     }
 
-    public function resolve(?string $business_id): ThermalPrintConfig
+    /**
+     * $branch_id, when given, is tried first (that branch's own saved
+     * override) before falling back to the business default - a branch row
+     * that exists but is disabled is respected as-is (deliberate override),
+     * never silently falling back to the business default's own
+     * is_enabled. Whole-row selection, not a per-field merge across scopes.
+     */
+    public function resolve(?string $business_id, ?string $branch_id = null): ThermalPrintConfig
     {
-        $key = $business_id ?? 'null';
+        $key = ($business_id ?? 'null') . ':' . ($branch_id ?? 'null');
 
         if (isset($this->memo[$key])) {
             return $this->memo[$key];
         }
 
-        $data = Cache::remember($this->cacheKey($business_id), 3600, function () use ($business_id) {
-            $setting = $this->setting_service->getThermalPrintSetting($business_id);
+        $data = Cache::remember($this->cacheKey($business_id, $branch_id), 3600, function () use ($business_id, $branch_id) {
+            $setting = $branch_id
+                ? $this->setting_service->getBranchThermalPrintSetting($business_id, $branch_id)
+                : null;
+
+            $setting = $setting ?? $this->setting_service->getThermalPrintSetting($business_id);
 
             return [
                 'is_enabled' => $setting->is_enabled,
@@ -49,14 +60,14 @@ class ThermalPrintSettingResolverService
         return $this->memo[$key] = new ThermalPrintConfig($data);
     }
 
-    public function forgetCache(?string $business_id): void
+    public function forgetCache(?string $business_id, ?string $branch_id = null): void
     {
-        Cache::forget($this->cacheKey($business_id));
-        unset($this->memo[$business_id ?? 'null']);
+        Cache::forget($this->cacheKey($business_id, $branch_id));
+        unset($this->memo[($business_id ?? 'null') . ':' . ($branch_id ?? 'null')]);
     }
 
-    protected function cacheKey(?string $business_id): string
+    protected function cacheKey(?string $business_id, ?string $branch_id = null): string
     {
-        return 'thermal_print_setting:' . ($business_id ?? 'null');
+        return 'thermal_print_setting:' . ($business_id ?? 'null') . ':' . ($branch_id ?? 'null');
     }
 }

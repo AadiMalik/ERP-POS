@@ -158,7 +158,7 @@ class PosRegisterSessionController extends Controller
         }
 
         $summary = $this->pos_register_session_service->getSummary($pos_register_session_id);
-        $thermal_config = $this->thermal_print_setting_resolver->resolve($session->business_id);
+        $thermal_config = $this->thermal_print_setting_resolver->resolve($session->business_id, $session->branch_id);
         $business = $this->business_service->getById($session->business_id);
         $printed_at = now();
 
@@ -192,6 +192,16 @@ class PosRegisterSessionController extends Controller
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
             return $this->validationResponse($validate->errors()->first());
+        }
+
+        $session = \App\Models\PosRegisterSession::find($request->pos_register_session_id);
+
+        if (!$session) {
+            return $this->error('This register session was not found.');
+        }
+
+        if (Auth::id() != $session->cashier_id && !Auth::user()->can('pos.register.cash-movement.manage')) {
+            return $this->error('You do not have permission to record cash movements for this register session.', 403);
         }
 
         $obj = $request->only([

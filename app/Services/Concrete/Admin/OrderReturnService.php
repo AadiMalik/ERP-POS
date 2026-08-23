@@ -17,6 +17,7 @@ use App\Models\OrderReturn;
 use App\Models\OrderReturnDetail;
 use App\Models\OrderStatusHistory;
 use App\Models\PaymentMethod;
+use App\Models\PosRegisterSession;
 use App\Models\ProductVariationStock;
 use App\Models\ProductVariationStockTransaction;
 use App\Repository\Repository;
@@ -439,7 +440,7 @@ class OrderReturnService
                 $line_subtotal = $base_quantity * $unit_price;
                 $line_discount_amount = round($line_subtotal * $discount_percent / 100, 3);
                 $taxable = $line_subtotal - $line_discount_amount;
-                $line_tax_amount = round($taxable * $tax_percent / 100, 3);
+                $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent);
                 $line_total = $taxable + $line_tax_amount;
 
                 $subtotal += $line_subtotal;
@@ -775,6 +776,19 @@ class OrderReturnService
                 if (empty($refund_account_id)) {
                     throw new Exception('Cash Account is not configured in Accounting Settings.');
                 }
+
+                // Attribute this cash refund to whichever register session is
+                // currently open for the approving user, if any, so it can be
+                // deducted from expected cash at that shift's closing - see
+                // PosRegisterSessionService::getSummary().
+                $open_session = PosRegisterSession::where('cashier_id', Auth::id())
+                    ->where('business_id', $order_return->business_id)
+                    ->where('status', 'open')
+                    ->first();
+
+                if ($open_session) {
+                    $order_return->update(['pos_register_session_id' => $open_session->pos_register_session_id]);
+                }
             } else {
                 $refund_account_id = $refund_method->account_id;
 
@@ -783,10 +797,15 @@ class OrderReturnService
                 }
             }
         } else {
-            $refund_account_id = $accounting_setting->default_customer_account_id;
+            // No refund method chosen = credit the customer with redeemable
+            // Store Credit (a dedicated liability account, never the AR/
+            // receivable account - see default_store_credit_account_id's
+            // doc comment on why these must stay separate) rather than the
+            // old plain, non-redeemable AR credit.
+            $refund_account_id = $accounting_setting->default_store_credit_account_id;
 
             if (empty($refund_account_id)) {
-                throw new Exception('Customer Receivable Account is not configured in Accounting Settings, required to credit a return with no refund method selected.');
+                throw new Exception('Store Credit Account is not configured in Accounting Settings, required to credit a return with no refund method selected.');
             }
         }
 
@@ -851,7 +870,7 @@ class OrderReturnService
             ]);
         }
 
-        // Credit: the refund/credit-note account for the total handed back.
+        // Credit: the refund/store-credit account for the total handed back.
         JournalEntryDetail::create([
             'journal_entry_detail_id' => generateUuid(),
             'journal_entry_id'        => $journal_entry->journal_entry_id,
@@ -859,8 +878,19 @@ class OrderReturnService
             'debit'                   => 0,
             'credit'                  => $order_return->total,
             'user_id'                 => empty($refund_method) ? $order_return->customer_id : null,
-            'description'             => 'Order Return - ' . $order_return->order_return_no . ($refund_method ? (' - ' . $refund_method->name) : ' - Customer Credit'),
+            'description'             => 'Order Return - ' . $order_return->order_return_no . ($refund_method ? (' - ' . $refund_method->name) : ' - Store Credit'),
         ]);
+
+        if (empty($refund_method) && !empty($order_return->customer_id)) {
+            app(CustomerStoreCreditService::class)->issue(
+                $order_return->business_id,
+                $order_return->customer_id,
+                (float) $order_return->total,
+                'order_return',
+                $order_return->order_return_id,
+                'Store credit issued from Order Return ' . $order_return->order_return_no
+            );
+        }
 
         // Per line: return stock to inventory at its original cost basis
         // (the order_detail.cost_price snapshot from the original sale) and
@@ -954,6 +984,8 @@ class OrderReturnService
             ]);
         }
 
+        \App\Services\Concrete\Admin\JournalEntryService::assertBalanced($journal_entry->journal_entry_id);
+
         if ($order->status !== 'returned' && $this->isOrderFullyReturned($order)) {
             $this->transitionOrderStatus($order, 'returned', 'Fully returned via Order Return ' . $order_return->order_return_no);
         }
@@ -974,6 +1006,19 @@ class OrderReturnService
             ->first();
 
         if ($journal_entry) {
+            app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+
+            if (empty($order_return->refund_payment_method_id) && !empty($order_return->customer_id)) {
+                app(CustomerStoreCreditService::class)->revoke(
+                    $order_return->business_id,
+                    $order_return->customer_id,
+                    (float) $order_return->total,
+                    'order_return',
+                    $order_return->order_return_id,
+                    'Store credit revoked - Order Return ' . $order_return->order_return_no . ' was reversed'
+                );
+            }
+
             $journal_entry->update([
                 'is_deleted'   => 1,
                 'deletedby_id' => Auth::id(),

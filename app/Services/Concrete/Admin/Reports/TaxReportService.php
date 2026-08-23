@@ -78,7 +78,7 @@ class TaxReportService
         $rows = collect();
 
         foreach ($accounts as $account) {
-            $debitNormal = $this->classifier->isDebitNormal(optional($account->accountType)->name);
+            $debitNormal = $this->classifier->isDebitNormal(optional($account->accountType)->code);
             $openingTotals = $openingMap[$account->account_id] ?? ['debit' => 0, 'credit' => 0];
             $period = $periodMap[$account->account_id] ?? ['debit' => 0, 'credit' => 0];
 

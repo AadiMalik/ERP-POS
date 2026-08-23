@@ -51,7 +51,7 @@ class RoleDefaultPermissions
                      'purchase-request-quotation', 'purchase', 'good-receipt-note', 'purchase-return',
                      'supplier-payment', 'customer-payment', 'service-purchase', 'service-purchase-return',
                      'service-sale', 'service-sale-return', 'order-type', 'payment-method', 'order-source', 'discount',
-                     'voucher', 'order', 'order-return', 'pos', 'expense', 'expense-category', 'admin-expense'],
+                     'voucher', 'order', 'order-return', 'pos', 'pos-register', 'expense', 'expense-category', 'admin-expense'],
                     ['delete']
                 );
 
@@ -60,7 +60,7 @@ class RoleDefaultPermissions
                     PermissionRegistry::namesForModules([
                         'warehouse', 'brand', 'category', 'sub-category', 'unit', 'product', 'barcode',
                         'unit-conversion', 'batch', 'stock', 'stock-transaction', 'opening-stock',
-                        'stock-taking', 'transfer-note',
+                        'stock-taking', 'transfer-note', 'purchase-return',
                     ]),
                     [
                         'dashboard.view',
@@ -93,7 +93,7 @@ class RoleDefaultPermissions
                     PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment', 'service-sale', 'service-sale-return']),
                     array_merge(
                         ['dashboard.view'],
-                        self::formatVariants(['customer-ledger', 'customer-aging', 'customer-payment-history'])
+                        self::formatVariants(['customer-ledger', 'customer-aging', 'customer-payment-history', 'sales-report'])
                     )
                 );
 
@@ -171,8 +171,11 @@ class RoleDefaultPermissions
                     'pos.access',
                     'pos.register.close',
                     'pos.register.report.view',
+                    'pos.register.cash-movement.manage',
+                    'pos-register.view',
                     'order.create',
                     'order.edit',
+                    'order.complete',
                     'order.discount.apply',
                     'order.coupon.apply',
                     'order.price.change',
@@ -198,6 +201,7 @@ class RoleDefaultPermissions
                 return [
                     'pos.access',
                     'order.create',
+                    'order.complete',
                     'order.hold',
                     'expense.access',
                 ];

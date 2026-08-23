@@ -7,18 +7,25 @@ use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\ProductVariationStockTransaction;
 use App\Repository\Repository;
+use App\Traits\Auditable;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
 class ProductVariationStockTransactionService
 {
+    use Auditable;
+
     protected $model_product_variation_stock_transaction;
     protected $with = ['business', 'product', 'productVariation', 'batch', 'warehouse', 'productVariationBatch', 'unit', 'createdBy', 'updatedBy', 'deletedBy'];
+    protected $product_variation_stock_service;
 
-    public function __construct()
+    public function __construct(ProductVariationStockService $product_variation_stock_service)
     {
         $this->model_product_variation_stock_transaction = new Repository(new ProductVariationStockTransaction());
+        $this->product_variation_stock_service = $product_variation_stock_service;
     }
 
     public function getData($obj)
@@ -157,13 +164,63 @@ class ProductVariationStockTransactionService
             ->make(true);
     }
 
-    public function delete($product_variation_stock_transaction_id)
+    /**
+     * Reverse a single stock transaction rather than leaving inventory
+     * totals inconsistent: soft-deletes the row, then replays the remaining
+     * active ledger for that product+variation+warehouse via
+     * ProductVariationStockService::recomputeLedger() so the aggregate Stock
+     * row and every later transaction's stored running-balance snapshot stay
+     * correct - mirrors the reversal pattern already used by
+     * PurchaseReturnService/OrderService/GrnService/StockTakingService.
+     * $reason is mandatory and kept for audit (distinct from `remarks`,
+     * which records why the transaction was originally created).
+     */
+    public function delete($product_variation_stock_transaction_id, string $reason)
     {
-        return $this->model_product_variation_stock_transaction->update([
-            'is_deleted' => 1,
-            'deletedby_id' => Auth::id(),
-            'date_deleted' => now()
-        ], $product_variation_stock_transaction_id);
+        if (trim($reason) === '') {
+            throw new Exception('A reason is required to delete/reverse a stock transaction.');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $transaction = $this->model_product_variation_stock_transaction->getModel()::where('is_deleted', 0)
+                ->findOrFail($product_variation_stock_transaction_id);
+
+            $before = $transaction->only(['quantity_after', 'avg_price_after']);
+
+            $transaction->update([
+                'is_deleted' => 1,
+                'delete_reason' => $reason,
+                'deletedby_id' => Auth::id(),
+                'date_deleted' => now(),
+            ]);
+
+            $after = $this->product_variation_stock_service->recomputeLedger(
+                $transaction->business_id,
+                $transaction->warehouse_id,
+                $transaction->product_id,
+                $transaction->product_variation_id
+            );
+
+            $this->logActivity(
+                'stock-transaction',
+                $product_variation_stock_transaction_id,
+                'reversed',
+                $before,
+                $after,
+                $reason,
+                $transaction->business_id
+            );
+
+            DB::commit();
+
+            return true;
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            throw $e;
+        }
     }
 
     public function getAll()

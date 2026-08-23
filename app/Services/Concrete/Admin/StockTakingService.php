@@ -19,6 +19,7 @@ use App\Models\StockTakingDetail;
 use App\Models\Warehouse;
 use App\Repository\Repository;
 use App\Services\Concrete\Admin\ProductVariationStockService;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +28,8 @@ use Yajra\DataTables\DataTables;
 
 class StockTakingService
 {
+    use Auditable;
+
     protected $model_stock_taking;
     protected $model_stock_taking_details;
     protected $with = [
@@ -363,6 +366,40 @@ class StockTakingService
         }
     }
 
+    /**
+     * Compares each line's live stock quantity right now against the
+     * system_quantity snapshot captured when the count was originally saved.
+     * applyStockTakingPosting() already always recomputes/posts against the
+     * LIVE quantity (never the stale snapshot) so the posted numbers are
+     * never wrong - this is purely so the approver can be warned that stock
+     * moved since the count was taken, before they confirm.
+     */
+    public function checkDrift($stock_taking_id): array
+    {
+        $stock_taking = $this->model_stock_taking->getModel()::with('stockTakingDetails.product')->findOrFail($stock_taking_id);
+
+        $drifted = [];
+
+        foreach ($stock_taking->stockTakingDetails as $detail) {
+            $live_quantity = (float) (ProductVariationStock::where('business_id', $stock_taking->business_id)
+                ->where('warehouse_id', $stock_taking->warehouse_id)
+                ->where('product_id', $detail->product_id)
+                ->where('product_variation_id', $detail->product_variation_id)
+                ->value('quantity') ?? 0);
+
+            if (abs($live_quantity - (float) $detail->system_quantity) > 0.0009) {
+                $drifted[] = [
+                    'product_name'            => $detail->product->name ?? '',
+                    'counted_system_quantity' => (float) $detail->system_quantity,
+                    'current_system_quantity' => $live_quantity,
+                    'physical_quantity'       => (float) $detail->physical_quantity,
+                ];
+            }
+        }
+
+        return $drifted;
+    }
+
     public function status($obj)
     {
         DB::beginTransaction();
@@ -385,6 +422,14 @@ class StockTakingService
             }
 
             DB::commit();
+
+            $this->logActivity(
+                'stock-taking',
+                $stock_taking->stock_taking_id,
+                $new_status === Status::APPROVED ? 'approved' : 'status_changed',
+                ['status' => $old_status],
+                ['status' => $new_status]
+            );
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -462,6 +507,7 @@ class StockTakingService
                 ->where('warehouse_id', $stock_taking->warehouse_id)
                 ->where('product_id', $detail->product_id)
                 ->where('product_variation_id', $detail->product_variation_id)
+                ->lockForUpdate()
                 ->first();
 
             $live_quantity = (float) ($stock->quantity ?? 0);
@@ -607,6 +653,8 @@ class StockTakingService
                 'description'             => 'Stock Taking Loss - ' . $stock_taking->stock_taking_no,
             ]);
         }
+
+        \App\Services\Concrete\Admin\JournalEntryService::assertBalanced($journal_entry->journal_entry_id);
     }
 
     /**
@@ -622,6 +670,8 @@ class StockTakingService
             ->first();
 
         if ($journal_entry) {
+            app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+
             $journal_entry->update([
                 'is_deleted'   => 1,
                 'deletedby_id' => Auth::id(),

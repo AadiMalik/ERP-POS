@@ -18,6 +18,7 @@ class ProductVariationPrice extends Model
         'product_variation_id',
         'sale_type_id',
         'price',
+        'minimum_selling_price',
         'createdby_id',
         'updatedby_id',
         'date_created',

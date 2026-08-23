@@ -9,6 +9,7 @@
         'default_expense_account_id' => 'Expense Account',
         'default_supplier_account_id' => 'Supplier Account',
         'default_customer_account_id' => 'Customer Account',
+        'default_store_credit_account_id' => 'Store Credit Account',
         'default_carriage_account_id' => 'Carriage Account',
         'default_round_off_account_id' => 'Round Off Account',
         'default_purchase_return_account_id' => 'Purchase Return',

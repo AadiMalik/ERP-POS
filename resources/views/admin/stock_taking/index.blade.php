@@ -122,21 +122,43 @@
             initDataTablestock_taking_table();
         });
         //status
-        $(document).on('change', '.change-status', function() {
-
-            let stock_taking_id = $(this).data('id');
-            let status = $(this).val();
-            let select = $(this);
-
+        function submitStockTakingStatus(stock_taking_id, status, select, confirmDrift) {
             $.ajax({
                 url: url_local + "/admin/stock-taking/change-status", // route
                 type: 'POST',
                 data: {
                     _token: $('meta[name="csrf-token"]').attr('content'),
                     stock_taking_id: stock_taking_id,
-                    status: status
+                    status: status,
+                    confirm_drift: confirmDrift ? 1 : 0
                 },
                 success: function(response) {
+
+                    // Approving can come back as a warning rather than a
+                    // completed change if live stock has moved since the
+                    // count was taken - ask the approver to confirm before
+                    // actually posting.
+                    if (response.Data && response.Data.requires_confirmation) {
+                        let lines = (response.Data.drift || []).map(function(d) {
+                            return d.product_name + ': counted against ' + d.counted_system_quantity +
+                                ', now ' + d.current_system_quantity;
+                        }).join('\n');
+
+                        Swal.fire({
+                            title: 'Stock has changed since this count was taken',
+                            text: 'The final adjustment will use the CURRENT stock quantity, not what was originally counted:\n' + lines,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Approve anyway'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                submitStockTakingStatus(stock_taking_id, status, select, true);
+                            } else {
+                                select.val(select.data('old'));
+                            }
+                        });
+                        return;
+                    }
 
                     successMessage(response.Message);
                     initDataTablestock_taking_table();
@@ -149,7 +171,15 @@
                     select.val(select.data('old'));
                 }
             });
+        }
 
+        $(document).on('change', '.change-status', function() {
+
+            let stock_taking_id = $(this).data('id');
+            let status = $(this).val();
+            let select = $(this);
+
+            submitStockTakingStatus(stock_taking_id, status, select, false);
         });
         //delete
         deleteRecord({

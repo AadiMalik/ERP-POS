@@ -47,7 +47,10 @@ class ProfitLossReportService
         $to = !empty($obj['end_date']) ? Carbon::parse($obj['end_date'])->endOfDay() : Carbon::today()->endOfDay();
 
         $accountsQuery = Account::with(['accountType', 'accountSubType'])
-            ->whereHas('accountType', fn ($q) => $q->whereIn('name', [AccountTypes::REVENUE, AccountTypes::EXPENSES]))
+            ->whereHas('accountType', fn ($q) => $q->whereIn('code', [
+                AccountTypes::CODES[AccountTypes::REVENUE],
+                AccountTypes::CODES[AccountTypes::EXPENSES],
+            ]))
             ->where('is_deleted', 0)
             ->where('status', Status::ACTIVE);
 
@@ -77,7 +80,7 @@ class ProfitLossReportService
             $periodMap = $this->ledger_query_service->periodMovements($filters, $from, $to);
 
             foreach ($accounts as $account) {
-                $bucket = $this->classifier->plBucket(optional($account->accountSubType)->name);
+                $bucket = $this->classifier->plBucket(optional($account->accountSubType)->code);
 
                 if (!$bucket) {
                     continue;

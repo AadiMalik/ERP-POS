@@ -46,6 +46,7 @@ use App\Enums\RoleNames;
                                 <option value="card">Card</option>
                                 <option value="bank">Bank</option>
                                 <option value="credit">Credit</option>
+                                <option value="store_credit">Store Credit</option>
                                 <option value="wallet">Wallet</option>
                                 <option value="other">Other</option>
                             </select>
@@ -62,7 +63,7 @@ use App\Enums\RoleNames;
                                 </option>
                                 @endforeach
                             </select>
-                            <small class="text-muted">Not required for Credit - routes to the receivable account at posting time.</small>
+                            <small class="text-muted">Not required for Credit or Store Credit - they route to the receivable/store-credit account configured in Accounting Settings at posting time.</small>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Sort Order</label>

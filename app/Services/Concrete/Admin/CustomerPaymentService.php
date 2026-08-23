@@ -583,6 +583,8 @@ class CustomerPaymentService
             ]);
         }
 
+        \App\Services\Concrete\Admin\JournalEntryService::assertBalanced($journal_entry->journal_entry_id);
+
         if (!empty($payment->order_id)) {
             $order = Order::where('order_id', $payment->order_id)->first();
 
@@ -605,6 +607,8 @@ class CustomerPaymentService
             ->first();
 
         if ($journal_entry) {
+            app(AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+
             $journal_entry->update([
                 'is_deleted'   => 1,
                 'deletedby_id' => Auth::id(),

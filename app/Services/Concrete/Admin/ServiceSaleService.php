@@ -474,6 +474,8 @@ class ServiceSaleService
             'user_id'                 => $service_sale->customer_id,
             'description'             => 'Service Sale - ' . $service_sale->service_sale_no,
         ]);
+
+        \App\Services\Concrete\Admin\JournalEntryService::assertBalanced($journal_entry->journal_entry_id);
     }
 
     /**
@@ -488,6 +490,8 @@ class ServiceSaleService
             ->first();
 
         if ($journal_entry) {
+            app(AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+
             $journal_entry->update([
                 'is_deleted'   => 1,
                 'deletedby_id' => Auth::id(),

@@ -249,6 +249,24 @@
             }
         });
 
+        var voucherSearchTimer = null;
+        $('#voucher_code').on('input', function () {
+            var term = $(this).val().trim();
+            // Free-typing invalidates whatever was picked from the dropdown -
+            // the exact-code Apply fallback still works via voucher_code alone.
+            $('#voucher_id').val('');
+            clearTimeout(voucherSearchTimer);
+
+            if (!term) {
+                $('#voucherSearchResults').hide().empty();
+                return;
+            }
+
+            voucherSearchTimer = setTimeout(function () {
+                searchVouchers(term);
+            }, 300);
+        });
+
         $('#posCategoryRail').on('click', '.category-rail-item', function () {
             var category_id = $(this).data('category-id') || '';
             $('#posCategoryRail .category-rail-item').removeClass('active');
@@ -325,6 +343,14 @@
         $('#customer_id').on('change', function () {
             updateCreditHint();
             updateCreditCustomerSummary();
+            // Store Credit's tile/row visibility depends on the selected
+            // customer's balance, unlike every other payment type - re-render
+            // whenever the customer changes so switching to/from a customer
+            // with a balance shows/hides it immediately.
+            renderPaymentMethodTiles();
+            if (state.payment_mode === 'multi') {
+                renderPayments();
+            }
         });
         updateCreditHint();
 
@@ -340,6 +366,7 @@
         $('#applyVoucherBtn').on('click', function () {
             // Voucher application is not a separate endpoint - it rides along
             // with the next store() call. Just recompute the local preview.
+            $('#voucherSearchResults').hide().empty();
             recalcLocal();
         });
 
@@ -803,6 +830,57 @@
 
     function escapeHtml(str) {
         return $('<div>').text(str == null ? '' : str).html();
+    }
+
+    // ==============================
+    // VOUCHER SEARCH
+    // ==============================
+    function searchVouchers(term) {
+        ajaxRequest({
+            url: URLS.search_vouchers,
+            data: { business_id: CFG.business_id, term: term },
+        })
+            .then(function (response) {
+                renderVoucherSearchResults(response.Data || []);
+            })
+            .catch(function (err) {
+                errorMessage(err.Message || 'Voucher search failed.');
+            });
+    }
+
+    function renderVoucherSearchResults(results) {
+        var $box = $('#voucherSearchResults');
+        $box.empty();
+
+        if (!results.length) {
+            $box.append('<div class="list-group-item text-muted">No matching vouchers</div>');
+            $box.show();
+            return;
+        }
+
+        results.forEach(function (item) {
+            var amount = item.type === 'percent' ? (parseFloat(item.value) || 0) + '% off' : money(item.value) + ' off';
+
+            var $row = $(
+                '<a href="javascript:void(0);" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">' +
+                    '<span><strong>' + escapeHtml(item.code) + '</strong>' +
+                        (item.name ? '<small class="text-muted d-block">' + escapeHtml(item.name) + '</small>' : '') +
+                    '</span>' +
+                    '<span class="fw-bold">' + escapeHtml(amount) + '</span>' +
+                '</a>'
+            );
+
+            $row.on('click', function () {
+                $('#voucher_id').val(item.voucher_id);
+                $('#voucher_code').val(item.code);
+                $box.hide().empty();
+                recalcLocal();
+            });
+
+            $box.append($row);
+        });
+
+        $box.show();
     }
 
     // A variation's default selling unit is its Sale Unit; when that isn't
@@ -1386,13 +1464,30 @@
     // "Multi Pay" reveals the pre-existing split-tender rows.
     var MULTI_PAY_VALUE = '__multi__';
 
+    // Store Credit is only ever a real option for a non-walk-in customer who
+    // currently has a positive balance - unlike Credit (gated by a
+    // permission, since it extends new trust), anyone can use their own
+    // already-owned store credit, so this is a data check, not a permission
+    // check.
+    function customerHasStoreCredit() {
+        var balance = parseFloat($('#customer_id').find(':selected').data('store-credit-balance') || 0);
+        var isWalkin = $('#customer_id').find(':selected').data('walkin') == 1;
+        return !isWalkin && balance > 0;
+    }
+
+    function filterPaymentMethodsForDisplay(methods) {
+        return (methods || []).filter(function (m) {
+            if (m.type === 'credit') return can('order.payment.credit');
+            if (m.type === 'store_credit') return customerHasStoreCredit();
+            return true;
+        });
+    }
+
     function renderPaymentMethodTiles() {
         var $select = $('#paymentMethodSelect');
         $select.empty().append('<option value="">Payment Method</option>');
 
-        var methods = (CFG.payment_methods || []).filter(function (m) {
-            return m.type !== 'credit' || can('order.payment.credit');
-        });
+        var methods = filterPaymentMethodsForDisplay(CFG.payment_methods);
 
         // Visible badge-style selector mirrors the Order Type pills - the
         // hidden <select> above stays the source of truth the rest of the
@@ -1412,9 +1507,7 @@
     // starting a new order after completing/resetting one) - cashiers pay
     // in cash far more often than any other method, so this saves a tap.
     function selectDefaultPaymentMethod() {
-        var methods = (CFG.payment_methods || []).filter(function (m) {
-            return m.type !== 'credit' || can('order.payment.credit');
-        });
+        var methods = filterPaymentMethodsForDisplay(CFG.payment_methods);
         var cash = methods.find(function (m) { return m.type === 'cash'; }) || methods[0];
 
         if (cash) {
@@ -1478,13 +1571,27 @@
         var isCredit = !!(selected && selected.type === 'credit');
 
         $('#creditCustomerSummary').toggleClass('d-none', !isCredit);
-        if (!isCredit) return;
+        if (isCredit) {
+            var $opt = $('#customer_id').find(':selected');
+            var name = $.trim($opt.text());
+            var limit = parseFloat($opt.data('credit-limit') || 0);
+
+            $('#creditCustomerText').text('Customer: ' + name + (limit > 0 ? ' · Credit limit: ' + money(limit) : ''));
+        }
+
+        updateStoreCreditSummary(selected);
+    }
+
+    function updateStoreCreditSummary(selected) {
+        var isStoreCredit = !!(selected && selected.type === 'store_credit');
+
+        $('#storeCreditSummary').toggleClass('d-none', !isStoreCredit);
+        if (!isStoreCredit) return;
 
         var $opt = $('#customer_id').find(':selected');
-        var name = $.trim($opt.text());
-        var limit = parseFloat($opt.data('credit-limit') || 0);
+        var balance = parseFloat($opt.data('store-credit-balance') || 0);
 
-        $('#creditCustomerText').text('Customer: ' + name + (limit > 0 ? ' · Credit limit: ' + money(limit) : ''));
+        $('#storeCreditText').text('Available store credit: ' + money(balance));
     }
 
     // True when any tendered payment (single or multi-pay) uses a
@@ -1495,6 +1602,29 @@
             var m = (CFG.payment_methods || []).find(function (x) { return x.payment_method_id === p.payment_method_id; });
             return m && m.type === 'credit';
         });
+    }
+
+    // Mirrors hasCreditPayment() for the store_credit type.
+    function hasStoreCreditPayment() {
+        return state.payments.some(function (p) {
+            var m = (CFG.payment_methods || []).find(function (x) { return x.payment_method_id === p.payment_method_id; });
+            return m && m.type === 'store_credit';
+        });
+    }
+
+    // Sum of tendered amounts across store_credit-type payments - used for
+    // the client-side "amount <= available balance" convenience check
+    // (the authoritative check is server-side, in
+    // CustomerStoreCreditService::redeem()).
+    function storeCreditAmountTendered() {
+        var total = 0;
+        state.payments.forEach(function (p) {
+            var m = (CFG.payment_methods || []).find(function (x) { return x.payment_method_id === p.payment_method_id; });
+            if (m && m.type === 'store_credit') {
+                total += parseFloat(p.amount) || 0;
+            }
+        });
+        return total;
     }
 
     // Shown after a Credit-type sale completes - due date/note are optional
@@ -1555,9 +1685,7 @@
         var $wrap = $('#paymentRows');
         $wrap.empty();
 
-        var methods = (CFG.payment_methods || []).filter(function (m) {
-            return m.type !== 'credit' || can('order.payment.credit');
-        });
+        var methods = filterPaymentMethodsForDisplay(CFG.payment_methods);
 
         state.payments.forEach(function (payment, idx) {
             var optionsHtml = methods.map(function (m) {
@@ -1698,6 +1826,10 @@
             var voucher_code = $('#voucher_code').val();
             if (voucher_code) {
                 payload.voucher_code = voucher_code;
+            }
+            var voucher_id = $('#voucher_id').val();
+            if (voucher_id) {
+                payload.voucher_id = voucher_id;
             }
         }
 
@@ -2147,6 +2279,23 @@
             return;
         }
 
+        // Same hard gate for Store Credit, plus a client-side convenience
+        // check against the balance shown - the authoritative check is
+        // still server-side (CustomerStoreCreditService::redeem()).
+        if (hasStoreCreditPayment()) {
+            if ($('#customer_id').find(':selected').data('walkin') == 1) {
+                errorMessage('Select a real customer before applying store credit.');
+                return;
+            }
+
+            var storeCreditBalance = parseFloat($('#customer_id').find(':selected').data('store-credit-balance') || 0);
+
+            if (storeCreditAmountTendered() > storeCreditBalance + 0.0001) {
+                errorMessage('This customer only has ' + money(storeCreditBalance) + ' in store credit available.');
+                return;
+            }
+        }
+
         var payload = buildStorePayload('draft');
 
         ajaxRequest({ url: URLS.order_store, method: 'POST', data: payload })
@@ -2320,6 +2469,8 @@
         state.order_id = null;
         state.order_daily_id = null;
         $('#voucher_code').val('');
+        $('#voucher_id').val('');
+        $('#voucherSearchResults').hide().empty();
         $('#discount_id').val('').trigger('change');
         $('#delivery_address').val('');
         $('#sale_type_id').val(state.default_sale_type_id);

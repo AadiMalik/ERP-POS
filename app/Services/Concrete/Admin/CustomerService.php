@@ -437,9 +437,10 @@ class CustomerService
 
         if (!$profile) {
             return [
-                'balance'     => 0,
-                'type'        => '',
-                'raw_balance' => 0,
+                'balance'             => 0,
+                'type'                => '',
+                'raw_balance'         => 0,
+                'store_credit_balance' => 0,
             ];
         }
 
@@ -452,9 +453,10 @@ class CustomerService
 
         if (empty($account_id)) {
             return [
-                'balance'     => 0,
-                'type'        => '',
-                'raw_balance' => 0,
+                'balance'             => 0,
+                'type'                => '',
+                'raw_balance'         => 0,
+                'store_credit_balance' => (float) $profile->store_credit_balance,
             ];
         }
 
@@ -470,9 +472,14 @@ class CustomerService
         $balance = (float) ($totals->total_credit ?? 0) - (float) ($totals->total_debit ?? 0);
 
         return [
-            'balance'     => round(abs($balance), 3),
-            'type'        => $balance > 0 ? 'Cr' : ($balance < 0 ? 'Dr' : ''),
-            'raw_balance' => $balance,
+            'balance'             => round(abs($balance), 3),
+            'type'                => $balance > 0 ? 'Cr' : ($balance < 0 ? 'Dr' : ''),
+            'raw_balance'         => $balance,
+            // Distinct from the AR balance above by design - store credit is
+            // a separately-tracked, dedicated liability (see
+            // CustomerStoreCreditService), never netted against what this
+            // customer owes on account.
+            'store_credit_balance' => (float) $profile->store_credit_balance,
         ];
     }
 }

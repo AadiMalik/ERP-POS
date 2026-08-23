@@ -363,7 +363,7 @@ class ServicePurchaseReturnService
                 $line_subtotal = $return_quantity * $unit_price;
                 $line_discount_amount = round($line_subtotal * $discount_percent / 100, 3);
                 $taxable = $line_subtotal - $line_discount_amount;
-                $line_tax_amount = round($taxable * $tax_percent / 100, 3);
+                $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent);
                 $line_total = $taxable + $line_tax_amount;
 
                 $subtotal += $line_subtotal;
@@ -617,6 +617,8 @@ class ServicePurchaseReturnService
             'supplier_id'             => $service_purchase_return->supplier_id,
             'description'             => 'Service Purchase Return - ' . $service_purchase_return->service_purchase_return_no,
         ]);
+
+        \App\Services\Concrete\Admin\JournalEntryService::assertBalanced($journal_entry->journal_entry_id);
     }
 
     /**
@@ -632,6 +634,8 @@ class ServicePurchaseReturnService
             ->first();
 
         if ($journal_entry) {
+            app(AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+
             $journal_entry->update([
                 'is_deleted'   => 1,
                 'deletedby_id' => Auth::id(),

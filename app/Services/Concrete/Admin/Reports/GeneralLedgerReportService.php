@@ -80,7 +80,7 @@ class GeneralLedgerReportService
         $grandCredit = 0;
 
         foreach ($accounts as $account) {
-            $debitNormal = $this->classifier->isDebitNormal(optional($account->accountType)->name);
+            $debitNormal = $this->classifier->isDebitNormal(optional($account->accountType)->code);
             $openingTotals = $openingMap[$account->account_id] ?? ['debit' => 0, 'credit' => 0];
             $opening = $this->classifier->toBalance($openingTotals['debit'], $openingTotals['credit'], $debitNormal);
 

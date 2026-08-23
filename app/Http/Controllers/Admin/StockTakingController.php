@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\Message;
 use App\Enums\Status;
 use App\Http\Controllers\Controller;
+use App\Models\ProductVariationStock;
 use App\Traits\ResponseAPI;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\DocumentSendLogService;
@@ -117,6 +118,32 @@ class StockTakingController extends Controller
             'products.*.reason' => ['nullable', 'string'],
         ]);
 
+        $validator->after(function ($validator) use ($request) {
+            $business_id = $request->business_id ?? Auth::user()->business_id;
+            $products = $request->input('products', []);
+
+            foreach ($products as $index => $product) {
+                if (empty($product['product_id']) || empty($product['product_variation_id'])) {
+                    continue;
+                }
+
+                $system_quantity = (float) (ProductVariationStock::where('business_id', $business_id)
+                    ->where('warehouse_id', $request->warehouse_id)
+                    ->where('product_id', $product['product_id'])
+                    ->where('product_variation_id', $product['product_variation_id'])
+                    ->value('quantity') ?? 0);
+
+                $physical_quantity = (float) ($product['physical_quantity'] ?? 0);
+
+                if (abs($physical_quantity - $system_quantity) > 0.0009 && empty(trim((string) ($product['reason'] ?? '')))) {
+                    $validator->errors()->add(
+                        "products.$index.reason",
+                        'A reason is required when the counted quantity differs from the system quantity (row ' . ($index + 1) . ').'
+                    );
+                }
+            }
+        });
+
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
@@ -148,6 +175,17 @@ class StockTakingController extends Controller
             return $this->validationResponse($validate->errors()->first());
         }
         try {
+            if ($request->status === Status::APPROVED && !$request->boolean('confirm_drift')) {
+                $drift = $this->stock_taking_service->checkDrift($request->stock_taking_id);
+
+                if (!empty($drift)) {
+                    return $this->success('Stock quantities have changed since this count was taken.', [
+                        'requires_confirmation' => true,
+                        'drift' => $drift,
+                    ]);
+                }
+            }
+
             $this->stock_taking_service->status($request->all());
             return $this->success(Message::STATUS, []);
         } catch (Exception $e) {

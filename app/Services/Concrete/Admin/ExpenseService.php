@@ -495,6 +495,8 @@ class ExpenseService
             'user_id'                 => $expense->user_id,
             'description'             => 'Expense - ' . $expense->expense_no,
         ]);
+
+        \App\Services\Concrete\Admin\JournalEntryService::assertBalanced($journal_entry->journal_entry_id);
     }
 
     /**
@@ -509,6 +511,8 @@ class ExpenseService
             ->first();
 
         if ($journal_entry) {
+            app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+
             $journal_entry->update([
                 'is_deleted'   => 1,
                 'deletedby_id' => Auth::id(),

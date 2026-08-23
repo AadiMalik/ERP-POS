@@ -53,7 +53,7 @@ class ExpenseReportController extends Controller
     {
         $business = $this->business_service->getAll();
         $accounts = $this->account_service->getAllActive(Auth::user()->business_id)
-            ->filter(fn ($account) => optional($account->accountType)->name === AccountTypes::EXPENSES)
+            ->filter(fn ($account) => optional($account->accountType)->code === AccountTypes::CODES[AccountTypes::EXPENSES])
             ->values();
 
         return view('admin.reports.expense_report.index', compact('business', 'accounts'));

@@ -302,13 +302,44 @@
         });
 
 
-        deleteRecord({
-            buttonClass: "#deleteProductVariationStockTransaction",
-            url: url_local + "/admin/product-variation-stock-transaction",
+        // Deleting a stock transaction is a reversal, not a raw delete - the
+        // server recomputes the running ledger afterwards, but always
+        // requires a reason for the audit trail, so this uses a dedicated
+        // prompt instead of the generic deleteRecord() confirm dialog.
+        $("body").off("click", "#deleteProductVariationStockTransaction").on("click", "#deleteProductVariationStockTransaction", function() {
+            let id = $(this).data("id");
 
-            tableCallback: function() {
-                initDataTableproduct_variation_stock_transaction_table();
-            }
+            Swal.fire({
+                title: "Reverse this stock transaction?",
+                text: "This will reverse the transaction and recompute the stock ledger. Please provide a reason.",
+                icon: "warning",
+                input: "textarea",
+                inputPlaceholder: "Reason for reversing this transaction...",
+                showCancelButton: true,
+                confirmButtonText: "Yes, reverse it!",
+                inputValidator: (value) => {
+                    if (!value || !value.trim()) {
+                        return "A reason is required.";
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    ajaxRequest({
+                            url: url_local + "/admin/product-variation-stock-transaction/" + id,
+                            method: "DELETE",
+                            data: {
+                                reason: result.value
+                            }
+                        })
+                        .then((response) => {
+                            successMessage(response.Message);
+                            initDataTableproduct_variation_stock_transaction_table();
+                        })
+                        .catch((err) => {
+                            errorMessage(err.Message || "Delete failed");
+                        });
+                }
+            });
         });
     </script>
 @endsection

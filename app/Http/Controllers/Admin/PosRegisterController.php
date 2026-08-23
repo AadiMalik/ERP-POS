@@ -30,6 +30,10 @@ class PosRegisterController extends Controller
         BranchService $branch_service,
         WarehouseService $warehouse_service
     ) {
+        $this->middleware('permission:pos-register.view')->only(['index', 'getData', 'edit']);
+        $this->middleware('permission:pos-register.create|pos-register.edit')->only(['store']);
+        $this->middleware('permission:pos-register.delete')->only(['destroy', 'status']);
+
         $this->pos_register_service = $pos_register_service;
         $this->business_service = $business_service;
         $this->branch_service = $branch_service;

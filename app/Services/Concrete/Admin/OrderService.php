@@ -32,6 +32,7 @@ use App\Models\ProductVariationUnitConversion;
 use App\Models\NotificationSetting;
 use App\Models\SaleType;
 use App\Models\Voucher;
+use App\Models\Warehouse;
 use App\Repository\Repository;
 use App\Traits\Auditable;
 use App\Traits\Notifiable;
@@ -734,6 +735,34 @@ class OrderService
      * business_id/branch_id/warehouse_id directly and register/session/cashier
      * stay null on the order.
      */
+    /**
+     * A concrete, active, correctly-owned warehouse must always be resolved
+     * before a sale can be saved or completed - throws otherwise. Reused by
+     * both save() (draft/hold creation) and post() (checkout), so a
+     * warehouse deactivated between hold and checkout is caught at posting
+     * time too, not just when the draft was first created.
+     */
+    protected function assertValidWarehouse(?string $businessId, ?string $branchId, ?string $warehouseId): void
+    {
+        if (empty($businessId) || empty($branchId) || empty($warehouseId)) {
+            throw new Exception('A valid warehouse could not be determined for this sale.');
+        }
+
+        $warehouse = Warehouse::where('warehouse_id', $warehouseId)
+            ->where('business_id', $businessId)
+            ->where('branch_id', $branchId)
+            ->where('is_deleted', 0)
+            ->first();
+
+        if (!$warehouse) {
+            throw new Exception('The selected warehouse does not exist or does not belong to this business/branch.');
+        }
+
+        if ($warehouse->status !== Status::ACTIVE) {
+            throw new Exception('The selected warehouse "' . $warehouse->name . '" is inactive and cannot be used for a sale.');
+        }
+    }
+
     public function save($obj)
     {
         DB::beginTransaction();
@@ -768,6 +797,8 @@ class OrderService
                     throw new Exception('business_id, branch_id and warehouse_id are required to create an order for this channel.');
                 }
             }
+
+            $this->assertValidWarehouse($business_id, $branch_id, $warehouse_id);
 
             // firstOrCreate (not first()) so a business that has never touched
             // POS Settings still gets a sane default row instead of every ??
@@ -1102,7 +1133,7 @@ class OrderService
                 ));
             }
 
-            $line_tax_amount = round($taxable * $tax_percent / 100, 3);
+            $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent);
             $line_total = $taxable + $line_tax_amount;
 
             $subtotal += $line_subtotal;
@@ -1232,7 +1263,7 @@ class OrderService
 
         foreach ($order->details as $detail) {
             $taxable = (float) $detail->subtotal - (float) $detail->discount_amount;
-            $line_tax_amount = round($taxable * $tax_percent / 100, 3);
+            $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent);
 
             $detail->update([
                 'tax' => $tax_percent,
@@ -1449,6 +1480,11 @@ class OrderService
                 }
             }
 
+            // Re-assert the warehouse is still valid at the moment of
+            // completion, not just when the draft was first saved - catches
+            // a warehouse deactivated between hold and checkout.
+            $this->assertValidWarehouse($order->business_id, $order->branch_id, $order->warehouse_id);
+
             if (!empty($obj['payments'])) {
                 $this->saveLinePayments($order->order_id, $obj['payments']);
                 $order->refresh();
@@ -1554,12 +1590,18 @@ class OrderService
             }
 
             $has_credit_payment = false;
+            $has_store_credit_payment = false;
 
             foreach ($payments as $payment) {
                 $method = PaymentMethod::find($payment->payment_method_id);
 
                 if ($method->type === 'credit') {
                     $has_credit_payment = true;
+                    continue;
+                }
+
+                if ($method->type === 'store_credit') {
+                    $has_store_credit_payment = true;
                     continue;
                 }
 
@@ -1578,6 +1620,18 @@ class OrderService
                 }
 
                 $this->validateCreditLimit($order, $payments);
+            }
+
+            if ($has_store_credit_payment) {
+                if (empty($accounting_setting->default_store_credit_account_id)) {
+                    throw new Exception('Store Credit Account is not configured in Accounting Settings, required for store credit payments.');
+                }
+
+                if (empty($order->user_id)) {
+                    throw new Exception('Store credit cannot be applied to a walk-in sale - select a customer first.');
+                }
+
+                $this->validateStoreCreditPayment($order, $payments);
             }
 
             $limit = checkPackageLimit('sales');
@@ -1627,6 +1681,9 @@ class OrderService
                 } elseif ($method->type === 'credit') {
                     $debit = (float) $payment->amount;
                     $account_id = $accounting_setting->default_customer_account_id;
+                } elseif ($method->type === 'store_credit') {
+                    $debit = (float) $payment->amount;
+                    $account_id = $accounting_setting->default_store_credit_account_id;
                 } else {
                     $debit = (float) $payment->amount;
                     $account_id = $method->account_id;
@@ -1642,7 +1699,7 @@ class OrderService
                     'account_id' => $account_id,
                     'debit' => $debit,
                     'credit' => 0,
-                    'user_id' => $method->type === 'credit' ? $order->user_id : null,
+                    'user_id' => in_array($method->type, ['credit', 'store_credit'], true) ? $order->user_id : null,
                     'description' => 'Order #' . $order->daily_order_id . ' - ' . $method->name,
                 ]);
             }
@@ -1818,12 +1875,29 @@ class OrderService
                 ]);
             }
 
+            \App\Services\Concrete\Admin\JournalEntryService::assertBalanced($journal_entry->journal_entry_id);
+
             if (!empty($order->voucher_id)) {
                 $this->voucher_service->redeem(
                     $order->voucher_id,
                     $order->order_id,
                     $order->user_id,
                     max(0, $order->voucher_discount_amount)
+                );
+            }
+
+            if ($has_store_credit_payment) {
+                $store_credit_amount = (float) $payments
+                    ->filter(fn ($payment) => optional(PaymentMethod::find($payment->payment_method_id))->type === 'store_credit')
+                    ->sum('amount');
+
+                app(CustomerStoreCreditService::class)->redeem(
+                    $order->business_id,
+                    $order->user_id,
+                    $store_credit_amount,
+                    'order',
+                    $order->order_id,
+                    'Redeemed at Order #' . $order->daily_order_id
                 );
             }
 
@@ -1884,6 +1958,33 @@ class OrderService
     }
 
     /**
+     * Sibling to validateCreditLimit() - caps store_credit-type payments
+     * against the customer's current store_credit_balance rather than a
+     * credit_limit (a different concept: this is money the customer
+     * already has, not new trust being extended). The authoritative
+     * balance check itself lives in CustomerStoreCreditService::redeem()
+     * (called after this passes) - this is a fail-fast pre-check so a
+     * doomed sale doesn't get all the way through journal-entry creation
+     * first.
+     */
+    protected function validateStoreCreditPayment(Order $order, $payments)
+    {
+        $store_credit_amount = (float) $payments
+            ->filter(fn ($payment) => optional(PaymentMethod::find($payment->payment_method_id))->type === 'store_credit')
+            ->sum('amount');
+
+        if ($store_credit_amount <= 0) {
+            return;
+        }
+
+        $available = app(CustomerStoreCreditService::class)->getBalance($order->business_id, $order->user_id);
+
+        if ($store_credit_amount > $available + 0.0009) {
+            throw new Exception('This customer only has ' . number_format($available, 2) . ' in store credit available.');
+        }
+    }
+
+    /**
      * Reverses a posted order exactly once: soft-deletes the linked
      * JournalEntry and ProductVariationStockTransaction rows, replays the
      * remaining ledger via ProductVariationStockService::recomputeLedger()
@@ -1910,6 +2011,8 @@ class OrderService
                 ->first();
 
             if ($journal_entry) {
+                app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+
                 $journal_entry->update([
                     'is_deleted' => 1,
                     'deletedby_id' => Auth::id(),
@@ -1948,6 +2051,19 @@ class OrderService
 
             if (!empty($order->voucher_id)) {
                 $this->voucher_service->reverseRedemption($order->order_id);
+            }
+
+            $redeemed_store_credit = app(CustomerStoreCreditService::class)->redeemedForOrder($order->order_id);
+
+            if ($redeemed_store_credit > 0 && !empty($order->user_id)) {
+                app(CustomerStoreCreditService::class)->reverse(
+                    $order->business_id,
+                    $order->user_id,
+                    $redeemed_store_credit,
+                    'order',
+                    $order->order_id,
+                    'Restored - Order #' . $order->daily_order_id . ' was voided'
+                );
             }
 
             $this->recordStatusHistory($order->order_id, $order->status, 'void', $obj['reason'] ?? 'Order voided');

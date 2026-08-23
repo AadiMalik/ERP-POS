@@ -11,10 +11,12 @@ use Illuminate\Support\Facades\Session;
 use Yajra\DataTables\DataTables;
 use App\Enums\CUDOperations;
 use App\Enums\RoleNames;
+use App\Traits\Auditable;
 use Spatie\Permission\Models\Permission;
 
 class PermissionService
 {
+    use Auditable;
 
     protected $model_permission;
     public function __construct()
@@ -59,7 +61,10 @@ class PermissionService
 
     public function save($obj)
     {
-        if (isset($obj['id']) && $obj['id'] > 0) {
+        $is_update = isset($obj['id']) && $obj['id'] > 0;
+        $old_values = $is_update ? $this->model_permission->find($obj['id'])?->only(['name', 'is_system']) : null;
+
+        if ($is_update) {
             $this->model_permission->update($obj, $obj['id']);
             $saved_obj = $this->model_permission->find($obj['id']);
         } else {
@@ -68,6 +73,15 @@ class PermissionService
 
         if (!$saved_obj)
             return false;
+
+        $this->logActivity(
+            'permission',
+            (string) $saved_obj->id,
+            $is_update ? 'updated' : 'created',
+            $old_values,
+            $saved_obj->only(['name', 'is_system']),
+            $is_update ? 'Permission updated' : 'Permission created'
+        );
 
         return $saved_obj;
     }
@@ -79,7 +93,14 @@ class PermissionService
 
     public function delete($id)
     {
-        return $this->model_permission->delete($id);
+        $permission = $this->model_permission->find($id);
+        $deleted = $this->model_permission->delete($id);
+
+        if ($deleted && $permission) {
+            $this->logActivity('permission', (string) $permission->id, 'deleted', $permission->only(['name', 'is_system']), null, 'Permission deleted');
+        }
+
+        return $deleted;
     }
 
     // get all

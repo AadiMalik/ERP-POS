@@ -172,10 +172,12 @@ class PermissionRegistry
             'stock' => ['label' => 'Stock', 'actions' => [
                 'view'   => ['name' => 'stock.view', 'label' => 'View', 'is_system' => false],
                 'status' => ['name' => 'stock.status', 'label' => 'Change Status', 'is_system' => false],
+                'delete' => ['name' => 'stock.delete', 'label' => 'Delete', 'is_system' => false],
             ]],
 
             'stock-transaction' => ['label' => 'Stock Transactions', 'actions' => [
-                'view' => ['name' => 'stock-transaction.view', 'label' => 'View', 'is_system' => false],
+                'view'   => ['name' => 'stock-transaction.view', 'label' => 'View', 'is_system' => false],
+                'delete' => ['name' => 'stock-transaction.delete', 'label' => 'Delete / Reverse', 'is_system' => false],
             ]],
 
             'account-type' => ['label' => 'Account Types', 'actions' => [
@@ -911,9 +913,17 @@ class PermissionRegistry
             // ---- Already-seeded modules (existing permission names, kept exactly as-is) ----
 
             'pos' => ['label' => 'POS', 'actions' => [
-                'access'          => ['name' => 'pos.access', 'label' => 'Access POS', 'is_system' => false],
-                'register_close'  => ['name' => 'pos.register.close', 'label' => 'Close Register', 'is_system' => false],
-                'register_report' => ['name' => 'pos.register.report.view', 'label' => 'View Register Report', 'is_system' => false],
+                'access'                => ['name' => 'pos.access', 'label' => 'Access POS', 'is_system' => false],
+                'register_close'        => ['name' => 'pos.register.close', 'label' => 'Close Register', 'is_system' => false],
+                'register_report'       => ['name' => 'pos.register.report.view', 'label' => 'View Register Report', 'is_system' => false],
+                'cash_movement_manage'  => ['name' => 'pos.register.cash-movement.manage', 'label' => 'Record Cash In/Out For Any Cashier', 'is_system' => false],
+            ]],
+
+            'pos-register' => ['label' => 'POS Registers', 'actions' => [
+                'view'   => ['name' => 'pos-register.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'pos-register.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'pos-register.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'pos-register.delete', 'label' => 'Delete', 'is_system' => false],
             ]],
 
             'order' => ['label' => 'Orders', 'actions' => [
@@ -924,6 +934,7 @@ class PermissionRegistry
                 'price_change'    => ['name' => 'order.price.change', 'label' => 'Change Price', 'is_system' => false],
                 'price_override_minimum' => ['name' => 'order.price.override-minimum', 'label' => 'Override Minimum Selling Price', 'is_system' => false],
                 'hold'            => ['name' => 'order.hold', 'label' => 'Hold', 'is_system' => false],
+                'complete'        => ['name' => 'order.complete', 'label' => 'Complete Sale', 'is_system' => false],
                 // 'order.cancel_void' is superseded by the separate 'cancel'/'void'
                 // actions below (cancel a draft vs. void a posted, accounted sale
                 // are different risk levels) - kept declared, never referenced by
@@ -1082,6 +1093,11 @@ class PermissionRegistry
                 'income_report_pdf' => ['name' => 'reports.income-report.pdf', 'label' => 'Income Report - PDF', 'is_system' => false],
                 'income_report_export' => ['name' => 'reports.income-report.export', 'label' => 'Income Report - Export (Excel)', 'is_system' => false],
                 'income_report_export_csv' => ['name' => 'reports.income-report.export-csv', 'label' => 'Income Report - Export (CSV)', 'is_system' => false],
+                'sales_report'            => ['name' => 'reports.sales-report.view', 'label' => 'Sales Report', 'is_system' => false],
+                'sales_report_print' => ['name' => 'reports.sales-report.print', 'label' => 'Sales Report - Print', 'is_system' => false],
+                'sales_report_pdf' => ['name' => 'reports.sales-report.pdf', 'label' => 'Sales Report - PDF', 'is_system' => false],
+                'sales_report_export' => ['name' => 'reports.sales-report.export', 'label' => 'Sales Report - Export (Excel)', 'is_system' => false],
+                'sales_report_export_csv' => ['name' => 'reports.sales-report.export-csv', 'label' => 'Sales Report - Export (CSV)', 'is_system' => false],
                 'expense_report'           => ['name' => 'reports.expense-report.view', 'label' => 'Expense Report (By Account)', 'is_system' => false],
                 'expense_report_print' => ['name' => 'reports.expense-report.print', 'label' => 'Expense Report (By Account) - Print', 'is_system' => false],
                 'expense_report_pdf' => ['name' => 'reports.expense-report.pdf', 'label' => 'Expense Report (By Account) - PDF', 'is_system' => false],
@@ -1243,7 +1259,7 @@ class PermissionRegistry
             'purchase-request', 'purchase-request-quotation', 'purchase', 'good-receipt-note',
             'purchase-return', 'opening-stock', 'stock-taking', 'transfer-note', 'supplier-payment', 'customer-payment',
             'service-purchase', 'service-purchase-return', 'service-sale', 'service-sale-return',
-            'pos', 'order', 'order-return', 'expense', 'expense-category', 'admin-expense',
+            'pos', 'pos-register', 'order', 'order-return', 'expense', 'expense-category', 'admin-expense',
             'activity-log', 'login-history', 'notification', 'reports', 'branch', 'user',
             'department', 'designation', 'shift', 'employee', 'attendance', 'leave-type',
             'leave-request', 'salary-component', 'salary-structure', 'payroll', 'payslip',

@@ -21,6 +21,7 @@ use App\Models\ProductVariationStockTransaction;
 use App\Models\Warehouse;
 use App\Repository\Repository;
 use App\Services\Concrete\Admin\ProductVariationStockService;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,8 @@ use Yajra\DataTables\DataTables;
 
 class OpeningStockService
 {
+    use Auditable;
+
     protected $model_opening_stock;
     protected $model_opening_stock_details;
     protected $with = [
@@ -365,6 +368,14 @@ class OpeningStockService
             }
 
             DB::commit();
+
+            $this->logActivity(
+                'opening-stock',
+                $opening_stock->opening_stock_id,
+                $new_status === Status::APPROVED ? 'approved' : 'status_changed',
+                ['status' => $old_status],
+                ['status' => $new_status]
+            );
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -476,6 +487,8 @@ class OpeningStockService
             'credit'                  => $amount,
             'description'             => 'Opening Stock - ' . $opening_stock->opening_stock_no,
         ]);
+
+        \App\Services\Concrete\Admin\JournalEntryService::assertBalanced($journal_entry->journal_entry_id);
 
         foreach ($opening_stock->openingStockDetails as $detail) {
             $base_quantity = $detail->base_quantity;
@@ -597,6 +610,8 @@ class OpeningStockService
             ->first();
 
         if ($journal_entry) {
+            app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+
             $journal_entry->update([
                 'is_deleted'   => 1,
                 'deletedby_id' => Auth::id(),

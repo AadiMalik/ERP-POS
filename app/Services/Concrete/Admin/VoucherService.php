@@ -236,6 +236,40 @@ class VoucherService
     }
 
     /**
+     * Lightweight search-as-you-type for the POS voucher lookup: active,
+     * non-deleted, business-scoped, matching code or name, currently inside
+     * its valid date window and not yet fully used up. This is a coarse
+     * "is it even a live voucher" filter for populating suggestions - full
+     * per-cart eligibility (customer/branch/order-amount/product/category
+     * scope) is still enforced by isApplicable() at apply-time, same as
+     * today when a code is typed exactly.
+     */
+    public function searchActive(string $term, string $business_id, int $limit = 20)
+    {
+        $now = Carbon::now();
+
+        return $this->model_voucher->getModel()::where('business_id', $business_id)
+            ->where('status', Status::ACTIVE)
+            ->where('is_deleted', 0)
+            ->where(function ($q) use ($term) {
+                $q->where('code', 'like', '%' . $term . '%')
+                    ->orWhere('name', 'like', '%' . $term . '%');
+            })
+            ->where(function ($q) use ($now) {
+                $q->whereNull('valid_from')->orWhere('valid_from', '<=', $now);
+            })
+            ->where(function ($q) use ($now) {
+                $q->whereNull('valid_to')->orWhere('valid_to', '>=', $now);
+            })
+            ->where(function ($q) {
+                $q->whereNull('usage_limit_total')->orWhereColumn('used_count', '<', 'usage_limit_total');
+            })
+            ->orderBy('code')
+            ->limit($limit)
+            ->get(['voucher_id', 'code', 'name', 'type', 'value', 'min_order_amount']);
+    }
+
+    /**
      * Case-tolerant active/non-deleted lookup by code for the given business - used
      * by the POS screen to resolve a scanned/typed voucher code.
      */

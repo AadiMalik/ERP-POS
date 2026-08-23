@@ -36,7 +36,7 @@ class IncomeReportService
         $branch_id = $obj['branch_id'] ?? null;
 
         $accountsQuery = Account::with(['accountType', 'accountSubType'])
-            ->whereHas('accountType', fn ($q) => $q->where('name', AccountTypes::REVENUE))
+            ->whereHas('accountType', fn ($q) => $q->where('code', AccountTypes::CODES[AccountTypes::REVENUE]))
             ->where('is_deleted', 0)
             ->where('status', Status::ACTIVE);
 

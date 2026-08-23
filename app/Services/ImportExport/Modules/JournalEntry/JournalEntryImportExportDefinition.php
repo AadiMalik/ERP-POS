@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\JournalEntryDetail;
+use App\Services\Concrete\Admin\JournalEntryService;
 use App\Services\ImportExport\Support\AbstractImportExportDefinition;
 use App\Services\ImportExport\Support\ChildTableDefinition;
 use App\Services\ImportExport\Support\ColumnDefinition;
@@ -235,6 +236,12 @@ class JournalEntryImportExportDefinition extends AbstractImportExportDefinition
                 'description' => $child->attributes['description'] ?? null,
             ]);
         }
+
+        // Authoritative check, not a repeat of applyDomainValidation()'s
+        // pre-save row marking above - this asserts against what was
+        // actually persisted, so it also catches any future bug in the
+        // pre-validation math instead of only trusting it.
+        JournalEntryService::assertBalanced($journalEntry->journal_entry_id);
 
         return ['model' => $journalEntry, 'created' => $created];
     }

@@ -503,6 +503,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('by-product/{product_id}', [App\Http\Controllers\Admin\ProductVariationStockController::class, 'byProduct']);
         Route::get('by-variation/{product_variation_id}', [App\Http\Controllers\Admin\ProductVariationStockController::class, 'byVariation']);
         Route::get('history/{product_variation_stock_id}', [App\Http\Controllers\Admin\ProductVariationStockController::class, 'history']);
+        Route::delete('{product_variation_stock_id}', [App\Http\Controllers\Admin\ProductVariationStockController::class, 'destroy']);
     });
 
     // product variation stock transaction
@@ -513,6 +514,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('by-warehouse/{warehouse_id}', [App\Http\Controllers\Admin\ProductVariationStockTransactionController::class, 'byWarehouse']);
         Route::get('by-product/{product_id}', [App\Http\Controllers\Admin\ProductVariationStockTransactionController::class, 'byProduct']);
         Route::get('by-variation/{product_variation_id}', [App\Http\Controllers\Admin\ProductVariationStockTransactionController::class, 'byVariation']);
+        Route::delete('{product_variation_stock_transaction_id}', [App\Http\Controllers\Admin\ProductVariationStockTransactionController::class, 'destroy']);
     });
     }); // end module:inventory (catalog & warehousing)
 
@@ -740,10 +742,11 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::post('resume', [App\Http\Controllers\Admin\OrderController::class, 'resume'])->middleware('permission:order.hold');
             Route::post('reopen', [App\Http\Controllers\Admin\OrderController::class, 'reopen'])->middleware('permission:order.reopen');
             Route::post('cancel', [App\Http\Controllers\Admin\OrderController::class, 'cancel'])->middleware('permission:order.cancel');
-            Route::post('complete', [App\Http\Controllers\Admin\OrderController::class, 'complete']);
+            Route::post('complete', [App\Http\Controllers\Admin\OrderController::class, 'complete'])->middleware('permission:order.complete');
             Route::post('credit-info', [App\Http\Controllers\Admin\OrderController::class, 'updateCreditInfo']);
             Route::post('void', [App\Http\Controllers\Admin\OrderController::class, 'void'])->middleware('permission:order.void');
             Route::get('search-products', [App\Http\Controllers\Admin\OrderController::class, 'searchProducts']);
+            Route::get('search-vouchers', [App\Http\Controllers\Admin\OrderController::class, 'searchVouchers']);
             Route::get('products-by-category', [App\Http\Controllers\Admin\OrderController::class, 'productsByCategory']);
             Route::post('resolve-prices', [App\Http\Controllers\Admin\OrderController::class, 'resolvePrices']);
             Route::get('filter-options/{business_id}', [App\Http\Controllers\Admin\OrderController::class, 'filterOptions']);
@@ -1174,6 +1177,16 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('pdf', [App\Http\Controllers\Admin\Reports\IncomeReportController::class, 'pdf'])->name('reports.income-report.pdf');
             Route::get('export', [App\Http\Controllers\Admin\Reports\IncomeReportController::class, 'export'])->name('reports.income-report.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\IncomeReportController::class, 'exportCsv'])->name('reports.income-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'sales-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\SalesReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\SalesReportController::class, 'data']);
+            Route::post('reconcile', [App\Http\Controllers\Admin\Reports\SalesReportController::class, 'reconcile']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\SalesReportController::class, 'print'])->name('reports.sales-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\SalesReportController::class, 'pdf'])->name('reports.sales-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\SalesReportController::class, 'export'])->name('reports.sales-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\SalesReportController::class, 'exportCsv'])->name('reports.sales-report.export-csv');
         });
 
         Route::group(['prefix' => 'expense-report'], function () {

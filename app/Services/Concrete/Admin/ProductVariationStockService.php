@@ -13,12 +13,16 @@ use App\Models\PurchaseReturn;
 use App\Models\ProductVariationStock;
 use App\Models\ProductVariationStockTransaction;
 use App\Repository\Repository;
+use App\Traits\Auditable;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
 class ProductVariationStockService
 {
+    use Auditable;
+
     protected $model_product_variation_stock;
     protected $with = ['business', 'product', 'productVariation', 'warehouse', 'createdBy', 'updatedBy', 'deletedBy'];
 
@@ -140,13 +144,30 @@ class ProductVariationStockService
         ], $product_variation_stock_id);
     }
 
+    /**
+     * Only allowed when the stock row's quantity is already zero - there is
+     * no valid "reversal" for deleting a row that still carries an on-hand
+     * balance (use a stock transaction reversal instead, which keeps the
+     * ledger consistent). See Phase 1 plan's "Stock Movement Deletion/
+     * Reversal fix".
+     */
     public function delete($product_variation_stock_id)
     {
-        return $this->model_product_variation_stock->update([
+        $stock = $this->model_product_variation_stock->getModel()::where('is_deleted', 0)->findOrFail($product_variation_stock_id);
+
+        if (abs((float) $stock->quantity) > 0.0009) {
+            throw new Exception('This stock record still has an on-hand quantity of ' . $stock->quantity . ' and cannot be deleted. Reverse its stock transactions instead.');
+        }
+
+        $result = $this->model_product_variation_stock->update([
             'is_deleted' => 1,
             'deletedby_id' => Auth::id(),
             'date_deleted' => now()
         ], $product_variation_stock_id);
+
+        $this->logActivity('stock', $product_variation_stock_id, 'deleted', $stock->only(['quantity', 'avg_price']), null, null, $stock->business_id);
+
+        return $result;
     }
 
     public function getAll()

@@ -73,7 +73,7 @@ class PaymentMethodController extends Controller
                     })
                     ->ignore($request->payment_method_id, 'payment_method_id')
             ],
-            'type' => ['required', Rule::in(['cash', 'card', 'bank', 'credit', 'wallet', 'other'])],
+            'type' => ['required', Rule::in(['cash', 'card', 'bank', 'credit', 'store_credit', 'wallet', 'other'])],
             'account_id' => [
                 Rule::requiredIf($request->type !== 'credit'),
                 'nullable',

@@ -28,6 +28,7 @@ class ProductVariationStockController extends Controller
     ) {
         $this->middleware('permission:stock.view')->only(['index', 'getData', 'byWarehouse', 'byBusiness', 'byProduct', 'byVariation', 'history']);
         $this->middleware('permission:stock.status')->only(['status']);
+        $this->middleware('permission:stock.delete')->only(['destroy']);
 
         $this->business_service = $business_service;
         $this->product_service = $product_service;
@@ -75,7 +76,7 @@ class ProductVariationStockController extends Controller
         } catch (Exception $e) {
 
             return $this->error(
-                Message::ERROR
+                $e->getMessage()
             );
         }
     }

@@ -126,6 +126,7 @@
                                                 @foreach ($customers as $item)
                                                     <option value="{{ $item->user_id }}" data-credit-limit="{{ $item->credit_limit ?? 0 }}"
                                                         data-walkin="{{ $item->is_walkin ? 1 : 0 }}" data-credit-days="{{ $item->credit_days ?? 0 }}"
+                                                        data-store-credit-balance="{{ $item->store_credit_balance ?? 0 }}"
                                                         data-phone="{{ $item->user->phone ?? '' }}" data-email="{{ $item->user->email ?? '' }}"
                                                         {{ $item->is_walkin ? 'selected' : '' }}>
                                                         {{ $item->user->name ?? '' }}{{ $item->is_walkin ? ' (Walk-in)' : '' }}
@@ -172,14 +173,16 @@
                                                 </select>
                                             </div>
                                         @endif
-                                        <div class="pos-field pos-field-voucher" id="voucherWrap">
+                                        <div class="pos-field pos-field-voucher" id="voucherWrap" style="position:relative;">
                                             <span class="pos-field-label">Voucher / Coupon</span>
                                             <div class="input-group input-group-sm">
-                                                <input type="text" class="form-control" id="voucher_code" placeholder="Enter code">
+                                                <input type="text" class="form-control" id="voucher_code" placeholder="Search or enter code" autocomplete="off">
                                                 <button class="btn btn-outline-primary" type="button" id="applyVoucherBtn">
                                                     Apply
                                                 </button>
                                             </div>
+                                            <input type="hidden" id="voucher_id" value="">
+                                            <div id="voucherSearchResults" class="list-group pos-search-results" style="display:none;"></div>
                                         </div>
                                     </div>
                                 @endif
@@ -203,6 +206,11 @@
                                                 <div class="d-flex justify-content-between align-items-center pos-credit-summary">
                                                     <span id="creditCustomerText"></span>
                                                     <a href="javascript:void(0);" id="creditCustomerChangeLink">Change</a>
+                                                </div>
+                                            </div>
+                                            <div class="d-none" id="storeCreditSummary">
+                                                <div class="d-flex justify-content-between align-items-center pos-credit-summary">
+                                                    <span id="storeCreditText"></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -651,6 +659,7 @@
                 'session_cash_movement' => url('admin/pos-register-session/cash-movement'),
                 'session_my_history' => url('admin/pos-register-session/my-history'),
                 'search_products' => url('admin/order/search-products'),
+                'search_vouchers' => url('admin/order/search-vouchers'),
                 'products_by_category' => url('admin/order/products-by-category'),
                 'resolve_prices' => url('admin/order/resolve-prices'),
                 'order_store' => url('admin/order'),

@@ -54,7 +54,7 @@ class AccountLedgerReportService
         $business_id = $obj['business_id'] ?? Auth::user()->business_id;
         $branch_id = $obj['branch_id'] ?? null;
 
-        $debitNormal = $this->classifier->isDebitNormal(optional($account->accountType)->name);
+        $debitNormal = $this->classifier->isDebitNormal(optional($account->accountType)->code);
 
         $filters = [
             'business_id' => $business_id,

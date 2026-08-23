@@ -143,9 +143,10 @@ class PaymentMethodService
     public function save($obj)
     {
         // Credit routes to the business's receivable account at posting time,
-        // so it doesn't need its own mapped account here. Every other type
-        // must have a valid account_id.
-        if (($obj['type'] ?? null) !== 'credit') {
+        // and store_credit to the business's dedicated store-credit account -
+        // neither needs its own mapped account here. Every other type must
+        // have a valid account_id.
+        if (!in_array($obj['type'] ?? null, ['credit', 'store_credit'], true)) {
             if (empty($obj['account_id'])) {
                 throw new Exception('Account is required for this payment method type.');
             }

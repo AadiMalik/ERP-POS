@@ -13,6 +13,7 @@ use App\Models\ProductVariationAttribute;
 use App\Models\ProductVariationPrice;
 use App\Models\ProductVariationPriceHistory;
 use App\Repository\Repository;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,8 @@ use Yajra\DataTables\DataTables;
 
 class ProductService
 {
+    use Auditable;
+
     protected $model_product;
     protected $model_product_image;
     protected $model_product_feature;
@@ -225,6 +228,11 @@ class ProductService
 
                         $requestVariationIds[] = $variation['product_variation_id'];
 
+                        $old_pricing = $this->model_product_variation->getModel()::where(
+                            'product_variation_id',
+                            $variation['product_variation_id']
+                        )->first(['purchase_price', 'sale_price', 'minimum_selling_price']);
+
                         $this->model_product_variation->getModel()::where(
                             'product_variation_id',
                             $variation['product_variation_id']
@@ -249,6 +257,22 @@ class ProductService
                         ]);
 
                         $product_variation_id = $variation['product_variation_id'];
+
+                        $new_pricing = [
+                            'purchase_price' => $variation['purchase_price'],
+                            'sale_price' => $variation['sale_price'],
+                            'minimum_selling_price' => $variation['minimum_selling_price'] ?? null,
+                        ];
+                        if ($old_pricing && $old_pricing->only(['purchase_price', 'sale_price', 'minimum_selling_price']) != $new_pricing) {
+                            $this->logActivity(
+                                'product',
+                                $product_variation_id,
+                                'price_changed',
+                                $old_pricing->only(['purchase_price', 'sale_price', 'minimum_selling_price']),
+                                $new_pricing,
+                                'Variation pricing updated for product ' . $product->name
+                            );
+                        }
 
                         $this->barcode_service->generateForVariation(
                             $this->model_product_variation->getModel()::find($product_variation_id),
@@ -443,13 +467,16 @@ class ProductService
     }
 
     /**
-     * Persists a variation's per-sale-type prices and "Apply Discount On"
-     * sale types - both are delete-and-recreate child rows (same pattern as
-     * ProductVariationAttribute), keyed off $variation['prices'] (assoc
-     * array sale_type_id => price) and $variation['discount_sale_type_ids']
+     * Persists a variation's per-sale-type prices/minimum-selling-prices and
+     * "Apply Discount On" sale types - both are delete-and-recreate child
+     * rows (same pattern as ProductVariationAttribute), keyed off
+     * $variation['prices'] (assoc array sale_type_id => ['price' => ...,
+     * 'minimum_selling_price' => ...]) and $variation['discount_sale_type_ids']
      * (only read when discount_apply_all is false). Diffs old vs new price
      * per sale type and logs a ProductVariationPriceHistory row for each one
-     * that actually changed, so price changes stay auditable.
+     * that actually changed, so price changes stay auditable. Minimum
+     * selling price is not part of that history (its schema is
+     * old_price/new_price-specific).
      */
     protected function savePricingForVariation($product_variation_id, $business_id, array $variation)
     {
@@ -460,12 +487,18 @@ class ProductService
 
         ProductVariationPrice::where('product_variation_id', $product_variation_id)->delete();
 
-        foreach ($prices as $sale_type_id => $price) {
+        foreach ($prices as $sale_type_id => $row) {
+            $price = is_array($row) ? ($row['price'] ?? null) : $row;
+            $minimum_selling_price = is_array($row) ? ($row['minimum_selling_price'] ?? null) : null;
+
             if ($sale_type_id === '' || $price === null || $price === '') {
                 continue;
             }
 
             $price = (float) $price;
+            $minimum_selling_price = ($minimum_selling_price !== null && $minimum_selling_price !== '')
+                ? (float) $minimum_selling_price
+                : null;
 
             ProductVariationPrice::create([
                 'product_variation_price_id' => generateUuid(),
@@ -473,6 +506,7 @@ class ProductService
                 'product_variation_id' => $product_variation_id,
                 'sale_type_id' => $sale_type_id,
                 'price' => $price,
+                'minimum_selling_price' => $minimum_selling_price,
                 'createdby_id' => Auth::id(),
                 'date_created' => now(),
             ]);

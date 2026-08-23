@@ -575,7 +575,7 @@ class PurchaseReturnService
                 $line_subtotal = $base_quantity * $unit_price;
                 $line_discount_amount = round($line_subtotal * $discount_percent / 100, 3);
                 $taxable = $line_subtotal - $line_discount_amount;
-                $line_tax_amount = round($taxable * $tax_percent / 100, 3);
+                $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent);
                 $line_total = $taxable + $line_tax_amount;
 
                 $subtotal += $line_subtotal;
@@ -717,6 +717,22 @@ class PurchaseReturnService
             ]);
 
             if ($new_status === Status::APPROVED && $old_status !== Status::APPROVED) {
+                // Re-check against every OTHER already-approved return for the
+                // same purchase line right before posting - the save()-time
+                // check only guards against already-approved returns that
+                // existed at save time, so two pending returns approved
+                // concurrently (or in sequence) could otherwise both pass and
+                // together over-return a purchase line. Mirrors
+                // OrderReturnService::status()'s equivalent guard.
+                foreach ($purchase_return->purchaseReturnDetails as $detail) {
+                    $received_quantity = (float) ($detail->received_quantity ?? 0);
+                    $already_returned = $this->getAlreadyReturnedQuantity($detail->purchase_detail_id, $detail->good_receipt_note_id);
+
+                    if (($already_returned + (float) $detail->return_quantity) > $received_quantity + 0.0009) {
+                        throw new Exception('Cannot approve this return: another approved return already covers part of this purchase line, and approving this one would exceed the received quantity.');
+                    }
+                }
+
                 $this->applyPurchaseReturnPosting($purchase_return);
             } elseif ($old_status === Status::APPROVED && $new_status !== Status::APPROVED) {
                 $this->reversePurchaseReturnPosting($purchase_return);
@@ -848,6 +864,8 @@ class PurchaseReturnService
             'description'             => 'Purchase Return - ' . $purchase_return->purchase_return_no,
         ]);
 
+        \App\Services\Concrete\Admin\JournalEntryService::assertBalanced($journal_entry->journal_entry_id);
+
         foreach ($purchase_return->purchaseReturnDetails as $detail) {
             $base_quantity = $detail->base_quantity;
 
@@ -859,6 +877,7 @@ class PurchaseReturnService
                 ->where('warehouse_id', $purchase_return->warehouse_id)
                 ->where('product_id', $detail->product_id)
                 ->where('product_variation_id', $detail->product_variation_id)
+                ->lockForUpdate()
                 ->first();
 
             $existing_avg = $stock->avg_price ?? 0;
@@ -922,6 +941,8 @@ class PurchaseReturnService
             ->first();
 
         if ($journal_entry) {
+            app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+
             $journal_entry->update([
                 'is_deleted'   => 1,
                 'deletedby_id' => Auth::id(),

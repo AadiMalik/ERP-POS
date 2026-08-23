@@ -336,9 +336,20 @@ class PosRegisterSessionService
 
             $discount_order_count = $posted_orders->filter(fn ($o) => (float) $o->discount_amount > 0)->count();
             $tax_order_count = $posted_orders->filter(fn ($o) => (float) $o->tax_amount > 0)->count();
+        }
 
-            // No refund mechanism exists yet - kept at 0 until a later phase adds it.
-            $cash_refunds = 0;
+        // Approved cash refunds attributed to this session (see
+        // OrderReturnService::applyOrderReturnPosting()) - joined to
+        // payment_methods rather than trusting a stored "cash" label, same
+        // as the sales-side cash bucketing above.
+        if (Schema::hasTable('order_returns')) {
+            $cash_refunds = (float) DB::table('order_returns')
+                ->join('payment_methods', 'payment_methods.payment_method_id', '=', 'order_returns.refund_payment_method_id')
+                ->where('order_returns.pos_register_session_id', $pos_register_session_id)
+                ->where('order_returns.status', 'approved')
+                ->where('order_returns.is_deleted', 0)
+                ->where('payment_methods.type', 'cash')
+                ->sum('order_returns.total');
         }
 
         $cash_movements_in = PosRegisterCashMovement::where('pos_register_session_id', $pos_register_session_id)

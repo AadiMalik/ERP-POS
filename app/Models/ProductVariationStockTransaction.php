@@ -32,6 +32,7 @@ class ProductVariationStockTransaction extends Model
         'reference_id',
         'reference_type',
         'remarks',
+        'delete_reason',
         'product_variation_batch_id',
         'is_deleted',
         'createdby_id',

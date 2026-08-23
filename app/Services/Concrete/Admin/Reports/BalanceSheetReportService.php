@@ -45,7 +45,11 @@ class BalanceSheetReportService
         $asOf = !empty($obj['as_of_date']) ? Carbon::parse($obj['as_of_date'])->endOfDay() : Carbon::today()->endOfDay();
 
         $accountsQuery = Account::with(['accountType', 'accountSubType'])
-            ->whereHas('accountType', fn ($q) => $q->whereIn('name', [AccountTypes::ASSETS, AccountTypes::LIABILITIES, AccountTypes::EQUITY]))
+            ->whereHas('accountType', fn ($q) => $q->whereIn('code', [
+                AccountTypes::CODES[AccountTypes::ASSETS],
+                AccountTypes::CODES[AccountTypes::LIABILITIES],
+                AccountTypes::CODES[AccountTypes::EQUITY],
+            ]))
             ->where('is_deleted', 0)
             ->where('status', Status::ACTIVE);
 
@@ -71,13 +75,14 @@ class BalanceSheetReportService
             $totalMap = $this->ledger_query_service->totalBalances($filters, $asOf);
 
             foreach ($accounts as $account) {
-                $typeName = optional($account->accountType)->name;
+                $typeCode = optional($account->accountType)->code;
+                $subTypeCode = optional($account->accountSubType)->code;
                 $subTypeName = optional($account->accountSubType)->name;
-                $debitNormal = $this->classifier->isDebitNormal($typeName);
+                $debitNormal = $this->classifier->isDebitNormal($typeCode);
                 $totals = $totalMap[$account->account_id] ?? ['debit' => 0, 'credit' => 0];
                 $amount = round($debitNormal ? $totals['debit'] - $totals['credit'] : $totals['credit'] - $totals['debit'], 2);
 
-                if ($subTypeName === AccountSubTypes::CURRENT_YEAR_EARNINGS && (abs($totals['debit']) > 0.009 || abs($totals['credit']) > 0.009)) {
+                if ($subTypeCode === AccountSubTypes::CODES[AccountSubTypes::CURRENT_YEAR_EARNINGS] && (abs($totals['debit']) > 0.009 || abs($totals['credit']) > 0.009)) {
                     $cyeHasPostedActivity = true;
                 }
 
@@ -92,10 +97,10 @@ class BalanceSheetReportService
                     'amount'          => $amount,
                 ];
 
-                if ($typeName === AccountTypes::ASSETS) {
-                    $assetBuckets[$this->classifier->bsBucket($typeName, $subTypeName)]->push($row);
-                } elseif ($typeName === AccountTypes::LIABILITIES) {
-                    $liabilityBuckets[$this->classifier->bsBucket($typeName, $subTypeName)]->push($row);
+                if ($typeCode === AccountTypes::CODES[AccountTypes::ASSETS]) {
+                    $assetBuckets[$this->classifier->bsBucket($typeCode, $subTypeCode)]->push($row);
+                } elseif ($typeCode === AccountTypes::CODES[AccountTypes::LIABILITIES]) {
+                    $liabilityBuckets[$this->classifier->bsBucket($typeCode, $subTypeCode)]->push($row);
                 } else {
                     $equityRows->push($row);
                 }

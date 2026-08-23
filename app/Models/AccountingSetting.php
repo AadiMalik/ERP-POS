@@ -26,6 +26,7 @@ class AccountingSetting extends Model
         'default_expense_account_id',
         'default_supplier_account_id',
         'default_customer_account_id',
+        'default_store_credit_account_id',
         'default_carriage_account_id',
         'default_round_off_account_id',
         'default_purchase_return_account_id',
