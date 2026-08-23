@@ -654,6 +654,7 @@
             'business_id' => $business_id,
             'branch_id' => $branch_id,
             'pos_setting' => $pos_setting,
+            'allow_negative_stock' => (bool) $inventory_setting->negative_stock,
             'payment_methods' => $payment_methods,
             'sale_types' => $sale_types,
             'tax_rates_setting' => [

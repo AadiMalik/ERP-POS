@@ -13,6 +13,7 @@ use App\Models\BusinessSetting;
 use App\Models\CustomerProfile;
 use App\Models\CustomerSetting;
 use App\Models\Discount;
+use App\Models\InventorySetting;
 use App\Models\Journal;
 use App\Models\JournalEntry;
 use App\Models\JournalEntryDetail;
@@ -664,10 +665,19 @@ class OrderService
         ];
 
         foreach ($order->details as $detail) {
+            // Live stock, not whatever it was when the order was held - lets
+            // the POS cart show an up-to-date "in stock" hint (and re-enforce
+            // the max-qty rule) as soon as a held/draft order is reopened for
+            // editing. is_track_stock false (or no warehouse resolved) means
+            // "unlimited" (available_stock stays null), same convention as
+            // attachAvailableStock() uses for search/browse.
+            $product = $detail->product;
+            $is_tracked = (bool) ($product->is_track_stock ?? false);
+
             $data['details'][] = [
                 'order_detail_id' => $detail->order_detail_id,
                 'product_id' => $detail->product_id,
-                'product_name' => $detail->product->name ?? '',
+                'product_name' => $product->name ?? '',
                 'product_variation_id' => $detail->product_variation_id,
                 'product_variation_name' => $detail->productVariation->name ?? '',
                 'unit_id' => $detail->unit_id,
@@ -687,6 +697,8 @@ class OrderService
                 'total' => $detail->total,
                 'cost_price' => $detail->cost_price,
                 'notes' => $detail->notes,
+                'is_track_stock' => $is_tracked,
+                'available_stock' => $is_tracked ? $this->getAvailableStock($order->business_id, $order->warehouse_id, $detail->product_id, $detail->product_variation_id) : null,
             ];
         }
 
@@ -769,6 +781,99 @@ class OrderService
 
         if ($warehouse->status !== Status::ACTIVE) {
             throw new Exception('The selected warehouse "' . $warehouse->name . '" is inactive and cannot be used for a sale.');
+        }
+    }
+
+    /**
+     * Business-level "allow selling below/at zero stock" toggle -
+     * InventorySetting::negative_stock (Settings -> Inventory -> "Negative
+     * Stock"). When on, stock checks throughout this service (save(),
+     * post(), resume revalidation) are skipped entirely for tracked
+     * products, matching this business's explicit choice to allow
+     * overselling. Off (the default) is a hard block, same as this
+     * service's behavior before this setting was wired up.
+     */
+    protected function allowsNegativeStock($business_id): bool
+    {
+        return (bool) (InventorySetting::where('business_id', $business_id)->value('negative_stock') ?? false);
+    }
+
+    /**
+     * Current on-hand quantity for one variation at one warehouse - the same
+     * ProductVariationStock.quantity lookup duplicated across this codebase's
+     * stock-consuming services (e.g. TransferNoteService::getAvailableQuantity()).
+     * Unlocked read - callers that need a concurrency-safe value take their
+     * own lockForUpdate() (see post()).
+     */
+    protected function getAvailableStock($business_id, $warehouse_id, $product_id, $product_variation_id): float
+    {
+        if (empty($warehouse_id)) {
+            return 0.0;
+        }
+
+        return (float) (ProductVariationStock::where('business_id', $business_id)
+            ->where('warehouse_id', $warehouse_id)
+            ->where('product_id', $product_id)
+            ->where('product_variation_id', $product_variation_id)
+            ->value('quantity') ?? 0);
+    }
+
+    /**
+     * Resolves (business_id, warehouse_id) for a POS browse/price request -
+     * mirrors previewVoucher()'s own resolution (register_session_id for the
+     * POS channel, else an explicit warehouse_id/business_id for any other
+     * channel). Lenient by design (never throws): these are read-only
+     * product listing endpoints, so an unresolvable warehouse just means
+     * available_stock can't be attached, not that the request should fail.
+     */
+    protected function resolveWarehouseContext(array $obj): array
+    {
+        $business_id = $obj['business_id'] ?? Auth::user()->business_id ?? null;
+        $warehouse_id = $obj['warehouse_id'] ?? null;
+
+        if (!empty($obj['register_session_id'])) {
+            $session = PosRegisterSession::find($obj['register_session_id']);
+
+            if ($session) {
+                $business_id = $session->business_id ?? $business_id;
+                $warehouse_id = $session->register->warehouse_id ?? $warehouse_id;
+            }
+        }
+
+        return [$business_id, $warehouse_id];
+    }
+
+    /**
+     * Attaches is_track_stock/available_stock onto each ProductVariation in
+     * the given collection. Tracked-ness comes from `$variation->product`
+     * (already eager-loaded by every caller) by default, or from the
+     * optional $is_tracked_by_product_id map for getProductsByCategory()'s
+     * flattened list - that caller can't set a `product` relation back onto
+     * each variation without creating a circular reference when the
+     * product->productVariations tree is JSON-encoded (variation.product
+     * would re-embed product.product_variations, including itself).
+     * available_stock is left null for a non-tracked product (unlimited, not
+     * a real number) so the POS UI can tell "not tracked" apart from "zero
+     * in stock".
+     */
+    protected function attachAvailableStock($variations, ?string $business_id, ?string $warehouse_id, ?array $is_tracked_by_product_id = null): void
+    {
+        if ($variations->isEmpty()) {
+            return;
+        }
+
+        $stocks = empty($warehouse_id) ? collect() : ProductVariationStock::where('business_id', $business_id)
+            ->where('warehouse_id', $warehouse_id)
+            ->whereIn('product_variation_id', $variations->pluck('product_variation_id'))
+            ->pluck('quantity', 'product_variation_id');
+
+        foreach ($variations as $variation) {
+            $is_tracked = $is_tracked_by_product_id !== null
+                ? (bool) ($is_tracked_by_product_id[$variation->product_id] ?? false)
+                : (bool) ($variation->product->is_track_stock ?? false);
+
+            $variation->setAttribute('is_track_stock', $is_tracked);
+            $variation->setAttribute('available_stock', $is_tracked ? (float) ($stocks[$variation->product_variation_id] ?? 0) : null);
         }
     }
 
@@ -1077,6 +1182,17 @@ class OrderService
             && (bool) ($pos_setting->allow_price_below_minimum ?? false)
             && !empty($obj['override_minimum_price']);
 
+        // Stock is only enforced here when actually persisting a real order
+        // (save()) - not for previewVoucher()'s stateless, transient-Order
+        // dry run ($persist=false), which may not even have a real
+        // warehouse_id resolved. This is the pre-post() safety net: it
+        // catches an out-of-stock/over-quantity line as soon as a draft/hold
+        // is saved (or re-saved on resume, see revalidateStockOnResume())
+        // rather than only at final checkout - post() still re-checks
+        // authoritatively (locked) regardless, since stock can move between
+        // this save and that checkout.
+        $skip_stock_check = !$persist || $this->allowsNegativeStock($order->business_id);
+
         foreach ($products as $line) {
             $quantity = (float) ($line['quantity'] ?? 0);
 
@@ -1103,6 +1219,19 @@ class OrderService
             }
 
             $base_quantity = $quantity * $conversion_factor;
+
+            if (!$skip_stock_check && $variation->product && $variation->product->is_track_stock) {
+                $available = $this->getAvailableStock($order->business_id, $order->warehouse_id, $variation->product_id, $variation->product_variation_id);
+
+                if ($base_quantity > $available) {
+                    throw new Exception(sprintf(
+                        'Insufficient stock for "%s". Available: %s, requested: %s.',
+                        $variation->name ?: ($variation->product->name ?? 'product'),
+                        $available,
+                        $base_quantity
+                    ));
+                }
+            }
 
             // A custom unit_price is only honored if explicitly provided - the
             // caller (controller) is responsible for only allowing that when the
@@ -1455,9 +1584,145 @@ class OrderService
         return $this->transitionStatus($order_id, ['draft'], 'hold', 'Order held');
     }
 
+    /**
+     * Resuming a held order can't just flip its status like hold()/reopen()
+     * (transitionStatus()) - stock available when it was held may no longer
+     * be valid (another sale, adjustment, or transfer could have moved it in
+     * the meantime), so every line is re-checked against current inventory
+     * first (see revalidateStockOnResume()) and the order is adjusted in
+     * place before the cashier resumes editing it. The adjustment messages
+     * are attached to the returned Order (stock_warnings) rather than
+     * thrown, since silently fixing the cart - not blocking the resume - is
+     * the point; the cashier is told what changed via that field
+     * (OrderController::resume() just passes response.Data through as-is,
+     * pos-screen.js's resumeOrder() surfaces it).
+     */
     public function resume($order_id)
     {
-        return $this->transitionStatus($order_id, ['hold'], 'draft', 'Order resumed');
+        DB::beginTransaction();
+
+        try {
+            $order = $this->model_order->getModel()::with(['details.product', 'payments'])->findOrFail($order_id);
+
+            if ($order->status !== 'hold') {
+                throw new Exception('This order cannot transition from "' . $order->status . '" to "draft".');
+            }
+
+            $warnings = $this->revalidateStockOnResume($order);
+
+            $order->update([
+                'status' => 'draft',
+                'updatedby_id' => Auth::id(),
+                'date_updated' => now(),
+            ]);
+
+            $this->recordStatusHistory($order_id, 'hold', 'draft', 'Order resumed');
+
+            DB::commit();
+
+            $result = $this->getById($order_id);
+            $result->setAttribute('stock_warnings', $warnings);
+
+            return $result;
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Re-checks every tracked-stock line of a held order against current
+     * inventory as it's resumed - only enforced when this business hasn't
+     * opted into InventorySetting::negative_stock (see
+     * allowsNegativeStock()), same gate as save()/post(). A line that's now
+     * at zero/negative stock is removed outright; a line whose held quantity
+     * now exceeds what's available is clamped down to it - never left able
+     * to exceed available stock. Order-level subtotal/discount/tax/total are
+     * adjusted by the resulting per-line deltas (order-level discount/
+     * voucher amounts are left as-is; recomputing those would mean re-running
+     * the full discount/voucher engine, out of scope for what is otherwise a
+     * stock-safety fix). Returns human-readable messages describing what
+     * changed, for the caller to surface to the cashier - never throws.
+     */
+    protected function revalidateStockOnResume(Order $order): array
+    {
+        $warnings = [];
+
+        if (empty($order->warehouse_id) || $this->allowsNegativeStock($order->business_id)) {
+            return $warnings;
+        }
+
+        $subtotal_delta = 0.0;
+        $discount_delta = 0.0;
+        $tax_delta = 0.0;
+        $total_delta = 0.0;
+        $removed_ids = [];
+
+        foreach ($order->details as $detail) {
+            $product = $detail->product;
+
+            if (!$product || !$product->is_track_stock) {
+                continue;
+            }
+
+            $available = $this->getAvailableStock($order->business_id, $order->warehouse_id, $detail->product_id, $detail->product_variation_id);
+
+            if ($available <= 0) {
+                $warnings[] = 'Removed "' . ($product->name ?? 'item') . '" - it is no longer in stock.';
+
+                $subtotal_delta -= (float) $detail->subtotal;
+                $discount_delta -= (float) $detail->discount_amount;
+                $tax_delta -= (float) $detail->tax_amount;
+                $total_delta -= (float) $detail->total;
+                $removed_ids[] = $detail->order_detail_id;
+                continue;
+            }
+
+            if ((float) $detail->base_quantity <= $available) {
+                continue;
+            }
+
+            $conversion_factor = (float) $detail->conversion_factor > 0 ? (float) $detail->conversion_factor : 1;
+            $new_base_quantity = $available;
+            $new_quantity = round($new_base_quantity / $conversion_factor, 3);
+            $new_subtotal = round($new_base_quantity * (float) $detail->unit_price, 3);
+            $new_discount_amount = round($new_subtotal * (float) $detail->discount / 100, 3);
+            $taxable = $new_subtotal - $new_discount_amount;
+            $new_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, (float) $detail->tax);
+            $new_total = round($taxable + $new_tax_amount, 3);
+
+            $subtotal_delta += $new_subtotal - (float) $detail->subtotal;
+            $discount_delta += $new_discount_amount - (float) $detail->discount_amount;
+            $tax_delta += $new_tax_amount - (float) $detail->tax_amount;
+            $total_delta += $new_total - (float) $detail->total;
+
+            $detail->update([
+                'quantity' => $new_quantity,
+                'base_quantity' => $new_base_quantity,
+                'subtotal' => $new_subtotal,
+                'discount_amount' => $new_discount_amount,
+                'tax_amount' => $new_tax_amount,
+                'total' => $new_total,
+            ]);
+
+            $warnings[] = 'Reduced quantity for "' . ($product->name ?? 'item') . '" to ' . $new_quantity . ' - only that much stock is available.';
+        }
+
+        if ($removed_ids) {
+            $this->model_order_detail->getModel()::whereIn('order_detail_id', $removed_ids)->delete();
+        }
+
+        if ($warnings) {
+            $order->update([
+                'subtotal' => round((float) $order->subtotal + $subtotal_delta, 3),
+                'discount_amount' => round((float) $order->discount_amount + $discount_delta, 3),
+                'tax_amount' => round((float) $order->tax_amount + $tax_delta, 3),
+                'total' => round((float) $order->total + $total_delta, 3),
+            ]);
+        }
+
+        return $warnings;
     }
 
     public function reopen($order_id)
@@ -1922,27 +2187,30 @@ class OrderService
                 ]);
             }
 
-            // Stock sufficiency check - tracked products only. This is a
-            // fast-fail UX pass only (unlocked read) so an obviously-doomed
-            // sale aborts early without taking any row locks; it is NOT the
+            // Stock sufficiency check - tracked products only, and only
+            // enforced when this business hasn't opted into
+            // InventorySetting::negative_stock ("allow selling below/at
+            // zero stock" - see allowsNegativeStock()). This is a fast-fail
+            // UX pass only (unlocked read) so an obviously-doomed sale
+            // aborts early without taking any row locks; it is NOT the
             // authoritative check under concurrency - the locked re-check
             // inside the decrement loop below is what actually prevents
             // overselling when two sales race for the same stock.
-            foreach ($order->details as $detail) {
-                $product = $detail->product;
+            $allow_negative_stock = $this->allowsNegativeStock($order->business_id);
 
-                if (!$product || !$product->is_track_stock) {
-                    continue;
-                }
+            if (!$allow_negative_stock) {
+                foreach ($order->details as $detail) {
+                    $product = $detail->product;
 
-                $available_qty = (float) (ProductVariationStock::where('business_id', $order->business_id)
-                    ->where('warehouse_id', $order->warehouse_id)
-                    ->where('product_id', $detail->product_id)
-                    ->where('product_variation_id', $detail->product_variation_id)
-                    ->value('quantity') ?? 0);
+                    if (!$product || !$product->is_track_stock) {
+                        continue;
+                    }
 
-                if ((float) $detail->base_quantity > $available_qty) {
-                    throw new Exception('Insufficient stock for "' . ($product->name ?? 'product') . '". Available: ' . $available_qty . ', required: ' . $detail->base_quantity . '.');
+                    $available_qty = $this->getAvailableStock($order->business_id, $order->warehouse_id, $detail->product_id, $detail->product_variation_id);
+
+                    if ((float) $detail->base_quantity > $available_qty) {
+                        throw new Exception('Insufficient stock for "' . ($product->name ?? 'product') . '". Available: ' . $available_qty . ', required: ' . $detail->base_quantity . '.');
+                    }
                 }
             }
 
@@ -1963,8 +2231,10 @@ class OrderService
 
                 // Authoritative check, now that the row is locked - the
                 // earlier pre-check above is only a fast-fail optimization
-                // and can be stale under concurrent checkouts.
-                if ($detail->product && $detail->product->is_track_stock && (float) $detail->base_quantity > (float) $existing_qty) {
+                // and can be stale under concurrent checkouts. Still
+                // skipped entirely when this business allows negative
+                // stock, same as the pre-check.
+                if (!$allow_negative_stock && $detail->product && $detail->product->is_track_stock && (float) $detail->base_quantity > (float) $existing_qty) {
                     throw new Exception('Insufficient stock for "' . ($detail->product->name ?? 'product') . '". Available: ' . $existing_qty . ', required: ' . $detail->base_quantity . '.');
                 }
 
@@ -2270,7 +2540,7 @@ class OrderService
 
     public function searchProducts($obj)
     {
-        $business_id = $obj['business_id'] ?? Auth::user()->business_id;
+        [$business_id, $warehouse_id] = $this->resolveWarehouseContext($obj);
         $term = $obj['term'] ?? '';
 
         $query = ProductVariation::with(['product', 'unit', 'saleUnit', 'productVariationUnitConversion.toUnit'])
@@ -2292,6 +2562,7 @@ class OrderService
         $variations = $query->limit(30)->get();
 
         $this->applyResolvedPricing($variations, $obj);
+        $this->attachAvailableStock($variations, $business_id, $warehouse_id);
 
         return $variations;
     }
@@ -2301,11 +2572,34 @@ class OrderService
      * given Sale Type - used by the POS screen to re-price the current cart
      * when the order-level Sale Type changes, or to price a single line when
      * the cashier overrides that line's Sale Type, without re-running product
-     * search.
+     * search. Also re-attaches is_track_stock/available_stock per variation
+     * (see attachAvailableStock()) so this same "sale type changed, re-price
+     * the cart" round trip keeps the cart's displayed stock current too.
      */
     public function resolvePrices($obj)
     {
-        return $this->pricing_engine->resolveBulk($obj['product_variation_ids'] ?? [], $obj['sale_type_id'] ?? null);
+        $ids = $obj['product_variation_ids'] ?? [];
+        $resolved = $this->pricing_engine->resolveBulk($ids, $obj['sale_type_id'] ?? null);
+
+        if (empty($ids)) {
+            return $resolved;
+        }
+
+        [$business_id, $warehouse_id] = $this->resolveWarehouseContext($obj);
+
+        $variations = ProductVariation::with('product')->whereIn('product_variation_id', $ids)->get();
+        $this->attachAvailableStock($variations, $business_id, $warehouse_id);
+
+        foreach ($variations as $variation) {
+            if (!isset($resolved[$variation->product_variation_id])) {
+                continue;
+            }
+
+            $resolved[$variation->product_variation_id]['is_track_stock'] = $variation->is_track_stock;
+            $resolved[$variation->product_variation_id]['available_stock'] = $variation->available_stock;
+        }
+
+        return $resolved;
     }
 
     /**
@@ -2342,7 +2636,7 @@ class OrderService
      */
     public function getProductsByCategory($obj)
     {
-        $business_id = $obj['business_id'] ?? Auth::user()->business_id;
+        [$business_id, $warehouse_id] = $this->resolveWarehouseContext($obj);
         $category_id = $obj['category_id'] ?? null;
 
         $query = Product::with([
@@ -2366,6 +2660,7 @@ class OrderService
 
         $all_variations = $products->flatMap(fn ($product) => $product->productVariations);
         $this->applyResolvedPricing($all_variations, $obj);
+        $this->attachAvailableStock($all_variations, $business_id, $warehouse_id, $products->pluck('is_track_stock', 'product_id')->all());
 
         return $products;
     }

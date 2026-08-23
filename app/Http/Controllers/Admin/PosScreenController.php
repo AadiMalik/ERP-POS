@@ -7,6 +7,7 @@ use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Models\BusinessSetting;
+use App\Models\InventorySetting;
 use App\Models\PosRegister;
 use App\Models\PosSetting;
 use App\Models\Role;
@@ -140,6 +141,7 @@ class PosScreenController extends Controller
 
         $pos_setting = PosSetting::firstOrCreate(['business_id' => $business_id]);
         $business_setting = BusinessSetting::firstOrCreate(['business_id' => $business_id]);
+        $inventory_setting = InventorySetting::firstOrCreate(['business_id' => $business_id]);
 
         $order_types = $this->order_type_service->getAllActive($business_id);
         $order_sources = $this->order_source_service->getAllActive($business_id);
@@ -197,6 +199,7 @@ class PosScreenController extends Controller
         return view('admin.pos.screen.index', compact(
             'pos_setting',
             'business_setting',
+            'inventory_setting',
             'business_id',
             'branch_id',
             'warehouse_id',

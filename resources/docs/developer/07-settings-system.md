@@ -18,6 +18,21 @@ permission) delegates to `App\Services\Concrete\Admin\SettingService`, which has
 one `updateXxxSetting()` method per domain — `routes/web.php`'s `setting` group
 maps one `POST` route per section to its update method.
 
+## Settings Consumed Outside the Settings Screen
+
+Most of these rows are read only by `SettingController`/`SettingService`
+itself, but some are consumed elsewhere as real business-rule gates:
+- `InventorySetting.negative_stock` ("Negative Stock") is read by
+  `OrderService::allowsNegativeStock()` and gates every stock check in the
+  POS sales flow (`OrderService::saveLinesAndComputeTotals()`,
+  `post()`, `revalidateStockOnResume()`) - off (default) hard-blocks
+  adding/holding/posting more of a tracked product than
+  `ProductVariationStock.quantity` allows; on, POS behaves as if stock is
+  unlimited. See the Sales & POS section of
+  [Modules, Controllers & Services](03-modules-controllers-services.md) and
+  the Business docs' "Stock Availability in POS" section
+  (`resources/docs/business/03-sales-pos.md`).
+
 ## Print Configuration (used beyond just the Settings screen)
 
 `App\Services\Concrete\Admin\PrintSettingResolverService` (singleton) resolves a

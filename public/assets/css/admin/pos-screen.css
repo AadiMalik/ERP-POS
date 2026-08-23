@@ -782,6 +782,35 @@
     color: var(--pos-muted);
 }
 
+/* Stock hint - shown wherever a tracked product/variation appears (product
+   grid, variation picker, search results, cart line). Untracked products
+   never render this at all (see stockHint() in pos-screen.js). */
+.pos-stock-hint {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--pos-muted);
+}
+
+.pos-stock-hint-out {
+    color: var(--pos-danger);
+    font-weight: 600;
+}
+
+.product-card-out-of-stock {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.product-card-out-of-stock:hover {
+    box-shadow: none;
+    transform: none;
+    border-color: var(--pos-border);
+}
+
+.pos-search-result-out-of-stock {
+    opacity: .6;
+}
+
 .product-card-add-btn {
     position: absolute;
     top: -1.2rem;

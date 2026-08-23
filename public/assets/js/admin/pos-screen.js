@@ -61,6 +61,53 @@
         return canChangePrice() && !!SETTING.allow_price_below_minimum && can('order.price.override-minimum');
     }
 
+    // Business-level "allow selling below/at zero stock" toggle
+    // (Settings -> Inventory -> Negative Stock), surfaced read-only via
+    // POS_CONFIG.allow_negative_stock (see PosScreenController::index()).
+    // When true, every client-side stock guard below is a no-op - the
+    // server (OrderService::save()/post()) allows overselling too, matching
+    // this business's explicit choice.
+    function allowsOutOfStockSale() {
+        return !!CFG.allow_negative_stock;
+    }
+
+    // Small "N in stock" / "Out of stock" hint - null/undefined
+    // available_stock means the product isn't stock-tracked (unlimited),
+    // so no hint is shown at all.
+    function stockHint(available_stock) {
+        if (available_stock === null || available_stock === undefined) {
+            return '';
+        }
+        return available_stock > 0
+            ? '<span class="pos-stock-hint">' + available_stock + ' in stock</span>'
+            : '<span class="pos-stock-hint pos-stock-hint-out">Out of stock</span>';
+    }
+
+    // Registers the qty (existing cart quantity + any quantity about to be
+    // added) a stock-tracked pv/line can't exceed when out-of-stock selling
+    // is off. Returns an error message string to block the action, or null
+    // to allow it. Mirrors updateLineFromRow()'s existing client-side
+    // minimum-price check - a UX-only mirror of the server's authoritative
+    // enforcement (OrderService::saveLinesAndComputeTotals()/post()), which
+    // always re-validates regardless of what the client does.
+    function stockBlockMessage(name, is_track_stock, available_stock, requestedQty) {
+        if (allowsOutOfStockSale() || !is_track_stock) {
+            return null;
+        }
+
+        available_stock = parseFloat(available_stock) || 0;
+
+        if (available_stock <= 0) {
+            return '"' + name + '" is out of stock.';
+        }
+
+        if (requestedQty > available_stock) {
+            return 'Only ' + available_stock + ' of "' + name + '" available in stock.';
+        }
+
+        return null;
+    }
+
     function money(v) {
         v = parseFloat(v || 0);
         if (isNaN(v)) v = 0;
@@ -280,9 +327,14 @@
 
         $('#posProductGrid').on('click', '.product-card', function () {
             var product = $(this).data('product');
-            if (product) {
-                handleGridProductClick(product);
+            if (!product) return;
+
+            if ($(this).hasClass('product-card-out-of-stock')) {
+                errorMessage('"' + (product.name || 'This product') + '" is out of stock.');
+                return;
             }
+
+            handleGridProductClick(product);
         });
 
         $('#productPickerGrid').on('click', '.product-card', function () {
@@ -290,8 +342,9 @@
             var pv = state.picker.variations[idx];
             if (!pv) return;
 
-            addProductToCart(pv, { image: firstImageOf(state.picker.product) });
-            state.product_picker_modal.hide();
+            if (addProductToCart(pv, { image: firstImageOf(state.picker.product) })) {
+                state.product_picker_modal.hide();
+            }
         });
 
         $('#cartRows').on('input change', '.line-qty, .line-price, .line-discount', function () {
@@ -777,7 +830,16 @@
     function searchProducts(term, isScan) {
         ajaxRequest({
             url: URLS.search_products,
-            data: { business_id: CFG.business_id, branch_id: CFG.branch_id, sale_type_id: $('#sale_type_id').val(), term: term },
+            data: {
+                business_id: CFG.business_id,
+                branch_id: CFG.branch_id,
+                sale_type_id: $('#sale_type_id').val(),
+                term: term,
+                // Lets the server resolve the register's warehouse so
+                // available_stock is scoped to it - see
+                // OrderService::resolveWarehouseContext().
+                register_session_id: state.session ? state.session.pos_register_session_id : null,
+            },
         })
             .then(function (response) {
                 var results = response.Data || [];
@@ -814,13 +876,18 @@
             var variation_name = item.name || '';
             var unit_name = primaryUnitOf(item).name;
             var displayPrice = item.resolved_price !== undefined ? item.resolved_price : item.sale_price;
+            var outOfStock = !!stockBlockMessage(product_name || variation_name, item.is_track_stock, item.available_stock, 1);
 
             var $row = $(
-                '<a href="javascript:void(0);" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">' +
+                '<a href="javascript:void(0);" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center' +
+                    (outOfStock ? ' pos-search-result-out-of-stock' : '') + '">' +
                     '<span>' + escapeHtml(product_name) + (variation_name ? ' - ' + escapeHtml(variation_name) : '') +
                         '<small class="text-muted d-block">' + escapeHtml(item.sku || '') + ' ' + escapeHtml(item.barcode || '') + '</small>' +
                     '</span>' +
-                    '<span class="fw-bold">' + money(displayPrice) + ' / ' + escapeHtml(unit_name) + '</span>' +
+                    '<span class="text-end">' +
+                        '<span class="fw-bold d-block">' + money(displayPrice) + ' / ' + escapeHtml(unit_name) + '</span>' +
+                        stockHint(item.available_stock) +
+                    '</span>' +
                 '</a>'
             );
 
@@ -1006,7 +1073,9 @@
     // choice (see primaryUnitOf()), so every line always uses the
     // variation's primary (Sale, else Base) unit. Every call site keeps
     // calling this with no quantity override, so the default (qty 1) is
-    // what's actually used.
+    // what's actually used. Returns true if the item was actually added,
+    // false if it was blocked by the stock guard - callers that only do
+    // something on success (e.g. close the picker modal) check this.
     function addProductToCart(pv, overrides) {
         overrides = overrides || {};
 
@@ -1024,10 +1093,21 @@
             return l.product_variation_id === pv.product_variation_id && l.unit_id === unit_id;
         });
 
+        var name = (pv.product && pv.product.name) || pv.name || 'This product';
+        var newQty = quantity + (existing ? (parseFloat(existing.quantity) || 0) : 0);
+
+        var blockMessage = stockBlockMessage(name, pv.is_track_stock, pv.available_stock, newQty);
+        if (blockMessage) {
+            errorMessage(blockMessage);
+            return false;
+        }
+
         if (existing) {
-            existing.quantity = (parseFloat(existing.quantity) || 0) + quantity;
+            existing.quantity = newQty;
+            existing.is_track_stock = pv.is_track_stock;
+            existing.available_stock = pv.available_stock;
             renderCart();
-            return;
+            return true;
         }
 
         state.line_seq += 1;
@@ -1052,6 +1132,11 @@
             // the client-side below-minimum-price validation (see
             // updateLineFromRow()/canOverrideMinPrice()).
             minimum_selling_price: pv.minimum_selling_price !== undefined ? pv.minimum_selling_price : null,
+            // Set by attachAvailableStock() (search/browse/reprice) - used
+            // for the client-side stock guard (see stockBlockMessage()) on
+            // this line going forward. null available_stock = not tracked.
+            is_track_stock: !!pv.is_track_stock,
+            available_stock: pv.available_stock !== undefined ? pv.available_stock : null,
             // null = inherits the order-level Sale Type (re-priced whenever it
             // changes); set only when the cashier overrides this one line's
             // Sale Type (see .line-sale-type, allowed only when
@@ -1063,6 +1148,7 @@
         });
 
         renderCart();
+        return true;
     }
 
     // Changing the order-level Sale Type (via #saleTypeSelect) force-syncs
@@ -1085,6 +1171,7 @@
             data: {
                 sale_type_id: saleTypeId,
                 product_variation_ids: variationIds,
+                register_session_id: state.session ? state.session.pos_register_session_id : null,
             },
         })
             .then(function (response) {
@@ -1099,6 +1186,8 @@
                     line.unit_price = r.price;
                     line.discount = r.discount_percentage;
                     line.minimum_selling_price = r.minimum_selling_price;
+                    line.is_track_stock = r.is_track_stock;
+                    line.available_stock = r.available_stock;
                 });
 
                 renderCart();
@@ -1120,11 +1209,20 @@
             data: {
                 sale_type_id: line.sale_type_id || $('#sale_type_id').val(),
                 product_variation_ids: [line.product_variation_id],
+                register_session_id: state.session ? state.session.pos_register_session_id : null,
             },
         })
             .then(function (response) {
                 var r = (response.Data || {})[line.product_variation_id];
-                if (!r || line.manual_override) return;
+                if (!r) return;
+
+                line.is_track_stock = r.is_track_stock;
+                line.available_stock = r.available_stock;
+
+                if (line.manual_override) {
+                    renderCart();
+                    return;
+                }
 
                 line.unit_price = r.price;
                 line.discount = r.discount_percentage;
@@ -1144,7 +1242,13 @@
 
         ajaxRequest({
             url: URLS.products_by_category,
-            data: { business_id: CFG.business_id, branch_id: CFG.branch_id, sale_type_id: $('#sale_type_id').val(), category_id: category_id || '' },
+            data: {
+                business_id: CFG.business_id,
+                branch_id: CFG.branch_id,
+                sale_type_id: $('#sale_type_id').val(),
+                category_id: category_id || '',
+                register_session_id: state.session ? state.session.pos_register_session_id : null,
+            },
         })
             .then(function (response) {
                 renderProductGrid(response.Data || []);
@@ -1185,6 +1289,16 @@
 
             var firstDisplayPrice = firstVariation.resolved_price !== undefined ? firstVariation.resolved_price : firstVariation.sale_price;
 
+            // Only a single-variation product shows its own stock right on
+            // the grid card - a multi-variation product's stock differs per
+            // variation, so it's shown per-card in the picker modal instead
+            // (see renderVariationPickerGrid()).
+            var stockHtml = variations.length === 1 ? stockHint(firstVariation.available_stock) : '';
+            var outOfStock = variations.length === 1
+                && !!stockBlockMessage(product.name, firstVariation.is_track_stock, firstVariation.available_stock, 1);
+
+            $card.toggleClass('product-card-out-of-stock', outOfStock);
+
             $card.html(
                 '<div class="product-card-img-wrap">' + imgHtml + badgeHtml + '</div>' +
                 '<div class="product-card-body">' +
@@ -1195,6 +1309,7 @@
                         '<span class="product-card-price">' + money(firstDisplayPrice) + '</span>' +
                         '<span class="product-card-unit">' + escapeHtml(unitName) + '</span>' +
                     '</div>' +
+                    stockHtml +
                 '</div>'
             );
 
@@ -1230,6 +1345,8 @@
             sale_unit_id: variation.sale_unit_id,
             sale_unit: variation.sale_unit,
             product_variation_unit_conversion: variation.product_variation_unit_conversion,
+            is_track_stock: variation.is_track_stock,
+            available_stock: variation.available_stock,
             product: { name: product.name, product_images: product.product_images },
         };
     }
@@ -1297,8 +1414,9 @@
 
         variations.forEach(function (pv, idx) {
             var unitName = primaryUnitOf(pv).name;
+            var outOfStock = !!stockBlockMessage(pv.name || product.name, pv.is_track_stock, pv.available_stock, 1);
 
-            var $card = $('<div class="product-card"></div>').data('idx', idx);
+            var $card = $('<div class="product-card"></div>').data('idx', idx).toggleClass('product-card-out-of-stock', outOfStock);
             $card.html(
                 '<div class="product-card-img-wrap">' + imgHtml + '</div>' +
                 '<div class="product-card-body">' +
@@ -1308,6 +1426,7 @@
                         '<span class="product-card-price">' + money(pv.resolved_price !== undefined ? pv.resolved_price : pv.sale_price) + '</span>' +
                         '<span class="product-card-unit">' + escapeHtml(unitName) + '</span>' +
                     '</div>' +
+                    stockHint(pv.available_stock) +
                 '</div>'
             );
 
@@ -1395,6 +1514,7 @@
                 imgHtml +
                 '<div class="cart-line-info">' +
                     '<div class="cart-line-name">' + lineDesc + '</div>' +
+                    stockHint(line.available_stock) +
                     saleTypeCell +
                 '</div>' +
                 '<div class="cart-line-price">' + priceCell + '</div>' +
@@ -1436,7 +1556,23 @@
         var line = state.cart.find(function (l) { return l.line_key === key; });
         if (!line) return;
 
-        line.quantity = parseFloat($row.find('.line-qty').val()) || 0;
+        var newQuantity = parseFloat($row.find('.line-qty').val()) || 0;
+
+        // UX-only stock guard, mirroring the server's authoritative one in
+        // OrderService::saveLinesAndComputeTotals()/post() - covers both the
+        // qty stepper (+/- triggers 'change', see its click handler) and a
+        // manually typed quantity. Reverts the input back to the last valid
+        // quantity rather than silently clamping, so the cashier sees
+        // exactly why nothing changed.
+        var blockMessage = stockBlockMessage(line.product_name, line.is_track_stock, line.available_stock, newQuantity);
+        if (blockMessage) {
+            errorMessage(blockMessage);
+            $row.find('.line-qty').val(line.quantity);
+            recalcLocal();
+            return;
+        }
+
+        line.quantity = newQuantity;
 
         var $discountInput = $row.find('.line-discount');
         var discountPercent = $discountInput.length ? (parseFloat($discountInput.val()) || 0) : (line.discount || 0);
@@ -2055,6 +2191,8 @@
                         sale_type_id: d.sale_type_id || null,
                         manual_override: false,
                         notes: d.notes || '',
+                        is_track_stock: !!d.is_track_stock,
+                        available_stock: d.available_stock !== undefined ? d.available_stock : null,
                     });
                 });
 
@@ -2247,35 +2385,48 @@
             });
     }
 
+    // Loads the order's details into the cart AFTER any hold -> draft
+    // transition (see below) rather than before - OrderService::resume()
+    // re-checks stock and can remove/reduce lines in place
+    // (revalidateStockOnResume()), so fetching details first would load the
+    // cart with stale, pre-adjustment quantities.
     function resumeOrder(order_id, status) {
-        ajaxRequest({ url: URLS.order_details + '/' + order_id })
-            .then(function (response) {
-                var data = response.Data;
-                loadCartFromDetails(data);
-
-                // OrderService::resume() only guards a hold -> draft
-                // transition and throws otherwise - an order that's already
-                // 'draft' (e.g. left stuck mid-checkout) just needs loading
-                // into the cart for editing, no status transition.
-                if (status !== 'hold') {
-                    successMessage('Order loaded for editing.');
+        function loadDetailsIntoCart() {
+            ajaxRequest({ url: URLS.order_details + '/' + order_id })
+                .then(function (response) {
+                    loadCartFromDetails(response.Data);
                     state.held_orders_offcanvas.hide();
                     loadHeldOrdersCount();
-                    return;
+                })
+                .catch(function (err) {
+                    errorMessage(err.Message || 'Unable to load order details.');
+                });
+        }
+
+        // OrderService::resume() only guards a hold -> draft transition and
+        // throws otherwise - an order that's already 'draft' (e.g. left
+        // stuck mid-checkout) just needs loading into the cart for editing,
+        // no status transition/stock revalidation.
+        if (status !== 'hold') {
+            successMessage('Order loaded for editing.');
+            loadDetailsIntoCart();
+            return;
+        }
+
+        ajaxRequest({ url: URLS.order_resume, method: 'POST', data: { order_id: order_id } })
+            .then(function (response) {
+                var warnings = (response.Data && response.Data.stock_warnings) || [];
+
+                if (warnings.length) {
+                    warningMessage('Order resumed - stock changed while it was on hold: ' + warnings.join(' '));
+                } else {
+                    successMessage('Order resumed.');
                 }
 
-                ajaxRequest({ url: URLS.order_resume, method: 'POST', data: { order_id: order_id } })
-                    .then(function () {
-                        successMessage('Order resumed.');
-                        state.held_orders_offcanvas.hide();
-                        loadHeldOrdersCount();
-                    })
-                    .catch(function (err) {
-                        errorMessage(err.Message || 'Unable to resume order.');
-                    });
+                loadDetailsIntoCart();
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to load order details.');
+                errorMessage(err.Message || 'Unable to resume order.');
             });
     }
 
@@ -2304,6 +2455,8 @@
                 sale_type_id: d.sale_type_id || null,
                 manual_override: false,
                 notes: d.notes || '',
+                is_track_stock: !!d.is_track_stock,
+                available_stock: d.available_stock !== undefined ? d.available_stock : null,
             });
         });
 

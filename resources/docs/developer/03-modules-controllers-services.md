@@ -57,6 +57,21 @@ Setup: `OrderTypeController`, `PaymentMethodController`, `OrderSourceController`
 `OrderService`), `OrderReturnController` (service: `OrderReturnService`),
 `CustomerPaymentController`.
 
+**Stock availability/validation in POS:** `OrderService::searchProducts()`,
+`getProductsByCategory()` and `resolvePrices()` attach `is_track_stock`/
+`available_stock` (current `ProductVariationStock.quantity` at the register's
+warehouse) onto every variation they return, so `pos-screen.js` can show it
+and block a cart quantity beyond it client-side. This is enforced
+server-side in three places, all gated by `allowsNegativeStock()`
+(`InventorySetting.negative_stock` - see
+[Settings System](07-settings-system.md)): `saveLinesAndComputeTotals()`
+(hold/draft save), `post()` (checkout - locked, authoritative, decrements
+stock), and `revalidateStockOnResume()` (runs inside `resume()`, before a
+held order's status flips back to draft - removes a line that's gone out of
+stock and clamps one whose held quantity now exceeds what's available,
+returning the adjustments as `stock_warnings` on the resumed order for the
+cashier).
+
 ## Accounting (`module:accounting`)
 Core: `AccountTypeController`, `AccountSubTypeController`,
 `ExpenseCategoryController`, `AccountController`, `JournalController`,

@@ -39,6 +39,36 @@ consumed which stock. Orders can also be placed on credit — an unpaid or parti
 paid order is tracked against the customer, and later settled via
 **Customer Payments**.
 
+## Stock Availability in POS
+
+For every stock-tracked product, the POS screen shows how much is currently
+available at the register's own warehouse — right on the product card for a
+single-variation product, and per variation in the picker when a product has
+more than one. A product that isn't stock-tracked shows no stock figure at
+all (it's treated as unlimited). This figure is always the live warehouse
+quantity, not a cached snapshot — it's refreshed every time products are
+searched/browsed, whenever the Sale Type changes (which re-prices the cart),
+and whenever a held order is resumed.
+
+By default, a cashier cannot add more of a product than is currently
+available, and a product already at zero (or negative) stock can't be added
+at all — this applies whether adding a new item, using the quantity +/-
+steppers, or typing a quantity directly. Business owners who want to allow
+selling past available stock (e.g. to take an order that will be fulfilled
+by an incoming purchase) can turn this restriction off via **Settings →
+Inventory → Negative Stock** — with it enabled, POS behaves as before and
+never blocks on quantity.
+
+Because a held order can sit for a while before it's resumed, its stock is
+never assumed to still be valid: resuming a held order re-checks every
+line's stock against current inventory. An item that's gone out of stock in
+the meantime is automatically removed from the cart, and a line whose held
+quantity now exceeds what's available is automatically reduced to the
+available amount — the cashier is shown exactly what changed. Stock is
+checked once more, authoritatively, the instant the sale is completed, so
+two cashiers racing for the last unit of the same product can never both
+succeed.
+
 ## Vouchers & Promotions
 
 A voucher can be as simple as "10% off with code SAVE10", or as targeted as a
