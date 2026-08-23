@@ -1406,6 +1406,44 @@
                             </a>
                         </li>
                     @endcanAccess
+                    @canAccessAny(['reports.service-sale-report.view', 'reports.service-purchase-report.view',
+                        'reports.service-transaction-summary.view', 'reports.service-payment-report.view'])
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Service Reports">Reports</div>
+                            </a>
+                            <ul class="menu-sub">
+                                @canAccess('reports.service-sale-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/service-sale-report') }}" class="menu-link">
+                                            <div data-i18n="Sale Service Report">Sale Service Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.service-purchase-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/service-purchase-report') }}" class="menu-link">
+                                            <div data-i18n="Purchase Service Report">Purchase Service Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.service-transaction-summary.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/service-transaction-summary') }}" class="menu-link">
+                                            <div data-i18n="Service Transaction Summary">Service Transaction Summary</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.service-payment-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/service-payment-report') }}" class="menu-link">
+                                            <div data-i18n="Service Payment Report">Service Payment Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                            </ul>
+                        </li>
+                    @endcanAccessAny
                 </ul>
             </li>
         @endcanAccessAny

@@ -1105,6 +1105,46 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         });
         }); // end module:inventory (procurement reports)
 
+        Route::group(['middleware' => ['module:service-management']], function () {
+        //service management reports - non-stock purchase/sale, gated on its
+        //own package module same as the Service Management screens themselves.
+        Route::group(['prefix' => 'service-sale-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\ServiceSaleReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\ServiceSaleReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\ServiceSaleReportController::class, 'print'])->name('reports.service-sale-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\ServiceSaleReportController::class, 'pdf'])->name('reports.service-sale-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\ServiceSaleReportController::class, 'export'])->name('reports.service-sale-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\ServiceSaleReportController::class, 'exportCsv'])->name('reports.service-sale-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'service-purchase-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\ServicePurchaseReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\ServicePurchaseReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\ServicePurchaseReportController::class, 'print'])->name('reports.service-purchase-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\ServicePurchaseReportController::class, 'pdf'])->name('reports.service-purchase-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\ServicePurchaseReportController::class, 'export'])->name('reports.service-purchase-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\ServicePurchaseReportController::class, 'exportCsv'])->name('reports.service-purchase-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'service-transaction-summary'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\ServiceTransactionSummaryReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\ServiceTransactionSummaryReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\ServiceTransactionSummaryReportController::class, 'print'])->name('reports.service-transaction-summary.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\ServiceTransactionSummaryReportController::class, 'pdf'])->name('reports.service-transaction-summary.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\ServiceTransactionSummaryReportController::class, 'export'])->name('reports.service-transaction-summary.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\ServiceTransactionSummaryReportController::class, 'exportCsv'])->name('reports.service-transaction-summary.export-csv');
+        });
+
+        Route::group(['prefix' => 'service-payment-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\ServicePaymentReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\ServicePaymentReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\ServicePaymentReportController::class, 'print'])->name('reports.service-payment-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\ServicePaymentReportController::class, 'pdf'])->name('reports.service-payment-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\ServicePaymentReportController::class, 'export'])->name('reports.service-payment-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\ServicePaymentReportController::class, 'exportCsv'])->name('reports.service-payment-report.export-csv');
+        });
+        }); // end module:service-management (service reports)
+
         Route::group(['middleware' => ['module:accounting']], function () {
         //accounting reports
         Route::group(['prefix' => 'general-ledger'], function () {

@@ -83,6 +83,7 @@ class RoleDefaultPermissions
                             'account-balance', 'day-book', 'cash-bank-ledger', 'income-report',
                             'expense-report', 'expense-detail-report', 'tax-report', 'equity-report',
                             'profit-loss', 'balance-sheet', 'accounts-payable', 'accounts-receivable',
+                            'service-transaction-summary', 'service-payment-report',
                         ]),
                         ['reports.budget-vs-actual.view']
                     )
@@ -93,7 +94,7 @@ class RoleDefaultPermissions
                     PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment', 'service-sale', 'service-sale-return']),
                     array_merge(
                         ['dashboard.view'],
-                        self::formatVariants(['customer-ledger', 'customer-aging', 'customer-payment-history', 'sales-report'])
+                        self::formatVariants(['customer-ledger', 'customer-aging', 'customer-payment-history', 'sales-report', 'service-sale-report'])
                     )
                 );
 
@@ -109,6 +110,7 @@ class RoleDefaultPermissions
                         self::formatVariants([
                             'supplier-ledger', 'supplier-aging', 'accounts-payable',
                             'supplier-payment-history', 'purchase-return-summary', 'purchase-return-detail',
+                            'service-purchase-report',
                         ])
                     )
                 );
@@ -133,6 +135,7 @@ class RoleDefaultPermissions
                         self::formatVariants([
                             'general-ledger', 'trial-balance', 'journal-register',
                             'account-ledger', 'account-balance', 'day-book',
+                            'service-transaction-summary', 'service-payment-report',
                         ]),
                         ['reports.budget-vs-actual.view']
                     )
