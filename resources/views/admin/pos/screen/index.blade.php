@@ -63,7 +63,10 @@
                         </div>
 
                         <div class="pos-field pos-field-ordertype pos-pill-group" data-select-target="order_type_id">
-                            <span class="pos-field-label">Order Type</span>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="pos-field-label">Order Type</span>
+                                @include('admin.partials.quick-add-btn', ['permission' => 'order-type.create', 'modal' => 'quickAddOrderTypeModal', 'label' => 'Order Type'])
+                            </div>
                             <div class="pos-pill-buttons">
                                 @foreach ($order_types as $item)
                                     <button type="button" class="pos-pill {{ $item->is_default ? 'active' : '' }}"
@@ -400,6 +403,8 @@
             </div>
         </div>
     </div>
+
+    @include('admin.order-type.model.quick-create')
 
     {{-- ================= Credit Payment Modal ================= --}}
     {{-- Shown after a Credit-type sale completes (see completeSale() in

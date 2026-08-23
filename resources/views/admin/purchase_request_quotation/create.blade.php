@@ -37,7 +37,10 @@ use Carbon\Carbon;
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="fw-semibold">Supplier<span class="text-danger">*</span></label>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <label class="fw-semibold mb-0">Supplier<span class="text-danger">*</span></label>
+                            @include('admin.partials.quick-add-btn', ['permission' => 'supplier.create', 'modal' => 'quickAddSupplierModal', 'label' => 'Supplier'])
+                        </div>
                         <select class="form-select" name="supplier_id" id="supplier_id" required>
                             <option value="">-- Select Supplier --</option>
                             @if (RoleNames::SUPERADMIN != getRoleName())
@@ -304,6 +307,8 @@ use Carbon\Carbon;
         </form>
     </div>
 </div>
+
+@include('admin.supplier.model.quick-create', ['business' => $business ?? []])
 @endsection
 
 @section('js')
@@ -328,6 +333,15 @@ use Carbon\Carbon;
         if (typeof $.fn.select2 !== 'undefined') {
             $('#business_id, #supplier_id, #purchase_request_id').select2();
         }
+
+        initQuickAdd({
+            modalId: '#quickAddSupplierModal',
+            formId: '#quickAddSupplierForm',
+            url: url_local + '/admin/supplier',
+            valueField: 'supplier_id',
+            labelField: 'name',
+            targetSelectIds: ['supplier_id'],
+        });
 
         // Set initial product index based on existing rows
         productIndex = $('#productRows tr').length || 0;

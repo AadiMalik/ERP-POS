@@ -30,7 +30,10 @@
                             </div>
                         @endif
                         <div class="col-md-3 mb-3">
-                            <label>Customer <span class="text-danger">*</span></label>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <label class="mb-0">Customer <span class="text-danger">*</span></label>
+                                @include('admin.partials.quick-add-btn', ['permission' => 'customer.create', 'modal' => 'quickAddCustomerModal', 'label' => 'Customer'])
+                            </div>
                             <select class="form-control select2" name="customer_id" id="customer_id">
                                 <option value="">--Select Customer--</option>
                                 @foreach ($customers as $item)
@@ -135,6 +138,8 @@
             </div>
         </div>
     </div>
+
+    @include('admin.customer.model.quick-create', ['business' => $business ?? []])
 @endsection
 
 @section('js')
@@ -166,6 +171,15 @@
                     width: '100%'
                 });
             }
+
+            initQuickAdd({
+                modalId: '#quickAddCustomerModal',
+                formId: '#quickAddCustomerForm',
+                url: url_local + '/admin/customer',
+                valueField: 'id',
+                labelField: 'name',
+                targetSelectIds: ['customer_id'],
+            });
 
             if (isEditMode && editItems.length) {
                 $.each(editItems, function(_, item) {

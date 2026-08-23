@@ -177,7 +177,10 @@ use App\Enums\RoleNames;
                                     </div>
                                     @endif
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Category <span class="text-danger">*</span></label>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <label class="fw-semibold mb-0">Category <span class="text-danger">*</span></label>
+                                            @include('admin.partials.quick-add-btn', ['permission' => 'category.create', 'modal' => 'quickAddCategoryModal', 'label' => 'Category'])
+                                        </div>
                                         <select class="form-select" name="category_id" id="category_id" required>
                                             <option value="">--Select Category--</option>
                                             @if (getRoleName() != RoleNames::SUPERADMIN)
@@ -191,14 +194,20 @@ use App\Enums\RoleNames;
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Sub Category</label>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <label class="fw-semibold mb-0">Sub Category</label>
+                                            @include('admin.partials.quick-add-btn', ['permission' => 'sub-category.create', 'modal' => 'quickAddSubCategoryModal', 'label' => 'Sub Category'])
+                                        </div>
                                         <select class="form-select" name="sub_category_id" id="sub_category_id">
                                             <option value="">--Select Sub Category--</option>
-                                            
+
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Brand <span class="text-danger">*</span></label>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <label class="fw-semibold mb-0">Brand <span class="text-danger">*</span></label>
+                                            @include('admin.partials.quick-add-btn', ['permission' => 'brand.create', 'modal' => 'quickAddBrandModal', 'label' => 'Brand'])
+                                        </div>
                                         <select class="form-select" name="brand_id" id="brand_id" required>
                                             <option value="">--Select Brand--</option>
                                             @if (getRoleName() != RoleNames::SUPERADMIN)
@@ -381,6 +390,10 @@ use App\Enums\RoleNames;
         </form>
     </div>
 </div>
+
+@include('admin.category.model.quick-create', ['business' => $businesses ?? []])
+@include('admin.sub_category.model.quick-create', ['business' => $businesses ?? [], 'categories' => $categories ?? []])
+@include('admin.brand.model.quick-create', ['business' => $businesses ?? []])
 
 <!-- VARIATION MODAL -->
 <div class="modal fade" id="variationModal">
@@ -1237,6 +1250,45 @@ use App\Enums\RoleNames;
         }).catch((err) => {
             errorMessage(err.Message);
         });
+    });
+
+    // ======================================================
+    // QUICK-ADD: CATEGORY / SUB CATEGORY / BRAND
+    // ======================================================
+
+    initQuickAdd({
+        modalId: '#quickAddCategoryModal',
+        formId: '#quickAddCategoryForm',
+        url: url_local + '/admin/category',
+        valueField: 'category_id',
+        labelField: 'name',
+        targetSelectIds: ['category_id'],
+    });
+
+    initQuickAdd({
+        modalId: '#quickAddBrandModal',
+        formId: '#quickAddBrandForm',
+        url: url_local + '/admin/brands',
+        valueField: 'brand_id',
+        labelField: 'name',
+        targetSelectIds: ['brand_id'],
+    });
+
+    // Sub Category's Category field mirrors whatever is currently loaded in
+    // the page's own #category_id select (covers both the static list and
+    // the Super Admin's business-driven AJAX-loaded list) instead of needing
+    // its own separately-passed category collection.
+    $('#quickAddSubCategoryModal').on('show.bs.modal', function() {
+        $('#qa_sub_category_category_id').html($('#category_id').html()).val($('#category_id').val());
+    });
+
+    initQuickAdd({
+        modalId: '#quickAddSubCategoryModal',
+        formId: '#quickAddSubCategoryForm',
+        url: url_local + '/admin/sub-category',
+        valueField: 'sub_category_id',
+        labelField: 'name',
+        targetSelectIds: ['sub_category_id'],
     });
 
 </script>

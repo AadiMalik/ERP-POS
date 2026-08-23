@@ -70,6 +70,9 @@ class DepartmentController extends Controller
 
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
+            if ($request->ajax()) {
+                return $this->validationResponse($validate->errors()->first());
+            }
             return redirect()->back()->withErrors($validate)->withInput();
         }
 
@@ -78,7 +81,14 @@ class DepartmentController extends Controller
         $obj['branch_id'] = Auth::user()->branch_id;
         $obj['status'] = $request->status ?? 'active';
 
-        $this->department_service->save($obj);
+        $department = $this->department_service->save($obj);
+
+        if ($request->ajax()) {
+            return $this->success(
+                empty($request->department_id) ? Message::SAVE : Message::UPDATE,
+                $department
+            );
+        }
 
         return redirect('admin/department')
             ->with('success', empty($request->department_id) ? Message::SAVE : Message::UPDATE);

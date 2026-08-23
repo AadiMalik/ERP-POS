@@ -418,6 +418,32 @@
         });
         $('#addCustomerSubmitBtn').on('click', submitAddCustomer);
 
+        // ---- Add Order Type modal (quick-add, mirrors #addCustomerModal) ----
+        // The visible UI is the pill-button row, not the hidden #order_type_id
+        // select directly, so on success a new pill is appended alongside the
+        // option (mirrors how a new payment method pill is added in
+        // renderPaymentMethodOptions()) and then selected via the same
+        // #order_type_id change -> syncPillsFromSelect() path every other
+        // order-type change already goes through.
+        initQuickAdd({
+            modalId: '#quickAddOrderTypeModal',
+            formId: '#quickAddOrderTypeForm',
+            url: url_local + '/admin/order-type',
+            valueField: 'order_type_id',
+            labelField: 'name',
+            targetSelectIds: ['order_type_id'],
+            onSuccess: function (data) {
+                $('.pos-field-ordertype .pos-pill-buttons').append(
+                    '<button type="button" class="pos-pill" data-value="' + data.order_type_id + '" data-code="' +
+                        (data.code || '') + '">' + escapeHtml(data.name || '') + '</button>'
+                );
+                // The pill didn't exist yet when the select's own change
+                // event ran syncPillsFromSelect() a moment ago, so re-run it
+                // now that the pill is in the DOM to mark it active.
+                syncPillsFromSelect();
+            },
+        });
+
         // ---- Credit Payment modal (shown after a Credit-type sale completes) ----
         $('#creditPaymentSaveBtn').on('click', function () { submitCreditInfo(true); });
         $('#creditPaymentSkipBtn').on('click', function () { submitCreditInfo(false); });

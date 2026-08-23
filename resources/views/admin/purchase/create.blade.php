@@ -78,9 +78,12 @@
                             </select>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>
-                                Supplier<span class="text-danger">*</span>
-                            </label>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <label class="mb-0">
+                                    Supplier<span class="text-danger">*</span>
+                                </label>
+                                @include('admin.partials.quick-add-btn', ['permission' => 'supplier.create', 'modal' => 'quickAddSupplierModal', 'label' => 'Supplier'])
+                            </div>
                             <select class="form-control select2" name="supplier_id" id="supplier_id">
                                 <option value="">--Select Supplier--</option>
                                 @foreach ($suppliers as $item)
@@ -226,6 +229,8 @@
             </div>
         </div>
     </div>
+
+    @include('admin.supplier.model.quick-create', ['business' => $business ?? []])
 @endsection
 
 @section('js')
@@ -255,6 +260,15 @@
             initializePage();
             bindPurchaseType();
             initializeExistingRows();
+
+            initQuickAdd({
+                modalId: '#quickAddSupplierModal',
+                formId: '#quickAddSupplierForm',
+                url: url_local + '/admin/supplier',
+                valueField: 'supplier_id',
+                labelField: 'name',
+                targetSelectIds: ['supplier_id'],
+            });
         });
 
         // ======================================================

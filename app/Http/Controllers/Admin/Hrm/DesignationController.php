@@ -74,6 +74,9 @@ class DesignationController extends Controller
 
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
+            if ($request->ajax()) {
+                return $this->validationResponse($validate->errors()->first());
+            }
             return redirect()->back()->withErrors($validate)->withInput();
         }
 
@@ -82,7 +85,14 @@ class DesignationController extends Controller
         $obj['branch_id'] = Auth::user()->branch_id;
         $obj['status'] = $request->status ?? 'active';
 
-        $this->designation_service->save($obj);
+        $designation = $this->designation_service->save($obj);
+
+        if ($request->ajax()) {
+            return $this->success(
+                empty($request->designation_id) ? Message::SAVE : Message::UPDATE,
+                $designation
+            );
+        }
 
         return redirect('admin/designation')
             ->with('success', empty($request->designation_id) ? Message::SAVE : Message::UPDATE);

@@ -95,6 +95,9 @@ class CustomerController extends Controller
 
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
+            if ($request->ajax()) {
+                return $this->validationResponse($validate->errors()->first());
+            }
             return redirect()->back()->withErrors($validate)->withInput();
         }
 
@@ -135,7 +138,17 @@ class CustomerController extends Controller
             // Users screen already use, kept as the single source of truth.
             $customer = $this->user_service->save($obj);
         } catch (Exception $e) {
+            if ($request->ajax()) {
+                return $this->error($e->getMessage());
+            }
             return redirect()->back()->withErrors(['name' => $e->getMessage()])->withInput();
+        }
+
+        if ($request->ajax()) {
+            return $this->success(
+                empty($request->id) ? Message::SAVE : Message::UPDATE,
+                $customer
+            );
         }
 
         return redirect('admin/customer')

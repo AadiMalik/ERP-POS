@@ -93,6 +93,7 @@ use App\Enums\RoleNames;
         </div>
     </div>
     @include('admin/sub_category/model/create')
+    @include('admin.category.model.quick-create', ['business' => $business ?? []])
     @include('admin.partials.import-export-modal')
 </div>
 <!-- ========== table components end ========== -->
@@ -129,6 +130,17 @@ use App\Enums\RoleNames;
     });
     $('#search_btn').click(function() {
         initDataTablesub_category_table();
+    });
+
+    wireNestedQuickAdd('#ajaxModel', '#quickAddCategoryModal');
+
+    initQuickAdd({
+        modalId: '#quickAddCategoryModal',
+        formId: '#quickAddCategoryForm',
+        url: url_local + '/admin/category',
+        valueField: 'category_id',
+        labelField: 'name',
+        targetSelectIds: ['category_id'],
     });
     $('#business_id').change(function() {
         let business_id = $(this).val();

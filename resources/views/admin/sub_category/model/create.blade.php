@@ -26,7 +26,10 @@ use App\Enums\RoleNames;
                         </div>
                         @endif
                         <div class="col-md-12">
-                            <label class="form-label">Category <span class="text-danger">*</span></label>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <label class="form-label mb-0">Category <span class="text-danger">*</span></label>
+                                @include('admin.partials.quick-add-btn', ['permission' => 'category.create', 'modal' => 'quickAddCategoryModal', 'label' => 'Category'])
+                            </div>
                             <select id="category_id" name="category_id" class="form-select" required>
                                 <option value="">--Select Category--</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())

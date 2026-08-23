@@ -23,7 +23,10 @@
                         <input type="text" class="form-control" name="code" value="{{ old('code', $designation->code ?? '') }}">
                     </div>
                     <div class="col-md-6">
-                        <label class="fw-semibold">Department</label>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <label class="fw-semibold mb-0">Department</label>
+                            @include('admin.partials.quick-add-btn', ['permission' => 'department.create', 'modal' => 'quickAddDepartmentModal', 'label' => 'Department'])
+                        </div>
                         <select name="department_id" id="department_id" class="form-select">
                             <option value="">-- Select Department --</option>
                             @foreach ($departments as $item)
@@ -56,6 +59,8 @@
             </div>
         </form>
     </div>
+
+    @include('admin.hrm.department.model.quick-create')
 </div>
 @endsection
 
@@ -73,6 +78,15 @@
 <script>
     $(document).ready(function() {
         $('#department_id').select2();
+    });
+
+    initQuickAdd({
+        modalId: '#quickAddDepartmentModal',
+        formId: '#quickAddDepartmentForm',
+        url: url_local + '/admin/department',
+        valueField: 'department_id',
+        labelField: 'name',
+        targetSelectIds: ['department_id'],
     });
 </script>
 @endsection

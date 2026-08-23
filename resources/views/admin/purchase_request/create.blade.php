@@ -34,7 +34,10 @@
                         @endif
 
                         <div class="col-md-3">
-                            <label class="fw-semibold">Supplier</label>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <label class="fw-semibold mb-0">Supplier</label>
+                                @include('admin.partials.quick-add-btn', ['permission' => 'supplier.create', 'modal' => 'quickAddSupplierModal', 'label' => 'Supplier'])
+                            </div>
                             <select class="form-select" name="supplier_id" id="supplier_id">
                                 <option value="">-- Select Supplier --</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
@@ -182,6 +185,8 @@
             </form>
         </div>
     </div>
+
+    @include('admin.supplier.model.quick-create', ['business' => $business ?? []])
 @endsection
 
 @section('js')
@@ -203,6 +208,15 @@
         $(document).ready(function() {
             // Initialize Select2
             $('#business_id, #supplier_id, #warehouse_id').select2();
+
+            initQuickAdd({
+                modalId: '#quickAddSupplierModal',
+                formId: '#quickAddSupplierForm',
+                url: url_local + '/admin/supplier',
+                valueField: 'supplier_id',
+                labelField: 'name',
+                targetSelectIds: ['supplier_id'],
+            });
 
             // ============================================
             // 2. PRODUCT SELECTION - LOAD VARIATIONS

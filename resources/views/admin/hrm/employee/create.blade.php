@@ -38,8 +38,11 @@
                         <input type="text" class="form-control" name="employee_code" value="{{ old('employee_code', $employee->employee_code ?? '') }}" placeholder="Auto-generated if left blank">
                     </div>
                     <div class="col-md-3">
-                        <label class="fw-semibold">Department</label>
-                        <select name="department_id" class="form-select select2">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <label class="fw-semibold mb-0">Department</label>
+                            @include('admin.partials.quick-add-btn', ['permission' => 'department.create', 'modal' => 'quickAddDepartmentModal', 'label' => 'Department'])
+                        </div>
+                        <select name="department_id" id="department_id" class="form-select select2">
                             <option value="">-- Select --</option>
                             @foreach ($departments as $item)
                             <option value="{{ $item->department_id }}" {{ old('department_id', $employee->department_id ?? '') == $item->department_id ? 'selected' : '' }}>{{ $item->name }}</option>
@@ -47,8 +50,11 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="fw-semibold">Designation</label>
-                        <select name="designation_id" class="form-select select2">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <label class="fw-semibold mb-0">Designation</label>
+                            @include('admin.partials.quick-add-btn', ['permission' => 'designation.create', 'modal' => 'quickAddDesignationModal', 'label' => 'Designation'])
+                        </div>
+                        <select name="designation_id" id="designation_id" class="form-select select2">
                             <option value="">-- Select --</option>
                             @foreach ($designations as $item)
                             <option value="{{ $item->designation_id }}" {{ old('designation_id', $employee->designation_id ?? '') == $item->designation_id ? 'selected' : '' }}>{{ $item->name }}</option>
@@ -56,8 +62,11 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="fw-semibold">Shift</label>
-                        <select name="shift_id" class="form-select select2">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <label class="fw-semibold mb-0">Shift</label>
+                            @include('admin.partials.quick-add-btn', ['permission' => 'shift.create', 'modal' => 'quickAddShiftModal', 'label' => 'Shift'])
+                        </div>
+                        <select name="shift_id" id="shift_id" class="form-select select2">
                             <option value="">-- Select --</option>
                             @foreach ($shifts as $item)
                             <option value="{{ $item->shift_id }}" {{ old('shift_id', $employee->shift_id ?? '') == $item->shift_id ? 'selected' : '' }}>{{ $item->name }}</option>
@@ -166,6 +175,10 @@
         </form>
     </div>
 
+    @include('admin.hrm.department.model.quick-create')
+    @include('admin.hrm.designation.model.quick-create', ['departments' => $departments])
+    @include('admin.hrm.shift.model.quick-create')
+
     @if (isset($employee))
     <div class="card mt-4">
         <div class="card-header bg-white border-bottom">
@@ -248,6 +261,43 @@
     $(document).ready(function() {
         $('.select2').select2();
     });
+
+    initQuickAdd({
+        modalId: '#quickAddDepartmentModal',
+        formId: '#quickAddDepartmentForm',
+        url: url_local + '/admin/department',
+        valueField: 'department_id',
+        labelField: 'name',
+        targetSelectIds: ['department_id', 'qa_designation_department_id'],
+    });
+
+    wireNestedQuickAdd('#quickAddDesignationModal', '#quickAddDepartmentModal');
+
+    initQuickAdd({
+        modalId: '#quickAddDesignationModal',
+        formId: '#quickAddDesignationForm',
+        url: url_local + '/admin/designation',
+        valueField: 'designation_id',
+        labelField: 'name',
+        targetSelectIds: ['designation_id'],
+    });
+
+    initQuickAdd({
+        modalId: '#quickAddShiftModal',
+        formId: '#quickAddShiftForm',
+        url: url_local + '/admin/shift',
+        valueField: 'shift_id',
+        labelField: 'name',
+        targetSelectIds: ['shift_id'],
+        beforeSubmit: function() {
+            if ($('#quickAddShiftForm input[name="working_days[]"]:checked').length === 0) {
+                errorMessage('Please select at least one working day.');
+                return false;
+            }
+            return true;
+        },
+    });
+
     deleteRecord({
         buttonClass: "#deleteEmployeeDocument",
         url: url_local + "/admin/employee-document",

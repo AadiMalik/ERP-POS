@@ -72,6 +72,9 @@ class ShiftController extends Controller
 
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
+            if ($request->ajax()) {
+                return $this->validationResponse($validate->errors()->first());
+            }
             return redirect()->back()->withErrors($validate)->withInput();
         }
 
@@ -86,7 +89,14 @@ class ShiftController extends Controller
         $obj['break_duration_minutes'] = $request->break_duration_minutes ?? 0;
         $obj['grace_period_minutes'] = $request->grace_period_minutes ?? 0;
 
-        $this->shift_service->save($obj);
+        $shift = $this->shift_service->save($obj);
+
+        if ($request->ajax()) {
+            return $this->success(
+                empty($request->shift_id) ? Message::SAVE : Message::UPDATE,
+                $shift
+            );
+        }
 
         return redirect('admin/shift')
             ->with('success', empty($request->shift_id) ? Message::SAVE : Message::UPDATE);

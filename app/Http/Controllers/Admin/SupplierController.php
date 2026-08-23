@@ -95,6 +95,9 @@ class SupplierController extends Controller
 
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
+            if ($request->ajax()) {
+                return $this->validationResponse($validate->errors()->first());
+            }
             return redirect()->back()->withErrors($validate)->withInput();
         }
 
@@ -143,6 +146,13 @@ class SupplierController extends Controller
         }
         // Create/update supplier
         $supplier = $this->supplier_service->save($obj);
+
+        if ($request->ajax()) {
+            return $this->success(
+                empty($request->supplier_id) ? Message::SAVE : Message::UPDATE,
+                $supplier
+            );
+        }
 
         return redirect('admin/supplier')
             ->with('success', empty($request->supplier_id) ? Message::SAVE : Message::UPDATE);
