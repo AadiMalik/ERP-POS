@@ -23,22 +23,46 @@ class VoucherService
         'users',
         'orderTypes',
         'branches',
+        'brands',
+        'variations',
+        'saleTypes',
+        'orderSources',
+        'paymentMethods',
+        'getProducts',
+        'getCategories',
     ];
 
     // Maps the array key the caller may pass in $obj to the scope-pivot table/column
     // it belongs to. An absent key = leave the existing pivot rows untouched, an empty
     // array = explicitly clear the restriction back to "applies to all".
     protected $scope_dimensions = [
-        'product_ids'    => ['table' => 'voucher_products', 'column' => 'product_id'],
-        'category_ids'   => ['table' => 'voucher_categories', 'column' => 'category_id'],
-        'customer_ids'   => ['table' => 'voucher_customers', 'column' => 'user_id'],
-        'order_type_ids' => ['table' => 'voucher_order_types', 'column' => 'order_type_id'],
-        'branch_ids'     => ['table' => 'voucher_branches', 'column' => 'branch_id'],
+        'product_ids'       => ['table' => 'voucher_products', 'column' => 'product_id'],
+        'category_ids'      => ['table' => 'voucher_categories', 'column' => 'category_id'],
+        'customer_ids'      => ['table' => 'voucher_customers', 'column' => 'user_id'],
+        'order_type_ids'    => ['table' => 'voucher_order_types', 'column' => 'order_type_id'],
+        'branch_ids'        => ['table' => 'voucher_branches', 'column' => 'branch_id'],
+        'brand_ids'         => ['table' => 'voucher_brands', 'column' => 'brand_id'],
+        'variation_ids'     => ['table' => 'voucher_variations', 'column' => 'product_variation_id'],
+        'sale_type_ids'     => ['table' => 'voucher_sale_types', 'column' => 'sale_type_id'],
+        'order_source_ids'  => ['table' => 'voucher_order_sources', 'column' => 'order_source_id'],
+        'payment_method_ids' => ['table' => 'voucher_payment_methods', 'column' => 'payment_method_id'],
+        'get_product_ids'   => ['table' => 'voucher_get_products', 'column' => 'product_id'],
+        'get_category_ids'  => ['table' => 'voucher_get_categories', 'column' => 'category_id'],
     ];
 
     public function __construct()
     {
         $this->model_voucher = new Repository(new Voucher());
+    }
+
+    /**
+     * The full set of scope relations to eager-load whenever a Voucher is
+     * fetched for eligibility/calculation - exposed so callers (OrderService)
+     * don't have to duplicate this list.
+     */
+    public function relations(): array
+    {
+        return $this->with;
     }
 
     public function getData($obj)
@@ -63,15 +87,22 @@ class VoucherService
             RoleNames::SUPERADMIN,
             RoleNames::BUSINESSADMIN,
         ];
-        $datatable = $this->model_voucher->getModel()::where($wh)
+        $datatable = $this->model_voucher->getModel()::with(['products', 'categories', 'brands', 'variations'])
+            ->where($wh)
             ->where('is_deleted', 0)
             ->orderBy('name', $orderBy);
         $datatable = applyRoleScope($datatable, $allow_roles);
         return DataTables::of($datatable)
+            ->addColumn('rule', function ($item) {
+                return $item->describeRule();
+            })
             ->addColumn('type', function ($item) {
-                return ucfirst($item->type);
+                return $item->promo_type === 'discount' ? ucfirst($item->type) : '-';
             })
             ->addColumn('value', function ($item) {
+                if ($item->promo_type !== 'discount') {
+                    return '-';
+                }
                 return $item->type == 'percent' ? number_format($item->value, 2) . '%' : number_format($item->value, 3);
             })
             ->addColumn('usage', function ($item) {
@@ -121,14 +152,28 @@ class VoucherService
                 'code',
                 'name',
                 'type',
+                'promo_type',
                 'value',
                 'valid_from',
                 'valid_to',
+                'days_of_week',
+                'time_start',
+                'time_end',
                 'usage_limit_total',
                 'usage_limit_per_customer',
                 'min_order_amount',
+                'max_discount_amount',
+                'is_exclusive',
+                'buy_quantity',
+                'get_quantity',
+                'get_discount_percent',
                 'status',
             ])->toArray();
+
+            // days_of_week may arrive as an array of checkbox values from the form.
+            if (isset($header['days_of_week']) && is_array($header['days_of_week'])) {
+                $header['days_of_week'] = implode(',', $header['days_of_week']);
+            }
 
             if (!empty($obj['voucher_id'])) {
                 $voucher_id = $obj['voucher_id'];
@@ -286,12 +331,11 @@ class VoucherService
     /**
      * The single server-side eligibility check - Order posting and the POS screen
      * UI both call this so voucher-eligibility logic lives in exactly one place.
-     * Identical to DiscountService::isApplicable(), except the per-customer
-     * usage-limit check is fully implemented here since voucher redemptions are
-     * tracked in voucher_redemptions.
      *
-     * $context keys: product_id, category_id, user_id, order_type_id,
-     * branch_id, order_amount, now (optional Carbon, defaults to now()).
+     * $context keys: product_id, category_id, brand_id, variation_id, user_id,
+     * order_type_id, branch_id, sale_type_id, order_source_id, payment_method_ids
+     * (array, checked only when present - unknowable pre-payment), order_amount,
+     * now (optional Carbon, defaults to now()).
      *
      * @return array{eligible: bool, reason: string|null}
      */
@@ -309,6 +353,29 @@ class VoucherService
 
         if (!empty($voucher->valid_to) && $now->gt(Carbon::parse($voucher->valid_to)->endOfDay())) {
             return ['eligible' => false, 'reason' => 'This voucher has expired.'];
+        }
+
+        if (!empty($voucher->days_of_week)) {
+            $allowed_days = array_map('intval', explode(',', $voucher->days_of_week));
+
+            if (!in_array($now->dayOfWeek, $allowed_days, true)) {
+                return ['eligible' => false, 'reason' => 'This voucher is not valid on this day of the week.'];
+            }
+        }
+
+        if (!empty($voucher->time_start) && !empty($voucher->time_end)) {
+            $current = $now->format('H:i:s');
+            $start = Carbon::parse($voucher->time_start)->format('H:i:s');
+            $end = Carbon::parse($voucher->time_end)->format('H:i:s');
+
+            // Overnight window (e.g. 22:00 - 02:00): valid outside the "gap" between end and start.
+            $in_window = $start <= $end
+                ? ($current >= $start && $current <= $end)
+                : ($current >= $start || $current <= $end);
+
+            if (!$in_window) {
+                return ['eligible' => false, 'reason' => 'This voucher is not valid at this time of day.'];
+            }
         }
 
         if (!empty($voucher->usage_limit_total) && $voucher->used_count >= $voucher->usage_limit_total) {
@@ -360,7 +427,246 @@ class VoucherService
             return ['eligible' => false, 'reason' => 'This voucher does not apply to the selected branch.'];
         }
 
+        if ($voucher->saleTypes->isNotEmpty()
+            && !$voucher->saleTypes->contains('sale_type_id', $context['sale_type_id'] ?? null)
+        ) {
+            return ['eligible' => false, 'reason' => 'This voucher does not apply to the selected sale type.'];
+        }
+
+        if ($voucher->orderSources->isNotEmpty()
+            && !$voucher->orderSources->contains('order_source_id', $context['order_source_id'] ?? null)
+        ) {
+            return ['eligible' => false, 'reason' => 'This voucher does not apply to the selected order source.'];
+        }
+
+        // Payment method is unknowable until payments are finalized - only checked
+        // when the caller (OrderService::post()) actually supplies it.
+        if ($voucher->paymentMethods->isNotEmpty() && array_key_exists('payment_method_ids', $context)) {
+            $allowed = $voucher->paymentMethods->pluck('payment_method_id')->all();
+            $used = (array) $context['payment_method_ids'];
+
+            if (empty(array_intersect($allowed, $used))) {
+                return ['eligible' => false, 'reason' => 'This voucher does not apply to the payment method used.'];
+            }
+        }
+
+        if (!empty($context['brand_id']) && $voucher->brands->isNotEmpty()
+            && !$voucher->brands->contains('brand_id', $context['brand_id'])
+        ) {
+            return ['eligible' => false, 'reason' => 'This voucher does not apply to the selected brand.'];
+        }
+
+        if (!empty($context['variation_id']) && $voucher->variations->isNotEmpty()
+            && !$voucher->variations->contains('product_variation_id', $context['variation_id'])
+        ) {
+            return ['eligible' => false, 'reason' => 'This voucher does not apply to the selected variation.'];
+        }
+
         return ['eligible' => true, 'reason' => null];
+    }
+
+    /**
+     * True if the voucher has any item-level targeting configured (product,
+     * category, brand, or variation) - determines whether calculate() bases
+     * the discount on matching lines only or the whole order remainder.
+     */
+    public function hasItemScope(Voucher $voucher): bool
+    {
+        return $voucher->products->isNotEmpty()
+            || $voucher->categories->isNotEmpty()
+            || $voucher->brands->isNotEmpty()
+            || $voucher->variations->isNotEmpty();
+    }
+
+    /**
+     * Filters $lines (each an assoc array with at least product_id, category_id,
+     * brand_id, product_variation_id, base) down to those matching the voucher's
+     * product/category/brand/variation scope - a union match, any one configured
+     * dimension matching is enough. An unscoped voucher matches every line.
+     */
+    public function eligibleLines(Voucher $voucher, array $lines): array
+    {
+        if (!$this->hasItemScope($voucher)) {
+            return $lines;
+        }
+
+        $product_ids = $voucher->products->pluck('product_id')->all();
+        $category_ids = $voucher->categories->pluck('category_id')->all();
+        $brand_ids = $voucher->brands->pluck('brand_id')->all();
+        $variation_ids = $voucher->variations->pluck('product_variation_id')->all();
+
+        return array_values(array_filter($lines, function ($line) use ($product_ids, $category_ids, $brand_ids, $variation_ids) {
+            return (!empty($product_ids) && in_array($line['product_id'] ?? null, $product_ids, true))
+                || (!empty($category_ids) && in_array($line['category_id'] ?? null, $category_ids, true))
+                || (!empty($brand_ids) && in_array($line['brand_id'] ?? null, $brand_ids, true))
+                || (!empty($variation_ids) && in_array($line['product_variation_id'] ?? null, $variation_ids, true));
+        }));
+    }
+
+    /**
+     * Same union-match as eligibleLines() but for the "get" side of a
+     * buy-X-get-Y voucher - falls back to the buy-scope (eligibleLines) when
+     * no separate get_products/get_categories are configured.
+     */
+    public function eligibleGetLines(Voucher $voucher, array $lines): array
+    {
+        $product_ids = $voucher->getProducts->pluck('product_id')->all();
+        $category_ids = $voucher->getCategories->pluck('category_id')->all();
+
+        if (empty($product_ids) && empty($category_ids)) {
+            return $this->eligibleLines($voucher, $lines);
+        }
+
+        return array_values(array_filter($lines, function ($line) use ($product_ids, $category_ids) {
+            return (!empty($product_ids) && in_array($line['product_id'] ?? null, $product_ids, true))
+                || (!empty($category_ids) && in_array($line['category_id'] ?? null, $category_ids, true));
+        }));
+    }
+
+    /**
+     * Computes the voucher's discount for a set of order lines and allocates it
+     * per line. $lines items need: line_key, product_id, category_id, brand_id,
+     * product_variation_id, quantity, unit_price, base (post-line-discount amount
+     * for that line). $order_remaining is the whole order's post-line-discount,
+     * post-Discount amount (used when the voucher has no item scope).
+     *
+     * @return array{discount_amount: float, allocations: array<string, array{voucher_discount_amount: float, free_quantity: float}>}
+     */
+    public function calculate(Voucher $voucher, array $lines, float $order_remaining): array
+    {
+        if (in_array($voucher->promo_type, ['bogo', 'buy_x_get_y'], true)) {
+            return $this->calculateBogo($voucher, $lines);
+        }
+
+        $matching = $this->eligibleLines($voucher, $lines);
+        $base = $this->hasItemScope($voucher)
+            ? array_sum(array_column($matching, 'base'))
+            : max($order_remaining, 0);
+
+        if ($base <= 0) {
+            return ['discount_amount' => 0, 'allocations' => []];
+        }
+
+        $raw = $voucher->type === 'percent'
+            ? round($base * (float) $voucher->value / 100, 3)
+            : min((float) $voucher->value, $base);
+
+        if (!empty($voucher->max_discount_amount)) {
+            $raw = min($raw, (float) $voucher->max_discount_amount);
+        }
+
+        $target_lines = $this->hasItemScope($voucher) ? $matching : $lines;
+
+        return [
+            'discount_amount' => $raw,
+            'allocations' => $this->allocateProportionally($target_lines, $raw),
+        ];
+    }
+
+    /**
+     * BOGO / buy-X-get-Y: for every complete buy_quantity multiple of eligible
+     * "buy" quantity in the cart, get_quantity units become free/discounted on
+     * the "get" side, capped to what's actually in the cart. Free units are
+     * taken from the cheapest-priced eligible lines first to protect margin.
+     */
+    protected function calculateBogo(Voucher $voucher, array $lines): array
+    {
+        $buy_quantity = (int) $voucher->buy_quantity;
+        $get_quantity = (int) $voucher->get_quantity;
+
+        if ($buy_quantity <= 0 || $get_quantity <= 0) {
+            return ['discount_amount' => 0, 'allocations' => []];
+        }
+
+        $buy_lines = $this->eligibleLines($voucher, $lines);
+        $buy_qty_total = array_sum(array_column($buy_lines, 'quantity'));
+        $sets = intdiv((int) floor($buy_qty_total), $buy_quantity);
+
+        if ($sets <= 0) {
+            return ['discount_amount' => 0, 'allocations' => []];
+        }
+
+        $free_units_remaining = $sets * $get_quantity;
+
+        $get_lines = $this->eligibleGetLines($voucher, $lines);
+        usort($get_lines, fn ($a, $b) => $a['unit_price'] <=> $b['unit_price']);
+
+        $discount_total = 0;
+        $allocations = [];
+
+        foreach ($get_lines as $line) {
+            if ($free_units_remaining <= 0) {
+                break;
+            }
+
+            $free_here = min($free_units_remaining, $line['quantity']);
+            $line_discount = round($free_here * (float) $line['unit_price'] * (float) $voucher->get_discount_percent / 100, 3);
+
+            $allocations[$line['line_key']] = [
+                'voucher_discount_amount' => $line_discount,
+                'free_quantity' => $free_here,
+            ];
+
+            $discount_total += $line_discount;
+            $free_units_remaining -= $free_here;
+        }
+
+        return ['discount_amount' => round($discount_total, 3), 'allocations' => $allocations];
+    }
+
+    /**
+     * Spreads $amount across $lines proportionally to each line's own base,
+     * giving any rounding remainder to the last line so allocations sum exactly
+     * to $amount.
+     */
+    protected function allocateProportionally(array $lines, float $amount): array
+    {
+        $total_base = array_sum(array_column($lines, 'base'));
+
+        if ($total_base <= 0 || $amount <= 0 || empty($lines)) {
+            return [];
+        }
+
+        $allocations = [];
+        $allocated = 0;
+        $count = count($lines);
+
+        foreach ($lines as $i => $line) {
+            $share = $i === $count - 1
+                ? round($amount - $allocated, 3)
+                : round($amount * ($line['base'] / $total_base), 3);
+
+            $allocations[$line['line_key']] = [
+                'voucher_discount_amount' => $share,
+                'free_quantity' => 0,
+            ];
+
+            $allocated += $share;
+        }
+
+        return $allocations;
+    }
+
+    /**
+     * Active vouchers matching everything checkable pre-payment (business,
+     * schedule, branch, customer, order-type, order-source, sale-type) for the
+     * POS "available vouchers" list - final per-item/BOGO/payment-method
+     * eligibility is still resolved by isApplicable()/calculate() once a
+     * specific voucher is applied to the actual cart.
+     */
+    public function eligibleForCart(array $context): \Illuminate\Support\Collection
+    {
+        $business_id = $context['business_id'] ?? Auth::user()->business_id;
+
+        $vouchers = $this->model_voucher->getModel()::with($this->with)
+            ->where('business_id', $business_id)
+            ->where('status', Status::ACTIVE)
+            ->where('is_deleted', 0)
+            ->get();
+
+        return $vouchers->filter(function (Voucher $voucher) use ($context) {
+            return $this->isApplicable($voucher, $context)['eligible'];
+        })->values();
     }
 
     /**

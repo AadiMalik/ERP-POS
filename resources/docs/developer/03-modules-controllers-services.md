@@ -60,7 +60,17 @@ Setup: `OrderTypeController`, `PaymentMethodController`, `OrderSourceController`
 ## Accounting (`module:accounting`)
 Core: `AccountTypeController`, `AccountSubTypeController`,
 `ExpenseCategoryController`, `AccountController`, `JournalController`,
-`JournalEntryController`, `RecurringTransactionController`, `VoucherController`.
+`JournalEntryController`, `RecurringTransactionController`, `VoucherController`
+(service: `VoucherService` — the full promotional rule engine: percent/fixed/
+BOGO/buy-X-get-Y, scheduling, min-order/max-discount, usage limits, and
+product/category/brand/variation/customer/branch/sale-type/order-type/order-
+source/payment-method targeting; `isApplicable()` is the single eligibility
+gate and `calculate()`/`eligibleForCart()` are called from
+`OrderService::saveLinesAndComputeTotals()` and the POS "browse"/"apply"
+endpoints — see `OrderController::eligibleVouchers()`/`previewVoucher()`).
+`DiscountController` (Sales & POS, service: `DiscountService`) stays a simple
+named flat-rate discount with no conditions - deliberately not merged with
+Voucher's rule engine (see `resources/docs/developer/02-database-schema.md`).
 Advanced (`App\Http\Controllers\Admin\Accounting`): `FiscalYearController`,
 `AccountingPeriodController` (service: `AccountingPeriodService`),
 `PeriodClosingRuleController`, `BudgetController`. Expenses: `ExpenseController`,

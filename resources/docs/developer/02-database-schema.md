@@ -87,12 +87,30 @@ non-stock family).
 PosRegisterSession, User (cashier), User (customer), OrderType, OrderSource,
 SaleType, Discount, Voucher`; `hasMany OrderDetail, OrderPayment, CustomerPayment,
 OrderStatusHistory, OrderReturn`); `OrderDetail` (`belongsTo Order, Product,
-ProductVariation, Unit, SaleType`).
+ProductVariation, Unit, SaleType, Voucher`).
 
 **Removed in migration history — don't chase these:** a standalone `customers`
 table (replaced by `users` + `customer_profiles`), a `tax_rates` table (tax is now
-inline on orders), and several discount/voucher scope pivot tables (simplified
-directly onto `discounts`/`vouchers`).
+inline on orders). `discounts` was deliberately simplified down to a flat named
+rate (`name`/`type`/`value`/`status`, no scope, no schedule) — a Discount is a
+simple order-level rate the cashier picks manually in POS, nothing else.
+
+**Voucher rule engine:** all conditional/targeting complexity lives on
+`vouchers` only (not `discounts`) — `promo_type` (`discount`/`bogo`/
+`buy_x_get_y`), `days_of_week`/`time_start`/`time_end` (scheduling),
+`max_discount_amount` (percent cap), `is_exclusive` (blocks combining with a
+Discount), `buy_quantity`/`get_quantity`/`get_discount_percent` (BOGO/buy-X-
+get-Y). Scope pivots (empty = applies to all): `voucher_products`,
+`voucher_categories`, `voucher_brands`, `voucher_variations`,
+`voucher_customers`, `voucher_order_types`, `voucher_branches`,
+`voucher_sale_types`, `voucher_order_sources`, `voucher_payment_methods`, plus
+`voucher_get_products`/`voucher_get_categories` for the "get" side of a
+buy-X-get-Y when it differs from what was bought. `order_details` and
+`order_return_details` carry `voucher_id`/`voucher_discount_amount`/
+`free_quantity` per line so eligibility, BOGO free units, and returns can all
+be attributed and prorated per item rather than only at the order level. All
+eligibility/calculation logic lives in `VoucherService::isApplicable()`/
+`calculate()`, called from `OrderService::saveLinesAndComputeTotals()`.
 
 ## Accounting
 

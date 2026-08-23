@@ -192,6 +192,7 @@
                             <th class="text-end">Unit Price</th>
                             <th>Sale Type</th>
                             <th class="text-end">Discount</th>
+                            <th class="text-end">Voucher</th>
                             <th class="text-end">Final Unit Price</th>
                             <th class="text-end">Tax</th>
                             <th class="text-end">Total</th>
@@ -204,7 +205,12 @@
                                 <td>{{ $detail->product->name ?? '-' }}</td>
                                 <td>{{ $detail->productVariation->name ?? '-' }}</td>
                                 <td>{{ $detail->unit->name ?? '-' }}</td>
-                                <td class="text-end">{{ decimal($detail->quantity) }}</td>
+                                <td class="text-end">
+                                    {{ decimal($detail->quantity) }}
+                                    @if ($detail->free_quantity > 0)
+                                        <small class="text-success d-block">({{ decimal($detail->free_quantity) }} free)</small>
+                                    @endif
+                                </td>
                                 <td class="text-end">{{ currency($detail->unit_price) }}</td>
                                 <td>{{ $detail->sale_type_label ?? '-' }}</td>
                                 <td class="text-end">
@@ -213,13 +219,20 @@
                                         <small class="text-muted d-block">({{ decimal($detail->discount) }}%)</small>
                                     @endif
                                 </td>
+                                <td class="text-end">
+                                    @if ($detail->voucher_discount_amount > 0)
+                                        {{ currency($detail->voucher_discount_amount) }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="text-end">{{ currency($detail->final_unit_price) }}</td>
                                 <td class="text-end">{{ currency($detail->tax_amount) }}</td>
                                 <td class="text-end">{{ currency($detail->total) }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="text-center">No items found</td>
+                                <td colspan="12" class="text-center">No items found</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -246,9 +259,26 @@
                                 <td class="text-end">{{ currency($item_discount_total) }}</td>
                             </tr>
                             <tr>
-                                <td>Order Discount</td>
+                                <td>
+                                    Order Discount
+                                    @if (!empty($order->discount))
+                                        <small class="text-muted d-block">{{ $order->discount->name ?? '' }}</small>
+                                    @endif
+                                </td>
                                 <td class="text-end">{{ currency($order_level_discount) }}</td>
                             </tr>
+                            @if (!empty($order->voucher))
+                                <tr>
+                                    <td>
+                                        Voucher Discount
+                                        <small class="text-muted d-block">
+                                            {{ $order->voucher->code }}{{ $order->voucher->name ? ' - ' . $order->voucher->name : '' }}
+                                            <br>{{ $order->voucher->describeRule() }}
+                                        </small>
+                                    </td>
+                                    <td class="text-end">{{ currency($order->voucher_discount_amount ?? 0) }}</td>
+                                </tr>
+                            @endif
                             <tr>
                                 <td>Tax</td>
                                 <td class="text-end">{{ currency($order->tax_amount) }}</td>
@@ -256,6 +286,14 @@
                             <tr class="fw-bold">
                                 <td>Total</td>
                                 <td class="text-end">{{ currency($order->total) }}</td>
+                            </tr>
+                            <tr>
+                                <td>Paid Amount</td>
+                                <td class="text-end">{{ currency($order->paid_amount ?? 0) }}</td>
+                            </tr>
+                            <tr>
+                                <td>Due Amount</td>
+                                <td class="text-end">{{ currency($due) }}</td>
                             </tr>
                         </table>
                     </div>

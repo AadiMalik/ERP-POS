@@ -257,6 +257,8 @@
             $('#voucher_id').val('');
             clearTimeout(voucherSearchTimer);
 
+            clearVoucherFeedback();
+
             if (!term) {
                 $('#voucherSearchResults').hide().empty();
                 return;
@@ -364,13 +366,19 @@
         });
 
         $('#applyVoucherBtn').on('click', function () {
-            // Voucher application is not a separate endpoint - it rides along
-            // with the next store() call. Just recompute the local preview.
             $('#voucherSearchResults').hide().empty();
             recalcLocal();
+            previewVoucherApply();
         });
 
-        $('#discount_id').on('change', recalcLocal);
+        $('#browseVouchersBtn').on('click', function () {
+            browseEligibleVouchers();
+        });
+
+        $('#discount_id').on('change', function () {
+            recalcLocal();
+            previewVoucherApply();
+        });
 
         $('#holdOrderBtn').on('click', holdOrder);
         $('#completeSaleBtn').on('click', completeSale);
@@ -833,7 +841,7 @@
     }
 
     // ==============================
-    // VOUCHER SEARCH
+    // VOUCHER SEARCH / APPLY
     // ==============================
     function searchVouchers(term) {
         ajaxRequest({
@@ -848,6 +856,30 @@
             });
     }
 
+    // "Browse" button - lists vouchers already eligible for the current
+    // business/branch/customer/order-type/order-source/sale-type/schedule, so
+    // the cashier doesn't have to know a code. Final item/BOGO/payment-method
+    // eligibility is still resolved by previewVoucherApply() once picked.
+    function browseEligibleVouchers() {
+        ajaxRequest({
+            url: URLS.eligible_vouchers,
+            data: {
+                business_id: CFG.business_id,
+                branch_id: CFG.branch_id,
+                customer_id: $('#customer_id').val(),
+                order_type_id: $('#order_type_id').val(),
+                order_source_id: $('#order_source_id').val(),
+                sale_type_id: $('#sale_type_id').val(),
+            },
+        })
+            .then(function (response) {
+                renderVoucherSearchResults(response.Data || []);
+            })
+            .catch(function (err) {
+                errorMessage(err.Message || 'Unable to load available vouchers.');
+            });
+    }
+
     function renderVoucherSearchResults(results) {
         var $box = $('#voucherSearchResults');
         $box.empty();
@@ -859,7 +891,7 @@
         }
 
         results.forEach(function (item) {
-            var amount = item.type === 'percent' ? (parseFloat(item.value) || 0) + '% off' : money(item.value) + ' off';
+            var amount = item.rule || (item.type === 'percent' ? (parseFloat(item.value) || 0) + '% off' : money(item.value) + ' off');
 
             var $row = $(
                 '<a href="javascript:void(0);" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">' +
@@ -875,12 +907,80 @@
                 $('#voucher_code').val(item.code);
                 $box.hide().empty();
                 recalcLocal();
+                previewVoucherApply();
             });
 
             $box.append($row);
         });
 
         $box.show();
+    }
+
+    function clearVoucherFeedback() {
+        $('#voucherApplyFeedback').hide().empty();
+        $('.cart-line .voucher-badge').remove();
+    }
+
+    // Real-time, server-authoritative voucher/discount validation - reuses the
+    // exact same eligibility/calculation OrderService runs when actually
+    // saving the order (see OrderService::previewVoucher()), without creating
+    // any draft order. Gives the cashier the amount and matched items on
+    // success, or the precise reason on failure, before checkout.
+    var voucherPreviewTimer = null;
+    function previewVoucherApply() {
+        clearTimeout(voucherPreviewTimer);
+
+        if (!state.session || !state.cart.length
+            || (!$('#voucher_code').val() && !$('#voucher_id').val() && !$('#discount_id').val())) {
+            clearVoucherFeedback();
+            return;
+        }
+
+        voucherPreviewTimer = setTimeout(function () {
+            var payload = buildStorePayload('draft');
+            payload.business_id = CFG.business_id;
+
+            ajaxRequest({ url: URLS.preview_voucher, method: 'POST', data: payload })
+                .then(function (response) {
+                    var data = response.Data || {};
+                    clearVoucherFeedback();
+
+                    var itemDiscount = parseFloat($('#sumItemDiscount').text().replace(/,/g, '')) || 0;
+                    var orderDiscount = Math.max(0, (parseFloat(data.discount_amount) || 0) - itemDiscount);
+
+                    $('#sumSubtotal').text(money(data.subtotal));
+                    $('#sumOrderDiscount').text(money(orderDiscount));
+                    $('#sumTotal').text(money(data.total));
+                    recalcPayments(parseFloat(data.total) || 0);
+
+                    if (parseFloat(data.voucher_discount_amount) > 0) {
+                        var msg = 'Voucher applied: -' + money(data.voucher_discount_amount);
+                        if (data.voucher_rule) msg += ' (' + escapeHtml(data.voucher_rule) + ')';
+                        $('#voucherApplyFeedback').removeClass('text-danger').addClass('text-success').text(msg).show();
+                    }
+
+                    (data.lines || []).forEach(function (line) {
+                        var cartLine = state.cart.find(function (l) { return l.product_variation_id === line.product_variation_id; });
+                        if (!cartLine) return;
+
+                        var badge = parseFloat(line.free_quantity) > 0
+                            ? (line.free_quantity + ' Free')
+                            : ('-' + money(line.voucher_discount_amount));
+
+                        $('#cartRows .cart-line[data-key="' + cartLine.line_key + '"] .line-total')
+                            .after('<small class="voucher-badge text-success d-block">' + escapeHtml(badge) + '</small>');
+                    });
+                })
+                .catch(function (err) {
+                    clearVoucherFeedback();
+                    $('#voucherApplyFeedback').removeClass('text-success').addClass('text-danger')
+                        .text(err.Message || 'This voucher cannot be applied.').show();
+                    // Don't silently carry an invalid voucher into checkout -
+                    // the cashier must pick another one or clear the field.
+                    $('#voucher_id').val('');
+                    recalcLocal();
+                });
+        }, 350);
     }
 
     // A variation's default selling unit is its Sale Unit; when that isn't
@@ -1442,6 +1542,10 @@
         $('#sumTotal').text(money(total));
 
         recalcPayments(total);
+
+        // Cart changed - re-validate any already-applied voucher/discount
+        // against the new cart (no-op if neither is set).
+        previewVoucherApply();
     }
 
     function updateCreditHint() {
@@ -1818,19 +1922,23 @@
             payload.order_id = state.order_id;
         }
 
+        // "Enable Discount" only toggles the Discount dropdown (a flat named
+        // rate) - vouchers are a separate, independent feature (their own
+        // order.coupon.apply permission) and must always be sendable
+        // regardless of that setting.
         if (SETTING.enable_discount) {
             var discount_id = $('#discount_id').val();
             if (discount_id) {
                 payload.discount_id = discount_id;
             }
-            var voucher_code = $('#voucher_code').val();
-            if (voucher_code) {
-                payload.voucher_code = voucher_code;
-            }
-            var voucher_id = $('#voucher_id').val();
-            if (voucher_id) {
-                payload.voucher_id = voucher_id;
-            }
+        }
+        var voucher_code = $('#voucher_code').val();
+        if (voucher_code) {
+            payload.voucher_code = voucher_code;
+        }
+        var voucher_id = $('#voucher_id').val();
+        if (voucher_id) {
+            payload.voucher_id = voucher_id;
         }
 
         if (state.payments && state.payments.length) {

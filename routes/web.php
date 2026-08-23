@@ -698,6 +698,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     Route::group(['prefix' => 'voucher'], function () {
         Route::post('data', [App\Http\Controllers\Admin\VoucherController::class, 'getData']);
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\VoucherController::class, 'status']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\VoucherController::class, 'byBusiness'])->name('voucher-by-business');
         Route::get('import/sample', [App\Http\Controllers\Admin\VoucherController::class, 'importSample'])->name('voucher-import-sample');
         Route::post('import/preview', [App\Http\Controllers\Admin\VoucherController::class, 'importPreview'])->name('voucher-import-preview');
         Route::post('import/confirm', [App\Http\Controllers\Admin\VoucherController::class, 'importConfirm'])->name('voucher-import-confirm');
@@ -749,6 +750,8 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::post('void', [App\Http\Controllers\Admin\OrderController::class, 'void'])->middleware('permission:order.void');
             Route::get('search-products', [App\Http\Controllers\Admin\OrderController::class, 'searchProducts']);
             Route::get('search-vouchers', [App\Http\Controllers\Admin\OrderController::class, 'searchVouchers']);
+            Route::get('eligible-vouchers', [App\Http\Controllers\Admin\OrderController::class, 'eligibleVouchers']);
+            Route::post('preview-voucher', [App\Http\Controllers\Admin\OrderController::class, 'previewVoucher']);
             Route::get('products-by-category', [App\Http\Controllers\Admin\OrderController::class, 'productsByCategory']);
             Route::post('resolve-prices', [App\Http\Controllers\Admin\OrderController::class, 'resolvePrices']);
             Route::get('filter-options/{business_id}', [App\Http\Controllers\Admin\OrderController::class, 'filterOptions']);

@@ -522,6 +522,71 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     * "Available vouchers for this cart" list for the POS screen, so the
+     * cashier can browse eligible vouchers instead of only entering a known
+     * code. Only checks what's knowable pre-payment (business, schedule,
+     * branch, customer, order-type, order-source, sale-type) - final
+     * per-item/BOGO/payment-method eligibility is still resolved when a
+     * specific voucher is actually applied via store()/saveLinesAndComputeTotals().
+     */
+    public function eligibleVouchers(Request $request)
+    {
+        try {
+            $vouchers = $this->voucher_service->eligibleForCart([
+                'business_id' => $request->business_id ?? Auth::user()->business_id,
+                'branch_id' => $request->branch_id,
+                'user_id' => $request->customer_id,
+                'order_type_id' => $request->order_type_id,
+                'order_source_id' => $request->order_source_id,
+                'sale_type_id' => $request->sale_type_id,
+            ]);
+
+            return $this->success(Message::FETCH, $vouchers->map(function ($voucher) {
+                return [
+                    'voucher_id' => $voucher->voucher_id,
+                    'code' => $voucher->code,
+                    'name' => $voucher->name,
+                    'type' => $voucher->type,
+                    'value' => $voucher->value,
+                    'rule' => $voucher->describeRule(),
+                ];
+            })->values());
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * Real-time, non-persisting preview for the POS "Apply Voucher" button -
+     * runs the exact same server-side eligibility/calculation OrderService
+     * uses when actually saving an order, so the cashier gets authoritative
+     * feedback (amount, matched items, BOGO free units, or the precise
+     * rejection reason) before anything is saved. Same discount_id/voucher_id
+     * permission stripping as store(), since this reveals what a voucher
+     * would apply.
+     */
+    public function previewVoucher(Request $request)
+    {
+        $obj = $request->all();
+
+        if (!empty($obj['discount_id']) && !Auth::user()->can('order.discount.apply')) {
+            unset($obj['discount_id']);
+        }
+
+        if ((!empty($obj['voucher_code']) || !empty($obj['voucher_id'])) && !Auth::user()->can('order.coupon.apply')) {
+            unset($obj['voucher_code']);
+            unset($obj['voucher_id']);
+        }
+
+        try {
+            $preview = $this->order_service->previewVoucher($obj);
+            return $this->success(Message::FETCH, $preview);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
     public function productsByCategory(Request $request)
     {
         try {

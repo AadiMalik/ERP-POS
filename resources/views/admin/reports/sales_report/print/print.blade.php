@@ -31,6 +31,7 @@
                 <th>Warehouse</th>
                 <th class="text-right">Subtotal</th>
                 <th class="text-right">Discount</th>
+                <th class="text-right">Voucher</th>
                 <th class="text-right">Tax</th>
                 <th class="text-right">Total</th>
                 <th class="text-right">Paid</th>
@@ -45,13 +46,14 @@
                     <td>{{ optional($row->warehouse)->name ?? '' }}</td>
                     <td class="text-right">{{ currency($row->subtotal) }}</td>
                     <td class="text-right">{{ currency($row->discount_amount) }}</td>
+                    <td class="text-right">{{ currency($row->voucher_discount_amount) }}</td>
                     <td class="text-right">{{ currency($row->tax_amount) }}</td>
                     <td class="text-right">{{ currency($row->total) }}</td>
                     <td class="text-right">{{ currency($row->paid_amount) }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="9" class="text-center">No records found</td>
+                    <td colspan="10" class="text-center">No records found</td>
                 </tr>
             @endforelse
         </tbody>

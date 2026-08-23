@@ -157,35 +157,43 @@
                                     </div>
                                 </div>
 
-                                @if ($pos_setting->enable_discount)
-                                    <div class="pos-meta-row">
-                                        @if (in_array($pos_setting->discount_level, ['order', 'both']))
-                                            <div class="pos-field pos-field-discount" id="orderDiscountWrap">
-                                                <span class="pos-field-label">Discount</span>
-                                                <select class="form-select form-select-sm select2" id="discount_id">
-                                                    <option value="">--No Discount--</option>
-                                                    @foreach ($discounts as $item)
-                                                        <option value="{{ $item->discount_id }}">
-                                                            {{ $item->name }}
-                                                            ({{ $item->type == 'percent' ? $item->value . '%' : $item->value }})
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        @endif
-                                        <div class="pos-field pos-field-voucher" id="voucherWrap" style="position:relative;">
-                                            <span class="pos-field-label">Voucher / Coupon</span>
-                                            <div class="input-group input-group-sm">
-                                                <input type="text" class="form-control" id="voucher_code" placeholder="Search or enter code" autocomplete="off">
-                                                <button class="btn btn-outline-primary" type="button" id="applyVoucherBtn">
-                                                    Apply
-                                                </button>
-                                            </div>
-                                            <input type="hidden" id="voucher_id" value="">
-                                            <div id="voucherSearchResults" class="list-group pos-search-results" style="display:none;"></div>
+                                {{-- Vouchers are a separate, always-available feature (their own
+                                     order.coupon.apply permission) - the Discount dropdown alone is
+                                     what "Enable Discount" toggles, so only that select is
+                                     conditional here. Both used to be wrongly nested inside the
+                                     same @if, which hid the voucher field entirely for any business
+                                     with Discount turned off. --}}
+                                <div class="pos-meta-row">
+                                    @if ($pos_setting->enable_discount && in_array($pos_setting->discount_level, ['order', 'both']))
+                                        <div class="pos-field pos-field-discount" id="orderDiscountWrap">
+                                            <span class="pos-field-label">Discount</span>
+                                            <select class="form-select form-select-sm select2" id="discount_id">
+                                                <option value="">--No Discount--</option>
+                                                @foreach ($discounts as $item)
+                                                    <option value="{{ $item->discount_id }}">
+                                                        {{ $item->name }}
+                                                        ({{ $item->type == 'percent' ? $item->value . '%' : $item->value }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </div>
+                                    @endif
+                                    <div class="pos-field pos-field-voucher" id="voucherWrap" style="position:relative;">
+                                        <span class="pos-field-label">Voucher / Coupon</span>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" class="form-control" id="voucher_code" placeholder="Search or enter code" autocomplete="off">
+                                            <button class="btn btn-outline-secondary" type="button" id="browseVouchersBtn" title="Show vouchers available for this cart">
+                                                <i class="fa fa-list"></i>
+                                            </button>
+                                            <button class="btn btn-outline-primary" type="button" id="applyVoucherBtn">
+                                                Apply
+                                            </button>
+                                        </div>
+                                        <div id="voucherApplyFeedback" class="small mt-1" style="display:none;"></div>
+                                        <input type="hidden" id="voucher_id" value="">
+                                        <div id="voucherSearchResults" class="list-group pos-search-results" style="display:none;"></div>
                                     </div>
-                                @endif
+                                </div>
 
                                 <div class="pos-field pos-field-payment">
                                     <span class="pos-field-label">Payment Method</span>
@@ -412,7 +420,11 @@
         </div>
     </div>
 
-    @include('admin.order-type.model.quick-create')
+    {{-- $business here is POS's own single current-context Business model, not
+         the collection admin.order-type.model.quick-create needs for its
+         Super-Admin business picker - pass $context_businesses explicitly so
+         the two don't collide (see PosScreenController::index()). --}}
+    @include('admin.order-type.model.quick-create', ['business' => $context_businesses])
 
     {{-- ================= Credit Payment Modal ================= --}}
     {{-- Shown after a Credit-type sale completes (see completeSale() in
@@ -660,6 +672,8 @@
                 'session_my_history' => url('admin/pos-register-session/my-history'),
                 'search_products' => url('admin/order/search-products'),
                 'search_vouchers' => url('admin/order/search-vouchers'),
+                'eligible_vouchers' => url('admin/order/eligible-vouchers'),
+                'preview_voucher' => url('admin/order/preview-voucher'),
                 'products_by_category' => url('admin/order/products-by-category'),
                 'resolve_prices' => url('admin/order/resolve-prices'),
                 'order_store' => url('admin/order'),

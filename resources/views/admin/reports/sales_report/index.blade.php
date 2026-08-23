@@ -111,6 +111,7 @@
                                 <th>Warehouse</th>
                                 <th class="text-end">Subtotal</th>
                                 <th class="text-end">Discount</th>
+                                <th class="text-end">Voucher</th>
                                 <th class="text-end">Tax</th>
                                 <th class="text-end">Total</th>
                                 <th class="text-end">Paid</th>
@@ -131,6 +132,7 @@
                         {data:'warehouse',name:'warehouse',sortable:false},
                         {data:'subtotal',name:'subtotal',sortable:false,className:'text-end'},
                         {data:'discount_amount',name:'discount_amount',sortable:false,className:'text-end'},
+                        {data:'voucher_discount_amount',name:'voucher_discount_amount',sortable:false,className:'text-end'},
                         {data:'tax_amount',name:'tax_amount',sortable:false,className:'text-end'},
                         {data:'total',name:'total',sortable:false,className:'text-end'},
                         {data:'paid_amount',name:'paid_amount',sortable:false,className:'text-end'}",

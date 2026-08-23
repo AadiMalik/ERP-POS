@@ -443,8 +443,23 @@ class OrderReturnService
                 $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent);
                 $line_total = $taxable + $line_tax_amount;
 
+                // Prorate this line's own voucher contribution (per-unit rate x
+                // returned base quantity) the same way its % discount is prorated
+                // above - a returned free (BOGO) unit refunds $0, it doesn't
+                // restore any voucher value, so free_quantity is capped at its
+                // proportional share too.
+                $original_base_quantity = (float) ($detail->base_quantity ?? 0);
+                $voucher_rate = $original_base_quantity > 0
+                    ? ((float) $detail->voucher_discount_amount / $original_base_quantity)
+                    : 0;
+                $line_voucher_discount_amount = round($voucher_rate * $base_quantity, 3);
+                $free_rate = $original_base_quantity > 0
+                    ? ((float) $detail->free_quantity / $original_base_quantity)
+                    : 0;
+                $line_free_quantity = round(min($free_rate * $base_quantity, (float) $detail->free_quantity), 3);
+
                 $subtotal += $line_subtotal;
-                $discount_amount_total += $line_discount_amount;
+                $discount_amount_total += $line_discount_amount + $line_voucher_discount_amount;
                 $tax_amount_total += $line_tax_amount;
                 $total += $line_total;
 
@@ -465,6 +480,9 @@ class OrderReturnService
                     'unit_price'                               => $unit_price,
                     'discount'                                 => $discount_percent,
                     'discount_amount'                          => $line_discount_amount,
+                    'voucher_id'                               => $detail->voucher_id,
+                    'voucher_discount_amount'                  => $line_voucher_discount_amount,
+                    'free_quantity'                            => $line_free_quantity,
                     'tax'                                      => $tax_percent,
                     'tax_amount'                               => $line_tax_amount,
                     'subtotal'                                 => $line_subtotal,

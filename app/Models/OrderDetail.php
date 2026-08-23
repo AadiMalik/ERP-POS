@@ -27,6 +27,9 @@ class OrderDetail extends Model
         'final_unit_price',
         'discount',
         'discount_amount',
+        'voucher_id',
+        'voucher_discount_amount',
+        'free_quantity',
         'tax',
         'tax_amount',
         'subtotal',
@@ -65,5 +68,10 @@ class OrderDetail extends Model
     public function saleType()
     {
         return $this->belongsTo(SaleType::class, 'sale_type_id', 'sale_type_id');
+    }
+
+    public function voucher()
+    {
+        return $this->belongsTo(Voucher::class, 'voucher_id', 'voucher_id');
     }
 }

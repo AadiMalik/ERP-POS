@@ -85,6 +85,7 @@ class SalesReportService
             ->addColumn('warehouse', fn ($row) => optional($row->warehouse)->name ?? '')
             ->editColumn('subtotal', fn ($row) => currency($row->subtotal))
             ->editColumn('discount_amount', fn ($row) => currency($row->discount_amount))
+            ->editColumn('voucher_discount_amount', fn ($row) => currency($row->voucher_discount_amount))
             ->editColumn('tax_amount', fn ($row) => currency($row->tax_amount))
             ->editColumn('total', fn ($row) => currency($row->total))
             ->editColumn('paid_amount', fn ($row) => currency($row->paid_amount))

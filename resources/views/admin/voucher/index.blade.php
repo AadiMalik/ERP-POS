@@ -49,6 +49,7 @@
                         <tr>
                             <th>Name</th>
                             <th>Code</th>
+                            <th>Rule</th>
                             <th>Type</th>
                             <th>Value</th>
                             <th>Usage</th>
@@ -77,6 +78,7 @@
 'columns' => "
 {data: 'name' , name: 'name'},
 {data: 'code' , name: 'code'},
+{data: 'rule' , name: 'rule', 'sortable': false , searchable: false},
 {data: 'type' , name: 'type', 'sortable': false , searchable: false},
 {data: 'value' , name: 'value', 'sortable': false , searchable: false},
 {data: 'usage' , name: 'usage', 'sortable': false , searchable: false},

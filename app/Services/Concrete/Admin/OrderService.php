@@ -79,7 +79,10 @@ class OrderService
         'orderSource',
         'saleType',
         'discount',
-        'voucher',
+        'voucher.products',
+        'voucher.categories',
+        'voucher.brands',
+        'voucher.variations',
         'details',
         'details.product',
         'details.productVariation',
@@ -748,9 +751,15 @@ class OrderService
             throw new Exception('A valid warehouse could not be determined for this sale.');
         }
 
+        // A Warehouse's Branch is optional (see resources/views/admin/warehouse/
+        // create.blade.php - no branch means it's shared across every branch
+        // of the business), so a null branch_id on the warehouse is valid for
+        // any branch, not just an exact match.
         $warehouse = Warehouse::where('warehouse_id', $warehouseId)
             ->where('business_id', $businessId)
-            ->where('branch_id', $branchId)
+            ->where(function ($q) use ($branchId) {
+                $q->whereNull('branch_id')->orWhere('branch_id', $branchId);
+            })
             ->where('is_deleted', 0)
             ->first();
 
@@ -1000,7 +1009,7 @@ class OrderService
      * available now as a working estimate - post() re-resolves the rate from
      * the final payments and reconciles the order before it is posted.
      */
-    protected function saveLinesAndComputeTotals(Order $order, array $obj, ?PosSetting $pos_setting)
+    protected function saveLinesAndComputeTotals(Order $order, array $obj, ?PosSetting $pos_setting, bool $persist = true)
     {
         $enable_discount = (bool) ($pos_setting->enable_discount ?? true);
         $discount_level = $pos_setting->discount_level ?? 'both';
@@ -1014,6 +1023,7 @@ class OrderService
         $line_discount_total = 0;
         $tax_amount_total = 0;
         $has_line = false;
+        $order_lines = [];
 
         $products = $obj['products'] ?? [];
 
@@ -1076,7 +1086,7 @@ class OrderService
 
             $has_line = true;
 
-            $variation = ProductVariation::findOrFail($line['product_variation_id']);
+            $variation = ProductVariation::with('product')->findOrFail($line['product_variation_id']);
             $line_sale_type_id = $allow_mixed_sale_types ? ($line['sale_type_id'] ?? $order->sale_type_id) : $order->sale_type_id;
             $resolved = $resolved_prices[$variation->product_variation_id . '|' . $line_sale_type_id] ?? null;
 
@@ -1140,7 +1150,11 @@ class OrderService
             $line_discount_total += $line_discount_amount;
             $tax_amount_total += $line_tax_amount;
 
-            $this->model_order_detail->create([
+            // Row build is deferred to a second pass (below) so the voucher's
+            // per-line allocation (product/category/brand/variation matching,
+            // BOGO free-unit selection) can be computed once the full cart is
+            // known, then merged in before the actual create() calls.
+            $order_lines[] = [
                 'order_detail_id' => generateUuid(),
                 'order_id' => $order->order_id,
                 'product_id' => $variation->product_id,
@@ -1155,6 +1169,9 @@ class OrderService
                 'final_unit_price' => round($net_unit_price, 3),
                 'discount' => $discount_percent,
                 'discount_amount' => $line_discount_amount,
+                'voucher_id' => null,
+                'voucher_discount_amount' => 0,
+                'free_quantity' => 0,
                 'tax' => $tax_percent,
                 'tax_amount' => $line_tax_amount,
                 'subtotal' => $line_subtotal,
@@ -1163,7 +1180,10 @@ class OrderService
                 'notes' => $line['notes'] ?? null,
                 'createdby_id' => Auth::id(),
                 'date_created' => now(),
-            ]);
+                // Transient fields for voucher matching/allocation only - stripped before create().
+                '_category_id' => $variation->product->category_id ?? null,
+                '_brand_id' => $variation->product->brand_id ?? null,
+            ];
         }
 
         if (!$has_line) {
@@ -1200,31 +1220,85 @@ class OrderService
 
         if (!empty($obj['voucher_code']) || !empty($obj['voucher_id'])) {
             $voucher = !empty($obj['voucher_id'])
-                ? Voucher::with(['products', 'categories', 'users', 'orderTypes', 'branches'])->find($obj['voucher_id'])
+                ? Voucher::with($this->voucher_service->relations())->find($obj['voucher_id'])
                 : $this->voucher_service->findByCode($obj['voucher_code'], $order->business_id);
 
             if (!$voucher) {
                 throw new Exception('The voucher/coupon code was not found.');
             }
 
-            $eligibility = $this->voucher_service->isApplicable($voucher, [
+            if ($voucher->is_exclusive && $discount_id) {
+                throw new Exception('This voucher cannot be combined with the selected discount.');
+            }
+
+            $payment_method_ids = collect($obj['payments'] ?? [])->pluck('payment_method_id')->filter()->values()->all();
+
+            $eligibility = $this->voucher_service->isApplicable($voucher, array_filter([
                 'user_id' => $order->user_id,
                 'order_type_id' => $order->order_type_id,
                 'branch_id' => $order->branch_id,
+                'sale_type_id' => $order->sale_type_id,
+                'order_source_id' => $order->order_source_id,
                 'order_amount' => $post_line_discount_subtotal - $order_discount_amount,
-            ]);
+                'payment_method_ids' => $payment_method_ids ?: null,
+            ], fn ($v) => $v !== null));
 
             if (!$eligibility['eligible']) {
                 throw new Exception($eligibility['reason'] ?? 'The selected voucher is not applicable to this order.');
             }
 
             $remaining = $post_line_discount_subtotal - $order_discount_amount;
-            $voucher_discount_amount = $voucher->type === 'percent'
-                ? round($remaining * $voucher->value / 100, 3)
-                : min((float) $voucher->value, $remaining);
 
+            $voucher_calc_lines = array_map(function ($line) {
+                return [
+                    'line_key' => $line['order_detail_id'],
+                    'product_id' => $line['product_id'],
+                    'category_id' => $line['_category_id'],
+                    'brand_id' => $line['_brand_id'],
+                    'product_variation_id' => $line['product_variation_id'],
+                    'quantity' => $line['base_quantity'],
+                    'unit_price' => $line['final_unit_price'],
+                    'base' => $line['subtotal'] - $line['discount_amount'],
+                ];
+            }, $order_lines);
+
+            $result = $this->voucher_service->calculate($voucher, $voucher_calc_lines, $remaining);
+
+            $is_item_bound = in_array($voucher->promo_type, ['bogo', 'buy_x_get_y'], true)
+                || $this->voucher_service->hasItemScope($voucher);
+
+            if ($is_item_bound && $result['discount_amount'] <= 0) {
+                throw new Exception(
+                    in_array($voucher->promo_type, ['bogo', 'buy_x_get_y'], true)
+                        ? 'This voucher\'s buy quantity condition has not been met by the items in this cart.'
+                        : 'This voucher does not apply to any items in this cart.'
+                );
+            }
+
+            foreach ($order_lines as &$line) {
+                if (!isset($result['allocations'][$line['order_detail_id']])) {
+                    continue;
+                }
+
+                $allocation = $result['allocations'][$line['order_detail_id']];
+                $line['voucher_id'] = $voucher->voucher_id;
+                $line['voucher_discount_amount'] = $allocation['voucher_discount_amount'];
+                $line['free_quantity'] = $allocation['free_quantity'];
+            }
+            unset($line);
+
+            $voucher_discount_amount = $result['discount_amount'];
             $voucher_id = $voucher->voucher_id;
         }
+
+        foreach ($order_lines as &$line) {
+            unset($line['_category_id'], $line['_brand_id']);
+
+            if ($persist) {
+                $this->model_order_detail->create($line);
+            }
+        }
+        unset($line);
 
         $discount_amount = $line_discount_total + $order_discount_amount + $voucher_discount_amount;
         $total = $subtotal - $discount_amount + $tax_amount_total;
@@ -1239,6 +1313,76 @@ class OrderService
             'discount_id' => $discount_id,
             'voucher_id' => $voucher_id,
             'voucher_discount_amount' => round($voucher_discount_amount, 3),
+            // Only populated meaningfully for callers that need the per-line
+            // breakdown without persisting (see previewVoucher()) - always
+            // returned since it costs nothing extra to include.
+            'lines' => $order_lines,
+        ];
+    }
+
+    /**
+     * Stateless voucher/discount preview for the POS "Apply" button - runs the
+     * exact same eligibility + calculation path as an actual order save
+     * (saveLinesAndComputeTotals($persist=false)) against a transient,
+     * never-persisted Order, so the cashier gets real server-authoritative
+     * feedback (amount, matched items, BOGO free units, or the precise
+     * rejection reason) without creating any draft order or touching the
+     * database. $obj: business_id, branch_id, warehouse_id (optional),
+     * customer_id, order_type_id, order_source_id, sale_type_id, products[],
+     * discount_id, voucher_code/voucher_id, payments[] (optional - payment-
+     * method-restricted vouchers can't be fully verified until checkout).
+     */
+    public function previewVoucher(array $obj): array
+    {
+        // Mirrors save()'s own business_id/branch_id/warehouse_id resolution
+        // (see ~line 778 above) - the POS payload only ever carries
+        // register_session_id, not branch_id/warehouse_id directly, so
+        // without this a branch-restricted voucher would always look
+        // ineligible in the preview even from the correct branch.
+        if (!empty($obj['register_session_id'])) {
+            $session = PosRegisterSession::find($obj['register_session_id']);
+            $business_id = $session->business_id ?? ($obj['business_id'] ?? Auth::user()->business_id);
+            $branch_id = $session->branch_id ?? ($obj['branch_id'] ?? null);
+            $warehouse_id = $session->register->warehouse_id ?? ($obj['warehouse_id'] ?? null);
+        } else {
+            $business_id = $obj['business_id'] ?? Auth::user()->business_id;
+            $branch_id = $obj['branch_id'] ?? null;
+            $warehouse_id = $obj['warehouse_id'] ?? null;
+        }
+
+        $order = new Order([
+            'business_id' => $business_id,
+            'branch_id' => $branch_id,
+            'warehouse_id' => $warehouse_id,
+            'user_id' => $obj['customer_id'] ?? null,
+            'order_type_id' => $obj['order_type_id'] ?? null,
+            'order_source_id' => $obj['order_source_id'] ?? null,
+            'sale_type_id' => $obj['sale_type_id'] ?? null,
+        ]);
+
+        $pos_setting = PosSetting::where('business_id', $business_id)->first();
+
+        $result = $this->saveLinesAndComputeTotals($order, $obj, $pos_setting, false);
+
+        $voucher_rule = null;
+        if (!empty($result['voucher_id'])) {
+            $voucher = Voucher::with($this->voucher_service->relations())->find($result['voucher_id']);
+            $voucher_rule = $voucher?->describeRule();
+        }
+
+        return [
+            'subtotal' => round($result['subtotal'], 3),
+            'discount_amount' => $result['discount_amount'],
+            'voucher_discount_amount' => $result['voucher_discount_amount'],
+            'voucher_rule' => $voucher_rule,
+            'total' => $result['total'],
+            'lines' => array_map(function ($line) {
+                return [
+                    'product_variation_id' => $line['product_variation_id'],
+                    'voucher_discount_amount' => $line['voucher_discount_amount'],
+                    'free_quantity' => $line['free_quantity'],
+                ];
+            }, array_filter($result['lines'], fn ($l) => $l['voucher_discount_amount'] > 0 || $l['free_quantity'] > 0)),
         ];
     }
 
@@ -1501,6 +1645,23 @@ class OrderService
             // that the final payment methods are known and reconcile the order
             // before anything is posted to the ledger.
             $this->recomputeOrderTax($order, $payments);
+
+            // Payment-method voucher restrictions are unknowable until payments are
+            // finalized (they weren't chosen yet at draft/save time) - the last
+            // possible point to enforce them server-side is here, before anything
+            // is booked to the ledger.
+            if (!empty($order->voucher_id)) {
+                $voucher = Voucher::with('paymentMethods')->find($order->voucher_id);
+
+                if ($voucher && $voucher->paymentMethods->isNotEmpty()) {
+                    $allowed = $voucher->paymentMethods->pluck('payment_method_id')->all();
+                    $used = $payments->pluck('payment_method_id')->filter()->all();
+
+                    if (empty(array_intersect($allowed, $used))) {
+                        throw new Exception('The applied voucher does not support the payment method used for this order.');
+                    }
+                }
+            }
 
             $order_total = round((float) $order->total, 2);
 
