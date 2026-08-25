@@ -142,6 +142,11 @@ class Business extends Model
         return $this->hasOne(ThemeSetting::class, 'business_id', 'business_id');
     }
 
+    public function websiteThemeSetting()
+    {
+        return $this->hasOne(WebsiteThemeSetting::class, 'business_id', 'business_id');
+    }
+
     public function posSetting()
     {
         return $this->hasOne(PosSetting::class, 'business_id', 'business_id');

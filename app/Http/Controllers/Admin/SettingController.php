@@ -89,11 +89,16 @@ class SettingController extends Controller
         $print_setting = $this->setting_service->getPrintSetting(Auth::user()->business_id);
         $barcode_setting = $this->setting_service->getBarcodeSetting(Auth::user()->business_id);
         $theme_setting = $this->setting_service->getThemeSetting(Auth::user()->business_id);
+        $website_theme_setting = $this->setting_service->getWebsiteThemeSetting(Auth::user()->business_id);
         $pos_setting = $this->setting_service->getPosSetting(Auth::user()->business_id);
         $pra_setting = $this->setting_service->getPraSetting(Auth::user()->business_id);
         $pos_customers = $this->customer_service->getAllActive(Auth::user()->business_id);
         $sale_types = $this->sale_type_service->getAll(Auth::user()->business_id);
         $theme_presets = config('theme_presets');
+        $website_theme_presets = config('website_theme_presets.themes');
+        $website_theme_font_pairings = config('website_theme_presets.font_pairings');
+        $website_theme_button_styles = config('website_theme_presets.button_styles');
+        $website_theme_typography_styles = config('website_theme_presets.typography_styles');
         $timezones = $this->common_service->getAllTimezone();
         $email_mailer = EmailProvider::getoptions();
         $sms_provider = SMSProvider::getOptions();
@@ -116,6 +121,11 @@ class SettingController extends Controller
             'print_setting',
             'barcode_setting',
             'theme_setting',
+            'website_theme_setting',
+            'website_theme_presets',
+            'website_theme_font_pairings',
+            'website_theme_button_styles',
+            'website_theme_typography_styles',
             'pos_setting',
             'pra_setting',
             'thermal_print_setting',
@@ -864,6 +874,78 @@ class SettingController extends Controller
 
         $business_id = $request->business_id ?? Auth::user()->business_id;
         $setting = $this->setting_service->applyThemePreset($business_id, $request->preset);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateWebsiteThemeSetting(Request $request)
+    {
+        $rules = [
+            'theme_preset'      => ['nullable', 'string', Rule::in(array_keys(config('website_theme_presets.themes')))],
+            'primary_color'     => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'secondary_color'   => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'accent_color'      => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'background_color'  => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'surface_color'     => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'text_color'        => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'heading_color'     => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'border_color'      => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'success_color'     => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'warning_color'     => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'error_color'       => 'required|regex:/^#[0-9A-Fa-f]{6}$/',
+            'font_pairing'      => ['required', 'string', Rule::in(array_keys(config('website_theme_presets.font_pairings')))],
+            'font_size_base'    => ['required', 'string', Rule::in(array_keys(config('website_theme_presets.font_size_scale')))],
+            'button_style'      => ['required', 'string', Rule::in(array_keys(config('website_theme_presets.button_styles')))],
+            'typography_style'  => ['required', 'string', Rule::in(array_keys(config('website_theme_presets.typography_styles')))],
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->only([
+            'theme_preset',
+            'primary_color',
+            'secondary_color',
+            'accent_color',
+            'background_color',
+            'surface_color',
+            'text_color',
+            'heading_color',
+            'border_color',
+            'success_color',
+            'warning_color',
+            'error_color',
+            'font_pairing',
+            'font_size_base',
+            'button_style',
+            'typography_style',
+        ]);
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        $setting = $this->setting_service->updateWebsiteThemeSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function applyWebsiteThemePreset(Request $request)
+    {
+        $rules = [
+            'preset' => ['required', 'string', Rule::in(array_keys(config('website_theme_presets.themes')))],
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $business_id = $request->business_id ?? Auth::user()->business_id;
+        $setting = $this->setting_service->applyWebsiteThemePreset($business_id, $request->preset);
 
         return $setting
             ? $this->success(Message::UPDATE, $setting)

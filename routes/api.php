@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\WebsiteThemeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -35,4 +36,10 @@ Route::prefix('v1/auth')->middleware('throttle:20,1')->group(function () {
         Route::post('set-password', [AuthController::class, 'setPassword']);
         Route::post('logout', [AuthController::class, 'logout']);
     });
+});
+
+// Public storefront config - business-wise website theme settings, consumed
+// by the Vue frontend before render using its .env-configured business_id.
+Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
+    Route::get('website-theme/{business_id}', [WebsiteThemeController::class, 'show']);
 });

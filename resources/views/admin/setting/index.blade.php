@@ -92,6 +92,10 @@
                                 data-bs-target="#theme">
                                 Theme / Appearance
                             </button>
+                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
+                                data-bs-target="#website_theme">
+                                Website Theme
+                            </button>
                         </div>
                     </div>
                     <div class="col-md-9">
@@ -143,6 +147,9 @@
                             </div>
                             <div class="tab-pane fade" id="theme">
                                 @include('admin.setting.tabs.theme')
+                            </div>
+                            <div class="tab-pane fade" id="website_theme">
+                                @include('admin.setting.tabs.website_theme')
                             </div>
                         </div>
                     </div>
@@ -421,6 +428,46 @@
                     content_display_style: data.get('content_config[content_display_style]'),
                 },
             });
+        });
+    </script>
+
+    {{-- Website Theme setting js --}}
+    <script>
+        window.WEBSITE_THEME_PRESETS = @json($website_theme_presets);
+
+        function saveWebsiteThemeSetting(form) {
+            ajaxRequest({
+                url: '{{ route('website_theme.update') }}',
+                method: 'POST',
+                data: new FormData($(form)[0]),
+                isFormData: true
+            }).then(res => {
+                successMessage(res.Message);
+                setTimeout(() => location.reload(), 800);
+            }).catch(err => {
+                errorMessage(err.Message);
+            });
+        }
+
+        function applyWebsiteThemePreset(presetKey) {
+            ajaxRequest({
+                url: '{{ route('website_theme.preset') }}',
+                method: 'POST',
+                data: {
+                    preset: presetKey,
+                    _token: '{{ csrf_token() }}'
+                }
+            }).then(res => {
+                successMessage(res.Message);
+                setTimeout(() => location.reload(), 600);
+            }).catch(err => {
+                errorMessage(err.Message);
+            });
+        }
+
+        $(document).on('click', '.btn-apply-website-theme-preset, .website-theme-preset-card', function(e) {
+            e.stopPropagation();
+            applyWebsiteThemePreset($(this).data('preset'));
         });
     </script>
 @endsection

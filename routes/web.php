@@ -1310,6 +1310,8 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('barcode', [App\Http\Controllers\Admin\SettingController::class, 'updateBarcodeSetting'])->name('barcode.update');
         Route::post('theme', [App\Http\Controllers\Admin\SettingController::class, 'updateThemeSetting'])->name('theme.update');
         Route::post('theme/preset', [App\Http\Controllers\Admin\SettingController::class, 'applyThemePreset'])->name('theme.preset');
+        Route::post('website-theme', [App\Http\Controllers\Admin\SettingController::class, 'updateWebsiteThemeSetting'])->name('website_theme.update');
+        Route::post('website-theme/preset', [App\Http\Controllers\Admin\SettingController::class, 'applyWebsiteThemePreset'])->name('website_theme.preset');
         Route::post('notification', [App\Http\Controllers\Admin\SettingController::class, 'updateNotificationSetting'])->name('notification.update');
     });
 

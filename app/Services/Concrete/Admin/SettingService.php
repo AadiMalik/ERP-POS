@@ -23,6 +23,7 @@ use App\Models\PrintSetting;
 use App\Models\SupplierSetting;
 use App\Models\ThemeSetting;
 use App\Models\ThermalPrintSetting;
+use App\Models\WebsiteThemeSetting;
 use App\Models\WhatsappSetting;
 use App\Repository\Repository;
 use App\Traits\Auditable;
@@ -48,6 +49,7 @@ class SettingService
     protected $model_print_setting;
     protected $model_barcode_setting;
     protected $model_theme_setting;
+    protected $model_website_theme_setting;
     protected $model_pos_setting;
     protected $model_pra_setting;
     protected $model_thermal_print_setting;
@@ -71,6 +73,7 @@ class SettingService
         $this->model_print_setting = new Repository(new PrintSetting());
         $this->model_barcode_setting = new Repository(new BarcodeSetting());
         $this->model_theme_setting = new Repository(new ThemeSetting());
+        $this->model_website_theme_setting = new Repository(new WebsiteThemeSetting());
         $this->model_pos_setting = new Repository(new PosSetting());
         $this->model_pra_setting = new Repository(new PraSetting());
         $this->model_thermal_print_setting = new Repository(new ThermalPrintSetting());
@@ -676,5 +679,137 @@ class SettingService
             'footer_config'    => $preset['footer_config'],
             'content_config'   => $preset['content_config'],
         ]);
+    }
+
+    public function getWebsiteThemeSetting($business_id)
+    {
+        $defaults = config('website_theme_presets.themes.theme1');
+
+        return $this->model_website_theme_setting->getModel()::firstOrCreate(
+            ['business_id' => $business_id],
+            [
+                'theme_preset'      => 'theme1',
+                'primary_color'     => $defaults['colors']['primary'],
+                'secondary_color'   => $defaults['colors']['secondary'],
+                'accent_color'      => $defaults['colors']['accent'],
+                'background_color'  => $defaults['colors']['background'],
+                'surface_color'     => $defaults['colors']['surface'],
+                'text_color'        => $defaults['colors']['text'],
+                'heading_color'     => $defaults['colors']['heading'],
+                'border_color'      => $defaults['colors']['border'],
+                'success_color'     => $defaults['colors']['success'],
+                'warning_color'     => $defaults['colors']['warning'],
+                'error_color'       => $defaults['colors']['error'],
+                'font_pairing'      => $defaults['font_pairing'],
+                'font_size_base'    => $defaults['font_size_base'],
+                'button_style'      => $defaults['button_style'],
+                'typography_style'  => $defaults['typography_style'],
+                'date_created'      => now(),
+            ]
+        );
+    }
+
+    public function updateWebsiteThemeSetting(array $obj)
+    {
+        $model = $this->model_website_theme_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+        $this->auditSetting('website_theme', $setting, $old_values);
+
+        return $setting;
+    }
+
+    public function applyWebsiteThemePreset($business_id, $presetKey)
+    {
+        $preset = config("website_theme_presets.themes.$presetKey");
+
+        if (!$preset) {
+            return false;
+        }
+
+        return $this->updateWebsiteThemeSetting([
+            'business_id'       => $business_id,
+            'theme_preset'      => $presetKey,
+            'primary_color'     => $preset['colors']['primary'],
+            'secondary_color'   => $preset['colors']['secondary'],
+            'accent_color'      => $preset['colors']['accent'],
+            'background_color'  => $preset['colors']['background'],
+            'surface_color'     => $preset['colors']['surface'],
+            'text_color'        => $preset['colors']['text'],
+            'heading_color'     => $preset['colors']['heading'],
+            'border_color'      => $preset['colors']['border'],
+            'success_color'     => $preset['colors']['success'],
+            'warning_color'     => $preset['colors']['warning'],
+            'error_color'       => $preset['colors']['error'],
+            'font_pairing'      => $preset['font_pairing'],
+            'font_size_base'    => $preset['font_size_base'],
+            'button_style'      => $preset['button_style'],
+            'typography_style'  => $preset['typography_style'],
+        ]);
+    }
+
+    /**
+     * Build the full storefront-ready config (resolved font stacks, button
+     * radius/weight/shadow, line-heights) served by the public website-theme
+     * API. Falls back to theme1's own values for any unknown/missing key so
+     * a bad row can never hand the storefront an invalid setting.
+     */
+    public function resolveWebsiteThemeConfig($setting)
+    {
+        $fontPairings = config('website_theme_presets.font_pairings');
+        $buttonStyles = config('website_theme_presets.button_styles');
+        $typographyStyles = config('website_theme_presets.typography_styles');
+        $fontSizeScale = config('website_theme_presets.font_size_scale');
+        $themes = config('website_theme_presets.themes');
+
+        $themePreset = array_key_exists($setting->theme_preset, $themes) ? $setting->theme_preset : 'theme1';
+        $pairing = $fontPairings[$setting->font_pairing] ?? $fontPairings['poppins_jakarta'];
+        $button = $buttonStyles[$setting->button_style] ?? $buttonStyles['soft_pill'];
+        $typography = $typographyStyles[$setting->typography_style] ?? $typographyStyles['comfortable'];
+        $defaults = $themes['theme1']['colors'];
+
+        return [
+            'theme_preset' => $themePreset,
+            'header_style' => $themePreset,
+            'footer_style' => $themePreset,
+            'colors' => [
+                'primary'    => $setting->primary_color ?? $defaults['primary'],
+                'secondary'  => $setting->secondary_color ?? $defaults['secondary'],
+                'accent'     => $setting->accent_color ?? $defaults['accent'],
+                'background' => $setting->background_color ?? $defaults['background'],
+                'surface'    => $setting->surface_color ?? $defaults['surface'],
+                'text'       => $setting->text_color ?? $defaults['text'],
+                'heading'    => $setting->heading_color ?? $defaults['heading'],
+                'border'     => $setting->border_color ?? $defaults['border'],
+                'success'    => $setting->success_color ?? $defaults['success'],
+                'warning'    => $setting->warning_color ?? $defaults['warning'],
+                'error'      => $setting->error_color ?? $defaults['error'],
+            ],
+            'typography' => [
+                'font_display'   => $pairing['font_display'],
+                'font_body'      => $pairing['font_body'],
+                'font_size_base' => $fontSizeScale[$setting->font_size_base] ?? '100%',
+                'lh_heading'     => $typography['lh_heading'],
+                'lh_body'        => $typography['lh_body'],
+            ],
+            'button' => [
+                'radius' => $button['radius'],
+                'weight' => $button['weight'],
+                'shadow' => $button['shadow'],
+            ],
+        ];
     }
 }
