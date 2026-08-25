@@ -283,6 +283,18 @@ use App\Enums\RoleNames;
                                                     {{ isset($product) && $product->is_featured ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="featured">Featured</label>
                                             </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="is_trending"
+                                                    id="trending"
+                                                    {{ isset($product) && $product->is_trending ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="trending">Trending</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="is_best_seller"
+                                                    id="bestSeller"
+                                                    {{ isset($product) && $product->is_best_seller ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="bestSeller">Best Seller</label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

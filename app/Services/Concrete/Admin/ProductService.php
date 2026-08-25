@@ -12,13 +12,18 @@ use App\Models\ProductVariation;
 use App\Models\ProductVariationAttribute;
 use App\Models\ProductVariationPrice;
 use App\Models\ProductVariationPriceHistory;
+use App\Models\ProductVariationStock;
+use App\Models\SaleType;
+use App\Models\Warehouse;
 use App\Repository\Repository;
 use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Yajra\DataTables\DataTables;
 
 class ProductService
@@ -31,6 +36,7 @@ class ProductService
     protected $model_product_variation;
     protected $model_product_variation_attribute;
     protected $barcode_service;
+    protected $pricing_service;
     protected $with = [
         'business',
         'category',
@@ -47,7 +53,7 @@ class ProductService
         'productFeatures'
     ];
 
-    public function __construct(BarcodeService $barcode_service)
+    public function __construct(BarcodeService $barcode_service, VariationPricingService $pricing_service)
     {
         $this->model_product = new Repository(new Product());
         $this->model_product_image = new Repository(new ProductImage());
@@ -55,6 +61,7 @@ class ProductService
         $this->model_product_variation = new Repository(new ProductVariation());
         $this->model_product_variation_attribute = new Repository(new ProductVariationAttribute());
         $this->barcode_service = $barcode_service;
+        $this->pricing_service = $pricing_service;
     }
 
     public function getData($obj)
@@ -741,5 +748,486 @@ class ProductService
     {
         $this->model_product_image->getModel()::where('product_id', $product_id)
             ->update(['is_default' => 0]);
+    }
+
+    // ─────────────────────────────────────────────
+    // Public storefront (website) catalog
+    // ─────────────────────────────────────────────
+
+    /**
+     * Storefront product listing for the Vue website - filterable/sortable/
+     * paginated, plus (only when unfiltered on page 1) a set of curated
+     * homepage sections. Correctness over raw SQL efficiency is the goal
+     * here (small demo catalog): the base filters are applied in SQL, then
+     * price/stock are resolved per variation and the rest (min/max price,
+     * in_stock, sorting, pagination) happens in PHP against the mapped
+     * summaries.
+     */
+    public function getWebsiteListing(string $business_id, array $params): array
+    {
+        $search = trim((string) ($params['search'] ?? ''));
+        $category_id = $params['category_id'] ?? null;
+        $sub_category_id = $params['sub_category_id'] ?? null;
+        $brand_id = $params['brand_id'] ?? null;
+        $min_price = (isset($params['min_price']) && $params['min_price'] !== '') ? (float) $params['min_price'] : null;
+        $max_price = (isset($params['max_price']) && $params['max_price'] !== '') ? (float) $params['max_price'] : null;
+        $in_stock = (isset($params['in_stock']) && $params['in_stock'] !== '' && $params['in_stock'] !== null)
+            ? filter_var($params['in_stock'], FILTER_VALIDATE_BOOLEAN)
+            : null;
+        $sort = $params['sort'] ?? 'featured';
+        $page = max(1, (int) ($params['page'] ?? 1));
+        $per_page = min(100, max(1, (int) ($params['per_page'] ?? 24)));
+        $branch_id = $params['branch_id'] ?? null;
+
+        $has_filters = $search !== ''
+            || !empty($category_id)
+            || !empty($sub_category_id)
+            || !empty($brand_id)
+            || $min_price !== null
+            || $max_price !== null
+            || $in_stock !== null;
+
+        $query = $this->websiteBaseQuery($business_id)->with($this->websiteWith());
+
+        if (!empty($category_id)) {
+            $query->where('category_id', $category_id);
+        }
+        if (!empty($sub_category_id)) {
+            $query->where('sub_category_id', $sub_category_id);
+        }
+        if (!empty($brand_id)) {
+            $query->where('brand_id', $brand_id);
+        }
+        if ($search !== '') {
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        $products = $query->get();
+
+        $sale_type_id = $this->resolveDefaultSaleTypeId($business_id);
+
+        [$price_map, $stock_map] = $this->resolvePricingAndStock($products, $business_id, $branch_id, $sale_type_id);
+
+        $rows = $products->map(function ($product) use ($price_map, $stock_map) {
+            return [
+                'product' => $product,
+                'summary' => $this->mapProductSummary($product, $price_map, $stock_map),
+            ];
+        });
+
+        if ($min_price !== null) {
+            $rows = $rows->filter(fn ($row) => $row['summary']['price'] >= $min_price);
+        }
+        if ($max_price !== null) {
+            $rows = $rows->filter(fn ($row) => $row['summary']['price'] <= $max_price);
+        }
+        if ($in_stock !== null) {
+            $rows = $rows->filter(function ($row) use ($in_stock) {
+                $stock = $row['summary']['stock'];
+                $is_in_stock = $stock === null || $stock > 0;
+                return $in_stock ? $is_in_stock : !$is_in_stock;
+            });
+        }
+
+        $rows = $rows->values();
+
+        $filters_meta = [
+            'price_min' => $rows->isNotEmpty() ? $rows->min(fn ($row) => $row['summary']['price']) : null,
+            'price_max' => $rows->isNotEmpty() ? $rows->max(fn ($row) => $row['summary']['price']) : null,
+        ];
+
+        $rows = $this->sortWebsiteRows($rows, $sort);
+
+        $total = $rows->count();
+        $last_page = max(1, (int) ceil($total / $per_page));
+        $page = min($page, $last_page);
+
+        $paged = $rows->slice(($page - 1) * $per_page, $per_page)->values();
+
+        $sections = null;
+        if (!$has_filters && $page == 1) {
+            $sections = $this->buildWebsiteSections($business_id, $branch_id, $sale_type_id);
+        }
+
+        return [
+            'sections' => $sections,
+            'products' => [
+                'data' => $paged->pluck('summary')->values()->all(),
+                'current_page' => $page,
+                'per_page' => $per_page,
+                'total' => $total,
+                'last_page' => $last_page,
+            ],
+            'filters_meta' => $filters_meta,
+        ];
+    }
+
+    /**
+     * Storefront single-product detail by slug. Returns null when not found
+     * (caller/controller turns that into a 404).
+     */
+    public function getWebsiteDetail(string $business_id, string $slug): ?array
+    {
+        $with = array_merge($this->websiteWith(), ['productFeatures']);
+
+        $product = $this->websiteBaseQuery($business_id)
+            ->where('slug', $slug)
+            ->with($with)
+            ->first();
+
+        if (!$product) {
+            return null;
+        }
+
+        $sale_type_id = $this->resolveDefaultSaleTypeId($business_id);
+
+        [$price_map, $stock_map] = $this->resolvePricingAndStock(collect([$product]), $business_id, null, $sale_type_id);
+
+        $variations = $product->productVariations;
+
+        $options = $variations->map(function ($variation) use ($price_map, $stock_map) {
+            $entry = $price_map[$variation->product_variation_id] ?? ['price' => 0.0, 'oldPrice' => null, 'discount' => 0];
+
+            return [
+                'id' => $variation->product_variation_id,
+                'label' => $variation->name,
+                'sku' => $variation->sku,
+                'price' => $entry['price'],
+                'oldPrice' => $entry['oldPrice'],
+                'discount' => $entry['discount'],
+                'stock' => $stock_map[$variation->product_variation_id] ?? null,
+                'attributes' => $variation->attributes->map(function ($attr) {
+                    return ['name' => $attr->name, 'value' => $attr->value];
+                })->values()->all(),
+            ];
+        })->values();
+
+        $primary_option = $options->first();
+
+        $related_products = $this->websiteBaseQuery($business_id)
+            ->where('product_id', '!=', $product->product_id)
+            ->where('category_id', $product->category_id)
+            ->with($this->websiteWith())
+            ->limit(8)
+            ->get();
+
+        [$related_price_map, $related_stock_map] = $this->resolvePricingAndStock($related_products, $business_id, null, $sale_type_id);
+
+        $related_mapped = $related_products->map(function ($p) use ($related_price_map, $related_stock_map) {
+            return $this->mapProductSummary($p, $related_price_map, $related_stock_map);
+        })->values()->all();
+
+        return [
+            'id' => $product->product_id,
+            'slug' => $product->slug,
+            'name' => $product->name,
+            'sku' => $primary_option['sku'] ?? null,
+            'short_description' => $product->short_description,
+            'description' => $product->description,
+            'category' => $product->category ? [
+                'id' => $product->category->category_id,
+                'name' => $product->category->name,
+                'slug' => Str::slug($product->category->name),
+            ] : null,
+            'sub_category' => $product->subCategory ? [
+                'id' => $product->subCategory->sub_category_id,
+                'name' => $product->subCategory->name,
+                'slug' => Str::slug($product->subCategory->name),
+            ] : null,
+            'brand' => $product->brand ? [
+                'id' => $product->brand->brand_id,
+                'name' => $product->brand->name,
+            ] : null,
+            'images' => $product->productImages->pluck('image_url')->values()->all(),
+            'features' => $product->productFeatures->map(function ($feature) {
+                return ['name' => $feature->name, 'description' => $feature->description];
+            })->values()->all(),
+            'is_single_variation' => $variations->count() <= 1,
+            'variations' => [
+                'label' => 'Options',
+                'options' => $options->all(),
+            ],
+            'price' => $primary_option['price'] ?? 0.0,
+            'oldPrice' => $primary_option['oldPrice'] ?? null,
+            'discount' => $primary_option['discount'] ?? 0,
+            'stock' => $primary_option['stock'] ?? null,
+            'related_products' => $related_mapped,
+        ];
+    }
+
+    /**
+     * Base query shared by every storefront read: active, not-deleted,
+     * website-visible products for the given business.
+     */
+    private function websiteBaseQuery(string $business_id)
+    {
+        return Product::where('business_id', $business_id)
+            ->where('status', Status::ACTIVE)
+            ->where('is_deleted', 0)
+            ->where('is_website_visible', 1);
+    }
+
+    /**
+     * Eager-load shape shared by every storefront read, avoiding N+1 across
+     * category/subCategory/brand/images/variations/attributes/prices.
+     */
+    private function websiteWith(): array
+    {
+        return [
+            'category:category_id,name',
+            'subCategory:sub_category_id,name',
+            'brand:brand_id,name',
+            'productImages' => function ($q) {
+                $q->orderByDesc('is_default')->orderBy('sorting');
+            },
+            'productVariations.prices',
+            'productVariations.attributes',
+        ];
+    }
+
+    /**
+     * The business's default Sale Type (is_default=1, else lowest sort_order
+     * among active/non-deleted) - resolved once per request and reused for
+     * every price resolution so the whole response is priced consistently.
+     */
+    private function resolveDefaultSaleTypeId(string $business_id): ?string
+    {
+        $sale_type = SaleType::where('business_id', $business_id)
+            ->where('status', Status::ACTIVE)
+            ->where('is_deleted', 0)
+            ->orderByDesc('is_default')
+            ->orderBy('sort_order')
+            ->first();
+
+        return $sale_type->sale_type_id ?? null;
+    }
+
+    /**
+     * Resolves price and stock for every variation across the given products
+     * collection in two bulk queries (not one per variation), keyed by
+     * product_variation_id. Single source of truth for storefront
+     * price/stock resolution - reused by listing, sections, detail, and
+     * related products so there is exactly one implementation of each.
+     *
+     * @return array{0: array, 1: array} [price_map, stock_map]
+     */
+    private function resolvePricingAndStock(Collection $products, string $business_id, ?string $branch_id, ?string $sale_type_id): array
+    {
+        $variation_ids = $products->flatMap(function ($product) {
+            return $product->productVariations->pluck('product_variation_id');
+        })->filter()->unique()->values()->all();
+
+        $price_map = $this->resolveVariationPriceMap($variation_ids, $sale_type_id);
+        $stock_sums = $this->resolveVariationStockSums($variation_ids, $business_id, $branch_id);
+
+        $stock_map = [];
+        foreach ($products as $product) {
+            $is_tracked = (bool) $product->is_track_stock;
+            foreach ($product->productVariations as $variation) {
+                $stock_map[$variation->product_variation_id] = $is_tracked
+                    ? (float) ($stock_sums[$variation->product_variation_id] ?? 0)
+                    : null; // untracked = unlimited, mirrors OrderService::attachAvailableStock()
+            }
+        }
+
+        return [$price_map, $stock_map];
+    }
+
+    /**
+     * Resolves the net (post-discount) price, pre-discount price, and
+     * discount percentage for a set of variation ids, reusing
+     * VariationPricingService - the same math OrderService uses to price a
+     * POS/order line - so the storefront never disagrees with checkout.
+     */
+    private function resolveVariationPriceMap(array $variation_ids, ?string $sale_type_id): array
+    {
+        if (empty($variation_ids)) {
+            return [];
+        }
+
+        $resolved = $this->pricing_service->resolveBulk($variation_ids, $sale_type_id);
+
+        $price_map = [];
+        foreach ($variation_ids as $variation_id) {
+            $r = $resolved[$variation_id] ?? null;
+            $base = $r ? (float) $r['price'] : 0.0;
+            $discount = $r ? (float) $r['discount_percentage'] : 0.0;
+
+            $price_map[$variation_id] = [
+                'price' => $discount > 0 ? round($base * (1 - $discount / 100), 2) : round($base, 2),
+                'oldPrice' => $discount > 0 ? round($base, 2) : null,
+                'discount' => $discount,
+            ];
+        }
+
+        return $price_map;
+    }
+
+    /**
+     * Sums ProductVariationStock.quantity per variation across the relevant
+     * warehouses - a single branch's warehouse(s) when $branch_id is given,
+     * else every warehouse belonging to the business. Mirrors
+     * OrderService::attachAvailableStock()'s pattern, generalized to
+     * multiple warehouses.
+     */
+    private function resolveVariationStockSums(array $variation_ids, string $business_id, ?string $branch_id)
+    {
+        if (empty($variation_ids)) {
+            return collect();
+        }
+
+        $warehouse_query = Warehouse::where('business_id', $business_id)->where('is_deleted', 0);
+
+        if (!empty($branch_id)) {
+            $warehouse_query->where('branch_id', $branch_id);
+        }
+
+        $warehouse_ids = $warehouse_query->pluck('warehouse_id');
+
+        if ($warehouse_ids->isEmpty()) {
+            return collect();
+        }
+
+        return ProductVariationStock::where('business_id', $business_id)
+            ->whereIn('warehouse_id', $warehouse_ids)
+            ->whereIn('product_variation_id', $variation_ids)
+            ->selectRaw('product_variation_id, SUM(quantity) as qty')
+            ->groupBy('product_variation_id')
+            ->pluck('qty', 'product_variation_id');
+    }
+
+    /**
+     * Maps a Product (with its eager-loaded relations) into the flat summary
+     * shape used across listing/sections/related-products. The "primary"
+     * variation representing sku/price/oldPrice/discount/stock is whichever
+     * variation resolves to the lowest net price (the single-variation case
+     * degenerates to just that variation).
+     */
+    private function mapProductSummary(Product $product, array $price_map, array $stock_map): array
+    {
+        $variations = $product->productVariations;
+
+        $primary = null;
+        $primary_price = null;
+
+        foreach ($variations as $variation) {
+            $entry = $price_map[$variation->product_variation_id] ?? null;
+            if ($entry === null) {
+                continue;
+            }
+            if ($primary === null || $entry['price'] < $primary_price) {
+                $primary = $variation;
+                $primary_price = $entry['price'];
+            }
+        }
+
+        if ($primary === null) {
+            $primary = $variations->first();
+        }
+
+        $price_entry = $primary ? ($price_map[$primary->product_variation_id] ?? null) : null;
+        $stock_value = $primary ? ($stock_map[$primary->product_variation_id] ?? null) : null;
+
+        $badges = [];
+        if ($product->is_featured) {
+            $badges[] = 'Featured';
+        }
+        if ($product->is_trending) {
+            $badges[] = 'Trending';
+        }
+        if ($product->is_best_seller) {
+            $badges[] = 'Best Seller';
+        }
+        if (!empty($product->date_created) && Carbon::parse($product->date_created)->greaterThan(now()->subDays(30))) {
+            $badges[] = 'New';
+        }
+
+        return [
+            'id' => $product->product_id,
+            'sku' => $primary->sku ?? null,
+            'slug' => $product->slug,
+            'name' => $product->name,
+            'category' => $product->category->name ?? null,
+            'category_id' => $product->category_id,
+            'subcategory' => $product->subCategory->name ?? null,
+            'sub_category_id' => $product->sub_category_id,
+            'brand' => $product->brand->name ?? null,
+            'brand_id' => $product->brand_id,
+            'price' => $price_entry['price'] ?? 0.0,
+            'oldPrice' => $price_entry['oldPrice'] ?? null,
+            'discount' => $price_entry['discount'] ?? 0,
+            'stock' => $stock_value,
+            'badges' => $badges,
+            'images' => $product->productImages->pluck('image_url')->values()->all(),
+            'short_description' => $product->short_description,
+        ];
+    }
+
+    /**
+     * Builds the 5 homepage sections (each capped at 12) - only computed by
+     * getWebsiteListing() when the request has no filters and is on page 1.
+     * Every section independently degrades to an empty array rather than
+     * throwing when nothing qualifies.
+     */
+    private function buildWebsiteSections(string $business_id, ?string $branch_id, ?string $sale_type_id): array
+    {
+        $with = $this->websiteWith();
+
+        $featured = $this->websiteBaseQuery($business_id)->with($with)->where('is_featured', 1)->orderByDesc('date_created')->limit(12)->get();
+        $discounted = $this->websiteBaseQuery($business_id)->with($with)->whereHas('productVariations', function ($q) {
+            $q->where('discount_percentage', '>', 0);
+        })->orderByDesc('date_created')->limit(12)->get();
+        $trending = $this->websiteBaseQuery($business_id)->with($with)->where('is_trending', 1)->orderByDesc('date_created')->limit(12)->get();
+        $new_arrivals = $this->websiteBaseQuery($business_id)->with($with)->orderByDesc('date_created')->limit(12)->get();
+        $best_sellers = $this->websiteBaseQuery($business_id)->with($with)->where('is_best_seller', 1)->orderByDesc('date_created')->limit(12)->get();
+
+        $all = $featured->concat($discounted)->concat($trending)->concat($new_arrivals)->concat($best_sellers);
+
+        [$price_map, $stock_map] = $this->resolvePricingAndStock($all, $business_id, $branch_id, $sale_type_id);
+
+        $map = function (Collection $collection) use ($price_map, $stock_map) {
+            return $collection->map(function ($product) use ($price_map, $stock_map) {
+                return $this->mapProductSummary($product, $price_map, $stock_map);
+            })->values()->all();
+        };
+
+        return [
+            'featured_products' => $map($featured),
+            'discounted_products' => $map($discounted),
+            'trending_products' => $map($trending),
+            'new_arrivals' => $map($new_arrivals),
+            'best_sellers' => $map($best_sellers),
+        ];
+    }
+
+    /**
+     * Sorts already-mapped [product, summary] rows in PHP (sort options need
+     * fields - is_featured, date_created - that only exist on the model,
+     * not the flat summary).
+     */
+    private function sortWebsiteRows(Collection $rows, string $sort): Collection
+    {
+        switch ($sort) {
+            case 'price_asc':
+                return $rows->sortBy(fn ($row) => $row['summary']['price'])->values();
+            case 'price_desc':
+                return $rows->sortByDesc(fn ($row) => $row['summary']['price'])->values();
+            case 'name_asc':
+                return $rows->sortBy(fn ($row) => strtolower($row['summary']['name'] ?? ''))->values();
+            case 'name_desc':
+                return $rows->sortByDesc(fn ($row) => strtolower($row['summary']['name'] ?? ''))->values();
+            case 'newest':
+                return $rows->sortByDesc(fn ($row) => (string) $row['product']->date_created)->values();
+            case 'featured':
+            default:
+                return $rows->sort(function ($a, $b) {
+                    $fa = $a['product']->is_featured ? 1 : 0;
+                    $fb = $b['product']->is_featured ? 1 : 0;
+                    if ($fa !== $fb) {
+                        return $fb <=> $fa;
+                    }
+                    return strcmp((string) $b['product']->date_created, (string) $a['product']->date_created);
+                })->values();
+        }
     }
 }

@@ -29,6 +29,8 @@ class Product extends Model
         'short_description',
         'description',
         'is_featured',
+        'is_trending',
+        'is_best_seller',
         'status',
         'is_deleted',
         'createdby_id',
