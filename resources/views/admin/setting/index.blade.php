@@ -96,6 +96,10 @@
                                 data-bs-target="#website_theme">
                                 Website Theme
                             </button>
+                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
+                                data-bs-target="#website_settings">
+                                Website Settings
+                            </button>
                         </div>
                     </div>
                     <div class="col-md-9">
@@ -150,6 +154,9 @@
                             </div>
                             <div class="tab-pane fade" id="website_theme">
                                 @include('admin.setting.tabs.website_theme')
+                            </div>
+                            <div class="tab-pane fade" id="website_settings">
+                                @include('admin.setting.tabs.website_settings')
                             </div>
                         </div>
                     </div>
@@ -469,5 +476,22 @@
             e.stopPropagation();
             applyWebsiteThemePreset($(this).data('preset'));
         });
+    </script>
+
+    {{-- Website Settings js --}}
+    <script>
+        function saveWebsiteSettings(form) {
+            ajaxRequest({
+                url: '{{ route('website_settings.update') }}',
+                method: 'POST',
+                data: new FormData($(form)[0]),
+                isFormData: true
+            }).then(res => {
+                successMessage(res.Message);
+                setTimeout(() => location.reload(), 800);
+            }).catch(err => {
+                errorMessage(err.Message);
+            });
+        }
     </script>
 @endsection

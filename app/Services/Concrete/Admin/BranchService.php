@@ -154,4 +154,27 @@ class BranchService
             ->where('is_deleted', 0)
             ->get();
     }
+
+    /**
+     * Public storefront listing - only active, non-deleted branches, and
+     * only the fields safe to expose outside the admin panel.
+     */
+    public function getActivePublicByBusiness($business_id)
+    {
+        return $this->model_branch->getModel()::where('business_id', $business_id)
+            ->where('status', Status::ACTIVE)
+            ->where('is_deleted', 0)
+            ->orderBy('name')
+            ->get([
+                'branch_id',
+                'name',
+                'address',
+                'phone',
+                'city',
+                'state',
+                'country',
+                'open_time',
+                'close_time',
+            ]);
+    }
 }

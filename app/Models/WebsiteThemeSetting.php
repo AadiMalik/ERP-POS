@@ -27,10 +27,22 @@ class WebsiteThemeSetting extends Model
         'font_size_base',
         'button_style',
         'typography_style',
+        'favicon',
+        'business_hours',
+        'seo_title',
+        'seo_description',
+        'seo_keywords',
+        'og_image',
+        'whatsapp_number',
+        'social_links',
         'createdby_id',
         'updatedby_id',
         'date_created',
         'date_updated',
+    ];
+
+    protected $casts = [
+        'social_links' => 'array',
     ];
 
     public function business()

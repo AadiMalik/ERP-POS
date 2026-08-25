@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\BranchController;
+use App\Http\Controllers\Api\WebsiteSettingController;
 use App\Http\Controllers\Api\WebsiteThemeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -38,8 +40,11 @@ Route::prefix('v1/auth')->middleware('throttle:20,1')->group(function () {
     });
 });
 
-// Public storefront config - business-wise website theme settings, consumed
-// by the Vue frontend before render using its .env-configured business_id.
+// Public storefront config - business-wise website theme settings, global
+// website settings, and branches, consumed by the Vue frontend before
+// render / on demand using its .env-configured business_id.
 Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::get('website-theme/{business_id}', [WebsiteThemeController::class, 'show']);
+    Route::get('website-settings/{business_id}', [WebsiteSettingController::class, 'show']);
+    Route::get('branches/{business_id}', [BranchController::class, 'index']);
 });

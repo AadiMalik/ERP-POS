@@ -812,4 +812,63 @@ class SettingService
             ],
         ];
     }
+
+    /**
+     * Public storefront "global settings" payload - business identity from
+     * `businesses`, currency from `accounting_settings`, and website-only
+     * config (favicon, SEO, social links, WhatsApp, hours) from
+     * `website_theme_settings`. No data is duplicated into a new table.
+     */
+    public function getWebsitePublicSettings($business_id)
+    {
+        $business = $this->model_business->getModel()::find($business_id);
+        $accounting = $this->getAccountingSetting($business_id);
+        $website_setting = $this->getWebsiteThemeSetting($business_id);
+
+        return $this->resolveWebsitePublicSettings($business, $accounting, $website_setting);
+    }
+
+    public function resolveWebsitePublicSettings($business, $accounting, $website_setting)
+    {
+        $default_social = [
+            'facebook' => null,
+            'instagram' => null,
+            'twitter' => null,
+            'pinterest' => null,
+            'youtube' => null,
+            'tiktok' => null,
+            'linkedin' => null,
+        ];
+        $social_links = is_array($website_setting->social_links) ? $website_setting->social_links : [];
+        $social_links = array_merge($default_social, $social_links);
+
+        return [
+            'business' => [
+                'name'    => $business->name ?? null,
+                'logo'    => $business && $business->logo ? asset('public/uploads/business/' . $business->logo) : null,
+                'email'   => $business->email ?? null,
+                'phone'   => $business->phone ?? null,
+                'address' => $business->address ?? null,
+                'city'    => $business->city ?? null,
+                'state'   => $business->state ?? null,
+                'country' => $business->country ?? null,
+            ],
+            'currency' => [
+                'code'           => $accounting->currency ?? 'USD',
+                'symbol'         => $accounting->currency_symbol ?? '$',
+                'position'       => $accounting->currency_position ?? 'before',
+                'decimal_points' => $accounting->decimal_points ?? 2,
+            ],
+            'seo' => [
+                'title'       => $website_setting->seo_title ?? ($business->name ?? null),
+                'description' => $website_setting->seo_description ?? null,
+                'keywords'    => $website_setting->seo_keywords ?? null,
+                'og_image'    => $website_setting->og_image ? asset('uploads/website/' . $website_setting->og_image) : null,
+            ],
+            'favicon'         => $website_setting->favicon ? asset('uploads/website/' . $website_setting->favicon) : null,
+            'business_hours'  => $website_setting->business_hours ?? null,
+            'whatsapp_number' => $website_setting->whatsapp_number ?? null,
+            'social_links'    => $social_links,
+        ];
+    }
 }

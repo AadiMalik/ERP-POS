@@ -23,6 +23,7 @@ use App\Support\Print\ThermalPrintConfig;
 use App\Traits\ResponseAPI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -950,5 +951,74 @@ class SettingController extends Controller
         return $setting
             ? $this->success(Message::UPDATE, $setting)
             : $this->error(Message::NOTUPDATE);
+    }
+
+    /**
+     * Website-only global settings (favicon, business hours, SEO, social
+     * links, WhatsApp number) - stored on the same `website_theme_settings`
+     * row as the design/theme tab, so this only fills the extra columns and
+     * never touches theme_preset/colors/typography/button_style.
+     */
+    public function updateWebsiteSettings(Request $request)
+    {
+        $rules = [
+            'business_hours'            => 'nullable|string|max:255',
+            'seo_title'                 => 'nullable|string|max:255',
+            'seo_description'           => 'nullable|string|max:1000',
+            'seo_keywords'               => 'nullable|string|max:1000',
+            'whatsapp_number'           => 'nullable|string|max:30',
+            'favicon'                   => 'nullable|image|max:1024',
+            'og_image'                  => 'nullable|image|max:2048',
+            'social_links'              => 'nullable|array',
+            'social_links.facebook'     => 'nullable|url',
+            'social_links.instagram'    => 'nullable|url',
+            'social_links.twitter'      => 'nullable|url',
+            'social_links.pinterest'    => 'nullable|url',
+            'social_links.youtube'      => 'nullable|url',
+            'social_links.tiktok'       => 'nullable|url',
+            'social_links.linkedin'     => 'nullable|url',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->only([
+            'business_hours',
+            'seo_title',
+            'seo_description',
+            'seo_keywords',
+            'whatsapp_number',
+        ]);
+        $obj['social_links'] = $request->input('social_links', []);
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+
+        if ($request->hasFile('favicon')) {
+            $obj['favicon'] = $this->storeWebsiteUpload($request->file('favicon'));
+        }
+        if ($request->hasFile('og_image')) {
+            $obj['og_image'] = $this->storeWebsiteUpload($request->file('og_image'));
+        }
+
+        $setting = $this->setting_service->updateWebsiteThemeSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    private function storeWebsiteUpload($file)
+    {
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $path = public_path('uploads/website');
+
+        if (!File::exists($path)) {
+            File::makeDirectory($path, 0755, true);
+        }
+
+        $file->move($path, $fileName);
+
+        return $fileName;
     }
 }
