@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\BranchController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\WebsiteSettingController;
 use App\Http\Controllers\Api\WebsiteThemeController;
 use Illuminate\Http\Request;
@@ -47,4 +48,5 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::get('website-theme/{business_id}', [WebsiteThemeController::class, 'show']);
     Route::get('website-settings/{business_id}', [WebsiteSettingController::class, 'show']);
     Route::get('branches/{business_id}', [BranchController::class, 'index']);
+    Route::get('categories/{business_id}', [CategoryController::class, 'index']);
 });

@@ -41,6 +41,11 @@ class Category extends Model
         return $this->belongsTo(Business::class, 'business_id');
     }
 
+    public function subCategories()
+    {
+        return $this->hasMany(SubCategory::class, 'category_id', 'category_id');
+    }
+
     public function createdby()
     {
         return $this->belongsTo(User::class, 'createdby_id');

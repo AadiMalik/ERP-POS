@@ -10,6 +10,7 @@ use App\Repository\Repository;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Yajra\DataTables\DataTables;
 
 class CategoryService
@@ -178,5 +179,45 @@ class CategoryService
                   ->where('status', Status::ACTIVE)
                   ->where('is_deleted', 0)
                   ->get();
+      }
+
+      /**
+       * Public storefront listing - active categories for a business, each
+       * with its active subcategories nested, and only the fields safe to
+       * expose outside the admin panel. Consumed by the Vue frontend instead
+       * of hard-coded category data.
+       */
+      public function getActivePublicByBusiness($business_id)
+      {
+            $categories = $this->model_category->getModel()::where('business_id', $business_id)
+                  ->where('status', Status::ACTIVE)
+                  ->where('is_deleted', 0)
+                  ->with(['subCategories' => function ($q) {
+                        $q->where('status', Status::ACTIVE)
+                              ->where('is_deleted', 0)
+                              ->orderBy('name');
+                  }])
+                  ->orderBy('name')
+                  ->get();
+
+            return $categories->map(function ($category) {
+                  return [
+                        'id' => $category->category_id,
+                        'name' => $category->name,
+                        'slug' => Str::slug($category->name),
+                        'image' => $category->logo_url,
+                        'status' => $category->status,
+                        'sub_categories' => $category->subCategories->map(function ($sub) {
+                              return [
+                                    'id' => $sub->sub_category_id,
+                                    'category_id' => $sub->category_id,
+                                    'name' => $sub->name,
+                                    'slug' => Str::slug($sub->name),
+                                    'image' => $sub->logo_url,
+                                    'status' => $sub->status,
+                              ];
+                        })->values(),
+                  ];
+            })->values();
       }
 }
