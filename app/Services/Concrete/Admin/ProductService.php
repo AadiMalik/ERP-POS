@@ -774,6 +774,9 @@ class ProductService
         $in_stock = (isset($params['in_stock']) && $params['in_stock'] !== '' && $params['in_stock'] !== null)
             ? filter_var($params['in_stock'], FILTER_VALIDATE_BOOLEAN)
             : null;
+        $on_sale = (isset($params['on_sale']) && $params['on_sale'] !== '' && $params['on_sale'] !== null)
+            ? filter_var($params['on_sale'], FILTER_VALIDATE_BOOLEAN)
+            : null;
         $sort = $params['sort'] ?? 'featured';
         $page = max(1, (int) ($params['page'] ?? 1));
         $per_page = min(100, max(1, (int) ($params['per_page'] ?? 24)));
@@ -785,7 +788,8 @@ class ProductService
             || !empty($brand_id)
             || $min_price !== null
             || $max_price !== null
-            || $in_stock !== null;
+            || $in_stock !== null
+            || $on_sale !== null;
 
         $query = $this->websiteBaseQuery($business_id)->with($this->websiteWith());
 
@@ -826,6 +830,12 @@ class ProductService
                 $stock = $row['summary']['stock'];
                 $is_in_stock = $stock === null || $stock > 0;
                 return $in_stock ? $is_in_stock : !$is_in_stock;
+            });
+        }
+        if ($on_sale !== null) {
+            $rows = $rows->filter(function ($row) use ($on_sale) {
+                $is_on_sale = $row['summary']['discount'] > 0;
+                return $on_sale ? $is_on_sale : !$is_on_sale;
             });
         }
 
@@ -924,20 +934,15 @@ class ProductService
             'sku' => $primary_option['sku'] ?? null,
             'short_description' => $product->short_description,
             'description' => $product->description,
-            'category' => $product->category ? [
-                'id' => $product->category->category_id,
-                'name' => $product->category->name,
-                'slug' => Str::slug($product->category->name),
-            ] : null,
-            'sub_category' => $product->subCategory ? [
-                'id' => $product->subCategory->sub_category_id,
-                'name' => $product->subCategory->name,
-                'slug' => Str::slug($product->subCategory->name),
-            ] : null,
-            'brand' => $product->brand ? [
-                'id' => $product->brand->brand_id,
-                'name' => $product->brand->name,
-            ] : null,
+            // Same flat shape as mapProductSummary() (listing/sections/related
+            // products) - one consistent product contract everywhere, not a
+            // nested shape only the detail endpoint uses.
+            'category' => $product->category->name ?? null,
+            'category_id' => $product->category_id,
+            'subcategory' => $product->subCategory->name ?? null,
+            'sub_category_id' => $product->sub_category_id,
+            'brand' => $product->brand->name ?? null,
+            'brand_id' => $product->brand_id,
             'images' => $product->productImages->pluck('image_url')->values()->all(),
             'features' => $product->productFeatures->map(function ($feature) {
                 return ['name' => $feature->name, 'description' => $feature->description];

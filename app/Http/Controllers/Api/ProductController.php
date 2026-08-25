@@ -45,6 +45,7 @@ class ProductController extends Controller
             'min_price',
             'max_price',
             'in_stock',
+            'on_sale',
             'sort',
             'page',
             'per_page',

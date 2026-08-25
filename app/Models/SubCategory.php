@@ -33,8 +33,8 @@ class SubCategory extends Model
     public function getLogoUrlAttribute()
     {
         return !empty($this->logo)
-            ? asset('public/uploads/sub_category/' . $this->logo)
-            : asset('public/assets/img/no-image.png'); // optional default image
+            ? asset('uploads/sub_category/' . $this->logo)
+            : asset('assets/img/no-image.png'); // optional default image
     }
 
     public function category()

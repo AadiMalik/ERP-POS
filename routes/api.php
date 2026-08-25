@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\BranchController;
+use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\WebsiteSettingController;
 use App\Http\Controllers\Api\WebsiteThemeController;
 use Illuminate\Http\Request;
@@ -49,4 +51,7 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::get('website-settings/{business_id}', [WebsiteSettingController::class, 'show']);
     Route::get('branches/{business_id}', [BranchController::class, 'index']);
     Route::get('categories/{business_id}', [CategoryController::class, 'index']);
+    Route::get('brands/{business_id}', [BrandController::class, 'index']);
+    Route::get('products/{business_id}', [ProductController::class, 'index']);
+    Route::get('products/{business_id}/{slug}', [ProductController::class, 'show']);
 });

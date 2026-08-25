@@ -10,6 +10,7 @@ use App\Repository\Repository;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Yajra\DataTables\DataTables;
 
 class BrandService
@@ -19,6 +20,29 @@ class BrandService
       public function __construct()
       {
             $this->model_brand = new Repository(new Brand());
+      }
+
+      /**
+       * Public storefront listing - active brands for a business. Mirrors
+       * CategoryService::getActivePublicByBusiness(). Consumed by the Vue
+       * frontend instead of hard-coded brand data.
+       */
+      public function getActivePublicByBusiness($business_id)
+      {
+            $brands = $this->model_brand->getModel()::where('business_id', $business_id)
+                  ->where('status', Status::ACTIVE)
+                  ->where('is_deleted', 0)
+                  ->orderBy('name')
+                  ->get();
+
+            return $brands->map(function ($brand) {
+                  return [
+                        'id' => $brand->brand_id,
+                        'name' => $brand->name,
+                        'slug' => Str::slug($brand->name),
+                        'image' => $brand->logo_url,
+                  ];
+            })->values();
       }
 
       public function getData($obj)

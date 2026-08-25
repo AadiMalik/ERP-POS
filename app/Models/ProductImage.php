@@ -27,8 +27,8 @@ class ProductImage extends Model
     public function getImageUrlAttribute()
     {
         return !empty($this->image)
-            ? asset('public/uploads/product/' . $this->image)
-            : asset('public/assets/img/no-image.png'); // optional default image
+            ? asset('uploads/product/' . $this->image)
+            : asset('assets/img/no-image.png'); // optional default image
     }
     public function product() {
         return $this->belongsTo(Product::class, 'product_id', 'product_id');

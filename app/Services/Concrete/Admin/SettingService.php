@@ -845,7 +845,7 @@ class SettingService
         return [
             'business' => [
                 'name'    => $business->name ?? null,
-                'logo'    => $business && $business->logo ? asset('public/uploads/business/' . $business->logo) : null,
+                'logo'    => $business && $business->logo ? asset('uploads/business/' . $business->logo) : null,
                 'email'   => $business->email ?? null,
                 'phone'   => $business->phone ?? null,
                 'address' => $business->address ?? null,
