@@ -55,10 +55,17 @@ class SettingService
     protected $model_thermal_print_setting;
     protected $model_notification_setting;
     protected $expense_category_service;
+    protected $customer_service;
+    protected $supplier_service;
 
-    public function __construct(ExpenseCategoryService $expense_category_service)
-    {
+    public function __construct(
+        ExpenseCategoryService $expense_category_service,
+        CustomerService $customer_service,
+        SupplierService $supplier_service
+    ) {
         $this->expense_category_service = $expense_category_service;
+        $this->customer_service = $customer_service;
+        $this->supplier_service = $supplier_service;
         $this->model_business = new Repository(new Business());
         $this->model_notification_setting = new Repository(new NotificationSetting());
         $this->model_business_setting = new Repository(new BusinessSetting());
@@ -306,6 +313,8 @@ class SettingService
 
         $old_values = $setting->exists ? $setting->getOriginal() : null;
         $old_expense_account_id = $setting->default_expense_account_id;
+        $old_customer_account_id = $setting->default_customer_account_id;
+        $old_supplier_account_id = $setting->default_supplier_account_id;
 
         if (!$setting->exists) {
             $setting->createdby_id = Auth::id();
@@ -325,6 +334,17 @@ class SettingService
         // their own snapshot account_id, so historical JVs are unaffected.
         if ($setting->default_expense_account_id !== $old_expense_account_id) {
             $this->expense_category_service->syncDefaultAccount($obj['business_id'], $setting->default_expense_account_id);
+        }
+
+        // Mirror create-time attachment: when Customer/Supplier Account changes
+        // in settings, push the new COA onto existing customer/supplier rows so
+        // payments and credit sales can post without re-editing each record.
+        if ($setting->default_customer_account_id !== $old_customer_account_id) {
+            $this->customer_service->syncDefaultAccount($obj['business_id'], $setting->default_customer_account_id);
+        }
+
+        if ($setting->default_supplier_account_id !== $old_supplier_account_id) {
+            $this->supplier_service->syncDefaultAccount($obj['business_id'], $setting->default_supplier_account_id);
         }
 
         return $setting;
@@ -861,6 +881,15 @@ class SettingService
                 'min_amount' => $website_setting->free_delivery_min_amount !== null
                     ? (float) $website_setting->free_delivery_min_amount
                     : null,
+            ],
+            'bank_details' => [
+                'bank_name' => $website_setting->bank_name ?? null,
+                'account_title' => $website_setting->bank_account_title ?? null,
+                'account_number' => $website_setting->bank_account_number ?? null,
+                'iban' => $website_setting->bank_iban ?? null,
+                'branch' => $website_setting->bank_branch ?? null,
+                'swift_code' => $website_setting->bank_swift_code ?? null,
+                'instructions' => $website_setting->bank_instructions ?? null,
             ],
         ];
     }

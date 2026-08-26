@@ -49,3 +49,6 @@ identity flow via `App\Http\Controllers\Api\Auth\AuthController`:
 
 This is a shared email+OTP identity API, not a general-purpose REST API over the
 ERP's business data — there is no public `/api/v1/products`, `/api/v1/orders`, etc.
+Onboarding/login creates or ensures a `CustomerProfile` via
+`CustomerAccountService::ensureProfile()` → `CustomerService::upsertProfile()`,
+which attaches `accounting_settings.default_customer_account_id` when configured.

@@ -21,6 +21,7 @@ use App\Services\Concrete\Admin\PaymentMethodService;
 use App\Services\Concrete\Admin\ThermalPrintSettingResolverService;
 use App\Services\Concrete\Admin\VoucherService;
 use App\Services\Concrete\Admin\WarehouseService;
+use App\Services\Concrete\Api\WebsiteCheckoutService;
 use App\Traits\ResponseAPI;
 use Exception;
 use Illuminate\Http\Request;
@@ -44,6 +45,7 @@ class OrderController extends Controller
     protected $document_send_log_service;
     protected $thermal_print_setting_resolver;
     protected $voucher_service;
+    protected $checkout_service;
 
     public function __construct(
         OrderService $order_service,
@@ -56,7 +58,8 @@ class OrderController extends Controller
         PaymentMethodService $payment_method_service,
         DocumentSendLogService $document_send_log_service,
         ThermalPrintSettingResolverService $thermal_print_setting_resolver,
-        VoucherService $voucher_service
+        VoucherService $voucher_service,
+        WebsiteCheckoutService $checkout_service
     ) {
         $this->middleware('module:order');
         $this->middleware('permission:order.export')->only(['export']);
@@ -73,6 +76,7 @@ class OrderController extends Controller
         $this->document_send_log_service = $document_send_log_service;
         $this->thermal_print_setting_resolver = $thermal_print_setting_resolver;
         $this->voucher_service = $voucher_service;
+        $this->checkout_service = $checkout_service;
     }
 
     protected function importExportModuleKey(): string
@@ -177,6 +181,30 @@ class OrderController extends Controller
         }
 
         return view('admin.order.show', compact('order', 'sale_type_badge', 'payment_method_label'));
+    }
+
+    /**
+     * Confirm bank-transfer payment for a website order after reviewing the
+     * uploaded receipt. Does not post stock/GL - only marks payment as paid.
+     */
+    public function confirmPayment(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'order_id' => 'required|string|exists:orders,order_id',
+        ]);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $this->assertOrderAccessible($request->order_id);
+
+        try {
+            $order = $this->checkout_service->confirmPayment($request->order_id, Auth::id());
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+
+        return $this->success(Message::UPDATE, $order);
     }
 
     /**

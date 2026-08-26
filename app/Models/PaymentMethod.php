@@ -20,6 +20,7 @@ class PaymentMethod extends Model
         'account_id',
         'type',
         'is_default',
+        'is_website_only',
         'status',
         'sort_order',
         'is_deleted',

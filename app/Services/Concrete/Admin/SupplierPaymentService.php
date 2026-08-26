@@ -530,8 +530,12 @@ class SupplierPaymentService
 
         $supplier = Supplier::find($payment->supplier_id);
 
-        if (empty($supplier) || empty($supplier->account_id)) {
-            throw new Exception('The selected supplier does not have a linked Chart of Account. Please configure it before posting this payment.');
+        if (!$supplier || empty($supplier->account_id)) {
+            throw new Exception(
+                'This supplier has no linked Chart of Account. '
+                . 'Set Supplier Account under Settings → Accounting, save settings '
+                . '(this updates existing suppliers), then post the payment again.'
+            );
         }
 
         if (empty($payment->payment_account_id)) {

@@ -41,6 +41,10 @@ class Order extends Model
         'notes',
         'due_date',
         'delivery_address',
+        'payment_proof',
+        'payment_confirmed_at',
+        'payment_confirmed_by_id',
+        'client_request_id',
         'status',
         'fbr_invoice_number',
         'fbr_status',
@@ -153,5 +157,19 @@ class Order extends Model
     public function deletedby()
     {
         return $this->belongsTo(User::class, 'deletedby_id');
+    }
+
+    public function paymentConfirmedBy()
+    {
+        return $this->belongsTo(User::class, 'payment_confirmed_by_id');
+    }
+
+    public function getPaymentProofUrlAttribute()
+    {
+        if (empty($this->payment_proof)) {
+            return null;
+        }
+
+        return asset('public/uploads/order_payment_proof/' . $this->payment_proof);
     }
 }

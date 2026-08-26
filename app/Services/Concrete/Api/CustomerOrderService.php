@@ -3,7 +3,9 @@
 namespace App\Services\Concrete\Api;
 
 use App\Models\Order;
+use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\File;
 
 /**
  * Storefront "My Orders" reads against the shared ERP orders table.
@@ -40,14 +42,24 @@ class CustomerOrderService
         $query = Order::with([
             'details.product.productImages',
             'details.productVariation',
-            'payments',
+            'payments.paymentMethod',
             'statusHistory',
             'user',
+            'orderSource',
+            'orderType',
+            'saleType',
         ])
             ->where('business_id', $business_id)
             ->where('user_id', $user_id)
             ->where('is_deleted', 0)
-            ->whereNotIn('status', ['draft', 'hold'])
+            // Website hold orders must appear in My Orders immediately after checkout.
+            // Exclude only POS-style drafts that the customer never placed.
+            ->where(function ($q) {
+                $q->where('status', '!=', 'draft')
+                    ->orWhereHas('orderSource', function ($s) {
+                        $s->where('code', 'WEBSITE');
+                    });
+            })
             ->orderByDesc('date_created');
 
         if ($status && $status !== 'all') {
@@ -73,10 +85,13 @@ class CustomerOrderService
         $order = Order::with([
             'details.product.productImages',
             'details.productVariation',
-            'payments',
+            'payments.paymentMethod',
             'statusHistory',
             'user',
             'branch',
+            'orderSource',
+            'orderType',
+            'saleType',
         ])
             ->where('business_id', $business_id)
             ->where('user_id', $user_id)
@@ -85,6 +100,58 @@ class CustomerOrderService
             ->first();
 
         if (!$order) {
+            throw new Exception('Order not found.');
+        }
+
+        return $this->mapOrder($order, true);
+    }
+
+    /**
+     * Public track-order lookup. Requires order number + email or phone that
+     * matches the order customer - never returns another customer's order.
+     */
+    public function track(string $business_id, string $order_number, ?string $email = null, ?string $phone = null): array
+    {
+        $email = $email ? strtolower(trim($email)) : null;
+        $phone = $phone ? preg_replace('/\s+/', '', trim($phone)) : null;
+
+        if (!$email && !$phone) {
+            throw new Exception('Email or phone is required to track an order.');
+        }
+
+        $order = Order::with([
+            'details.product.productImages',
+            'details.productVariation',
+            'payments.paymentMethod',
+            'statusHistory',
+            'user',
+            'orderSource',
+            'orderType',
+            'saleType',
+        ])
+            ->where('business_id', $business_id)
+            ->where('is_deleted', 0)
+            ->where(function ($q) use ($order_number) {
+                $q->where('daily_order_id', $order_number)
+                    ->orWhere('order_id', $order_number);
+            })
+            ->first();
+
+        if (!$order || !$order->user) {
+            throw new Exception('Order not found.');
+        }
+
+        $user_email = strtolower((string) ($order->user->email ?? ''));
+        $user_phone = preg_replace('/\s+/', '', (string) ($order->user->phone ?? ''));
+
+        $email_ok = $email && $user_email && hash_equals($user_email, $email);
+        $phone_ok = $phone && $user_phone && (
+            hash_equals($user_phone, $phone)
+            || str_ends_with($user_phone, $phone)
+            || str_ends_with($phone, $user_phone)
+        );
+
+        if (!$email_ok && !$phone_ok) {
             throw new Exception('Order not found.');
         }
 
@@ -154,6 +221,18 @@ class CustomerOrderService
             ];
         }
 
+        $payment_method = null;
+        $first_payment = $order->payments->first();
+        if ($first_payment && $first_payment->paymentMethod) {
+            $pm = $first_payment->paymentMethod;
+            $payment_method = [
+                'id' => $pm->payment_method_id,
+                'code' => $pm->type === 'cod' ? 'cod' : ($pm->type === 'bank' ? 'bank_transfer' : strtolower($pm->code)),
+                'name' => $pm->name,
+                'type' => $pm->type,
+            ];
+        }
+
         $payload = [
             'id' => $order->order_id,
             'orderNumber' => $order->daily_order_id ?: $order->order_id,
@@ -166,22 +245,34 @@ class CustomerOrderService
             'tax' => (float) ($order->tax_amount ?? $order->tax ?? 0),
             'total' => $total,
             'paymentStatus' => $payment_status,
+            'paymentMethod' => $payment_method,
+            'orderType' => $order->orderType->name ?? null,
+            'orderSource' => $order->orderSource->code ?? null,
+            'saleType' => $order->saleType->name ?? null,
             'branchId' => $order->branch_id,
             'notes' => $order->notes,
             'status' => $this->mapStatus($order->status),
+            'erpStatus' => $order->status,
             'statusHistory' => $history,
             'placedAt' => optional($order->date_created ?? $order->order_date)->toIso8601String(),
             'deliveryAddress' => $order->delivery_address,
+            'hasPaymentProof' => !empty($order->payment_proof),
+            'paymentConfirmedAt' => optional($order->payment_confirmed_at)->toIso8601String(),
         ];
 
         if ($detailed) {
             $payload['payments'] = $order->payments->map(function ($p) {
                 return [
-                    'method' => $p->payment_method ?? $p->method ?? null,
+                    'method' => $p->paymentMethod->name ?? null,
+                    'type' => $p->paymentMethod->type ?? null,
                     'amount' => (float) ($p->amount ?? 0),
-                    'status' => $p->status ?? null,
+                    'reference' => $p->reference_no,
                 ];
             })->values()->all();
+
+            if (!empty($order->payment_proof)) {
+                $payload['paymentProofUrl'] = asset('public/uploads/order_payment_proof/' . $order->payment_proof);
+            }
         }
 
         return $payload;

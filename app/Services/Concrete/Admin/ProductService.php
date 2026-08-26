@@ -984,6 +984,7 @@ class ProductService
             'oldPrice' => $primary_option['oldPrice'] ?? null,
             'discount' => $primary_option['discount'] ?? 0,
             'stock' => $primary_option['stock'] ?? null,
+            'default_variation_id' => $primary_option['id'] ?? null,
             'related_products' => $related_mapped,
         ];
     }
@@ -1199,6 +1200,8 @@ class ProductService
             'oldPrice' => $price_entry['oldPrice'] ?? null,
             'discount' => $price_entry['discount'] ?? 0,
             'stock' => $stock_value,
+            'default_variation_id' => $primary->product_variation_id ?? null,
+            'is_single_variation' => $variations->count() <= 1,
             'badges' => $badges,
             'images' => $product->productImages->pluck('image_url')->values()->all(),
             'short_description' => $product->short_description,

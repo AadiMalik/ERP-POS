@@ -2,11 +2,11 @@
 
 namespace App\Services\Concrete\Auth;
 
-use App\Mail\OtpMail;
 use App\Models\Otp;
+use App\Services\Concrete\Email\DTO\EmailData;
+use App\Services\Concrete\Email\EmailService;
 use Exception;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 
 class OtpService
 {
@@ -15,12 +15,19 @@ class OtpService
     const RESEND_COOLDOWN_SECONDS = 60;
     const MAX_SENDS_PER_HOUR = 5;
 
+    protected EmailService $email_service;
+
+    public function __construct(EmailService $email_service)
+    {
+        $this->email_service = $email_service;
+    }
+
     /**
      * Generate, store, and email a fresh OTP for the given email + purpose.
-     * Enforces a resend cooldown and an hourly cap, and invalidates any
-     * previous unconsumed OTP for the same email + purpose.
+     * Uses the business EmailSetting (e.g. Mailtrap SMTP) — never the .env
+     * mailpit defaults — so storefront OTP matches admin email settings.
      */
-    public function send(string $email, string $purpose): void
+    public function send(string $email, string $purpose, string $business_id): void
     {
         $email = strtolower(trim($email));
 
@@ -49,7 +56,7 @@ class OtpService
 
         $code = (string) random_int(100000, 999999);
 
-        Otp::create([
+        $otp = Otp::create([
             'email' => $email,
             'otp_hash' => Hash::make($code),
             'purpose' => $purpose,
@@ -59,7 +66,21 @@ class OtpService
             'ip_address' => request()?->ip(),
         ]);
 
-        Mail::to($email)->send(new OtpMail($code, $purpose));
+        $result = $this->email_service->send($business_id, new EmailData([
+            'to' => $email,
+            'subject' => 'Your verification code',
+            'view' => 'emails.otp',
+            'data' => [
+                'otp' => $code,
+                'purpose' => $purpose,
+            ],
+        ]));
+
+        if (!$result['status']) {
+            // Do not leave a usable OTP / cooldown when delivery failed.
+            $otp->delete();
+            throw new Exception($result['message'] ?: 'Failed to send verification email. Please try again.');
+        }
     }
 
     /**

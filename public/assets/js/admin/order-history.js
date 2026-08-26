@@ -213,8 +213,11 @@ $('#odReceivePaymentBtn').click(function () {
 });
 
 $('#rpSubmitBtn').click(function () {
-    var amount = decimal($('#rpAmount').val() || 0);
-    var due = decimal(currentOrderDetail.due_amount || 0);
+    // Parse after decimal() formatting - decimal() returns a string via
+    // toFixed(), and string ">" compares lexicographically (e.g. "9.00" >
+    // "10.61"), which wrongly blocked valid partial payments.
+    var amount = parseFloat(decimal($('#rpAmount').val() || 0));
+    var due = parseFloat(decimal(currentOrderDetail.due_amount || 0));
 
     if (!currentOrderDetail.order_id) {
         return;

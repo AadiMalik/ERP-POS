@@ -377,8 +377,11 @@
                 return false;
             }
             let orderDue = $('#order_id option:selected').data('due');
-            if ($('#order_id').val() && orderDue !== undefined && decimal($('#amount').val() || 0) > decimal(
-                    orderDue)) {
+            // decimal() returns a toFixed() string - compare as numbers so
+            // equal amounts (e.g. 10.61 vs 10.61) and partials are not
+            // rejected by lexicographic string comparison.
+            if ($('#order_id').val() && orderDue !== undefined && parseFloat(decimal($('#amount').val() || 0)) >
+                parseFloat(decimal(orderDue))) {
                 e.preventDefault();
                 errorMessage('Payment amount exceeds the selected order\'s remaining due.');
                 return false;

@@ -127,17 +127,26 @@ class UserController extends Controller
         }
 
         if ($is_customer) {
+            $ignore_profile_id = null;
+            if ($request->filled('id') && $request->filled('business_id')) {
+                $profile = $this->customer_service->getProfile($request->id, $request->business_id);
+                $ignore_profile_id = $profile->customer_profile_id ?? null;
+            }
+
             $rules['code'] = [
                 'nullable',
                 Rule::unique('customer_profiles', 'code')
                     ->where(function ($query) use ($request) {
                         return $query->where('business_id', $request->business_id)
                             ->where('is_deleted', 0);
-                    }),
+                    })
+                    ->ignore($ignore_profile_id, 'customer_profile_id'),
             ];
         }
 
-        $validate = Validator::make($request->all(), $rules);
+        $validate = Validator::make($request->all(), $rules, [
+            'code.unique' => 'This customer code is already taken.',
+        ]);
         if ($validate->fails()) {
             return redirect()->back()->withErrors($validate)->withInput();
         }

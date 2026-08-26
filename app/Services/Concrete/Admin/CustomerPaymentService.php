@@ -232,10 +232,28 @@ class CustomerPaymentService
                     : ($accounting_setting->default_bank_account_id ?? null);
             }
 
-            $amount = (float) ($obj['amount'] ?? 0);
-            $tax_amount = (float) ($obj['tax_amount'] ?? 0);
-            $discount_amount = (float) ($obj['discount_amount'] ?? 0);
-            $net_amount = $amount - $tax_amount - $discount_amount;
+            // Prefer the profile's linked COA; fall back to Accounting Settings
+            // default and backfill the profile when missing (legacy customers
+            // created before COA-on-create).
+            $customer_account_id = $profile->account_id
+                ?: ($accounting_setting->default_customer_account_id ?? null);
+
+            if (empty($profile->account_id) && !empty($customer_account_id)) {
+                $profile->update([
+                    'account_id'   => $customer_account_id,
+                    'updatedby_id' => Auth::id(),
+                    'date_updated' => now(),
+                ]);
+            }
+
+            // Compare money at the business currency scale (same as currency()
+            // display). Rounding due to 3dp while showing 2dp made equal-looking
+            // amounts like Rs 10.61 vs Rs 10.61 fail the overpay guard.
+            $money_scale = (int) (session('accounting_setting.decimal_points') ?? 2);
+            $amount = round((float) ($obj['amount'] ?? 0), $money_scale);
+            $tax_amount = round((float) ($obj['tax_amount'] ?? 0), $money_scale);
+            $discount_amount = round((float) ($obj['discount_amount'] ?? 0), $money_scale);
+            $net_amount = round($amount - $tax_amount - $discount_amount, $money_scale);
 
             if ($net_amount < 0) {
                 throw new Exception('Tax and discount amount cannot exceed the payment amount.');
@@ -245,7 +263,7 @@ class CustomerPaymentService
             // remaining due - excess is rejected outright (no partial
             // on-account carry-over for a single submission).
             if ($order) {
-                $remaining_due = round((float) $order->total - (float) $order->paid_amount, 3);
+                $remaining_due = round((float) $order->total - (float) $order->paid_amount, $money_scale);
 
                 // On update, exclude this payment's own previously-posted
                 // amount from "already applied" so re-saving the same
@@ -253,11 +271,11 @@ class CustomerPaymentService
                 if (!empty($obj['customer_payment_id'])) {
                     $existing = $this->model_customer_payment->getModel()::find($obj['customer_payment_id']);
                     if ($existing && $existing->status === Status::POSTED && $existing->order_id === $order->order_id) {
-                        $remaining_due += (float) $existing->amount;
+                        $remaining_due = round($remaining_due + (float) $existing->amount, $money_scale);
                     }
                 }
 
-                if ($amount > $remaining_due + 0.001) {
+                if ($amount > $remaining_due) {
                     throw new Exception('Payment amount (' . currency($amount) . ') exceeds the order\'s remaining due (' . currency(max($remaining_due, 0)) . ').');
                 }
             }
@@ -278,9 +296,9 @@ class CustomerPaymentService
                     }
                 }
 
-                $remaining_due = round((float) $service_sale->total - $paid_so_far, 3);
+                $remaining_due = round((float) $service_sale->total - $paid_so_far, $money_scale);
 
-                if ($amount > $remaining_due + 0.001) {
+                if ($amount > $remaining_due) {
                     throw new Exception('Payment amount (' . currency($amount) . ') exceeds the service sale\'s remaining due (' . currency(max($remaining_due, 0)) . ').');
                 }
             }
@@ -294,7 +312,7 @@ class CustomerPaymentService
                 'payment_date'         => $obj['payment_date'],
                 'payment_method'       => $obj['payment_method'],
                 'payment_account_id'   => $payment_account_id,
-                'customer_account_id'  => $profile->account_id,
+                'customer_account_id'  => $customer_account_id,
                 'reference_no'         => $obj['reference_no'] ?? null,
                 'cheque_date'          => $obj['cheque_date'] ?? null,
                 'amount'               => $amount,
@@ -496,7 +514,11 @@ class CustomerPaymentService
         app(AccountingPeriodService::class)->assertPostable($payment->business_id, now());
 
         if (empty($payment->customer_account_id)) {
-            throw new Exception('The selected customer does not have a linked Chart of Account. Please configure it before posting this payment.');
+            throw new Exception(
+                'This customer has no linked Chart of Account. '
+                . 'Set Customer Account under Settings → Accounting, save settings '
+                . '(this updates existing customers), then post the payment again.'
+            );
         }
 
         if (empty($payment->payment_account_id)) {

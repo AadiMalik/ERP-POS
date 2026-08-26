@@ -47,6 +47,16 @@ class CustomerAccountService
                 throw new Exception('This account is disabled for this store. Please contact support.');
             }
 
+            // Keep COA in sync with Accounting Settings on every login/profile ensure.
+            $account_id = $this->customer_service->resolveDefaultCustomerAccountId($business_id);
+            if ($profile->account_id !== $account_id) {
+                $profile->update([
+                    'account_id'   => $account_id,
+                    'date_updated' => now(),
+                ]);
+                $profile->refresh();
+            }
+
             return $profile;
         }
 

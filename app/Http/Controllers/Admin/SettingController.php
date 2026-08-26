@@ -971,6 +971,13 @@ class SettingController extends Controller
             'og_image'                  => 'nullable|image|max:2048',
             'free_delivery_enabled'     => 'nullable|boolean',
             'free_delivery_min_amount'  => 'nullable|numeric|min:0',
+            'bank_name'                 => 'nullable|string|max:150',
+            'bank_account_title'        => 'nullable|string|max:150',
+            'bank_account_number'       => 'nullable|string|max:100',
+            'bank_iban'                 => 'nullable|string|max:100',
+            'bank_branch'               => 'nullable|string|max:150',
+            'bank_swift_code'           => 'nullable|string|max:50',
+            'bank_instructions'         => 'nullable|string|max:2000',
         ];
 
         $validate = Validator::make($request->all(), $rules);
@@ -984,6 +991,13 @@ class SettingController extends Controller
             'seo_description',
             'seo_keywords',
             'whatsapp_number',
+            'bank_name',
+            'bank_account_title',
+            'bank_account_number',
+            'bank_iban',
+            'bank_branch',
+            'bank_swift_code',
+            'bank_instructions',
         ]);
         $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
         $obj['free_delivery_enabled'] = $request->boolean('free_delivery_enabled');

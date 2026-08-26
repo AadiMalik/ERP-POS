@@ -813,6 +813,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::post('complete', [App\Http\Controllers\Admin\OrderController::class, 'complete'])->middleware('permission:order.complete');
             Route::post('credit-info', [App\Http\Controllers\Admin\OrderController::class, 'updateCreditInfo']);
             Route::post('void', [App\Http\Controllers\Admin\OrderController::class, 'void'])->middleware('permission:order.void');
+            Route::post('confirm-payment', [App\Http\Controllers\Admin\OrderController::class, 'confirmPayment'])->middleware('permission:order.complete');
             Route::get('search-products', [App\Http\Controllers\Admin\OrderController::class, 'searchProducts']);
             Route::get('search-vouchers', [App\Http\Controllers\Admin\OrderController::class, 'searchVouchers']);
             Route::get('eligible-vouchers', [App\Http\Controllers\Admin\OrderController::class, 'eligibleVouchers']);

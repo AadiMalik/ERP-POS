@@ -8,6 +8,13 @@ Your books are organized around a **Chart of Accounts** — a tree of Account Ty
 accounts underneath). A default chart of accounts can be applied from Accounting
 Settings to get started quickly.
 
+Set **Customer Account** and **Supplier Account** in Accounting Settings before
+taking credit sales or posting customer/supplier payments. New customers (admin
+or website signup) and new suppliers receive that COA automatically; changing the
+default and saving settings also updates existing customers/suppliers. If posting
+fails because a COA is missing, configure the account in Settings → Accounting and
+save again.
+
 ## How Transactions Post Automatically
 
 Most day-to-day transactions post to the books **automatically** — you don't need

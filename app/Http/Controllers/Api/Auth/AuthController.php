@@ -78,7 +78,7 @@ class AuthController extends Controller
 
             $purpose = $has_profile ? 'login' : 'onboarding';
 
-            $this->otp_service->send($request->email, $purpose);
+            $this->otp_service->send($request->email, $purpose, $request->business_id);
 
             return $this->success(Message::SUCCESS, ['purpose' => $purpose]);
         } catch (Exception $e) {
@@ -262,8 +262,11 @@ class AuthController extends Controller
         }
 
         if ($eligible) {
+            if (!$request->filled('business_id')) {
+                return $this->error('Business is required to reset password.');
+            }
             try {
-                $this->otp_service->send($request->email, 'password_reset');
+                $this->otp_service->send($request->email, 'password_reset', $request->business_id);
             } catch (Exception $e) {
                 return $this->error($e->getMessage());
             }

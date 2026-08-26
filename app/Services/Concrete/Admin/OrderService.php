@@ -2017,12 +2017,18 @@ class OrderService
 
             $has_credit_payment = false;
             $has_store_credit_payment = false;
+            $has_cod_payment = false;
 
             foreach ($payments as $payment) {
                 $method = PaymentMethod::find($payment->payment_method_id);
 
                 if ($method->type === 'credit') {
                     $has_credit_payment = true;
+                    continue;
+                }
+
+                if ($method->type === 'cod') {
+                    $has_cod_payment = true;
                     continue;
                 }
 
@@ -2040,12 +2046,18 @@ class OrderService
                 throw new Exception('Cash Account is not configured in Accounting Settings.');
             }
 
-            if ($has_credit_payment) {
+            if ($has_credit_payment || $has_cod_payment) {
                 if (empty($accounting_setting->default_customer_account_id)) {
-                    throw new Exception('Customer Receivable Account is not configured in Accounting Settings, required for credit payments.');
+                    throw new Exception(
+                        'Customer Account is not configured in Settings → Accounting. '
+                        . 'Set Customer Account, save settings (existing customers are updated), '
+                        . 'then complete the credit/COD sale again.'
+                    );
                 }
 
-                $this->validateCreditLimit($order, $payments);
+                if ($has_credit_payment) {
+                    $this->validateCreditLimit($order, $payments);
+                }
             }
 
             if ($has_store_credit_payment) {
@@ -2104,7 +2116,7 @@ class OrderService
                 if ($method->type === 'cash') {
                     $debit = $cash_applied;
                     $account_id = $accounting_setting->default_cash_account_id;
-                } elseif ($method->type === 'credit') {
+                } elseif ($method->type === 'credit' || $method->type === 'cod') {
                     $debit = (float) $payment->amount;
                     $account_id = $accounting_setting->default_customer_account_id;
                 } elseif ($method->type === 'store_credit') {
@@ -2125,7 +2137,7 @@ class OrderService
                     'account_id' => $account_id,
                     'debit' => $debit,
                     'credit' => 0,
-                    'user_id' => in_array($method->type, ['credit', 'store_credit'], true) ? $order->user_id : null,
+                    'user_id' => in_array($method->type, ['credit', 'store_credit', 'cod'], true) ? $order->user_id : null,
                     'description' => 'Order #' . $order->daily_order_id . ' - ' . $method->name,
                 ]);
             }

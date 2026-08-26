@@ -6,7 +6,11 @@ All configuration lives under one **Settings** screen, organized into sections
 - **Business** — company profile, address, logo, and general preferences.
 - **Accounting** — default chart of accounts, tax settings, aging basis for
   receivables/payables, and the specific accounts used for inventory,
-  cost-of-goods-sold, and service transactions.
+  cost-of-goods-sold, and service transactions. **Customer Account** and
+  **Supplier Account** here are attached automatically when a customer or
+  supplier is created (including website/API customer signup). Saving a change
+  to either default also updates existing customers/suppliers for that business
+  so credit sales and payments can post.
 - **Inventory** — stock-related preferences.
 - **Customer** / **Supplier** — defaults for new customer/supplier records.
 - **Email**, **SMS**, **WhatsApp** — the channels used to send documents (e.g.

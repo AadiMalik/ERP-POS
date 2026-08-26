@@ -141,7 +141,10 @@ class SupplierService
 
                 $old_values = $supplier->only(['name', 'credit_limit', 'credit_days']);
 
-                $obj['account_id'] = session('accounting_setting.default_supplier_account_id') ?? null;
+                // Always refresh payable COA from Accounting Settings on update.
+                $obj['account_id'] = $this->resolveDefaultSupplierAccountId(
+                    $supplier->business_id ?? ($obj['business_id'] ?? Auth::user()->business_id)
+                );
                 $obj['updatedby_id'] = Auth::user()->id;
                 $obj['date_updated'] = now();
 
@@ -168,7 +171,7 @@ class SupplierService
 
             $obj['supplier_id'] = generateUuid();
             $obj['code'] = $obj['code'] ?? generateSupplierCode();
-            $obj['account_id'] = session('accounting_setting.default_supplier_account_id') ?? null;
+            $obj['account_id'] = $this->resolveDefaultSupplierAccountId($obj['business_id'] ?? Auth::user()->business_id);
             $obj['createdby_id'] = Auth::user()->id;
             $obj['date_created'] = now();
 
@@ -198,6 +201,35 @@ class SupplierService
     {
         return $this->model_supplier->getModel()::with($this->with)->find($supplier_id);
     }
+
+    /**
+     * Default payable COA for a business — always from accounting_settings.
+     */
+    public function resolveDefaultSupplierAccountId(?string $business_id): ?string
+    {
+        if (empty($business_id)) {
+            return null;
+        }
+
+        return AccountingSetting::where('business_id', $business_id)
+            ->value('default_supplier_account_id');
+    }
+
+    /**
+     * Point every active supplier for the business at the current default
+     * supplier COA when Accounting Settings → Supplier Account changes.
+     */
+    public function syncDefaultAccount(string $business_id, ?string $account_id): int
+    {
+        return $this->model_supplier->getModel()::where('business_id', $business_id)
+            ->where('is_deleted', 0)
+            ->update([
+                'account_id'   => $account_id,
+                'updatedby_id' => Auth::id(),
+                'date_updated' => now(),
+            ]);
+    }
+
     public function status($supplier_id)
     {
         $result = $this->model_supplier->update([

@@ -57,9 +57,13 @@ class CustomerService
     /**
      * Creates or updates the CustomerProfile for the given user + business.
      * Called by UserService::save() whenever the user being saved holds the
-     * customer ("User") role - the User row itself (name/email/phone/
-     * password) is already handled by UserService, this only persists the
+     * customer ("User") role, and by API CustomerAccountService::ensureProfile()
+     * on website signup/login - the User row itself (name/email/phone/
+     * password) is already handled by the caller, this only persists the
      * business-scoped commercial fields.
+     *
+     * account_id is always taken from Accounting Settings → Customer Account
+     * on both create and update (same pattern as SupplierService).
      */
     public function upsertProfile($user_id, $business_id, array $obj)
     {
@@ -85,6 +89,10 @@ class CustomerService
             'notes' => $obj['notes'] ?? null,
         ], fn ($value) => !is_null($value));
 
+        // Mirror SupplierService: always (re)attach the default customer COA
+        // from settings. Resolve from DB so API signup (no admin session) works.
+        $fields['account_id'] = $this->resolveDefaultCustomerAccountId($business_id);
+
         if ($profile) {
             $old_values = $profile->only(['credit_limit', 'credit_days']);
 
@@ -97,7 +105,7 @@ class CustomerService
                 $this->logActivity('customer', $profile->customer_profile_id, 'updated', $old_values, $profile->only(['credit_limit', 'credit_days']), 'Customer credit terms updated');
             }
 
-            return $profile;
+            return $profile->fresh();
         }
 
         // Opening balance only applies the first time a profile is created
@@ -125,6 +133,36 @@ class CustomerService
         }
 
         return $profile;
+    }
+
+    /**
+     * Default receivable COA for a business — always from accounting_settings
+     * so create/update/API signup use the current saved default, not a stale session.
+     */
+    public function resolveDefaultCustomerAccountId(string $business_id): ?string
+    {
+        if (empty($business_id)) {
+            return null;
+        }
+
+        return AccountingSetting::where('business_id', $business_id)
+            ->value('default_customer_account_id');
+    }
+
+    /**
+     * Point every active customer profile for the business at the current
+     * default customer COA (called when Accounting Settings → Customer Account
+     * changes). Same idea as ExpenseCategoryService::syncDefaultAccount().
+     */
+    public function syncDefaultAccount(string $business_id, ?string $account_id): int
+    {
+        return CustomerProfile::where('business_id', $business_id)
+            ->where('is_deleted', 0)
+            ->update([
+                'account_id'   => $account_id,
+                'updatedby_id' => Auth::id(),
+                'date_updated' => now(),
+            ]);
     }
 
     /**

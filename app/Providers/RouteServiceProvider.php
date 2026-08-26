@@ -45,8 +45,10 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiting()
     {
+        // Storefront SPA issues many parallel requests (theme, CMS, catalog).
+        // 60/min was exhausting during normal browsing and blocked auth (send-otp).
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            return Limit::perMinute(300)->by($request->user()?->id ?: $request->ip());
         });
     }
 }

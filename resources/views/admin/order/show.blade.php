@@ -333,6 +333,51 @@
             </div>
         </div>
 
+        @if (!empty($order->payment_proof) || optional($order->orderSource)->code === 'WEBSITE')
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Website Payment Receipt</h6>
+                    @php
+                        $due_for_confirm = max(($order->total ?? 0) - ($order->paid_amount ?? 0), 0);
+                        $is_bank_website = $order->payments->contains(fn ($p) => optional($p->paymentMethod)->type === 'bank');
+                    @endphp
+                    @if ($due_for_confirm > 0 && $is_bank_website && !empty($order->payment_proof))
+                        <button type="button" class="btn btn-sm btn-success" id="confirmWebsitePaymentBtn"
+                            data-order-id="{{ $order->order_id }}">
+                            <i class="fa fa-check"></i>
+                            Confirm Payment
+                        </button>
+                    @endif
+                </div>
+                <div class="card-body">
+                    @if (!empty($order->payment_proof))
+                        @php
+                            $proof_url = asset('public/uploads/order_payment_proof/' . $order->payment_proof);
+                            $ext = strtolower(pathinfo($order->payment_proof, PATHINFO_EXTENSION));
+                        @endphp
+                        <p class="mb-2">
+                            <strong>Uploaded Receipt:</strong>
+                            <a href="{{ $proof_url }}" target="_blank">{{ $order->payment_proof }}</a>
+                        </p>
+                        @if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif']))
+                            <img src="{{ $proof_url }}" alt="Payment receipt" class="img-fluid border rounded" style="max-height:320px;">
+                        @endif
+                        @if (!empty($order->payment_confirmed_at))
+                            <p class="mt-3 mb-0 text-success">
+                                Payment confirmed on {{ localDateTime($order->payment_confirmed_at) }}.
+                            </p>
+                        @else
+                            <p class="mt-3 mb-0 text-warning">
+                                Payment is pending verification. Confirming marks Payment Status as Paid without posting stock/GL.
+                            </p>
+                        @endif
+                    @else
+                        <p class="mb-0 text-muted">No payment receipt uploaded for this website order.</p>
+                    @endif
+                </div>
+            </div>
+        @endif
+
         @php
             $customer_payments = $order->customerPayments->sortBy('payment_date')->values();
             $running_paid = 0;
@@ -480,4 +525,47 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('js')
+<script>
+(function () {
+    const btn = document.getElementById('confirmWebsitePaymentBtn');
+    if (!btn) return;
+
+    btn.addEventListener('click', function () {
+        const orderId = btn.getAttribute('data-order-id');
+        if (!orderId) return;
+
+        if (!confirm('Confirm bank transfer payment for this website order? Payment Status will become Paid.')) {
+            return;
+        }
+
+        btn.disabled = true;
+
+        fetch('{{ url('admin/order/confirm-payment') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ order_id: orderId }),
+        })
+            .then((r) => r.json())
+            .then((data) => {
+                if (data.Success) {
+                    window.location.reload();
+                } else {
+                    alert(data.Message || data.ErrorMessage || 'Unable to confirm payment.');
+                    btn.disabled = false;
+                }
+            })
+            .catch(() => {
+                alert('Unable to confirm payment.');
+                btn.disabled = false;
+            });
+    });
+})();
+</script>
 @endsection

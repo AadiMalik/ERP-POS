@@ -197,7 +197,8 @@ class CustomerPaymentController extends Controller
                 throw new Exception('This order has no customer to receive payment from.');
             }
 
-            $due = round((float) $order->total - (float) $order->paid_amount, 3);
+            $money_scale = (int) (session('accounting_setting.decimal_points') ?? 2);
+            $due = round((float) $order->total - (float) $order->paid_amount, $money_scale);
 
             if ($due <= 0) {
                 throw new Exception('This order is already fully paid.');
@@ -283,12 +284,13 @@ class CustomerPaymentController extends Controller
     public function ordersByCustomer($user_id)
     {
         try {
+            $money_scale = (int) (session('accounting_setting.decimal_points') ?? 2);
             $orders = Order::where('user_id', $user_id)
                 ->where('status', '!=', 'cancelled')
                 ->where('is_deleted', 0)
                 ->get(['order_id', 'daily_order_id', 'order_date', 'total', 'paid_amount'])
-                ->map(function ($order) {
-                    $order->due_amount = round((float) $order->total - (float) $order->paid_amount, 3);
+                ->map(function ($order) use ($money_scale) {
+                    $order->due_amount = round((float) $order->total - (float) $order->paid_amount, $money_scale);
                     $order->order_date = $order->order_date ? localDate($order->order_date) : null;
                     return $order;
                 })

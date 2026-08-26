@@ -62,4 +62,36 @@ class CustomerOrderController extends Controller
 
         return $this->success(Message::FETCH, $order);
     }
+
+    /**
+     * Public track-order endpoint - order number + email/phone verification.
+     */
+    public function track(Request $request, $business_id)
+    {
+        $validate = Validator::make(
+            array_merge($request->all(), ['business_id' => $business_id]),
+            [
+                'business_id' => 'required|string|exists:businesses,business_id',
+                'order_number' => 'required|string|max:100',
+                'email' => 'nullable|email|max:150',
+                'phone' => 'nullable|string|max:40',
+            ]
+        );
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        try {
+            $order = $this->order_service->track(
+                $business_id,
+                $request->order_number,
+                $request->email,
+                $request->phone
+            );
+        } catch (Exception $e) {
+            return $this->error($e->getMessage(), 404);
+        }
+
+        return $this->success(Message::FETCH, $order);
+    }
 }

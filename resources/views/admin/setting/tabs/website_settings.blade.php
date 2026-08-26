@@ -81,5 +81,40 @@
         </div>
     </div>
 
+    <div class="card mb-3">
+        <div class="card-header"><strong>Bank Transfer Details (Website)</strong></div>
+        <div class="card-body row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Bank Name</label>
+                <input type="text" class="form-control" name="bank_name" value="{{ $wt->bank_name }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Account Title</label>
+                <input type="text" class="form-control" name="bank_account_title" value="{{ $wt->bank_account_title }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Account Number</label>
+                <input type="text" class="form-control" name="bank_account_number" value="{{ $wt->bank_account_number }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">IBAN</label>
+                <input type="text" class="form-control" name="bank_iban" value="{{ $wt->bank_iban }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Bank Branch</label>
+                <input type="text" class="form-control" name="bank_branch" value="{{ $wt->bank_branch }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">SWIFT / BIC</label>
+                <input type="text" class="form-control" name="bank_swift_code" value="{{ $wt->bank_swift_code }}">
+            </div>
+            <div class="col-md-12">
+                <label class="form-label">Payment Instructions</label>
+                <textarea class="form-control" name="bank_instructions" rows="3"
+                    placeholder="Shown to customers at website checkout when they select Bank Transfer.">{{ $wt->bank_instructions }}</textarea>
+            </div>
+        </div>
+    </div>
+
     <button type="submit" class="btn btn-primary">Save Website Settings</button>
 </form>

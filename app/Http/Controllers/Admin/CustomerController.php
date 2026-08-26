@@ -89,11 +89,14 @@ class CustomerController extends Controller
                     ->where(function ($query) use ($request) {
                         return $query->where('business_id', $request->business_id)
                             ->where('is_deleted', 0);
-                    }),
+                    })
+                    ->ignore($this->customerProfileIdForRequest($request), 'customer_profile_id'),
             ],
         ];
 
-        $validate = Validator::make($request->all(), $rules);
+        $validate = Validator::make($request->all(), $rules, [
+            'code.unique' => 'This customer code is already taken.',
+        ]);
         if ($validate->fails()) {
             if ($request->ajax()) {
                 return $this->validationResponse($validate->errors()->first());
@@ -138,10 +141,11 @@ class CustomerController extends Controller
             // Users screen already use, kept as the single source of truth.
             $customer = $this->user_service->save($obj);
         } catch (Exception $e) {
+            $message = $this->friendlyCustomerSaveError($e);
             if ($request->ajax()) {
-                return $this->error($e->getMessage());
+                return $this->error($message);
             }
-            return redirect()->back()->withErrors(['name' => $e->getMessage()])->withInput();
+            return redirect()->back()->withErrors(['code' => $message])->withInput();
         }
 
         if ($request->ajax()) {
@@ -214,5 +218,32 @@ class CustomerController extends Controller
         } catch (Exception $e) {
             return $this->error(Message::ERROR);
         }
+    }
+
+    /**
+     * Current customer's profile id for unique-code ignore-on-update
+     * (same pattern as SupplierController → ignore supplier_id).
+     */
+    protected function customerProfileIdForRequest(Request $request): ?string
+    {
+        if (!$request->filled('id') || !$request->filled('business_id')) {
+            return null;
+        }
+
+        $profile = $this->customer_service->getProfile($request->id, $request->business_id);
+
+        return $profile->customer_profile_id ?? null;
+    }
+
+    protected function friendlyCustomerSaveError(Exception $e): string
+    {
+        $message = $e->getMessage();
+
+        if (str_contains($message, 'customer_profiles_business_id_code_unique')
+            || (str_contains($message, 'Duplicate entry') && str_contains($message, 'code'))) {
+            return 'This customer code is already taken.';
+        }
+
+        return $message;
     }
 }

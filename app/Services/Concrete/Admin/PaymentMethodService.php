@@ -21,12 +21,17 @@ class PaymentMethodService
     // Lazily seeded default payment methods for a business that has none yet.
     // account_id is intentionally left null - the business admin maps real
     // accounts afterward via the UI (Credit stays null permanently by design).
+    // COD is website-only and is seeded separately via seedWebsiteDefaults().
     protected $default_methods = [
-        ['name' => 'Cash', 'code' => 'CASH', 'type' => 'cash'],
-        ['name' => 'Card', 'code' => 'CARD', 'type' => 'card'],
-        ['name' => 'Bank', 'code' => 'BANK', 'type' => 'bank'],
-        ['name' => 'Credit', 'code' => 'CREDIT', 'type' => 'credit'],
-        ['name' => 'Wallet', 'code' => 'WALLET', 'type' => 'wallet'],
+        ['name' => 'Cash', 'code' => 'CASH', 'type' => 'cash', 'is_website_only' => false],
+        ['name' => 'Card', 'code' => 'CARD', 'type' => 'card', 'is_website_only' => false],
+        ['name' => 'Bank', 'code' => 'BANK', 'type' => 'bank', 'is_website_only' => false],
+        ['name' => 'Credit', 'code' => 'CREDIT', 'type' => 'credit', 'is_website_only' => false],
+        ['name' => 'Wallet', 'code' => 'WALLET', 'type' => 'wallet', 'is_website_only' => false],
+    ];
+
+    protected $website_only_methods = [
+        ['name' => 'Cash on Delivery', 'code' => 'COD', 'type' => 'cod', 'is_website_only' => true],
     ];
 
     public function __construct()
@@ -61,8 +66,55 @@ class PaymentMethodService
                 'account_id' => null,
                 'type' => $method['type'],
                 'is_default' => $index === 0,
+                'is_website_only' => !empty($method['is_website_only']) ? 1 : 0,
                 'status' => Status::ACTIVE,
                 'sort_order' => $index,
+                'is_deleted' => 0,
+                'createdby_id' => Auth::id(),
+                'date_created' => now(),
+            ]);
+        }
+    }
+
+    /**
+     * Ensures website-only payment methods (COD) exist without adding them to
+     * POS defaults. Safe to call repeatedly - only inserts missing codes.
+     * Also ensures standard POS methods (including BANK) exist first.
+     */
+    public function seedWebsiteDefaults($business_id)
+    {
+        if (empty($business_id)) {
+            return;
+        }
+
+        // POS defaults first so BANK exists for website bank-transfer reuse.
+        $this->seedDefaults($business_id);
+
+        foreach ($this->website_only_methods as $index => $method) {
+            $exists = $this->model_payment_method->getModel()::where('business_id', $business_id)
+                ->where('code', $method['code'])
+                ->where('is_deleted', 0)
+                ->exists();
+
+            if ($exists) {
+                continue;
+            }
+
+            $max_sort = (int) $this->model_payment_method->getModel()::where('business_id', $business_id)
+                ->where('is_deleted', 0)
+                ->max('sort_order');
+
+            $this->model_payment_method->create([
+                'payment_method_id' => generateUuid(),
+                'business_id' => $business_id,
+                'name' => $method['name'],
+                'code' => $method['code'],
+                'account_id' => null,
+                'type' => $method['type'],
+                'is_default' => 0,
+                'is_website_only' => 1,
+                'status' => Status::ACTIVE,
+                'sort_order' => $max_sort + 1 + $index,
                 'is_deleted' => 0,
                 'createdby_id' => Auth::id(),
                 'date_created' => now(),
@@ -142,11 +194,10 @@ class PaymentMethodService
 
     public function save($obj)
     {
-        // Credit routes to the business's receivable account at posting time,
-        // and store_credit to the business's dedicated store-credit account -
-        // neither needs its own mapped account here. Every other type must
-        // have a valid account_id.
-        if (!in_array($obj['type'] ?? null, ['credit', 'store_credit'], true)) {
+        // Credit / store_credit / COD route to receivable (or no mapped tender
+        // account) at posting time - none need their own mapped account here.
+        // Every other type must have a valid account_id.
+        if (!in_array($obj['type'] ?? null, ['credit', 'store_credit', 'cod'], true)) {
             if (empty($obj['account_id'])) {
                 throw new Exception('Account is required for this payment method type.');
             }
@@ -201,10 +252,14 @@ class PaymentMethodService
         $business_id = $business_id ?? Auth::user()->business_id;
         $this->seedDefaults($business_id);
 
+        // POS / admin tender lists never include website-only methods (COD).
         return $this->model_payment_method->getModel()::with($this->with)
             ->where('business_id', $business_id)
             ->where('status', Status::ACTIVE)
             ->where('is_deleted', 0)
+            ->where(function ($q) {
+                $q->where('is_website_only', 0)->orWhereNull('is_website_only');
+            })
             ->orderBy('sort_order', 'asc')
             ->get();
     }

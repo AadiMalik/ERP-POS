@@ -55,7 +55,19 @@ Setup: `OrderTypeController`, `PaymentMethodController`, `OrderSourceController`
 `DiscountController`, `SaleTypeController`. Operations: `PosRegisterController`,
 `PosRegisterSessionController`, `PosScreenController`, `OrderController` (service:
 `OrderService`), `OrderReturnController` (service: `OrderReturnService`),
-`CustomerPaymentController`.
+`CustomerPaymentController` (service: `CustomerPaymentService` — order-targeted
+payments may not exceed remaining due; due/amount are compared at the
+business `decimal_points` scale so amounts that display as equal, e.g.
+Rs 10.61 vs Rs 10.61, are accepted). Customer receivable COA:
+`CustomerService::upsertProfile()` (admin Users create/edit and API
+`CustomerAccountService::ensureProfile()` / website signup) attaches
+`accounting_settings.default_customer_account_id` to `customer_profiles.account_id`
+on **create and update**, mirroring `SupplierService::save()` +
+`default_supplier_account_id`. Changing either default in
+`SettingService::updateAccountingSetting()` runs `syncDefaultAccount()` on
+existing customers/suppliers. Posting a customer payment or credit/COD sale
+without a COA returns a message to set Customer Account under Settings →
+Accounting and save.
 
 **Stock availability/validation in POS:** `OrderService::searchProducts()`,
 `getProductsByCategory()` and `resolvePrices()` attach `is_track_stock`/

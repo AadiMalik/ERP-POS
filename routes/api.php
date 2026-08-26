@@ -3,7 +3,9 @@
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\BrandController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\CustomerOrderController;
 use App\Http\Controllers\Api\NewsletterSubscriberController;
@@ -84,6 +86,12 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::get('reviews/{business_id}/{product_id}', [ProductReviewController::class, 'index']);
     Route::post('contact/{business_id}', [ContactMessageController::class, 'store']);
     Route::post('newsletter/subscribe/{business_id}', [NewsletterSubscriberController::class, 'store']);
+
+    // Public website payment methods + bank details (COD is website-only).
+    Route::get('payment-methods/{business_id}', [CheckoutController::class, 'paymentMethods']);
+
+    // Public track order (order number + email/phone verification).
+    Route::post('orders/{business_id}/track', [CustomerOrderController::class, 'track']);
 });
 
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->prefix('v1')->group(function () {
@@ -98,6 +106,16 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->prefix('v1')->group(functi
     // Customer orders (own orders only for the given business).
     Route::get('orders/{business_id}', [CustomerOrderController::class, 'index']);
     Route::get('orders/{business_id}/{order_id}', [CustomerOrderController::class, 'show']);
+
+    // Website cart (authenticated, business-scoped).
+    Route::get('cart/{business_id}', [CartController::class, 'show']);
+    Route::post('cart/{business_id}', [CartController::class, 'store']);
+    Route::put('cart/{business_id}/items/{cart_item_id}', [CartController::class, 'update']);
+    Route::delete('cart/{business_id}/items/{cart_item_id}', [CartController::class, 'destroy']);
+    Route::delete('cart/{business_id}', [CartController::class, 'clear']);
+
+    // Website checkout / place order.
+    Route::post('checkout/{business_id}', [CheckoutController::class, 'placeOrder']);
 
     // Wishlist (product-level and variation-level).
     Route::get('wishlist/{business_id}', [WishlistController::class, 'index']);
