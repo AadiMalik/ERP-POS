@@ -403,12 +403,14 @@ class PosScreenController extends Controller
 
             return $this->success('Customer added.', [
                 'user_id' => $customer->id,
+                'code' => $profile->code ?? '',
                 'name' => $customer->name,
                 'phone' => $customer->phone,
                 'email' => $customer->email,
                 'credit_limit' => $profile->credit_limit ?? 0,
                 'is_walkin' => $profile->is_walkin ?? 0,
                 'credit_days' => $profile->credit_days ?? 0,
+                'store_credit_balance' => $profile->store_credit_balance ?? 0,
             ]);
         } catch (Exception $e) {
             return $this->error($e->getMessage());

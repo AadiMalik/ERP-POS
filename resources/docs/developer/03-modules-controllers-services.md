@@ -87,6 +87,16 @@ stock and clamps one whose held quantity now exceeds what's available,
 returning the adjustments as `stock_warnings` on the resumed order for the
 cashier).
 
+**POS screen layout (`resources/views/admin/pos/screen/index.blade.php`,
+`public/assets/js/admin/pos-screen.js`, `public/assets/css/admin/pos-screen.css`):**
+customer picker is a native compact `<select>` in the cart header (same styling as
+Sale Type); payment method (default **Cash** via `selectDefaultPaymentMethod()`),
+order discount, voucher, and delivery address sit in a collapsible panel toggled
+by a side bookmark clip (`#posCheckoutToggle` on `#posCheckoutWrap`, collapsed by default — toggling adds/removes `.checkout-open`
+on `#posMainCol` so the product grid flexes). Delivery order types show address +
+payment method on one row inside that panel and auto-expand it
+(`updateDeliveryAddressVisibility()`).
+
 **Order status changes:** there is no generic status dropdown. Status moves via
 dedicated actions: POS (`hold`, `resume`, `complete` → `post()`), Admin Order
 Detail (`OrderController::changeStatus()` → `OrderService::changeStatus()` —

@@ -1,8 +1,9 @@
 /* ==========================================================================
    POS Screen - single-screen, non-scroll layout
    Header (pos-header.blade.php) + an 8/4 column split: left column stacks
-   Search/Order Type/Branch, Categories/Products, and Customer/Delivery/
-   Discount/Voucher/Payment Method; right column stacks Cart and Totals.
+   Search/Order Type/Branch, Categories/Products, and a collapsible
+   Payment/Discount/Voucher panel; right column stacks Cart (with customer
+   picker in the header) and Totals.
    A sticky footer (Paid Amount / Due-Change / Hold & Pay) always stays on
    screen. The page itself never scrolls (see layouts/pos.blade.php) - only
    the product grid and the cart list own their own internal scroll region,
@@ -20,6 +21,83 @@
     --pos-muted: #8592a3;
     --pos-text: #32475c;
     --pos-bg: #f5f5f9;
+    --pos-control-h: 34px;
+}
+
+/* ============================================================
+   Unified control height — inputs, selects, select2, buttons
+   ============================================================ */
+.pos-navbar .form-control:not(textarea),
+.pos-navbar .form-select,
+.pos-screen-wrapper .form-control:not(textarea),
+.pos-screen-wrapper .form-select {
+    height: var(--pos-control-h);
+    min-height: var(--pos-control-h);
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: calc(var(--pos-control-h) - 2px);
+    font-size: 0.8rem;
+}
+
+.pos-screen-wrapper .input-group > .form-control,
+.pos-screen-wrapper .input-group > .btn,
+.pos-screen-wrapper .input-group-sm > .form-control,
+.pos-screen-wrapper .input-group-sm > .btn {
+    height: var(--pos-control-h);
+    min-height: var(--pos-control-h);
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: calc(var(--pos-control-h) - 2px);
+}
+
+.pos-screen-wrapper .select2-container .select2-selection--single,
+.pos-navbar .select2-container .select2-selection--single {
+    height: var(--pos-control-h) !important;
+    min-height: var(--pos-control-h);
+}
+
+.pos-screen-wrapper .select2-container .select2-selection__rendered,
+.pos-navbar .select2-container .select2-selection__rendered {
+    line-height: calc(var(--pos-control-h) - 2px) !important;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 0.8rem;
+}
+
+.pos-screen-wrapper .select2-container .select2-selection__arrow,
+.pos-navbar .select2-container .select2-selection__arrow {
+    height: calc(var(--pos-control-h) - 2px) !important;
+}
+
+.pos-navbar .pos-header-btn,
+.pos-navbar .btn-icon.btn-sm,
+.pos-screen-wrapper .pos-cart-icon-btn,
+.pos-screen-wrapper .pos-clear-cart-btn,
+.pos-screen-wrapper .pos-hold-btn,
+.pos-screen-wrapper .pos-pay-btn {
+    height: var(--pos-control-h);
+    min-height: var(--pos-control-h);
+    padding-top: 0;
+    padding-bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.pos-screen-wrapper .pos-cart-icon-btn,
+.pos-screen-wrapper .pos-clear-cart-btn {
+    width: var(--pos-control-h);
+    min-width: var(--pos-control-h);
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.pos-screen-wrapper .pos-hold-btn,
+.pos-screen-wrapper .pos-pay-btn {
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+    font-size: 0.82rem;
 }
 
 /* ============================================================
@@ -127,7 +205,8 @@
     border: 1px solid transparent;
     font-size: 0.8rem;
     font-weight: 500;
-    padding: 0.4rem 0.75rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
     border-radius: 0.5rem;
     white-space: nowrap;
 }
@@ -138,8 +217,9 @@
 }
 
 .btn-icon {
-    width: 32px;
-    height: 32px;
+    width: var(--pos-control-h);
+    min-width: var(--pos-control-h);
+    height: var(--pos-control-h);
     padding: 0;
     display: inline-flex;
     align-items: center;
@@ -299,7 +379,7 @@
     align-items: center;
     gap: 0.3rem;
     flex-wrap: wrap;
-    height: 36px;
+    min-height: var(--pos-control-h);
 }
 
 .pos-pill {
@@ -308,9 +388,12 @@
     color: var(--pos-text);
     font-size: 0.72rem;
     font-weight: 600;
-    padding: 0.32rem 0.65rem;
+    height: var(--pos-control-h);
+    padding: 0 0.65rem;
     border-radius: 1rem;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
     transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
 
@@ -328,7 +411,21 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    height: 36px;
+    min-height: var(--pos-control-h);
+}
+
+.pos-screen-wrapper .btn.btn-sm,
+.pos-screen-wrapper .btn.btn-outline-primary.btn-sm,
+.pos-screen-wrapper .btn.btn-outline-secondary.btn-sm {
+    height: var(--pos-control-h);
+    min-height: var(--pos-control-h);
+    padding-top: 0;
+    padding-bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: 0.78rem;
 }
 
 .pos-branch-current,
@@ -340,17 +437,19 @@
     background: var(--pos-bg);
     border: 1px solid var(--pos-border);
     border-radius: 0.6rem;
-    padding: 0.4rem 0.7rem;
+    padding: 0 0.7rem;
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    height: 100%;
+    height: var(--pos-control-h);
+    min-height: var(--pos-control-h);
     box-sizing: border-box;
 }
 
 .pos-branch-switch #changeBranchBtn.pos-header-btn {
-    width: 36px;
-    height: 36px;
+    width: var(--pos-control-h);
+    min-width: var(--pos-control-h);
+    height: var(--pos-control-h);
     padding: 0;
     display: flex;
     align-items: center;
@@ -425,14 +524,117 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
 }
 
+.pos-main-col {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Bookmark clip sits on product panel — see .pos-checkout-clip above */
+
+/* ============ Product Grid Panel ============ */
+.pos-product-panel {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.pos-checkout-clip {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    z-index: 6;
+    transform: translate(50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    width: 1.25rem;
+    padding: 0.45rem 0.1rem;
+    border: none;
+    background: var(--pos-primary);
+    color: #fff;
+    border-radius: 0 0.35rem 0.35rem 0;
+    box-shadow: 2px 0 8px rgba(105, 108, 255, .35);
+    cursor: pointer;
+    font-size: 0.55rem;
+    font-weight: 700;
+    line-height: 1.1;
+    transition: background .15s ease, box-shadow .15s ease;
+}
+
+.pos-checkout-clip i {
+    font-size: 0.58rem;
+    opacity: .9;
+}
+
+.pos-checkout-clip span {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    max-height: 2.2rem;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.pos-checkout-clip:hover {
+    background: var(--pos-primary-dark);
+}
+
+.pos-checkout-clip[aria-expanded="true"] {
+    background: var(--pos-primary-dark);
+    box-shadow: 2px 0 10px rgba(105, 108, 255, .5);
+}
+
+.pos-checkout-wrap {
+    flex: 0 0 auto;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height .25s ease, opacity .2s ease;
+}
+
+.pos-checkout-wrap:not(.is-collapsed) {
+    max-height: 280px;
+    opacity: 1;
+}
+
 .pos-row-meta {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0;
     background: #fff;
     border-radius: 0.7rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
-    padding: 0.5rem 0.65rem;
+    padding: 0;
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+
+.pos-checkout-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.55rem 0.65rem;
+}
+
+.pos-delivery-payment-row .pos-field-delivery:not(.d-none) + .pos-field-payment {
+    flex: 1.2 1 0;
+}
+
+.pos-main-col.checkout-open .pos-product-panel {
+    flex: 1 1 auto;
+}
+
+.pos-main-col:not(.checkout-open) .pos-product-panel {
+    flex: 1 1 auto;
 }
 
 .pos-meta-row {
@@ -449,12 +651,10 @@
 .pos-row-meta .form-select,
 .pos-row-meta .form-control {
     font-size: 0.8rem;
-    height: 34px;
 }
 
 .pos-field-voucher .input-group .form-control,
 .pos-field-voucher .input-group .btn {
-    height: 34px;
     font-size: 0.78rem;
 }
 
@@ -467,8 +667,7 @@
    36px box, since the method list is business-configurable and can run
    longer than the fixed Order Type set. */
 .pos-payment-pills {
-    height: auto;
-    min-height: 34px;
+    min-height: var(--pos-control-h);
 }
 
 /* Hidden by default - only surfaces (via :has()) once there's something to
@@ -523,7 +722,6 @@
     border: 1px solid var(--pos-border);
     padding-left: 2.3rem;
     padding-right: 2.6rem;
-    height: 40px;
     font-size: 0.85rem;
 }
 
@@ -536,8 +734,8 @@
 .pos-scan-btn {
     position: absolute;
     right: 0.35rem;
-    width: 30px;
-    height: 30px;
+    width: calc(var(--pos-control-h) - 4px);
+    height: calc(var(--pos-control-h) - 4px);
     border-radius: 50%;
     background: var(--pos-primary);
     color: #fff;
@@ -579,6 +777,7 @@
     min-height: 0;
     display: flex;
     gap: 0.55rem;
+    overflow: visible;
 }
 
 .pos-category-rail {
@@ -592,15 +791,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.22rem;
-}
-
-.pos-main-col {
-    flex: 1 1 auto;
-    min-width: 0;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
 }
 
 .category-rail-item {
@@ -657,15 +847,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-/* ============ Product Grid Panel ============ */
-.pos-product-panel {
-    flex: 1 1 auto;
-    min-width: 0;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
 }
 
 .pos-product-results {
@@ -844,13 +1025,110 @@
 
 .pos-cart-header {
     flex: 0 0 auto;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto auto auto;
     align-items: center;
-    padding: 0.6rem 0.8rem;
+    gap: 0.35rem;
+    padding: 0.55rem 0.75rem;
     border-bottom: 1px solid var(--pos-border);
     background: var(--pos-primary);
     color: #fff;
+}
+
+.pos-cart-header-select {
+    position: relative;
+    min-width: 0;
+}
+
+.pos-cart-header-select-customer {
+    min-width: 0;
+}
+
+.pos-cart-header-select-customer .select2-container {
+    width: 100% !important;
+    min-width: 0;
+}
+
+/* Cart header dropdowns — customer (select2) and sale type (native) share one look */
+.pos-cart-header-select select,
+.pos-cart-header-select .select2-container .select2-selection--single {
+    background-color: rgba(255, 255, 255, .15);
+    border: 1px solid rgba(255, 255, 255, .3);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+}
+
+.pos-cart-header-select select {
+    padding: 0 1.6rem 0 0.55rem;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 0.6rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.pos-cart-header-select .select2-container .select2-selection__rendered {
+    padding-left: 0.55rem;
+    padding-right: 1.4rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #fff !important;
+    line-height: calc(var(--pos-control-h) - 2px) !important;
+}
+
+.pos-cart-header-select .select2-container .select2-selection__placeholder {
+    color: rgba(255, 255, 255, .75) !important;
+}
+
+.pos-cart-header-select .select2-container .select2-selection__arrow b {
+    border-color: #fff transparent transparent transparent;
+}
+
+.pos-cart-header-select select:hover,
+.pos-cart-header-select select:focus,
+.pos-cart-header-select .select2-container--default.select2-container--open .select2-selection--single,
+.pos-cart-header-select .select2-container .select2-selection--single:hover {
+    background-color: rgba(255, 255, 255, .25);
+    border-color: #fff;
+    color: #fff;
+    outline: none;
+    box-shadow: none;
+}
+
+.pos-cart-header-select select option {
+    color: #212529;
+}
+
+.pos-cart-icon-btn {
+    background: rgba(255, 255, 255, .15);
+    color: #fff;
+    font-size: 0.72rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, .25);
+}
+
+.pos-cart-icon-btn:hover {
+    background: rgba(255, 255, 255, .3);
+    color: #fff;
+}
+
+.pos-cart-credit-hint {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    z-index: 30;
+    background: #fff8e6;
+    border: 1px solid #ffe4a8;
+    color: #8a5a00;
+    font-size: 0.62rem;
+    font-weight: 600;
+    border-radius: 0.35rem;
+    padding: 0.15rem 0.45rem;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .12);
 }
 
 .pos-cart-header h6 {
@@ -876,8 +1154,11 @@
     background: rgba(255, 255, 255, .15);
     color: #fff;
     font-size: 0.72rem;
-    padding: 0.25rem 0.55rem;
+    padding-left: 0.55rem;
+    padding-right: 0.55rem;
     border-radius: 0.5rem;
+    width: auto;
+    min-width: var(--pos-control-h);
 }
 
 .pos-clear-cart-btn:hover {
@@ -885,16 +1166,14 @@
     color: #fff;
 }
 
-/* Order-level Sale Type dropdown, compacted to fit the dark cart header
-   next to Clear Cart, themed for a dark background instead of the light
-   toolbar. Drives the hidden #sale_type_id select (see pos-screen.js). */
+/* Legacy alias — sale type now uses .pos-cart-header-select */
 .pos-cart-saletype select {
     background-color: rgba(255, 255, 255, .15);
     border: 1px solid rgba(255, 255, 255, .3);
     color: #fff;
     font-size: 0.72rem;
     font-weight: 600;
-    padding: 0.25rem 1.6rem 0.25rem 0.55rem;
+    padding: 0 1.6rem 0 0.55rem;
     border-radius: 0.5rem;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
     background-repeat: no-repeat;
@@ -1258,8 +1537,7 @@
 }
 
 .pos-footer-paid .form-control {
-    height: 38px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 700;
     border-radius: 0.55rem;
 }
@@ -1289,7 +1567,6 @@
     border: 1px solid #ffddac;
     font-weight: 700;
     border-radius: 0.6rem;
-    padding: 0.5rem 1.1rem;
 }
 
 .pos-hold-btn:hover {
@@ -1301,9 +1578,7 @@
     background: var(--pos-success);
     color: #fff;
     font-weight: 700;
-    font-size: 1.02rem;
     border-radius: 0.6rem;
-    padding: 0.5rem 2rem;
     box-shadow: 0 6px 16px rgba(113, 221, 55, .35);
 }
 
@@ -1345,6 +1620,14 @@
     .pos-meta-row {
         flex-wrap: wrap;
     }
+
+    .pos-cart-header {
+        grid-template-columns: auto minmax(0, 1fr) auto auto;
+    }
+
+    .pos-cart-order-no {
+        display: none !important;
+    }
 }
 
 @media (max-width: 991.98px) {
@@ -1380,6 +1663,32 @@
 
     .pos-cart-card {
         min-height: 260px;
+    }
+
+    .pos-cart-header {
+        grid-template-columns: auto 1fr auto auto;
+        grid-template-areas: "title customer add saletype";
+    }
+
+    .pos-cart-header h6 {
+        grid-area: title;
+    }
+
+    .pos-cart-header-select-customer {
+        grid-area: customer;
+    }
+
+    .pos-cart-icon-btn {
+        grid-area: add;
+    }
+
+    .pos-cart-header-select:not(.pos-cart-header-select-customer) {
+        grid-area: saletype;
+    }
+
+    .pos-clear-cart-btn,
+    .pos-cart-order-no {
+        display: none !important;
     }
 
     .product-grid {

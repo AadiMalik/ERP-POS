@@ -142,25 +142,7 @@
             dropdownParent: $('#openSessionModal'),
         });
 
-        // Customer search also matches phone/email (not just the visible
-        // name text) - each <option data-phone data-email> is rendered by
-        // index.blade.php from the User model's own fields.
-        $('#customer_id').select2({
-            placeholder: 'Walk-in Customer',
-            matcher: function (params, data) {
-                var term = ($.trim(params.term) || '').toLowerCase();
-                if (!term || !data.id) return data;
-
-                var $opt = data.element ? $(data.element) : null;
-                var haystack = [
-                    data.text || '',
-                    $opt ? ($opt.data('phone') || '') : '',
-                    $opt ? ($opt.data('email') || '') : '',
-                ].join(' ').toLowerCase();
-
-                return haystack.indexOf(term) > -1 ? data : null;
-            },
-        });
+        initCustomerSelect();
 
         state.open_session_modal = new bootstrap.Modal(document.getElementById('openSessionModal'));
         state.close_session_modal = new bootstrap.Modal(document.getElementById('closeSessionModal'));
@@ -181,6 +163,7 @@
 
         renderPaymentMethodTiles();
         selectDefaultPaymentMethod();
+        updateCheckoutSummary();
         bootstrapSession();
         wireEvents();
     });
@@ -410,7 +393,7 @@
         updateCreditHint();
 
         $('#creditCustomerChangeLink').on('click', function () {
-            $('#customer_id').select2('open');
+            openCustomerSelect();
         });
 
         $('#addPaymentRowBtn').on('click', function () {
@@ -459,6 +442,10 @@
         });
 
         $('#sale_type_id').on('change', repriceCartForSaleType);
+
+        $('#posCheckoutToggle').on('click', function () {
+            toggleCheckoutPanel();
+        });
 
         $('#order_type_id').on('change', updateDeliveryAddressVisibility);
         updateDeliveryAddressVisibility();
@@ -578,7 +565,7 @@
         $(document).on('keydown', function (e) {
             if (e.key === 'F3') {
                 e.preventDefault();
-                $('#customer_id').select2('open');
+                openCustomerSelect();
             } else if (e.key === 'F6') {
                 e.preventDefault();
                 $('#holdOrderBtn').trigger('click');
@@ -608,12 +595,81 @@
     // 'DELIVERY' (see OrderTypeService::$default_types / OrderService::save())
     // - mirrors the server-side check so the field only shows/blocks
     // submission when it will actually be required.
+    function formatCustomerLabel(code, name, isWalkin) {
+        var label = (code ? code + ' - ' : '') + (name || '');
+        return isWalkin ? label + ' (Walk-in)' : label;
+    }
+
+    function initCustomerSelect() {
+        $('#customer_id').select2({
+            placeholder: 'Walk-in Customer',
+            dropdownParent: $('body'),
+            width: '100%',
+            minimumResultsForSearch: 0,
+            matcher: function (params, data) {
+                var term = ($.trim(params.term) || '').toLowerCase();
+                if (!term || !data.id) {
+                    return data;
+                }
+
+                var $opt = data.element ? $(data.element) : null;
+                var haystack = [
+                    data.text || '',
+                    $opt ? ($opt.data('code') || '') : '',
+                    $opt ? ($opt.data('phone') || '') : '',
+                    $opt ? ($opt.data('email') || '') : '',
+                ].join(' ').toLowerCase();
+
+                return haystack.indexOf(term) > -1 ? data : null;
+            },
+        });
+    }
+
+    function openCustomerSelect() {
+        $('#customer_id').select2('open');
+    }
+
     function isDeliveryOrderType() {
         return $('#order_type_id').find(':selected').data('code') === 'DELIVERY';
     }
 
     function updateDeliveryAddressVisibility() {
-        $('#deliveryAddressWrap').toggleClass('d-none', !isDeliveryOrderType());
+        var isDelivery = isDeliveryOrderType();
+        $('#deliveryAddressWrap').toggleClass('d-none', !isDelivery);
+        $('#posCheckoutPanel').toggleClass('is-delivery-order', isDelivery);
+
+        if (isDelivery) {
+            toggleCheckoutPanel(true);
+        }
+    }
+
+    function toggleCheckoutPanel(forceOpen) {
+        var $wrap = $('#posCheckoutWrap');
+        var opening = typeof forceOpen === 'boolean'
+            ? forceOpen
+            : $wrap.hasClass('is-collapsed');
+
+        $wrap.toggleClass('is-collapsed', !opening);
+        $('#posMainCol').toggleClass('checkout-open', opening);
+        $('#posCheckoutToggle').attr('aria-expanded', opening ? 'true' : 'false');
+    }
+
+    function updateCheckoutSummary() {
+        var label = 'Cash';
+        var methods = CFG.payment_methods || [];
+
+        if (state.payment_mode === 'multi') {
+            label = 'Multi Pay';
+        } else if (state.selected_payment_method_id) {
+            var selected = methods.find(function (m) {
+                return m.payment_method_id === state.selected_payment_method_id;
+            });
+            if (selected) {
+                label = selected.name;
+            }
+        }
+
+        $('#posCheckoutSummary').text(label);
     }
 
     // ==============================
@@ -639,12 +695,14 @@
 
                 var $option = $('<option></option>')
                     .attr('value', customer.user_id)
+                    .attr('data-code', customer.code || '')
                     .attr('data-credit-limit', customer.credit_limit || 0)
                     .attr('data-walkin', customer.is_walkin ? 1 : 0)
                     .attr('data-credit-days', customer.credit_days || 0)
+                    .attr('data-store-credit-balance', customer.store_credit_balance || 0)
                     .attr('data-phone', customer.phone || '')
                     .attr('data-email', customer.email || '')
-                    .text(customer.name || '');
+                    .text(formatCustomerLabel(customer.code, customer.name, customer.is_walkin));
 
                 $('#customer_id').append($option).val(customer.user_id).trigger('change');
 
@@ -1777,6 +1835,8 @@
             updateCreditCustomerSummary();
             recalcPayments();
         }
+
+        updateCheckoutSummary();
     }
 
     // UI-only: sets the dropdown's value and shows the matching block,
@@ -1792,6 +1852,7 @@
         $('#singlePaymentBlock').toggleClass('d-none', !!isMulti);
         updateCreditCustomerSummary();
         syncPillsFromSelect();
+        updateCheckoutSummary();
     }
 
     function resetPaymentSelection() {
@@ -1803,6 +1864,7 @@
         $('#paidAmountInput').val('');
         $('#creditCustomerSummary').addClass('d-none');
         syncPillsFromSelect();
+        updateCheckoutSummary();
     }
 
     function updateCreditCustomerSummary() {
@@ -2740,6 +2802,7 @@
         renderCart();
         renderPayments();
         selectDefaultPaymentMethod();
+        toggleCheckoutPanel(false);
     }
 
     function resetScreenState() {

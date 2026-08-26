@@ -105,7 +105,7 @@
                             @endforeach
                         </div>
 
-                        <div class="pos-main-col">
+                        <div class="pos-main-col" id="posMainCol">
                             <div class="pos-product-panel" id="posProductPanel">
                                 <div class="pos-product-results" id="posProductResults">
                                     <div id="posProductGrid" class="product-grid"></div>
@@ -114,123 +114,105 @@
                                         <p class="text-muted mb-0">No products found</p>
                                     </div>
                                 </div>
+                                <button type="button" class="pos-checkout-clip" id="posCheckoutToggle"
+                                    aria-expanded="false" title="Payment &amp; Options">
+                                    <i class="fa fa-bookmark"></i>
+                                    <span id="posCheckoutSummary">Cash</span>
+                                </button>
                             </div>
 
-                            {{-- ---- Customer / Delivery / Discount / Voucher / Payment Method ---- --}}
-                            <div class="pos-row pos-row-meta">
-                                <div class="pos-meta-row">
-                                    <div class="pos-field pos-field-customer">
-                                        <span class="pos-field-label">Customer</span>
-                                        <div class="pos-customer-row">
-                                            <select class="form-select form-select-sm select2" id="customer_id">
-                                                @foreach ($customers as $item)
-                                                    <option value="{{ $item->user_id }}" data-credit-limit="{{ $item->credit_limit ?? 0 }}"
-                                                        data-walkin="{{ $item->is_walkin ? 1 : 0 }}" data-credit-days="{{ $item->credit_days ?? 0 }}"
-                                                        data-store-credit-balance="{{ $item->store_credit_balance ?? 0 }}"
-                                                        data-phone="{{ $item->user->phone ?? '' }}" data-email="{{ $item->user->email ?? '' }}"
-                                                        {{ $item->is_walkin ? 'selected' : '' }}>
-                                                        {{ $item->user->name ?? '' }}{{ $item->is_walkin ? ' (Walk-in)' : '' }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            <button type="button" class="btn pos-add-customer-btn" id="addCustomerBtn" title="Add Customer">
-                                                <i class="fa fa-user-plus"></i>
-                                            </button>
-                                        </div>
-                                        <div id="creditLimitHint" class="pos-field-floating-hint d-none"></div>
-                                    </div>
+                            {{-- Order-level Sale Type control lives in .pos-cart-header, next to
+                                 Clear Cart, for prominence - #sale_type_id here is the single
+                                 source of truth the cart-header dropdown (#saleTypeSelect) drives. --}}
+                            <select class="d-none" id="sale_type_id">
+                                @foreach ($sale_types as $item)
+                                    <option value="{{ $item->sale_type_id }}" {{ $item->is_default ? 'selected' : '' }}>
+                                        {{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
 
-                                    {{-- Order-level Sale Type control lives in .pos-cart-header, next to
-                                         Clear Cart, for prominence - #sale_type_id here is the single
-                                         source of truth the cart-header dropdown (#saleTypeSelect) drives. --}}
-                                    <select class="d-none" id="sale_type_id">
-                                        @foreach ($sale_types as $item)
-                                            <option value="{{ $item->sale_type_id }}" {{ $item->is_default ? 'selected' : '' }}>
-                                                {{ $item->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-
-                                    <div class="pos-field pos-field-delivery d-none" id="deliveryAddressWrap">
-                                        <label class="pos-field-label" for="delivery_address">Delivery Address <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control form-control-sm" id="delivery_address" placeholder="Enter address">
-                                    </div>
-                                </div>
-
-                                {{-- Vouchers are a separate, always-available feature (their own
-                                     order.coupon.apply permission) - the Discount dropdown alone is
-                                     what "Enable Discount" toggles, so only that select is
-                                     conditional here. Both used to be wrongly nested inside the
-                                     same @if, which hid the voucher field entirely for any business
-                                     with Discount turned off. --}}
-                                <div class="pos-meta-row">
-                                    @if ($pos_setting->enable_discount && in_array($pos_setting->discount_level, ['order', 'both']))
-                                        <div class="pos-field pos-field-discount" id="orderDiscountWrap">
-                                            <span class="pos-field-label">Discount</span>
-                                            <select class="form-select form-select-sm select2" id="discount_id">
-                                                <option value="">--No Discount--</option>
-                                                @foreach ($discounts as $item)
-                                                    <option value="{{ $item->discount_id }}">
-                                                        {{ $item->name }}
-                                                        ({{ $item->type == 'percent' ? $item->value . '%' : $item->value }})
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    @endif
-                                    <div class="pos-field pos-field-voucher" id="voucherWrap" style="position:relative;">
-                                        <span class="pos-field-label">Voucher / Coupon</span>
-                                        <div class="input-group input-group-sm">
-                                            <input type="text" class="form-control" id="voucher_code" placeholder="Search or enter code" autocomplete="off">
-                                            <button class="btn btn-outline-secondary" type="button" id="browseVouchersBtn" title="Show vouchers available for this cart">
-                                                <i class="fa fa-list"></i>
-                                            </button>
-                                            <button class="btn btn-outline-primary" type="button" id="applyVoucherBtn">
-                                                Apply
-                                            </button>
-                                        </div>
-                                        <div id="voucherApplyFeedback" class="small mt-1" style="display:none;"></div>
-                                        <input type="hidden" id="voucher_id" value="">
-                                        <div id="voucherSearchResults" class="list-group pos-search-results" style="display:none;"></div>
-                                    </div>
-                                </div>
-
-                                <div class="pos-field pos-field-payment">
-                                    <span class="pos-field-label">Payment Method</span>
-                                    <select class="d-none" id="paymentMethodSelect">
-                                        <option value="">Payment Method</option>
-                                    </select>
-                                    <div class="pos-pill-group" data-select-target="paymentMethodSelect">
-                                        <div class="pos-pill-buttons pos-payment-pills" id="paymentMethodPills"></div>
-                                    </div>
-
-                                    <div class="pos-payment-extra">
-                                        <div class="pos-payment-extra-summary">
-                                            <span>Entered</span><span id="paymentEntered">0.00</span>
-                                        </div>
-
-                                        <div id="singlePaymentBlock">
-                                            <div class="d-none" id="creditCustomerSummary">
-                                                <div class="d-flex justify-content-between align-items-center pos-credit-summary">
-                                                    <span id="creditCustomerText"></span>
-                                                    <a href="javascript:void(0);" id="creditCustomerChangeLink">Change</a>
-                                                </div>
+                            {{-- ---- Delivery / Discount / Voucher / Payment Method (collapsible) ---- --}}
+                            <div class="pos-checkout-wrap is-collapsed" id="posCheckoutWrap">
+                                <div class="pos-row pos-row-meta" id="posCheckoutPanel">
+                                    <div class="pos-checkout-body" id="posCheckoutBody">
+                                        <div class="pos-meta-row pos-delivery-payment-row">
+                                            <div class="pos-field pos-field-delivery d-none" id="deliveryAddressWrap">
+                                                <label class="pos-field-label" for="delivery_address">Delivery Address <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" id="delivery_address" placeholder="Enter address">
                                             </div>
-                                            <div class="d-none" id="storeCreditSummary">
-                                                <div class="d-flex justify-content-between align-items-center pos-credit-summary">
-                                                    <span id="storeCreditText"></span>
+
+                                            <div class="pos-field pos-field-payment" id="paymentMethodField">
+                                                <span class="pos-field-label">Payment Method</span>
+                                                <select class="d-none" id="paymentMethodSelect">
+                                                    <option value="">Payment Method</option>
+                                                </select>
+                                                <div class="pos-pill-group" data-select-target="paymentMethodSelect">
+                                                    <div class="pos-pill-buttons pos-payment-pills" id="paymentMethodPills"></div>
+                                                </div>
+
+                                                <div class="pos-payment-extra">
+                                                    <div class="pos-payment-extra-summary">
+                                                        <span>Entered</span><span id="paymentEntered">0.00</span>
+                                                    </div>
+
+                                                    <div id="singlePaymentBlock">
+                                                        <div class="d-none" id="creditCustomerSummary">
+                                                            <div class="d-flex justify-content-between align-items-center pos-credit-summary">
+                                                                <span id="creditCustomerText"></span>
+                                                                <a href="javascript:void(0);" id="creditCustomerChangeLink">Change</a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-none" id="storeCreditSummary">
+                                                            <div class="d-flex justify-content-between align-items-center pos-credit-summary">
+                                                                <span id="storeCreditText"></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="d-none" id="multiPaymentBlock">
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <span class="fw-semibold">Split Payment</span>
+                                                            <button type="button" class="btn btn-sm btn-outline-primary" id="addPaymentRowBtn">
+                                                                <i class="fa fa-plus"></i> Add
+                                                            </button>
+                                                        </div>
+                                                        <div id="paymentRows"></div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div class="d-none" id="multiPaymentBlock">
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span class="fw-semibold">Split Payment</span>
-                                                <button type="button" class="btn btn-sm btn-outline-primary" id="addPaymentRowBtn">
-                                                    <i class="fa fa-plus"></i> Add
-                                                </button>
+                                        <div class="pos-meta-row">
+                                            @if ($pos_setting->enable_discount && in_array($pos_setting->discount_level, ['order', 'both']))
+                                                <div class="pos-field pos-field-discount" id="orderDiscountWrap">
+                                                    <span class="pos-field-label">Discount</span>
+                                                    <select class="form-select form-select-sm select2" id="discount_id">
+                                                        <option value="">--No Discount--</option>
+                                                        @foreach ($discounts as $item)
+                                                            <option value="{{ $item->discount_id }}">
+                                                                {{ $item->name }}
+                                                                ({{ $item->type == 'percent' ? $item->value . '%' : $item->value }})
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            @endif
+                                            <div class="pos-field pos-field-voucher" id="voucherWrap" style="position:relative;">
+                                                <span class="pos-field-label">Voucher / Coupon</span>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="text" class="form-control" id="voucher_code" placeholder="Search or enter code" autocomplete="off">
+                                                    <button class="btn btn-outline-secondary" type="button" id="browseVouchersBtn" title="Show vouchers available for this cart">
+                                                        <i class="fa fa-list"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-primary" type="button" id="applyVoucherBtn">
+                                                        Apply
+                                                    </button>
+                                                </div>
+                                                <div id="voucherApplyFeedback" class="small mt-1" style="display:none;"></div>
+                                                <input type="hidden" id="voucher_id" value="">
+                                                <div id="voucherSearchResults" class="list-group pos-search-results" style="display:none;"></div>
                                             </div>
-                                            <div id="paymentRows"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -245,24 +227,41 @@
                     <div class="pos-cart-card" id="posCartPanel">
                         <div class="pos-cart-header">
                             <h6 class="mb-0">Cart <span class="pos-cart-count" id="cartItemCount">(0 Items)</span></h6>
-                            <div class="d-flex align-items-center gap-2">
-                                {{-- Order-level Sale Type - compact dropdown right next to Clear
-                                     Cart, so it applies immediately to every item currently in the
-                                     cart (see repriceCartForSaleType() in pos-screen.js) and to
-                                     anything added afterward. Drives the hidden #sale_type_id select
-                                     that the rest of the screen (pricing, payload) reads from. --}}
-                                <div class="pos-cart-saletype">
-                                    <select id="saleTypeSelect" class="form-select form-select-sm" title="Sale Type">
-                                        @foreach ($sale_types as $item)
-                                            <option value="{{ $item->sale_type_id }}" {{ $item->is_default ? 'selected' : '' }}>{{ $item->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <span class="pos-cart-order-no d-none" id="cartOrderNoBadge"></span>
-                                <button type="button" class="btn btn-sm pos-clear-cart-btn d-none" id="clearCartBtn">
-                                    <i class="fa fa-trash"></i> Clear
-                                </button>
+                            <div class="pos-cart-header-select pos-cart-header-select-customer">
+                                <select id="customer_id" class="form-select form-select-sm" title="Customer">
+                                    @foreach ($customers as $item)
+                                        @php
+                                            $customer_label = ($item->code ? $item->code . ' - ' : '') . ($item->user->name ?? '');
+                                            if ($item->is_walkin) {
+                                                $customer_label .= ' (Walk-in)';
+                                            }
+                                        @endphp
+                                        <option value="{{ $item->user_id }}" data-code="{{ $item->code ?? '' }}"
+                                            data-credit-limit="{{ $item->credit_limit ?? 0 }}"
+                                            data-walkin="{{ $item->is_walkin ? 1 : 0 }}" data-credit-days="{{ $item->credit_days ?? 0 }}"
+                                            data-store-credit-balance="{{ $item->store_credit_balance ?? 0 }}"
+                                            data-phone="{{ $item->user->phone ?? '' }}" data-email="{{ $item->user->email ?? '' }}"
+                                            {{ $item->is_walkin ? 'selected' : '' }}>
+                                            {{ $customer_label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div id="creditLimitHint" class="pos-cart-credit-hint d-none"></div>
                             </div>
+                            <button type="button" class="btn btn-sm pos-cart-icon-btn" id="addCustomerBtn" title="Add Customer">
+                                <i class="fa fa-user-plus"></i>
+                            </button>
+                            <div class="pos-cart-header-select">
+                                <select id="saleTypeSelect" class="form-select form-select-sm" title="Sale Type">
+                                    @foreach ($sale_types as $item)
+                                        <option value="{{ $item->sale_type_id }}" {{ $item->is_default ? 'selected' : '' }}>{{ $item->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <span class="pos-cart-order-no d-none" id="cartOrderNoBadge"></span>
+                            <button type="button" class="btn btn-sm pos-clear-cart-btn d-none" id="clearCartBtn">
+                                <i class="fa fa-trash"></i> Clear
+                            </button>
                         </div>
                         <div class="pos-cart-columns">
                             <span class="pos-cart-col-items">Items</span>

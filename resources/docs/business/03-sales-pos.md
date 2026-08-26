@@ -25,7 +25,19 @@ vs. counted cash. This is required before the POS screen can be used
 
 The **POS Screen** is the main selling interface: search or scan products, add a
 customer (or sell as a walk-in), apply discounts/vouchers, choose a payment method,
-and complete the sale. An order can also be:
+and complete the sale.
+
+**Cart header:** the customer dropdown (with a quick **+** button to add a new
+customer) sits on the same line as the cart title, styled like the Sale Type
+dropdown. Customers appear as **Code - Name** and the list is searchable
+(by code, name, phone, or email). **Payment & Options** (payment method, order
+discount, voucher/coupon) opens from a small bookmark-style clip on the side
+of the product area — collapsed by default so more room is left for browsing
+products. The clip label shows the current payment method (Cash is selected
+automatically on a fresh sale). For **Delivery** order types, opening that
+panel shows the delivery address and payment method on the same row.
+
+An order can also be:
 - **Held** and **resumed** later (e.g. a customer steps away).
 - **Reopened** after completion (to add items or fix a mistake), subject to
   permission.
