@@ -147,7 +147,17 @@ class OrderService
             $wh[] = ['register_id', $obj['register_id']];
         }
         if (isset($obj['cashier_id']) && $obj['cashier_id'] != 0 && $obj['cashier_id'] != "") {
-            $wh[] = ['cashier_id', $obj['cashier_id']];
+            // POS Held Orders filters by the open session's cashier, but
+            // website/API hold orders are created without a cashier_id - include
+            // those alongside the current cashier's own held orders.
+            if (!empty($obj['include_null_cashier'])) {
+                $query->where(function ($q) use ($obj) {
+                    $q->where('cashier_id', $obj['cashier_id'])
+                        ->orWhereNull('cashier_id');
+                });
+            } else {
+                $wh[] = ['cashier_id', $obj['cashier_id']];
+            }
         }
         if (isset($obj['customer_id']) && $obj['customer_id'] != 0 && $obj['customer_id'] != "") {
             $wh[] = ['user_id', $obj['customer_id']];
@@ -1728,6 +1738,63 @@ class OrderService
     public function reopen($order_id)
     {
         return $this->transitionStatus($order_id, ['cancelled'], 'draft', 'Order reopened');
+    }
+
+    /**
+     * Admin-facing status changes from the Order Detail page.
+     * Posted (complete sale), cancelled and void delegate to their dedicated
+     * flows; delivery fulfilment steps (shipped / out_for_delivery / delivered)
+     * are lightweight transitions that do not touch stock or GL.
+     */
+    public function changeStatus(array $obj): Order
+    {
+        $order_id = $obj['order_id'] ?? null;
+        $to_status = strtolower(trim((string) ($obj['status'] ?? '')));
+        $reason = trim((string) ($obj['reason'] ?? ''));
+
+        if ($to_status === '') {
+            throw new Exception('A target status is required.');
+        }
+
+        if ($to_status === Status::POSTED) {
+            return $this->post(['order_id' => $order_id]);
+        }
+
+        if ($to_status === 'cancelled') {
+            if ($reason === '') {
+                throw new Exception('A cancellation reason is required.');
+            }
+
+            return $this->cancel(['order_id' => $order_id, 'reason' => $reason]);
+        }
+
+        if ($to_status === 'void') {
+            if ($reason === '') {
+                throw new Exception('A void reason is required.');
+            }
+
+            return $this->void(['order_id' => $order_id, 'reason' => $reason]);
+        }
+
+        $delivery_steps = [
+            Status::SHIPPED => ['posted'],
+            'out_for_delivery' => [Status::SHIPPED],
+            Status::DELIVERED => ['out_for_delivery', Status::SHIPPED, Status::POSTED],
+        ];
+
+        if (!array_key_exists($to_status, $delivery_steps)) {
+            throw new Exception('Unsupported order status.');
+        }
+
+        $order = $this->model_order->getModel()::with('orderType')->findOrFail($order_id);
+
+        if (($order->orderType->code ?? null) !== 'DELIVERY') {
+            throw new Exception('Delivery fulfilment statuses can only be applied to delivery orders.');
+        }
+
+        $note = $reason !== '' ? $reason : ('Order marked as ' . str_replace('_', ' ', $to_status));
+
+        return $this->transitionStatus($order_id, $delivery_steps[$to_status], $to_status, $note);
     }
 
     public function cancel($obj)

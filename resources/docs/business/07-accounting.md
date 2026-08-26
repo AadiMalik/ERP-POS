@@ -11,9 +11,13 @@ Settings to get started quickly.
 Set **Customer Account** and **Supplier Account** in Accounting Settings before
 taking credit sales or posting customer/supplier payments. New customers (admin
 or website signup) and new suppliers receive that COA automatically; changing the
-default and saving settings also updates existing customers/suppliers. If posting
-fails because a COA is missing, configure the account in Settings → Accounting and
-save again.
+default and saving settings also updates existing customers/suppliers.
+
+When you **post a customer payment**, the receivable account is chosen in this
+order: the customer's own linked Chart of Account (on their customer profile)
+first; if that is missing or no longer valid, the **Customer Account** default
+from Accounting Settings; if neither is configured, the payment is rejected and
+nothing is posted to the books.
 
 ## How Transactions Post Automatically
 

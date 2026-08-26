@@ -108,6 +108,9 @@ class OrderController extends Controller
             'draft' => 'Draft',
             'hold' => 'Hold',
             'posted' => 'Posted',
+            'shipped' => 'Shipped',
+            'out_for_delivery' => 'Out for Delivery',
+            'delivered' => 'Delivered',
             'cancelled' => 'Cancelled',
             'void' => 'Void',
             'returned' => 'Returned',
@@ -377,7 +380,13 @@ class OrderController extends Controller
         }
 
         if (empty($order->register_session_id)) {
-            return $this->error('This order has no register session and cannot be completed from POS.', 422);
+            $order->loadMissing('orderSource');
+
+            // Website/API orders are created without a register session; they
+            // may still be posted from Admin or POS once payments are in place.
+            if (($order->orderSource->code ?? null) !== 'WEBSITE') {
+                return $this->error('This order has no register session and cannot be completed from POS.', 422);
+            }
         }
 
         try {
@@ -428,6 +437,51 @@ class OrderController extends Controller
 
         try {
             $order = $this->order_service->void($request->all());
+            return $this->success(Message::UPDATE, $order);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * Update order status from the Admin Order Detail page (complete, cancel,
+     * void, or delivery fulfilment steps).
+     */
+    public function changeStatus(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:orders,order_id',
+            'status' => 'required|string|in:posted,cancelled,void,shipped,out_for_delivery,delivered',
+            'reason' => 'nullable|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationResponse($validator->errors()->first());
+        }
+
+        $this->assertOrderAccessible($request->order_id);
+
+        $status = strtolower($request->status);
+
+        if (in_array($status, ['cancelled', 'void'], true) && !trim((string) $request->reason)) {
+            return $this->validationResponse('A reason is required for this status change.');
+        }
+
+        $permission_map = [
+            'posted' => 'order.complete',
+            'cancelled' => 'order.cancel',
+            'void' => 'order.void',
+            'shipped' => 'order.complete',
+            'out_for_delivery' => 'order.complete',
+            'delivered' => 'order.complete',
+        ];
+
+        if (!Auth::user()->can($permission_map[$status] ?? 'order.complete')) {
+            abort(403, 'You are not authorized to perform this action.');
+        }
+
+        try {
+            $order = $this->order_service->changeStatus($request->all());
             return $this->success(Message::UPDATE, $order);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
@@ -676,6 +730,9 @@ class OrderController extends Controller
             'draft' => 'Draft',
             'hold' => 'Hold',
             'posted' => 'Posted',
+            'shipped' => 'Shipped',
+            'out_for_delivery' => 'Out for Delivery',
+            'delivered' => 'Delivered',
             'cancelled' => 'Cancelled',
             'void' => 'Void',
             'returned' => 'Returned',

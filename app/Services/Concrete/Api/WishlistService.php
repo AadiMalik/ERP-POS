@@ -71,6 +71,15 @@ class WishlistService
         return $items;
     }
 
+    /**
+     * Visible wishlist item count for the authenticated user within a business.
+     * Matches the filtered items returned by list().
+     */
+    public function count(int $user_id, string $business_id): int
+    {
+        return count($this->list($user_id, $business_id));
+    }
+
     public function add(int $user_id, string $business_id, string $product_id, ?string $product_variation_id = null): array
     {
         $product = Product::where('business_id', $business_id)
@@ -95,6 +104,8 @@ class WishlistService
             }
         }
 
+        $this->clearConflictingEntries($user_id, $business_id, $product_id, $product_variation_id);
+
         $item_key = Wishlist::makeItemKey($product_id, $product_variation_id);
 
         $row = Wishlist::firstOrCreate(
@@ -116,6 +127,7 @@ class WishlistService
             'product_id' => $row->product_id,
             'product_variation_id' => $row->product_variation_id,
             'is_wishlisted' => true,
+            'count' => $this->count($user_id, $business_id),
         ];
     }
 
@@ -133,8 +145,20 @@ class WishlistService
         }
     }
 
+    public function removeAllForProduct(int $user_id, string $business_id, string $product_id): int
+    {
+        return Wishlist::where('user_id', $user_id)
+            ->where('business_id', $business_id)
+            ->where('product_id', $product_id)
+            ->delete();
+    }
+
     public function toggle(int $user_id, string $business_id, string $product_id, ?string $product_variation_id = null): array
     {
+        if (!$product_variation_id) {
+            return $this->toggleProduct($user_id, $business_id, $product_id);
+        }
+
         $item_key = Wishlist::makeItemKey($product_id, $product_variation_id);
         $existing = Wishlist::where('user_id', $user_id)
             ->where('business_id', $business_id)
@@ -148,10 +172,58 @@ class WishlistService
                 'product_id' => $product_id,
                 'product_variation_id' => $product_variation_id,
                 'is_wishlisted' => false,
+                'count' => $this->count($user_id, $business_id),
             ];
         }
 
         return $this->add($user_id, $business_id, $product_id, $product_variation_id);
+    }
+
+    /**
+     * Product-level toggle used by listing cards: remove every entry for the
+     * product when any exist, otherwise add a product-level row.
+     */
+    protected function toggleProduct(int $user_id, string $business_id, string $product_id): array
+    {
+        $scope = Wishlist::where('user_id', $user_id)
+            ->where('business_id', $business_id)
+            ->where('product_id', $product_id);
+
+        if ($scope->exists()) {
+            $scope->delete();
+
+            return [
+                'product_id' => $product_id,
+                'product_variation_id' => null,
+                'is_wishlisted' => false,
+                'count' => $this->count($user_id, $business_id),
+            ];
+        }
+
+        return $this->add($user_id, $business_id, $product_id, null);
+    }
+
+    /**
+     * Keep product-level and variation-level rows mutually exclusive for the
+     * same product so a user cannot accumulate duplicate logical entries.
+     */
+    protected function clearConflictingEntries(
+        int $user_id,
+        string $business_id,
+        string $product_id,
+        ?string $product_variation_id
+    ): void {
+        $query = Wishlist::where('user_id', $user_id)
+            ->where('business_id', $business_id)
+            ->where('product_id', $product_id);
+
+        if ($product_variation_id) {
+            $query->whereNull('product_variation_id')->delete();
+
+            return;
+        }
+
+        $query->whereNotNull('product_variation_id')->delete();
     }
 
     public function status(int $user_id, string $business_id, string $product_id, ?string $product_variation_id = null): array

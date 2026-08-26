@@ -2371,6 +2371,7 @@
                 // invisible here even though they're fully recoverable.
                 status: ['draft', 'hold'],
                 cashier_id: state.session ? state.session.cashier_id : null,
+                include_null_cashier: 1,
                 business_id: CFG.business_id,
             },
             headers: {

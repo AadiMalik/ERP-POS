@@ -7,6 +7,7 @@ use App\Enums\JournalSourceTypes;
 use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\AccountingSetting;
+use App\Models\Account;
 use App\Models\CustomerProfile;
 use App\Models\Journal;
 use App\Models\JournalEntry;
@@ -31,6 +32,8 @@ use Yajra\DataTables\DataTables;
 class CustomerService
 {
     use Auditable;
+
+    public const RECEIVABLE_COA_MISSING_MESSAGE = 'Chart of Account is not attached to this customer and no default customer account is configured in Accounting Settings.';
 
     protected $model_customer;
     protected $with = [
@@ -147,6 +150,65 @@ class CustomerService
 
         return AccountingSetting::where('business_id', $business_id)
             ->value('default_customer_account_id');
+    }
+
+    /**
+     * Whether an account_id is a valid, postable receivable COA for the business
+     * (active leaf account belonging to that business).
+     */
+    public function isValidReceivableAccount(?string $account_id, string $business_id): bool
+    {
+        if (empty($account_id) || empty($business_id)) {
+            return false;
+        }
+
+        return Account::where('account_id', $account_id)
+            ->where('business_id', $business_id)
+            ->where('status', Status::ACTIVE)
+            ->where('is_deleted', 0)
+            ->whereNotNull('parent_account_id')
+            ->exists();
+    }
+
+    /**
+     * Resolve the receivable COA for customer-payment posting and ledger reads.
+     * Priority: customer_profiles.account_id → accounting_settings.default_customer_account_id.
+     * Returns null when neither source yields a valid account (non-throwing callers).
+     */
+    public function tryResolveCustomerReceivableAccountId(CustomerProfile $profile, ?AccountingSetting $accounting_setting = null): ?string
+    {
+        $business_id = $profile->business_id;
+
+        if (!empty($profile->account_id) && $this->isValidReceivableAccount($profile->account_id, $business_id)) {
+            return $profile->account_id;
+        }
+
+        if ($accounting_setting === null) {
+            $accounting_setting = AccountingSetting::where('business_id', $business_id)->first();
+        }
+
+        $default_account_id = $accounting_setting->default_customer_account_id ?? null;
+
+        if (!empty($default_account_id) && $this->isValidReceivableAccount($default_account_id, $business_id)) {
+            return $default_account_id;
+        }
+
+        return null;
+    }
+
+    /**
+     * Same priority as tryResolveCustomerReceivableAccountId() but throws when
+     * no valid receivable COA exists — used before posting customer payments.
+     */
+    public function resolveCustomerReceivableAccountId(CustomerProfile $profile, ?AccountingSetting $accounting_setting = null): string
+    {
+        $account_id = $this->tryResolveCustomerReceivableAccountId($profile, $accounting_setting);
+
+        if ($account_id === null) {
+            throw new Exception(self::RECEIVABLE_COA_MISSING_MESSAGE);
+        }
+
+        return $account_id;
     }
 
     /**
@@ -482,12 +544,10 @@ class CustomerService
             ];
         }
 
-        $account_id = $profile->account_id;
-
-        if (empty($account_id)) {
-            $accounting_setting = AccountingSetting::where('business_id', $business_id)->first();
-            $account_id = $accounting_setting->default_customer_account_id ?? null;
-        }
+        $account_id = $this->tryResolveCustomerReceivableAccountId(
+            $profile,
+            AccountingSetting::where('business_id', $business_id)->first()
+        );
 
         if (empty($account_id)) {
             return [

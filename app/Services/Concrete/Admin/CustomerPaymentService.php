@@ -28,6 +28,7 @@ class CustomerPaymentService
     use Auditable;
 
     protected $model_customer_payment;
+    protected $customer_service;
     protected $with = [
         'business',
         'branch',
@@ -37,9 +38,10 @@ class CustomerPaymentService
         'paymentAccount',
     ];
 
-    public function __construct()
+    public function __construct(CustomerService $customer_service)
     {
         $this->model_customer_payment = new Repository(new CustomerPayment());
+        $this->customer_service = $customer_service;
     }
 
     public function getData($obj)
@@ -232,19 +234,12 @@ class CustomerPaymentService
                     : ($accounting_setting->default_bank_account_id ?? null);
             }
 
-            // Prefer the profile's linked COA; fall back to Accounting Settings
-            // default and backfill the profile when missing (legacy customers
-            // created before COA-on-create).
-            $customer_account_id = $profile->account_id
-                ?: ($accounting_setting->default_customer_account_id ?? null);
-
-            if (empty($profile->account_id) && !empty($customer_account_id)) {
-                $profile->update([
-                    'account_id'   => $customer_account_id,
-                    'updatedby_id' => Auth::id(),
-                    'date_updated' => now(),
-                ]);
-            }
+            // Receivable COA: profile account first, then Accounting Settings
+            // default (validated in resolveCustomerReceivableAccountId()).
+            $customer_account_id = $this->customer_service->tryResolveCustomerReceivableAccountId(
+                $profile,
+                $accounting_setting
+            );
 
             // Compare money at the business currency scale (same as currency()
             // display). Rounding due to 3dp while showing 2dp made equal-looking
@@ -513,12 +508,23 @@ class CustomerPaymentService
 
         app(AccountingPeriodService::class)->assertPostable($payment->business_id, now());
 
-        if (empty($payment->customer_account_id)) {
-            throw new Exception(
-                'This customer has no linked Chart of Account. '
-                . 'Set Customer Account under Settings → Accounting, save settings '
-                . '(this updates existing customers), then post the payment again.'
-            );
+        $profile = CustomerProfile::where('user_id', $payment->user_id)
+            ->where('business_id', $payment->business_id)
+            ->where('is_deleted', 0)
+            ->first();
+
+        if (!$profile) {
+            throw new Exception('Selected customer does not have a profile for this business.');
+        }
+
+        $customer_account_id = $this->customer_service->resolveCustomerReceivableAccountId(
+            $profile,
+            $accounting_setting
+        );
+
+        if ($payment->customer_account_id !== $customer_account_id) {
+            $payment->update(['customer_account_id' => $customer_account_id]);
+            $payment->refresh();
         }
 
         if (empty($payment->payment_account_id)) {

@@ -81,7 +81,10 @@ Business, Account` — linked to the chart of accounts for AP).
 now-removed `customers` table — `belongsTo User, Branch, Business, Account`),
 `customer_payments`, `customer_store_credit_transactions`, `otps` (customer OTP
 login), `service_sales`/`_details`, `service_sale_returns`/`_details` (parallel
-non-stock family).
+non-stock family). `orders.status` is an ENUM:
+`draft`, `hold`, `posted`, `cancelled`, `void`, `returned`, plus delivery
+fulfilment values `shipped`, `out_for_delivery`, `delivered` (see migration
+`2026_08_26_181500_add_delivery_statuses_to_orders_table`).
 
 **Core models:** `Order` (`belongsTo Business, Branch, Warehouse, PosRegister,
 PosRegisterSession, User (cashier), User (customer), OrderType, OrderSource,

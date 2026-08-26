@@ -6,6 +6,7 @@ use App\Enums\Status;
 use App\Models\AccountingSetting;
 use App\Models\CustomerProfile;
 use App\Models\JournalEntryDetail;
+use App\Services\Concrete\Admin\CustomerService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -25,6 +26,13 @@ use Illuminate\Support\Collection;
  */
 class CustomerLedgerQueryService
 {
+    protected $customer_service;
+
+    public function __construct(CustomerService $customer_service)
+    {
+        $this->customer_service = $customer_service;
+    }
+
     public function resolveCustomerProfile(string $user_id, ?string $business_id = null): ?CustomerProfile
     {
         $query = CustomerProfile::with(['account', 'user']);
@@ -40,13 +48,14 @@ class CustomerLedgerQueryService
 
     public function resolveAccountId(?CustomerProfile $profile, ?string $business_id): ?string
     {
-        if ($profile && !empty($profile->account_id)) {
-            return $profile->account_id;
+        if (!$profile || empty($business_id)) {
+            return null;
         }
 
-        $accounting_setting = AccountingSetting::where('business_id', $business_id)->first();
-
-        return $accounting_setting->default_customer_account_id ?? null;
+        return $this->customer_service->tryResolveCustomerReceivableAccountId(
+            $profile,
+            AccountingSetting::where('business_id', $business_id)->first()
+        );
     }
 
     public function baseQuery(?string $business_id, ?string $branch_id, string $user_id, string $account_id, array $allow_roles = []): Builder

@@ -21,8 +21,8 @@ class CustomerOrderService
         $status = strtolower((string) $status);
 
         return match ($status) {
-            'draft', 'hold' => 'processing',
-            'posted', 'completed', 'confirmed' => 'delivered',
+            'draft', 'hold', 'posted' => 'processing',
+            'completed', 'confirmed' => 'delivered',
             'shipped' => 'shipped',
             'delivered' => 'delivered',
             'out_for_delivery' => 'out_for_delivery',
@@ -161,10 +161,10 @@ class CustomerOrderService
     protected function erpStatusesForFilter(string $filter): array
     {
         return match ($filter) {
-            'processing' => ['draft', 'hold', 'processing'],
+            'processing' => ['draft', 'hold', 'posted', 'processing'],
             'shipped' => ['shipped'],
             'out_for_delivery' => ['out_for_delivery'],
-            'delivered' => ['posted', 'completed', 'confirmed', 'delivered'],
+            'delivered' => ['completed', 'confirmed', 'delivered'],
             'cancelled' => ['cancelled', 'void', 'returned', 'refunded', 'return_requested'],
             default => [],
         };

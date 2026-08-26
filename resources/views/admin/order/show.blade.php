@@ -42,6 +42,61 @@
                         Return Order
                     </a>
                 @endif
+                @php
+                    $is_delivery = optional($order->orderType)->code === 'DELIVERY';
+                @endphp
+                @can('order.complete')
+                    @if (in_array($order->status, ['draft', 'hold'], true))
+                        <button type="button" class="btn btn-success order-status-btn"
+                            data-status="posted"
+                            data-confirm="Complete this order? Stock will be deducted and the sale will be posted to accounting.">
+                            <i class="fa fa-check"></i>
+                            Complete Order
+                        </button>
+                    @endif
+                    @if ($is_delivery)
+                        @if ($order->status === 'posted')
+                            <button type="button" class="btn btn-outline-primary order-status-btn"
+                                data-status="shipped"
+                                data-confirm="Mark this delivery order as Shipped?">
+                                <i class="fa fa-truck"></i>
+                                Mark Shipped
+                            </button>
+                        @endif
+                        @if ($order->status === 'shipped')
+                            <button type="button" class="btn btn-outline-primary order-status-btn"
+                                data-status="out_for_delivery"
+                                data-confirm="Mark this order as Out for Delivery?">
+                                <i class="fa fa-motorcycle"></i>
+                                Out for Delivery
+                            </button>
+                        @endif
+                        @if (in_array($order->status, ['posted', 'shipped', 'out_for_delivery'], true))
+                            <button type="button" class="btn btn-outline-success order-status-btn"
+                                data-status="delivered"
+                                data-confirm="Mark this order as Delivered?">
+                                <i class="fa fa-box-open"></i>
+                                Mark Delivered
+                            </button>
+                        @endif
+                    @endif
+                @endcan
+                @can('order.cancel')
+                    @if (in_array($order->status, ['draft', 'hold'], true))
+                        <button type="button" class="btn btn-outline-danger" id="cancelOrderFromShowBtn">
+                            <i class="fa fa-ban"></i>
+                            Cancel Order
+                        </button>
+                    @endif
+                @endcan
+                @can('order.void')
+                    @if ($order->status === 'posted')
+                        <button type="button" class="btn btn-outline-danger" id="voidOrderFromShowBtn">
+                            <i class="fa fa-times"></i>
+                            Void Order
+                        </button>
+                    @endif
+                @endcan
                 <a href="{{ url('admin/order') }}" class="btn btn-outline-primary">
                     <i class="fa fa-arrow-left"></i>
                     Back
@@ -525,47 +580,184 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="orderStatusReasonModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderStatusReasonModalTitle">Reason required</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="orderStatusReasonTarget">
+                    <textarea class="form-control" id="orderStatusReasonInput" rows="3" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" id="confirmOrderStatusReasonBtn">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('js')
 <script>
 (function () {
-    const btn = document.getElementById('confirmWebsitePaymentBtn');
-    if (!btn) return;
+    const orderId = @json($order->order_id);
+    const csrf = @json(csrf_token());
+    const changeStatusUrl = @json(url('admin/order/change-status'));
 
-    btn.addEventListener('click', function () {
-        const orderId = btn.getAttribute('data-order-id');
-        if (!orderId) return;
-
-        if (!confirm('Confirm bank transfer payment for this website order? Payment Status will become Paid.')) {
-            return;
-        }
-
-        btn.disabled = true;
-
-        fetch('{{ url('admin/order/confirm-payment') }}', {
+    function postStatusChange(status, reason) {
+        return fetch(changeStatusUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': csrf,
                 'Accept': 'application/json',
             },
-            body: JSON.stringify({ order_id: orderId }),
-        })
-            .then((r) => r.json())
-            .then((data) => {
-                if (data.Success) {
-                    window.location.reload();
-                } else {
-                    alert(data.Message || data.ErrorMessage || 'Unable to confirm payment.');
-                    btn.disabled = false;
+            body: JSON.stringify({
+                order_id: orderId,
+                status: status,
+                reason: reason || null,
+            }),
+        }).then((r) => r.json());
+    }
+
+    function showStatusError(message) {
+        errorMessage(message || 'Unable to update order status.');
+    }
+
+    function confirmAction(text, confirmButtonText) {
+        return Swal.fire({
+            title: 'Are you sure?',
+            text: text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: confirmButtonText || 'Yes, proceed',
+            cancelButtonText: 'Cancel',
+        });
+    }
+
+    function handleStatusResponse(data) {
+        if (data.Success) {
+            window.location.reload();
+            return;
+        }
+        showStatusError(data.Message || data.ErrorMessage);
+    }
+
+    document.querySelectorAll('.order-status-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const status = btn.getAttribute('data-status');
+            const confirmMsg = btn.getAttribute('data-confirm') || 'Update order status?';
+
+            confirmAction(confirmMsg).then(function (result) {
+                if (!result.isConfirmed) {
+                    return;
                 }
-            })
-            .catch(() => {
-                alert('Unable to confirm payment.');
+
+                btn.disabled = true;
+                postStatusChange(status)
+                    .then(handleStatusResponse)
+                    .catch(function () {
+                        showStatusError();
+                        btn.disabled = false;
+                    });
+            });
+        });
+    });
+
+    let pendingReasonStatus = null;
+    const reasonModalEl = document.getElementById('orderStatusReasonModal');
+    const reasonModal = reasonModalEl ? bootstrap.Modal.getOrCreateInstance(reasonModalEl) : null;
+
+    function openReasonModal(status, title) {
+        pendingReasonStatus = status;
+        document.getElementById('orderStatusReasonTarget').value = status;
+        document.getElementById('orderStatusReasonModalTitle').textContent = title;
+        document.getElementById('orderStatusReasonInput').value = '';
+        reasonModal.show();
+    }
+
+    document.getElementById('confirmOrderStatusReasonBtn')?.addEventListener('click', function () {
+        const reason = document.getElementById('orderStatusReasonInput').value.trim();
+        if (!reason) {
+            Swal.fire({
+                title: 'Reason required',
+                text: 'Please enter a reason before continuing.',
+                icon: 'warning',
+                confirmButtonText: 'OK',
+            });
+            return;
+        }
+        const btn = this;
+        btn.disabled = true;
+        postStatusChange(pendingReasonStatus, reason)
+            .then(function (data) {
                 btn.disabled = false;
+                if (data.Success) {
+                    reasonModal.hide();
+                    window.location.reload();
+                    return;
+                }
+                showStatusError(data.Message || data.ErrorMessage);
+            })
+            .catch(function () {
+                btn.disabled = false;
+                showStatusError();
             });
     });
+
+    document.getElementById('cancelOrderFromShowBtn')?.addEventListener('click', function () {
+        openReasonModal('cancelled', 'Cancel Order');
+    });
+
+    document.getElementById('voidOrderFromShowBtn')?.addEventListener('click', function () {
+        openReasonModal('void', 'Void Order');
+    });
+
+    const btn = document.getElementById('confirmWebsitePaymentBtn');
+    if (btn) {
+        btn.addEventListener('click', function () {
+            const orderId = btn.getAttribute('data-order-id');
+            if (!orderId) return;
+
+            confirmAction(
+                'Payment Status will become Paid.',
+                'Yes, confirm payment'
+            ).then(function (result) {
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                btn.disabled = true;
+
+                fetch('{{ url('admin/order/confirm-payment') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ order_id: orderId }),
+                })
+                    .then((r) => r.json())
+                    .then((data) => {
+                        if (data.Success) {
+                            window.location.reload();
+                        } else {
+                            errorMessage(data.Message || data.ErrorMessage || 'Unable to confirm payment.');
+                            btn.disabled = false;
+                        }
+                    })
+                    .catch(function () {
+                        errorMessage('Unable to confirm payment.');
+                        btn.disabled = false;
+                    });
+            });
+        });
+    }
 })();
 </script>
 @endsection

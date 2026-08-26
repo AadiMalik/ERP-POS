@@ -33,6 +33,21 @@ and complete the sale. An order can also be:
   you can allow "cancel before payment" without allowing "void after payment" for
   the same staff member.
 
+**Updating order status:** open **Orders → View** on any order. The action
+buttons at the top depend on the current status and your permissions:
+- **Complete Order** — for Draft/Hold orders; posts the sale (deducts stock and
+  books accounting). Website delivery orders can be completed here without going
+  through POS.
+- **Cancel Order** — for Draft/Hold only; requires a reason.
+- **Void Order** — for Posted orders only; reverses stock/accounting; requires a
+  reason.
+- **Mark Shipped / Out for Delivery / Mark Delivered** — for **Delivery** order
+  type only, after the order is posted. These are fulfilment tracking steps and
+  do not change stock or accounting again.
+
+Every change is recorded in the order's **Status History** section on the same
+page. The Orders list also offers **Cancel** on Draft/Hold rows.
+
 Completing a sale **immediately deducts stock** for every physical item sold, and
 records the movement in the stock ledger so you can always trace exactly which sale
 consumed which stock. Orders can also be placed on credit — an unpaid or partially

@@ -34,7 +34,10 @@ class WishlistController extends Controller
 
         $items = $this->wishlist_service->list(Auth::id(), $business_id);
 
-        return $this->success(Message::FETCH, ['items' => $items]);
+        return $this->success(Message::FETCH, [
+            'items' => $items,
+            'count' => count($items),
+        ]);
     }
 
     public function store(Request $request, $business_id)

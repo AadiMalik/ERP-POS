@@ -65,9 +65,12 @@ Rs 10.61 vs Rs 10.61, are accepted). Customer receivable COA:
 on **create and update**, mirroring `SupplierService::save()` +
 `default_supplier_account_id`. Changing either default in
 `SettingService::updateAccountingSetting()` runs `syncDefaultAccount()` on
-existing customers/suppliers. Posting a customer payment or credit/COD sale
-without a COA returns a message to set Customer Account under Settings →
-Accounting and save.
+existing customers/suppliers. Customer-payment posting resolves the receivable COA
+via `CustomerService::resolveCustomerReceivableAccountId()` (profile COA first,
+then `default_customer_account_id`, validated as an active leaf account for the
+business); `CustomerPaymentService::applyPosting()` re-resolves at post time inside
+the same DB transaction — if neither source is valid, posting aborts with
+`CustomerService::RECEIVABLE_COA_MISSING_MESSAGE` and no journal entry is created.
 
 **Stock availability/validation in POS:** `OrderService::searchProducts()`,
 `getProductsByCategory()` and `resolvePrices()` attach `is_track_stock`/
@@ -83,6 +86,18 @@ held order's status flips back to draft - removes a line that's gone out of
 stock and clamps one whose held quantity now exceeds what's available,
 returning the adjustments as `stock_warnings` on the resumed order for the
 cashier).
+
+**Order status changes:** there is no generic status dropdown. Status moves via
+dedicated actions: POS (`hold`, `resume`, `complete` → `post()`), Admin Order
+Detail (`OrderController::changeStatus()` → `OrderService::changeStatus()` —
+`POST admin/order/change-status`), and list-row Cancel (`order.cancel`). Posted/
+cancelled/void delegate to `post()`/`cancel()`/`void()`; delivery fulfilment
+steps (`shipped`, `out_for_delivery`, `delivered`) are lightweight
+`transitionStatus()` updates on `DELIVERY` order type only (no second stock/GL
+hit). Website hold orders have no `cashier_id`; POS Held Orders passes
+`include_null_cashier=1` so they appear alongside the session cashier's own
+holds. `CustomerOrderService::mapStatus()` maps ERP `posted` → storefront
+`processing` so fulfilment steps can advance before `delivered`.
 
 ## Accounting (`module:accounting`)
 Core: `AccountTypeController`, `AccountSubTypeController`,
