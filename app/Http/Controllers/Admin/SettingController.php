@@ -969,14 +969,8 @@ class SettingController extends Controller
             'whatsapp_number'           => 'nullable|string|max:30',
             'favicon'                   => 'nullable|image|max:1024',
             'og_image'                  => 'nullable|image|max:2048',
-            'social_links'              => 'nullable|array',
-            'social_links.facebook'     => 'nullable|url',
-            'social_links.instagram'    => 'nullable|url',
-            'social_links.twitter'      => 'nullable|url',
-            'social_links.pinterest'    => 'nullable|url',
-            'social_links.youtube'      => 'nullable|url',
-            'social_links.tiktok'       => 'nullable|url',
-            'social_links.linkedin'     => 'nullable|url',
+            'free_delivery_enabled'     => 'nullable|boolean',
+            'free_delivery_min_amount'  => 'nullable|numeric|min:0',
         ];
 
         $validate = Validator::make($request->all(), $rules);
@@ -991,8 +985,9 @@ class SettingController extends Controller
             'seo_keywords',
             'whatsapp_number',
         ]);
-        $obj['social_links'] = $request->input('social_links', []);
         $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['free_delivery_enabled'] = $request->boolean('free_delivery_enabled');
+        $obj['free_delivery_min_amount'] = $request->input('free_delivery_min_amount');
 
         if ($request->hasFile('favicon')) {
             $obj['favicon'] = $this->storeWebsiteUpload($request->file('favicon'));

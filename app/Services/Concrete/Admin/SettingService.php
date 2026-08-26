@@ -830,22 +830,10 @@ class SettingService
 
     public function resolveWebsitePublicSettings($business, $accounting, $website_setting)
     {
-        $default_social = [
-            'facebook' => null,
-            'instagram' => null,
-            'twitter' => null,
-            'pinterest' => null,
-            'youtube' => null,
-            'tiktok' => null,
-            'linkedin' => null,
-        ];
-        $social_links = is_array($website_setting->social_links) ? $website_setting->social_links : [];
-        $social_links = array_merge($default_social, $social_links);
-
         return [
             'business' => [
                 'name'    => $business->name ?? null,
-                'logo'    => $business && $business->logo ? asset('uploads/business/' . $business->logo) : null,
+                'logo'    => $business && $business->logo ? asset('public/uploads/business/' . $business->logo) : null,
                 'email'   => $business->email ?? null,
                 'phone'   => $business->phone ?? null,
                 'address' => $business->address ?? null,
@@ -863,12 +851,17 @@ class SettingService
                 'title'       => $website_setting->seo_title ?? ($business->name ?? null),
                 'description' => $website_setting->seo_description ?? null,
                 'keywords'    => $website_setting->seo_keywords ?? null,
-                'og_image'    => $website_setting->og_image ? asset('uploads/website/' . $website_setting->og_image) : null,
+                'og_image'    => $website_setting->og_image ? asset('public/uploads/website/' . $website_setting->og_image) : null,
             ],
-            'favicon'         => $website_setting->favicon ? asset('uploads/website/' . $website_setting->favicon) : null,
+            'favicon'         => $website_setting->favicon ? asset('public/uploads/website/' . $website_setting->favicon) : null,
             'business_hours'  => $website_setting->business_hours ?? null,
             'whatsapp_number' => $website_setting->whatsapp_number ?? null,
-            'social_links'    => $social_links,
+            'free_delivery'   => [
+                'enabled'    => (bool) ($website_setting->free_delivery_enabled ?? false),
+                'min_amount' => $website_setting->free_delivery_min_amount !== null
+                    ? (float) $website_setting->free_delivery_min_amount
+                    : null,
+            ],
         ];
     }
 }

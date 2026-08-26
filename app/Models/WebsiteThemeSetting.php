@@ -35,6 +35,8 @@ class WebsiteThemeSetting extends Model
         'og_image',
         'whatsapp_number',
         'social_links',
+        'free_delivery_enabled',
+        'free_delivery_min_amount',
         'createdby_id',
         'updatedby_id',
         'date_created',

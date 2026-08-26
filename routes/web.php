@@ -432,6 +432,71 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('export', [App\Http\Controllers\Admin\SubCategoryController::class, 'export'])->name('sub-category-export');
     });
 
+    //website cms
+    Route::resource('website-section', App\Http\Controllers\Admin\WebsiteSectionController::class)->except(['show']);
+    Route::group(['prefix' => 'website-section'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\WebsiteSectionController::class, 'getData'])->name('website-section-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\WebsiteSectionController::class, 'status']);
+    });
+
+    Route::resource('website-page', App\Http\Controllers\Admin\WebsitePageController::class)->except(['show']);
+    Route::group(['prefix' => 'website-page'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\WebsitePageController::class, 'getData'])->name('website-page-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\WebsitePageController::class, 'status']);
+    });
+
+    Route::resource('website-faq', App\Http\Controllers\Admin\WebsiteFaqController::class)->except(['show']);
+    Route::group(['prefix' => 'website-faq'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\WebsiteFaqController::class, 'getData'])->name('website-faq-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\WebsiteFaqController::class, 'status']);
+    });
+
+    Route::resource('social-media', App\Http\Controllers\Admin\SocialMediaLinkController::class)->except(['show']);
+    Route::group(['prefix' => 'social-media'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\SocialMediaLinkController::class, 'getData'])->name('social-media-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\SocialMediaLinkController::class, 'status']);
+    });
+
+    Route::resource('website-hero-stat', App\Http\Controllers\Admin\WebsiteHeroStatController::class)->except(['show']);
+    Route::group(['prefix' => 'website-hero-stat'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\WebsiteHeroStatController::class, 'getData'])->name('website-hero-stat-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\WebsiteHeroStatController::class, 'status']);
+    });
+
+    Route::resource('website-benefit', App\Http\Controllers\Admin\WebsiteBenefitController::class)->except(['show']);
+    Route::group(['prefix' => 'website-benefit'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\WebsiteBenefitController::class, 'getData'])->name('website-benefit-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\WebsiteBenefitController::class, 'status']);
+    });
+
+    Route::resource('website-testimonial', App\Http\Controllers\Admin\WebsiteTestimonialController::class)->except(['show']);
+    Route::group(['prefix' => 'website-testimonial'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\WebsiteTestimonialController::class, 'getData'])->name('website-testimonial-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\WebsiteTestimonialController::class, 'status']);
+    });
+
+    Route::group(['prefix' => 'contact-message'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\ContactMessageController::class, 'index'])->name('contact-message-index');
+        Route::post('data', [App\Http\Controllers\Admin\ContactMessageController::class, 'getData'])->name('contact-message-data');
+        Route::get('{id}/show', [App\Http\Controllers\Admin\ContactMessageController::class, 'show']);
+        Route::post('{id}/reply', [App\Http\Controllers\Admin\ContactMessageController::class, 'reply']);
+        Route::delete('{id}', [App\Http\Controllers\Admin\ContactMessageController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'product-review'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\ProductReviewController::class, 'index'])->name('product-review-index');
+        Route::post('data', [App\Http\Controllers\Admin\ProductReviewController::class, 'getData'])->name('product-review-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\ProductReviewController::class, 'status']);
+        Route::delete('{id}', [App\Http\Controllers\Admin\ProductReviewController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'newsletter-subscriber'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\NewsletterSubscriberController::class, 'index'])->name('newsletter-subscriber-index');
+        Route::post('data', [App\Http\Controllers\Admin\NewsletterSubscriberController::class, 'getData'])->name('newsletter-subscriber-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\NewsletterSubscriberController::class, 'status']);
+        Route::delete('{id}', [App\Http\Controllers\Admin\NewsletterSubscriberController::class, 'destroy']);
+    });
+
     //unit
     Route::resource('unit', App\Http\Controllers\Admin\UnitController::class);
     Route::group(['prefix' => 'unit'], function () {

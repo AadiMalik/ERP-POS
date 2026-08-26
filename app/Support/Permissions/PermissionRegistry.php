@@ -473,6 +473,80 @@ class PermissionRegistry
                 'manage' => ['name' => 'setting.manage', 'label' => 'Manage', 'is_system' => false],
             ]],
 
+            // ---- Website CMS ----
+
+            'website-section' => ['label' => 'Website Sections', 'actions' => [
+                'view'   => ['name' => 'website-section.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'website-section.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'website-section.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'website-section.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'website-section.status', 'label' => 'Change Status', 'is_system' => false],
+            ]],
+
+            'website-page' => ['label' => 'Website Pages', 'actions' => [
+                'view'   => ['name' => 'website-page.view', 'label' => 'View', 'is_system' => false],
+                'edit'   => ['name' => 'website-page.edit', 'label' => 'Edit', 'is_system' => false],
+                'status' => ['name' => 'website-page.status', 'label' => 'Change Status', 'is_system' => false],
+            ]],
+
+            'website-faq' => ['label' => 'FAQ / Help Center', 'actions' => [
+                'view'   => ['name' => 'website-faq.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'website-faq.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'website-faq.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'website-faq.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'website-faq.status', 'label' => 'Change Status', 'is_system' => false],
+            ]],
+
+            'social-media' => ['label' => 'Social Media', 'actions' => [
+                'view'   => ['name' => 'social-media.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'social-media.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'social-media.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'social-media.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'social-media.status', 'label' => 'Change Status', 'is_system' => false],
+            ]],
+
+            'website-hero-stat' => ['label' => 'Hero Stats', 'actions' => [
+                'view'   => ['name' => 'website-hero-stat.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'website-hero-stat.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'website-hero-stat.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'website-hero-stat.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'website-hero-stat.status', 'label' => 'Change Status', 'is_system' => false],
+            ]],
+
+            'website-benefit' => ['label' => 'Content Cards', 'actions' => [
+                'view'   => ['name' => 'website-benefit.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'website-benefit.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'website-benefit.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'website-benefit.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'website-benefit.status', 'label' => 'Change Status', 'is_system' => false],
+            ]],
+
+            'website-testimonial' => ['label' => 'Testimonials', 'actions' => [
+                'view'   => ['name' => 'website-testimonial.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'website-testimonial.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'website-testimonial.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'website-testimonial.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'website-testimonial.status', 'label' => 'Change Status', 'is_system' => false],
+            ]],
+
+            'contact-message' => ['label' => 'Contact Messages', 'actions' => [
+                'view'   => ['name' => 'contact-message.view', 'label' => 'View', 'is_system' => false],
+                'reply'  => ['name' => 'contact-message.reply', 'label' => 'Reply', 'is_system' => false],
+                'delete' => ['name' => 'contact-message.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
+            'product-review' => ['label' => 'Reviews', 'actions' => [
+                'view'   => ['name' => 'product-review.view', 'label' => 'View', 'is_system' => false],
+                'status' => ['name' => 'product-review.status', 'label' => 'Publish / Hide', 'is_system' => false],
+                'delete' => ['name' => 'product-review.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
+            'newsletter-subscriber' => ['label' => 'Newsletter Subscribers', 'actions' => [
+                'view'   => ['name' => 'newsletter-subscriber.view', 'label' => 'View', 'is_system' => false],
+                'status' => ['name' => 'newsletter-subscriber.status', 'label' => 'Change Status', 'is_system' => false],
+                'delete' => ['name' => 'newsletter-subscriber.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
             // ---- HRM & Payroll modules ----
 
             'department' => ['label' => 'Departments', 'actions' => [
@@ -1294,6 +1368,9 @@ class PermissionRegistry
             'employee-advance', 'employee-deduction', 'employee-ledger', 'employee-exit',
             'employee-clearance', 'asset', 'asset-allocation',
             'hrm-reports', 'payroll-reports',
+            'website-section', 'website-page', 'website-faq', 'social-media',
+            'website-hero-stat', 'website-benefit', 'website-testimonial',
+            'contact-message', 'product-review', 'newsletter-subscriber',
         ];
     }
 }

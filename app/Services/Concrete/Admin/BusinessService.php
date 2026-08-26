@@ -19,11 +19,13 @@ class BusinessService
     protected SubscriptionService $subscription_service;
     protected ChartOfAccountsCloneService $chart_of_accounts_clone_service;
     protected AccountingSettingCloneService $accounting_setting_clone_service;
+    protected WebsiteCmsDefaultsService $website_cms_defaults_service;
 
     public function __construct(
         SubscriptionService $subscription_service,
         ChartOfAccountsCloneService $chart_of_accounts_clone_service,
-        AccountingSettingCloneService $accounting_setting_clone_service
+        AccountingSettingCloneService $accounting_setting_clone_service,
+        WebsiteCmsDefaultsService $website_cms_defaults_service
     ) {
         $this->model_business = new Repository(new Business());
         $this->model_package = new Repository(new Package());
@@ -31,6 +33,7 @@ class BusinessService
         $this->subscription_service = $subscription_service;
         $this->chart_of_accounts_clone_service = $chart_of_accounts_clone_service;
         $this->accounting_setting_clone_service = $accounting_setting_clone_service;
+        $this->website_cms_defaults_service = $website_cms_defaults_service;
     }
 
     public function getData($data)
@@ -112,6 +115,7 @@ class BusinessService
             $this->subscription_service->createInitial($saved_obj, $package);
             $account_id_map = $this->chart_of_accounts_clone_service->cloneTemplateToBusiness($saved_obj->business_id);
             $this->accounting_setting_clone_service->cloneTemplateToBusiness($saved_obj->business_id, $account_id_map);
+            $this->website_cms_defaults_service->seed($saved_obj->business_id);
             return $saved_obj->fresh();
         });
     }

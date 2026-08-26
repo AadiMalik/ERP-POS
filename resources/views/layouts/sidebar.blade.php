@@ -1578,6 +1578,89 @@
             </li>
         @endcanAccessAny
 
+        {{-- Website CMS --}}
+        @canAccessAny(['website-section.view', 'website-page.view', 'website-faq.view', 'social-media.view', 'website-hero-stat.view', 'website-benefit.view', 'website-testimonial.view', 'contact-message.view', 'product-review.view', 'newsletter-subscriber.view'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-globe"></i>
+                    <div data-i18n="Website CMS">Website CMS</div>
+                </a>
+
+                <ul class="menu-sub">
+                    @canAccess('website-section.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/website-section') }}" class="menu-link">
+                                <div data-i18n="Homepage Sections">Homepage Sections</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('website-page.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/website-page') }}" class="menu-link">
+                                <div data-i18n="Pages & Policies">Pages & Policies</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('website-faq.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/website-faq') }}" class="menu-link">
+                                <div data-i18n="FAQ / Help Center">FAQ / Help Center</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('social-media.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/social-media') }}" class="menu-link">
+                                <div data-i18n="Social Media">Social Media</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('website-hero-stat.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/website-hero-stat') }}" class="menu-link">
+                                <div data-i18n="Hero Stats">Hero Stats</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('website-benefit.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/website-benefit') }}" class="menu-link">
+                                <div data-i18n="Content Cards">Content Cards</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('website-testimonial.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/website-testimonial') }}" class="menu-link">
+                                <div data-i18n="Testimonials">Testimonials</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('contact-message.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/contact-message') }}" class="menu-link">
+                                <div data-i18n="Contact Messages">Contact Messages</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('product-review.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/product-review') }}" class="menu-link">
+                                <div data-i18n="Reviews">Reviews</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('newsletter-subscriber.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/newsletter-subscriber') }}" class="menu-link">
+                                <div data-i18n="Newsletter Subscribers">Newsletter Subscribers</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                </ul>
+            </li>
+        @endcanAccessAny
+
         {{-- POS (operational interface only) --}}
         @canAccess('pos.access')
             <li class="menu-item">

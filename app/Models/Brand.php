@@ -32,8 +32,8 @@ class Brand extends Model
     public function getLogoUrlAttribute()
     {
         return !empty($this->logo)
-            ? asset('uploads/brand/' . $this->logo)
-            : asset('assets/img/no-image.png'); // optional default image
+            ? asset('public/uploads/brand/' . $this->logo)
+            : asset('public/assets/img/no-image.png'); // optional default image
     }
 
     public function business()
