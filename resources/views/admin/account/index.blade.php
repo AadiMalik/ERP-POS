@@ -3,7 +3,7 @@
     <style>
         /* Main Container Styles */
         .coa-container {
-            --coa-primary: #696cff;
+            --coa-primary: #3833C8;
             --coa-primary-soft: rgba(105, 108, 255, 0.08);
             --coa-primary-soft-hover: rgba(105, 108, 255, 0.13);
             --coa-border: #e7e7f0;

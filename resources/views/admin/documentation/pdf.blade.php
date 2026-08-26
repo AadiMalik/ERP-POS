@@ -6,15 +6,15 @@
     <style>
         body { font-family: 'DejaVu Sans', sans-serif; font-size: 12px; color: #32475c; }
         .cover { text-align: center; padding-top: 220px; page-break-after: always; }
-        .cover .brand { color: #696cff; font-size: 16px; font-weight: bold; margin-bottom: 40px; }
+        .cover .brand { color: #3833C8; font-size: 16px; font-weight: bold; margin-bottom: 40px; }
         .cover h1 { font-size: 28px; margin-bottom: 10px; }
         .cover .generated { color: #8897ab; font-size: 11px; margin-top: 40px; }
         .toc { page-break-after: always; }
-        .toc h2 { font-size: 18px; border-bottom: 2px solid #696cff; padding-bottom: 8px; }
+        .toc h2 { font-size: 18px; border-bottom: 2px solid #3833C8; padding-bottom: 8px; }
         .toc ol { font-size: 13px; line-height: 2; }
         .section { page-break-before: always; }
         .section:first-of-type { page-break-before: auto; }
-        .section h1 { font-size: 18px; color: #696cff; border-bottom: 1px solid #eceef1; padding-bottom: 6px; }
+        .section h1 { font-size: 18px; color: #3833C8; border-bottom: 1px solid #eceef1; padding-bottom: 6px; }
         .section h2 { font-size: 15px; margin-top: 20px; }
         .section h3 { font-size: 13px; margin-top: 14px; }
         table { width: 100%; border-collapse: collapse; margin: 10px 0; }
@@ -27,7 +27,7 @@
 </head>
 <body>
     <div class="cover">
-        <div class="brand">{{ env('APP_NAME') }}</div>
+        <div class="brand">@include('partials.brand-wordmark')</div>
         <h1>{{ $title }}</h1>
         <div class="generated">Generated on {{ now()->format('d M Y') }}</div>
     </div>

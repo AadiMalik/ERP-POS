@@ -4,7 +4,7 @@ Custom config files beyond Laravel's defaults, all under `config/`:
 
 | File | Purpose |
 |---|---|
-| `theme_presets.php` | Built-in Theme/Appearance presets for Business Settings — each is a complete visual identity (colors, sidebar/header/footer behavior, card/table/button/form/filter style, animation level), not just an accent color. `sneat_default` ("Style 1 · Smart Mart Modern") is the seeded default. |
+| `theme_presets.php` | Built-in Theme/Appearance presets for Business Settings — each is a complete visual identity (colors, sidebar/header/footer behavior, card/table/button/form/filter style, animation level), not just an accent color. `sneat_default` ("Style 1 · Dukanaz Modern") is the seeded default. |
 | `print_defaults.php` | Default print/document layout settings (paper size, orientation, header fields) used before a business customizes its own Print Settings. |
 | `thermal_print_defaults.php` | Default layout for thermal receipt printers. |
 | `barcode_label_defaults.php` | Default barcode label size/format. |

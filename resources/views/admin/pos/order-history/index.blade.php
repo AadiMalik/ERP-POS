@@ -16,7 +16,7 @@
 
         .pos-oh-summary-tile {
             border: 1px solid var(--pos-border, #eceef1);
-            border-left: 3px solid var(--pos-primary, #696cff);
+            border-left: 3px solid var(--pos-primary, #3833C8);
             border-radius: 0.5rem;
             background: #fff;
         }

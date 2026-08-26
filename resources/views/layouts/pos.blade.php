@@ -9,8 +9,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Laravel') }} - POS</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('public/assets/img/favicon/favicon.ico') }}" />
+    @include('partials.favicon')
     @include('layouts/css')
     @yield('css')
     <style>

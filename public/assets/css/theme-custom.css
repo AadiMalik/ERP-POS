@@ -92,7 +92,7 @@
  * Sidebar skin
  * --------------------------------------------------------------------- */
 body[data-sidebar-skin="dark"] .bg-menu-theme {
-    background-color: #2b2c40 !important;
+    background-color: #0B1B32 !important;
 }
 
 body[data-sidebar-skin="dark"] .bg-menu-theme .menu-link,
@@ -738,7 +738,7 @@ td.dt-control {
 
 .dt-control-icon {
     transition: transform .15s ease-in-out;
-    color: var(--bs-primary, #696cff);
+    color: var(--bs-primary, #3833C8);
 }
 
 tr.shown .dt-control-icon {
@@ -786,4 +786,75 @@ a.dt-control {
     .dt-detail-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* ---------------------------------------------------------------------
+ * Dukanaz brand assets
+ * --------------------------------------------------------------------- */
+.dukanaz-brand-link {
+    display: flex;
+    align-items: center;
+}
+
+.dukanaz-brand-logo {
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.dukanaz-brand-img {
+    display: block;
+    max-height: 32px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.dukanaz-brand-img--sidebar {
+    max-height: 36px;
+    width: auto;
+    object-fit: contain;
+}
+
+.dukanaz-brand-img--login {
+    max-height: 130px;
+    max-width: min(100%, 280px);
+}
+
+.dukanaz-wordmark,
+.dukanaz-footer-brand {
+    font-weight: 700;
+    color: #0B1B32;
+}
+
+body[data-sidebar-skin="dark"] .bg-menu-theme .app-brand-text .dukanaz-wordmark,
+body[data-sidebar-skin="gradient"] .bg-menu-theme .app-brand-text .dukanaz-wordmark {
+    color: #fff;
+}
+
+body[data-sidebar-skin="dark"] .bg-menu-theme .app-brand-text .dukanaz-wordmark .dukanaz-accent,
+body[data-sidebar-skin="gradient"] .bg-menu-theme .app-brand-text .dukanaz-wordmark .dukanaz-accent {
+    color: #2DD4BF;
+}
+
+.dukanaz-accent {
+    color: #2DD4BF;
+}
+
+.dukanaz-footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: .375rem;
+    margin-left: .25rem;
+    font-weight: 400;
+    color: inherit;
+}
+
+.dukanaz-footer-icon {
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.layout-menu-collapsed:not(.layout-menu-hover) .app-brand-text {
+    display: none;
 }

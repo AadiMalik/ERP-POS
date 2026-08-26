@@ -24,14 +24,14 @@
     $sidebarWidthMap = ['compact' => '200px', 'wide' => '300px'];
 
     $hex2rgb = function ($hex) {
-        $hex = ltrim($hex ?: '696cff', '#');
+        $hex = ltrim($hex ?: '3833C8', '#');
         if (strlen($hex) !== 6) {
-            $hex = '696cff';
+            $hex = '3833C8';
         }
         return implode(', ', array_map('hexdec', str_split($hex, 2)));
     };
 
-    $primary   = $theme['primary_color'] ?? '#696cff';
+    $primary   = $theme['primary_color'] ?? '#3833C8';
     $secondary = $theme['secondary_color'] ?? '#8592a3';
     $accent    = $theme['accent_color'] ?? '#03c3ec';
 @endphp

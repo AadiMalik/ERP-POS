@@ -6,7 +6,7 @@
 
         <div class="row g-4 mb-4">
             <div class="col-md-6">
-                <div class="card h-100 border-0 text-white" style="background: linear-gradient(135deg, #696cff 0%, #8f92ff 100%);">
+                <div class="card h-100 border-0 text-white" style="background: linear-gradient(135deg, #3833C8 0%, #2DD4BF 100%);">
                     <div class="card-body p-4">
                         <i class="fa fa-briefcase fa-2x mb-3"></i>
                         <h5 class="text-white fw-bold">Business Documentation</h5>

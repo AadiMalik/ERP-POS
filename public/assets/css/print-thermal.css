@@ -1,4 +1,4 @@
-/* Thermal Receipt stylesheet - Smart Mart ERP
+/* Thermal Receipt stylesheet - Dukanaz
    Compact, single-column flow layout for 58mm/80mm thermal printers.
    Every optional section is its own conditional block in the Blade template
    (never an empty cell / visibility:hidden), so hiding a field naturally

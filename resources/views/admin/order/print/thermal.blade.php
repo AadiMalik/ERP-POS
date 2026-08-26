@@ -311,7 +311,7 @@
                 @endif
 
                 @if ($thermal_config->isVisible('powered_by_smart_mart'))
-                    <p class="tr-powered-by">Powered by Smart Mart ERP</p>
+                    <p class="tr-powered-by">Powered by Dukanaz</p>
                 @endif
             </div>
         @endif

@@ -8,18 +8,18 @@
  * shadow, table/button/form/filter styling, and animation level) - so
  * switching styles changes the ERP's whole look, not just its accent color.
  *
- * 'sneat_default' (Style 1 - Smart Mart Modern) is the seeded default for
+ * 'sneat_default' (Style 1 - Dukanaz Modern) is the seeded default for
  * every business that has not opened the Theme tab yet, and reproduces the
- * reference Smart Mart ERP dashboard look (light sidebar, solid active pill,
+ * reference Dukanaz ERP dashboard look (light sidebar, solid active pill,
  * pastel gradient KPI cards, colorful charts).
  */
 return [
 
     'sneat_default' => [
-        'label'           => 'Style 1 · Smart Mart Modern',
-        'primary_color'   => '#696cff',
-        'secondary_color' => '#8592a3',
-        'accent_color'    => '#03c3ec',
+        'label'           => 'Style 1 · Dukanaz Modern',
+        'primary_color'   => '#3833C8',
+        'secondary_color' => '#64748b',
+        'accent_color'    => '#2DD4BF',
         'font_family'     => "'Public Sans', sans-serif",
         'font_size_base'  => 'md',
         'sidebar_config'  => [

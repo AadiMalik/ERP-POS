@@ -51,7 +51,7 @@
             <div class="col-md-4">
                 <label class="form-label">Primary Color</label>
                 <input type="color" class="form-control form-control-color w-100" name="primary_color"
-                    value="{{ $theme_setting->primary_color ?? '#696cff' }}">
+                    value="{{ $theme_setting->primary_color ?? '#3833C8' }}">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Secondary Color</label>

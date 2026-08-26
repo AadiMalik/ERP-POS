@@ -786,7 +786,7 @@ function businessAccountingAdvancedModeEnabled(): bool
 
 /**
  * Resolves the current request's full Theme/Appearance config: the
- * "sneat_default" preset (Style 1 - Smart Mart Modern) as the base, with the
+ * "sneat_default" preset (Style 1 - Dukanaz Modern) as the base, with the
  * business' saved ThemeSetting (hydrated into session by SettingMiddleware)
  * overlaid on top. Centralizes the merge logic previously duplicated between
  * layouts/app.blade.php and layouts/theme-vars.blade.php.

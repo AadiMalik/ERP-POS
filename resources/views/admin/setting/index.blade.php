@@ -9,7 +9,7 @@
         }
 
         .setting-nav .nav-link.active {
-            background: #696cff;
+            background: #3833C8;
             color: #fff;
         }
 

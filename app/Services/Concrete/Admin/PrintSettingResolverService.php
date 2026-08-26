@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 /**
  * The hot "read" path used on every print/pdf request. Resolves the effective
  * print configuration for a business, backed by the business's own
- * `print_settings` row (auto-created with the Smart Mart ERP defaults on first
+ * `print_settings` row (auto-created with the Dukanaz defaults on first
  * read via SettingService::getPrintSetting() - see config/print_defaults.php).
  *
  * Registered as a container singleton (see AppServiceProvider::register) so the

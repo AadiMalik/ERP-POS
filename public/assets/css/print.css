@@ -1,4 +1,4 @@
-/* Shared Print / Print Preview stylesheet - Smart Mart ERP */
+/* Shared Print / Print Preview stylesheet - Dukanaz */
 
 * {
     box-sizing: border-box;
@@ -31,7 +31,7 @@ body {
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    background: #696cff;
+    background: #3833C8;
     color: #fff;
 }
 

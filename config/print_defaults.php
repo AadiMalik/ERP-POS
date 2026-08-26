@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Built-in "Smart Mart ERP Default" print layout.
+ * Built-in "Dukanaz Default" print layout.
  *
  * This is the single source of truth for what the original hardcoded
  * print.css / print partials looked like. SettingService::getPrintSetting()

@@ -37,7 +37,7 @@
        so charts never fall out of sync with the rest of the UI. Semantic
        colors (success/warning/danger) stay fixed on purpose - status meaning
        shouldn't shift with a brand color change. */
-    config.colors.primary = '{{ $__chart_theme['primary_color'] ?? '#696cff' }}';
+    config.colors.primary = '{{ $__chart_theme['primary_color'] ?? '#3833C8' }}';
     config.colors.secondary = '{{ $__chart_theme['secondary_color'] ?? '#8592a3' }}';
     config.colors.info = '{{ $__chart_theme['accent_color'] ?? '#03c3ec' }}';
 </script>

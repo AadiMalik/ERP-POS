@@ -27,9 +27,9 @@
     var SIDEBAR_WIDTH_MAP = { compact: '200px', wide: '300px', default: '' };
 
     function hexToRgb(hex) {
-        hex = (hex || '#696cff').replace('#', '');
+        hex = (hex || '#3833C8').replace('#', '');
         if (hex.length !== 6) {
-            hex = '696cff';
+            hex = '3833C8';
         }
         var r = parseInt(hex.substring(0, 2), 16);
         var g = parseInt(hex.substring(2, 4), 16);

@@ -6,8 +6,7 @@
       <script>
         document.write(new Date().getFullYear());
       </script>
-      , made ❤️ by
-      Adnan Junaid
+      @include('partials.brand-logo', ['variant' => 'footer'])
     </div>
   </div>
 </footer>

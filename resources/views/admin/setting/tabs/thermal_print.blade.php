@@ -236,7 +236,7 @@
                             <input class="form-check-input" type="checkbox"
                                 name="field_config[powered_by_smart_mart]" value="1"
                                 {{ $field_check('powered_by_smart_mart') }}>
-                            <label class="form-check-label">"Powered by Smart Mart ERP" Credit</label>
+                            <label class="form-check-label">"Powered by Dukanaz" Credit</label>
                         </div>
                     </div>
                 </div>

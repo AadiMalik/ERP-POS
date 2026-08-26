@@ -100,7 +100,7 @@
 
         <hr class="tr-divider">
         <div class="tr-footer">
-            <p class="tr-powered-by">Powered by Smart Mart ERP</p>
+            <p class="tr-powered-by">Powered by Dukanaz</p>
         </div>
     </div>
 @endsection

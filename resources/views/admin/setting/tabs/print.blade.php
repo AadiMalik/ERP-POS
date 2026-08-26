@@ -10,7 +10,7 @@
     }
 
     .print-setting-nav .nav-link.active {
-        background: #696cff;
+        background: #3833C8;
         color: #fff;
     }
 
@@ -29,7 +29,7 @@
     @csrf
     <h4>Print Settings</h4>
     <p class="text-muted">Controls the header, footer, page and printer behavior of every printed CRUD document and
-        report for this business. Leave everything as-is to keep using the built-in Smart Mart ERP default layout.
+        report for this business. Leave everything as-is to keep using the built-in Dukanaz default layout.
     </p>
     <hr>
 
