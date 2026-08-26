@@ -16,6 +16,7 @@ use App\Models\ProductVariationStock;
 use App\Models\SaleType;
 use App\Models\Warehouse;
 use App\Repository\Repository;
+use App\Services\Concrete\Api\WishlistService;
 use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
@@ -812,10 +813,16 @@ class ProductService
 
         [$price_map, $stock_map] = $this->resolvePricingAndStock($products, $business_id, $branch_id, $sale_type_id);
 
-        $rows = $products->map(function ($product) use ($price_map, $stock_map) {
+        $wishlist_flags = $this->resolveWishlistFlags(
+            $business_id,
+            $params['user_id'] ?? null,
+            $products->pluck('product_id')->all()
+        );
+
+        $rows = $products->map(function ($product) use ($price_map, $stock_map, $wishlist_flags) {
             return [
                 'product' => $product,
-                'summary' => $this->mapProductSummary($product, $price_map, $stock_map),
+                'summary' => $this->mapProductSummary($product, $price_map, $stock_map, $wishlist_flags),
             ];
         });
 
@@ -856,7 +863,12 @@ class ProductService
 
         $sections = null;
         if (!$has_filters && $page == 1) {
-            $sections = $this->buildWebsiteSections($business_id, $branch_id, $sale_type_id);
+            $sections = $this->buildWebsiteSections(
+                $business_id,
+                $branch_id,
+                $sale_type_id,
+                $params['user_id'] ?? null
+            );
         }
 
         return [
@@ -876,7 +888,7 @@ class ProductService
      * Storefront single-product detail by slug. Returns null when not found
      * (caller/controller turns that into a 404).
      */
-    public function getWebsiteDetail(string $business_id, string $slug): ?array
+    public function getWebsiteDetail(string $business_id, string $slug, $user_id = null): ?array
     {
         $with = array_merge($this->websiteWith(), ['productFeatures']);
 
@@ -893,9 +905,11 @@ class ProductService
 
         [$price_map, $stock_map] = $this->resolvePricingAndStock(collect([$product]), $business_id, null, $sale_type_id);
 
+        $wishlist_flags = $this->resolveWishlistFlags($business_id, $user_id, [$product->product_id]);
+
         $variations = $product->productVariations;
 
-        $options = $variations->map(function ($variation) use ($price_map, $stock_map) {
+        $options = $variations->map(function ($variation) use ($price_map, $stock_map, $wishlist_flags) {
             $entry = $price_map[$variation->product_variation_id] ?? ['price' => 0.0, 'oldPrice' => null, 'discount' => 0];
 
             return [
@@ -906,6 +920,7 @@ class ProductService
                 'oldPrice' => $entry['oldPrice'],
                 'discount' => $entry['discount'],
                 'stock' => $stock_map[$variation->product_variation_id] ?? null,
+                'is_wishlisted' => !empty($wishlist_flags['variation_ids'][$variation->product_variation_id]),
                 'attributes' => $variation->attributes->map(function ($attr) {
                     return ['name' => $attr->name, 'value' => $attr->value];
                 })->values()->all(),
@@ -923,9 +938,18 @@ class ProductService
 
         [$related_price_map, $related_stock_map] = $this->resolvePricingAndStock($related_products, $business_id, null, $sale_type_id);
 
-        $related_mapped = $related_products->map(function ($p) use ($related_price_map, $related_stock_map) {
-            return $this->mapProductSummary($p, $related_price_map, $related_stock_map);
+        $related_flags = $this->resolveWishlistFlags(
+            $business_id,
+            $user_id,
+            $related_products->pluck('product_id')->all()
+        );
+
+        $related_mapped = $related_products->map(function ($p) use ($related_price_map, $related_stock_map, $related_flags) {
+            return $this->mapProductSummary($p, $related_price_map, $related_stock_map, $related_flags);
         })->values()->all();
+
+        $is_product_wishlisted = !empty($wishlist_flags['product_ids'][$product->product_id]);
+        $wishlisted_variation_ids = array_keys(array_filter($wishlist_flags['variation_ids'] ?? []));
 
         return [
             'id' => $product->product_id,
@@ -948,6 +972,10 @@ class ProductService
                 return ['name' => $feature->name, 'description' => $feature->description];
             })->values()->all(),
             'is_single_variation' => $variations->count() <= 1,
+            'is_wishlisted' => $is_product_wishlisted,
+            'is_product_wishlisted' => $is_product_wishlisted,
+            'has_wishlisted_variation' => !empty($wishlisted_variation_ids),
+            'wishlisted_variation_ids' => $wishlisted_variation_ids,
             'variations' => [
                 'label' => 'Options',
                 'options' => $options->all(),
@@ -1108,7 +1136,7 @@ class ProductService
      * variation resolves to the lowest net price (the single-variation case
      * degenerates to just that variation).
      */
-    private function mapProductSummary(Product $product, array $price_map, array $stock_map): array
+    private function mapProductSummary(Product $product, array $price_map, array $stock_map, array $wishlist_flags = []): array
     {
         $variations = $product->productVariations;
 
@@ -1147,6 +1175,15 @@ class ProductService
             $badges[] = 'New';
         }
 
+        $is_product_wishlisted = !empty($wishlist_flags['product_ids'][$product->product_id]);
+        $has_wishlisted_variation = false;
+        foreach ($variations as $variation) {
+            if (!empty($wishlist_flags['variation_ids'][$variation->product_variation_id])) {
+                $has_wishlisted_variation = true;
+                break;
+            }
+        }
+
         return [
             'id' => $product->product_id,
             'sku' => $primary->sku ?? null,
@@ -1165,7 +1202,22 @@ class ProductService
             'badges' => $badges,
             'images' => $product->productImages->pluck('image_url')->values()->all(),
             'short_description' => $product->short_description,
+            'is_wishlisted' => $is_product_wishlisted || $has_wishlisted_variation,
+            'is_product_wishlisted' => $is_product_wishlisted,
+            'has_wishlisted_variation' => $has_wishlisted_variation,
         ];
+    }
+
+    /**
+     * Optional wishlist enrichment for authenticated storefront requests.
+     */
+    private function resolveWishlistFlags(string $business_id, $user_id, array $product_ids = []): array
+    {
+        if (!$user_id) {
+            return ['product_ids' => [], 'variation_ids' => []];
+        }
+
+        return app(WishlistService::class)->flagsForUser((int) $user_id, $business_id, $product_ids);
     }
 
     /**
@@ -1174,7 +1226,7 @@ class ProductService
      * Every section independently degrades to an empty array rather than
      * throwing when nothing qualifies.
      */
-    private function buildWebsiteSections(string $business_id, ?string $branch_id, ?string $sale_type_id): array
+    private function buildWebsiteSections(string $business_id, ?string $branch_id, ?string $sale_type_id, $user_id = null): array
     {
         $with = $this->websiteWith();
 
@@ -1190,9 +1242,15 @@ class ProductService
 
         [$price_map, $stock_map] = $this->resolvePricingAndStock($all, $business_id, $branch_id, $sale_type_id);
 
-        $map = function (Collection $collection) use ($price_map, $stock_map) {
-            return $collection->map(function ($product) use ($price_map, $stock_map) {
-                return $this->mapProductSummary($product, $price_map, $stock_map);
+        $wishlist_flags = $this->resolveWishlistFlags(
+            $business_id,
+            $user_id,
+            $all->pluck('product_id')->unique()->values()->all()
+        );
+
+        $map = function (Collection $collection) use ($price_map, $stock_map, $wishlist_flags) {
+            return $collection->map(function ($product) use ($price_map, $stock_map, $wishlist_flags) {
+                return $this->mapProductSummary($product, $price_map, $stock_map, $wishlist_flags);
             })->values()->all();
         };
 

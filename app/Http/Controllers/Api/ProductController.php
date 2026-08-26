@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\ProductService;
 use App\Traits\ResponseAPI;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
@@ -52,6 +53,9 @@ class ProductController extends Controller
             'branch_id',
         ]);
 
+        // Optional Sanctum user - when present, product payloads include wishlist flags.
+        $params['user_id'] = Auth::guard('sanctum')->id();
+
         $result = $this->product_service->getWebsiteListing($business_id, $params);
 
         return $this->success(Message::FETCH, $result);
@@ -71,7 +75,8 @@ class ProductController extends Controller
             return $this->error($validate->errors()->first(), 404);
         }
 
-        $result = $this->product_service->getWebsiteDetail($business_id, $slug);
+        $user_id = Auth::guard('sanctum')->id();
+        $result = $this->product_service->getWebsiteDetail($business_id, $slug, $user_id);
 
         if ($result === null) {
             return $this->error('Product not found', 404);

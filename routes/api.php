@@ -5,9 +5,11 @@ use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ContactMessageController;
+use App\Http\Controllers\Api\CustomerOrderController;
 use App\Http\Controllers\Api\NewsletterSubscriberController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductReviewController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\SocialMediaLinkController;
 use App\Http\Controllers\Api\WebsiteBenefitController;
 use App\Http\Controllers\Api\WebsiteFaqController;
@@ -18,6 +20,7 @@ use App\Http\Controllers\Api\WebsiteSectionController;
 use App\Http\Controllers\Api\WebsiteSettingController;
 use App\Http\Controllers\Api\WebsiteTestimonialController;
 use App\Http\Controllers\Api\WebsiteThemeController;
+use App\Http\Controllers\Api\WishlistController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -50,6 +53,7 @@ Route::prefix('v1/auth')->middleware('throttle:20,1')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('set-password', [AuthController::class, 'setPassword']);
+        Route::post('change-password', [AuthController::class, 'changePassword']);
         Route::post('logout', [AuthController::class, 'logout']);
     });
 });
@@ -84,4 +88,21 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
 
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->prefix('v1')->group(function () {
     Route::post('reviews/{business_id}', [ProductReviewController::class, 'store']);
+
+    // Customer account profile + addresses (scoped to business_id).
+    Route::get('profile/{business_id}', [ProfileController::class, 'show']);
+    Route::put('profile/{business_id}', [ProfileController::class, 'update']);
+    Route::post('profile/{business_id}/addresses', [ProfileController::class, 'storeAddress']);
+    Route::delete('profile/{business_id}/addresses/{address_id}', [ProfileController::class, 'destroyAddress']);
+
+    // Customer orders (own orders only for the given business).
+    Route::get('orders/{business_id}', [CustomerOrderController::class, 'index']);
+    Route::get('orders/{business_id}/{order_id}', [CustomerOrderController::class, 'show']);
+
+    // Wishlist (product-level and variation-level).
+    Route::get('wishlist/{business_id}', [WishlistController::class, 'index']);
+    Route::post('wishlist/{business_id}', [WishlistController::class, 'store']);
+    Route::delete('wishlist/{business_id}', [WishlistController::class, 'destroy']);
+    Route::post('wishlist/{business_id}/toggle', [WishlistController::class, 'toggle']);
+    Route::get('wishlist/{business_id}/status', [WishlistController::class, 'status']);
 });
