@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CheckoutController;
+use App\Http\Controllers\Api\VoucherController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\CustomerOrderController;
 use App\Http\Controllers\Api\NewsletterSubscriberController;
@@ -113,6 +114,13 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->prefix('v1')->group(functi
     Route::put('cart/{business_id}/items/{cart_item_id}', [CartController::class, 'update']);
     Route::delete('cart/{business_id}/items/{cart_item_id}', [CartController::class, 'destroy']);
     Route::delete('cart/{business_id}', [CartController::class, 'clear']);
+
+    // Website vouchers (authenticated, cart-scoped).
+    Route::get('vouchers/{business_id}/search', [VoucherController::class, 'search']);
+    Route::get('vouchers/{business_id}/eligible', [VoucherController::class, 'eligible']);
+    Route::post('vouchers/{business_id}/preview', [VoucherController::class, 'preview']);
+    Route::post('vouchers/{business_id}/apply', [VoucherController::class, 'apply']);
+    Route::delete('vouchers/{business_id}', [VoucherController::class, 'remove']);
 
     // Website checkout / place order.
     Route::post('checkout/{business_id}', [CheckoutController::class, 'placeOrder']);

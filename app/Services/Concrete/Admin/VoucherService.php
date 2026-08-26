@@ -126,6 +126,10 @@ class VoucherService
             ->addColumn('action', function ($item) {
 
                 return "
+                    <a class='btn btn-icon btn-outline-info mr-2'
+                     id='viewVoucherHistory' href='javascript:void(0)'
+                      data-toggle='tooltip' data-id='" . $item->voucher_id . "' data-original-title='Usage History'><i title='History' class='icon-base fa fa-history'></i></a>
+
                     <a class='btn btn-icon btn-outline-primary mr-2'
                      id='editVoucher' href='javascript:void(0)'
                       data-toggle='tooltip'  data-id='" . $item->voucher_id . "' data-original-title='Edit'><i title='Edit' class='icon-base fa fa-pencil'></i></a>
@@ -736,5 +740,48 @@ class VoucherService
 
             throw $e;
         }
+    }
+
+    public function listActiveByBusiness(string $business_id)
+    {
+        return $this->model_voucher->getModel()::where('business_id', $business_id)
+            ->where('is_deleted', 0)
+            ->orderBy('name')
+            ->get(['voucher_id', 'code', 'name']);
+    }
+
+    public function getRedemptionHistory(string $voucher_id)
+    {
+        return VoucherRedemption::with(['user', 'order'])
+            ->where('voucher_id', $voucher_id)
+            ->where('is_deleted', 0)
+            ->orderByDesc('date_created')
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'voucher_redemption_id' => $row->voucher_redemption_id,
+                    'order_id' => $row->order_id,
+                    'order_no' => optional($row->order)->daily_order_id,
+                    'order_status' => optional($row->order)->status,
+                    'user_id' => $row->user_id,
+                    'customer' => optional($row->user)->name,
+                    'customer_email' => optional($row->user)->email,
+                    'discount_amount' => (float) $row->discount_amount,
+                    'used_at' => optional($row->date_created)->format('d-m-Y H:i'),
+                ];
+            });
+    }
+
+    public function getRedemptionSummary(string $voucher_id): array
+    {
+        $rows = VoucherRedemption::where('voucher_id', $voucher_id)
+            ->where('is_deleted', 0)
+            ->get();
+
+        return [
+            'total_uses' => $rows->count(),
+            'total_discount' => round((float) $rows->sum('discount_amount'), 3),
+            'unique_customers' => $rows->pluck('user_id')->filter()->unique()->count(),
+        ];
     }
 }

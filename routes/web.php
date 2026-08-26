@@ -762,6 +762,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     Route::resource('voucher', App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
     Route::group(['prefix' => 'voucher'], function () {
         Route::post('data', [App\Http\Controllers\Admin\VoucherController::class, 'getData']);
+        Route::get('{voucher_id}/redemptions', [App\Http\Controllers\Admin\VoucherController::class, 'redemptions']);
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\VoucherController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\VoucherController::class, 'byBusiness'])->name('voucher-by-business');
         Route::get('import/sample', [App\Http\Controllers\Admin\VoucherController::class, 'importSample'])->name('voucher-import-sample');
@@ -1299,6 +1300,12 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('pdf', [App\Http\Controllers\Admin\Reports\SalesReportController::class, 'pdf'])->name('reports.sales-report.pdf');
             Route::get('export', [App\Http\Controllers\Admin\Reports\SalesReportController::class, 'export'])->name('reports.sales-report.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\SalesReportController::class, 'exportCsv'])->name('reports.sales-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'voucher-usage-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\VoucherUsageReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\VoucherUsageReportController::class, 'data']);
+            Route::post('summary', [App\Http\Controllers\Admin\Reports\VoucherUsageReportController::class, 'summary']);
         });
 
         Route::group(['prefix' => 'expense-report'], function () {

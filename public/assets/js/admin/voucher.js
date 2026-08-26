@@ -197,3 +197,52 @@ deleteRecord({
             initDataTablepos_voucher_table();
       }
 });
+
+$(document).on('click', '#viewVoucherHistory', function () {
+      var voucherId = $(this).data('id');
+      $('#voucherHistoryLoading').show();
+      $('#voucherHistoryContent').hide();
+      $('#voucherHistoryBody').empty();
+      $('#voucherHistoryModal').modal('show');
+
+      ajaxRequest({
+            url: url_local + '/admin/voucher/' + voucherId + '/redemptions',
+            method: 'GET',
+      }).then(function (response) {
+            var data = response.Data || {};
+            var voucher = data.voucher || {};
+            var summary = data.summary || {};
+            var history = data.history || [];
+
+            $('#vh_code').text(voucher.code || '-');
+            $('#vh_name').text(voucher.name || '');
+            $('#vh_rule').text(voucher.rule || '');
+            $('#vh_total_uses').text(summary.total_uses ?? 0);
+            $('#vh_total_discount').text(typeof money === 'function' ? money(summary.total_discount || 0) : (summary.total_discount || 0));
+            $('#vh_unique_customers').text(summary.unique_customers ?? 0);
+
+            if (!history.length) {
+                  $('#voucherHistoryBody').append('<tr><td colspan="6" class="text-muted text-center">No usage recorded yet.</td></tr>');
+            } else {
+                  history.forEach(function (row) {
+                        $('#voucherHistoryBody').append(
+                              '<tr>' +
+                              '<td>' + escapeHtml(row.used_at || '-') + '</td>' +
+                              '<td>' + escapeHtml(row.customer || 'Walk-in') + '</td>' +
+                              '<td>' + escapeHtml(row.customer_email || '-') + '</td>' +
+                              '<td>' + escapeHtml(row.order_no || '-') + '</td>' +
+                              '<td>' + escapeHtml(row.order_status || '-') + '</td>' +
+                              '<td>' + (typeof money === 'function' ? money(row.discount_amount || 0) : (row.discount_amount || 0)) + '</td>' +
+                              '</tr>'
+                        );
+                  });
+            }
+
+            $('#voucherHistoryLoading').hide();
+            $('#voucherHistoryContent').show();
+      }).catch(function (err) {
+            $('#voucherHistoryLoading').hide();
+            errorMessage(err.Message || 'Unable to load voucher history.');
+            $('#voucherHistoryModal').modal('hide');
+      });
+});

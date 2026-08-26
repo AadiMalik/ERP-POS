@@ -68,6 +68,7 @@
         </div>
     </div>
     @include('admin/voucher/model/create')
+    @include('admin/voucher/model/history')
     @include('admin.partials.import-export-modal')
 </div>
 <!-- ========== table components end ========== -->

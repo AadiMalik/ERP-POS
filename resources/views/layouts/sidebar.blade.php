@@ -381,7 +381,7 @@
             'reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
             'reports.journal-register.view', 'reports.account-ledger.view', 'reports.account-balance.view',
             'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view',
-            'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.sales-report.view', 'reports.expense-report.view',
+            'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.sales-report.view', 'reports.voucher-usage.view', 'reports.expense-report.view',
             'reports.tax-report.view', 'reports.equity-report.view', 'reports.budget-vs-actual.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -467,7 +467,7 @@
                     @canAccessAny(['reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
                         'reports.journal-register.view', 'reports.account-ledger.view', 'reports.account-balance.view',
                         'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view',
-                        'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.sales-report.view', 'reports.expense-report.view',
+                        'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.sales-report.view', 'reports.voucher-usage.view', 'reports.expense-report.view',
                         'reports.tax-report.view', 'reports.equity-report.view', 'reports.budget-vs-actual.view'])
                         <li class="menu-item">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -555,6 +555,13 @@
                                     <li class="menu-item">
                                         <a href="{{ url('/admin/reports/sales-report') }}" class="menu-link">
                                             <div data-i18n="Sales Report">Sales Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.voucher-usage.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/voucher-usage-report') }}" class="menu-link">
+                                            <div data-i18n="Voucher Usage Report">Voucher Usage Report</div>
                                         </a>
                                     </li>
                                 @endcanAccess

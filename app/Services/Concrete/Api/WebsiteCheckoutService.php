@@ -115,6 +115,7 @@ class WebsiteCheckoutService
         }
 
         $branch_id = $payload['branch_id'] ?? null;
+        $cart = $this->cart_service->getOrCreateCart($user_id, $business_id, $branch_id);
         $cart_payload = $this->cart_service->getCart($user_id, $business_id, $branch_id);
 
         if (empty($cart_payload['items'])) {
@@ -173,7 +174,7 @@ class WebsiteCheckoutService
         DB::beginTransaction();
 
         try {
-            $order_model = $this->order_service->save([
+            $order_data = [
                 'business_id' => $business_id,
                 'branch_id' => $cart_payload['branch_id'],
                 'warehouse_id' => $cart_payload['warehouse_id'],
@@ -194,7 +195,15 @@ class WebsiteCheckoutService
                         'reference_no' => $payload['payment_reference'] ?? null,
                     ],
                 ],
-            ]);
+            ];
+
+            if (!empty($cart->voucher_id)) {
+                $order_data['voucher_id'] = $cart->voucher_id;
+            } elseif (!empty($cart->voucher_code)) {
+                $order_data['voucher_code'] = $cart->voucher_code;
+            }
+
+            $order_model = $this->order_service->save($order_data);
 
             if (!$order_model) {
                 throw new Exception('Failed to create order.');
@@ -222,8 +231,12 @@ class WebsiteCheckoutService
             ]);
 
             // Clear cart only after successful order creation.
-            $cart = $this->cart_service->getOrCreateCart($user_id, $business_id);
             WebsiteCartItem::where('cart_id', $cart->cart_id)->delete();
+            $cart->update([
+                'voucher_id' => null,
+                'voucher_code' => null,
+                'date_updated' => now(),
+            ]);
 
             DB::commit();
 

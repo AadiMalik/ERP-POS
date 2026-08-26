@@ -1180,6 +1180,8 @@ class PermissionRegistry
                 'sales_report_pdf' => ['name' => 'reports.sales-report.pdf', 'label' => 'Sales Report - PDF', 'is_system' => false],
                 'sales_report_export' => ['name' => 'reports.sales-report.export', 'label' => 'Sales Report - Export (Excel)', 'is_system' => false],
                 'sales_report_export_csv' => ['name' => 'reports.sales-report.export-csv', 'label' => 'Sales Report - Export (CSV)', 'is_system' => false],
+                'voucher_usage_report' => ['name' => 'reports.voucher-usage.view', 'label' => 'Voucher Usage Report', 'is_system' => false],
+                'voucher_usage_report_export' => ['name' => 'reports.voucher-usage.export', 'label' => 'Voucher Usage Report - Export', 'is_system' => false],
                 'service_sale_report'      => ['name' => 'reports.service-sale-report.view', 'label' => 'Sale Service Report', 'is_system' => false],
                 'service_sale_report_print' => ['name' => 'reports.service-sale-report.print', 'label' => 'Sale Service Report - Print', 'is_system' => false],
                 'service_sale_report_pdf' => ['name' => 'reports.service-sale-report.pdf', 'label' => 'Sale Service Report - PDF', 'is_system' => false],

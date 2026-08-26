@@ -19,6 +19,8 @@ class WebsiteCart extends Model
         'business_id',
         'user_id',
         'branch_id',
+        'voucher_id',
+        'voucher_code',
         'date_created',
         'date_updated',
     ];

@@ -14,6 +14,7 @@ use App\Models\Warehouse;
 use App\Models\WebsiteCart;
 use App\Models\WebsiteCartItem;
 use App\Services\Concrete\Admin\VariationPricingService;
+use App\Services\Concrete\Api\WebsiteCartVoucherService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -24,10 +25,14 @@ use Illuminate\Support\Facades\DB;
 class WebsiteCartService
 {
     protected $pricing_engine;
+    protected $voucher_service;
 
-    public function __construct(VariationPricingService $pricing_engine)
-    {
+    public function __construct(
+        VariationPricingService $pricing_engine,
+        WebsiteCartVoucherService $voucher_service
+    ) {
         $this->pricing_engine = $pricing_engine;
+        $this->voucher_service = $voucher_service;
     }
 
     public function getOrCreateCart(int $user_id, string $business_id, ?string $branch_id = null): WebsiteCart
@@ -190,7 +195,83 @@ class WebsiteCartService
     {
         $cart = $this->getOrCreateCart($user_id, $business_id);
         WebsiteCartItem::where('cart_id', $cart->cart_id)->delete();
-        $cart->update(['date_updated' => now()]);
+        $cart->update([
+            'voucher_id' => null,
+            'voucher_code' => null,
+            'date_updated' => now(),
+        ]);
+
+        return $this->buildCartPayload($cart->fresh());
+    }
+
+    public function searchVouchers(int $user_id, string $business_id, string $term): array
+    {
+        $this->getOrCreateCart($user_id, $business_id);
+
+        return $this->voucher_service->search($term, $business_id);
+    }
+
+    public function eligibleVouchers(int $user_id, string $business_id, ?string $branch_id = null): array
+    {
+        $cart = $this->getOrCreateCart($user_id, $business_id, $branch_id);
+        $context = $this->resolveFulfillmentContext($cart->business_id, $branch_id ?? $cart->branch_id);
+        $sale_type_id = $this->resolveDefaultSaleTypeId($cart->business_id);
+
+        return $this->voucher_service->eligible($cart, $context, $sale_type_id);
+    }
+
+    public function previewVoucher(int $user_id, string $business_id, array $params): array
+    {
+        $cart = $this->getOrCreateCart($user_id, $business_id, $params['branch_id'] ?? null);
+        $payload = $this->buildCartPayload($cart, false);
+        $context = [
+            'branch_id' => $payload['branch_id'],
+            'warehouse_id' => $payload['warehouse_id'],
+        ];
+        $sale_type_id = $payload['sale_type']['id'] ?? $this->resolveDefaultSaleTypeId($business_id);
+
+        return $this->voucher_service->previewOnly(
+            $cart,
+            $payload['items'],
+            $context,
+            $sale_type_id,
+            $params['voucher_code'] ?? null,
+            $params['voucher_id'] ?? null,
+            $params['payment_method_id'] ?? null,
+        );
+    }
+
+    public function applyVoucher(
+        int $user_id,
+        string $business_id,
+        ?string $voucher_code,
+        ?string $voucher_id,
+        ?string $branch_id = null
+    ): array {
+        $cart = $this->getOrCreateCart($user_id, $business_id, $branch_id);
+        $payload = $this->buildCartPayload($cart, false);
+        $context = [
+            'branch_id' => $payload['branch_id'],
+            'warehouse_id' => $payload['warehouse_id'],
+        ];
+        $sale_type_id = $payload['sale_type']['id'] ?? $this->resolveDefaultSaleTypeId($business_id);
+
+        $cart = $this->voucher_service->apply(
+            $cart,
+            $payload['items'],
+            $context,
+            $sale_type_id,
+            $voucher_code,
+            $voucher_id
+        );
+
+        return $this->buildCartPayload($cart->fresh());
+    }
+
+    public function removeVoucher(int $user_id, string $business_id): array
+    {
+        $cart = $this->getOrCreateCart($user_id, $business_id);
+        $cart = $this->voucher_service->remove($cart);
 
         return $this->buildCartPayload($cart->fresh());
     }
@@ -199,7 +280,7 @@ class WebsiteCartService
      * Build the storefront cart response with live prices/stock.
      * Invalid/unavailable lines are dropped so the cart never shows stale items.
      */
-    public function buildCartPayload(WebsiteCart $cart): array
+    public function buildCartPayload(WebsiteCart $cart, bool $include_voucher = true): array
     {
         $cart->load(['items']);
         $context = $this->resolveFulfillmentContext($cart->business_id, $cart->branch_id);
@@ -272,6 +353,33 @@ class WebsiteCartService
         $taxable = max(0, $subtotal - $discount_total);
         $tax_amount = round($taxable * $tax_percent / 100, 3);
         $total = round($taxable + $tax_amount, 3);
+        $voucher_discount = 0.0;
+        $voucher_meta = null;
+        $voucher_error = null;
+
+        if ($include_voucher && (!empty($cart->voucher_id) || !empty($cart->voucher_code))) {
+            $voucher_result = $this->voucher_service->previewForCart(
+                $cart,
+                $items,
+                $context,
+                $sale_type_id
+            );
+
+            $voucher_meta = $voucher_result['voucher'];
+            $voucher_error = $voucher_result['error'];
+
+            if ($voucher_result['preview']) {
+                $preview = $voucher_result['preview'];
+                $voucher_discount = (float) ($preview['voucher_discount_amount'] ?? 0);
+                $taxable = max(0, $subtotal - $discount_total - $voucher_discount);
+                $tax_amount = round($taxable * $tax_percent / 100, 3);
+                $total = round((float) ($preview['total'] ?? ($taxable + $tax_amount)), 3);
+
+                if ($voucher_meta) {
+                    $voucher_meta['discount_amount'] = $voucher_discount;
+                }
+            }
+        }
 
         return [
             'cart_id' => $cart->cart_id,
@@ -285,9 +393,12 @@ class WebsiteCartService
             ] : null,
             'items' => $items,
             'item_count' => collect($items)->sum('quantity'),
+            'voucher' => $voucher_meta,
+            'voucher_error' => $voucher_error,
             'totals' => [
                 'subtotal' => round($subtotal, 3),
                 'discount' => round($discount_total, 3),
+                'voucher_discount' => round($voucher_discount, 3),
                 'tax_percent' => $tax_percent,
                 'tax' => $tax_amount,
                 'shipping' => 0,

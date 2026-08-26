@@ -62,7 +62,7 @@ class VoucherController extends Controller
         OrderSourceService $order_source_service,
         PaymentMethodService $payment_method_service
     ) {
-        $this->middleware('permission:voucher.view')->only(['index', 'getData', 'byBusiness']);
+        $this->middleware('permission:voucher.view')->only(['index', 'getData', 'byBusiness', 'redemptions']);
         $this->middleware('permission:voucher.create|voucher.edit')->only(['store']);
         $this->middleware('permission:voucher.edit')->only(['edit']);
         $this->middleware('permission:voucher.delete')->only(['destroy']);
@@ -133,6 +133,31 @@ class VoucherController extends Controller
     public function getData(Request $request)
     {
         return $this->voucher_service->getData($request->all());
+    }
+
+    public function redemptions($voucher_id)
+    {
+        try {
+            $voucher = $this->voucher_service->getById($voucher_id);
+            if (!$voucher) {
+                return $this->error('Voucher not found.', 404);
+            }
+
+            return $this->success(Message::FETCH, [
+                'voucher' => [
+                    'voucher_id' => $voucher->voucher_id,
+                    'code' => $voucher->code,
+                    'name' => $voucher->name,
+                    'rule' => $voucher->describeRule(),
+                    'used_count' => $voucher->used_count,
+                    'usage_limit_total' => $voucher->usage_limit_total,
+                ],
+                'summary' => $this->voucher_service->getRedemptionSummary($voucher_id),
+                'history' => $this->voucher_service->getRedemptionHistory($voucher_id),
+            ]);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
     }
 
     public function store(Request $request)
