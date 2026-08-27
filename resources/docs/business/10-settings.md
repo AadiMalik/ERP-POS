@@ -27,6 +27,14 @@ All configuration lives under one **Settings** screen, organized into sections
 - **Theme** — visual appearance; choose from built-in presets (each a complete
   look — colors, sidebar style, card style, table style) or fine-tune individual
   options.
+- **Website Theme** — colors, typography, and button styles for your public
+  online store.
+- **Website Settings** — storefront tab icon (favicon), business hours,
+  WhatsApp number, SEO title/description/keywords, OG image, free-delivery
+  rules, and bank-transfer details. Upload a **Tab Icon** to brand the
+  browser tab on your website; if you leave it empty, the Dukanaz default
+  icon is shown instead. Business name, logo, email, phone, and address still
+  come from the Business profile screen.
 - **Notification** — which in-app/email alerts you receive.
 
 Only users with the `Manage Settings` permission can change these — everyone else

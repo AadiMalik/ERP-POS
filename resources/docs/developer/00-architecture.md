@@ -16,7 +16,11 @@ Platform branding lives under `public/assets/img/`. Do not drop raw logo files i
 views — go through the existing partials:
 
 - `resources/views/partials/favicon.blade.php` — browser tab / apple-touch icons
+  for the ERP admin/auth/POS layouts
   (`public/assets/img/favicon/favicon-{16,32,192,512}.png` and `favicon.ico`).
+  The public Vue storefront uses a business-uploaded favicon from
+  `website_theme_settings.favicon` when set; otherwise the same Dukanaz
+  `favicon-32.png` is returned by `SettingService::resolveWebsitePublicSettings()`.
 - `resources/views/partials/brand-logo.blade.php` — wordmark/lockup variants:
   `sidebar` (horizontal lockup), `login` (the same 192px tab icon as the favicon,
   sized as a 72×72 rounded square on the auth card), `footer`, and `icon`.

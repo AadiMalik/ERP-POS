@@ -873,7 +873,10 @@ class SettingService
                 'keywords'    => $website_setting->seo_keywords ?? null,
                 'og_image'    => $website_setting->og_image ? asset('public/uploads/website/' . $website_setting->og_image) : null,
             ],
-            'favicon'         => $website_setting->favicon ? asset('public/uploads/website/' . $website_setting->favicon) : null,
+            // Business-uploaded tab icon, or the platform Dukanaz default when unset.
+            'favicon'         => $website_setting->favicon
+                ? asset('public/uploads/website/' . $website_setting->favicon)
+                : asset('public/assets/img/favicon/favicon-32.png'),
             'business_hours'  => $website_setting->business_hours ?? null,
             'whatsapp_number' => $website_setting->whatsapp_number ?? null,
             'free_delivery'   => [

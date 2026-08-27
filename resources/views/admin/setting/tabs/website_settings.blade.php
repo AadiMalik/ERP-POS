@@ -4,7 +4,8 @@
 
 <h5 class="mb-3">Website Settings</h5>
 <p class="text-muted">
-    General storefront configuration - favicon, business hours and SEO metadata shown on the public website.
+    General storefront configuration — browser tab icon (favicon), business hours and SEO metadata shown on the public website.
+    If no tab icon is uploaded, the Dukanaz default icon is used automatically.
     Business name, logo, email, phone and address come from the <a href="{{ url('admin/business') }}">Business profile</a>,
     currency comes from the Accounting tab, and social links are managed under
     <a href="{{ url('admin/social-media') }}">Website CMS &gt; Social Media</a>.
@@ -17,10 +18,19 @@
         <div class="card-header"><strong>General</strong></div>
         <div class="card-body row g-3">
             <div class="col-md-6">
-                <label class="form-label">Favicon</label>
+                <label class="form-label">Tab Icon (Favicon)</label>
                 <input type="file" class="form-control" name="favicon" accept="image/*">
+                <small class="text-muted d-block mt-1">
+                    Shown in the browser tab on your public website.
+                    If you leave this empty, the Dukanaz default icon is used.
+                </small>
                 @if (!empty($wt->favicon))
-                    <img src="{{ asset('public/uploads/website/' . $wt->favicon) }}" alt="Favicon" style="height:32px;width:32px;object-fit:contain;" class="mt-2">
+                    <img src="{{ asset('public/uploads/website/' . $wt->favicon) }}" alt="Tab icon" style="height:32px;width:32px;object-fit:contain;" class="mt-2">
+                @else
+                    <div class="d-flex align-items-center gap-2 mt-2">
+                        <img src="{{ asset('public/assets/img/favicon/favicon-32.png') }}" alt="Dukanaz default tab icon" style="height:32px;width:32px;object-fit:contain;">
+                        <small class="text-muted">Currently using Dukanaz default</small>
+                    </div>
                 @endif
             </div>
             <div class="col-md-6">

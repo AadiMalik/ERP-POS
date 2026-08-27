@@ -84,3 +84,16 @@ business logo/name/theme colors with a Powered by Dukanaz footer
 and `business_id`, checks `CustomerAccountService::emailExistsForBusiness()`,
 and returns “This email is not registered.” when there is no customer profile
 for that business (no mail sent).
+
+## Public Website Settings & Theme APIs
+
+Consumed by the Vue storefront (`frontend_design`) at bootstrap:
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/website-settings/{business_id}` | Business identity, currency, SEO, favicon, hours, WhatsApp, free delivery, bank details |
+| GET | `/api/v1/website-theme/{business_id}` | Theme preset, colors, typography, button styles |
+
+`website-settings.favicon` is the business upload URL when set; otherwise the
+platform Dukanaz `favicon-32.png` asset URL so the storefront tab icon never
+falls back to a placeholder emoji.

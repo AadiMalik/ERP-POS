@@ -42,6 +42,25 @@ every report's `pdf()` action and by the shared
 `resources/views/admin/partials/print/pdf_header.blade.php` partial. See
 [Reports Infrastructure](06-reports-infrastructure.md).
 
+## Website Theme & Public Storefront Settings
+
+`WebsiteThemeSetting` (one row per business) powers both the **Website Theme**
+and **Website Settings** tabs. Theme fields (colors, typography, buttons,
+presets) are exposed by `GET /api/v1/website-theme/{business_id}`. Public
+storefront globals — favicon, SEO, hours, WhatsApp, free delivery, bank
+details — are assembled by `SettingService::getWebsitePublicSettings()` /
+`resolveWebsitePublicSettings()` and exposed by
+`GET /api/v1/website-settings/{business_id}` (business identity from
+`businesses`, currency from `accounting_settings`).
+
+**Tab icon (favicon):** admins upload via Settings → Website Settings
+(`favicon` stored under `public/uploads/website/`). When `favicon` is null,
+`resolveWebsitePublicSettings()` returns the platform Dukanaz asset
+`public/assets/img/favicon/favicon-32.png` so the Vue storefront always has
+a real URL. The storefront (`frontend_design`) also ships a local copy under
+`/favicon/` for the HTML bootstrap before the API responds, and
+`applyWebsiteSettings()` falls back to that path if the API value is missing.
+
 ## Adding a New Settings Domain
 
 1. Migration + model for the new `xxx_settings` table (one row per business,
