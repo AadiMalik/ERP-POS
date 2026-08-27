@@ -45,17 +45,35 @@ class MySubscriptionController extends Controller
 
         abort_if(!$business, 403, 'No business associated with this account.');
 
+        $business->loadMissing('package.modules');
+
         $subscription = $this->subscription_service->getCurrentSubscription($business);
         $display_status = $subscription ? $this->subscription_service->computeDisplayStatus($subscription) : null;
         $open_request = $this->subscription_service->hasOpenRenewalRequest($business);
+        $open_request?->loadMissing('requestedPackage');
 
         $invoices = $business->subscriptions()->with('invoices.payments')->orderByDesc('start_at')->get()->pluck('invoices')->flatten();
-        $renewal_requests = SubscriptionRenewalRequest::where('business_id', $business->business_id)
+        $renewal_requests = SubscriptionRenewalRequest::with('requestedPackage')
+            ->where('business_id', $business->business_id)
             ->orderByDesc('date_created')
             ->get();
 
-        $packages = Package::with('modules')->where('status', 1)->where('is_deleted', 0)->orderBy('order')->get();
+        $currentPackageId = $subscription?->package_id ?? $business->package_id;
+        $packages = Package::with('modules')
+            ->where('is_deleted', 0)
+            ->where(function ($query) use ($currentPackageId) {
+                $query->where('status', 1);
+                if ($currentPackageId) {
+                    $query->orWhere('package_id', $currentPackageId);
+                }
+            })
+            ->orderBy('order')
+            ->orderBy('price')
+            ->get();
 
+        $currentPackage = $packages->firstWhere('package_id', $currentPackageId)
+            ?? $business->package;
+        $pricingPlans = $this->buildPricingPlans($packages, $currentPackage, $business);
         $moduleUsage = $this->buildModuleUsage($business);
 
         return view('admin.my-subscription.index', compact(
@@ -66,6 +84,7 @@ class MySubscriptionController extends Controller
             'invoices',
             'renewal_requests',
             'packages',
+            'pricingPlans',
             'moduleUsage'
         ));
     }
@@ -106,6 +125,107 @@ class MySubscriptionController extends Controller
         return $summary;
     }
 
+    /**
+     * Card payload for the price table: direction, blockers, umbrella ticks,
+     * and the handful of limits shown on each plan card.
+     */
+    protected function buildPricingPlans($packages, $currentPackage, $business): array
+    {
+        $plans = [];
+        $usageByKey = $this->feature_limit_service->usageByLimitedKey($business);
+
+        foreach ($packages as $package) {
+            $direction = $this->planDirection($currentPackage, $package);
+            $blockers = $direction === 'current'
+                ? []
+                : $this->feature_limit_service->compareToPackage($business, $package, $usageByKey);
+
+            $plans[] = [
+                'package' => $package,
+                'is_current' => $direction === 'current',
+                'is_popular' => $package->name === 'Professional',
+                'direction' => $direction,
+                'can_switch' => empty($blockers),
+                'blockers' => $blockers,
+                'umbrellas' => $this->packageUmbrellaHighlights($package),
+                'limits' => $this->packageLimitHighlights($package),
+            ];
+        }
+
+        return $plans;
+    }
+
+    protected function planDirection($currentPackage, Package $target): string
+    {
+        if (!$currentPackage || $currentPackage->package_id === $target->package_id) {
+            return 'current';
+        }
+
+        if ((int) $target->order !== (int) $currentPackage->order) {
+            return (int) $target->order > (int) $currentPackage->order ? 'upgrade' : 'downgrade';
+        }
+
+        return (float) $target->price >= (float) $currentPackage->price ? 'upgrade' : 'downgrade';
+    }
+
+    protected function packageUmbrellaHighlights(Package $package): array
+    {
+        $labels = [
+            'inventory' => 'Inventory',
+            'pos' => 'POS & Sales',
+            'accounting' => 'Accounting',
+            'service-management' => 'Service Management',
+            'hrm' => 'HRM',
+            'payroll' => 'Payroll',
+        ];
+
+        $out = [];
+
+        foreach ($labels as $key => $label) {
+            $out[] = [
+                'key' => $key,
+                'label' => $label,
+                'enabled' => $package->moduleEnabled($key),
+            ];
+        }
+
+        return $out;
+    }
+
+    protected function packageLimitHighlights(Package $package): array
+    {
+        $keys = [
+            'branch' => 'Branches',
+            'user' => 'Admin Users',
+            'warehouse' => 'Warehouses',
+            'product' => 'Products',
+            'customer' => 'Customers',
+            'employee' => 'Employees',
+        ];
+
+        $out = [];
+
+        foreach ($keys as $key => $label) {
+            $meta = SubscriptionModuleRegistry::find($key);
+            $parent = $meta['parent'] ?? null;
+            $enabled = $package->moduleEnabled($key) && (!$parent || $package->moduleEnabled($parent));
+
+            if (!$enabled) {
+                $out[] = ['label' => $label, 'value' => 'Not included'];
+                continue;
+            }
+
+            if ($package->moduleIsUnlimited($key)) {
+                $out[] = ['label' => $label, 'value' => 'Unlimited'];
+                continue;
+            }
+
+            $out[] = ['label' => $label, 'value' => (string) ($package->moduleLimit($key) ?? 0)];
+        }
+
+        return $out;
+    }
+
     public function storeRenewalRequest(Request $request)
     {
         $business = Auth::user()->business;
@@ -122,11 +242,27 @@ class MySubscriptionController extends Controller
         }
 
         $current = $this->subscription_service->getCurrentSubscription($business);
+        $target = Package::with('modules')->where('is_deleted', 0)->findOrFail($request->requested_package_id);
+        $currentPackageId = $current?->package_id ?? $business->package_id;
+
+        if ($target->package_id !== $currentPackageId) {
+            if (!(int) $target->status) {
+                return redirect()->back()->with('error', 'That package is not available.');
+            }
+
+            $blockers = $this->feature_limit_service->compareToPackage($business, $target);
+
+            if ($blockers) {
+                return redirect()->back()
+                    ->with('error', $this->feature_limit_service->formatCompareBlockersMessage($target, $blockers))
+                    ->with('plan_change_blockers', $blockers);
+            }
+        }
 
         SubscriptionRenewalRequest::create([
             'subscription_renewal_request_id' => generateUuid(),
             'business_id' => $business->business_id,
-            'business_subscription_id' => $current->business_subscription_id ?? null,
+            'business_subscription_id' => $current?->business_subscription_id,
             'requested_package_id' => $request->requested_package_id,
             'requested_billing_cycle' => $request->requested_billing_cycle,
             'status' => 'pending',

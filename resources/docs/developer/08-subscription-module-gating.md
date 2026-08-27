@@ -27,6 +27,32 @@ $business->loadMissing('package.modules');
 max 5 warehouses on a given plan) at the record level, separate from the route-group
 gate.
 
+`FeatureLimitService::compareToPackage(Business $business, Package $target)`
+compares current usage (`resolveCount` / `usageByLimitedKey`) against a
+**target** package's `package_modules` rows. For every `limited` registry key:
+
+- disabled on the target (or parent umbrella off) and `used > 0` → blocker
+  (treated as limit 0)
+- enabled, not unlimited, and `used > limit_value` → blocker
+
+Each blocker is `{key, label, used, allowed, excess}`.
+`formatCompareBlockersMessage()` / `assertCompatibleWithPackage()` turn that
+into the “reduce these first, then you can change plans” error. Same-package
+renewal skips the check. A plan change (Business Admin request **and** Super
+Admin `SubscriptionService::renew()` when `package_id` differs) is rejected
+until usage fits.
+
+## Catalog packages
+
+`database/seeders/PackageSeeder` upserts three public plans by name (Starter
+$49, Professional $149, Enterprise $349) and writes `package_modules` the same
+way `PackageService::saveModules()` does. It does **not** delete an existing
+plan such as Basic Plan. Run `php artisan db:seed --class=PackageSeeder`.
+Business Admin **My Subscription** renders those (plus the tenant’s current
+package even if inactive) as pricing cards; Upgrade/Downgrade submits the
+existing `my-subscription.renewal-requests.store` request after the
+compatibility check.
+
 ## Route-Level Gate
 
 `App\Http\Middleware\EnsureModuleEnabled` (registered as the `module` middleware

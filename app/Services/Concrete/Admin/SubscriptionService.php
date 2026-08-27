@@ -25,15 +25,18 @@ class SubscriptionService
     protected InvoiceService $invoice_service;
     protected PaymentService $payment_service;
     protected SubscriptionHistoryService $history_service;
+    protected FeatureLimitService $feature_limit_service;
 
     public function __construct(
         InvoiceService $invoice_service,
         PaymentService $payment_service,
-        SubscriptionHistoryService $history_service
+        SubscriptionHistoryService $history_service,
+        FeatureLimitService $feature_limit_service
     ) {
         $this->invoice_service = $invoice_service;
         $this->payment_service = $payment_service;
         $this->history_service = $history_service;
+        $this->feature_limit_service = $feature_limit_service;
     }
 
     /**
@@ -141,7 +144,12 @@ class SubscriptionService
     {
         return DB::transaction(function () use ($business, $data) {
             $current = $this->getCurrentSubscription($business);
-            $package = Package::findOrFail($data['package_id'] ?? $current->package_id ?? $business->package_id);
+            $package = Package::with('modules')->findOrFail($data['package_id'] ?? $current?->package_id ?? $business->package_id);
+            $fromPackageId = $current?->package_id ?? $business->package_id;
+
+            if ($package->package_id !== $fromPackageId) {
+                $this->feature_limit_service->assertCompatibleWithPackage($business, $package);
+            }
 
             $billing_cycle = $data['billing_cycle'] ?? $package->duration_type;
             $start = ($current && $current->end_at && Carbon::parse($current->end_at)->gt(now()))

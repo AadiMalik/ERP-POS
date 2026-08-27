@@ -1,0 +1,225 @@
+.erp-pricing {
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.erp-pricing-intro {
+    margin-bottom: 2rem;
+}
+
+.erp-pricing-intro h5 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.35rem;
+}
+
+.erp-pricing-intro p {
+    margin-bottom: 0;
+    max-width: 36rem;
+}
+
+.erp-pricing-row {
+    --bs-gutter-x: 1.75rem;
+    --bs-gutter-y: 2.25rem;
+    padding-top: 0.75rem;
+}
+
+.erp-pricing-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 2rem 1.75rem 1.75rem;
+    background: var(--bs-paper-bg, #fff);
+    border: 1px solid rgba(67, 89, 113, 0.12);
+    border-radius: calc(var(--erp-radius, 0.5rem) + 0.5rem);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.erp-pricing-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+}
+
+.erp-pricing-card.is-popular {
+    border-color: rgba(var(--erp-primary-rgb), 0.55);
+    box-shadow: 0 14px 36px rgba(var(--erp-primary-rgb), 0.18);
+    background:
+        linear-gradient(180deg, rgba(var(--erp-primary-rgb), 0.06) 0%, #fff 38%);
+}
+
+.erp-pricing-card.is-current:not(.is-popular) {
+    border-color: rgba(40, 199, 111, 0.45);
+}
+
+.erp-pricing-badge {
+    position: absolute;
+    top: -0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    padding: 0.3rem 0.85rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--erp-primary);
+    border-radius: 999px;
+    box-shadow: 0 6px 16px rgba(var(--erp-primary-rgb), 0.35);
+}
+
+.erp-pricing-badge.is-current {
+    background: #28c76f;
+    box-shadow: 0 6px 16px rgba(40, 199, 111, 0.35);
+}
+
+.erp-pricing-icon {
+    width: 3rem;
+    height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    border-radius: 0.85rem;
+    color: var(--erp-primary);
+    background: rgba(var(--erp-primary-rgb), 0.1);
+    font-size: 1.15rem;
+}
+
+.erp-pricing-card.is-popular .erp-pricing-icon {
+    color: #fff;
+    background: var(--erp-primary);
+}
+
+.erp-pricing-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+}
+
+.erp-pricing-desc {
+    min-height: 2.6rem;
+    margin-bottom: 1.25rem;
+    color: #677788;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.erp-pricing-price {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.35rem;
+    margin-bottom: 1.5rem;
+}
+
+.erp-pricing-price strong {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #384551;
+}
+
+.erp-pricing-price span {
+    padding-bottom: 0.2rem;
+    color: #a1acb8;
+    font-size: 0.85rem;
+}
+
+.erp-pricing-features,
+.erp-pricing-limits {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.25rem;
+}
+
+.erp-pricing-features li,
+.erp-pricing-limits li {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.7rem;
+    font-size: 0.9rem;
+}
+
+.erp-pricing-features li:last-child,
+.erp-pricing-limits li:last-child {
+    margin-bottom: 0;
+}
+
+.erp-pricing-check {
+    flex: 0 0 1.35rem;
+    width: 1.35rem;
+    height: 1.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.65rem;
+}
+
+.erp-pricing-check.is-on {
+    color: #28c76f;
+    background: rgba(40, 199, 111, 0.12);
+}
+
+.erp-pricing-check.is-off {
+    color: #a1acb8;
+    background: rgba(67, 89, 113, 0.08);
+}
+
+.erp-pricing-features .is-off + span {
+    color: #a1acb8;
+    text-decoration: line-through;
+}
+
+.erp-pricing-limits {
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.5rem;
+    background: rgba(67, 89, 113, 0.04);
+    border-radius: 0.75rem;
+}
+
+.erp-pricing-limits li {
+    justify-content: space-between;
+    margin-bottom: 0.45rem;
+    color: #677788;
+    font-size: 0.8125rem;
+}
+
+.erp-pricing-limits .erp-pricing-limit-value {
+    font-weight: 600;
+    color: #384551;
+}
+
+.erp-pricing-cta {
+    margin-top: auto;
+}
+
+.erp-pricing-cta .btn {
+    min-height: 44px;
+    font-weight: 600;
+    border-radius: 0.65rem;
+}
+
+@media (min-width: 1200px) {
+    .erp-pricing-card.is-popular {
+        transform: translateY(-10px);
+    }
+
+    .erp-pricing-card.is-popular:hover {
+        transform: translateY(-14px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .erp-pricing-card,
+    .erp-pricing-card.is-popular,
+    .erp-pricing-card:hover,
+    .erp-pricing-card.is-popular:hover {
+        transition: none;
+        transform: none;
+    }
+}

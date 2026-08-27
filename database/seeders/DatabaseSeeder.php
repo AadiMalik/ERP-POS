@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             TimezoneSeeder::class,
             ChartOfAccountsTemplateSeeder::class,
             PermissionSeeder::class,
+            PackageSeeder::class,
         ]);
     }
 }

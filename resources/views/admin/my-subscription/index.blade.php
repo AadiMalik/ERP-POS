@@ -1,4 +1,7 @@
 @extends('layouts.app')
+@section('css')
+    <link rel="stylesheet" href="{{ asset('public/assets/css/admin/subscription-pricing.css') }}" />
+@endsection
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">My Subscription</h4>
@@ -6,11 +9,13 @@
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
-        @if (session('error'))
+        @if (session('error') && !session('plan_change_blockers'))
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
         @include('admin.subscriptions.partials.subscription-card', ['subscription' => $subscription, 'display_status' => $display_status])
+
+        @include('admin.my-subscription.partials.pricing-cards')
 
         <div class="card mt-4">
             <div class="card-header bg-light"><h6 class="mb-0">Modules &amp; Usage</h6></div>
@@ -44,116 +49,9 @@
             </div>
         </div>
 
-        <div class="card mt-4">
-            <div class="card-header bg-light"><h6 class="mb-0">Compare Packages</h6></div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table mb-0 align-middle">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Package</th>
-                                <th>Price</th>
-                                <th>Billing</th>
-                                <th>Modules Included</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($packages as $item)
-                                @php
-                                    $isCurrent = ($subscription->package_id ?? '') == $item->package_id;
-                                    $enabledCount = $item->modules->where('is_enabled', true)->count();
-                                    $totalCount = $item->modules->count();
-                                @endphp
-                                <tr class="{{ $isCurrent ? 'table-primary' : '' }}">
-                                    <td>
-                                        @if ($isCurrent)
-                                            <span class="badge bg-primary">Current</span>
-                                        @endif
-                                    </td>
-                                    <td>{{ $item->name }}</td>
-                                    <td>{{ currency($item->price) }}</td>
-                                    <td>{{ ucfirst($item->duration_type) }}</td>
-                                    <td>{{ $enabledCount }}/{{ $totalCount }}</td>
-                                    <td>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
-                                            data-bs-target="#pkg-details-{{ $item->package_id }}">Details</button>
-                                    </td>
-                                </tr>
-                                <tr class="collapse" id="pkg-details-{{ $item->package_id }}">
-                                    <td colspan="6" class="bg-light">
-                                        @foreach (\App\Support\Subscription\SubscriptionModuleRegistry::grouped() as $category => $categoryModules)
-                                            @php
-                                                $moduleState = $item->modules->keyBy('module_key');
-                                            @endphp
-                                            <strong>{{ $category }}:</strong>
-                                            @foreach ($categoryModules as $key => $meta)
-                                                @php
-                                                    $row = $moduleState->get($key);
-                                                    $enabled = $row ? $row->is_enabled : ($meta['default_enabled'] ?? true);
-                                                @endphp
-                                                <span class="badge {{ $enabled ? 'bg-label-success' : 'bg-label-secondary' }} me-1 mb-1">
-                                                    {{ $meta['label'] }}
-                                                    @if ($enabled && $meta['type'] === 'limited')
-                                                        ({{ $row && $row->is_unlimited ? 'Unlimited' : ($row->limit_value ?? ($meta['default_limit'] ?? 5)) }})
-                                                    @endif
-                                                </span>
-                                            @endforeach
-                                            <br>
-                                        @endforeach
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-4">
+        <div class="row g-4 mt-1">
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header bg-light"><h6 class="mb-0">Request a Renewal / Plan Change</h6></div>
-                    <div class="card-body">
-                        @if ($open_request)
-                            <div class="alert alert-info mb-0">
-                                <i class="fa fa-clock"></i>
-                                You already have a renewal request for
-                                <strong>{{ $open_request->requestedPackage->name ?? '-' }}</strong>
-                                pending Super Admin approval.
-                            </div>
-                        @else
-                            <form action="{{ route('my-subscription.renewal-requests.store') }}" method="POST">
-                                @csrf
-                                <div class="mb-3">
-                                    <label class="fw-semibold">Package</label>
-                                    <select class="form-select" name="requested_package_id" required>
-                                        @foreach ($packages as $item)
-                                            <option value="{{ $item->package_id }}" {{ ($subscription->package_id ?? '') == $item->package_id ? 'selected' : '' }}>
-                                                {{ $item->name }} ({{ currency($item->price) }} / {{ $item->duration_type }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="fw-semibold">Billing Cycle</label>
-                                    <select class="form-select" name="requested_billing_cycle" required>
-                                        <option value="monthly">Monthly</option>
-                                        <option value="yearly">Yearly</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="fw-semibold">Notes (optional)</label>
-                                    <textarea class="form-control" name="requested_notes" rows="2"></textarea>
-                                </div>
-                                <button class="btn btn-primary">Submit Renewal Request</button>
-                            </form>
-                        @endif
-                    </div>
-                </div>
-
-                <div class="card mt-4">
                     <div class="card-header bg-light"><h6 class="mb-0">Renewal Request History</h6></div>
                     <div class="card-body p-0">
                         <table class="table mb-0">
@@ -260,6 +158,41 @@
             $('#paymentAmount').val(total);
             $('#paymentForm').attr('action', `${url_local}/admin/my-subscription/invoices/${id}/payments`);
             $('#paymentModal').modal('show');
+        });
+
+        $(document).on('click', '.plan-change-btn', function() {
+            var name = $(this).data('package-name');
+            var direction = $(this).data('direction');
+            var price = $(this).data('price');
+            var titles = {
+                current: 'Request Renewal',
+                upgrade: 'Upgrade Plan',
+                downgrade: 'Downgrade Plan'
+            };
+            var summaries = {
+                current: 'Submit a renewal request for <strong>' + name + '</strong> (' + price + '). Super Admin will review it before the new period starts.',
+                upgrade: 'Request an upgrade to <strong>' + name + '</strong> (' + price + '). Super Admin will review the request before the plan changes.',
+                downgrade: 'Request a downgrade to <strong>' + name + '</strong> (' + price + '). Super Admin will review the request before the plan changes.'
+            };
+            $('#planChangePackageId').val($(this).data('package-id'));
+            $('#planChangeTitle').text(titles[direction] || 'Request Plan Change');
+            $('#planChangeSummary').html(summaries[direction] || '');
+            $('#planChangeSubmit').text(direction === 'current' ? 'Submit Renewal Request' : 'Submit Request');
+            $('#planChangeModal').modal('show');
+        });
+
+        $(document).on('click', '.plan-blocked-btn', function() {
+            var name = $(this).data('package-name');
+            var blockers = $(this).data('blockers') || [];
+            $('#planBlockedIntro').text('You cannot switch to ' + name + ' yet. Reduce these first, then you can change plans:');
+            var $list = $('#planBlockedList').empty();
+            blockers.forEach(function(blocker) {
+                var text = Number(blocker.allowed) === 0
+                    ? blocker.label + ': ' + blocker.used + ' used, not included on this plan (remove ' + blocker.excess + ')'
+                    : blocker.label + ': ' + blocker.used + ' used, plan allows ' + blocker.allowed + ' (remove ' + blocker.excess + ')';
+                $list.append($('<li>').text(text));
+            });
+            $('#planBlockedModal').modal('show');
         });
     </script>
 @endsection

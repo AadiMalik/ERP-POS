@@ -26,7 +26,12 @@ use App\Models\Purchase;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestQuotation;
 use App\Models\PurchaseReturn;
+use App\Models\Package;
 use App\Models\RecurringTransaction;
+use App\Models\ServicePurchase;
+use App\Models\ServicePurchaseReturn;
+use App\Models\ServiceSale;
+use App\Models\ServiceSaleReturn;
 use App\Models\Shift;
 use App\Models\StockTaking;
 use App\Models\SubCategory;
@@ -220,6 +225,115 @@ class FeatureLimitService
         ];
     }
 
+    /**
+     * Compare current business usage against a target package's enable/limit
+     * matrix. Used to block a downgrade (or any plan change) when the
+     * tenant already has more records than the target plan allows.
+     *
+     * @param array<string,int>|null $usageByKey Precomputed counts from usageByLimitedKey()
+     * @return list<array{key:string,label:string,used:int,allowed:int,excess:int}>
+     */
+    public function compareToPackage(Business $business, Package $target, ?array $usageByKey = null): array
+    {
+        $target->loadMissing('modules');
+        $usageByKey = $usageByKey ?? $this->usageByLimitedKey($business);
+        $blockers = [];
+
+        foreach (SubscriptionModuleRegistry::modules() as $key => $meta) {
+            if ($meta['type'] !== 'limited') {
+                continue;
+            }
+
+            $used = $usageByKey[$key] ?? 0;
+            $parent = $meta['parent'] ?? null;
+            $enabled = $target->moduleEnabled($key);
+
+            if ($parent && !$target->moduleEnabled($parent)) {
+                $enabled = false;
+            }
+
+            if (!$enabled) {
+                if ($used > 0) {
+                    $blockers[] = [
+                        'key' => $key,
+                        'label' => $meta['label'],
+                        'used' => $used,
+                        'allowed' => 0,
+                        'excess' => $used,
+                    ];
+                }
+
+                continue;
+            }
+
+            if ($target->moduleIsUnlimited($key)) {
+                continue;
+            }
+
+            $limit = $target->moduleLimit($key) ?? 0;
+
+            if ($used > $limit) {
+                $blockers[] = [
+                    'key' => $key,
+                    'label' => $meta['label'],
+                    'used' => $used,
+                    'allowed' => $limit,
+                    'excess' => $used - $limit,
+                ];
+            }
+        }
+
+        return $blockers;
+    }
+
+    /**
+     * @param list<array{key:string,label:string,used:int,allowed:int,excess:int}> $blockers
+     */
+    public function formatCompareBlockersMessage(Package $target, array $blockers): string
+    {
+        $lines = [
+            'You cannot switch to ' . $target->name . ' yet. Reduce these first, then you can change plans:',
+        ];
+
+        foreach ($blockers as $blocker) {
+            if ((int) $blocker['allowed'] === 0) {
+                $lines[] = $blocker['label'] . ': ' . $blocker['used'] . ' used, not included on this plan (remove ' . $blocker['excess'] . ')';
+            } else {
+                $lines[] = $blocker['label'] . ': ' . $blocker['used'] . ' used, plan allows ' . $blocker['allowed'] . ' (remove ' . $blocker['excess'] . ')';
+            }
+        }
+
+        return implode(' ', $lines);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function assertCompatibleWithPackage(Business $business, Package $target): void
+    {
+        $blockers = $this->compareToPackage($business, $target);
+
+        if ($blockers) {
+            throw new Exception($this->formatCompareBlockersMessage($target, $blockers));
+        }
+    }
+
+    /**
+     * @return array<string,int>
+     */
+    public function usageByLimitedKey(Business $business): array
+    {
+        $counts = [];
+
+        foreach (SubscriptionModuleRegistry::modules() as $key => $meta) {
+            if ($meta['type'] === 'limited') {
+                $counts[$key] = $this->resolveCount($key, $business);
+            }
+        }
+
+        return $counts;
+    }
+
     protected function resolveCount(string $moduleKey, Business $business): int
     {
         $businessId = $business->business_id;
@@ -243,6 +357,10 @@ class FeatureLimitService
             'good-receipt-note' => GoodReceiptNote::where('business_id', $businessId)->where('is_deleted', 0)->count(),
             'purchase-return' => PurchaseReturn::where('business_id', $businessId)->where('is_deleted', 0)->count(),
             'supplier-payment' => SupplierPayment::where('business_id', $businessId)->where('is_deleted', 0)->count(),
+            'service-purchase' => ServicePurchase::where('business_id', $businessId)->where('is_deleted', 0)->count(),
+            'service-purchase-return' => ServicePurchaseReturn::where('business_id', $businessId)->where('is_deleted', 0)->count(),
+            'service-sale' => ServiceSale::where('business_id', $businessId)->where('is_deleted', 0)->count(),
+            'service-sale-return' => ServiceSaleReturn::where('business_id', $businessId)->where('is_deleted', 0)->count(),
             'account' => Account::where('business_id', $businessId)->where('is_deleted', 0)->count(),
             'journal-entry' => JournalEntry::where('business_id', $businessId)->where('is_deleted', 0)->count(),
             'recurring-transaction' => RecurringTransaction::where('business_id', $businessId)->where('is_deleted', 0)->count(),
