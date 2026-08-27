@@ -1194,6 +1194,32 @@
             </li>
         @endcanAccess
 
+        {{-- Push Notifications (FCM) --}}
+        @canAccessAny(['notification-template.view', 'broadcast-notification.view'])
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-mobile-alt"></i>
+                    <div data-i18n="Push Notifications">Push Notifications</div>
+                </a>
+                <ul class="menu-sub">
+                    @canAccess('notification-template.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/notification-template') }}" class="menu-link">
+                                <div data-i18n="Notification Templates">Notification Templates</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('broadcast-notification.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/broadcast-notification') }}" class="menu-link">
+                                <div data-i18n="Broadcast Notifications">Broadcast Notifications</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                </ul>
+            </li>
+        @endcanAccessAny
+
         {{-- Audit & Security --}}
         @canAccessAny(['activity-log.view', 'login-history.view'])
             <li class="menu-item">

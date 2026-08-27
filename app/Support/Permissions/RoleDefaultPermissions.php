@@ -118,6 +118,11 @@ class RoleDefaultPermissions
             case RoleNames::MARKITINGMANAGER:
                 return array_merge(
                     PermissionRegistry::namesForModulesExcludingActions(['discount', 'voucher', 'order-source'], ['delete']),
+                    PermissionRegistry::namesForModules([
+                        'firebase-setting',
+                        'notification-template',
+                        'broadcast-notification',
+                    ]),
                     ['dashboard.view']
                 );
 

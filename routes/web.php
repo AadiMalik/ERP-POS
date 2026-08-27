@@ -1115,6 +1115,24 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     Route::post('notifications/{id}/read', [App\Http\Controllers\Admin\NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('notifications/mark-all-read', [App\Http\Controllers\Admin\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
 
+    // FCM push: templates & broadcast campaigns (Firebase config lives under Settings → Firebase)
+    Route::resource('notification-template', App\Http\Controllers\Admin\NotificationTemplateController::class)->except(['show']);
+    Route::group(['prefix' => 'notification-template'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\NotificationTemplateController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\NotificationTemplateController::class, 'status']);
+    });
+
+    Route::group(['prefix' => 'broadcast-notification'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\BroadcastNotificationController::class, 'getData']);
+        Route::get('users-with-tokens', [App\Http\Controllers\Admin\BroadcastNotificationController::class, 'usersWithTokens'])->name('broadcast-notification.users-with-tokens');
+        Route::get('templates-by-business', [App\Http\Controllers\Admin\BroadcastNotificationController::class, 'templatesByBusiness'])->name('broadcast-notification.templates-by-business');
+        Route::post('{id}/recipients/data', [App\Http\Controllers\Admin\BroadcastNotificationController::class, 'getRecipientData']);
+        Route::post('{id}/start', [App\Http\Controllers\Admin\BroadcastNotificationController::class, 'start'])->name('broadcast-notification.start');
+        Route::post('{id}/cancel', [App\Http\Controllers\Admin\BroadcastNotificationController::class, 'cancel'])->name('broadcast-notification.cancel');
+        Route::post('{id}/resend-failed', [App\Http\Controllers\Admin\BroadcastNotificationController::class, 'resendFailed'])->name('broadcast-notification.resend-failed');
+    });
+    Route::resource('broadcast-notification', App\Http\Controllers\Admin\BroadcastNotificationController::class)->except(['edit', 'update']);
+
     //procurement reports
     Route::group(['prefix' => 'reports'], function () {
         Route::group(['middleware' => ['module:inventory']], function () {
@@ -1379,6 +1397,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('email', [App\Http\Controllers\Admin\SettingController::class, 'updateEmailSetting'])->name('email.update');
         Route::post('sms', [App\Http\Controllers\Admin\SettingController::class, 'updateSmsSetting'])->name('sms.update');
         Route::post('whatsapp', [App\Http\Controllers\Admin\SettingController::class, 'updateWhatsappSetting'])->name('whatsapp.update');
+        Route::post('firebase', [App\Http\Controllers\Admin\SettingController::class, 'updateFirebaseSetting'])->name('firebase.update');
         Route::post('fbr', [App\Http\Controllers\Admin\SettingController::class, 'updateFbrSetting'])->name('fbr.update');
         Route::post('pos', [App\Http\Controllers\Admin\SettingController::class, 'updatePosSetting'])->name('pos.update');
         Route::post('pra', [App\Http\Controllers\Admin\SettingController::class, 'updatePraSetting'])->name('pra.update');

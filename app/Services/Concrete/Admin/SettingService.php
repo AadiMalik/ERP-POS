@@ -206,6 +206,11 @@ class SettingService
         return $this->model_whatsapp_setting->getModel()::firstOrCreate(['business_id' => $business_id]);
     }
 
+    public function getFirebaseSetting($business_id)
+    {
+        return app(FirebaseSettingService::class)->getByBusiness($business_id);
+    }
+
     public function getPrintSetting($business_id, $document_type = 'default')
     {
         return $this->model_print_setting->getModel()::firstOrCreate(
@@ -601,6 +606,11 @@ class SettingService
         $this->auditSetting('whatsapp', $setting, $old_values);
 
         return $setting;
+    }
+
+    public function updateFirebaseSetting(array $obj)
+    {
+        return app(FirebaseSettingService::class)->save($obj);
     }
 
     public function updatePrintSetting(array $obj)

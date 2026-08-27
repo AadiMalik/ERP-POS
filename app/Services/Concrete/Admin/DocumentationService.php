@@ -36,6 +36,7 @@ class DocumentationService
             ['slug' => 'settings', 'title' => 'Settings', 'file' => '10-settings.md'],
             ['slug' => 'subscription-billing', 'title' => 'Subscription & Billing', 'file' => '11-subscription-billing.md'],
             ['slug' => 'audit-security', 'title' => 'Notifications, Activity Log & Security', 'file' => '12-audit-security.md'],
+            ['slug' => 'push-notifications', 'title' => 'Push Notifications (FCM)', 'file' => '13-push-notifications.md'],
         ];
     }
 
@@ -55,6 +56,7 @@ class DocumentationService
             ['slug' => 'configuration', 'title' => 'Configuration Reference', 'file' => '10-configuration.md'],
             ['slug' => 'coding-conventions', 'title' => 'Coding Conventions', 'file' => '11-coding-conventions.md'],
             ['slug' => 'documentation-system', 'title' => 'The Documentation System Itself', 'file' => '12-documentation-system.md'],
+            ['slug' => 'fcm-broadcast-notifications', 'title' => 'FCM Broadcast Notifications', 'file' => '13-fcm-broadcast-notifications.md'],
         ];
     }
 

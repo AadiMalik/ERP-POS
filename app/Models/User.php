@@ -81,6 +81,16 @@ class User extends Authenticatable
         return $this->hasOne(Employee::class, 'user_id');
     }
 
+    public function fcmTokens()
+    {
+        return $this->hasMany(UserFcmToken::class, 'user_id');
+    }
+
+    public function activeFcmTokens()
+    {
+        return $this->fcmTokens()->where('is_active', true);
+    }
+
     public function createdby()
     {
         return $this->belongsTo(User::class,'createdby_id');

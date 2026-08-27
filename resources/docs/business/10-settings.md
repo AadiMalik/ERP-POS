@@ -15,6 +15,8 @@ All configuration lives under one **Settings** screen, organized into sections
 - **Customer** / **Supplier** — defaults for new customer/supplier records.
 - **Email**, **SMS**, **WhatsApp** — the channels used to send documents (e.g.
   quotations, invoices) and notifications to customers/suppliers.
+- **Firebase** — FCM service-account credentials for mobile push / broadcast
+  notifications (Settings → Firebase tab).
 - **FBR** and **PRA** — Pakistan tax-authority e-invoicing integration settings
   (Federal Board of Revenue and Punjab Revenue Authority).
 - **POS** — point-of-sale behavior, including register open/close time windows and

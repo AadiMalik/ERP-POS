@@ -21,12 +21,15 @@ commands, or invoke any command directly for ops/debugging.
 | `GenerateSubscriptionInvoicePdfJob` | Renders and saves a subscription invoice PDF asynchronously to `public_path('uploads/subscription_invoices')`, `$tries = 3`, `$backoff = 10` |
 | `SendPurchaseRequestQuotationJob` | Generates an RFQ/quotation PDF and sends it to one supplier per job (so one slow/failing send doesn't block the others) |
 | `SendSubscriptionNotificationJob` | Dispatches one subscription notification (expiry reminder or lifecycle event) to a business |
+| `ProcessBroadcastNotificationJob` | Sends one batch of FCM broadcast recipients (`ShouldBeUnique` per campaign), then re-dispatches until complete/cancelled |
 
 Job pattern: constructor takes just an ID, re-fetches the model inside `handle()`,
 wraps rendering in try/catch and logs+rethrows on failure. Use this pattern for any
 new async, per-document PDF generation; for on-demand single-page PDFs, follow the
 synchronous controller `stream()` pattern instead (see
 [Reports Infrastructure](06-reports-infrastructure.md)).
+
+FCM broadcast details: [FCM Broadcast Notifications](13-fcm-broadcast-notifications.md).
 
 The queue must be running (`php artisan queue:work`) for any of the above to
 actually process — see [Development Setup](01-dev-setup.md).

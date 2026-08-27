@@ -52,7 +52,8 @@ class SettingController extends Controller
         SaleTypeService $sale_type_service,
         BranchService $branch_service
     ) {
-        $this->middleware('permission:setting.manage');
+$this->middleware('permission:setting.manage');
+        $this->middleware('permission:firebase-setting.manage|setting.manage')->only(['updateFirebaseSetting']);
 
         $this->business_service = $business_service;
         $this->setting_service = $setting_service;
@@ -87,6 +88,7 @@ class SettingController extends Controller
         $sms_setting = $this->setting_service->getSmsSetting(Auth::user()->business_id);
         $fbr_setting = $this->setting_service->getFbrSetting(Auth::user()->business_id);
         $whatsapp_setting = $this->setting_service->getWhatsappSetting(Auth::user()->business_id);
+        $firebase_setting = $this->setting_service->getFirebaseSetting(Auth::user()->business_id);
         $print_setting = $this->setting_service->getPrintSetting(Auth::user()->business_id);
         $barcode_setting = $this->setting_service->getBarcodeSetting(Auth::user()->business_id);
         $theme_setting = $this->setting_service->getThemeSetting(Auth::user()->business_id);
@@ -119,6 +121,7 @@ class SettingController extends Controller
             'sms_setting',
             'fbr_setting',
             'whatsapp_setting',
+            'firebase_setting',
             'print_setting',
             'barcode_setting',
             'theme_setting',
@@ -433,6 +436,37 @@ class SettingController extends Controller
         $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
 
         $setting = $this->setting_service->updateWhatsappSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateFirebaseSetting(Request $request)
+    {
+        $rules = [
+            'project_id' => 'required|string|max:191',
+            'client_email' => 'required|email|max:191',
+            'private_key' => 'nullable|string',
+            'is_active' => 'required|boolean',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $businessId = $request->business_id ?? Auth::user()->business_id;
+        $existing = $this->setting_service->getFirebaseSetting($businessId);
+
+        if (empty($request->private_key) && !$existing->hasPrivateKey()) {
+            return $this->validationResponse('Private key is required for a new Firebase configuration.');
+        }
+
+        $obj = $request->only(['project_id', 'client_email', 'private_key', 'is_active']);
+        $obj['business_id'] = $businessId;
+
+        $setting = $this->setting_service->updateFirebaseSetting($obj);
 
         return $setting
             ? $this->success(Message::UPDATE, $setting)

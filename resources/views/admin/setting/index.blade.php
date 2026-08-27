@@ -65,6 +65,10 @@
                                 WhatsApp
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
+                                data-bs-target="#firebase">
+                                Firebase
+                            </button>
+                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#fbr">
                                 FBR
                             </button>
@@ -130,6 +134,9 @@
                             </div>
                             <div class="tab-pane fade" id="whatsapp">
                                 @include('admin.setting.tabs.whatsapp')
+                            </div>
+                            <div class="tab-pane fade" id="firebase">
+                                @include('admin.setting.tabs.firebase')
                             </div>
                             <div class="tab-pane fade" id="fbr">
                                 @include('admin.setting.tabs.fbr')

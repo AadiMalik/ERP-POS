@@ -5,7 +5,7 @@
 There is **no single generic `Setting` model/config-in-db table**. Instead, each
 settings domain is its own Eloquent model — `BusinessSetting`, `AccountingSetting`,
 `CustomerSetting`, `SupplierSetting`, `InventorySetting`, `EmailSetting`,
-`SmsSetting`, `WhatsappSetting`, `FbrSetting`, `PraSetting`, `PrintSetting`,
+`SmsSetting`, `WhatsappSetting`, `FirebaseSetting`, `FbrSetting`, `PraSetting`, `PrintSetting`,
 `BarcodeSetting`, `ThemeSetting`, `ThermalPrintSetting`, `NotificationSetting`,
 `PosSetting` — each presumably one row per business. `Business` exposes a `hasOne`
 relation to every one of them.

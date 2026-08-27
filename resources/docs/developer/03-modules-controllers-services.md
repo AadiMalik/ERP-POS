@@ -199,6 +199,15 @@ See [The Documentation System Itself](12-documentation-system.md).
 `ActivityLogController`, `LoginHistoryController`, `NotificationController` —
 `admin/activity-log`, `admin/login-history`, `admin/notifications`.
 
+## Push Notifications (FCM)
+`NotificationTemplateController`, `BroadcastNotificationController` —
+`admin/notification-template`, `admin/broadcast-notification`.
+Firebase credentials: Settings → Firebase tab (`SettingController::updateFirebaseSetting`,
+`SettingService::getFirebaseSetting` / `updateFirebaseSetting`).
+Reusable sender: `App\Services\Concrete\Firebase\FirebaseNotificationService`.
+Queued worker: `ProcessBroadcastNotificationJob`. See
+[FCM Broadcast Notifications](13-fcm-broadcast-notifications.md).
+
 ## Shared Concerns
 `App\Http\Controllers\Admin\Concerns\HasLookupTypeCrudActions` — shared trait for
 simple lookup-type CRUD controllers (e.g. Order Type/Source, Payment Method) to

@@ -7,6 +7,10 @@ items awaiting your approval, or subscription reminders. Mark individual alerts 
 all of them as read, and control which alerts you receive under
 [Settings](10-settings.md).
 
+Admins can send marketing push notifications to mobile customers under
+**Push Notifications** (Firebase Settings, Templates, Broadcasts). See
+[Push Notifications (FCM)](13-push-notifications.md).
+
 ## Activity Log
 
 Every significant action across the system — creating, updating, deleting,

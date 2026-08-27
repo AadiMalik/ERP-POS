@@ -1071,6 +1071,27 @@ class PermissionRegistry
                 'setting_manage'  => ['name' => 'notification-setting.manage', 'label' => 'Manage Notification Settings', 'is_system' => false],
             ]],
 
+            'firebase-setting' => ['label' => 'Firebase Settings', 'actions' => [
+                'manage' => ['name' => 'firebase-setting.manage', 'label' => 'Manage Firebase Settings', 'is_system' => false],
+            ]],
+
+            'notification-template' => ['label' => 'Notification Templates', 'actions' => [
+                'view'   => ['name' => 'notification-template.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'notification-template.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'notification-template.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'notification-template.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'notification-template.status', 'label' => 'Change Status', 'is_system' => false],
+            ]],
+
+            'broadcast-notification' => ['label' => 'Broadcast Notifications', 'actions' => [
+                'view'   => ['name' => 'broadcast-notification.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'broadcast-notification.create', 'label' => 'Create', 'is_system' => false],
+                'start'  => ['name' => 'broadcast-notification.start', 'label' => 'Start Campaign', 'is_system' => false],
+                'cancel' => ['name' => 'broadcast-notification.cancel', 'label' => 'Cancel Campaign', 'is_system' => false],
+                'resend' => ['name' => 'broadcast-notification.resend', 'label' => 'Resend Failed', 'is_system' => false],
+                'delete' => ['name' => 'broadcast-notification.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
             'documentation' => ['label' => 'Documentation', 'actions' => [
                 'view'           => ['name' => 'documentation.view', 'label' => 'View Documentation Portal', 'is_system' => false],
                 'business_view'  => ['name' => 'documentation.business.view', 'label' => 'View Business Documentation', 'is_system' => false],
@@ -1364,7 +1385,8 @@ class PermissionRegistry
             'purchase-return', 'opening-stock', 'stock-taking', 'transfer-note', 'supplier-payment', 'customer-payment',
             'service-purchase', 'service-purchase-return', 'service-sale', 'service-sale-return',
             'pos', 'pos-register', 'order', 'order-return', 'expense', 'expense-category', 'admin-expense',
-            'activity-log', 'login-history', 'notification', 'documentation', 'reports', 'branch', 'user',
+            'activity-log', 'login-history', 'notification', 'firebase-setting',
+            'notification-template', 'broadcast-notification', 'documentation', 'reports', 'branch', 'user',
             'department', 'designation', 'shift', 'employee', 'attendance', 'leave-type',
             'leave-request', 'salary-component', 'salary-structure', 'payroll', 'payslip',
             'employee-advance', 'employee-deduction', 'employee-ledger', 'employee-exit',
