@@ -23,6 +23,7 @@ the custom settings surfaced under [Configuration Reference](10-configuration.md
 ```bash
 php artisan migrate                              # run pending migrations
 php artisan db:seed --class=PermissionSeeder      # sync permission rows from PermissionRegistry (see CLAUDE.md)
+php artisan db:seed --class=WebsiteDemoProductsSeeder  # optional: 50 demo catalog products + cats/brands/stock/images for storefront
 php artisan route:list --name=<filter>            # inspect registered routes
 php artisan queue:work                            # process queued jobs (PDF generation, notifications, quotation sends)
 php artisan schedule:run                          # run due scheduled commands (normally via cron/Task Scheduler)

@@ -1226,24 +1226,76 @@ class ProductService
     /**
      * Builds the 5 homepage sections (each capped at 12) - only computed by
      * getWebsiteListing() when the request has no filters and is on page 1.
-     * Every section independently degrades to an empty array rather than
-     * throwing when nothing qualifies.
+     *
+     * Featured / Trending / New Arrivals / Best Sellers prioritize matching
+     * products, then fill remaining slots with other website-visible products
+     * (no duplicate product_ids within a section) so rails stay populated when
+     * the catalog has inventory. Discounted Products never falls back — only
+     * products with a valid current variation discount are included; an empty
+     * array means the storefront should hide that section entirely.
      */
     private function buildWebsiteSections(string $business_id, ?string $branch_id, ?string $sale_type_id, $user_id = null): array
     {
         $with = $this->websiteWith();
+        $limit = 12;
 
-        $featured = $this->websiteBaseQuery($business_id)->with($with)->where('is_featured', 1)->orderByDesc('date_created')->limit(12)->get();
-        $discounted = $this->websiteBaseQuery($business_id)->with($with)->whereHas('productVariations', function ($q) {
-            $q->where('discount_percentage', '>', 0);
-        })->orderByDesc('date_created')->limit(12)->get();
-        $trending = $this->websiteBaseQuery($business_id)->with($with)->where('is_trending', 1)->orderByDesc('date_created')->limit(12)->get();
-        $new_arrivals = $this->websiteBaseQuery($business_id)->with($with)->orderByDesc('date_created')->limit(12)->get();
-        $best_sellers = $this->websiteBaseQuery($business_id)->with($with)->where('is_best_seller', 1)->orderByDesc('date_created')->limit(12)->get();
+        $featured = $this->fillWebsiteSection(
+            $this->websiteBaseQuery($business_id)->with($with)->where('is_featured', 1)->orderByDesc('date_created')->limit($limit)->get(),
+            $business_id,
+            $with,
+            $limit
+        );
+
+        // No filler products — only variations with an actual discount that
+        // applies to all sale types or to the request's sale type.
+        $discounted = $this->websiteBaseQuery($business_id)->with($with)->whereHas('productVariations', function ($q) use ($sale_type_id) {
+            $q->where('discount_percentage', '>', 0)
+                ->where(function ($inner) use ($sale_type_id) {
+                    $inner->where('discount_apply_all', 1);
+                    if (!empty($sale_type_id)) {
+                        $inner->orWhereHas('discountSaleTypes', function ($st) use ($sale_type_id) {
+                            $st->where('sale_types.sale_type_id', $sale_type_id);
+                        });
+                    }
+                });
+        })->orderByDesc('date_created')->limit($limit * 2)->get();
+
+        $trending = $this->fillWebsiteSection(
+            $this->websiteBaseQuery($business_id)->with($with)->where('is_trending', 1)->orderByDesc('date_created')->limit($limit)->get(),
+            $business_id,
+            $with,
+            $limit
+        );
+
+        $new_arrivals = $this->fillWebsiteSection(
+            $this->websiteBaseQuery($business_id)->with($with)->orderByDesc('date_created')->limit($limit)->get(),
+            $business_id,
+            $with,
+            $limit
+        );
+
+        $best_sellers = $this->fillWebsiteSection(
+            $this->websiteBaseQuery($business_id)->with($with)->where('is_best_seller', 1)->orderByDesc('date_created')->limit($limit)->get(),
+            $business_id,
+            $with,
+            $limit
+        );
 
         $all = $featured->concat($discounted)->concat($trending)->concat($new_arrivals)->concat($best_sellers);
 
         [$price_map, $stock_map] = $this->resolvePricingAndStock($all, $business_id, $branch_id, $sale_type_id);
+
+        // Drop candidates whose resolved (sale-type-aware) discount is 0 so
+        // the Discounted rail never lists products that are not actually on sale.
+        $discounted = $discounted->filter(function ($product) use ($price_map) {
+            foreach ($product->productVariations as $variation) {
+                $entry = $price_map[$variation->product_variation_id] ?? null;
+                if ($entry && ($entry['discount'] ?? 0) > 0) {
+                    return true;
+                }
+            }
+            return false;
+        })->take($limit)->values();
 
         $wishlist_flags = $this->resolveWishlistFlags(
             $business_id,
@@ -1264,6 +1316,34 @@ class ProductService
             'new_arrivals' => $map($new_arrivals),
             'best_sellers' => $map($best_sellers),
         ];
+    }
+
+    /**
+     * Keeps prioritized section products first, then fills remaining slots up
+     * to $limit with other website-visible products (newest first), excluding
+     * product_ids already in the primary set so a section never duplicates.
+     */
+    private function fillWebsiteSection(Collection $primary, string $business_id, array $with, int $limit): Collection
+    {
+        $primary = $primary->take($limit)->values();
+
+        if ($primary->count() >= $limit) {
+            return $primary;
+        }
+
+        $exclude_ids = $primary->pluck('product_id')->filter()->values()->all();
+        $needed = $limit - $primary->count();
+
+        $fillers = $this->websiteBaseQuery($business_id)
+            ->with($with)
+            ->when(!empty($exclude_ids), function ($q) use ($exclude_ids) {
+                $q->whereNotIn('product_id', $exclude_ids);
+            })
+            ->orderByDesc('date_created')
+            ->limit($needed)
+            ->get();
+
+        return $primary->concat($fillers)->values();
     }
 
     /**

@@ -53,6 +53,23 @@ checks `CustomerAccountService::emailExistsForBusiness()` for the given
 `ProductVariationBatchController`, `ProductVariationStockController`,
 `ProductVariationStockTransactionController`.
 
+Storefront homepage product rails are built by
+`ProductService::buildWebsiteSections()` (attached to
+`GET /api/v1/products/{business_id}` on unfiltered page 1, and reused by
+`WebsiteHomeService`). Each rail is capped at 12:
+
+| Section | Primary source | Fallback fillers |
+|---|---|---|
+| Featured | `is_featured = 1` | Other website-visible products (newest first), excluding IDs already in the rail |
+| Trending | `is_trending = 1` | Same filler rule |
+| New Arrivals | Newest website-visible products | Same filler rule (usually a no-op) |
+| Best Sellers | `is_best_seller = 1` | Same filler rule |
+| Discounted | Variations with a valid current discount (`discount_percentage > 0` and `discount_apply_all` or matching sale type); resolved discount must stay &gt; 0 | **None** — empty array; storefront hides the whole Discounted section |
+
+Fillers never duplicate a product inside the same section. Themes hide empty
+product sections (`v-if` on length) so the homepage never shows a blank rail
+or a “Products Not Found” empty state for these groups.
+
 ## Purchasing / Procurement (`module:inventory`)
 `SupplierController`, `PurchaseRequestController`,
 `PurchaseRequestQuotationController`, `PurchaseController` (service:

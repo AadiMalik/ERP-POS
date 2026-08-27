@@ -8,6 +8,14 @@ conversions, e.g. buying by the case but selling by the piece). A product can ha
 multiple **Variations** (e.g. size/color) — the variation is the actual thing that's
 bought, sold, and stocked, each with its own SKU, barcode/QR code, and pricing.
 
+On your website homepage, products can appear in Featured, Trending, New Arrivals,
+Best Sellers, and Discounted sections. Mark products as Featured, Trending, or
+Best Seller on the product form so they are preferred for those rails. If you have
+fewer flagged products than the section shows, the site fills the rest with other
+visible products so the section is not left empty. The Discounted section only
+lists products that currently have a real discount — if none do, that section is
+hidden (no empty heading or “products not found” message).
+
 ## Warehouses & Stock
 
 Stock is tracked **per warehouse, per product variation**. Every stock-affecting

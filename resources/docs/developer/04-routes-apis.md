@@ -97,3 +97,17 @@ Consumed by the Vue storefront (`frontend_design`) at bootstrap:
 `website-settings.favicon` is the business upload URL when set; otherwise the
 platform Dukanaz `favicon-32.png` asset URL so the storefront tab icon never
 falls back to a placeholder emoji.
+
+## Public Website Catalog APIs
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/products/{business_id}` | Shop listing + homepage `sections` (page 1, no filters) |
+| GET | `/api/v1/website-home/{business_id}` | Aggregated homepage payload (`product_groups.*.enabled` when non-empty) |
+
+Homepage `sections` / `product_groups` keys: `featured_products`,
+`discounted_products`, `trending_products`, `new_arrivals`, `best_sellers`
+(12 each). Featured / Trending / New Arrivals / Best Sellers fill remaining
+slots with other website-visible products when the prioritized set is short.
+Discounted Products never fills with non-discounted items — an empty list
+means the Vue themes hide that section entirely.
