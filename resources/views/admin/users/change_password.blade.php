@@ -22,11 +22,19 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="fw-semibold">Password<span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" name="password" required>
+                            @include('partials.password-input', [
+                                'name' => 'password',
+                                'id' => 'user_change_password',
+                                'autocomplete' => 'new-password',
+                            ])
                         </div>
                         <div class="col-md-6">
                             <label class="fw-semibold">Confirm Password<span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" name="password_confirmation" required>
+                            @include('partials.password-input', [
+                                'name' => 'password_confirmation',
+                                'id' => 'user_change_password_confirmation',
+                                'autocomplete' => 'new-password',
+                            ])
                         </div>
                     </div>
                 </div>

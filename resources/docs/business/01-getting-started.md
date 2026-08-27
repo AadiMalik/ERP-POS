@@ -2,9 +2,18 @@
 
 ## Logging In
 
-Every user signs in with an email and password at the login page. If your account
-has **"must change password"** flagged (common for newly created staff accounts),
-you'll be asked to set a new password before you can continue.
+Every user signs in with an email and password at the login page. If you forget
+your password, use **Forgot Password** on that screen: enter your email. If that
+email is not registered, you will see an error and no code is sent. If it is
+registered, a 6-digit code is emailed from Dukanaz (it addresses you by name and
+expires in 10 minutes). Enter that code and choose a new password. If your
+account has **"must change password"** flagged (common for newly created staff
+accounts), you'll be asked to set a new password before you can continue.
+
+Customers signing up, signing in with a code, or resetting a password from your
+**website** get that code in an email that uses your business name, logo, and
+website colors, with **Powered by Dukanaz** only at the bottom. For password
+reset, the email must already be registered as a customer of that business.
 
 After logging in you land on your **Dashboard**, which summarizes sales, purchases,
 finance and recent activity for your business. Super Admin accounts (the platform

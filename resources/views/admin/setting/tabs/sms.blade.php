@@ -56,7 +56,13 @@
         {{-- Password --}}
         <div class="col-md-6 mb-3 provider-field provider-brandsms provider-vonage">
             <label>Password / API Secret</label>
-            <input type="password" class="form-control" name="password" value="{{ $sms_setting->password }}">
+            @include('partials.password-input', [
+                'name' => 'password',
+                'id' => 'sms_password',
+                'autocomplete' => 'new-password',
+                'required' => false,
+                'value' => $sms_setting->password,
+            ])
         </div>
 
         {{-- Account SID --}}
@@ -68,7 +74,13 @@
         {{-- Auth Token --}}
         <div class="col-md-6 mb-3 provider-field provider-twilio">
             <label>Auth Token</label>
-            <input type="password" class="form-control" name="auth_token" value="{{ $sms_setting->auth_token }}">
+            @include('partials.password-input', [
+                'name' => 'auth_token',
+                'id' => 'sms_auth_token',
+                'autocomplete' => 'new-password',
+                'required' => false,
+                'value' => $sms_setting->auth_token,
+            ])
         </div>
 
         {{-- Sender --}}

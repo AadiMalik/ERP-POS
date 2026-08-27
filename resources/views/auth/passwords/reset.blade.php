@@ -1,65 +1,63 @@
-@extends('layouts.app')
+@extends('layouts.auth')
+
+@section('title', 'Reset Password')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Reset Password') }}</div>
-
-                <div class="card-body">
-                    <form method="POST" action="{{ route('password.update') }}">
-                        @csrf
-
-                        <input type="hidden" name="token" value="{{ $token }}">
-
-                        <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ $email ?? old('email') }}" required autocomplete="email" autofocus>
-
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
-
-                                @error('password')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label for="password-confirm" class="col-md-4 col-form-label text-md-end">{{ __('Confirm Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password">
-                            </div>
-                        </div>
-
-                        <div class="row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Reset Password') }}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    <h4 class="mb-2">Reset Password</h4>
+    <p class="mb-4">Enter the 6-digit code sent to <strong>{{ $email }}</strong>, then choose a new password.</p>
+    @if (session('status'))
+        <div class="alert alert-success" role="alert">
+            {{ session('status') }}
         </div>
+    @endif
+    <form method="POST" class="mb-3" action="{{ route('password.otp.reset') }}">
+        @csrf
+        <div class="mb-3">
+            <label for="code" class="form-label">Verification code</label>
+            <input id="code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
+                class="form-control @error('code') is-invalid @enderror" name="code"
+                value="{{ old('code') }}" required autocomplete="one-time-code" autofocus>
+            @error('code')
+            <span class="invalid-feedback" role="alert">
+                <strong>{{ $message }}</strong>
+            </span>
+            @enderror
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="password">New password</label>
+            @include('partials.password-input', [
+                'name' => 'password',
+                'id' => 'password',
+                'autocomplete' => 'new-password',
+            ])
+            <small class="form-text text-muted">Must be at least 8 characters.</small>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="password_confirmation">Confirm new password</label>
+            @include('partials.password-input', [
+                'name' => 'password_confirmation',
+                'id' => 'password_confirmation',
+                'autocomplete' => 'new-password',
+                'required' => true,
+            ])
+        </div>
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary d-grid w-100">
+                Reset password
+            </button>
+        </div>
+    </form>
+    <form method="POST" action="{{ route('password.otp.resend') }}" class="text-center mb-2">
+        @csrf
+        <button type="submit" class="btn btn-link p-0">Resend code</button>
+    </form>
+    <div class="text-center">
+        <a href="{{ route('password.request') }}">
+            <small>Use a different email</small>
+        </a>
+        <span class="mx-1">·</span>
+        <a href="{{ route('login') }}">
+            <small>Back to login</small>
+        </a>
     </div>
-</div>
 @endsection

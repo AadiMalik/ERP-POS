@@ -16,6 +16,7 @@
 <script src="{{ asset('public/assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
 <!-- Main JS -->
 <script src="{{ asset('public/assets/js/main.js') }}"></script>
+<script src="{{ asset('public/assets/js/password-toggle.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -51,8 +51,14 @@
 
         <div class="col-md-6 mb-3">
             <label>Password</label>
-            <input type="password" class="form-control email-config-field" name="mail_password"
-                value="{{ $email_setting->mail_password }}">
+            @include('partials.password-input', [
+                'name' => 'mail_password',
+                'id' => 'mail_password',
+                'class' => 'form-control email-config-field',
+                'autocomplete' => 'new-password',
+                'required' => false,
+                'value' => $email_setting->mail_password,
+            ])
         </div>
 
         <div class="col-md-6 mb-3">

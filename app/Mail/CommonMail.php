@@ -13,38 +13,43 @@ use Illuminate\Queue\SerializesModels;
 class CommonMail extends Mailable
 {
 
-    public EmailData $email;
+    public EmailData $emailData;
 
-    public function __construct(EmailData $email)
+    public function __construct(EmailData $emailData)
     {
 
-        $this->email = $email;
+        $this->emailData = $emailData;
     }
 
     public function build()
     {
-        $mail = $this->subject($this->email->subject);
+        $mail = $this->subject($this->emailData->subject);
+        $data = $this->emailData->data;
 
         // Blade View
-        if (!empty($this->email->view)) {
+        if (!empty($this->emailData->view)) {
 
             $mail->view(
-                $this->email->view,
-                $this->email->data
+                $this->emailData->view,
+                $data
             );
         }
         // HTML Body
-        elseif (!empty($this->email->body)) {
+        elseif (!empty($this->emailData->body)) {
 
-            $mail->html($this->email->body);
+            $mail->html($this->emailData->body);
         }
 
-        if (!empty($this->email->attachment)) {
+        if (!empty($this->emailData->text_view)) {
+            $mail->text($this->emailData->text_view, $data);
+        }
+
+        if (!empty($this->emailData->attachment)) {
 
             $mail->attach(
-                $this->email->attachment,
+                $this->emailData->attachment,
                 [
-                    'as' => $this->email->attachment_name
+                    'as' => $this->emailData->attachment_name
                 ]
             );
         }

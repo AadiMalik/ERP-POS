@@ -79,8 +79,9 @@ Business, Account` — linked to the chart of accounts for AP).
 `order_details`, `order_payments`, `order_status_history`, `order_returns`/
 `_details`, `customer_profiles` (the actual "customer" entity, replacing an earlier
 now-removed `customers` table — `belongsTo User, Branch, Business, Account`),
-`customer_payments`, `customer_store_credit_transactions`, `otps` (customer OTP
-login), `service_sales`/`_details`, `service_sale_returns`/`_details` (parallel
+`customer_payments`, `customer_store_credit_transactions`, `otps` (email OTP for
+storefront onboarding/login **and** admin/web password reset; purposes
+`onboarding`, `login`, `password_reset`), `service_sales`/`_details`, `service_sale_returns`/`_details` (parallel
 non-stock family). `orders.status` is an ENUM:
 `draft`, `hold`, `posted`, `cancelled`, `void`, `returned`, plus delivery
 fulfilment values `shipped`, `out_for_delivery`, `delivered` (see migration

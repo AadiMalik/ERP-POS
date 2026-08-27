@@ -40,7 +40,12 @@
                             <div class="col-md-6">
                                 <label class="fw-semibold" id="password_label">Password<span
                                         class="text-danger" id="password_required_mark">*</span></label>
-                                <input type="password" class="form-control" id="password" name="password">
+                                @include('partials.password-input', [
+                                    'name' => 'password',
+                                    'id' => 'password',
+                                    'autocomplete' => 'new-password',
+                                    'required' => false,
+                                ])
                                 <small class="form-text text-muted d-none" id="password_hint">
                                     Optional for customers - they set their own password via the OTP
                                     onboarding flow.
@@ -49,8 +54,12 @@
                             <div class="col-md-6">
                                 <label class="fw-semibold" id="password_confirmation_label">Confirm
                                     Password<span class="text-danger" id="password_confirmation_required_mark">*</span></label>
-                                <input type="password" class="form-control" id="password_confirmation"
-                                    name="password_confirmation">
+                                @include('partials.password-input', [
+                                    'name' => 'password_confirmation',
+                                    'id' => 'password_confirmation',
+                                    'autocomplete' => 'new-password',
+                                    'required' => false,
+                                ])
                             </div>
                         @endif
                         <div class="col-md-6">

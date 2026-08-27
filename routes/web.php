@@ -20,6 +20,10 @@ Route::get('/', function () {
 
 Auth::routes(['register' => false]);
 
+Route::get('password/otp', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'showOtpForm'])->name('password.otp');
+Route::post('password/otp', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'resetWithOtp'])->name('password.otp.reset');
+Route::post('password/otp/resend', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'resendOtp'])->name('password.otp.resend');
+
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::get('/documentation', fn () => redirect()->route('documentation.index'));

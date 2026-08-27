@@ -10,6 +10,48 @@ Public Sans font, configurable per-business theme presets — see
 `spatie/laravel-permission`, customized (see
 [Permissions & Access Control](05-permissions-access-control.md)).
 
+## Brand Assets
+
+Platform branding lives under `public/assets/img/`. Do not drop raw logo files into
+views — go through the existing partials:
+
+- `resources/views/partials/favicon.blade.php` — browser tab / apple-touch icons
+  (`public/assets/img/favicon/favicon-{16,32,192,512}.png` and `favicon.ico`).
+- `resources/views/partials/brand-logo.blade.php` — wordmark/lockup variants:
+  `sidebar` (horizontal lockup), `login` (the same 192px tab icon as the favicon,
+  sized as a 72×72 rounded square on the auth card), `footer`, and `icon`.
+- `resources/views/partials/brand-wordmark.blade.php` — “Dukanaz” text mark used
+  next to the login icon.
+
+Guest auth screens (login, forgot password, OTP reset) share
+`resources/views/layouts/auth.blade.php` so they never load the admin sidebar.
+Password fields across auth **and** the admin panel use
+`resources/views/partials/password-input.blade.php` (eye icon show/hide via
+`public/assets/js/password-toggle.js`).
+
+OTP emails are sent by `OtpService::send($email, $purpose, $business_id, $channel)`.
+`$channel` defaults to `erp`:
+
+- **erp** (`emails.otp` / `emails.otp-text`) — Dukanaz-branded. The horizontal
+  lockup is inlined via Laravel's mail `$message->embed()` (with a public URL
+  fallback). Used for admin / ERP forgot-password only.
+- **storefront** (`emails.otp-storefront` / `emails.otp-storefront-text`) — used
+  for all website auth OTPs (`send-otp` onboarding/login and `forgot-password`).
+  Branding comes from `Business` (name, logo under `public/uploads/business/`)
+  and `WebsiteThemeSetting` (heading/primary/accent colors). Footer is
+  **Powered by Dukanaz**; everything else is the tenant business.
+
+The recipient’s name/email are included when a matching `users` row exists, and
+the subject/copy change by purpose (`password_reset`, `login`, `onboarding`).
+`OtpService` passes that data through `EmailData` to `CommonMail` (public
+property `$emailData` — not `$email`, so Blade can use an account-email string
+without colliding with the DTO).
+
+The auth layout does **not** load `theme-custom.css` (that file depends on
+`--erp-*` variables from the app layout). Login-specific icon sizing is therefore
+inlined on the auth layout as well as mirrored under `.dukanaz-brand-img--login`
+in `public/assets/css/theme-custom.css`.
+
 ## Request Flow / Layering
 
 `Route → Controller → Service → Model`. Controllers

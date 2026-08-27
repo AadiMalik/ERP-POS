@@ -142,7 +142,11 @@ restores the returned stock and reverses the sale's financial impact.
 
 Customer records (CRM) are separate from Admin Users — a customer doesn't need a
 login to be sold to, but a customer *can* be given a login (used for the customer
-mobile/website ordering API). Customer payments and any store credit balance are
+mobile/website ordering API). Signup, sign-in, and **Forgot Password** codes from
+your website are emailed with your business name, logo, and website colors, with
+**Powered by Dukanaz** only at the bottom. For password reset the email must
+already be registered as a customer of your business; otherwise they see that
+the email is not registered. Customer payments and any store credit balance are
 tracked per customer, feeding the Customer Ledger and Aging reports.
 
 ## Multiple Registers & Branches

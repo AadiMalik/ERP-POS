@@ -38,6 +38,30 @@ subscription-gated module, wrap it in that module's existing `module:<key>` grou
 rather than inventing a new one unless it's genuinely a new toggleable feature (see
 [Subscription & Module Gating](08-subscription-module-gating.md)).
 
+## Web Auth (guest)
+
+`Auth::routes(['register' => false])` plus OTP reset routes in `routes/web.php`.
+Admin forgot-password is **not** Laravel's email-link broker — it uses the same
+`OtpService` / `otps` table as the customer API:
+
+| Method | Path | Name | Controller |
+|---|---|---|---|
+| GET | `/login` | `login` | `LoginController` |
+| GET | `/password/reset` | `password.request` | `ForgotPasswordController@showLinkRequestForm` |
+| POST | `/password/email` | `password.email` | `ForgotPasswordController@sendResetLinkEmail` |
+| GET | `/password/otp` | `password.otp` | `ForgotPasswordController@showOtpForm` |
+| POST | `/password/otp` | `password.otp.reset` | `ForgotPasswordController@resetWithOtp` |
+| POST | `/password/otp/resend` | `password.otp.resend` | `ForgotPasswordController@resendOtp` |
+
+These views use `layouts.auth` (no sidebar). A leftover `/password/reset/{token}`
+bookmark is redirected to `password.request`. Send/resend/reset are throttled
+`6,1`. Unregistered (or inactive/deleted) emails get
+“This email is not registered.” and stay on the form — no OTP is sent.
+`OtpService::send()` emails a branded Dukanaz HTML+text template
+(`emails.otp`) via the user's `business_id` EmailSetting and
+falls back to the platform (`business_id = null`) channel for Super Admin or
+tenants without SMTP.
+
 ## Public / Customer-Facing API (`routes/api.php`)
 
 Minimal — not part of the Admin surface. Powers the customer mobile app/website
@@ -52,3 +76,11 @@ ERP's business data — there is no public `/api/v1/products`, `/api/v1/orders`,
 Onboarding/login creates or ensures a `CustomerProfile` via
 `CustomerAccountService::ensureProfile()` → `CustomerService::upsertProfile()`,
 which attaches `accounting_settings.default_customer_account_id` when configured.
+
+Website auth OTPs (`send-otp` / `resend-otp` for onboarding or login, and
+`forgot-password`) all call `OtpService::send(..., 'storefront')` —
+business logo/name/theme colors with a Powered by Dukanaz footer
+(`emails.otp-storefront`). `POST /api/v1/auth/forgot-password` requires `email`
+and `business_id`, checks `CustomerAccountService::emailExistsForBusiness()`,
+and returns “This email is not registered.” when there is no customer profile
+for that business (no mail sent).

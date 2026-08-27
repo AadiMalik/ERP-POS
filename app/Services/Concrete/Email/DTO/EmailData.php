@@ -18,6 +18,8 @@ class EmailData
     public ?string $attachment_name = null;
     public array $cc = [];
     public array $bcc = [];
+    public ?string $text_view = null;
+
     public function __construct(array $data)
     {
         $this->to = $data['to'];
@@ -29,5 +31,6 @@ class EmailData
         $this->attachment_name = $data['attachment_name'] ?? null;
         $this->cc = $data['cc'] ?? [];
         $this->bcc = $data['bcc'] ?? [];
+        $this->text_view = $data['text_view'] ?? null;
     }
 }

@@ -2,7 +2,10 @@
 
 namespace App\Services\Concrete\Auth;
 
+use App\Models\Business;
 use App\Models\Otp;
+use App\Models\User;
+use App\Models\WebsiteThemeSetting;
 use App\Services\Concrete\Email\DTO\EmailData;
 use App\Services\Concrete\Email\EmailService;
 use Exception;
@@ -24,10 +27,10 @@ class OtpService
 
     /**
      * Generate, store, and email a fresh OTP for the given email + purpose.
-     * Uses the business EmailSetting (e.g. Mailtrap SMTP) — never the .env
-     * mailpit defaults — so storefront OTP matches admin email settings.
+     * $channel `erp` uses Dukanaz branding; `storefront` uses the tenant
+     * business logo/name/colors with a Powered by Dukanaz footer.
      */
-    public function send(string $email, string $purpose, string $business_id): void
+    public function send(string $email, string $purpose, ?string $business_id = null, string $channel = 'erp'): void
     {
         $email = strtolower(trim($email));
 
@@ -66,21 +69,135 @@ class OtpService
             'ip_address' => request()?->ip(),
         ]);
 
-        $result = $this->email_service->send($business_id, new EmailData([
+        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+        $fullName = $user && filled($user->name) ? trim($user->name) : null;
+        $firstName = $fullName ? explode(' ', $fullName)[0] : null;
+
+        $brand = $this->brandContext($channel, $business_id, $purpose);
+
+        $emailData = new EmailData([
             'to' => $email,
-            'subject' => 'Your verification code',
-            'view' => 'emails.otp',
-            'data' => [
+            'subject' => $brand['subject'],
+            'view' => $brand['view'],
+            'text_view' => $brand['text_view'],
+            'data' => array_merge($brand['data'], [
                 'otp' => $code,
                 'purpose' => $purpose,
-            ],
-        ]));
+                'user_name' => $fullName,
+                'first_name' => $firstName,
+                'account_email' => $email,
+                'expiry_minutes' => self::EXPIRY_MINUTES,
+                'year' => date('Y'),
+            ]),
+        ]);
+
+        $result = $this->deliver($emailData, $business_id);
 
         if (!$result['status']) {
             // Do not leave a usable OTP / cooldown when delivery failed.
             $otp->delete();
             throw new Exception($result['message'] ?: 'Failed to send verification email. Please try again.');
         }
+    }
+
+    /**
+     * Prefer the tenant's EmailSetting; if that is missing or fails, use the
+     * platform-level channel so password-reset still works for Super Admin
+     * (null business_id) and businesses that have not configured SMTP yet.
+     */
+    protected function deliver(EmailData $emailData, ?string $business_id): array
+    {
+        $businessResult = null;
+
+        if ($business_id) {
+            $businessResult = $this->email_service->send($business_id, $emailData);
+            if ($businessResult['status']) {
+                return $businessResult;
+            }
+        }
+
+        $platformResult = $this->email_service->sendPlatform($emailData);
+        if ($platformResult['status']) {
+            return $platformResult;
+        }
+
+        return $businessResult ?? $platformResult;
+    }
+
+    /**
+     * ERP OTPs are Dukanaz-branded. Storefront OTPs (signup, login, password
+     * reset from the website API) use the tenant business identity (logo,
+     * name, theme colors) and a Powered by Dukanaz footer.
+     */
+    protected function brandContext(string $channel, ?string $business_id, string $purpose): array
+    {
+        if ($channel === 'storefront' && $business_id) {
+            return $this->storefrontBrand($business_id, $purpose);
+        }
+
+        $logoPath = public_path('assets/img/brand/horizontal-lockup.png');
+        $subjects = [
+            'password_reset' => 'Reset your Dukanaz password',
+            'login' => 'Your Dukanaz sign-in code',
+            'onboarding' => 'Verify your Dukanaz account',
+        ];
+
+        return [
+            'subject' => $subjects[$purpose] ?? 'Your Dukanaz verification code',
+            'view' => 'emails.otp',
+            'text_view' => 'emails.otp-text',
+            'data' => [
+                'app_name' => 'Dukanaz',
+                'tagline' => 'Business Software, Unified',
+                'logo_path' => is_file($logoPath) ? $logoPath : null,
+                'logo_url' => asset('public/assets/img/brand/horizontal-lockup.png'),
+                'login_url' => url('/login'),
+                'brand_primary' => '#0B1B32',
+                'brand_accent' => '#2DD4BF',
+            ],
+        ];
+    }
+
+    protected function storefrontBrand(string $business_id, string $purpose): array
+    {
+        $business = Business::find($business_id);
+        $name = $business->name ?? 'our store';
+        $theme = WebsiteThemeSetting::where('business_id', $business_id)->first();
+
+        $logoPath = null;
+        $logoUrl = null;
+        if ($business && !empty($business->logo)) {
+            $file = public_path('uploads/business/' . $business->logo);
+            if (is_file($file)) {
+                $logoPath = $file;
+            }
+            $logoUrl = asset('public/uploads/business/' . $business->logo);
+        }
+
+        $primary = ($theme && filled($theme->primary_color)) ? $theme->primary_color : '#0B1B32';
+        $accent = ($theme && filled($theme->accent_color)) ? $theme->accent_color : $primary;
+        $heading = ($theme && filled($theme->heading_color)) ? $theme->heading_color : $primary;
+
+        $subjects = [
+            'password_reset' => "Reset your {$name} password",
+            'login' => "Your {$name} sign-in code",
+            'onboarding' => "Verify your {$name} account",
+        ];
+
+        return [
+            'subject' => $subjects[$purpose] ?? "Your {$name} verification code",
+            'view' => 'emails.otp-storefront',
+            'text_view' => 'emails.otp-storefront-text',
+            'data' => [
+                'app_name' => $name,
+                'tagline' => null,
+                'logo_path' => $logoPath,
+                'logo_url' => $logoUrl,
+                'login_url' => null,
+                'brand_primary' => $heading,
+                'brand_accent' => $accent,
+            ],
+        ];
     }
 
     /**

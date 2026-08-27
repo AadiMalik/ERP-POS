@@ -19,15 +19,27 @@
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="fw-semibold">Current Password<span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" name="current_password" required>
+                            @include('partials.password-input', [
+                                'name' => 'current_password',
+                                'id' => 'force_current_password',
+                                'autocomplete' => 'current-password',
+                            ])
                         </div>
                         <div class="col-md-4">
                             <label class="fw-semibold">New Password<span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" name="password" required>
+                            @include('partials.password-input', [
+                                'name' => 'password',
+                                'id' => 'force_password',
+                                'autocomplete' => 'new-password',
+                            ])
                         </div>
                         <div class="col-md-4">
                             <label class="fw-semibold">Confirm New Password<span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" name="password_confirmation" required>
+                            @include('partials.password-input', [
+                                'name' => 'password_confirmation',
+                                'id' => 'force_password_confirmation',
+                                'autocomplete' => 'new-password',
+                            ])
                         </div>
                     </div>
                     <small class="form-text text-muted d-block mt-2">

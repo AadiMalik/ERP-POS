@@ -78,7 +78,8 @@ class AuthController extends Controller
 
             $purpose = $has_profile ? 'login' : 'onboarding';
 
-            $this->otp_service->send($request->email, $purpose, $request->business_id);
+            // Website signup / sign-in OTPs use the tenant business branding.
+            $this->otp_service->send($request->email, $purpose, $request->business_id, 'storefront');
 
             return $this->success(Message::SUCCESS, ['purpose' => $purpose]);
         } catch (Exception $e) {
@@ -246,33 +247,33 @@ class AuthController extends Controller
     {
         $validate = Validator::make($request->all(), [
             'email' => 'required|email',
-            'business_id' => 'nullable|string|exists:businesses,business_id',
+            'business_id' => 'required|string|exists:businesses,business_id',
         ]);
         if ($validate->fails()) {
             return $this->validationResponse($validate->errors()->first());
         }
 
         $user = $this->findUser($request->email);
+        $existsForBusiness = $this->account_service->emailExistsForBusiness(
+            $request->email,
+            $request->business_id
+        );
 
-        // Always respond the same way whether or not the account exists,
-        // so this endpoint can't be used to enumerate registered emails.
-        $eligible = $user && $user->status === 'active';
-        if ($eligible && $request->filled('business_id')) {
-            $eligible = $this->account_service->emailExistsForBusiness($request->email, $request->business_id);
+        if (!$user || !$existsForBusiness) {
+            return $this->error('This email is not registered.');
         }
 
-        if ($eligible) {
-            if (!$request->filled('business_id')) {
-                return $this->error('Business is required to reset password.');
-            }
-            try {
-                $this->otp_service->send($request->email, 'password_reset', $request->business_id);
-            } catch (Exception $e) {
-                return $this->error($e->getMessage());
-            }
+        if ($user->status !== 'active') {
+            return $this->error('This account is disabled. Please contact support.');
         }
 
-        return $this->success('If this email is registered, a reset code has been sent.', []);
+        try {
+            $this->otp_service->send($request->email, 'password_reset', $request->business_id, 'storefront');
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+
+        return $this->success('A verification code has been sent to your email.', []);
     }
 
     public function resetPassword(Request $request)

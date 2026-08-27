@@ -31,6 +31,21 @@ controllers → route prefixes**; pair it with
 (global header search — each result group gated by its own module's view
 permission) — `admin/users`, `admin/customer`, `admin/profile`, `admin/search`.
 
+Web login / forgot-password lives outside the admin group:
+`App\Http\Controllers\Auth\LoginController`,
+`ForgotPasswordController` (OTP via `OtpService`, not Laravel's password-reset
+broker). Guest screens use `resources/views/layouts/auth.blade.php`. Password
+inputs share `resources/views/partials/password-input.blade.php`.
+Forgot-password first looks up an active, non-deleted `users` row for the email;
+if none exists it stays on the form with “This email is not registered.” and
+does not send mail. A registered email gets a Dukanaz-branded OTP
+(`emails.otp` / `emails.otp-text`). All website API OTPs
+(`send-otp` onboarding/login and `forgot-password`) use
+`OtpService::send(..., 'storefront')` — that business’s logo/name/colors with
+a Powered by Dukanaz footer (`emails.otp-storefront`). Forgot-password also
+checks `CustomerAccountService::emailExistsForBusiness()` for the given
+`business_id` before sending.
+
 ## Inventory (`module:inventory`)
 `WarehouseController`, `BrandController`, `CategoryController`,
 `SubCategoryController`, `UnitController`, `ProductController`,

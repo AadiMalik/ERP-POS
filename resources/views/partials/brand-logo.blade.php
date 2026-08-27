@@ -12,7 +12,7 @@
 @elseif ($variant === 'login')
     <a href="{{ route('login') }}" class="app-brand-link dukanaz-brand-link justify-content-center">
         <span class="app-brand-logo demo dukanaz-brand-logo dukanaz-brand-logo--login">
-            <img src="{{ $brandBase }}/stacked-tagline.png" alt="Dukanaz — Business Software, Unified" class="dukanaz-brand-img dukanaz-brand-img--login">
+            <img src="{{ asset('public/assets/img/favicon/favicon-192.png') }}" alt="Dukanaz" class="dukanaz-brand-img dukanaz-brand-img--login">
         </span>
     </a>
 @elseif ($variant === 'footer')
