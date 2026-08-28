@@ -17,8 +17,20 @@ class Package extends Model
     protected $fillable = [
         'package_id',
         'name',
+        'code',
         'description',
+        'tagline',
+        'badge',
+        'best_for',
         'price',
+        'price_yearly',
+        'currency',
+        'features',
+        'limitations',
+        'compare',
+        'support',
+        'cta',
+        'is_custom',
         'order',
         'duration_type',
         'duration_days',
@@ -50,6 +62,43 @@ class Package extends Model
         'date_updated',
         'date_deleted',
     ];
+
+    protected $casts = [
+        'features' => 'array',
+        'limitations' => 'array',
+        'compare' => 'array',
+        'is_custom' => 'boolean',
+        'price' => 'float',
+        'price_yearly' => 'float',
+    ];
+
+    /**
+     * Amount charged for a subscription period in PKR.
+     * monthly → price; yearly → price_yearly (annual total).
+     */
+    public function priceForCycle(?string $billingCycle = null): ?float
+    {
+        if ($this->is_custom) {
+            return null;
+        }
+
+        $cycle = $billingCycle ?: ($this->duration_type ?: 'monthly');
+
+        if ($cycle === 'yearly') {
+            return $this->price_yearly !== null ? (float) $this->price_yearly : null;
+        }
+
+        return $this->price !== null ? (float) $this->price : null;
+    }
+
+    public function yearlyMonthlyEquivalent(): ?float
+    {
+        if ($this->price_yearly === null) {
+            return null;
+        }
+
+        return round(((float) $this->price_yearly) / 12, 2);
+    }
 
     public function createdby()
     {

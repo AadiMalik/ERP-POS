@@ -60,6 +60,86 @@ class PermissionRegistry
                 'manage' => ['name' => 'subscription.manage', 'label' => 'Manage', 'is_system' => true],
             ]],
 
+            // Dukanaz Intro marketing CMS (platform / Super Admin only)
+            'intro-module' => ['label' => 'Intro Modules', 'actions' => [
+                'view'   => ['name' => 'intro-module.view', 'label' => 'View', 'is_system' => true],
+                'create' => ['name' => 'intro-module.create', 'label' => 'Create', 'is_system' => true],
+                'edit'   => ['name' => 'intro-module.edit', 'label' => 'Edit', 'is_system' => true],
+                'delete' => ['name' => 'intro-module.delete', 'label' => 'Delete', 'is_system' => true],
+                'status' => ['name' => 'intro-module.status', 'label' => 'Change Status', 'is_system' => true],
+            ]],
+            'intro-blog' => ['label' => 'Intro Blog', 'actions' => [
+                'view'   => ['name' => 'intro-blog.view', 'label' => 'View', 'is_system' => true],
+                'create' => ['name' => 'intro-blog.create', 'label' => 'Create', 'is_system' => true],
+                'edit'   => ['name' => 'intro-blog.edit', 'label' => 'Edit', 'is_system' => true],
+                'delete' => ['name' => 'intro-blog.delete', 'label' => 'Delete', 'is_system' => true],
+            ]],
+            'intro-blog-category' => ['label' => 'Intro Blog Categories', 'actions' => [
+                'view'   => ['name' => 'intro-blog-category.view', 'label' => 'View', 'is_system' => true],
+                'create' => ['name' => 'intro-blog-category.create', 'label' => 'Create', 'is_system' => true],
+                'edit'   => ['name' => 'intro-blog-category.edit', 'label' => 'Edit', 'is_system' => true],
+                'delete' => ['name' => 'intro-blog-category.delete', 'label' => 'Delete', 'is_system' => true],
+                'status' => ['name' => 'intro-blog-category.status', 'label' => 'Change Status', 'is_system' => true],
+            ]],
+            'intro-blog-tag' => ['label' => 'Intro Blog Tags', 'actions' => [
+                'view'   => ['name' => 'intro-blog-tag.view', 'label' => 'View', 'is_system' => true],
+                'create' => ['name' => 'intro-blog-tag.create', 'label' => 'Create', 'is_system' => true],
+                'edit'   => ['name' => 'intro-blog-tag.edit', 'label' => 'Edit', 'is_system' => true],
+                'delete' => ['name' => 'intro-blog-tag.delete', 'label' => 'Delete', 'is_system' => true],
+                'status' => ['name' => 'intro-blog-tag.status', 'label' => 'Change Status', 'is_system' => true],
+            ]],
+            'intro-blog-comment' => ['label' => 'Intro Blog Comments', 'actions' => [
+                'view'      => ['name' => 'intro-blog-comment.view', 'label' => 'View', 'is_system' => true],
+                'moderate'  => ['name' => 'intro-blog-comment.moderate', 'label' => 'Moderate', 'is_system' => true],
+                'delete'    => ['name' => 'intro-blog-comment.delete', 'label' => 'Delete', 'is_system' => true],
+            ]],
+            'intro-testimonial' => ['label' => 'Intro Testimonials', 'actions' => [
+                'view'   => ['name' => 'intro-testimonial.view', 'label' => 'View', 'is_system' => true],
+                'create' => ['name' => 'intro-testimonial.create', 'label' => 'Create', 'is_system' => true],
+                'edit'   => ['name' => 'intro-testimonial.edit', 'label' => 'Edit', 'is_system' => true],
+                'delete' => ['name' => 'intro-testimonial.delete', 'label' => 'Delete', 'is_system' => true],
+                'status' => ['name' => 'intro-testimonial.status', 'label' => 'Change Status', 'is_system' => true],
+            ]],
+            'intro-contact' => ['label' => 'Intro Contact Inquiries', 'actions' => [
+                'view'   => ['name' => 'intro-contact.view', 'label' => 'View', 'is_system' => true],
+                'edit'   => ['name' => 'intro-contact.edit', 'label' => 'Edit Status', 'is_system' => true],
+                'reply'  => ['name' => 'intro-contact.reply', 'label' => 'Reply by Email', 'is_system' => true],
+                'delete' => ['name' => 'intro-contact.delete', 'label' => 'Delete', 'is_system' => true],
+            ]],
+            'intro-website-setting' => ['label' => 'Intro Website Settings', 'actions' => [
+                'view' => ['name' => 'intro-website-setting.view', 'label' => 'View', 'is_system' => true],
+                'edit' => ['name' => 'intro-website-setting.edit', 'label' => 'Edit', 'is_system' => true],
+            ]],
+            'intro-navigation' => ['label' => 'Intro Navigation', 'actions' => [
+                'view'   => ['name' => 'intro-navigation.view', 'label' => 'View', 'is_system' => true],
+                'create' => ['name' => 'intro-navigation.create', 'label' => 'Create', 'is_system' => true],
+                'edit'   => ['name' => 'intro-navigation.edit', 'label' => 'Edit', 'is_system' => true],
+                'delete' => ['name' => 'intro-navigation.delete', 'label' => 'Delete', 'is_system' => true],
+                'status' => ['name' => 'intro-navigation.status', 'label' => 'Change Status', 'is_system' => true],
+            ]],
+            'intro-media' => ['label' => 'Intro Media', 'actions' => [
+                'view'   => ['name' => 'intro-media.view', 'label' => 'View', 'is_system' => true],
+                'create' => ['name' => 'intro-media.create', 'label' => 'Upload', 'is_system' => true],
+                'delete' => ['name' => 'intro-media.delete', 'label' => 'Delete', 'is_system' => true],
+            ]],
+            'intro-homepage-section' => ['label' => 'Intro Homepage Sections', 'actions' => [
+                'view'   => ['name' => 'intro-homepage-section.view', 'label' => 'View', 'is_system' => true],
+                'create' => ['name' => 'intro-homepage-section.create', 'label' => 'Create', 'is_system' => true],
+                'edit'   => ['name' => 'intro-homepage-section.edit', 'label' => 'Edit', 'is_system' => true],
+                'delete' => ['name' => 'intro-homepage-section.delete', 'label' => 'Delete', 'is_system' => true],
+                'status' => ['name' => 'intro-homepage-section.status', 'label' => 'Change Status', 'is_system' => true],
+            ]],
+            'intro-page' => ['label' => 'Intro Pages / SEO', 'actions' => [
+                'view'   => ['name' => 'intro-page.view', 'label' => 'View', 'is_system' => true],
+                'create' => ['name' => 'intro-page.create', 'label' => 'Create', 'is_system' => true],
+                'edit'   => ['name' => 'intro-page.edit', 'label' => 'Edit', 'is_system' => true],
+                'delete' => ['name' => 'intro-page.delete', 'label' => 'Delete', 'is_system' => true],
+            ]],
+            'intro-business' => ['label' => 'Intro Business Registrations', 'actions' => [
+                'view' => ['name' => 'intro-business.view', 'label' => 'View', 'is_system' => true],
+                'edit' => ['name' => 'intro-business.edit', 'label' => 'Manage Status', 'is_system' => true],
+            ]],
+
             'my-subscription' => ['label' => 'My Subscription', 'actions' => [
                 'manage' => ['name' => 'my-subscription.manage', 'label' => 'Manage', 'is_system' => false],
             ]],

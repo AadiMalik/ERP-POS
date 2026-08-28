@@ -67,9 +67,18 @@ class PackageController extends Controller
                     })
                     ->ignore($request->package_id, 'package_id')
             ],
-            'price' => 'required|numeric',
+            'price' => 'nullable|numeric|min:0',
+            'price_yearly' => 'nullable|numeric|min:0',
             'duration_days' => 'required|integer',
             'duration_type' => 'required|string',
+            'code' => 'nullable|string|max:50',
+            'tagline' => 'nullable|string|max:255',
+            'badge' => 'nullable|string|max:100',
+            'best_for' => 'nullable|string|max:255',
+            'currency' => 'nullable|string|max:10',
+            'support' => 'nullable|string|max:255',
+            'cta' => 'nullable|string|max:100',
+            'is_custom' => 'nullable|boolean',
         ];
 
         $validate = Validator::make($request->all(), $rules);
@@ -83,14 +92,51 @@ class PackageController extends Controller
             $obj = $request->only([
                 'package_id',
                 'name',
+                'code',
                 'description',
+                'tagline',
+                'badge',
+                'best_for',
                 'price',
+                'price_yearly',
+                'currency',
+                'support',
+                'cta',
                 'order',
                 'duration_type',
                 'duration_days',
             ]);
 
             $obj['status'] = $request->status ?? 1;
+            $obj['is_custom'] = $request->boolean('is_custom');
+            $obj['currency'] = $obj['currency'] ?: 'PKR';
+
+            foreach (['features', 'limitations'] as $jsonField) {
+                $raw = $request->input($jsonField);
+                if (is_string($raw)) {
+                    $lines = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $raw))));
+                    $obj[$jsonField] = $lines;
+                } elseif (is_array($raw)) {
+                    $obj[$jsonField] = $raw;
+                }
+            }
+
+            $compare = [];
+            foreach (['accounting', 'hrPayroll', 'recurring', 'stockTransfers', 'b2bPortal', 'api', 'advancedReports'] as $key) {
+                if ($request->has('compare_' . $key)) {
+                    $val = $request->input('compare_' . $key);
+                    if ($val === 'true' || $val === '1' || $val === 1 || $val === true) {
+                        $compare[$key] = true;
+                    } elseif ($val === 'false' || $val === '0' || $val === 0 || $val === false) {
+                        $compare[$key] = false;
+                    } else {
+                        $compare[$key] = $val;
+                    }
+                }
+            }
+            if ($compare) {
+                $obj['compare'] = $compare;
+            }
 
             // Module access + limits are stored per-key in package_modules
             // (see SubscriptionModuleRegistry) - the legacy is_*_enabled /

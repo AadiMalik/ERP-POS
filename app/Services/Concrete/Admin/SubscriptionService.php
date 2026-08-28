@@ -61,6 +61,11 @@ class SubscriptionService
             $start = now();
             $is_trial = (int) $package->trial_days > 0;
 
+            $cycle_price = $package->priceForCycle($billing_cycle);
+            if (!$is_trial && $cycle_price === null) {
+                throw new Exception('Selected package does not support this billing cycle, or requires a custom quote.');
+            }
+
             $end = $is_trial
                 ? $start->copy()->addDays((int) $package->trial_days)
                 : $this->computeEndDate($start, $package, $billing_cycle);
@@ -76,13 +81,13 @@ class SubscriptionService
                 'billing_cycle' => $billing_cycle,
                 'start_at' => $start,
                 'end_at' => $end,
-                'subtotal' => $package->price,
+                'subtotal' => $cycle_price ?? 0,
                 'discount' => $billing['discount'],
                 'discount_type' => $billing['discount_type'],
                 'discount_amount' => 0,
                 'tax' => $billing['tax'],
                 'tax_amount' => 0,
-                'total' => $package->price,
+                'total' => $cycle_price ?? 0,
                 'payment_status' => $billing['mark_paid'] ? 'paid' : 'unpaid',
                 'payment_method' => $billing['payment_method'],
                 'payment_reference' => $billing['payment_reference'],
@@ -157,6 +162,11 @@ class SubscriptionService
                 : now();
             $end = $this->computeEndDate($start, $package, $billing_cycle);
 
+            $cycle_price = $package->priceForCycle($billing_cycle);
+            if ($cycle_price === null) {
+                throw new Exception('Selected package does not support this billing cycle, or requires a custom quote.');
+            }
+
             $payment = $data['payment'] ?? [];
             $mark_paid = $payment['confirm'] ?? true;
 
@@ -167,13 +177,13 @@ class SubscriptionService
                 'billing_cycle' => $billing_cycle,
                 'start_at' => $start,
                 'end_at' => $end,
-                'subtotal' => $package->price,
+                'subtotal' => $cycle_price,
                 'discount' => $data['discount'] ?? 0,
                 'discount_type' => $data['discount_type'] ?? 'percentage',
                 'discount_amount' => 0,
                 'tax' => $data['tax'] ?? 0,
                 'tax_amount' => 0,
-                'total' => $package->price,
+                'total' => $cycle_price,
                 'payment_status' => $mark_paid ? 'paid' : 'unpaid',
                 'payment_method' => $payment['method'] ?? 'cash',
                 'payment_reference' => $payment['reference'] ?? null,

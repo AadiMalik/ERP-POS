@@ -89,7 +89,12 @@ function ajaxRequest({
             error: function (xhr) {
                 hideLoader();
 
-                let message = xhr.responseJSON?.Message || xhr.responseJSON?.ErrorMessage || "Something went wrong";
+                let message =
+                    xhr.responseJSON?.Message ||
+                    xhr.responseJSON?.ErrorMessage ||
+                    xhr.responseJSON?.message ||
+                    (xhr.status === 404 ? "Record or route not found" : null) ||
+                    "Something went wrong";
 
                 reject({
                     Message: message,
@@ -108,6 +113,7 @@ function editRecord({
     buttonClass,
     url,
     onSuccess,
+    suffix = "/edit",
 }) {
     $("body").off("click", buttonClass).on("click", buttonClass, function (e) {
         e.preventDefault();
@@ -115,7 +121,7 @@ function editRecord({
         let id = $(this).data("id");
 
         ajaxRequest({
-            url: `${url}/${id}/edit`,
+            url: `${url}/${id}${suffix}`,
         })
             .then((response) => {
                 if (typeof onSuccess === "function") {

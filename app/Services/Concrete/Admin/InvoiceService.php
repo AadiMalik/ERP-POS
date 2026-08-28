@@ -22,7 +22,12 @@ class InvoiceService
      */
     public function create(BusinessSubscription $subscription, Package $package, array $billing = []): SubscriptionInvoice
     {
-        $subtotal = (float) $package->price;
+        $billing_cycle = $subscription->billing_cycle ?? $package->duration_type;
+        $resolved = $package->priceForCycle($billing_cycle);
+        if ($resolved === null) {
+            throw new \Exception('Package price is not configured for the selected billing cycle.');
+        }
+        $subtotal = (float) $resolved;
         $discount = (float) ($billing['discount'] ?? 0);
         $discount_type = $billing['discount_type'] ?? 'percentage';
         $tax = (float) ($billing['tax'] ?? 0);
@@ -41,7 +46,7 @@ class InvoiceService
             'business_subscription_id' => $subscription->business_subscription_id,
             'package_id' => $package->package_id,
             'invoice_no' => $this->nextInvoiceNumber(),
-            'billing_cycle' => $subscription->billing_cycle ?? $package->duration_type,
+            'billing_cycle' => $billing_cycle,
             'period_start' => $subscription->start_at,
             'period_end' => $subscription->end_at,
             'subtotal' => $subtotal,

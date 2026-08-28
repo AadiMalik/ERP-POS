@@ -26,6 +26,8 @@ class DatabaseSeeder extends Seeder
             ChartOfAccountsTemplateSeeder::class,
             PermissionSeeder::class,
             PackageSeeder::class,
+            IntroPackageCatalogSeeder::class,
+            IntroCmsSeeder::class,
         ]);
     }
 }

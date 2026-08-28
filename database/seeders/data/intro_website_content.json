@@ -1,0 +1,1797 @@
+{
+  "testimonials": [
+    {
+      "business": "Al-Falah Mart",
+      "name": "Ahsan Raza",
+      "designation": "Owner",
+      "type": "Mart",
+      "rating": 5,
+      "text": "Stock counts finally match what's on the shelf. Three tills, one warehouse, zero end-of-day surprises since we switched."
+    },
+    {
+      "business": "Zainab Textiles & Traders",
+      "name": "Zainab Malik",
+      "designation": "Operations Director",
+      "type": "Wholesale",
+      "rating": 5,
+      "text": "Bulk pricing tiers and supplier bills that reconcile themselves — our accountant now closes the month in two days, not two weeks."
+    },
+    {
+      "business": "UrbanThreads Retail",
+      "name": "Bilal Chaudhry",
+      "designation": "CEO",
+      "type": "Retail",
+      "rating": 5,
+      "text": "Six stores, one live catalog. When we launch a promotion it is on every till and the website at the same moment."
+    },
+    {
+      "business": "Prime Distributors",
+      "name": "Sana Iqbal",
+      "designation": "Head of Supply Chain",
+      "type": "B2B",
+      "rating": 4,
+      "text": "Our retail customers place their own orders through the B2B portal now. Our sales team spends that time on relationships instead of order-taking."
+    },
+    {
+      "business": "Metro Grocers",
+      "name": "Kamran Sheikh",
+      "designation": "Managing Partner",
+      "type": "Mart",
+      "rating": 5,
+      "text": "Expiry-aware batches saved us from write-offs we did not even know we had. The dashboard alone paid for the subscription."
+    },
+    {
+      "business": "Wholesale Hub Lahore",
+      "name": "Farah Naveed",
+      "designation": "Finance Manager",
+      "type": "Wholesale",
+      "rating": 5,
+      "text": "Receivables used to live in three spreadsheets. Now every purchase order, receipt and payable is one connected trail we can actually audit."
+    },
+    {
+      "business": "StyleSquare Retail Chain",
+      "name": "Omar Farooq",
+      "designation": "Regional Manager",
+      "type": "Retail",
+      "rating": 4,
+      "text": "Branch-level stock visibility changed how we do transfers. No more calling five stores to find one size."
+    },
+    {
+      "business": "Al-Noor B2B Supplies",
+      "name": "Hassan Tariq",
+      "designation": "Founder",
+      "type": "B2B",
+      "rating": 5,
+      "text": "Recurring purchase orders fire themselves every month. What used to be a Sunday-night ritual is now something nobody thinks about."
+    }
+  ],
+  "bankDetails": {
+    "bankName": "Meezan Bank Limited",
+    "accountTitle": "Dukanaz Technologies (Pvt.) Ltd.",
+    "accountNumber": "0123 4567 8901234",
+    "iban": "PK36 MEZN 0001 2340 1234 5678",
+    "branch": "Gulberg III Branch, Lahore",
+    "branchCode": "0123",
+    "swift": "MEZNPKKA",
+    "instructions": [
+      "Transfer the exact package amount shown on this page — partial payments delay verification.",
+      "Use your registered business name as the transfer narration / reference where your bank allows it.",
+      "Keep the deposit slip, screenshot or e-receipt — you will upload it on the next step.",
+      "Verification is manual and typically completed within 1 business day of submission."
+    ]
+  },
+  "journeySteps": [
+    {
+      "id": "registration",
+      "label": "Business Registration",
+      "page": "business-registration.html"
+    },
+    {
+      "id": "package",
+      "label": "Package Selection",
+      "page": "pricing.html"
+    },
+    {
+      "id": "subscription",
+      "label": "Subscription",
+      "page": "subscription-checkout.html"
+    },
+    {
+      "id": "bank-transfer",
+      "label": "Bank Transfer",
+      "page": "payment-instructions.html"
+    },
+    {
+      "id": "upload-proof",
+      "label": "Upload Payment Proof",
+      "page": "payment-submission.html"
+    },
+    {
+      "id": "reference-number",
+      "label": "Enter Reference Number",
+      "page": "payment-submission.html"
+    },
+    {
+      "id": "submit-request",
+      "label": "Submit Request",
+      "page": "payment-submission.html"
+    },
+    {
+      "id": "pending-verification",
+      "label": "Pending Verification",
+      "page": "payment-confirmation.html"
+    },
+    {
+      "id": "activation",
+      "label": "Activation",
+      "page": "payment-confirmation.html"
+    }
+  ],
+  "blogCategories": [
+    "Retail Management",
+    "Wholesale & B2B",
+    "Inventory Management",
+    "POS & Sales",
+    "Purchases",
+    "HR & Payroll",
+    "Recurring & Automation",
+    "Multi-Branch",
+    "ERP Benefits",
+    "Digital Transformation",
+    "Business Productivity"
+  ],
+  "blogAuthors": {
+    "ayesha": {
+      "name": "Ayesha Khan",
+      "role": "Product Strategist",
+      "initials": "AK"
+    },
+    "hamza": {
+      "name": "Hamza Siddiqui",
+      "role": "Operations Architect",
+      "initials": "HS"
+    },
+    "nadia": {
+      "name": "Nadia Rehman",
+      "role": "Retail Systems Lead",
+      "initials": "NR"
+    },
+    "imran": {
+      "name": "Imran Qureshi",
+      "role": "People & Payroll Advisor",
+      "initials": "IQ"
+    },
+    "sana": {
+      "name": "Sana Malik",
+      "role": "Digital Transformation Editor",
+      "initials": "SM"
+    }
+  },
+  "blogPosts": [
+    {
+      "slug": "living-core-vs-spreadsheets",
+      "title": "Why a living ERP core beats a stack of spreadsheets",
+      "excerpt": "Disconnected workbooks feel cheap until month-end. A shared core turns every sale, purchase and payroll run into one trail you can actually audit.",
+      "category": "ERP Benefits",
+      "tags": [
+        "ERP",
+        "Single source of truth",
+        "Productivity"
+      ],
+      "keywords": [
+        "erp benefits",
+        "spreadsheets",
+        "reconciliation",
+        "operating system",
+        "dukanaz core"
+      ],
+      "author": "ayesha",
+      "publishedAt": "2026-08-12",
+      "readMinutes": 8,
+      "featured": true,
+      "visual": {
+        "accent": "indigo",
+        "motif": "orbit"
+      },
+      "related": [
+        "reports-not-spreadsheets",
+        "digital-transformation-pk",
+        "live-revenue-stream"
+      ],
+      "body": [
+        {
+          "type": "p",
+          "text": "Most growing businesses in Pakistan do not start with an ERP. They start with a till, a purchase book and a payroll file. Those tools work — until the third branch opens, the accountant is reconciling three catalogs, and nobody can say what is actually on the shelf tonight."
+        },
+        {
+          "type": "p",
+          "text": "Dukanaz is built as a living core: Sales, Purchases, Inventory, HR, Payroll, Accounting and Recurring operations all write to the same record the instant something happens. That is the difference between an operating system and a folder of workbooks."
+        },
+        {
+          "type": "h2",
+          "text": "What “connected” actually means"
+        },
+        {
+          "type": "p",
+          "text": "A connected system is not a dashboard glued onto exports. When a cashier rings a sale, stock drops, the receivable (if it is credit) appears, and the report already knows. When a purchase order is received in part, the warehouse and the supplier payable both move — without a nightly import."
+        },
+        {
+          "type": "ul",
+          "items": [
+            "One catalog and one promotion engine across every till and the website",
+            "Branch-scoped stock, staff and books that still roll up to HQ",
+            "Journals that post themselves from operational events",
+            "Audit logs that attribute every change to a person and a time"
+          ]
+        },
+        {
+          "type": "callout",
+          "title": "Signal, not a second system",
+          "text": "If a new module cannot write to the same core, it is a second system you will eventually reconcile. Dukanaz refuses that pattern — forty modules, one shared record."
+        },
+        {
+          "type": "h2",
+          "text": "The cost of staying on spreadsheets"
+        },
+        {
+          "type": "p",
+          "text": "The hidden cost is not the software licence you avoided. It is the Sunday-night stock count, the invoice that exists in two versions, and the payroll run that cannot see last week’s overtime. Teams that switch describe the same feeling: the business finally stops arguing with its own numbers."
+        },
+        {
+          "type": "ol",
+          "items": [
+            "Map the events that already happen (sale, receipt, transfer, clock-in, recurring bill)",
+            "Put those events on one core instead of exporting them between tools",
+            "Let accounting, reports and notifications consume the same stream"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "stock-counts-you-can-trust",
+      "title": "Stock counts you can actually trust — across every warehouse",
+      "excerpt": "A sale, a transfer or a partial receipt should light up the right cell in the grid instantly. That is how inventory stops being a guess.",
+      "category": "Inventory Management",
+      "tags": [
+        "Inventory",
+        "Warehouses",
+        "Stock transfers"
+      ],
+      "keywords": [
+        "inventory management",
+        "warehouse",
+        "stock count",
+        "SKU",
+        "low stock",
+        "barcode"
+      ],
+      "author": "hamza",
+      "publishedAt": "2026-08-04",
+      "readMinutes": 7,
+      "featured": true,
+      "visual": {
+        "accent": "teal",
+        "motif": "grid"
+      },
+      "related": [
+        "one-hq-many-branches",
+        "supplier-to-shelf",
+        "retail-one-catalog"
+      ],
+      "body": [
+        {
+          "type": "p",
+          "text": "Inventory is only useful if the number on screen matches the shelf. In a multi-location operation that means every branch and warehouse is a live cell — not a weekly export from a handheld that nobody trusts."
+        },
+        {
+          "type": "h2",
+          "text": "The grid, not the guess"
+        },
+        {
+          "type": "p",
+          "text": "Dukanaz treats each location as a scoped stock ledger. A POS checkout, a stock transfer, a purchase receipt or a sales return writes the same SKU in the same moment. Low-stock cells light up before a till rings a line you cannot fulfil."
+        },
+        {
+          "type": "ul",
+          "items": [
+            "Real-time on-hand per branch and warehouse",
+            "Transfers that decrement one location and increment the other as a single event",
+            "Variations (size, color, pack size) as first-class SKUs, barcode-ready",
+            "Unlimited warehouses on higher packages — same core, same reports"
+          ]
+        },
+        {
+          "type": "callout",
+          "title": "Partial receipts are normal",
+          "text": "Suppliers split shipments. A purchase order that arrives in two trucks should update stock and the payable in two honest steps — not wait for a “complete” tick that never comes."
+        },
+        {
+          "type": "h2",
+          "text": "What operators actually check"
+        },
+        {
+          "type": "p",
+          "text": "Branch managers want “what can I sell in the next two hours.” HQ wants “where is the slow mover sitting.” Both questions are the same grid at different zoom levels. When the grid is live, replenishment stops being a WhatsApp chain."
+        }
+      ]
+    },
+    {
+      "slug": "pos-that-never-stops",
+      "title": "The counter at full speed: POS that never stops a sale",
+      "excerpt": "Barcode scanning, split payments and an offline mode that keeps the queue moving — every checkout still writes back to the core.",
+      "category": "POS & Sales",
+      "tags": [
+        "POS",
+        "Checkout",
+        "Offline"
+      ],
+      "keywords": [
+        "point of sale",
+        "barcode",
+        "split payment",
+        "offline pos",
+        "till",
+        "counter"
+      ],
+      "author": "nadia",
+      "publishedAt": "2026-07-28",
+      "readMinutes": 6,
+      "featured": true,
+      "visual": {
+        "accent": "indigo",
+        "motif": "pulse"
+      },
+      "related": [
+        "live-revenue-stream",
+        "retail-one-catalog",
+        "stock-counts-you-can-trust"
+      ],
+      "body": [
+        {
+          "type": "p",
+          "text": "A point of sale that pauses for a dropped connection is a queue that starts arguing. Dukanaz POS is built for the counter: scan, split tender, print, and keep moving. When the line comes back, every ticket syncs to the same core the website and wholesale desk already use."
+        },
+        {
+          "type": "h2",
+          "text": "What “full speed” looks like"
+        },
+        {
+          "type": "ul",
+          "items": [
+            "Barcode and QR scanning on every SKU and variation",
+            "Split payments across cash, card and wallet without a second ticket",
+            "Offline mode that never blocks a sale, then syncs in order",
+            "Promotions and price lists that HQ published — not a local price book"
+          ]
+        },
+        {
+          "type": "callout",
+          "title": "The till is not a silo",
+          "text": "Checkout is an event, not a file. Stock, cash drawer and the day’s revenue stream all move with it. That is why the live ticker on the command center is not a demo — it is the same write path."
+        },
+        {
+          "type": "h2",
+          "text": "Marts and high-turn retail"
+        },
+        {
+          "type": "p",
+          "text": "Grocery and general marts live on tight margins and fast lanes. Expiry-aware batches and real-time shelf stock keep a high-turnover floor from selling what is already gone. The same POS serves a boutique with six SKUs and a mart with six thousand — the core does not change, the catalog does."
+        }
+      ]
+    },
+    {
+      "slug": "wholesale-b2b-portal",
+      "title": "Wholesale and B2B: bulk pricing, self-service ordering, one payable trail",
+      "excerpt": "Tiered price lists and a B2B portal let retail customers place their own orders — while supplier bills still reconcile themselves.",
+      "category": "Wholesale & B2B",
+      "tags": [
+        "Wholesale",
+        "B2B portal",
+        "Pricing engine"
+      ],
+      "keywords": [
+        "wholesale management",
+        "b2b operations",
+        "bulk pricing",
+        "ordering portal",
+        "payables"
+      ],
+      "author": "hamza",
+      "publishedAt": "2026-07-19",
+      "readMinutes": 7,
+      "featured": false,
+      "visual": {
+        "accent": "amber",
+        "motif": "flow"
+      },
+      "related": [
+        "supplier-to-shelf",
+        "living-core-vs-spreadsheets",
+        "reports-not-spreadsheets"
+      ],
+      "body": [
+        {
+          "type": "p",
+          "text": "Wholesale is not retail with bigger cartons. It is tiered pricing, purchase orders, credit terms and a customer who would rather order at midnight than wait for a sales call. Dukanaz treats that as a first-class channel, not an export from the till."
+        },
+        {
+          "type": "h2",
+          "text": "Price lists that know the buyer"
+        },
+        {
+          "type": "p",
+          "text": "The pricing engine carries sale types, order types and customer tiers. A distributor on a contracted slab should never see the walk-in rate. When the slab changes at HQ, every subsequent B2B invoice and portal order picks it up — no “please update the Excel.”"
+        },
+        {
+          "type": "ul",
+          "items": [
+            "Self-service B2B ordering portal on Business and Enterprise packages",
+            "Quotations that convert to orders without retyping lines",
+            "Supplier bills that post into accounts payable on receipt",
+            "Credit and receivable balances visible to the people who should see them"
+          ]
+        },
+        {
+          "type": "callout",
+          "title": "Sales time is for relationships",
+          "text": "Teams that open the portal stop using salespeople as order-takers. The trail from portal cart to warehouse pick to invoice is the same core the counter already uses."
+        },
+        {
+          "type": "h2",
+          "text": "Distribution without a second ledger"
+        },
+        {
+          "type": "p",
+          "text": "Multi-warehouse routing, stock transfers and payables live together. That is how a Lahore hub and a Karachi depot stay honest without a weekly merge of three workbooks."
+        }
+      ]
+    },
+    {
+      "slug": "one-hq-many-branches",
+      "title": "One HQ, many locations: how multi-branch groups stay in sync",
+      "excerpt": "Independent stock and staff at the branch, one consolidated view at HQ — transfers stop being a phone tree.",
+      "category": "Multi-Branch",
+      "tags": [
+        "Multi-branch",
+        "HQ",
+        "Transfers"
+      ],
+      "keywords": [
+        "multi-branch management",
+        "locations",
+        "stock transfer",
+        "consolidated reporting",
+        "roles"
+      ],
+      "author": "ayesha",
+      "publishedAt": "2026-07-08",
+      "readMinutes": 6,
+      "featured": false,
+      "visual": {
+        "accent": "teal",
+        "motif": "nodes"
+      },
+      "related": [
+        "stock-counts-you-can-trust",
+        "retail-one-catalog",
+        "employee-to-payroll"
+      ],
+      "body": [
+        {
+          "type": "p",
+          "text": "A second branch is a celebration. A fifth branch is a coordination problem. Multi-branch groups need scoping — this cashier cannot see that warehouse — and a roll-up that finance actually believes."
+        },
+        {
+          "type": "h2",
+          "text": "Scoped where it must be, shared where it should be"
+        },
+        {
+          "type": "ul",
+          "items": [
+            "Branch-level stock, staff and cash drawers",
+            "A shared catalog and promotion engine unless you deliberately override",
+            "Transfers as a first-class document, not a verbal “send two cartons”",
+            "Roles that gate modules and locations, with an audit trail"
+          ]
+        },
+        {
+          "type": "callout",
+          "title": "Finding a size should not take five calls",
+          "text": "Regional managers describe the same win: they can see which location still has the SKU before they move a van. That is the grid at HQ zoom, not a spreadsheet emailed at 11pm."
+        },
+        {
+          "type": "h2",
+          "text": "Packages that match the map"
+        },
+        {
+          "type": "p",
+          "text": "Starter is built for a single shop. Growth opens up to five branches and stock transfers. Business and Enterprise stretch to fifteen locations or unlimited — same core, clearer ceilings, prices in PKR so finance can plan without a currency surprise."
+        }
+      ]
+    },
+    {
+      "slug": "employee-to-payroll",
+      "title": "From employee to payroll: one connected people cycle",
+      "excerpt": "Departments, shifts and attendance feed salary processing — so month-end is not a second payroll spreadsheet.",
+      "category": "HR & Payroll",
+      "tags": [
+        "HR",
+        "Payroll",
+        "Attendance"
+      ],
+      "keywords": [
+        "hr payroll",
+        "attendance",
+        "shifts",
+        "leave",
+        "payslip",
+        "employees"
+      ],
+      "author": "imran",
+      "publishedAt": "2026-06-30",
+      "readMinutes": 7,
+      "featured": false,
+      "visual": {
+        "accent": "indigo",
+        "motif": "flow"
+      },
+      "related": [
+        "set-it-once-recurring",
+        "one-hq-many-branches",
+        "living-core-vs-spreadsheets"
+      ],
+      "body": [
+        {
+          "type": "p",
+          "text": "Payroll goes wrong when attendance lives in one file, designations in another, and overtime in a manager’s notebook. Dukanaz connects the cycle: employee record, department, shift, clock-in, leave balance, payroll run, payslip."
+        },
+        {
+          "type": "h2",
+          "text": "The cycle, named"
+        },
+        {
+          "type": "ol",
+          "items": [
+            "Onboard the employee with role and location scope",
+            "Assign departments, designations and shift patterns",
+            "Capture attendance that payroll can actually read",
+            "Run salary with leave and overtime already in the numbers",
+            "Issue the payslip from the same event — not a paste into Word"
+          ]
+        },
+        {
+          "type": "callout",
+          "title": "People data is operational data",
+          "text": "A cashier’s till permissions and a cashier’s pay run should not disagree about which branch they work. Roles, attendance and payroll share the org tree so they cannot drift."
+        },
+        {
+          "type": "h2",
+          "text": "What Growth unlocks"
+        },
+        {
+          "type": "p",
+          "text": "HR & Payroll is part of Growth and above. Starter stays lean for a single shop that is not ready to run salaries in the core yet. When you are, you do not migrate a second product — you switch the module on against the employees you already have."
+        }
+      ]
+    },
+    {
+      "slug": "set-it-once-recurring",
+      "title": "Set it once. It runs forever: recurring operations that post themselves",
+      "excerpt": "Recurring sales, purchases, expenses and subscription billing fire on schedule and post the result — nobody thinks about Sunday night anymore.",
+      "category": "Recurring & Automation",
+      "tags": [
+        "Recurring",
+        "Automation",
+        "Subscriptions"
+      ],
+      "keywords": [
+        "recurring operations",
+        "business automation",
+        "subscription billing",
+        "scheduled transactions",
+        "notifications"
+      ],
+      "author": "sana",
+      "publishedAt": "2026-06-18",
+      "readMinutes": 6,
+      "featured": false,
+      "visual": {
+        "accent": "teal",
+        "motif": "orbit"
+      },
+      "related": [
+        "employee-to-payroll",
+        "wholesale-b2b-portal",
+        "living-core-vs-spreadsheets"
+      ],
+      "body": [
+        {
+          "type": "p",
+          "text": "The work that happens every month is the work that burns people out: the standing purchase, the retainer invoice, the rent expense, the payroll-adjacent cost. Recurring operations exist so those events fire when the calendar says so — and the ledger already knows."
+        },
+        {
+          "type": "h2",
+          "text": "Four loops, one scheduler"
+        },
+        {
+          "type": "ul",
+          "items": [
+            "Recurring sales — retainers, replenishment contracts, subscription lines",
+            "Recurring purchases — standing orders with suppliers you already trust",
+            "Recurring expenses — rent, retainers, utilities that should never be forgotten",
+            "Subscription billing — the same core the website already posts into"
+          ]
+        },
+        {
+          "type": "callout",
+          "title": "Automation is a notification with a result",
+          "text": "When a task fires, Dukanaz creates the transaction and routes an alert to the owner. That is not a reminder in someone’s inbox hoping they remember to type the invoice."
+        },
+        {
+          "type": "h2",
+          "text": "Approvals still belong on sensitive actions"
+        },
+        {
+          "type": "p",
+          "text": "Recurring does not mean unsupervised. Approval workflows on Business and Enterprise can still gate unusual amounts. The point is that the routine path does not wait for a hero."
+        }
+      ]
+    },
+    {
+      "slug": "supplier-to-shelf",
+      "title": "From purchase order to payable — without a reconciliation spreadsheet",
+      "excerpt": "Raise a PO, receive it in full or in part, and watch stock and the supplier’s balance update on their own.",
+      "category": "Purchases",
+      "tags": [
+        "Purchases",
+        "Suppliers",
+        "Payables"
+      ],
+      "keywords": [
+        "purchases",
+        "purchase order",
+        "goods received",
+        "supplier management",
+        "accounts payable"
+      ],
+      "author": "hamza",
+      "publishedAt": "2026-06-05",
+      "readMinutes": 6,
+      "featured": false,
+      "visual": {
+        "accent": "amber",
+        "motif": "flow"
+      },
+      "related": [
+        "stock-counts-you-can-trust",
+        "wholesale-b2b-portal",
+        "live-revenue-stream"
+      ],
+      "body": [
+        {
+          "type": "p",
+          "text": "Purchasing is a path, not a form: supplier, purchase order, goods received, stock on hand, payable posted. If any step is a separate workbook, the path will lie to you the first time a shipment splits."
+        },
+        {
+          "type": "h2",
+          "text": "The supply path"
+        },
+        {
+          "type": "ol",
+          "items": [
+            "Raise the PO against a vendor who already lives in the directory",
+            "Receive in full or in part — split trucks are normal",
+            "Watch the warehouse cell update and the payable appear",
+            "Return stock when you must, and watch the payable reverse with it"
+          ]
+        },
+        {
+          "type": "callout",
+          "title": "POS availability is downstream",
+          "text": "A receipt that does not reach the till is a stockout you will discover from a customer, not a dashboard. Dukanaz feeds purchasing straight into availability so the counter is never guessing."
+        },
+        {
+          "type": "h2",
+          "text": "Returns close the loop"
+        },
+        {
+          "type": "p",
+          "text": "Purchase returns are not a polite email. They are a document that sends stock back and adjusts what you owe. Sales returns do the mirror image on the customer side. Both keep the grid honest."
+        }
+      ]
+    },
+    {
+      "slug": "retail-one-catalog",
+      "title": "One catalog, every till: running a retail chain from a single core",
+      "excerpt": "Centralized pricing and promotions across every storefront — physical and online — with per-branch stock you can actually see.",
+      "category": "Retail Management",
+      "tags": [
+        "Retail",
+        "Catalog",
+        "Promotions"
+      ],
+      "keywords": [
+        "retail management",
+        "pricing",
+        "promotions",
+        "multi-store",
+        "ecommerce sync"
+      ],
+      "author": "nadia",
+      "publishedAt": "2026-05-22",
+      "readMinutes": 6,
+      "featured": false,
+      "visual": {
+        "accent": "indigo",
+        "motif": "grid"
+      },
+      "related": [
+        "pos-that-never-stops",
+        "one-hq-many-branches",
+        "live-revenue-stream"
+      ],
+      "body": [
+        {
+          "type": "p",
+          "text": "Retail chains fail the customer when the mall till and the website disagree on price, or when a campaign is live in one city and forgotten in another. One catalog and one promotion engine is the only design that scales past two stores."
+        },
+        {
+          "type": "h2",
+          "text": "What centralization is for"
+        },
+        {
+          "type": "ul",
+          "items": [
+            "A single SKU list with variations, barcodes and images the core already knows",
+            "Promotions and vouchers that land on every till and the storefront together",
+            "Per-branch on-hand so you do not advertise what a location cannot fulfil",
+            "Website / e-commerce as another window into the same catalog — not a second shop"
+          ]
+        },
+        {
+          "type": "callout",
+          "title": "Fashion, grocery, general trade",
+          "text": "The pattern is the same whether you sell garments, groceries or general merchandise. Configure how you sell — do not fork the system. Dukanaz is built for retail chains, marts, wholesale and B2B operations."
+        },
+        {
+          "type": "h2",
+          "text": "Discounts without a side system"
+        },
+        {
+          "type": "p",
+          "text": "Vouchers, sale types and the pricing engine live next to POS. A campaign is a core event. When it ends, every channel ends with it."
+        }
+      ]
+    },
+    {
+      "slug": "digital-transformation-pk",
+      "title": "Digital transformation for growing businesses — without ripping out how you already sell",
+      "excerpt": "Transformation is not a new logo on old exports. It is putting the events you already run — sales, stock, people, payables — on one core.",
+      "category": "Digital Transformation",
+      "tags": [
+        "Digital transformation",
+        "Change",
+        "Pakistan"
+      ],
+      "keywords": [
+        "digital transformation",
+        "erp adoption",
+        "pakistan business",
+        "modernization",
+        "change management"
+      ],
+      "author": "sana",
+      "publishedAt": "2026-05-09",
+      "readMinutes": 8,
+      "featured": false,
+      "visual": {
+        "accent": "teal",
+        "motif": "pulse"
+      },
+      "related": [
+        "living-core-vs-spreadsheets",
+        "reports-not-spreadsheets",
+        "set-it-once-recurring"
+      ],
+      "body": [
+        {
+          "type": "p",
+          "text": "“Digital transformation” is often a slide that means “we bought another app.” Real transformation is quieter: the sale, the receipt, the transfer and the payroll run all land in one place, in PKR, with an audit trail a bank or a partner can actually read."
+        },
+        {
+          "type": "h2",
+          "text": "Start from the events, not the modules"
+        },
+        {
+          "type": "p",
+          "text": "Teams that succeed list the events that already happen in the business. Then they put those events on Dukanaz instead of adding a reporting layer on top of the old files. POS first, or purchasing first, or multi-branch stock first — the order follows the pain, not a vendor checklist."
+        },
+        {
+          "type": "ol",
+          "items": [
+            "Pick the event that currently causes the most arguments (usually stock or receivables)",
+            "Run it live in the core beside the old process for a short overlap",
+            "Turn off the workbook when the numbers stop disagreeing",
+            "Add the next event — payroll, recurring, B2B — against the same record"
+          ]
+        },
+        {
+          "type": "callout",
+          "title": "PKR, bank transfer, no surprise stack",
+          "text": "This prototype prices packages in Pakistani Rupees and walks a bank-transfer subscription. Transformation should feel like provisioning infrastructure, not a foreign checkout that finance cannot explain to the board."
+        },
+        {
+          "type": "h2",
+          "text": "Website and mobile are not a separate company"
+        },
+        {
+          "type": "p",
+          "text": "The Admin Panel is the source of truth. The storefront and the mobile app are other windows into it. That is how digital channels stop becoming a second inventory."
+        }
+      ]
+    },
+    {
+      "slug": "live-revenue-stream",
+      "title": "Every sale, the instant it happens: POS, web and wholesale in one stream",
+      "excerpt": "No nightly import. Quotations, orders and checkouts land in the same live revenue view — so HQ is never waiting on a branch file.",
+      "category": "POS & Sales",
+      "tags": [
+        "Sales",
+        "Quotations",
+        "Live data"
+      ],
+      "keywords": [
+        "sales",
+        "quotations",
+        "orders",
+        "invoices",
+        "live revenue",
+        "channels"
+      ],
+      "author": "nadia",
+      "publishedAt": "2026-04-21",
+      "readMinutes": 5,
+      "featured": false,
+      "visual": {
+        "accent": "indigo",
+        "motif": "bars"
+      },
+      "related": [
+        "pos-that-never-stops",
+        "wholesale-b2b-portal",
+        "reports-not-spreadsheets"
+      ],
+      "body": [
+        {
+          "type": "p",
+          "text": "Revenue that arrives tomorrow is not operational. Cashiers, the website and the wholesale desk should all write into one stream so a regional manager can see today while today is still happening."
+        },
+        {
+          "type": "h2",
+          "text": "Quote to cash, without retyping"
+        },
+        {
+          "type": "ul",
+          "items": [
+            "Quotations that become orders without a second document",
+            "Orders tracked end-to-end into invoices",
+            "Sales returns that put stock back and unwind the receivable",
+            "Customer profiles, loyalty and balances on the same record"
+          ]
+        },
+        {
+          "type": "callout",
+          "title": "Channels are inputs, not islands",
+          "text": "A website order is not “e-commerce data.” It is a sale. A POS ticket is not “till data.” It is a sale. Wholesale is a sale with a different price list. One stream, three doors."
+        },
+        {
+          "type": "h2",
+          "text": "What the ticker is teaching"
+        },
+        {
+          "type": "p",
+          "text": "The live transaction stream on the Dukanaz command center is a product decision: if HQ cannot watch the business move, the core is not live enough. Branch names, amounts in PKR, no batch window."
+        }
+      ]
+    },
+    {
+      "slug": "reports-not-spreadsheets",
+      "title": "Answers, not spreadsheets: turning operations into decisions",
+      "excerpt": "Forty-plus live reports from the same core — sales, inventory, staff and financial views you can export when a partner asks, not rebuild by hand.",
+      "category": "Business Productivity",
+      "tags": [
+        "Reports",
+        "Analytics",
+        "Decisions"
+      ],
+      "keywords": [
+        "business productivity",
+        "reports",
+        "analytics",
+        "margin",
+        "kpi",
+        "export"
+      ],
+      "author": "ayesha",
+      "publishedAt": "2026-04-07",
+      "readMinutes": 6,
+      "featured": false,
+      "visual": {
+        "accent": "teal",
+        "motif": "bars"
+      },
+      "related": [
+        "living-core-vs-spreadsheets",
+        "digital-transformation-pk",
+        "stock-counts-you-can-trust"
+      ],
+      "body": [
+        {
+          "type": "p",
+          "text": "A report that takes two days to assemble is a memoir, not a control loop. Productivity in an operations business is the time between “what happened” and “what we will do.” Dukanaz generates sales, inventory, financial and staff-performance views from live data."
+        },
+        {
+          "type": "h2",
+          "text": "What “live” buys you"
+        },
+        {
+          "type": "ul",
+          "items": [
+            "Revenue and margin without a VLOOKUP across branch files",
+            "Stock and transfer views that match the warehouse grid",
+            "Receivables and payables that accounting already posted",
+            "Staff and payroll summaries that HR already ran"
+          ]
+        },
+        {
+          "type": "callout",
+          "title": "Export when you must, operate when you can",
+          "text": "Partners and banks will still ask for a file. Export exists for that moment. The rest of the week, the decision should happen on the core — not in a copy that started drifting at 9am."
+        },
+        {
+          "type": "h2",
+          "text": "Limits that keep the prototype honest"
+        },
+        {
+          "type": "p",
+          "text": "Packages publish user, branch, product and invoice ceilings in PKR so you provision for scale instead of discovering a wall mid-season. Starter is a single shop. Growth is a chain finding its pace. Business is wholesale and B2B. Enterprise is unlimited on dedicated infrastructure. Pick the node that matches the map, then register — still a frontend prototype, still a real decision frame."
+        }
+      ]
+    }
+  ],
+  "seedComments": {
+    "living-core-vs-spreadsheets": [
+      {
+        "id": "seed-1",
+        "slug": "living-core-vs-spreadsheets",
+        "name": "Ahsan Raza",
+        "body": "This is exactly the argument I used with my partners. Three tills, one warehouse — the moment stock matched the shelf we stopped arguing with the books.",
+        "createdAt": "2026-08-14T09:12:00.000Z"
+      },
+      {
+        "id": "seed-2",
+        "slug": "living-core-vs-spreadsheets",
+        "name": "Farah Naveed",
+        "body": "Receivables used to live in three files. A single core is not a slogan when month-end actually closes.",
+        "createdAt": "2026-08-16T18:40:00.000Z"
+      }
+    ],
+    "stock-counts-you-can-trust": [
+      {
+        "id": "seed-3",
+        "slug": "stock-counts-you-can-trust",
+        "name": "Omar Farooq",
+        "body": "Branch-level visibility changed how we do transfers. No more calling five stores to find one size.",
+        "createdAt": "2026-08-06T11:05:00.000Z"
+      }
+    ]
+  },
+  "site": {
+    "name": "Dukanaz",
+    "email": "hello@dukanaz.com",
+    "phone": "+1 (415) 555-0182",
+    "phoneHours": "Mon–Fri, 9am–6pm",
+    "tagline": "A living business operating system — Sales, Purchases, Inventory, HR/Payroll and Accounting connected around one core.",
+    "copyrightNote": "DUKANAZ // COMMAND_CENTER — UI/UX design prototype"
+  },
+  "navLinks": [
+    {
+      "to": "/pricing",
+      "label": "Pricing",
+      "match": "pricing"
+    },
+    {
+      "to": "/blog",
+      "label": "Blog",
+      "match": "blog"
+    },
+    {
+      "to": "/#contact",
+      "label": "Contact",
+      "match": "contact"
+    }
+  ],
+  "tickerItems": [
+    [
+      "Downtown Branch",
+      "Rs. 48,200"
+    ],
+    [
+      "Website Order #4821",
+      "Rs. 91,820"
+    ],
+    [
+      "Warehouse Outlet",
+      "Rs. 12,950"
+    ],
+    [
+      "Mall Kiosk POS",
+      "Rs. 7,430"
+    ],
+    [
+      "Wholesale Order",
+      "Rs. 234,000"
+    ],
+    [
+      "Uptown Branch",
+      "Rs. 21,290"
+    ],
+    [
+      "Mobile Checkout",
+      "Rs. 5,810"
+    ],
+    [
+      "Distribution Order",
+      "Rs. 112,000"
+    ]
+  ],
+  "railModules": [
+    {
+      "i": "01",
+      "name": "Dashboard",
+      "desc": "Live command view of the business."
+    },
+    {
+      "i": "02",
+      "name": "Point of Sale",
+      "desc": "Counter & mobile checkout."
+    },
+    {
+      "i": "03",
+      "name": "Sales",
+      "desc": "Quotations, orders, invoices."
+    },
+    {
+      "i": "04",
+      "name": "Purchases",
+      "desc": "PO to supplier bill, automatically."
+    },
+    {
+      "i": "05",
+      "name": "Products & Variations",
+      "desc": "SKUs, size/color, barcodes."
+    },
+    {
+      "i": "06",
+      "name": "Inventory Management",
+      "desc": "Real-time, per-branch stock."
+    },
+    {
+      "i": "07",
+      "name": "Stock Transfers",
+      "desc": "Move inventory between locations."
+    },
+    {
+      "i": "08",
+      "name": "Warehouses",
+      "desc": "Unlimited stock locations."
+    },
+    {
+      "i": "09",
+      "name": "Branches / Locations",
+      "desc": "Independent stock & staff scoping."
+    },
+    {
+      "i": "10",
+      "name": "Customer Management",
+      "desc": "Profiles, loyalty, balances."
+    },
+    {
+      "i": "11",
+      "name": "Supplier Management",
+      "desc": "Vendor directory & payables."
+    },
+    {
+      "i": "12",
+      "name": "Quotations",
+      "desc": "Turn a quote into an order."
+    },
+    {
+      "i": "13",
+      "name": "Order Management",
+      "desc": "Track orders end-to-end."
+    },
+    {
+      "i": "14",
+      "name": "Sales Returns",
+      "desc": "Refunds tracked back to stock."
+    },
+    {
+      "i": "15",
+      "name": "Purchase Returns",
+      "desc": "Send stock back, adjust payables."
+    },
+    {
+      "i": "16",
+      "name": "Payments",
+      "desc": "Every method, reconciled."
+    },
+    {
+      "i": "17",
+      "name": "Expenses",
+      "desc": "Categorized spend tracking."
+    },
+    {
+      "i": "18",
+      "name": "Cash Management",
+      "desc": "Till counts & cash drawers."
+    },
+    {
+      "i": "19",
+      "name": "Bank Management",
+      "desc": "Accounts & reconciliation."
+    },
+    {
+      "i": "20",
+      "name": "Accounts Receivable",
+      "desc": "What customers owe you."
+    },
+    {
+      "i": "21",
+      "name": "Accounts Payable",
+      "desc": "What you owe suppliers."
+    },
+    {
+      "i": "22",
+      "name": "Automated Accounting",
+      "desc": "Journals post themselves."
+    },
+    {
+      "i": "23",
+      "name": "Tax Management",
+      "desc": "Multi-rate, multi-region."
+    },
+    {
+      "i": "24",
+      "name": "Discounts & Vouchers",
+      "desc": "Promotions & campaign codes."
+    },
+    {
+      "i": "25",
+      "name": "Pricing Engine",
+      "desc": "Sale types, tiers, order types."
+    },
+    {
+      "i": "26",
+      "name": "Delivery Management",
+      "desc": "Riders, routes, proof of delivery."
+    },
+    {
+      "i": "27",
+      "name": "B2B Ordering Portal",
+      "desc": "Self-service wholesale ordering."
+    },
+    {
+      "i": "28",
+      "name": "Employees",
+      "desc": "Records, documents, roles."
+    },
+    {
+      "i": "29",
+      "name": "Departments & Designations",
+      "desc": "Org structure that scales."
+    },
+    {
+      "i": "30",
+      "name": "Attendance & Shifts",
+      "desc": "Clock-ins tied to payroll."
+    },
+    {
+      "i": "31",
+      "name": "Leave Management",
+      "desc": "Requests, approvals, balances."
+    },
+    {
+      "i": "32",
+      "name": "Payroll",
+      "desc": "Salary processing, automated."
+    },
+    {
+      "i": "33",
+      "name": "Recurring Transactions",
+      "desc": "Sales, purchases & expenses on autopilot."
+    },
+    {
+      "i": "34",
+      "name": "Notifications & Automation",
+      "desc": "Alerts routed to the right person."
+    },
+    {
+      "i": "35",
+      "name": "Roles & Permissions",
+      "desc": "Module-level access control."
+    },
+    {
+      "i": "36",
+      "name": "Audit & Activity Logs",
+      "desc": "Every change, attributed."
+    },
+    {
+      "i": "37",
+      "name": "Approval Workflows",
+      "desc": "Sign-off on sensitive actions."
+    },
+    {
+      "i": "38",
+      "name": "Reports & Analytics",
+      "desc": "40+ live, drillable reports."
+    },
+    {
+      "i": "39",
+      "name": "Website / E-commerce",
+      "desc": "A storefront the core already knows."
+    },
+    {
+      "i": "40",
+      "name": "Mobile App & API",
+      "desc": "Same core, in your pocket."
+    }
+  ],
+  "explorerGroups": [
+    {
+      "id": "all",
+      "label": "All Modules"
+    },
+    {
+      "id": "sales",
+      "label": "Sales & Channels"
+    },
+    {
+      "id": "ops",
+      "label": "Inventory & Ops"
+    },
+    {
+      "id": "finance",
+      "label": "Finance"
+    },
+    {
+      "id": "people",
+      "label": "HR & Payroll"
+    },
+    {
+      "id": "security",
+      "label": "Automation & Security"
+    }
+  ],
+  "explorerCards": [
+    {
+      "group": "sales",
+      "name": "POS",
+      "desc": "Checkout, any counter",
+      "icon": "pos"
+    },
+    {
+      "group": "sales",
+      "name": "Quotations & Orders",
+      "desc": "Quote to invoice",
+      "icon": "doc"
+    },
+    {
+      "group": "sales",
+      "name": "Sales Returns",
+      "desc": "Refunds, tracked",
+      "icon": "undo"
+    },
+    {
+      "group": "sales",
+      "name": "E-commerce",
+      "desc": "Synced storefront",
+      "icon": "cart"
+    },
+    {
+      "group": "sales",
+      "name": "Delivery Management",
+      "desc": "Riders & routes",
+      "icon": "undo"
+    },
+    {
+      "group": "sales",
+      "name": "B2B Ordering Portal",
+      "desc": "Self-service wholesale",
+      "icon": "building"
+    },
+    {
+      "group": "sales",
+      "name": "Discounts & Vouchers",
+      "desc": "Promotions engine",
+      "icon": "chart"
+    },
+    {
+      "group": "sales",
+      "name": "Customer Management",
+      "desc": "Profiles & loyalty",
+      "icon": "user"
+    },
+    {
+      "group": "ops",
+      "name": "Inventory",
+      "desc": "Real-time stock",
+      "icon": "layers"
+    },
+    {
+      "group": "ops",
+      "name": "Stock Transfers",
+      "desc": "Branch to branch",
+      "icon": "transfer"
+    },
+    {
+      "group": "ops",
+      "name": "Warehouses",
+      "desc": "Unlimited locations",
+      "icon": "pin"
+    },
+    {
+      "group": "ops",
+      "name": "Products & Variations",
+      "desc": "SKUs, size, color",
+      "icon": "box"
+    },
+    {
+      "group": "ops",
+      "name": "Purchases & Returns",
+      "desc": "Full supply loop",
+      "icon": "swap"
+    },
+    {
+      "group": "ops",
+      "name": "Supplier Management",
+      "desc": "Vendor directory",
+      "icon": "truck"
+    },
+    {
+      "group": "ops",
+      "name": "Branches / Locations",
+      "desc": "Independent scoping",
+      "icon": "pin"
+    },
+    {
+      "group": "ops",
+      "name": "Barcode & QR",
+      "desc": "Scan-ready",
+      "icon": "scan"
+    },
+    {
+      "group": "finance",
+      "name": "Automated Accounting",
+      "desc": "Self-posting ledgers",
+      "icon": "bank"
+    },
+    {
+      "group": "finance",
+      "name": "Payments",
+      "desc": "Every method",
+      "icon": "card"
+    },
+    {
+      "group": "finance",
+      "name": "Expenses",
+      "desc": "Categorized spend",
+      "icon": "cardline"
+    },
+    {
+      "group": "finance",
+      "name": "Cash Management",
+      "desc": "Till & drawer counts",
+      "icon": "cash"
+    },
+    {
+      "group": "finance",
+      "name": "Bank Management",
+      "desc": "Accounts & reconciliation",
+      "icon": "bankcircle"
+    },
+    {
+      "group": "finance",
+      "name": "Receivables & Payables",
+      "desc": "Always current",
+      "icon": "rupee"
+    },
+    {
+      "group": "finance",
+      "name": "Tax Management",
+      "desc": "Multi-rate, multi-region",
+      "icon": "chart"
+    },
+    {
+      "group": "finance",
+      "name": "Reports & Analytics",
+      "desc": "40+ live reports",
+      "icon": "bars"
+    },
+    {
+      "group": "people",
+      "name": "Employees",
+      "desc": "Records & documents",
+      "icon": "user"
+    },
+    {
+      "group": "people",
+      "name": "Departments & Designations",
+      "desc": "Org structure",
+      "icon": "org"
+    },
+    {
+      "group": "people",
+      "name": "Attendance & Shifts",
+      "desc": "Clock-ins tied to pay",
+      "icon": "cal"
+    },
+    {
+      "group": "people",
+      "name": "Leave Management",
+      "desc": "Requests & balances",
+      "icon": "undo"
+    },
+    {
+      "group": "people",
+      "name": "Payroll",
+      "desc": "Automated processing",
+      "icon": "lines"
+    },
+    {
+      "group": "people",
+      "name": "Recurring Expenses",
+      "desc": "Payroll-adjacent costs",
+      "icon": "refresh"
+    },
+    {
+      "group": "security",
+      "name": "Recurring Transactions",
+      "desc": "Sales, purchases, expenses",
+      "icon": "clock"
+    },
+    {
+      "group": "security",
+      "name": "Notifications",
+      "desc": "Routed automatically",
+      "icon": "bell"
+    },
+    {
+      "group": "security",
+      "name": "Roles & Permissions",
+      "desc": "Module-level access",
+      "icon": "user"
+    },
+    {
+      "group": "security",
+      "name": "Audit & Activity Logs",
+      "desc": "Every change, attributed",
+      "icon": "lock"
+    },
+    {
+      "group": "security",
+      "name": "Approval Workflows",
+      "desc": "Sign-off, enforced",
+      "icon": "checkcircle"
+    },
+    {
+      "group": "security",
+      "name": "Accounting Period Controls",
+      "desc": "Lock closed periods",
+      "icon": "square"
+    },
+    {
+      "group": "security",
+      "name": "Security",
+      "desc": "Access controls",
+      "icon": "shield"
+    },
+    {
+      "group": "security",
+      "name": "System Settings & API",
+      "desc": "Configuration & integrations",
+      "icon": "key"
+    }
+  ],
+  "orbitNodes": [
+    {
+      "angle": 0,
+      "label": "Sales",
+      "icon": "doc"
+    },
+    {
+      "angle": 45,
+      "label": "Purchases",
+      "icon": "swap"
+    },
+    {
+      "angle": 90,
+      "label": "Inventory",
+      "icon": "layers"
+    },
+    {
+      "angle": 135,
+      "label": "POS",
+      "icon": "pos"
+    },
+    {
+      "angle": 180,
+      "label": "HR / Payroll",
+      "icon": "people"
+    },
+    {
+      "angle": 225,
+      "label": "Accounting",
+      "icon": "bank"
+    },
+    {
+      "angle": 270,
+      "label": "Reports",
+      "icon": "bars"
+    },
+    {
+      "angle": 315,
+      "label": "Recurring",
+      "icon": "refresh"
+    }
+  ],
+  "deckItems": [
+    {
+      "to": "/#hero",
+      "tag": "Core",
+      "title": "Command Center"
+    },
+    {
+      "to": "/#rail",
+      "tag": "System",
+      "title": "Every Module"
+    },
+    {
+      "to": "/#sales",
+      "tag": "Revenue",
+      "title": "Sales & POS"
+    },
+    {
+      "to": "/#purchases",
+      "tag": "Supply",
+      "title": "Purchases"
+    },
+    {
+      "to": "/#inventory",
+      "tag": "Stock",
+      "title": "Inventory & Warehouses"
+    },
+    {
+      "to": "/#hr",
+      "tag": "People",
+      "title": "HR & Payroll"
+    },
+    {
+      "to": "/#recurring",
+      "tag": "Automation",
+      "title": "Recurring Ops"
+    },
+    {
+      "to": "/#reports",
+      "tag": "Insight",
+      "title": "Reports & Analytics"
+    },
+    {
+      "to": "/#accounting",
+      "tag": "Finance",
+      "title": "Automated Accounting"
+    },
+    {
+      "to": "/#flows",
+      "tag": "Process",
+      "title": "Data Flows"
+    },
+    {
+      "to": "/#explorer",
+      "tag": "Catalog",
+      "title": "Module Explorer"
+    },
+    {
+      "to": "/#business",
+      "tag": "Fit",
+      "title": "Business Types"
+    },
+    {
+      "to": "/#capabilities",
+      "tag": "Trust",
+      "title": "Capabilities"
+    },
+    {
+      "to": "/#channels",
+      "tag": "Reach",
+      "title": "Website + Mobile"
+    },
+    {
+      "to": "/#testimonials",
+      "tag": "Proof",
+      "title": "Customer Reviews"
+    },
+    {
+      "to": "/#pricing",
+      "tag": "Access",
+      "title": "Pricing"
+    },
+    {
+      "to": "/pricing",
+      "tag": "Packages",
+      "title": "Full Pricing & Packages"
+    },
+    {
+      "to": "/blog",
+      "tag": "Log",
+      "title": "Blog & Insights"
+    },
+    {
+      "to": "/business-registration",
+      "tag": "Start",
+      "title": "Register Your Business"
+    },
+    {
+      "to": "/#contact",
+      "tag": "Talk",
+      "title": "Request Access"
+    }
+  ],
+  "businessTypes": [
+    {
+      "id": "retail",
+      "tab": "Retail Chains",
+      "pill": "Retail",
+      "title": "Centralized pricing, live everywhere",
+      "text": "One catalog and one promotion engine across every storefront — physical and online — with per-branch stock visibility.",
+      "steps": [
+        {
+          "icon": "pos",
+          "label": "POS"
+        },
+        {
+          "icon": "layers",
+          "label": "Inventory"
+        },
+        {
+          "icon": "cart",
+          "label": "Website"
+        }
+      ]
+    },
+    {
+      "id": "wholesale",
+      "tab": "Wholesale & Distribution",
+      "pill": "Wholesale",
+      "title": "Bulk pricing, B2B invoicing",
+      "text": "Tiered pricing, purchase orders and supplier bills that reconcile straight into accounts payable.",
+      "steps": [
+        {
+          "icon": "swap",
+          "label": "Purchase"
+        },
+        {
+          "icon": "pin",
+          "label": "Warehouse"
+        },
+        {
+          "icon": "doc",
+          "label": "B2B Invoice"
+        }
+      ]
+    },
+    {
+      "id": "mart",
+      "tab": "Marts & Grocery Stores",
+      "pill": "Mart",
+      "title": "High-volume checkout, tight margins",
+      "text": "Fast multi-lane barcode checkout, real-time shelf stock and expiry-aware batches keep a high-turnover grocery mart running without stockouts.",
+      "steps": [
+        {
+          "icon": "scan",
+          "label": "Barcode Scan"
+        },
+        {
+          "icon": "layers",
+          "label": "Stock Updated"
+        },
+        {
+          "icon": "bars",
+          "label": "Reports Live"
+        }
+      ]
+    },
+    {
+      "id": "services",
+      "tab": "Service Businesses",
+      "pill": "Services",
+      "title": "Book, deliver, invoice",
+      "text": "Sell time and expertise the same way you sell products — quotations, recurring billing and receivables in one place.",
+      "steps": [
+        {
+          "icon": "doc",
+          "label": "Quotation"
+        },
+        {
+          "icon": "refresh",
+          "label": "Recurring Billing"
+        },
+        {
+          "icon": "rupee",
+          "label": "Receivable"
+        }
+      ]
+    },
+    {
+      "id": "multibranch",
+      "tab": "Multi-Branch Groups",
+      "pill": "Multi-Branch",
+      "title": "One HQ, many locations",
+      "text": "Branch-level controls with a consolidated view — stock, staff and books stay scoped, reporting rolls up.",
+      "steps": [
+        {
+          "icon": "pin",
+          "label": "Branch A"
+        },
+        {
+          "icon": "core",
+          "label": "Core"
+        },
+        {
+          "icon": "pin",
+          "label": "Branch B"
+        }
+      ]
+    }
+  ],
+  "homeFaqs": [
+    {
+      "q": "Can the core handle multiple branches and warehouses?",
+      "a": "Yes — unlimited branches and warehouses, each with independent stock, staff and pricing, rolling up into one consolidated view."
+    },
+    {
+      "q": "Is accounting really automated, or is it an add-on?",
+      "a": "It's core, not an add-on. Every sale, purchase and expense posts to the ledger on its own — no manual journal entry."
+    },
+    {
+      "q": "Does the POS work without a connection?",
+      "a": "Yes — it keeps selling through a dropped connection and syncs every transaction the moment you're back online."
+    },
+    {
+      "q": "How granular are roles and permissions?",
+      "a": "Module- and action-level. Build a custom role for a cashier, a branch manager or an accountant with exactly the access each one needs."
+    },
+    {
+      "q": "Can the mobile app and website read the same data?",
+      "a": "Yes — both consume the same authenticated API layer as the Admin Panel, so nothing is ever out of sync."
+    }
+  ],
+  "pricingFaqs": [
+    {
+      "q": "Can I switch packages later?",
+      "a": "Yes — upgrade or downgrade at your next billing cycle. Your data, branches and history carry over automatically."
+    },
+    {
+      "q": "What happens if I exceed my branch or user limit?",
+      "a": "We'll notify you before you hit the ceiling so you can upgrade — nothing is cut off mid-operation."
+    },
+    {
+      "q": "Is there a setup or onboarding fee?",
+      "a": "No setup fee on Starter or Growth. Business and Enterprise include a dedicated onboarding specialist at no extra cost."
+    },
+    {
+      "q": "What payment methods are supported in this prototype?",
+      "a": "Bank Transfer, verified manually against your submitted transaction reference and payment proof — usually within 1 business day."
+    }
+  ]
+}

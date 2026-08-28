@@ -52,6 +52,105 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('data', [App\Http\Controllers\Admin\BusinessController::class, 'getData'])->name('business-data');
     });
 
+    //////////////////// Dukanaz Intro CMS (Super Admin only) ////////////////////
+    Route::group(['prefix' => 'intro', 'middleware' => ['superadmin'], 'as' => 'intro.'], function () {
+        Route::get('modules', [App\Http\Controllers\Admin\Intro\ModuleController::class, 'index'])->name('modules.index');
+        Route::post('modules/data', [App\Http\Controllers\Admin\Intro\ModuleController::class, 'getData'])->name('modules-data');
+        Route::get('modules/{id}/edit', [App\Http\Controllers\Admin\Intro\ModuleController::class, 'show'])->name('modules.edit');
+        Route::get('modules/{id}', [App\Http\Controllers\Admin\Intro\ModuleController::class, 'show'])->name('modules.show');
+        Route::post('modules', [App\Http\Controllers\Admin\Intro\ModuleController::class, 'store'])->name('modules.store');
+        Route::post('modules/change-status/{id}', [App\Http\Controllers\Admin\Intro\ModuleController::class, 'status'])->name('modules.status');
+        Route::post('modules/toggle-feature/{id}', [App\Http\Controllers\Admin\Intro\ModuleController::class, 'toggleFeature'])->name('modules.feature');
+        Route::delete('modules/{id}', [App\Http\Controllers\Admin\Intro\ModuleController::class, 'destroy'])->name('modules.destroy');
+
+        Route::get('blog-categories', [App\Http\Controllers\Admin\Intro\BlogCategoryController::class, 'index'])->name('blog-categories.index');
+        Route::post('blog-categories/data', [App\Http\Controllers\Admin\Intro\BlogCategoryController::class, 'getData'])->name('blog-categories-data');
+        Route::get('blog-categories/{id}/edit', [App\Http\Controllers\Admin\Intro\BlogCategoryController::class, 'show'])->name('blog-categories.edit');
+        Route::get('blog-categories/{id}', [App\Http\Controllers\Admin\Intro\BlogCategoryController::class, 'show'])->name('blog-categories.show');
+        Route::post('blog-categories', [App\Http\Controllers\Admin\Intro\BlogCategoryController::class, 'store'])->name('blog-categories.store');
+        Route::post('blog-categories/change-status/{id}', [App\Http\Controllers\Admin\Intro\BlogCategoryController::class, 'status']);
+        Route::delete('blog-categories/{id}', [App\Http\Controllers\Admin\Intro\BlogCategoryController::class, 'destroy']);
+
+        Route::get('blog-tags', [App\Http\Controllers\Admin\Intro\BlogTagController::class, 'index'])->name('blog-tags.index');
+        Route::post('blog-tags/data', [App\Http\Controllers\Admin\Intro\BlogTagController::class, 'getData'])->name('blog-tags-data');
+        Route::get('blog-tags/{id}/edit', [App\Http\Controllers\Admin\Intro\BlogTagController::class, 'show']);
+        Route::get('blog-tags/{id}', [App\Http\Controllers\Admin\Intro\BlogTagController::class, 'show']);
+        Route::post('blog-tags', [App\Http\Controllers\Admin\Intro\BlogTagController::class, 'store']);
+        Route::post('blog-tags/change-status/{id}', [App\Http\Controllers\Admin\Intro\BlogTagController::class, 'status']);
+        Route::delete('blog-tags/{id}', [App\Http\Controllers\Admin\Intro\BlogTagController::class, 'destroy']);
+
+        Route::get('blogs', [App\Http\Controllers\Admin\Intro\BlogController::class, 'index'])->name('blogs.index');
+        Route::post('blogs/data', [App\Http\Controllers\Admin\Intro\BlogController::class, 'getData'])->name('blogs-data');
+        Route::get('blogs/{id}/edit', [App\Http\Controllers\Admin\Intro\BlogController::class, 'show']);
+        Route::get('blogs/{id}', [App\Http\Controllers\Admin\Intro\BlogController::class, 'show']);
+        Route::post('blogs', [App\Http\Controllers\Admin\Intro\BlogController::class, 'store']);
+        Route::delete('blogs/{id}', [App\Http\Controllers\Admin\Intro\BlogController::class, 'destroy']);
+
+        Route::get('blog-comments', [App\Http\Controllers\Admin\Intro\BlogCommentController::class, 'index'])->name('blog-comments.index');
+        Route::post('blog-comments/data', [App\Http\Controllers\Admin\Intro\BlogCommentController::class, 'getData'])->name('blog-comments-data');
+        Route::get('blog-comments/{id}/edit', [App\Http\Controllers\Admin\Intro\BlogCommentController::class, 'show']);
+        Route::get('blog-comments/{id}', [App\Http\Controllers\Admin\Intro\BlogCommentController::class, 'show']);
+        Route::post('blog-comments/{id}/moderate', [App\Http\Controllers\Admin\Intro\BlogCommentController::class, 'moderate']);
+        Route::delete('blog-comments/{id}', [App\Http\Controllers\Admin\Intro\BlogCommentController::class, 'destroy']);
+
+        Route::get('testimonials', [App\Http\Controllers\Admin\Intro\TestimonialController::class, 'index'])->name('testimonials.index');
+        Route::post('testimonials/data', [App\Http\Controllers\Admin\Intro\TestimonialController::class, 'getData'])->name('testimonials-data');
+        Route::get('testimonials/{id}/edit', [App\Http\Controllers\Admin\Intro\TestimonialController::class, 'show']);
+        Route::get('testimonials/{id}', [App\Http\Controllers\Admin\Intro\TestimonialController::class, 'show']);
+        Route::post('testimonials', [App\Http\Controllers\Admin\Intro\TestimonialController::class, 'store']);
+        Route::post('testimonials/change-status/{id}', [App\Http\Controllers\Admin\Intro\TestimonialController::class, 'status']);
+        Route::delete('testimonials/{id}', [App\Http\Controllers\Admin\Intro\TestimonialController::class, 'destroy']);
+
+        Route::get('contact-inquiries', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'index'])->name('contact-inquiries.index');
+        Route::post('contact-inquiries/data', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'getData'])->name('contact-inquiries-data');
+        Route::get('contact-inquiries/{id}/edit', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'show']);
+        Route::get('contact-inquiries/{id}', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'show']);
+        Route::post('contact-inquiries/{id}/reply', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'reply']);
+        Route::post('contact-inquiries/{id}/status', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'updateStatus']);
+        Route::delete('contact-inquiries/{id}', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'destroy']);
+
+        Route::get('website-settings', [App\Http\Controllers\Admin\Intro\WebsiteSettingController::class, 'index'])->name('website-settings.index');
+        Route::get('website-settings/data', [App\Http\Controllers\Admin\Intro\WebsiteSettingController::class, 'show'])->name('website-settings.show');
+        Route::post('website-settings', [App\Http\Controllers\Admin\Intro\WebsiteSettingController::class, 'update'])->name('website-settings.update');
+
+        Route::get('navigation', [App\Http\Controllers\Admin\Intro\NavigationController::class, 'index'])->name('navigation.index');
+        Route::post('navigation/data', [App\Http\Controllers\Admin\Intro\NavigationController::class, 'getData'])->name('navigation-data');
+        Route::get('navigation/{id}/edit', [App\Http\Controllers\Admin\Intro\NavigationController::class, 'show']);
+        Route::get('navigation/{id}', [App\Http\Controllers\Admin\Intro\NavigationController::class, 'show']);
+        Route::post('navigation', [App\Http\Controllers\Admin\Intro\NavigationController::class, 'store']);
+        Route::post('navigation/change-status/{id}', [App\Http\Controllers\Admin\Intro\NavigationController::class, 'status']);
+        Route::delete('navigation/{id}', [App\Http\Controllers\Admin\Intro\NavigationController::class, 'destroy']);
+
+        Route::get('media', [App\Http\Controllers\Admin\Intro\MediaController::class, 'index'])->name('media.index');
+        Route::post('media/data', [App\Http\Controllers\Admin\Intro\MediaController::class, 'getData'])->name('media-data');
+        Route::get('media/{id}/edit', [App\Http\Controllers\Admin\Intro\MediaController::class, 'show']);
+        Route::get('media/{id}', [App\Http\Controllers\Admin\Intro\MediaController::class, 'show']);
+        Route::post('media', [App\Http\Controllers\Admin\Intro\MediaController::class, 'store']);
+        Route::delete('media/{id}', [App\Http\Controllers\Admin\Intro\MediaController::class, 'destroy']);
+
+        Route::get('homepage-sections', [App\Http\Controllers\Admin\Intro\HomepageSectionController::class, 'index'])->name('homepage-sections.index');
+        Route::post('homepage-sections/data', [App\Http\Controllers\Admin\Intro\HomepageSectionController::class, 'getData'])->name('homepage-sections-data');
+        Route::get('homepage-sections/{id}/edit', [App\Http\Controllers\Admin\Intro\HomepageSectionController::class, 'show'])->name('homepage-sections.edit');
+        Route::get('homepage-sections/{id}', [App\Http\Controllers\Admin\Intro\HomepageSectionController::class, 'show']);
+        Route::post('homepage-sections', [App\Http\Controllers\Admin\Intro\HomepageSectionController::class, 'store']);
+        Route::post('homepage-sections/change-status/{id}', [App\Http\Controllers\Admin\Intro\HomepageSectionController::class, 'status']);
+        Route::post('homepage-sections/toggle-enabled/{id}', [App\Http\Controllers\Admin\Intro\HomepageSectionController::class, 'toggleEnabled']);
+        Route::delete('homepage-sections/{id}', [App\Http\Controllers\Admin\Intro\HomepageSectionController::class, 'destroy']);
+
+        Route::get('pages', [App\Http\Controllers\Admin\Intro\PageController::class, 'index'])->name('pages.index');
+        Route::post('pages/data', [App\Http\Controllers\Admin\Intro\PageController::class, 'getData'])->name('pages-data');
+        Route::get('pages/{id}/edit', [App\Http\Controllers\Admin\Intro\PageController::class, 'show']);
+        Route::get('pages/{id}', [App\Http\Controllers\Admin\Intro\PageController::class, 'show']);
+        Route::post('pages', [App\Http\Controllers\Admin\Intro\PageController::class, 'store']);
+        Route::delete('pages/{id}', [App\Http\Controllers\Admin\Intro\PageController::class, 'destroy']);
+
+        Route::get('business-registrations', [App\Http\Controllers\Admin\Intro\BusinessRegistrationController::class, 'index'])->name('business-registrations.index');
+        Route::post('business-registrations/data', [App\Http\Controllers\Admin\Intro\BusinessRegistrationController::class, 'getData'])->name('business-registrations-data');
+        Route::get('business-registrations/{id}/edit', [App\Http\Controllers\Admin\Intro\BusinessRegistrationController::class, 'show']);
+        Route::get('business-registrations/{id}', [App\Http\Controllers\Admin\Intro\BusinessRegistrationController::class, 'show']);
+        Route::post('business-registrations/{id}/status', [App\Http\Controllers\Admin\Intro\BusinessRegistrationController::class, 'updateStatus']);
+    });
+
     //////////////////// Subscription & Billing (Super Admin) ////////////////////
     Route::group(['prefix' => 'subscriptions', 'middleware' => ['superadmin']], function () {
         Route::get('/', [App\Http\Controllers\Admin\SubscriptionController::class, 'index'])->name('subscriptions.dashboard');

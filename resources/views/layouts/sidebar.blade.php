@@ -157,6 +157,28 @@
                     </li>
                 </ul>
             </li>
+            <!-- Dukanaz Intro CMS -->
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-globe"></i>
+                    <div data-i18n="Intro CMS">Intro CMS</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item"><a href="{{ route('intro.modules.index') }}" class="menu-link"><div>Modules</div></a></li>
+                    <li class="menu-item"><a href="{{ route('intro.blogs.index') }}" class="menu-link"><div>Blog</div></a></li>
+                    <li class="menu-item"><a href="{{ route('intro.blog-categories.index') }}" class="menu-link"><div>Blog Categories</div></a></li>
+                    <li class="menu-item"><a href="{{ route('intro.blog-tags.index') }}" class="menu-link"><div>Blog Tags</div></a></li>
+                    <li class="menu-item"><a href="{{ route('intro.blog-comments.index') }}" class="menu-link"><div>Blog Comments</div></a></li>
+                    <li class="menu-item"><a href="{{ route('intro.testimonials.index') }}" class="menu-link"><div>Testimonials</div></a></li>
+                    <li class="menu-item"><a href="{{ route('intro.contact-inquiries.index') }}" class="menu-link"><div>Contact Inquiries</div></a></li>
+                    <li class="menu-item"><a href="{{ route('intro.website-settings.index') }}" class="menu-link"><div>Website Settings</div></a></li>
+                    <li class="menu-item"><a href="{{ route('intro.navigation.index') }}" class="menu-link"><div>Navigation</div></a></li>
+                    <li class="menu-item"><a href="{{ route('intro.media.index') }}" class="menu-link"><div>Media</div></a></li>
+                    <li class="menu-item"><a href="{{ route('intro.homepage-sections.index') }}" class="menu-link"><div>Homepage Sections</div></a></li>
+                    <li class="menu-item"><a href="{{ route('intro.pages.index') }}" class="menu-link"><div>Pages / SEO</div></a></li>
+                    <li class="menu-item"><a href="{{ route('intro.business-registrations.index') }}" class="menu-link"><div>Business Registrations</div></a></li>
+                </ul>
+            </li>
         @else
             <!-- My Subscription -->
             @canAccess('my-subscription.manage')
