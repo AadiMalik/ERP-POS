@@ -164,17 +164,20 @@
             var name = $(this).data('package-name');
             var direction = $(this).data('direction');
             var price = $(this).data('price');
+            var duration = $(this).data('duration') || 'monthly';
             var titles = {
                 current: 'Request Renewal',
                 upgrade: 'Upgrade Plan',
                 downgrade: 'Downgrade Plan'
             };
             var summaries = {
-                current: 'Submit a renewal request for <strong>' + name + '</strong> (' + price + '). Super Admin will review it before the new period starts.',
-                upgrade: 'Request an upgrade to <strong>' + name + '</strong> (' + price + '). Super Admin will review the request before the plan changes.',
-                downgrade: 'Request a downgrade to <strong>' + name + '</strong> (' + price + '). Super Admin will review the request before the plan changes.'
+                current: 'Submit a renewal request for <strong>' + name + '</strong> (' + price + ' / ' + duration + '). Super Admin will review it before the new period starts.',
+                upgrade: 'Request an upgrade to <strong>' + name + '</strong> (' + price + ' / ' + duration + '). Super Admin will review the request before the plan changes.',
+                downgrade: 'Request a downgrade to <strong>' + name + '</strong> (' + price + ' / ' + duration + '). Super Admin will review the request before the plan changes.'
             };
             $('#planChangePackageId').val($(this).data('package-id'));
+            $('#planChangeBillingCycle').val(duration);
+            $('#planChangeCycleNote').text('Billing period comes from the selected package (' + duration + ').');
             $('#planChangeTitle').text(titles[direction] || 'Request Plan Change');
             $('#planChangeSummary').html(summaries[direction] || '');
             $('#planChangeSubmit').text(direction === 'current' ? 'Submit Renewal Request' : 'Submit Request');
@@ -194,5 +197,23 @@
             });
             $('#planBlockedModal').modal('show');
         });
+
+        (function () {
+            var initialPeriod = @json(($currentBillingCycle ?? 'monthly') === 'yearly' ? 'yearly' : 'monthly');
+            function setPeriod(period) {
+                $('.erp-period-btn').each(function () {
+                    var active = $(this).data('period') === period;
+                    $(this).toggleClass('is-active btn-primary', active);
+                    $(this).toggleClass('btn-outline-primary', !active);
+                });
+                $('.erp-plan-col').each(function () {
+                    $(this).toggle($(this).data('duration') === period);
+                });
+            }
+            $(document).on('click', '.erp-period-btn', function () {
+                setPeriod($(this).data('period'));
+            });
+            setPeriod(initialPeriod);
+        })();
     </script>
 @endsection

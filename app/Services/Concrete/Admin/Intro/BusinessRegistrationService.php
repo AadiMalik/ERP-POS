@@ -100,13 +100,13 @@ class BusinessRegistrationService
             throw new Exception('This package requires a sales consultation. Please contact Dukanaz.');
         }
 
-        $billingCycle = $data['billing_cycle'] ?? 'monthly';
+        $billingCycle = $package->duration_type ?: ($data['billing_cycle'] ?? 'monthly');
         if (!in_array($billingCycle, ['monthly', 'yearly'], true)) {
             throw new Exception('Invalid billing cycle.');
         }
 
         if ($package->priceForCycle($billingCycle) === null) {
-            throw new Exception('Selected package does not support ' . $billingCycle . ' billing.');
+            throw new Exception('Selected package does not have a valid price.');
         }
 
         return DB::transaction(function () use ($data, $package, $billingCycle) {

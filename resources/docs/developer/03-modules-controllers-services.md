@@ -26,11 +26,12 @@ controllers → route prefixes**; pair it with
 `admin/subscription-invoices`, `admin/subscription-payments`,
 `admin/subscription-settings`, `admin/my-subscription`.
 
-Business Admin **My Subscription** shows a price-table of active packages
-(`FeatureLimitService::compareToPackage` gates downgrade/upgrade requests).
-Catalog plans are seeded by `PackageSeeder` (Starter / Professional /
-Enterprise); Super Admin still creates and edits packages via
-`PackageController`.
+Business Admin **My Subscription** shows a Monthly/Yearly price table of active
+packages (`FeatureLimitService::compareToPackage` gates downgrade/upgrade
+requests). Catalog plans are seeded by `IntroPackageCatalogSeeder` (Starter /
+Growth / Business / Enterprise × monthly + yearly, with `discount` % on the
+package). Super Admin creates and edits packages via `PackageController`
+(price + discount + duration_type + module matrix).
 
 ## Users, Customers & Profile (Core CRM/Identity)
 `UserController`, `CustomerController`, `ProfileController`, `SearchController`

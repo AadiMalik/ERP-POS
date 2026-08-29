@@ -24,6 +24,24 @@ class PackageService
     {
         $datatable = $this->model_package->getModel()::where('is_deleted', 0);
         return DataTables::of($datatable)
+            ->editColumn('price', function ($item) {
+                $list = $item->listPrice();
+                if ($list === null) {
+                    return '—';
+                }
+                $effective = $item->effectivePrice();
+                $discount = $item->discountPercent();
+                $html = currency($effective);
+                if ($discount > 0) {
+                    $html .= ' <small class="text-muted text-decoration-line-through">' . currency($list) . '</small>'
+                        . ' <span class="badge bg-label-success">' . rtrim(rtrim(number_format($discount, 2), '0'), '.') . '%</span>';
+                }
+                return $html;
+            })
+            ->editColumn('duration_days', function ($item) {
+                $type = ucfirst($item->duration_type ?: 'monthly');
+                return $type . ' <small class="text-muted">(' . (int) $item->duration_days . 'd)</small>';
+            })
             ->addColumn('status', function ($item) {
                 return $item->status
                     ? '
@@ -59,7 +77,7 @@ class PackageService
                     </a>
                 ";
             })
-            ->rawColumns(['status','action'])
+            ->rawColumns(['price', 'duration_days', 'status', 'action'])
             ->make(true);
     }
 

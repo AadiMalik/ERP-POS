@@ -16,6 +16,7 @@ class IntroBusinessRegistration extends Model
     public $incrementing = false;
 
     protected $fillable = [
+        'intro_business_registration_id',
         'business_id',
         'package_id',
         'billing_cycle',

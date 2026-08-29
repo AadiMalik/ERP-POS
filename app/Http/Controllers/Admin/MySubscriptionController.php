@@ -59,6 +59,9 @@ class MySubscriptionController extends Controller
             ->get();
 
         $currentPackageId = $subscription?->package_id ?? $business->package_id;
+        $currentBillingCycle = $subscription?->billing_cycle
+            ?? ($business->package->duration_type ?? 'monthly');
+
         $packages = Package::with('modules')
             ->where('is_deleted', 0)
             ->where(function ($query) use ($currentPackageId) {
@@ -68,6 +71,7 @@ class MySubscriptionController extends Controller
                 }
             })
             ->orderBy('order')
+            ->orderBy('duration_type')
             ->orderBy('price')
             ->get();
 
@@ -85,7 +89,8 @@ class MySubscriptionController extends Controller
             'renewal_requests',
             'packages',
             'pricingPlans',
-            'moduleUsage'
+            'moduleUsage',
+            'currentBillingCycle'
         ));
     }
 
@@ -143,7 +148,7 @@ class MySubscriptionController extends Controller
             $plans[] = [
                 'package' => $package,
                 'is_current' => $direction === 'current',
-                'is_popular' => $package->name === 'Professional',
+                'is_popular' => $package->name === 'Growth',
                 'direction' => $direction,
                 'can_switch' => empty($blockers),
                 'blockers' => $blockers,
@@ -234,8 +239,15 @@ class MySubscriptionController extends Controller
 
         $request->validate([
             'requested_package_id' => 'required|exists:packages,package_id',
-            'requested_billing_cycle' => 'required|in:monthly,yearly',
+            'requested_billing_cycle' => 'nullable|in:monthly,yearly',
         ]);
+
+        $requestedPackage = Package::where('package_id', $request->requested_package_id)
+            ->where('is_deleted', 0)
+            ->firstOrFail();
+
+        $billingCycle = $requestedPackage->duration_type
+            ?: ($request->requested_billing_cycle ?: 'monthly');
 
         if ($this->subscription_service->hasOpenRenewalRequest($business)) {
             return redirect()->back()->with('error', 'You already have a pending renewal request awaiting Super Admin review.');
@@ -263,8 +275,8 @@ class MySubscriptionController extends Controller
             'subscription_renewal_request_id' => generateUuid(),
             'business_id' => $business->business_id,
             'business_subscription_id' => $current?->business_subscription_id,
-            'requested_package_id' => $request->requested_package_id,
-            'requested_billing_cycle' => $request->requested_billing_cycle,
+            'requested_package_id' => $requestedPackage->package_id,
+            'requested_billing_cycle' => $billingCycle,
             'status' => 'pending',
             'requested_notes' => $request->requested_notes,
             'is_deleted' => 0,

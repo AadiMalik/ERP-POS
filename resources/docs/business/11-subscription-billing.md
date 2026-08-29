@@ -9,12 +9,14 @@ Inventory, Accounting, HRM, Payroll, Service Management) and any usage limits
 
 Under **My Subscription**, a Business Admin can:
 - View the current plan, its limits, and when it renews or expires.
-- Compare available plans on the **Plans & Pricing** cards (price, included
-  modules, and key limits such as branches, users, warehouses, products,
-  customers, and employees).
+- Toggle **Monthly** / **Yearly** to compare the matching catalog packages.
+- Compare available plans on the **Plans & Pricing** cards (list price, any
+  discount %, charged price, included modules, and key limits such as branches,
+  users, warehouses, products, customers, and employees).
 - Request an **upgrade**, **downgrade**, or **renewal** of the current plan
-  from those cards. The request is reviewed by the platform operator (Super
-  Admin) before the plan actually changes.
+  from those cards. The billing period comes from the selected package
+  (monthly package vs yearly package). The request is reviewed by the platform
+  operator (Super Admin) before the plan actually changes.
 - View and pay **invoices**, and download them as PDF.
 - Submit a **payment** against an invoice for the platform operator to approve.
 

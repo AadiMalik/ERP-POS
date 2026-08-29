@@ -8,10 +8,10 @@ use App\Support\Subscription\SubscriptionModuleRegistry;
 use Illuminate\Database\Seeder;
 
 /**
- * Seeds Dukanaz Intro website plans (PKR) with monthly + yearly pricing,
- * badge/tagline/compare marketing fields. Does not remove existing packages.
+ * Seeds Dukanaz catalog: Starter / Growth / Business / Enterprise × monthly + yearly.
  *
- * Yearly amount = demo priceYearlyMonthly × 12 (annual total charged on yearly cycle).
+ * Yearly list price = monthly × 12; yearly rows use discount = 10%.
+ * Module access comes from package_modules (not marketing features JSON).
  */
 class IntroPackageCatalogSeeder extends Seeder
 {
@@ -22,61 +22,46 @@ class IntroPackageCatalogSeeder extends Seeder
             unset($plan['modules']);
 
             $package = Package::updateOrCreate(
-                ['name' => $plan['name'], 'duration_type' => 'monthly', 'is_deleted' => 0],
+                [
+                    'name' => $plan['name'],
+                    'duration_type' => $plan['duration_type'],
+                    'is_deleted' => 0,
+                ],
                 $plan
             );
 
             $this->syncModules($package->package_id, $modules);
         }
+
+        // Legacy USD / Professional catalog rows — keep data but hide from pricing.
+        Package::where('is_deleted', 0)
+            ->whereIn('name', ['Professional', 'Basic Plan'])
+            ->update(['status' => 0, 'date_updated' => now()]);
     }
 
     protected function plans(): array
     {
-        return [
-            $this->starter(),
-            $this->growth(),
-            $this->business(),
-            $this->enterprise(),
-        ];
+        $out = [];
+        foreach (['monthly', 'yearly'] as $duration) {
+            $out[] = $this->starter($duration);
+            $out[] = $this->growth($duration);
+            $out[] = $this->business($duration);
+            $out[] = $this->enterprise($duration);
+        }
+
+        return $out;
     }
 
-    protected function starter(): array
+    protected function starter(string $duration): array
     {
-        return array_merge($this->base('Starter', 1), [
-            'code' => 'NODE-01',
+        return array_merge($this->priced('Starter', 1, 4500, $duration), [
+            'code' => $duration === 'yearly' ? 'NODE-01-Y' : 'NODE-01',
             'description' => 'For a single shop finding its footing.',
             'tagline' => 'For a single shop finding its footing.',
             'badge' => null,
             'best_for' => 'Single-branch retail, marts & small shops',
-            'price' => 4500,
-            'price_yearly' => 3600 * 12, // 43,200 PKR / year
-            'features' => [
-                'POS & Billing (barcode-ready)',
-                'Inventory Management',
-                'Sales & Purchases',
-                'Customer Management',
-                'Basic Reports (10+ reports)',
-                'Website order sync',
-            ],
-            'limitations' => [
-                'No HR & Payroll module',
-                'No Automated Accounting',
-                'No B2B Ordering Portal',
-                'No API / custom integrations',
-                'Email support only (48h response)',
-            ],
-            'compare' => [
-                'accounting' => false,
-                'hrPayroll' => false,
-                'recurring' => false,
-                'stockTransfers' => false,
-                'b2bPortal' => false,
-                'api' => false,
-                'advancedReports' => false,
-            ],
             'support' => 'Email support',
             'cta' => 'Choose Starter',
-            'is_custom' => false,
             'modules' => [
                 'umbrellas' => ['inventory', 'pos'],
                 'unlimited' => [],
@@ -91,43 +76,16 @@ class IntroPackageCatalogSeeder extends Seeder
         ]);
     }
 
-    protected function growth(): array
+    protected function growth(string $duration): array
     {
-        return array_merge($this->base('Growth', 2), [
-            'code' => 'NODE-02',
+        return array_merge($this->priced('Growth', 2, 9900, $duration), [
+            'code' => $duration === 'yearly' ? 'NODE-02-Y' : 'NODE-02',
             'description' => 'For multi-branch operations scaling fast.',
             'tagline' => 'For multi-branch operations scaling fast.',
             'badge' => 'Most Provisioned',
             'best_for' => 'Growing retail chains, marts & small wholesalers',
-            'price' => 9900,
-            'price_yearly' => 7900 * 12, // 94,800 PKR / year
-            'features' => [
-                'Everything in Starter',
-                'Automated Accounting',
-                'HR & Payroll',
-                'Recurring Transactions',
-                'Stock Transfers between branches',
-                'Discounts, Vouchers & Pricing Engine',
-                'Advanced Reports & Analytics (40+)',
-                'Priority chat & email support',
-            ],
-            'limitations' => [
-                'No B2B Ordering Portal',
-                'API access is read-only',
-                'No dedicated onboarding specialist',
-            ],
-            'compare' => [
-                'accounting' => true,
-                'hrPayroll' => true,
-                'recurring' => true,
-                'stockTransfers' => true,
-                'b2bPortal' => false,
-                'api' => 'Read-only',
-                'advancedReports' => true,
-            ],
             'support' => 'Priority chat & email',
             'cta' => 'Choose Growth',
-            'is_custom' => false,
             'modules' => [
                 'umbrellas' => ['inventory', 'pos', 'accounting', 'hrm', 'payroll'],
                 'unlimited' => [],
@@ -142,42 +100,16 @@ class IntroPackageCatalogSeeder extends Seeder
         ]);
     }
 
-    protected function business(): array
+    protected function business(string $duration): array
     {
-        return array_merge($this->base('Business', 3), [
-            'code' => 'NODE-03',
+        return array_merge($this->priced('Business', 3, 18500, $duration), [
+            'code' => $duration === 'yearly' ? 'NODE-03-Y' : 'NODE-03',
             'description' => 'For wholesale, distribution & B2B operations.',
             'tagline' => 'For wholesale, distribution & B2B operations.',
             'badge' => null,
             'best_for' => 'Wholesale, distribution & B2B businesses',
-            'price' => 18500,
-            'price_yearly' => 14800 * 12, // 177,600 PKR / year
-            'features' => [
-                'Everything in Growth',
-                'B2B Ordering Portal',
-                'Full API & custom integrations',
-                'Approval Workflows',
-                'Multi-warehouse routing',
-                'Granular roles & permissions',
-                'Dedicated onboarding specialist',
-                'Priority phone, chat & email support',
-            ],
-            'limitations' => [
-                'Custom integration work billed separately',
-                'Standard 99.5% uptime SLA',
-            ],
-            'compare' => [
-                'accounting' => true,
-                'hrPayroll' => true,
-                'recurring' => true,
-                'stockTransfers' => true,
-                'b2bPortal' => true,
-                'api' => true,
-                'advancedReports' => true,
-            ],
             'support' => 'Priority phone, chat & email',
             'cta' => 'Choose Business',
-            'is_custom' => false,
             'modules' => [
                 'umbrellas' => ['inventory', 'pos', 'accounting', 'hrm', 'payroll', 'service-management'],
                 'unlimited' => ['product', 'order'],
@@ -190,41 +122,16 @@ class IntroPackageCatalogSeeder extends Seeder
         ]);
     }
 
-    protected function enterprise(): array
+    protected function enterprise(string $duration): array
     {
-        return array_merge($this->base('Enterprise', 4), [
-            'code' => 'NODE-∞',
+        return array_merge($this->priced('Enterprise', 4, 35000, $duration), [
+            'code' => $duration === 'yearly' ? 'NODE-ENT-Y' : 'NODE-ENT',
             'description' => 'For unlimited scale on dedicated infrastructure.',
             'tagline' => 'For unlimited scale on dedicated infrastructure.',
-            'badge' => 'Custom',
+            'badge' => 'Enterprise',
             'best_for' => 'Large multi-branch groups & enterprise distributors',
-            'price' => null,
-            'price_yearly' => null,
-            'features' => [
-                'Everything in Business',
-                'Dedicated infrastructure',
-                'Custom SLA & uptime guarantee',
-                'White-glove data migration',
-                'Custom modules & workflows',
-                'Dedicated account manager',
-            ],
-            'limitations' => [
-                'Annual contract required',
-                'Onboarding timeline varies by scope',
-                'Bank Transfer subscription requires a sales call first',
-            ],
-            'compare' => [
-                'accounting' => true,
-                'hrPayroll' => true,
-                'recurring' => true,
-                'stockTransfers' => true,
-                'b2bPortal' => true,
-                'api' => true,
-                'advancedReports' => true,
-            ],
             'support' => 'Dedicated account manager',
-            'cta' => 'Talk to Sales',
-            'is_custom' => true,
+            'cta' => 'Choose Enterprise',
             'modules' => [
                 'umbrellas' => ['inventory', 'pos', 'accounting', 'hrm', 'payroll', 'service-management'],
                 'unlimited' => ['branch', 'user', 'warehouse', 'product', 'order', 'customer'],
@@ -233,19 +140,33 @@ class IntroPackageCatalogSeeder extends Seeder
         ]);
     }
 
-    protected function base(string $name, int $order): array
+    /**
+     * @param  float  $monthlyPrice  Base monthly list price (PKR)
+     */
+    protected function priced(string $name, int $order, float $monthlyPrice, string $duration): array
     {
+        $isYearly = $duration === 'yearly';
+        $listPrice = $isYearly ? $monthlyPrice * 12 : $monthlyPrice;
+        $discount = $isYearly ? 10 : 0;
+
         $existingId = Package::where('name', $name)
-            ->where('duration_type', 'monthly')
+            ->where('duration_type', $duration)
             ->where('is_deleted', 0)
             ->value('package_id');
 
         $row = [
             'name' => $name,
             'currency' => 'PKR',
+            'price' => $listPrice,
+            'discount' => $discount,
+            'price_yearly' => null,
+            'features' => null,
+            'limitations' => null,
+            'compare' => null,
+            'is_custom' => false,
             'order' => $order,
-            'duration_type' => 'monthly',
-            'duration_days' => 30,
+            'duration_type' => $duration,
+            'duration_days' => $isYearly ? 365 : 30,
             'trial_days' => 0,
             'status' => 1,
             'is_deleted' => 0,

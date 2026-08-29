@@ -43,19 +43,24 @@
                             value="{{ $package->name ?? '' }}">
                     </div>
 
-                    {{-- Price (Monthly PKR) --}}
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Monthly Price (PKR)</label>
+                    {{-- Price (list price for this duration) --}}
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Price (PKR)</label>
                         <input type="number" step="0.01" class="form-control" name="price"
                             value="{{ $package->price ?? '' }}" placeholder="e.g. 4500">
+                        <small class="text-muted">List price for this package period (monthly amount or yearly annual total).</small>
                     </div>
 
-                    {{-- Yearly Price (annual total PKR) --}}
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Yearly Price — annual total (PKR)</label>
-                        <input type="number" step="0.01" class="form-control" name="price_yearly"
-                            value="{{ $package->price_yearly ?? '' }}" placeholder="e.g. 43200">
-                        <small class="text-muted">Charged when billing cycle is yearly. Display monthly equiv = yearly ÷ 12.</small>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Discount %</label>
+                        <input type="number" step="0.01" min="0" max="100" class="form-control" name="discount"
+                            value="{{ $package->discount ?? 0 }}" placeholder="0">
+                        <small class="text-muted">Applied to list price. Charged amount = price × (1 − discount/100).</small>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Currency</label>
+                        <input type="text" class="form-control" name="currency" value="{{ $package->currency ?? 'PKR' }}">
                     </div>
 
                     <div class="col-md-4 mb-3">
@@ -67,8 +72,8 @@
                         <input type="text" class="form-control" name="badge" value="{{ $package->badge ?? '' }}" placeholder="Most Provisioned">
                     </div>
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Currency</label>
-                        <input type="text" class="form-control" name="currency" value="{{ $package->currency ?? 'PKR' }}">
+                        <label class="form-label">CTA Label</label>
+                        <input type="text" class="form-control" name="cta" value="{{ $package->cta ?? '' }}" placeholder="Choose Starter">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Tagline</label>
@@ -81,42 +86,6 @@
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Support</label>
                         <input type="text" class="form-control" name="support" value="{{ $package->support ?? '' }}">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">CTA Label</label>
-                        <input type="text" class="form-control" name="cta" value="{{ $package->cta ?? '' }}" placeholder="Choose Starter">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Features (one per line)</label>
-                        <textarea class="form-control" name="features" rows="5">{{ isset($package) && is_array($package->features) ? implode("\n", $package->features) : '' }}</textarea>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Limitations (one per line)</label>
-                        <textarea class="form-control" name="limitations" rows="5">{{ isset($package) && is_array($package->limitations) ? implode("\n", $package->limitations) : '' }}</textarea>
-                    </div>
-                    <div class="col-12 mb-3">
-                        <label class="form-label">Compare flags</label>
-                        @php $cmp = isset($package) && is_array($package->compare) ? $package->compare : []; @endphp
-                        <div class="row">
-                            @foreach (['accounting'=>'Accounting','hrPayroll'=>'HR & Payroll','recurring'=>'Recurring','stockTransfers'=>'Stock Transfers','b2bPortal'=>'B2B Portal','api'=>'API','advancedReports'=>'Advanced Reports'] as $ck => $cl)
-                            <div class="col-md-3 mb-2">
-                                <label class="form-label small">{{ $cl }}</label>
-                                <select class="form-select form-select-sm" name="compare_{{ $ck }}">
-                                    @php $cv = $cmp[$ck] ?? false; $cv = is_bool($cv) ? ($cv ? 'true' : 'false') : (string)$cv; @endphp
-                                    <option value="false" {{ $cv === 'false' ? 'selected' : '' }}>No</option>
-                                    <option value="true" {{ $cv === 'true' ? 'selected' : '' }}>Yes</option>
-                                    <option value="Read-only" {{ $cv === 'Read-only' ? 'selected' : '' }}>Read-only</option>
-                                </select>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="form-check mt-4">
-                            <input class="form-check-input" type="checkbox" name="is_custom" value="1" id="is_custom"
-                                {{ isset($package) && $package->is_custom ? 'checked' : '' }}>
-                            <label class="form-check-label" for="is_custom">Custom / Talk to Sales (no fixed price)</label>
-                        </div>
                     </div>
 
                     {{-- Order --}}

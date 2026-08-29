@@ -16,6 +16,10 @@
                         <div id="v_price">-</div>
                     </div>
                     <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Discount %</label>
+                        <div id="v_discount">-</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
                         <label class="fw-bold">Duration Type</label>
                         <div id="v_duration_type">-</div>
                     </div>

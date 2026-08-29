@@ -74,6 +74,11 @@ class SubscriptionService
                 ? Status::TRIAL
                 : ($billing['mark_paid'] ? Status::ACTIVE : Status::PAYMENT_PENDING);
 
+            $paymentMethod = $billing['payment_method'] ?? 'cash';
+            if ($paymentMethod === 'bank transfer') {
+                $paymentMethod = 'bank_transfer';
+            }
+
             $subscription = BusinessSubscription::create([
                 'business_subscription_id' => generateUuid(),
                 'business_id' => $business->business_id,
@@ -89,7 +94,7 @@ class SubscriptionService
                 'tax_amount' => 0,
                 'total' => $cycle_price ?? 0,
                 'payment_status' => $billing['mark_paid'] ? 'paid' : 'unpaid',
-                'payment_method' => $billing['payment_method'],
+                'payment_method' => $paymentMethod,
                 'payment_reference' => $billing['payment_reference'],
                 'status' => $status,
                 'is_deleted' => 0,
@@ -169,6 +174,10 @@ class SubscriptionService
 
             $payment = $data['payment'] ?? [];
             $mark_paid = $payment['confirm'] ?? true;
+            $paymentMethod = $payment['method'] ?? 'cash';
+            if ($paymentMethod === 'bank transfer') {
+                $paymentMethod = 'bank_transfer';
+            }
 
             $subscription = BusinessSubscription::create([
                 'business_subscription_id' => generateUuid(),
@@ -185,7 +194,7 @@ class SubscriptionService
                 'tax_amount' => 0,
                 'total' => $cycle_price,
                 'payment_status' => $mark_paid ? 'paid' : 'unpaid',
-                'payment_method' => $payment['method'] ?? 'cash',
+                'payment_method' => $paymentMethod,
                 'payment_reference' => $payment['reference'] ?? null,
                 'status' => $mark_paid ? Status::ACTIVE : Status::PAYMENT_PENDING,
                 'renewed_from_subscription_id' => $current->business_subscription_id ?? null,

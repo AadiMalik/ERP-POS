@@ -1,11 +1,11 @@
 @php
-    $currentBillingCycle = $subscription?->billing_cycle ?? 'monthly';
-    $planCount = count($pricingPlans);
-    $colClass = $planCount >= 4 ? 'col-12 col-md-6 col-xl-3' : 'col-12 col-md-6 col-xl-4';
+    $currentBillingCycle = $currentBillingCycle ?? ($subscription?->billing_cycle ?? 'monthly');
     $planIcons = [
         'Starter' => 'fa-store',
-        'Professional' => 'fa-briefcase',
+        'Growth' => 'fa-rocket',
+        'Business' => 'fa-briefcase',
         'Enterprise' => 'fa-building',
+        'Professional' => 'fa-briefcase',
         'Basic Plan' => 'fa-cube',
     ];
 @endphp
@@ -38,14 +38,23 @@
             <i class="fa fa-clock me-1"></i>
             You already have a request for
             <strong>{{ $open_request->requestedPackage->name ?? '-' }}</strong>
+            ({{ ucfirst($open_request->requested_billing_cycle ?? '') }})
             pending Super Admin approval. Another plan change cannot be submitted until that request is reviewed.
         </div>
     @endif
+
+    <div class="d-flex justify-content-center mb-4">
+        <div class="btn-group" role="group" aria-label="Billing period">
+            <button type="button" class="btn btn-outline-primary erp-period-btn is-active" data-period="monthly">Monthly</button>
+            <button type="button" class="btn btn-outline-primary erp-period-btn" data-period="yearly">Yearly</button>
+        </div>
+    </div>
 
     <div class="row erp-pricing-row justify-content-center">
         @foreach ($pricingPlans as $plan)
             @php
                 $pkg = $plan['package'];
+                $duration = $pkg->duration_type ?: 'monthly';
                 $icon = $planIcons[$pkg->name] ?? 'fa-layer-group';
                 $cardClass = 'erp-pricing-card';
                 if ($plan['is_popular']) {
@@ -54,8 +63,12 @@
                 if ($plan['is_current']) {
                     $cardClass .= ' is-current';
                 }
+                $listPrice = $pkg->listPrice();
+                $effective = $pkg->effectivePrice();
+                $discount = $pkg->discountPercent();
+                $periodLabel = $duration === 'yearly' ? 'year' : 'month';
             @endphp
-            <div class="{{ $colClass }}">
+            <div class="col-12 col-md-6 col-xl-3 erp-plan-col" data-duration="{{ $duration }}" @if($duration !== $currentBillingCycle) style="display:none" @endif>
                 <article class="{{ $cardClass }}">
                     @if ($plan['is_popular'])
                         <span class="erp-pricing-badge">Most Popular</span>
@@ -70,8 +83,18 @@
                     <p class="erp-pricing-desc">{{ $pkg->description }}</p>
 
                     <div class="erp-pricing-price">
-                        <strong>{{ currency($pkg->price) }}</strong>
-                        <span>/ {{ $pkg->duration_type }}</span>
+                        @if ($effective === null)
+                            <strong>—</strong>
+                        @else
+                            <strong>{{ currency($effective) }}</strong>
+                            <span>/ {{ $periodLabel }}</span>
+                            @if ($discount > 0 && $listPrice !== null)
+                                <div class="small text-muted">
+                                    <span class="text-decoration-line-through">{{ currency($listPrice) }}</span>
+                                    <span class="text-success ms-1">{{ rtrim(rtrim(number_format($discount, 2), '0'), '.') }}% off</span>
+                                </div>
+                            @endif
+                        @endif
                     </div>
 
                     <ul class="erp-pricing-features">
@@ -104,8 +127,9 @@
                                 class="btn btn-outline-primary w-100 plan-change-btn"
                                 data-package-id="{{ $pkg->package_id }}"
                                 data-package-name="{{ $pkg->name }}"
+                                data-duration="{{ $duration }}"
                                 data-direction="current"
-                                data-price="{{ currency($pkg->price) }}">
+                                data-price="{{ $effective !== null ? currency($effective) : '—' }}">
                                 Request Renewal
                             </button>
                         @elseif (!$plan['can_switch'])
@@ -120,8 +144,9 @@
                                 class="btn {{ $plan['direction'] === 'upgrade' ? 'btn-primary' : 'btn-outline-primary' }} w-100 plan-change-btn"
                                 data-package-id="{{ $pkg->package_id }}"
                                 data-package-name="{{ $pkg->name }}"
+                                data-duration="{{ $duration }}"
                                 data-direction="{{ $plan['direction'] }}"
-                                data-price="{{ currency($pkg->price) }}">
+                                data-price="{{ $effective !== null ? currency($effective) : '—' }}">
                                 {{ $plan['direction'] === 'upgrade' ? 'Upgrade' : 'Downgrade' }}
                             </button>
                         @endif
@@ -137,6 +162,7 @@
         <form method="POST" action="{{ route('my-subscription.renewal-requests.store') }}">
             @csrf
             <input type="hidden" name="requested_package_id" id="planChangePackageId">
+            <input type="hidden" name="requested_billing_cycle" id="planChangeBillingCycle" value="{{ $currentBillingCycle }}">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="planChangeTitle">Request Plan Change</h5>
@@ -144,13 +170,7 @@
                 </div>
                 <div class="modal-body">
                     <p class="mb-3" id="planChangeSummary"></p>
-                    <div class="mb-3">
-                        <label class="fw-semibold">Billing Cycle</label>
-                        <select class="form-select" name="requested_billing_cycle" required>
-                            <option value="monthly" {{ $currentBillingCycle === 'monthly' ? 'selected' : '' }}>Monthly</option>
-                            <option value="yearly" {{ $currentBillingCycle === 'yearly' ? 'selected' : '' }}>Yearly</option>
-                        </select>
-                    </div>
+                    <p class="small text-muted mb-3" id="planChangeCycleNote"></p>
                     <div class="mb-0">
                         <label class="fw-semibold">Notes (optional)</label>
                         <textarea class="form-control" name="requested_notes" rows="2" placeholder="Anything the platform operator should know"></textarea>

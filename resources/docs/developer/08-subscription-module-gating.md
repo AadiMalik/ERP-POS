@@ -44,14 +44,28 @@ until usage fits.
 
 ## Catalog packages
 
-`database/seeders/PackageSeeder` upserts three public plans by name (Starter
-$49, Professional $149, Enterprise $349) and writes `package_modules` the same
-way `PackageService::saveModules()` does. It does **not** delete an existing
-plan such as Basic Plan. Run `php artisan db:seed --class=PackageSeeder`.
-Business Admin **My Subscription** renders those (plus the tenant’s current
-package even if inactive) as pricing cards; Upgrade/Downgrade submits the
-existing `my-subscription.renewal-requests.store` request after the
-compatibility check.
+Public plans are seeded by `database/seeders/IntroPackageCatalogSeeder`:
+**Starter**, **Growth**, **Business**, and **Enterprise**, each as a separate
+**monthly** and **yearly** row (`duration_type`). Unique key is
+`name + duration_type` among non-deleted packages.
+
+- **List price** (`packages.price`): monthly amount, or yearly annual total
+  (`monthly × 12` for yearly rows).
+- **Discount %** (`packages.discount`): applied to list price when charging /
+  displaying the effective amount. Yearly catalog rows seed with **10%**;
+  monthly rows seed with **0%** (discount can still be set later for monthly).
+- **Effective charge**: `price × (1 − discount/100)` via `Package::effectivePrice()`
+  / `priceForCycle()`.
+- Module access and numeric caps live in `package_modules` (not marketing
+  features / limitations / compare JSON — those admin fields were removed).
+
+`PackageSeeder` only deactivates legacy **Professional** / **Basic Plan** rows.
+Run `php artisan db:seed --class=IntroPackageCatalogSeeder` after migrating
+`discount`.
+
+Business Admin **My Subscription** filters pricing cards by Monthly/Yearly
+toggle; Upgrade/Downgrade/Renewal uses the selected package’s `duration_type`
+as `requested_billing_cycle`.
 
 ## Route-Level Gate
 

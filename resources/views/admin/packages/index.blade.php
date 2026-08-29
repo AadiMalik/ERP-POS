@@ -102,6 +102,7 @@
                 '#v_name': item.name,
                 '#v_description': item.description,
                 '#v_price': item.price,
+                '#v_discount': item.discount != null ? item.discount : 0,
                 '#v_duration_type': item.duration_type,
                 '#v_duration': item.duration_days,
                 '#v_order': item.order,

@@ -7,8 +7,11 @@ table below.
 
 ## Tenancy / Platform
 
-`packages` (plan definitions, per-module limits/flags) → `businesses` (root tenant)
-→ `business_subscriptions` → `subscription_invoices`, `subscription_payments`,
+`packages` (plan definitions: `price` list amount, `discount` %, `duration_type`
+monthly|yearly — separate catalog rows per period; per-module limits/flags live
+in `package_modules`) → `businesses` (root tenant)
+→ `business_subscriptions` (`payment_method` enum: `cash` | `bank_transfer` |
+`cheque` | `online`) → `subscription_invoices`, `subscription_payments`,
 `subscription_renewal_requests`, `subscription_history`,
 `subscription_reminder_logs`, `subscription_settings`. `package_modules` holds the
 module/feature gating matrix per package (see

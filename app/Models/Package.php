@@ -23,6 +23,7 @@ class Package extends Model
         'badge',
         'best_for',
         'price',
+        'discount',
         'price_yearly',
         'currency',
         'features',
@@ -69,30 +70,76 @@ class Package extends Model
         'compare' => 'array',
         'is_custom' => 'boolean',
         'price' => 'float',
+        'discount' => 'float',
         'price_yearly' => 'float',
     ];
 
     /**
-     * Amount charged for a subscription period in PKR.
-     * monthly → price; yearly → price_yearly (annual total).
+     * List / catalogue price before package discount (PKR).
      */
-    public function priceForCycle(?string $billingCycle = null): ?float
+    public function listPrice(): ?float
     {
-        if ($this->is_custom) {
-            return null;
-        }
-
-        $cycle = $billingCycle ?: ($this->duration_type ?: 'monthly');
-
-        if ($cycle === 'yearly') {
-            return $this->price_yearly !== null ? (float) $this->price_yearly : null;
-        }
-
         return $this->price !== null ? (float) $this->price : null;
     }
 
+    public function discountPercent(): float
+    {
+        return max(0, min(100, (float) ($this->discount ?? 0)));
+    }
+
+    /**
+     * Amount charged for this package period after discount %.
+     * Each catalog row is period-specific (monthly or yearly via duration_type).
+     */
+    public function effectivePrice(): ?float
+    {
+        $list = $this->listPrice();
+        if ($list === null) {
+            return null;
+        }
+
+        $discount = $this->discountPercent();
+        if ($discount <= 0) {
+            return round($list, 2);
+        }
+
+        return round($list * (1 - ($discount / 100)), 2);
+    }
+
+    /**
+     * Amount charged for a subscription period in PKR.
+     * Packages are period-specific; $billingCycle is accepted for call-site
+     * compatibility and should match duration_type.
+     */
+    public function priceForCycle(?string $billingCycle = null): ?float
+    {
+        return $this->effectivePrice();
+    }
+
+    /**
+     * Monthly-equivalent display for yearly packages (effective annual ÷ 12).
+     */
+    public function monthlyEquivalent(): ?float
+    {
+        $effective = $this->effectivePrice();
+        if ($effective === null) {
+            return null;
+        }
+
+        if (($this->duration_type ?: 'monthly') === 'yearly') {
+            return round($effective / 12, 2);
+        }
+
+        return $effective;
+    }
+
+    /** @deprecated Use monthlyEquivalent() — kept for older Intro map callers. */
     public function yearlyMonthlyEquivalent(): ?float
     {
+        if (($this->duration_type ?: 'monthly') === 'yearly') {
+            return $this->monthlyEquivalent();
+        }
+
         if ($this->price_yearly === null) {
             return null;
         }

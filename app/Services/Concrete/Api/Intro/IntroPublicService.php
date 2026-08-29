@@ -16,6 +16,7 @@ use App\Services\Concrete\Admin\Intro\BlogCommentService;
 use App\Services\Concrete\Admin\Intro\BusinessRegistrationService;
 use App\Services\Concrete\Admin\Intro\ContactInquiryService;
 use App\Services\Concrete\Admin\Intro\WebsiteSettingService;
+use App\Support\Subscription\SubscriptionModuleRegistry;
 use Exception;
 
 class IntroPublicService
@@ -60,43 +61,123 @@ class IntroPublicService
 
     protected function mapPackage(Package $p): array
     {
+        $moduleCatalog = $this->mapPackageModuleCatalog($p);
+        $listPrice = $p->listPrice();
+        $effective = $p->effectivePrice();
+        $discount = $p->discountPercent();
+        $duration = $p->duration_type ?: 'monthly';
+
         return [
             'package_id' => $p->package_id,
-            'id' => $p->code ?: strtolower(str_replace(' ', '-', $p->name)),
+            'id' => strtolower(str_replace(' ', '-', $p->name ?: ($p->code ?: 'package'))),
             'code' => $p->code,
             'name' => $p->name,
             'description' => $p->description,
             'tagline' => $p->tagline,
             'badge' => $p->badge,
             'best_for' => $p->best_for,
-            'price' => $p->price !== null ? (float) $p->price : null,
-            'price_monthly' => $p->price !== null ? (float) $p->price : null,
-            'price_yearly' => $p->price_yearly !== null ? (float) $p->price_yearly : null,
-            'price_yearly_monthly' => $p->yearlyMonthlyEquivalent(),
+            'price' => $listPrice,
+            'price_list' => $listPrice,
+            'price_effective' => $effective,
+            'discount' => $discount,
+            'price_monthly' => $duration === 'monthly' ? $effective : $p->monthlyEquivalent(),
+            'price_yearly' => $duration === 'yearly' ? $effective : null,
+            'price_yearly_monthly' => $duration === 'yearly' ? $p->monthlyEquivalent() : null,
             'currency' => $p->currency ?: 'PKR',
-            'features' => $p->features ?? [],
-            'limitations' => $p->limitations ?? [],
-            'compare' => $p->compare ?? [],
             'support' => $p->support,
-            'cta' => $p->cta,
-            'is_custom' => (bool) $p->is_custom,
+            'cta' => $p->cta ?: ('Choose ' . ($p->name ?: 'Plan')),
+            'is_custom' => false,
             'order' => $p->order,
-            'duration_type' => $p->duration_type,
+            'duration_type' => $duration,
             'duration_days' => $p->duration_days,
             'trial_days' => $p->trial_days,
-            'billing_cycles' => $p->is_custom
-                ? []
-                : array_values(array_filter([
-                    $p->price !== null ? 'monthly' : null,
-                    $p->price_yearly !== null ? 'yearly' : null,
-                ])),
+            'billing_cycles' => $effective !== null ? [$duration] : [],
             'modules' => $p->modules->map(fn ($m) => [
                 'module_key' => $m->module_key,
                 'is_enabled' => (bool) $m->is_enabled,
                 'is_unlimited' => (bool) $m->is_unlimited,
                 'limit_value' => $m->limit_value,
             ])->values(),
+            'module_groups' => $moduleCatalog['groups'],
+            'included_modules' => $moduleCatalog['included'],
+            'excluded_modules' => $moduleCatalog['excluded'],
+            'highlights' => $moduleCatalog['highlights'],
         ];
+    }
+
+    /**
+     * Build included / excluded / grouped module lists from package_modules
+     * + SubscriptionModuleRegistry for Intro marketing pages.
+     */
+    protected function mapPackageModuleCatalog(Package $p): array
+    {
+        $byKey = $p->modules->keyBy('module_key');
+        $groups = [];
+        $included = [];
+        $excluded = [];
+
+        foreach (SubscriptionModuleRegistry::grouped() as $category => $modules) {
+            $items = [];
+            foreach ($modules as $key => $meta) {
+                $row = $byKey->get($key);
+                $parent = $meta['parent'] ?? null;
+                $parentOn = !$parent || ($byKey->get($parent)?->is_enabled ?? false);
+                $enabled = $row && $row->is_enabled && $parentOn;
+                $unlimited = $enabled && ($row->is_unlimited ?? false);
+                $limitValue = null;
+                $limitLabel = null;
+
+                if ($meta['type'] === 'limited') {
+                    if (!$enabled) {
+                        $limitLabel = 'Not included';
+                    } elseif ($unlimited) {
+                        $limitLabel = 'Unlimited';
+                    } else {
+                        $limitValue = $row->limit_value !== null
+                            ? (int) $row->limit_value
+                            : (int) ($meta['default_limit'] ?? 0);
+                        $limitLabel = (string) $limitValue;
+                    }
+                } else {
+                    $limitLabel = $enabled ? 'Included' : 'Not included';
+                }
+
+                $item = [
+                    'module_key' => $key,
+                    'label' => $meta['label'],
+                    'category' => $category,
+                    'type' => $meta['type'],
+                    'is_enabled' => (bool) $enabled,
+                    'is_unlimited' => (bool) $unlimited,
+                    'limit_value' => $limitValue,
+                    'limit_label' => $limitLabel,
+                ];
+                $items[] = $item;
+                if ($enabled) {
+                    $included[] = $item;
+                } else {
+                    $excluded[] = $item;
+                }
+            }
+            $groups[] = [
+                'category' => $category,
+                'modules' => $items,
+            ];
+        }
+
+        $highlightKeys = [
+            'inventory', 'pos', 'accounting', 'hrm', 'payroll', 'service-management',
+            'branch', 'user', 'warehouse', 'product', 'order', 'customer', 'employee',
+        ];
+        $flat = collect($groups)->pluck('modules')->flatten(1)->keyBy('module_key');
+        $highlights = [];
+        foreach ($highlightKeys as $key) {
+            if ($flat->has($key)) {
+                $highlights[] = $flat->get($key);
+            }
+        }
+
+        return compact('groups', 'included', 'excluded', 'highlights');
     }
 
     public function modules(?string $category = null, ?bool $featured = null)
