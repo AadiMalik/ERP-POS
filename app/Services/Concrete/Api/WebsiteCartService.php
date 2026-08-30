@@ -373,7 +373,16 @@ class WebsiteCartService
                 $voucher_discount = (float) ($preview['voucher_discount_amount'] ?? 0);
                 $taxable = max(0, $subtotal - $discount_total - $voucher_discount);
                 $tax_amount = round($taxable * $tax_percent / 100, 3);
-                $total = round((float) ($preview['total'] ?? ($taxable + $tax_amount)), 3);
+                // Not $preview['total']: that comes from the shared POS
+                // previewVoucher(), which re-prices each line via POS pricing
+                // and knows nothing about the storefront's own promotional/
+                // sale pricing already baked into $subtotal - it answers "a
+                // fresh POS order for these lines", not "this cart minus the
+                // voucher", and using it here inflated the cart total instead
+                // of reducing it. Only the voucher_discount_amount delta is
+                // trustworthy from that preview; the total must be rebuilt
+                // from this cart's own already-correct taxable/tax.
+                $total = round($taxable + $tax_amount, 3);
 
                 if ($voucher_meta) {
                     $voucher_meta['discount_amount'] = $voucher_discount;
