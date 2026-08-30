@@ -31,6 +31,7 @@ class SubscriptionInvoice extends Model
         'status',
         'due_date',
         'notes',
+        'request_type',
 
         'is_deleted',
         'createdby_id',

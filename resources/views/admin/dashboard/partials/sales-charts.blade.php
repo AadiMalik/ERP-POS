@@ -146,9 +146,15 @@
             }
         }
 
-        donutChart('#paymentMethodChart', @json($sales['by_payment_method'] ?? []), 240);
-        donutChart('#orderTypeChart', @json($sales['by_order_type'] ?? []));
-        donutChart('#orderSourceChart', @json($sales['by_order_source'] ?? []));
+        @if (($sales['by_payment_method'] ?? collect())->isNotEmpty())
+            donutChart('#paymentMethodChart', @json($sales['by_payment_method']), 240);
+        @endif
+        @if (($sales['by_order_type'] ?? collect())->isNotEmpty())
+            donutChart('#orderTypeChart', @json($sales['by_order_type']));
+        @endif
+        @if (($sales['by_order_source'] ?? collect())->isNotEmpty())
+            donutChart('#orderSourceChart', @json($sales['by_order_source']));
+        @endif
 
         @if ($sales['top_products']->isNotEmpty())
             try {

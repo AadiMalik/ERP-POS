@@ -27,6 +27,8 @@
 
         @include('admin.dashboard.partials.kpi-cards')
 
+        @include('admin.dashboard.partials.overview-widgets')
+
         @include('admin.dashboard.partials.sales-charts')
 
         <div class="row">

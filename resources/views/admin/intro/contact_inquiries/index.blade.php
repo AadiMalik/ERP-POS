@@ -20,6 +20,7 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Subject</th>
+                            <th>Business</th>
                             <th>Status</th>
                             <th>Date</th>
                             <th>Action</th>
@@ -40,6 +41,7 @@
 {data:'name',name:'name'},
 {data:'email',name:'email'},
 {data:'subject',name:'subject'},
+{data:'business_name',name:'business_name',sortable:false,searchable:false},
 {data:'status_badge',name:'status',sortable:false,searchable:false},
 {data:'date_created',name:'date_created'},
 {data:'action',name:'action',sortable:false,searchable:false},

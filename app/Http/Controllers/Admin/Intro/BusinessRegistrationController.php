@@ -20,7 +20,7 @@ class BusinessRegistrationController extends Controller
     {
         $this->middleware('superadmin');
         $this->middleware('permission:intro-business.view')->only(['index', 'getData', 'show']);
-        $this->middleware('permission:intro-business.edit')->only(['updateStatus']);
+        $this->middleware('permission:intro-business.edit')->only(['updateStatus', 'approvePayment', 'rejectPayment']);
         $this->service = $service;
     }
 
@@ -54,6 +54,33 @@ class BusinessRegistrationController extends Controller
         try {
             $this->service->updateStatus($id, $request->status);
             return $this->success(Message::STATUS, []);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function approvePayment($id)
+    {
+        try {
+            $registration = $this->service->approvePayment($id);
+            return $this->success('Payment confirmed and business activated.', $registration);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function rejectPayment(Request $request, $id)
+    {
+        $validate = Validator::make($request->all(), [
+            'reason' => 'nullable|string|max:500',
+        ]);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        try {
+            $registration = $this->service->rejectPayment($id, $request->reason ?? 'Rejected by Super Admin');
+            return $this->success('Payment rejected.', $registration);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }

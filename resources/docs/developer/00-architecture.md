@@ -120,7 +120,7 @@ etc.) — nothing is persisted specifically for reporting.
 | `barryvdh/laravel-dompdf` | All PDF generation (reports, invoices, this documentation portal) |
 | `maatwebsite/excel` | Excel/CSV export (report `export`/`export-csv` actions) |
 | `spatie/laravel-permission` | Roles & permissions (customized — see [Permissions](05-permissions-access-control.md)) |
-| `laravel/sanctum` | Customer-facing API token auth (`routes/api.php`) |
+| `laravel/sanctum` | Customer-facing API token auth (`routes/api.php` website + `routes/mobile.php` mobile app) |
 | `league/commonmark` (transitive, via Laravel Mail Markdown) | Renders this Documentation portal's Markdown source |
 | `yajra/laravel-datatables` (via `config/datatables.php`) | Server-side DataTables for list screens |
 

@@ -89,12 +89,58 @@ Gating happens **only at the umbrella level** in route groups (`hrm`, `payroll`,
 per-record numeric limits via `FeatureLimitService::check()`, not their own route
 middleware.
 
+## Dashboard widget gating
+
+The Business Dashboard (`HomeController` → `DashboardAccessService` /
+`DashboardService`) layers package modules on top of role tiers:
+
+- **Finance widgets** (Net Profit KPI, Revenue/Expenses/Profit overview,
+  Account/COA summary, receivables/payables, ledger activity, recent payments)
+  require a role in `DashboardAccessService::FINANCE_ROLES` **and**
+  `businessModuleEnabled('accounting')`. Without Accounting on the package,
+  those widgets are omitted even for Business Admin.
+- Sidebar Accounting / HRM headers and `@canAccess` quick links already use
+  the same `FeatureLimitService::hasModule` / `AccessControlService` checks.
+
 ## Platform-Level Gate
 
 `superadmin` middleware (`App\Http\Middleware\EnsureSuperAdmin`) is a **separate**
 concept from module gating — it protects the platform operator's own screens
 (managing tenant Businesses, Packages, Subscriptions/Billing) rather than a
 per-tenant feature toggle.
+
+## Unified Subscription Invoices Queue
+
+Super Admin billing review is centered on `subscription_invoices` (not a
+separate request table):
+
+| Column / concept | Purpose |
+|------------------|---------|
+| `request_type` | `new` (intro / contact register / unpaid createInitial) or `renew` (self-service / admin renew unpaid) |
+| Unpaid invoice + pending `subscription_payments` row | Created immediately when `mark_paid` / `payment.confirm` is false |
+| Payment confirm | `PaymentService::approve` — invoice paid, subscription `active`, business `active`, `subscription_start`/`end` applied, confirmation email + PDF via platform `EmailService`, linked renewal request → approved |
+| Payment reject | Final; cannot confirm afterwards (and confirmed cannot be rejected) |
+| Soft delete invoice | Cascades soft-delete of payments; cancels `payment_pending` subscription |
+
+**Expiry freeze until confirm:** unpaid `createInitial` sets business `pending`
+and null dates; unpaid `renew` leaves previous `subscription_end` /
+`current_business_subscription_id` untouched.
+
+**Business statuses:** `active`, `suspended`, `expired`, plus `pending` and
+`under_review`.
+
+**Restricted access:** `CheckBusinessSubscription` + sidebar — when
+`SubscriptionService::isAccessRestricted()` (pending / under_review / expired),
+non–Super Admin users only reach allowlisted My Subscription / profile /
+logout routes.
+
+**Notifications:** unpaid invoice create dispatches in-app
+`subscription_payment_pending` to Super Admins; sidebar Invoices badge uses
+`InvoiceService::pendingPaymentCount()`.
+
+**Intro Contact → register:** `ContactInquiryService::registerBusiness` /
+`activateBusiness` / `updatePayment` reuse `BusinessRegistrationService` and
+`PaymentService`.
 
 ## Subscription Lifecycle
 

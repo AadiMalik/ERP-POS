@@ -20,11 +20,11 @@ use App\Services\Concrete\Admin\Reports\ProfitLossReportService;
  * Expenses, Account/COA Summary, Cash/Bank Balance, Ledger Activity, Total
  * Receivables/Payables and Recent Payments. Composes the existing
  * accounting report services rather than re-deriving any of their logic.
- * Only ever invoked by DashboardService for
- * DashboardAccessService::FINANCE_ROLES, mirroring exactly what those
- * report services already allow via their own hardcoded allow_roles - no
- * new privilege is introduced beyond what the standalone Financial Reports
- * already grant.
+ * Only ever invoked by DashboardService when scope is_finance is true
+ * (FINANCE_ROLES + package `accounting` module), mirroring exactly what those
+ * report services already allow via their own hardcoded allow_roles and the
+ * `module:accounting` route group — no new privilege beyond the standalone
+ * Financial Reports.
  */
 class DashboardFinanceService
 {

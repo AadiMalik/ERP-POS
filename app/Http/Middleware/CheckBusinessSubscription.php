@@ -58,6 +58,20 @@ class CheckBusinessSubscription
         }
 
         $subscription = $this->subscription_service->getCurrentSubscription($business);
+        $route_name = $request->route()?->getName();
+
+        // Pending / under review / expired: stay logged in but only My Subscription
+        // (and allowlisted account routes) so they can renew or await payment.
+        if ($this->subscription_service->isAccessRestricted($business)) {
+            $allowlist = $this->subscription_service->restrictedAccessAllowlist();
+
+            if ($route_name && in_array($route_name, $allowlist, true)) {
+                return $next($request);
+            }
+
+            return redirect()->route('my-subscription.index')
+                ->with('error', 'Your subscription requires attention. Please renew or wait for payment confirmation to restore full access.');
+        }
 
         // No subscription at all - treat the same as expired (nothing to fall back on)
         if (!$subscription) {
@@ -69,15 +83,13 @@ class CheckBusinessSubscription
 
         $status = $this->subscription_service->computeDisplayStatus($subscription);
 
-        // Business suspended, or subscription explicitly cancelled/expired
-        if (in_array($status, [Status::SUSPENDED, Status::CANCELLED, Status::EXPIRED]) || $business->status === Status::SUSPENDED) {
+        // Business suspended, or subscription explicitly cancelled
+        if (in_array($status, [Status::SUSPENDED, Status::CANCELLED], true) || $business->status === Status::SUSPENDED) {
             Auth::logout();
 
             $message = $status === Status::CANCELLED
                 ? 'Your subscription has been cancelled.'
-                : ($status === Status::EXPIRED
-                    ? 'Your subscription has expired. Please renew to continue.'
-                    : 'Your business has been suspended.');
+                : 'Your business has been suspended.';
 
             return redirect()->route('login')->with('error', $message);
         }
@@ -90,7 +102,6 @@ class CheckBusinessSubscription
 
             if ($settings->restrict_access_in_grace_period && $is_write_request) {
                 $allowlist = $settings->restricted_route_names ?? [];
-                $route_name = $request->route()?->getName();
 
                 if (!in_array($route_name, $allowlist)) {
                     abort(403, 'Your subscription is in the grace period. Please renew to continue.');

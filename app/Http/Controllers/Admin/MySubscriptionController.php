@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Models\Package;
 use App\Models\SubscriptionInvoice;
@@ -271,20 +272,38 @@ class MySubscriptionController extends Controller
             }
         }
 
-        SubscriptionRenewalRequest::create([
-            'subscription_renewal_request_id' => generateUuid(),
-            'business_id' => $business->business_id,
-            'business_subscription_id' => $current?->business_subscription_id,
-            'requested_package_id' => $requestedPackage->package_id,
-            'requested_billing_cycle' => $billingCycle,
-            'status' => 'pending',
-            'requested_notes' => $request->requested_notes,
-            'is_deleted' => 0,
-            'createdby_id' => Auth::id(),
-            'date_created' => now(),
-        ]);
+        try {
+            $subscription = $this->subscription_service->renew($business, [
+                'package_id' => $requestedPackage->package_id,
+                'billing_cycle' => $billingCycle,
+                'request_type' => 'renew',
+                'payment' => [
+                    'confirm' => false,
+                    'method' => 'bank_transfer',
+                    'reference' => 'self-service renewal',
+                ],
+            ]);
 
-        return redirect()->route('my-subscription.index')->with('success', 'Your renewal request has been submitted and is awaiting Super Admin approval.');
+            $invoice = $subscription->invoices()->latest('date_created')->first();
+
+            SubscriptionRenewalRequest::create([
+                'subscription_renewal_request_id' => generateUuid(),
+                'business_id' => $business->business_id,
+                'business_subscription_id' => $current?->business_subscription_id,
+                'requested_package_id' => $requestedPackage->package_id,
+                'requested_billing_cycle' => $billingCycle,
+                'status' => 'pending',
+                'requested_notes' => $request->requested_notes,
+                'resulting_subscription_invoice_id' => $invoice?->subscription_invoice_id,
+                'is_deleted' => 0,
+                'createdby_id' => Auth::id(),
+                'date_created' => now(),
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return redirect()->route('my-subscription.index')->with('success', 'Your renewal request has been submitted. An invoice is awaiting Super Admin payment confirmation.');
     }
 
     public function invoicePdf($subscription_invoice_id)
@@ -329,13 +348,50 @@ class MySubscriptionController extends Controller
             $proof_path = $fileName;
         }
 
-        $this->payment_service->record($invoice, [
-            'amount' => $request->amount,
-            'payment_method' => $request->payment_method,
-            'payment_reference' => $request->payment_reference,
-            'payment_proof' => $proof_path,
-            'notes' => $request->notes,
-        ], Auth::id(), true);
+        // Prefer updating the existing pending payment (created with the unpaid
+        // invoice) so Super Admin sees bank reference + receipt on that row.
+        $pending = $invoice->payments()
+            ->where('is_deleted', 0)
+            ->where('status', 'pending')
+            ->latest('date_created')
+            ->first();
+
+        if ($pending) {
+            $pending->update([
+                'amount' => $request->amount,
+                'payment_method' => $request->payment_method,
+                'payment_reference' => $request->payment_reference,
+                'payment_proof' => $proof_path ?: $pending->payment_proof,
+                'notes' => $request->notes ?: $pending->notes,
+                'updatedby_id' => Auth::id(),
+                'date_updated' => now(),
+            ]);
+
+            // Business submitted bank details / receipt — move pending → under_review.
+            if ($business->status === Status::PENDING || $business->status === 'pending') {
+                $business->forceFill([
+                    'status' => Status::UNDER_REVIEW,
+                    'updatedby_id' => Auth::id(),
+                    'date_updated' => now(),
+                ])->save();
+            }
+        } else {
+            $this->payment_service->record($invoice, [
+                'amount' => $request->amount,
+                'payment_method' => $request->payment_method,
+                'payment_reference' => $request->payment_reference,
+                'payment_proof' => $proof_path,
+                'notes' => $request->notes,
+            ], Auth::id(), true);
+
+            if ($business->status === Status::PENDING || $business->status === 'pending') {
+                $business->forceFill([
+                    'status' => Status::UNDER_REVIEW,
+                    'updatedby_id' => Auth::id(),
+                    'date_updated' => now(),
+                ])->save();
+            }
+        }
 
         return redirect()->route('my-subscription.index')->with('success', 'Payment submitted and is awaiting Super Admin confirmation.');
     }

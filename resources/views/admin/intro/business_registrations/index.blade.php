@@ -25,6 +25,7 @@
                             <th>Package</th>
                             <th>Cycle</th>
                             <th>Sub Status</th>
+                            <th>Payment</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -47,6 +48,7 @@
 {data:'package_name',name:'package_name',sortable:false,searchable:false},
 {data:'billing_cycle',name:'billing_cycle'},
 {data:'subscription_status',name:'subscription_status',sortable:false,searchable:false},
+{data:'payment_info',name:'payment_info',sortable:false,searchable:false},
 {data:'status_badge',name:'status',sortable:false,searchable:false},
 {data:'action',name:'action',sortable:false,searchable:false},
 ",

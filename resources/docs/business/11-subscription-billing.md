@@ -15,8 +15,8 @@ Under **My Subscription**, a Business Admin can:
   users, warehouses, products, customers, and employees).
 - Request an **upgrade**, **downgrade**, or **renewal** of the current plan
   from those cards. The billing period comes from the selected package
-  (monthly package vs yearly package). The request is reviewed by the platform
-  operator (Super Admin) before the plan actually changes.
+  (monthly package vs yearly package). Submitting a request creates an unpaid
+  invoice for Super Admin to confirm.
 - View and pay **invoices**, and download them as PDF.
 - Submit a **payment** against an invoice for the platform operator to approve.
 
@@ -37,14 +37,37 @@ employees when moving to a plan without HRM).
 
 ## Renewal & Payment Approval
 
-Renewal and plan-change requests, and payments, are reviewed by the platform
-operator (Super Admin), who can approve, reject, or request changes. Once a
-payment is approved, your subscription is renewed/extended accordingly. You'll
-receive reminders as your subscription approaches its expiry date.
+When you renew or register with a package, an unpaid invoice is created
+immediately (marked as **New** or **Renew**). Super Admin reviews it on the
+**Subscription Invoices** screen, where they can:
+
+- Confirm or reject the payment (once decided, the other action is locked)
+- Print / download the invoice PDF
+- Delete the invoice (which also removes related payments)
+
+Until payment is confirmed:
+- **New** registrations keep business status **pending** (or **under review**)
+  and have **no** subscription end date yet.
+- **Renewals** keep the previous expiry date (and an expired business stays
+  expired) until confirmation.
+
+On confirmation the business becomes **active**, dates are applied, a
+confirmation email with the invoice PDF is sent (using platform email
+settings), and any open renewal request is marked approved.
 
 ## What Happens If a Subscription Lapses
 
 If a subscription isn't renewed in time, the business moves through defined
-lifecycle states (e.g. trial → expired) and access to gated modules may be
-suspended until renewed — this is handled automatically on a schedule so you get
-advance warning rather than a sudden cutoff.
+lifecycle states and eventually **expired**. An expired (or still-pending)
+Business Admin can still log in, but the admin sidebar shows only **My
+Subscription** (and Profile) so they can renew. Full menus return after
+payment is confirmed and the subscription is active again.
+
+You'll also receive reminders as your subscription approaches its expiry date.
+
+## Intro website & Contact inquiries
+
+Public registration from the intro website creates a pending business and an
+unpaid **New** invoice for Super Admin. From **Intro CMS → Contact Inquiries**,
+Super Admin can also register a business from a contact message, attach payment
+details, update status, and activate (confirm payment) in one place.

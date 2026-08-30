@@ -11,14 +11,16 @@ account has **"must change password"** flagged (common for newly created staff
 accounts), you'll be asked to set a new password before you can continue.
 
 Customers signing up, signing in with a code, or resetting a password from your
-**website** get that code in an email that uses your business name, logo, and
-website colors, with **Powered by Dukanaz** only at the bottom. For password
-reset, the email must already be registered as a customer of that business.
+**website** or **mobile app** get that code in an email that uses your business
+name, logo, and website colors, with **Powered by Dukanaz** only at the bottom.
+For password reset, the email must already be registered as a customer of that
+business.
 
 After logging in you land on your **Dashboard**, which summarizes sales, purchases,
-finance and recent activity for your business. Super Admin accounts (the platform
-operator) instead land on the Subscription dashboard, since they manage tenant
-businesses rather than day-to-day operations.
+and recent activity for your business. Finance widgets (Net Profit, account
+summary, and related charts) appear only when your package includes Accounting.
+Super Admin accounts (the platform operator) instead land on the Subscription
+dashboard, since they manage tenant businesses rather than day-to-day operations.
 
 ## How the System Is Organized
 

@@ -12,6 +12,7 @@ class  Status
     const APPROVED = 'approved';
     const REJECTED = 'rejected';
     const PENDING = 'pending';
+    const UNDER_REVIEW = 'under_review';
     const POSTED = 'posted';
     const PAUSED = 'paused';
     const COMPLETED = 'completed';

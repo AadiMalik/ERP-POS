@@ -51,7 +51,17 @@ does not send mail. A registered email gets a Dukanaz-branded OTP
 `OtpService::send(..., 'storefront')` — that business’s logo/name/colors with
 a Powered by Dukanaz footer (`emails.otp-storefront`). Forgot-password also
 checks `CustomerAccountService::emailExistsForBusiness()` for the given
-`business_id` before sending.
+`business_id` before sending. The mobile app mirrors the same OTP/auth flow
+under `/api/mobile/auth/*` via `App\Http\Controllers\Api\Mobile\Auth\AuthController`
+and `MobileCustomerAccountService` (see [Routes & APIs](04-routes-apis.md)).
+
+## Mobile App Customer API
+Controllers: `App\Http\Controllers\Api\Mobile\*` (Auth, catalog, cart, checkout,
+wishlist, profile, orders, CMS). Services: `App\Services\Concrete\Api\Mobile\*`
+(`MobileCartService`, `MobileCheckoutService`, `MobileWishlistService`,
+`MobileOrderService`, `MobileCustomerAccountService` extend the website Api
+services; `MobileCatalogService`, `MobileCmsService`, `MobileStoreConfigService`
+wrap Admin public helpers). Routes: `routes/mobile.php` → `/api/mobile/...`.
 
 ## Inventory (`module:inventory`)
 `WarehouseController`, `BrandController`, `CategoryController`,

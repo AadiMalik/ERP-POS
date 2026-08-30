@@ -62,6 +62,13 @@ class BusinessService
                         Suspended
                     </span>
                 ';
+                } elseif ($item->status == Status::PENDING || $item->status == Status::UNDER_REVIEW) {
+                    $label = $item->status == Status::UNDER_REVIEW ? 'Under Review' : 'Pending';
+                    return '
+                    <span class="badge bg-label-info me-1 mb-1">
+                        ' . $label . '
+                    </span>
+                ';
                 } else {
                     return '
                     <span class="badge bg-label-danger me-1 mb-1">

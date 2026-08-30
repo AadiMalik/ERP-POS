@@ -42,9 +42,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Shared email+OTP customer identity/auth API - consumed identically by the
-// website and the mobile app (and staff-side customer creation reuses the
-// same User/CustomerProfile data, just without going through OTP).
+// Shared email+OTP customer identity/auth API for the Vue storefront.
+// The mobile app uses a parallel surface under /api/mobile (routes/mobile.php).
 Route::prefix('v1/auth')->middleware('throttle:20,1')->group(function () {
     Route::post('check-email', [AuthController::class, 'checkEmail']);
     Route::post('send-otp', [AuthController::class, 'sendOtp']);

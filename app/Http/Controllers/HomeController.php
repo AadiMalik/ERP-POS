@@ -20,6 +20,7 @@ class HomeController extends Controller
     public function __construct(DashboardAccessService $access_service, DashboardService $dashboard_service)
     {
         $this->middleware('auth');
+        $this->middleware('check.subscription');
         $this->access_service = $access_service;
         $this->dashboard_service = $dashboard_service;
     }
@@ -36,6 +37,11 @@ class HomeController extends Controller
     {
         if (getRoleName() == RoleNames::SUPERADMIN) {
             return redirect()->route('subscriptions.dashboard');
+        }
+
+        $business = auth()->user()->business;
+        if ($business && app(\App\Services\Concrete\Admin\SubscriptionService::class)->isAccessRestricted($business)) {
+            return redirect()->route('my-subscription.index');
         }
 
         $scope = $this->access_service->resolveScope($request);

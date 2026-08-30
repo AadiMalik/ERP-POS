@@ -120,7 +120,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="fw-semibold">Payment Method</label>
-                                <select class="form-select" name="payment_method" required>
+                                <select class="form-select" name="payment_method" id="paymentMethod" required>
                                     <option value="cash">Cash</option>
                                     <option value="bank_transfer">Bank Transfer</option>
                                     <option value="cheque">Cheque</option>
@@ -128,12 +128,13 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="fw-semibold">Reference Number</label>
-                                <input type="text" class="form-control" name="payment_reference">
+                                <label class="fw-semibold" id="paymentReferenceLabel">Bank Reference No</label>
+                                <input type="text" class="form-control" name="payment_reference" placeholder="e.g. bank transaction / reference number">
                             </div>
                             <div class="mb-3">
-                                <label class="fw-semibold">Payment Proof</label>
+                                <label class="fw-semibold" id="paymentProofLabel">Bank Receipt</label>
                                 <input type="file" class="form-control" name="payment_proof" accept="image/*,.pdf">
+                                <small class="text-muted">Upload the bank transfer receipt (image or PDF).</small>
                             </div>
                             <div class="mb-3">
                                 <label class="fw-semibold">Notes</label>
@@ -157,7 +158,14 @@
             var total = $(this).data('total');
             $('#paymentAmount').val(total);
             $('#paymentForm').attr('action', `${url_local}/admin/my-subscription/invoices/${id}/payments`);
+            $('#paymentMethod').val('bank_transfer').trigger('change');
             $('#paymentModal').modal('show');
+        });
+
+        $(document).on('change', '#paymentMethod', function () {
+            var isBank = $(this).val() === 'bank_transfer';
+            $('#paymentReferenceLabel').text(isBank ? 'Bank Reference No' : 'Reference Number');
+            $('#paymentProofLabel').text(isBank ? 'Bank Receipt' : 'Payment Proof');
         });
 
         $(document).on('click', '.plan-change-btn', function() {

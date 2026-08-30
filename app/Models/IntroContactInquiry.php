@@ -16,6 +16,9 @@ class IntroContactInquiry extends Model
     public $incrementing = false;
 
     protected $fillable = [
+        'intro_contact_inquiry_id',
+        'business_id',
+        'subscription_invoice_id',
         'name',
         'email',
         'phone',
@@ -31,5 +34,15 @@ class IntroContactInquiry extends Model
     public function replies()
     {
         return $this->hasMany(IntroContactReply::class, 'intro_contact_inquiry_id', 'intro_contact_inquiry_id');
+    }
+
+    public function business()
+    {
+        return $this->belongsTo(Business::class, 'business_id', 'business_id');
+    }
+
+    public function subscriptionInvoice()
+    {
+        return $this->belongsTo(SubscriptionInvoice::class, 'subscription_invoice_id', 'subscription_invoice_id');
     }
 }

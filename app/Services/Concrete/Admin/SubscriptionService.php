@@ -102,6 +102,7 @@ class SubscriptionService
                 'date_created' => now(),
             ]);
 
+            $billing['request_type'] = $billing['request_type'] ?? 'new';
             $invoice = $this->invoice_service->create($subscription, $package, $billing);
 
             $subscription->update([
@@ -110,20 +111,35 @@ class SubscriptionService
                 'total' => $invoice->total,
             ]);
 
-            if ($billing['mark_paid']) {
-                $this->payment_service->record($invoice, [
-                    'amount' => $invoice->total,
-                    'payment_method' => $billing['payment_method'],
-                    'payment_reference' => $billing['payment_reference'],
-                ], Auth::id(), false);
-            }
+            // Always create a payment row so Super Admin can confirm/reject
+            // from the unified invoices queue. Unpaid = pending; paid = confirmed.
+            $this->payment_service->record($invoice, [
+                'amount' => $invoice->total,
+                'payment_method' => $billing['payment_method'],
+                'payment_reference' => $billing['payment_reference'],
+            ], Auth::id(), !$billing['mark_paid']);
 
-            $business->update([
-                'package_id' => $package->package_id,
-                'subscription_start' => $subscription->start_at,
-                'subscription_end' => $subscription->end_at,
-                'current_business_subscription_id' => $subscription->business_subscription_id,
-            ]);
+            if ($billing['mark_paid']) {
+                $business->update([
+                    'package_id' => $package->package_id,
+                    'subscription_start' => $subscription->start_at,
+                    'subscription_end' => $subscription->end_at,
+                    'current_business_subscription_id' => $subscription->business_subscription_id,
+                    'status' => $business->status === Status::SUSPENDED ? Status::SUSPENDED : Status::ACTIVE,
+                ]);
+            } else {
+                // Freeze expiry until payment is confirmed (new = null dates).
+                // Refresh so we overwrite any concurrent status writes (e.g. under_review).
+                $business->refresh();
+                $business->forceFill([
+                    'package_id' => $package->package_id,
+                    'subscription_start' => null,
+                    'subscription_end' => null,
+                    'current_business_subscription_id' => $subscription->business_subscription_id,
+                    'status' => Status::PENDING,
+                ])->save();
+                $this->invoice_service->notifySuperAdminPending($invoice->loadMissing('business'));
+            }
 
             $this->history_service->log(
                 $business->business_id,
@@ -203,6 +219,7 @@ class SubscriptionService
                 'date_created' => now(),
             ]);
 
+            $data['request_type'] = $data['request_type'] ?? 'renew';
             $invoice = $this->invoice_service->create($subscription, $package, $data);
 
             $subscription->update([
@@ -211,32 +228,36 @@ class SubscriptionService
                 'total' => $invoice->total,
             ]);
 
+            $this->payment_service->record($invoice, [
+                'amount' => $payment['amount'] ?? $invoice->total,
+                'payment_method' => $paymentMethod,
+                'payment_reference' => $payment['reference'] ?? null,
+                'payment_proof' => $payment['proof'] ?? null,
+                'notes' => $payment['notes'] ?? null,
+            ], Auth::id(), !$mark_paid);
+
             if ($mark_paid) {
-                $this->payment_service->record($invoice, [
-                    'amount' => $payment['amount'] ?? $invoice->total,
-                    'payment_method' => $payment['method'] ?? 'cash',
-                    'payment_reference' => $payment['reference'] ?? null,
-                    'payment_proof' => $payment['proof'] ?? null,
-                    'notes' => $payment['notes'] ?? null,
-                ], Auth::id(), false);
+                $business_update = [
+                    'package_id' => $package->package_id,
+                    'subscription_start' => $subscription->start_at,
+                    'subscription_end' => $subscription->end_at,
+                    'current_business_subscription_id' => $subscription->business_subscription_id,
+                    'grace_period_ends_at' => null,
+                ];
+
+                // A renewal resolves an expired state by definition. Suspension
+                // is a separate, deliberate admin action and is intentionally
+                // left untouched here - only reactivate() clears it.
+                if ($business->status === Status::EXPIRED) {
+                    $business_update['status'] = Status::ACTIVE;
+                }
+
+                $business->update($business_update);
+            } else {
+                // Keep previous expiry / current subscription until payment confirm.
+                // Do not flip expired/pending business status yet.
+                $this->invoice_service->notifySuperAdminPending($invoice->loadMissing('business'));
             }
-
-            $business_update = [
-                'package_id' => $package->package_id,
-                'subscription_start' => $subscription->start_at,
-                'subscription_end' => $subscription->end_at,
-                'current_business_subscription_id' => $subscription->business_subscription_id,
-                'grace_period_ends_at' => null,
-            ];
-
-            // A renewal resolves an expired state by definition. Suspension
-            // is a separate, deliberate admin action and is intentionally
-            // left untouched here - only reactivate() clears it.
-            if ($business->status === Status::EXPIRED) {
-                $business_update['status'] = Status::ACTIVE;
-            }
-
-            $business->update($business_update);
 
             $this->history_service->log(
                 $business->business_id,
@@ -516,6 +537,46 @@ class SubscriptionService
             ->where('is_deleted', 0)
             ->latest('date_created')
             ->first();
+    }
+
+    /**
+     * True when a non–Super Admin should only reach My Subscription
+     * (and essential account routes): expired subscription, or business
+     * still pending / under review awaiting payment confirmation.
+     */
+    public function isAccessRestricted(Business $business): bool
+    {
+        if (in_array($business->status, [Status::PENDING, Status::UNDER_REVIEW, Status::EXPIRED], true)) {
+            return true;
+        }
+
+        $subscription = $this->getCurrentSubscription($business);
+
+        if (!$subscription) {
+            return true;
+        }
+
+        return $this->computeDisplayStatus($subscription) === Status::EXPIRED;
+    }
+
+    /**
+     * Route names a restricted Business Admin may still hit while renewing.
+     */
+    public function restrictedAccessAllowlist(): array
+    {
+        $settings = SubscriptionSetting::current();
+        $fromSettings = $settings->restricted_route_names ?? [];
+
+        return array_values(array_unique(array_merge($fromSettings, [
+            'my-subscription.index',
+            'my-subscription.renewal-requests.store',
+            'my-subscription.invoice-pdf',
+            'my-subscription.payments.store',
+            'profile.edit',
+            'profile.update',
+            'profile.password.update',
+            'logout',
+        ])));
     }
 
     protected function computeEndDate(Carbon $start, Package $package, ?string $billing_cycle): Carbon

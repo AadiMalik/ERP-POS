@@ -111,3 +111,25 @@ Homepage `sections` / `product_groups` keys: `featured_products`,
 slots with other website-visible products when the prioritized set is short.
 Discounted Products never fills with non-discounted items — an empty list
 means the Vue themes hide that section entirely.
+
+## Mobile App Customer API (`routes/mobile.php`)
+
+Registered in `RouteServiceProvider` with prefix `/api/mobile` (same pattern as
+`/api/intro`). Controllers live under `App\Http\Controllers\Api\Mobile\` and
+services under `App\Services\Concrete\Api\Mobile\`.
+
+Same endpoint surface as the website storefront (`/api/v1/...`), but on its own
+prefix so the mobile app can diverge later without touching the Vue storefront:
+
+| Website (`/api/v1/...`) | Mobile (`/api/mobile/...`) |
+|---|---|
+| `POST /auth/{check-email, send-otp, …}` | `POST /auth/{check-email, send-otp, …}` |
+| `GET /products/{business_id}` | `GET /products/{business_id}` |
+| `GET|POST /cart/{business_id}` | `GET|POST /cart/{business_id}` |
+| `POST /checkout/{business_id}` | `POST /checkout/{business_id}` |
+| … (full mirror of public + Sanctum groups) | … |
+
+Auth OTPs still use the `storefront` email channel (tenant branding). Sanctum
+tokens are named `mobile-auth`. Mobile cart/checkout/wishlist/order/account
+services currently extend the website Api services so behaviour stays identical;
+override only the Mobile subclasses when the app needs different rules.

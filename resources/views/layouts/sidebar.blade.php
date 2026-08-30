@@ -12,6 +12,44 @@
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
+        @php
+            $subscriptionLocked = false;
+            $subscriptionPendingPaymentCount = 0;
+            if (auth()->check() && getRoleName() == \App\Enums\RoleNames::SUPERADMIN) {
+                try {
+                    $subscriptionPendingPaymentCount = app(\App\Services\Concrete\Admin\InvoiceService::class)->pendingPaymentCount();
+                } catch (\Throwable $e) {
+                    $subscriptionPendingPaymentCount = 0;
+                }
+            } elseif (auth()->check() && getRoleName() != \App\Enums\RoleNames::SUPERADMIN && auth()->user()->business) {
+                try {
+                    $subscriptionLocked = app(\App\Services\Concrete\Admin\SubscriptionService::class)
+                        ->isAccessRestricted(auth()->user()->business);
+                } catch (\Throwable $e) {
+                    $subscriptionLocked = false;
+                }
+            }
+        @endphp
+
+        @if ($subscriptionLocked)
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Subscription</span>
+            </li>
+            @canAccess('my-subscription.manage')
+                <li class="menu-item">
+                    <a href="{{ route('my-subscription.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons fa fa-credit-card"></i>
+                        <div data-i18n="My Subscription">My Subscription</div>
+                    </a>
+                </li>
+            @endcanAccess
+            <li class="menu-item">
+                <a href="{{ route('profile.edit') }}" class="menu-link">
+                    <i class="menu-icon tf-icons fa fa-user"></i>
+                    <div data-i18n="Profile">Profile</div>
+                </a>
+            </li>
+        @else
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Main</span>
         </li>
@@ -87,7 +125,7 @@
             <span class="menu-header-text">Business</span>
         </li>
         <!-- Business -->
-        @canAccessAny(['package.view', 'business.view', 'branch.view', 'setting.manage'])
+        @canAccessAny(['package.view', 'business.view', 'branch.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons fa fa-store"></i>
@@ -116,13 +154,6 @@
                             </a>
                         </li>
                     @endcanAccess
-                    @canAccess('setting.manage')
-                        <li class="menu-item">
-                            <a href="{{ url('/admin/business-setting') }}" class="menu-link">
-                                <div data-i18n="Business Setting">Business Setting</div>
-                            </a>
-                        </li>
-                    @endcanAccess
                 </ul>
             </li>
         @endcanAccessAny
@@ -141,13 +172,12 @@
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="{{ route('subscription-renewal-requests.index') }}" class="menu-link">
-                            <div data-i18n="Renewal Requests">Renewal Requests</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
                         <a href="{{ route('subscription-invoices.index') }}" class="menu-link">
-                            <div data-i18n="Invoices">Invoices</div>
+                            <div data-i18n="Invoices">Invoices
+                                @if (($subscriptionPendingPaymentCount ?? 0) > 0)
+                                    <span class="badge badge-danger bg-danger rounded-pill ms-1" id="subscriptionInvoicesPendingBadge">{{ $subscriptionPendingPaymentCount }}</span>
+                                @endif
+                            </div>
                         </a>
                     </li>
                     <li class="menu-item">
@@ -346,11 +376,11 @@
         @endcanAccessAny
         @endif
 
+        @if (businessModuleEnabled('accounting'))
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Accounting</span>
         </li>
         {{-- Accounting --}}
-        @if (businessModuleEnabled('accounting'))
         @canAccessAny(['account-type.view', 'account-sub-type.view', 'journal.view', 'account.view', 'journal-entry.view',
             'recurring-transaction.view',
             'fiscal-year.view', 'accounting-period.view', 'period-closing-rule.manage', 'budget.view',
@@ -622,6 +652,7 @@
         @endcanAccessAny
         @endif
 
+        @if (businessModuleEnabled('hrm') || businessModuleEnabled('payroll'))
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">HRM</span>
         </li>
@@ -1192,6 +1223,7 @@
                 </ul>
             </li>
         @endcanAccessAny
+        @endif
 
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">System</span>
@@ -1701,6 +1733,7 @@
     <br>
     <br>
     <br>
+        @endif
     </ul>
 </aside>
 <!-- / Menu -->

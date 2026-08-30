@@ -107,6 +107,9 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('contact-inquiries/{id}', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'show']);
         Route::post('contact-inquiries/{id}/reply', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'reply']);
         Route::post('contact-inquiries/{id}/status', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'updateStatus']);
+        Route::post('contact-inquiries/{id}/register-business', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'registerBusiness'])->name('contact-inquiries.register-business');
+        Route::post('contact-inquiries/{id}/payment', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'updatePayment'])->name('contact-inquiries.payment');
+        Route::post('contact-inquiries/{id}/activate', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'activate'])->name('contact-inquiries.activate');
         Route::delete('contact-inquiries/{id}', [App\Http\Controllers\Admin\Intro\ContactInquiryController::class, 'destroy']);
 
         Route::get('website-settings', [App\Http\Controllers\Admin\Intro\WebsiteSettingController::class, 'index'])->name('website-settings.index');
@@ -149,6 +152,8 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('business-registrations/{id}/edit', [App\Http\Controllers\Admin\Intro\BusinessRegistrationController::class, 'show']);
         Route::get('business-registrations/{id}', [App\Http\Controllers\Admin\Intro\BusinessRegistrationController::class, 'show']);
         Route::post('business-registrations/{id}/status', [App\Http\Controllers\Admin\Intro\BusinessRegistrationController::class, 'updateStatus']);
+        Route::post('business-registrations/{id}/approve-payment', [App\Http\Controllers\Admin\Intro\BusinessRegistrationController::class, 'approvePayment'])->name('business-registrations.approve-payment');
+        Route::post('business-registrations/{id}/reject-payment', [App\Http\Controllers\Admin\Intro\BusinessRegistrationController::class, 'rejectPayment'])->name('business-registrations.reject-payment');
     });
 
     //////////////////// Subscription & Billing (Super Admin) ////////////////////
@@ -174,9 +179,11 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     Route::group(['prefix' => 'subscription-invoices', 'middleware' => ['superadmin']], function () {
         Route::get('/', [App\Http\Controllers\Admin\SubscriptionInvoiceController::class, 'index'])->name('subscription-invoices.index');
         Route::post('data', [App\Http\Controllers\Admin\SubscriptionInvoiceController::class, 'getData'])->name('subscription-invoices-data');
+        Route::get('pending-count', [App\Http\Controllers\Admin\SubscriptionInvoiceController::class, 'pendingCount'])->name('subscription-invoices.pending-count');
         Route::get('{subscription_invoice_id}', [App\Http\Controllers\Admin\SubscriptionInvoiceController::class, 'show'])->name('subscription-invoices.show');
         Route::get('{subscription_invoice_id}/pdf', [App\Http\Controllers\Admin\SubscriptionInvoiceController::class, 'pdf'])->name('subscription-invoices.pdf');
         Route::post('{subscription_invoice_id}/void', [App\Http\Controllers\Admin\SubscriptionInvoiceController::class, 'void'])->name('subscription-invoices.void');
+        Route::delete('{subscription_invoice_id}', [App\Http\Controllers\Admin\SubscriptionInvoiceController::class, 'destroy'])->name('subscription-invoices.destroy');
     });
 
     Route::group(['prefix' => 'subscription-payments', 'middleware' => ['superadmin']], function () {

@@ -83,7 +83,8 @@ class DashboardAccessService
      * hardcoded allow_roles already on ProfitLossReportService,
      * BalanceSheetReportService and ExpenseReportService, so the dashboard
      * introduces zero new privilege beyond what those report pages already
-     * grant.
+     * grant. Still requires the business package's `accounting` module
+     * (see resolveScope is_finance) — role alone is not enough.
      */
     public const FINANCE_ROLES = [
         RoleNames::BUSINESSADMIN,
@@ -112,13 +113,20 @@ class DashboardAccessService
 
         [$start_date, $end_date, $can_use_date_filter] = $this->resolveDateRange($role, $request);
 
+        // Finance widgets (Net Profit, P&L overview, COA, receivables/payables)
+        // require both a finance-capable role and the Accounting package module —
+        // without accounting, ProfitLoss/BalanceSheet routes are module-gated
+        // and the widgets must not appear either.
+        $is_finance = in_array($role, self::FINANCE_ROLES)
+            && businessModuleEnabled('accounting');
+
         return [
             'allowed' => true,
             'tier' => $tier,
             'role' => $role,
             'user' => $user,
             'business_id' => $user->business_id,
-            'is_finance' => in_array($role, self::FINANCE_ROLES),
+            'is_finance' => $is_finance,
             'can_select_branch' => $can_select_branch,
             'branch_options' => $branch_options,
             'effective_branch_id' => $effective_branch_id,
