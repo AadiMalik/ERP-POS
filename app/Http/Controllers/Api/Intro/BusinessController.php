@@ -24,6 +24,10 @@ class BusinessController extends Controller
 
     public function register(Request $request)
     {
+        if (filled($request->input('website'))) {
+            return $this->success(Message::SAVE, null);
+        }
+
         $validate = Validator::make($request->all(), [
             'package_id' => 'required|exists:packages,package_id',
             'billing_cycle' => 'nullable|in:monthly,yearly',

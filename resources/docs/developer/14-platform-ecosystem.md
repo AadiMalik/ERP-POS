@@ -59,16 +59,24 @@ side:
 - **Product listings always include `badges`.**
   `ProductService::formatCustomerProduct()` (used by both the storefront and
   mobile catalog services) always sets `'badges' => $badges`, even as an
-  empty array — never omits the key.
+  empty array — never omits the key. The smart-mart `mapProduct()` also
+  defaults missing `badges` to `[]` so older payloads cannot crash the UI.
+- **Mobile homepage uses the aggregated payload.** Flutter
+  `HomeService.fetch()` hits `/mobile/website-home/{business_id}` and renders
+  `promo_banners`, hero secondary CTA, and product-rail "See all" into Shop.
+  Catalog screens (`Home` / `Shop` / categories / listing) surface
+  `ApiResult` failures with retry instead of silent empty lists.
 
 ## Dukanaz Command Center Is a Different Kind of Client
 
 Unlike the storefront/mobile pair, `routes/intro.php` is **entirely public**
-— no Sanctum auth on any route, only the global `api` throttle (300/min) —
-because it represents the platform itself, not a tenant business. It's
-powered by `App\Http\Controllers\Api\Intro\*` and reads/writes:
-platform-level `packages`, `modules`, `blog_*`, `testimonials`, `website_settings`
-(the platform's own, distinct from a tenant's `website_settings`), and the
+— no Sanctum auth on any route — because it represents the platform itself,
+not a tenant business. GETs rely on the global `api` throttle (300/min);
+`business-register`, `contact`, and `blog-comments` add `throttle:20,1` plus
+a `website` honeypot (filled → fake success, no persist). It's powered by
+`App\Http\Controllers\Api\Intro\*` and reads/writes: platform-level
+`packages`, `modules`, `blog_*`, `testimonials`, `website_settings` (the
+platform's own, distinct from a tenant's `website_settings`), and the
 `intro_business_registrations` table created by `BusinessController::register()`
 ahead of onboarding a new tenant `Business`.
 

@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('packages', [PackageController::class, 'index']);
 Route::get('packages/{package_id}', [PackageController::class, 'show']);
 
-Route::post('business-register', [BusinessController::class, 'register']);
+Route::post('business-register', [BusinessController::class, 'register'])->middleware('throttle:20,1');
 
 Route::get('modules', [ModuleController::class, 'index']);
 Route::get('modules/{slug}', [ModuleController::class, 'show']);
@@ -35,10 +35,10 @@ Route::get('blogs', [BlogController::class, 'index']);
 Route::get('blogs/{slug}', [BlogController::class, 'show']);
 Route::get('blog-categories', [BlogCategoryController::class, 'index']);
 Route::get('blog-tags', [BlogTagController::class, 'index']);
-Route::post('blog-comments', [BlogCommentController::class, 'store']);
+Route::post('blog-comments', [BlogCommentController::class, 'store'])->middleware('throttle:20,1');
 
 Route::get('testimonials', [TestimonialController::class, 'index']);
-Route::post('contact', [ContactController::class, 'store']);
+Route::post('contact', [ContactController::class, 'store'])->middleware('throttle:20,1');
 
 Route::get('website-settings', [WebsiteSettingController::class, 'show']);
 Route::get('navigation', [NavigationController::class, 'index']);

@@ -141,9 +141,12 @@ site (`dukanaz-command-center`, a Vue 3 app in its own repo — see
 [Platform Ecosystem](14-platform-ecosystem.md)) that introduces the
 ERP/POS/Website/Mobile product to prospective businesses. Controllers live
 under `App\Http\Controllers\Api\Intro\`. Unlike `api.php`/`mobile.php`, every
-route here is fully public — no Sanctum auth anywhere — and only the global
-`api` throttle (300/min) applies, since there is no tenant/customer identity
-involved, only platform-level content and lead capture:
+route here is fully public — no Sanctum auth anywhere. The global `api`
+throttle (300/min) still applies for GETs; the write endpoints
+`business-register`, `contact`, and `blog-comments` also use
+`throttle:20,1`. Those three controllers treat a filled honeypot field
+`website` as a bot and return a fake success without persisting — Command
+Center forms include a hidden `website` input for this:
 
 | Method | Path | Controller@Action | Purpose |
 |---|---|---|---|

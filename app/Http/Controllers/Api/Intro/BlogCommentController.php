@@ -23,6 +23,10 @@ class BlogCommentController extends Controller
 
     public function store(Request $request)
     {
+        if (filled($request->input('website'))) {
+            return $this->success(Message::SAVE, null);
+        }
+
         $validate = Validator::make($request->all(), [
             'blog_slug' => 'required_without:intro_blog_id|string',
             'intro_blog_id' => 'required_without:blog_slug|string',

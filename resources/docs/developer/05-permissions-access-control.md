@@ -96,3 +96,17 @@ use this form for anything that also needs a `module:` check.
 6. **Update the documentation** — see
    [The Documentation System Itself](12-documentation-system.md) and CLAUDE.md's
    "Documentation" section.
+
+## Context-dependent permission checks (sanctioned exception)
+
+Constructor `->only([...])` middleware cannot express "this permission applies
+*only if* a specific field is present on this request." In those cases the
+controller may check inline with `Auth::user()->can('…')` (or Spatie's
+`$user->can(...)`) after validating the payload, and reject with 403 when the
+optional field is present but the user lacks the permission.
+
+**Canonical example:** `OrderController` — discount / coupon / price-override
+fields are gated only when those fields appear on the save/post request.
+Do **not** move those checks into constructor middleware; documenting the
+inline check next to the field is the approved pattern. Everything else still
+belongs in constructor middleware.
