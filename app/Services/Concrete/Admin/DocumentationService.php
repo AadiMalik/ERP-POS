@@ -37,6 +37,7 @@ class DocumentationService
             ['slug' => 'subscription-billing', 'title' => 'Subscription & Billing', 'file' => '11-subscription-billing.md'],
             ['slug' => 'audit-security', 'title' => 'Notifications, Activity Log & Security', 'file' => '12-audit-security.md'],
             ['slug' => 'push-notifications', 'title' => 'Push Notifications (FCM)', 'file' => '13-push-notifications.md'],
+            ['slug' => 'platform-ecosystem', 'title' => 'The Wider Platform: Website, Intro Site & Mobile App', 'file' => '14-platform-ecosystem.md'],
         ];
     }
 
@@ -57,6 +58,7 @@ class DocumentationService
             ['slug' => 'coding-conventions', 'title' => 'Coding Conventions', 'file' => '11-coding-conventions.md'],
             ['slug' => 'documentation-system', 'title' => 'The Documentation System Itself', 'file' => '12-documentation-system.md'],
             ['slug' => 'fcm-broadcast-notifications', 'title' => 'FCM Broadcast Notifications', 'file' => '13-fcm-broadcast-notifications.md'],
+            ['slug' => 'platform-ecosystem', 'title' => 'Platform Ecosystem: Companion Repos & Their API Contracts', 'file' => '14-platform-ecosystem.md'],
         ];
     }
 

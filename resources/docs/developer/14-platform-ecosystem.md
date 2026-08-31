@@ -1,0 +1,90 @@
+# Platform Ecosystem: Companion Repos & Their API Contracts
+
+This ERP backend is consumed by three separate frontend repositories, each on
+its own tech stack, its own repo, and (for the two Vue apps) its own
+deployment. This page maps the ecosystem and states where each client's
+contract with this backend actually lives in code — useful whenever a change
+here needs to be checked against a consumer, or vice versa.
+
+## The Four Repos
+
+| Repo | Path | Stack | Talks to |
+|---|---|---|---|
+| ERP + POS (this repo) | `c:\xampp\htdocs\erp` | Laravel 8 | — (the backend) |
+| Per-business storefront | `c:\xampp\htdocs\smart-mart` | Vue 3 + Vite | `routes/api.php` (`/api/v1/...`) |
+| Public intro / sign-up site | `c:\xampp\htdocs\dukanaz-command-center` | Vue 3 + Vite | `routes/intro.php` (`/api/intro/...`) |
+| Customer mobile app | `D:\smart_mart_mobile` | Flutter (Dio) | `routes/mobile.php` (`/api/mobile/...`) |
+
+One ERP backend, one shared database — each of the three clients is a
+different *view* onto the same tenant data, never a separate system with its
+own copy.
+
+## smart-mart & the Mobile App Are Deliberately Identical Contracts
+
+`routes/api.php` and `routes/mobile.php` expose the same endpoint surface
+under different prefixes (see [Routes & APIs](04-routes-apis.md)), and on the
+PHP side the Mobile API service classes
+(`app/Services/Concrete/Api/Mobile/*`) are thin `extends`/delegators over the
+same storefront services the Vue app's controllers call
+(`app/Services/Concrete/Api/*`, `app/Services/Concrete/Admin/*` for
+catalog/CMS). **There is no independent pricing, cart, voucher, or checkout
+logic for the mobile app** — if you change a rule in a storefront service, it
+applies to the mobile app automatically. Only override a `Mobile*` subclass
+when the app genuinely needs different behavior from the website.
+
+Both clients' service/store layers expect the exact envelope
+`App\Traits\ResponseAPI` emits: capitalized `{Success, Message, Data}` keys
+on every response — not Laravel's typical lowercase convention. Keep this in
+mind before hand-writing a raw `response()->json([...])` anywhere on these
+routes; it must go through `ResponseAPI` (or match its shape) or every
+frontend `unwrap()`/`ApiResult` parser silently treats it as a failure.
+
+A few endpoint-specific contract quirks worth knowing before you touch either
+side:
+
+- **Order response fields are deliberately mixed-case.**
+  `CustomerOrderService::formatOrder()` returns order-level fields as
+  camelCase (`orderNumber`, `paymentStatus`, `placedAt`) but item-level
+  fields as snake_case (`product_variation_id`). Both Vue and Flutter clients
+  mirror this exactly — it looks inconsistent but is intentional and matched
+  on both ends. Don't "fix" one side without the other.
+- **The address endpoints accept both casings.** `ProfileController::store
+  Address()` validates `fullName|full_name` and `isDefault|is_default` as
+  accepted alternates specifically so either client convention works.
+- **Product listings always include `badges`.**
+  `ProductService::formatCustomerProduct()` (used by both the storefront and
+  mobile catalog services) always sets `'badges' => $badges`, even as an
+  empty array — never omits the key.
+
+## Dukanaz Command Center Is a Different Kind of Client
+
+Unlike the storefront/mobile pair, `routes/intro.php` is **entirely public**
+— no Sanctum auth on any route, only the global `api` throttle (300/min) —
+because it represents the platform itself, not a tenant business. It's
+powered by `App\Http\Controllers\Api\Intro\*` and reads/writes:
+platform-level `packages`, `modules`, `blog_*`, `testimonials`, `website_settings`
+(the platform's own, distinct from a tenant's `website_settings`), and the
+`intro_business_registrations` table created by `BusinessController::register()`
+ahead of onboarding a new tenant `Business`.
+
+**Current limitation, not yet built:** `BusinessController::register()`
+validates only text fields (`package_id`, `business_name`, `owner_name`,
+`owner_email`, `owner_phone`, `business_type`, `city`, `address`, `notes`,
+etc.) — there is no file-upload field for a payment/deposit proof, even
+though the intro site's registration flow presents one to the user. If this
+capability is added, follow the existing pattern used for order payment
+proofs (`public/uploads/order_payment_proof/`) for storage and validation.
+
+## Where to Look When a Cross-Repo Bug Is Reported
+
+1. Confirm which prefix the client actually hit — `/api/v1/...` (storefront),
+   `/api/mobile/...` (Flutter), or `/api/intro/...` (Command Center) — they
+   are not interchangeable even where paths look similar.
+2. For storefront/mobile, check the shared service first
+   (`app/Services/Concrete/Api/*` or `Admin/*`) before assuming the bug is
+   route-specific — a fix there fixes both clients.
+3. Diff the client's expected request/response field names against the
+   relevant `Service::format*()`/`Resource` method directly in this repo —
+   don't assume the frontend's assumption is correct or that the backend's
+   convention is a bug; check [Routes & APIs](04-routes-apis.md) and this
+   page for the quirks already known to be intentional.

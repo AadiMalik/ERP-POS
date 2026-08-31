@@ -133,3 +133,32 @@ Auth OTPs still use the `storefront` email channel (tenant branding). Sanctum
 tokens are named `mobile-auth`. Mobile cart/checkout/wishlist/order/account
 services currently extend the website Api services so behaviour stays identical;
 override only the Mobile subclasses when the app needs different rules.
+
+## Public Intro/Marketing API (`routes/intro.php`)
+
+Registered with prefix `/api/intro`, powering the separate public marketing
+site (`dukanaz-command-center`, a Vue 3 app in its own repo — see
+[Platform Ecosystem](14-platform-ecosystem.md)) that introduces the
+ERP/POS/Website/Mobile product to prospective businesses. Controllers live
+under `App\Http\Controllers\Api\Intro\`. Unlike `api.php`/`mobile.php`, every
+route here is fully public — no Sanctum auth anywhere — and only the global
+`api` throttle (300/min) applies, since there is no tenant/customer identity
+involved, only platform-level content and lead capture:
+
+| Method | Path | Controller@Action | Purpose |
+|---|---|---|---|
+| GET | `packages`, `packages/{id}` | `PackageController@index/show` | Subscription package catalog (reads the same `packages` table Super Admin manages) |
+| POST | `business-register` | `BusinessController@register` | Creates an `intro_business_registrations` row ahead of onboarding a new tenant `Business`. Validates text fields only (`package_id`, `business_name`, `owner_name`, `owner_email`, `owner_phone`, `business_type`, `city`, `address`, `notes`, `billing_cycle`) — no file-upload field exists yet for a payment proof (see limitation noted in [Platform Ecosystem](14-platform-ecosystem.md)) |
+| GET | `modules`, `modules/{slug}` | `ModuleController@index/show` | Marketing copy describing platform modules |
+| GET | `blogs`, `blogs/{slug}`, `blog-categories`, `blog-tags` | `BlogController@*` | Blog content |
+| POST | `blog-comments` | `BlogCommentController@store` | Blog comment submission |
+| GET | `testimonials` | `TestimonialController@index` | Customer testimonials |
+| POST | `contact` | `ContactController@store` | General inquiry form |
+| GET | `website-settings` | `WebsiteSettingController@show` | Platform-level site identity/branding — distinct from a tenant's own `website-settings/{business_id}` above |
+| GET | `navigation` | `NavigationController@index` | Header/footer nav tree |
+| GET | `pages`, `pages/{slug}` | `PageController@index/show` | Static CMS pages |
+| GET | `homepage` | `HomepageController@show` | Aggregated homepage payload |
+
+All content here is managed through the **Intro CMS** admin screens, kept
+deliberately separate from a tenant's own Website CMS since it represents the
+platform, not any one business.
