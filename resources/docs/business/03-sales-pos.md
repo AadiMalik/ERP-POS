@@ -19,7 +19,9 @@ A cashier opens a **POS Register Session** with a starting cash amount before
 taking any sales. All sales, cash movements (cash in/out during the shift), and
 payments are tracked against that session. Closing the session reconciles expected
 vs. counted cash. This is required before the POS screen can be used
-(`pos.access` permission).
+(`pos.access` permission). The session is always opened for the signed-in
+cashier's own business (and branch, when their account is branch-scoped) —
+staff cannot open a register under another business.
 
 ## Taking a Sale
 

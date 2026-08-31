@@ -148,7 +148,7 @@ involved, only platform-level content and lead capture:
 | Method | Path | Controller@Action | Purpose |
 |---|---|---|---|
 | GET | `packages`, `packages/{id}` | `PackageController@index/show` | Subscription package catalog (reads the same `packages` table Super Admin manages) |
-| POST | `business-register` | `BusinessController@register` | Creates an `intro_business_registrations` row ahead of onboarding a new tenant `Business`. Validates text fields only (`package_id`, `business_name`, `owner_name`, `owner_email`, `owner_phone`, `business_type`, `city`, `address`, `notes`, `billing_cycle`) — no file-upload field exists yet for a payment proof (see limitation noted in [Platform Ecosystem](14-platform-ecosystem.md)) |
+| POST | `business-register` | `BusinessController@register` | Creates an `intro_business_registrations` row ahead of onboarding a new tenant `Business`. Accepts text fields (`package_id`, `business_name`, `owner_name`, `owner_email`, `owner_phone`, `business_type`, `city`, `address`, `notes`, `billing_cycle`, `payment_reference`) plus optional `payment_proof` file (`jpg,jpeg,png,pdf`, max 5MB) stored on the pending subscription payment — see [Platform Ecosystem](14-platform-ecosystem.md) |
 | GET | `modules`, `modules/{slug}` | `ModuleController@index/show` | Marketing copy describing platform modules |
 | GET | `blogs`, `blogs/{slug}`, `blog-categories`, `blog-tags` | `BlogController@*` | Blog content |
 | POST | `blog-comments` | `BlogCommentController@store` | Blog comment submission |

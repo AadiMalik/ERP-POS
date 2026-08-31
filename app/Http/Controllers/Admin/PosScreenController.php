@@ -99,6 +99,8 @@ class PosScreenController extends Controller
         PosRegisterSessionService $pos_register_session_service,
         SaleTypeService $sale_type_service
     ) {
+        $this->middleware('permission:pos.access');
+
         $this->customer_service = $customer_service;
         $this->order_type_service = $order_type_service;
         $this->order_source_service = $order_source_service;

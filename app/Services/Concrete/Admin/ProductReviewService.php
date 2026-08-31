@@ -3,6 +3,7 @@
 namespace App\Services\Concrete\Admin;
 
 use App\Enums\RoleNames;
+use App\Models\Product;
 use App\Models\ProductReview;
 use App\Repository\Repository;
 use Exception;
@@ -125,6 +126,15 @@ class ProductReviewService
      */
     public function submit($business_id, array $data)
     {
+        $product = Product::where('product_id', $data['product_id'])
+            ->where('business_id', $business_id)
+            ->where('is_deleted', 0)
+            ->first();
+
+        if (!$product) {
+            throw new Exception('Product not found for this store.');
+        }
+
         $model = $this->model_review->getModel();
 
         if (!empty($data['customer_id'])) {

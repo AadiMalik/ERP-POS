@@ -117,6 +117,7 @@ class SubscriptionService
                 'amount' => $invoice->total,
                 'payment_method' => $billing['payment_method'],
                 'payment_reference' => $billing['payment_reference'],
+                'payment_proof' => $billing['payment_proof'] ?? null,
             ], Auth::id(), !$billing['mark_paid']);
 
             if ($billing['mark_paid']) {

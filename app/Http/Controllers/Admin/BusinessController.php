@@ -61,6 +61,7 @@ class BusinessController extends Controller
             ],
             'owner_name' => 'required',
             'owner_email' => 'required|email',
+            'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ];
 
         if (empty($request->business_id)) {

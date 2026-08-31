@@ -45,7 +45,8 @@ are considering signing up. This is where a prospective customer:
 
 - Reads about the available subscription packages and what each one includes.
 - Registers their business and picks a package.
-- Submits proof of payment to activate their subscription.
+- Uploads a bank deposit slip / transfer screenshot as payment proof
+  (stored with the pending subscription invoice for Super Admin review).
 - Sends a general inquiry to be contacted about getting set up.
 
 The content on this site (packages, pricing, module descriptions, blog posts,

@@ -107,7 +107,22 @@ Setup: `OrderTypeController`, `PaymentMethodController`, `OrderSourceController`
 `CustomerPaymentController` (service: `CustomerPaymentService` — order-targeted
 payments may not exceed remaining due; due/amount are compared at the
 business `decimal_points` scale so amounts that display as equal, e.g.
-Rs 10.61 vs Rs 10.61, are accepted). Customer receivable COA:
+Rs 10.61 vs Rs 10.61, are accepted).
+
+**Register session open — tenant/cashier binding:**
+`PosRegisterSessionService::open()` forces `business_id`, branch-scoped
+`branch_id`, and `cashier_id` to the authenticated user for every non-Super-Admin
+caller, so a crafted request cannot open a POS session under another tenant or
+as another cashier. Super Admin may still supply those fields explicitly.
+`resolveRegisterForUser()` continues to require the selected register to match
+the (now server-enforced) business/branch.
+
+`PosRegisterSessionController` and `PosScreenController` also apply
+`$this->middleware('permission:pos.access')` in their constructors (in addition
+to the route-group middleware), matching the project convention so a future
+route outside the group cannot ship ungated.
+
+Customer receivable COA:
 `CustomerService::upsertProfile()` (admin Users create/edit and API
 `CustomerAccountService::ensureProfile()` / website signup) attaches
 `accounting_settings.default_customer_account_id` to `customer_profiles.account_id`

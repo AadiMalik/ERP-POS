@@ -91,15 +91,31 @@ class PosRegisterSessionService
      */
     public function open($obj)
     {
-        $cashier_id = $obj['cashier_id'] ?? Auth::id();
+        $user = Auth::user();
+        $is_superadmin = getRoleName() == RoleNames::SUPERADMIN;
+
+        // Non-Super-Admin callers cannot spoof tenant/cashier identity via the
+        // request body — force business/cashier (and branch when the user is
+        // branch-scoped) to the authenticated user. Business Admins with a
+        // null branch_id may still pick a branch inside their own business;
+        // resolveRegisterForUser still requires the register to match both ids.
+        if (!$is_superadmin) {
+            $obj['business_id'] = $user->business_id;
+            if (!empty($user->branch_id)) {
+                $obj['branch_id'] = $user->branch_id;
+            }
+            $obj['cashier_id'] = $user->id;
+        }
+
+        $cashier_id = $obj['cashier_id'] ?? $user->id;
 
         // Always resolve (and validate) the register through the service - this
         // enforces the manual-mode business/branch/status checks even when a
         // pos_register_id was explicitly passed in.
         $register = $this->pos_register_service->resolveRegisterForUser(
-            $obj['business_id'] ?? Auth::user()->business_id,
-            $obj['branch_id'] ?? Auth::user()->branch_id,
-            Auth::user(),
+            $obj['business_id'] ?? $user->business_id,
+            $obj['branch_id'] ?? $user->branch_id,
+            $user,
             $obj['pos_register_id'] ?? null
         );
 

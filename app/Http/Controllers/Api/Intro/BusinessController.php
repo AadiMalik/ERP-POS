@@ -8,6 +8,7 @@ use App\Services\Concrete\Api\Intro\IntroPublicService;
 use App\Traits\ResponseAPI;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
 class BusinessController extends Controller
@@ -36,12 +37,27 @@ class BusinessController extends Controller
             'city' => 'nullable|string|max:100',
             'address' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
+            'payment_reference' => 'nullable|string|max:150',
+            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
         if ($validate->fails()) {
             return $this->validationResponse($validate->errors()->first());
         }
         try {
-            $row = $this->service->registerBusiness($request->all());
+            $data = $request->except(['payment_proof']);
+
+            if ($request->hasFile('payment_proof')) {
+                $file = $request->file('payment_proof');
+                $fileName = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '_', $file->getClientOriginalName());
+                $path = public_path('uploads/subscription_payments');
+                if (!File::exists($path)) {
+                    File::makeDirectory($path, 0755, true);
+                }
+                $file->move($path, $fileName);
+                $data['payment_proof'] = $fileName;
+            }
+
+            $row = $this->service->registerBusiness($data);
             return $this->success(Message::SAVE, $row->load(['business', 'package']));
         } catch (Exception $e) {
             return $this->error($e->getMessage());

@@ -38,6 +38,14 @@ it is not, it returns an error and does not send a code.
 
 After a successful reset you sign in again with the new password.
 
+## File Uploads
+
+Logo and image uploads on Business, Branch, Supplier, Category, and Brand
+screens accept only image files (`jpg`, `jpeg`, `png`, `webp`) up to 2MB.
+Subscription and order payment proofs accept image or PDF files up to 5MB.
+Expense and customer-payment attachments accept PDF, images, and common
+Office documents (`pdf,jpg,jpeg,png,webp,doc,docx,xls,xlsx`) up to 5MB.
+
 ## Who Can See What
 
 Access to the Activity Log and Login History is itself permission-gated, so you

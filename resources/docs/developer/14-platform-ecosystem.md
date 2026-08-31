@@ -39,6 +39,11 @@ mind before hand-writing a raw `response()->json([...])` anywhere on these
 routes; it must go through `ResponseAPI` (or match its shape) or every
 frontend `unwrap()`/`ApiResult` parser silently treats it as a failure.
 
+**Product reviews:** `ProductReviewService::submit($business_id, …)` verifies
+the `product_id` belongs to that route `business_id` before creating a row, so
+a customer cannot attach a review to another tenant's catalog via a crafted
+request.
+
 A few endpoint-specific contract quirks worth knowing before you touch either
 side:
 
@@ -67,13 +72,16 @@ platform-level `packages`, `modules`, `blog_*`, `testimonials`, `website_setting
 `intro_business_registrations` table created by `BusinessController::register()`
 ahead of onboarding a new tenant `Business`.
 
-**Current limitation, not yet built:** `BusinessController::register()`
-validates only text fields (`package_id`, `business_name`, `owner_name`,
-`owner_email`, `owner_phone`, `business_type`, `city`, `address`, `notes`,
-etc.) — there is no file-upload field for a payment/deposit proof, even
-though the intro site's registration flow presents one to the user. If this
-capability is added, follow the existing pattern used for order payment
-proofs (`public/uploads/order_payment_proof/`) for storage and validation.
+**Intro business registration accepts a payment proof:**
+`Api\Intro\BusinessController::register()` validates an optional
+`payment_proof` file (`jpg,jpeg,png,pdf`, max 5MB) and stores it under
+`public/uploads/subscription_payments/`. The filename is passed through
+`BusinessRegistrationService::registerFromIntro()` →
+`SubscriptionService::createInitial()` → `PaymentService::record()` onto the
+pending `subscription_payments` row (same path as My Subscription uploads).
+When a proof is present the new business is set to `under_review`. The Command
+Center registration UI must submit `FormData` (not JSON) so the file reaches
+this endpoint.
 
 ## Where to Look When a Cross-Repo Bug Is Reported
 

@@ -65,6 +65,7 @@ class BranchController extends Controller
             ],
             'email' => 'required|email',
             'phone' => 'required',
+            'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ];
 
         $validate = Validator::make($request->all(), $rules);

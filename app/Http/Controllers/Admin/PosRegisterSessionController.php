@@ -26,6 +26,8 @@ class PosRegisterSessionController extends Controller
         BusinessService $business_service,
         ThermalPrintSettingResolverService $thermal_print_setting_resolver
     ) {
+        $this->middleware('permission:pos.access');
+
         $this->pos_register_session_service = $pos_register_session_service;
         $this->business_service = $business_service;
         $this->thermal_print_setting_resolver = $thermal_print_setting_resolver;

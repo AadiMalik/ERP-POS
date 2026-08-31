@@ -91,6 +91,7 @@ class SupplierController extends Controller
                     ->ignore($request->supplier_id, 'supplier_id')
             ],
             'company_name' => 'required',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ];
 
         $validate = Validator::make($request->all(), $rules);

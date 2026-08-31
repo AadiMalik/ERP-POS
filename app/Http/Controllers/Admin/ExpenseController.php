@@ -139,7 +139,7 @@ class ExpenseController extends Controller
             'reference_no'            => ['nullable', 'string', 'max:191'],
             'amount'                  => ['required', 'numeric', 'min:0.01'],
             'description'             => ['nullable', 'string'],
-            'attachment'              => ['nullable', 'file', 'max:5120'],
+            'attachment'              => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp,doc,docx,xls,xlsx', 'max:5120'],
         ]);
 
         if ($validator->fails()) {

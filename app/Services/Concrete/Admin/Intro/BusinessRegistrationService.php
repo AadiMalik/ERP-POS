@@ -251,9 +251,19 @@ class BusinessRegistrationService
                 'billing_cycle' => $billingCycle,
                 'mark_paid' => false,
                 'payment_method' => 'bank_transfer',
-                'payment_reference' => 'intro registration',
+                'payment_reference' => $data['payment_reference'] ?? 'intro registration',
+                'payment_proof' => $data['payment_proof'] ?? null,
                 'request_type' => 'new',
             ]);
+
+            // Deposit slip attached at registration → under_review so Super Admin
+            // sees a receipt ready to confirm (same as My Subscription upload).
+            if (!empty($data['payment_proof'])) {
+                $business->forceFill([
+                    'status' => Status::UNDER_REVIEW,
+                    'date_updated' => now(),
+                ])->save();
+            }
 
             $accountMap = $this->chart_of_accounts_clone_service->cloneTemplateToBusiness($business->business_id);
             $this->accounting_setting_clone_service->cloneTemplateToBusiness($business->business_id, $accountMap);
