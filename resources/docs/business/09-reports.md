@@ -9,8 +9,9 @@ export.
 ## Financial Reports (Accounting)
 General Ledger, Trial Balance, Journal Register, Account Ledger, Account Balance,
 Day Book, Cash & Bank Ledger, Income Report, Expense Report, Expense Detail
-Report, Tax Report, Equity Report, **Profit & Loss**, **Balance Sheet**, and
-Budget vs. Actual.
+Report, Tax Report, Equity Report, **Profit & Loss**, **Balance Sheet**, Budget
+vs. Actual, plus Fixed Asset reports: **Fixed Asset Register**, **Depreciation
+Report**, **Asset Valuation / Book Value**, and **Asset Disposal / Sale**.
 
 ## Sales Report
 Overall sales performance, with the ability to reconcile against payments received.

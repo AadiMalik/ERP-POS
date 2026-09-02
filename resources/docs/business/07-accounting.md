@@ -67,6 +67,39 @@ Two expense flows exist: **Expenses** tied to a POS register session (day-to-day
 till expenses), and **Admin Expenses** for general business expenses not tied to a
 specific POS session — both categorized under **Expense Categories**.
 
+## Fixed Assets & Depreciation
+
+Accounting **Fixed Assets** (buildings, machinery, vehicles, equipment) are managed
+separately from HR **Assets** (employee-issued laptops/phones). Use **Fixed Asset
+Categories** and **Fixed Assets** under Accounting.
+
+Before recording assets, configure these accounts in **Settings → Accounting**:
+- Fixed Asset / Purchase Asset Account
+- Accumulated Depreciation Account
+- Depreciation Expense Account
+- Gain on Asset Disposal Account
+- Loss on Asset Disposal Account
+
+When you create an asset directly in Fixed Assets, the system posts an acquisition
+journal voucher using those accounts. If the asset was already purchased through
+the **Purchase** module (and that purchase already posted accounting), tick
+**Purchase already posted** (or link the purchase) so a duplicate JV is not created.
+
+Depreciation uses **straight-line** by default, with frequency Daily / Weekly /
+Monthly / Yearly. You can optionally increase or decrease the period amount over
+time, and set a minimum book-value percentage (default 0%) so depreciation never
+goes below residual/minimum value. Purchase cost is kept separate from current
+book value.
+
+Use **Accounting → Depreciation** to view all depreciation entries for your
+business, post a period manually for an active asset, or reverse the latest
+entry if needed. A scheduled job also runs every day at **00:15** and posts due
+depreciation with `Dr Depreciation Expense / Cr Accumulated Depreciation`. You
+can pause, resume, or post depreciation from the asset detail screen as well.
+
+Reports: **Fixed Asset Register**, **Depreciation Report**, **Asset Valuation /
+Book Value**, and **Asset Disposal / Sale** under Accounting Reports.
+
 See [Reports](09-reports.md) for the full set of financial statements (Trial
 Balance, General Ledger, Profit & Loss, Balance Sheet, Day Book, Tax Report, and
 more) generated from this data.

@@ -65,7 +65,12 @@ record is closed out.
 ## Assets
 
 Track company **Assets** (laptops, phones, tools) and their **Allocation** to
-employees, including issue and return dates, so you always know who has what.
+employees for HR inventory purposes, including issue and return dates so you
+always know who has what. This is **not** accounting Fixed Asset / depreciation
+tracking — PPE, depreciation schedules, and disposal JVs live under
+**Accounting → Fixed Assets**. Use HR Assets when you need to issue/return items
+to staff; use Fixed Assets when you need book value and depreciation on the
+ledger.
 
 ## Employee Self-Service (ESS)
 

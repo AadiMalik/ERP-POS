@@ -382,13 +382,14 @@
         </li>
         {{-- Accounting --}}
         @canAccessAny(['account-type.view', 'account-sub-type.view', 'journal.view', 'account.view', 'journal-entry.view',
-            'recurring-transaction.view',
+            'recurring-transaction.view', 'fixed-asset.view', 'fixed-asset-category.view', 'fixed-asset-depreciation.view',
             'fiscal-year.view', 'accounting-period.view', 'period-closing-rule.manage', 'budget.view',
             'reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
             'reports.journal-register.view', 'reports.account-ledger.view', 'reports.account-balance.view',
             'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view',
             'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.sales-report.view', 'reports.voucher-usage.view', 'reports.expense-report.view',
-            'reports.tax-report.view', 'reports.equity-report.view', 'reports.budget-vs-actual.view'])
+            'reports.tax-report.view', 'reports.equity-report.view', 'reports.budget-vs-actual.view',
+            'reports.fixed-asset-register.view', 'reports.depreciation-report.view', 'reports.asset-valuation-report.view', 'reports.asset-disposal-report.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons fa fa-box"></i>
@@ -438,6 +439,27 @@
                             </a>
                         </li>
                     @endcanAccess
+                    @canAccess('fixed-asset-category.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/fixed-asset-category') }}" class="menu-link">
+                                <div data-i18n="Fixed Asset Categories">Fixed Asset Categories</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('fixed-asset.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/fixed-asset') }}" class="menu-link">
+                                <div data-i18n="Fixed Assets">Fixed Assets</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('fixed-asset-depreciation.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/fixed-asset-depreciation') }}" class="menu-link">
+                                <div data-i18n="Depreciation">Depreciation</div>
+                            </a>
+                        </li>
+                    @endcanAccess
                     {{-- Advanced Accounting Mode - hidden by default, see
                          CommonFunctions::businessAccountingAdvancedModeEnabled() --}}
                     @if (businessAccountingAdvancedModeEnabled())
@@ -474,7 +496,8 @@
                         'reports.journal-register.view', 'reports.account-ledger.view', 'reports.account-balance.view',
                         'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view',
                         'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.sales-report.view', 'reports.voucher-usage.view', 'reports.expense-report.view',
-                        'reports.tax-report.view', 'reports.equity-report.view', 'reports.budget-vs-actual.view'])
+                        'reports.tax-report.view', 'reports.equity-report.view', 'reports.budget-vs-actual.view',
+                        'reports.fixed-asset-register.view', 'reports.depreciation-report.view', 'reports.asset-valuation-report.view', 'reports.asset-disposal-report.view'])
                         <li class="menu-item">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
                                 <div data-i18n="Accounting Reports">Reports</div>
@@ -540,6 +563,34 @@
                                     <li class="menu-item">
                                         <a href="{{ url('/admin/reports/balance-sheet') }}" class="menu-link">
                                             <div data-i18n="Balance Sheet">Balance Sheet</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.fixed-asset-register.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/fixed-asset-register') }}" class="menu-link">
+                                            <div data-i18n="Fixed Asset Register">Fixed Asset Register</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.depreciation-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/depreciation-report') }}" class="menu-link">
+                                            <div data-i18n="Depreciation Report">Depreciation Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.asset-valuation-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/asset-valuation-report') }}" class="menu-link">
+                                            <div data-i18n="Asset Valuation Report">Asset Valuation Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.asset-disposal-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/asset-disposal-report') }}" class="menu-link">
+                                            <div data-i18n="Asset Disposal Report">Asset Disposal Report</div>
                                         </a>
                                     </li>
                                 @endcanAccess

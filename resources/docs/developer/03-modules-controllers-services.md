@@ -190,9 +190,14 @@ Voucher's rule engine (see `resources/docs/developer/02-database-schema.md`).
 Advanced (`App\Http\Controllers\Admin\Accounting`): `FiscalYearController`,
 `AccountingPeriodController` (service: `AccountingPeriodService`),
 `PeriodClosingRuleController`, `BudgetController`. Expenses: `ExpenseController`,
-`AdminExpenseController`. Also two ungated cross-cutting popup controllers reused
-from Orders/Purchases/Expenses: `JournalVoucherViewController`,
-`StockConsumptionViewController`.
+`AdminExpenseController`. Fixed Assets (accounting PPE, distinct from HRM
+`Hrm\AssetController`): `FixedAssetCategoryController`, `FixedAssetController`,
+`FixedAssetDepreciationController` (services: `FixedAssetCategoryService`,
+`FixedAssetService`, `FixedAssetDepreciationService`,
+`FixedAsset\FixedAssetAccountingService`, `FixedAsset\FixedAssetCalculator`).
+Depreciation cron: `fixed-assets:post-depreciation` daily at 00:15. Also two
+ungated cross-cutting popup controllers reused from Orders/Purchases/Expenses:
+`JournalVoucherViewController`, `StockConsumptionViewController`.
 
 ## HRM (`module:hrm`) — `App\Http\Controllers\Admin\Hrm`
 `DepartmentController`, `DesignationController`, `ShiftController`,

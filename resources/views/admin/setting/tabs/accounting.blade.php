@@ -24,6 +24,11 @@
         'default_opening_stock_account_id' => 'Opening Stock Account',
         'default_stock_adjustment_account_id' => 'Stock Adjustment Account',
         'default_withholding_tax_account_id' => 'Withholding Tax Account',
+        'default_fixed_asset_account_id' => 'Fixed Asset / Purchase Asset Account',
+        'default_accumulated_depreciation_account_id' => 'Accumulated Depreciation Account',
+        'default_depreciation_expense_account_id' => 'Depreciation Expense Account',
+        'default_gain_on_asset_disposal_account_id' => 'Gain on Asset Disposal Account',
+        'default_loss_on_asset_disposal_account_id' => 'Loss on Asset Disposal Account',
     ];
 @endphp
 <form id="accountingSettingForm">

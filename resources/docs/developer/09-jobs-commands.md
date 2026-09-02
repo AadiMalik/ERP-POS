@@ -4,6 +4,7 @@
 
 | Command | Signature | Schedule | Purpose |
 |---|---|---|---|
+| `ProcessFixedAssetDepreciationCommand` | `fixed-assets:post-depreciation {--dry-run} {--business=} {--date=}` | daily 00:15, `withoutOverlapping()` | Posts due straight-line depreciation for active Fixed Assets and related JVs (idempotent per period) |
 | `ProcessSubscriptionLifecycleCommand` | `subscriptions:process-lifecycle {--dry-run}` | daily 01:00 | Advances tenant subscription states (trial→expired, due-renewal reminders) |
 | `ProcessAccountingPeriodsCommand` | `accounting-periods:process {--dry-run} {--business=}` | daily 02:00, `withoutOverlapping()` | Auto-opens/closes fiscal accounting periods per business |
 | `CheckNotificationAlertsCommand` | `notifications:check-alerts {--dry-run}` | hourly | Scans for conditions that should raise in-app notifications |

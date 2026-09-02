@@ -705,6 +705,44 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('template', [App\Http\Controllers\Admin\AccountTypeController::class, 'template']);
     });
 
+    // Fixed Asset Categories (accounting PPE — not HRM assets)
+    Route::group(['prefix' => 'fixed-asset-category'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\FixedAssetCategoryController::class, 'index']);
+        Route::post('data', [App\Http\Controllers\Admin\FixedAssetCategoryController::class, 'getData']);
+        Route::get('create', [App\Http\Controllers\Admin\FixedAssetCategoryController::class, 'create']);
+        Route::post('store', [App\Http\Controllers\Admin\FixedAssetCategoryController::class, 'store']);
+        Route::get('edit/{fixed_asset_category_id}', [App\Http\Controllers\Admin\FixedAssetCategoryController::class, 'edit']);
+        Route::get('status/{fixed_asset_category_id}', [App\Http\Controllers\Admin\FixedAssetCategoryController::class, 'status']);
+        Route::delete('{fixed_asset_category_id}', [App\Http\Controllers\Admin\FixedAssetCategoryController::class, 'destroy']);
+    });
+
+    // Fixed Assets (accounting PPE)
+    Route::group(['prefix' => 'fixed-asset'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\FixedAssetController::class, 'index']);
+        Route::post('data', [App\Http\Controllers\Admin\FixedAssetController::class, 'getData']);
+        Route::get('create', [App\Http\Controllers\Admin\FixedAssetController::class, 'create']);
+        Route::post('store', [App\Http\Controllers\Admin\FixedAssetController::class, 'store']);
+        Route::get('edit/{fixed_asset_id}', [App\Http\Controllers\Admin\FixedAssetController::class, 'edit']);
+        Route::get('show/{fixed_asset_id}', [App\Http\Controllers\Admin\FixedAssetController::class, 'show']);
+        Route::delete('{fixed_asset_id}', [App\Http\Controllers\Admin\FixedAssetController::class, 'destroy']);
+        Route::post('{fixed_asset_id}/pause', [App\Http\Controllers\Admin\FixedAssetController::class, 'pause']);
+        Route::post('{fixed_asset_id}/resume', [App\Http\Controllers\Admin\FixedAssetController::class, 'resume']);
+        Route::post('{fixed_asset_id}/depreciate', [App\Http\Controllers\Admin\FixedAssetController::class, 'depreciate']);
+        Route::post('{fixed_asset_id}/transfer', [App\Http\Controllers\Admin\FixedAssetController::class, 'transfer']);
+        Route::post('{fixed_asset_id}/adjust', [App\Http\Controllers\Admin\FixedAssetController::class, 'adjust']);
+        Route::post('{fixed_asset_id}/dispose', [App\Http\Controllers\Admin\FixedAssetController::class, 'dispose']);
+    });
+
+    // Fixed Asset Depreciation (business-scoped CRUD)
+    Route::group(['prefix' => 'fixed-asset-depreciation'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\FixedAssetDepreciationController::class, 'index']);
+        Route::post('data', [App\Http\Controllers\Admin\FixedAssetDepreciationController::class, 'getData']);
+        Route::get('create', [App\Http\Controllers\Admin\FixedAssetDepreciationController::class, 'create']);
+        Route::post('store', [App\Http\Controllers\Admin\FixedAssetDepreciationController::class, 'store']);
+        Route::get('show/{fixed_asset_depreciation_id}', [App\Http\Controllers\Admin\FixedAssetDepreciationController::class, 'show']);
+        Route::delete('{fixed_asset_depreciation_id}', [App\Http\Controllers\Admin\FixedAssetDepreciationController::class, 'destroy']);
+    });
+
     //Account Sub Types
     Route::resource('account-sub-type', App\Http\Controllers\Admin\AccountSubTypeController::class);
     Route::group(['prefix' => 'account-sub-type'], function () {
@@ -1443,6 +1481,42 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('pdf', [App\Http\Controllers\Admin\Reports\ExpenseReportController::class, 'pdf'])->name('reports.expense-report.pdf');
             Route::get('export', [App\Http\Controllers\Admin\Reports\ExpenseReportController::class, 'export'])->name('reports.expense-report.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\ExpenseReportController::class, 'exportCsv'])->name('reports.expense-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'fixed-asset-register'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\FixedAssetRegisterReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\FixedAssetRegisterReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\FixedAssetRegisterReportController::class, 'print'])->name('reports.fixed-asset-register.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\FixedAssetRegisterReportController::class, 'pdf'])->name('reports.fixed-asset-register.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\FixedAssetRegisterReportController::class, 'export'])->name('reports.fixed-asset-register.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\FixedAssetRegisterReportController::class, 'exportCsv'])->name('reports.fixed-asset-register.export-csv');
+        });
+
+        Route::group(['prefix' => 'depreciation-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\DepreciationReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\DepreciationReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\DepreciationReportController::class, 'print'])->name('reports.depreciation-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\DepreciationReportController::class, 'pdf'])->name('reports.depreciation-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\DepreciationReportController::class, 'export'])->name('reports.depreciation-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\DepreciationReportController::class, 'exportCsv'])->name('reports.depreciation-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'asset-valuation-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\AssetValuationReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\AssetValuationReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\AssetValuationReportController::class, 'print'])->name('reports.asset-valuation-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\AssetValuationReportController::class, 'pdf'])->name('reports.asset-valuation-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\AssetValuationReportController::class, 'export'])->name('reports.asset-valuation-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\AssetValuationReportController::class, 'exportCsv'])->name('reports.asset-valuation-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'asset-disposal-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\AssetDisposalReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\AssetDisposalReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\AssetDisposalReportController::class, 'print'])->name('reports.asset-disposal-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\AssetDisposalReportController::class, 'pdf'])->name('reports.asset-disposal-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\AssetDisposalReportController::class, 'export'])->name('reports.asset-disposal-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\AssetDisposalReportController::class, 'exportCsv'])->name('reports.asset-disposal-report.export-csv');
         });
 
         Route::group(['prefix' => 'expense-detail-report'], function () {

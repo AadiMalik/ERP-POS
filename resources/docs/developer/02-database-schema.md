@@ -123,16 +123,24 @@ eligibility/calculation logic lives in `VoucherService::isApplicable()`/
 
 `account_types`, `account_sub_types`, `accounts` (chart of accounts,
 self-referencing `parent_account_id`), `journals` (journal *types* — CPV/BPV/PRV/
-OSV/ICV/SV/SRV/CRV/BRV/OBV), `journal_entries`/`journal_entry_details`,
+OSV/ICV/SV/SRV/CRV/BRV/OBV/FAV/FDV/FXD), `journal_entries`/`journal_entry_details`,
 `expense_categories`, `expenses`, `recurring_transactions`/`_runs`, `fiscal_years`,
 `accounting_periods`, `period_closing_rules`/`_attempts`/`_issues`, `budgets`/
-`budget_lines`, `document_send_logs` (generic doc-emailing log).
+`budget_lines`, `document_send_logs` (generic doc-emailing log),
+`fixed_asset_categories`, `fixed_assets`, `fixed_asset_depreciations`,
+`fixed_asset_transactions` (accounting PPE — distinct from HRM `assets`/
+`asset_allocations`).
 
 **Core models:** `Account` (self-referencing tree via `parentAccount`/
 `childAccounts`; `belongsTo AccountType, AccountSubType, Business`); `JournalEntry`
 (`belongsTo Journal, Business, Branch`; `hasMany JournalEntryDetail`; polymorphic-
 style `source_type`/`source_id` linking back to the originating Order, Purchase,
-Expense, etc.; supports recurring transactions via `recurring_transaction_id`).
+Expense, Fixed Asset acquisition/depreciation/disposal, etc.; supports recurring
+transactions via `recurring_transaction_id`); `FixedAsset`
+(`belongsTo FixedAssetCategory, Supplier, Purchase, Branch, Business`;
+`hasMany FixedAssetDepreciation, FixedAssetTransaction`; purchase_cost is
+immutable after depreciation starts; COA mappings come from
+`accounting_settings.default_fixed_asset_*` / depreciation / gain-loss columns).
 
 ## HRM
 

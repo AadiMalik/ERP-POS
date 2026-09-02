@@ -108,6 +108,9 @@ class SubscriptionModuleRegistry
             'fiscal-year'        => ['label' => 'Fiscal Years', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
             'accounting-period'  => ['label' => 'Accounting Periods', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
             'budget'             => ['label' => 'Budgeting', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'fixed-asset-category' => ['label' => 'Fixed Asset Categories', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
+            'fixed-asset'        => ['label' => 'Fixed Assets', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 50, 'unlimited_allowed' => true],
+            'fixed-asset-depreciation' => ['label' => 'Fixed Asset Depreciation', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
 
             // ---- Expenses ----
             'expense'          => ['label' => 'Expense Details', 'category' => 'Expenses', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],

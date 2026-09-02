@@ -73,6 +73,7 @@ class RoleDefaultPermissions
                 return array_merge(
                     PermissionRegistry::namesForModules([
                         'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction',
+                        'fixed-asset-category', 'fixed-asset', 'fixed-asset-depreciation',
                         'expense', 'expense-category', 'admin-expense', 'supplier-payment', 'customer-payment',
                         'fiscal-year', 'accounting-period', 'period-closing-rule', 'budget',
                     ]),
@@ -84,6 +85,7 @@ class RoleDefaultPermissions
                             'expense-report', 'expense-detail-report', 'tax-report', 'equity-report',
                             'profit-loss', 'balance-sheet', 'accounts-payable', 'accounts-receivable',
                             'service-transaction-summary', 'service-payment-report',
+                            'fixed-asset-register', 'depreciation-report', 'asset-valuation-report', 'asset-disposal-report',
                         ]),
                         ['reports.budget-vs-actual.view']
                     )
@@ -130,7 +132,9 @@ class RoleDefaultPermissions
                 return array_merge(
                     PermissionRegistry::namesForModulesExcludingActions(
                         [
-                            'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction', 'expense', 'expense-category', 'admin-expense',
+                            'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction',
+                            'fixed-asset-category', 'fixed-asset', 'fixed-asset-depreciation',
+                            'expense', 'expense-category', 'admin-expense',
                             'fiscal-year', 'accounting-period', 'period-closing-rule', 'budget',
                         ],
                         ['delete']
@@ -141,6 +145,7 @@ class RoleDefaultPermissions
                             'general-ledger', 'trial-balance', 'journal-register',
                             'account-ledger', 'account-balance', 'day-book',
                             'service-transaction-summary', 'service-payment-report',
+                            'fixed-asset-register', 'depreciation-report', 'asset-valuation-report', 'asset-disposal-report',
                         ]),
                         ['reports.budget-vs-actual.view']
                     )

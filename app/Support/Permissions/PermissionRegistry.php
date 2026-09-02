@@ -302,6 +302,34 @@ class PermissionRegistry
                 'export' => ['name' => 'journal-entry.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
+            // Accounting Fixed Assets (PPE) — distinct from HRM employee assets (asset.*)
+            'fixed-asset-category' => ['label' => 'Fixed Asset Categories', 'actions' => [
+                'view'   => ['name' => 'fixed-asset-category.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'fixed-asset-category.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'fixed-asset-category.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'fixed-asset-category.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'fixed-asset-category.status', 'label' => 'Change Status', 'is_system' => false],
+            ]],
+
+            'fixed-asset' => ['label' => 'Fixed Assets', 'actions' => [
+                'view'       => ['name' => 'fixed-asset.view', 'label' => 'View', 'is_system' => false],
+                'create'     => ['name' => 'fixed-asset.create', 'label' => 'Create', 'is_system' => false],
+                'edit'       => ['name' => 'fixed-asset.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'     => ['name' => 'fixed-asset.delete', 'label' => 'Delete', 'is_system' => false],
+                'depreciate' => ['name' => 'fixed-asset.depreciate', 'label' => 'Post Depreciation', 'is_system' => false],
+                'pause'      => ['name' => 'fixed-asset.pause', 'label' => 'Pause Depreciation', 'is_system' => false],
+                'resume'     => ['name' => 'fixed-asset.resume', 'label' => 'Resume Depreciation', 'is_system' => false],
+                'dispose'    => ['name' => 'fixed-asset.dispose', 'label' => 'Sell / Dispose', 'is_system' => false],
+                'adjust'     => ['name' => 'fixed-asset.adjust', 'label' => 'Adjust Configuration', 'is_system' => false],
+                'transfer'   => ['name' => 'fixed-asset.transfer', 'label' => 'Transfer Branch/Location', 'is_system' => false],
+            ]],
+
+            'fixed-asset-depreciation' => ['label' => 'Fixed Asset Depreciation', 'actions' => [
+                'view'   => ['name' => 'fixed-asset-depreciation.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'fixed-asset-depreciation.create', 'label' => 'Create / Post', 'is_system' => false],
+                'delete' => ['name' => 'fixed-asset-depreciation.delete', 'label' => 'Reverse / Delete', 'is_system' => false],
+            ]],
+
             'recurring-transaction' => ['label' => 'Recurring Transactions', 'actions' => [
                 'view'         => ['name' => 'recurring-transaction.view', 'label' => 'View', 'is_system' => false],
                 'create'       => ['name' => 'recurring-transaction.create', 'label' => 'Create', 'is_system' => false],
@@ -1333,6 +1361,26 @@ class PermissionRegistry
                 'balance_sheet_pdf' => ['name' => 'reports.balance-sheet.pdf', 'label' => 'Balance Sheet - PDF', 'is_system' => false],
                 'balance_sheet_export' => ['name' => 'reports.balance-sheet.export', 'label' => 'Balance Sheet - Export (Excel)', 'is_system' => false],
                 'balance_sheet_export_csv' => ['name' => 'reports.balance-sheet.export-csv', 'label' => 'Balance Sheet - Export (CSV)', 'is_system' => false],
+                'fixed_asset_register' => ['name' => 'reports.fixed-asset-register.view', 'label' => 'Fixed Asset Register', 'is_system' => false],
+                'fixed_asset_register_print' => ['name' => 'reports.fixed-asset-register.print', 'label' => 'Fixed Asset Register - Print', 'is_system' => false],
+                'fixed_asset_register_pdf' => ['name' => 'reports.fixed-asset-register.pdf', 'label' => 'Fixed Asset Register - PDF', 'is_system' => false],
+                'fixed_asset_register_export' => ['name' => 'reports.fixed-asset-register.export', 'label' => 'Fixed Asset Register - Export (Excel)', 'is_system' => false],
+                'fixed_asset_register_export_csv' => ['name' => 'reports.fixed-asset-register.export-csv', 'label' => 'Fixed Asset Register - Export (CSV)', 'is_system' => false],
+                'depreciation_report' => ['name' => 'reports.depreciation-report.view', 'label' => 'Depreciation Report', 'is_system' => false],
+                'depreciation_report_print' => ['name' => 'reports.depreciation-report.print', 'label' => 'Depreciation Report - Print', 'is_system' => false],
+                'depreciation_report_pdf' => ['name' => 'reports.depreciation-report.pdf', 'label' => 'Depreciation Report - PDF', 'is_system' => false],
+                'depreciation_report_export' => ['name' => 'reports.depreciation-report.export', 'label' => 'Depreciation Report - Export (Excel)', 'is_system' => false],
+                'depreciation_report_export_csv' => ['name' => 'reports.depreciation-report.export-csv', 'label' => 'Depreciation Report - Export (CSV)', 'is_system' => false],
+                'asset_valuation_report' => ['name' => 'reports.asset-valuation-report.view', 'label' => 'Asset Valuation / Book Value Report', 'is_system' => false],
+                'asset_valuation_report_print' => ['name' => 'reports.asset-valuation-report.print', 'label' => 'Asset Valuation Report - Print', 'is_system' => false],
+                'asset_valuation_report_pdf' => ['name' => 'reports.asset-valuation-report.pdf', 'label' => 'Asset Valuation Report - PDF', 'is_system' => false],
+                'asset_valuation_report_export' => ['name' => 'reports.asset-valuation-report.export', 'label' => 'Asset Valuation Report - Export (Excel)', 'is_system' => false],
+                'asset_valuation_report_export_csv' => ['name' => 'reports.asset-valuation-report.export-csv', 'label' => 'Asset Valuation Report - Export (CSV)', 'is_system' => false],
+                'asset_disposal_report' => ['name' => 'reports.asset-disposal-report.view', 'label' => 'Asset Disposal / Sale Report', 'is_system' => false],
+                'asset_disposal_report_print' => ['name' => 'reports.asset-disposal-report.print', 'label' => 'Asset Disposal Report - Print', 'is_system' => false],
+                'asset_disposal_report_pdf' => ['name' => 'reports.asset-disposal-report.pdf', 'label' => 'Asset Disposal Report - PDF', 'is_system' => false],
+                'asset_disposal_report_export' => ['name' => 'reports.asset-disposal-report.export', 'label' => 'Asset Disposal Report - Export (Excel)', 'is_system' => false],
+                'asset_disposal_report_export_csv' => ['name' => 'reports.asset-disposal-report.export-csv', 'label' => 'Asset Disposal Report - Export (CSV)', 'is_system' => false],
                 // Visible in both Simple and Advanced Accounting Mode - see
                 // BudgetVarianceReportController.
                 'budget_vs_actual' => ['name' => 'reports.budget-vs-actual.view', 'label' => 'Budget vs Actual', 'is_system' => false],
@@ -1460,6 +1508,7 @@ class PermissionRegistry
             'dashboard', 'warehouse', 'brand', 'category', 'sub-category', 'unit', 'product',
             'barcode', 'unit-conversion', 'batch', 'stock', 'stock-transaction',
             'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction',
+            'fixed-asset-category', 'fixed-asset', 'fixed-asset-depreciation',
             'supplier', 'customer', 'order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher',
             'purchase-request', 'purchase-request-quotation', 'purchase', 'good-receipt-note',
             'purchase-return', 'opening-stock', 'stock-taking', 'transfer-note', 'supplier-payment', 'customer-payment',

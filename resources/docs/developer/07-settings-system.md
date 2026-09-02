@@ -32,6 +32,13 @@ itself, but some are consumed elsewhere as real business-rule gates:
   [Modules, Controllers & Services](03-modules-controllers-services.md) and
   the Business docs' "Stock Availability in POS" section
   (`resources/docs/business/03-sales-pos.md`).
+- `AccountingSetting` COA defaults include Fixed Asset mappings
+  (`default_fixed_asset_account_id`, `default_accumulated_depreciation_account_id`,
+  `default_depreciation_expense_account_id`,
+  `default_gain_on_asset_disposal_account_id`,
+  `default_loss_on_asset_disposal_account_id`) used by
+  `FixedAssetAccountingService` for acquisition, depreciation, and disposal JVs.
+  Cloned via `AccountingSettingCloneService` when a business is provisioned.
 
 ## Print Configuration (used beyond just the Settings screen)
 
