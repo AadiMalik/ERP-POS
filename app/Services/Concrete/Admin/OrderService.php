@@ -966,7 +966,7 @@ class OrderService
                 throw new Exception('Delivery address is required for delivery orders.');
             }
 
-            $status = in_array($obj['status'] ?? 'draft', ['draft', 'hold'], true) ? $obj['status'] : 'draft';
+            $status = in_array($obj['status'] ?? 'draft', ['draft', 'hold'], true) ? ($obj['status'] ?? 'draft') : 'draft';
 
             //====================================
             // Update
@@ -1026,6 +1026,15 @@ class OrderService
                     'status' => $status,
                     'fbr_invoice_number' => $obj['fbr_invoice_number'] ?? null,
                     'pra_invoice_number' => $obj['pra_invoice_number'] ?? null,
+                    // Offline desktop POS idempotency/device tracking (see
+                    // OfflinePushService::pushOrderSave()) - these were being
+                    // set on $obj but silently dropped here, so a retried
+                    // push could never find its own earlier order via
+                    // client_request_id and every dependent order.hold/
+                    // order.complete kept re-resolving to nothing.
+                    'client_request_id' => $obj['client_request_id'] ?? null,
+                    'pos_device_id' => $obj['pos_device_id'] ?? null,
+                    'offline_local_id' => $obj['offline_local_id'] ?? null,
                     'is_deleted' => 0,
                     'createdby_id' => Auth::id(),
                     'date_created' => now(),

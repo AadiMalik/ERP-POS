@@ -122,6 +122,43 @@ the (now server-enforced) business/branch.
 to the route-group middleware), matching the project convention so a future
 route outside the group cannot ship ungated.
 
+**Offline Desktop POS API** (`routes/offline.php`, prefix `/api/offline`):
+`App\Http\Controllers\Api\Offline\*` controllers delegate to
+`App\Services\Concrete\Api\Offline\*` services. `OfflineSyncService` packages
+bootstrap/incremental master data; `OfflinePushService::push()` replays a
+device's queued `sync_queue` transactions (type strings set by the Electron
+client — `order.complete`, `order.hold`, `session.open`, `session.close`,
+`session.cash_movement`, `customer.add`, `expense.add` — these two names in
+particular must stay in lockstep with the `type` values the desktop repo's
+`electron/ipc/handlers.js` writes, since they're matched by exact string) through
+existing `OrderService` / `PosRegisterSessionService` / `UserService` /
+`ExpenseService` with `client_request_id` (orders) / `offline_local_id`
+(sessions, cash movements, expenses) idempotency. Since the desktop only knows
+its own locally-generated session id until that session's own `session.open`
+transaction has synced, every other transaction referencing a session (orders,
+close, cash movements, expenses) is resolved from local to server
+`pos_register_session_id` via `OfflinePushService::resolveSessionServerId()`
+before being handed to the underlying service — a transaction referencing a
+session that hasn't synced yet fails (and is retried next cycle) rather than
+being applied against the wrong record. Device rows live in `pos_devices`;
+middleware `EnsureOfflinePosDevice` validates `X-Pos-Device-Id` +
+`X-Pos-Device-Token`. The same `/api/offline/sync/push` endpoint also serves
+the desktop's per-order "sync this order" / "sync all orders" actions (its
+Pending Sync panel and separate Order History screen) — those send a
+smaller, order-only `transactions` batch rather than the periodic scheduler's
+full mixed one, but hit the identical route/controller/service. The Electron
+client lives in the separate **`erp-desktop-pos`** repo
+(`C:\xampp\htdocs\erp-desktop-pos` — Vue 3 + SQLite + sync engine). `exportSettings()`'s `thermal_print_setting` is manually
+flattened from `ThermalPrintConfig` (`isEnabled()`/`paperWidthMm()`/
+`fieldConfig()`/`footerConfig()`) into a plain array — that class has no public
+properties, so returning it as-is JSON-encodes to `{}`. The desktop's Reports
+panel prints its Register Session Summary client-side (no PDF/ESC-POS
+pipeline): a hidden receipt block in `PosScreen.vue`, styled with the same
+`tr-*` class names as `resources/views/admin/pos/register-session/print/
+thermal-session-summary.blade.php` / `public/assets/css/print-thermal.css`, is
+isolated via `@media print` and sent to the OS print dialog with
+`window.print()` when `paper_width_mm` is synced from the setting above.
+
 Customer receivable COA:
 `CustomerService::upsertProfile()` (admin Users create/edit and API
 `CustomerAccountService::ensureProfile()` / website signup) attaches

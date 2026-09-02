@@ -18,6 +18,8 @@ class PosRegisterSession extends Model
         'business_id',
         'branch_id',
         'cashier_id',
+        'pos_device_id',
+        'offline_local_id',
         'opening_datetime',
         'opening_cash',
         'opening_notes',

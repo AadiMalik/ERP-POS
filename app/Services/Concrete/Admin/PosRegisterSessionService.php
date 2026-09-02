@@ -151,6 +151,14 @@ class PosRegisterSessionService
             'opening_cash' => $obj['opening_cash'] ?? 0,
             'opening_notes' => $obj['opening_notes'] ?? null,
             'status' => 'open',
+            // Offline desktop POS idempotency/device tracking (see
+            // OfflinePushService::pushSessionOpen(), which sets both on
+            // $obj) - these were being silently dropped, so
+            // resolveSessionServerId() could never find this session again
+            // by its offline_local_id and every order under it kept
+            // resolving to no session.
+            'pos_device_id' => $obj['pos_device_id'] ?? null,
+            'offline_local_id' => $obj['offline_local_id'] ?? null,
             'is_deleted' => 0,
             'createdby_id' => Auth::id(),
             'date_created' => now(),

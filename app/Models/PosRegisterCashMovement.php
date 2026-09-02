@@ -15,6 +15,7 @@ class PosRegisterCashMovement extends Model
     protected $fillable = [
         'pos_register_cash_movement_id',
         'pos_register_session_id',
+        'offline_local_id',
         'type',
         'amount',
         'reason',

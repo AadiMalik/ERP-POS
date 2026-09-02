@@ -283,6 +283,10 @@ class ExpenseService
                 $data['createdby_id'] = Auth::id();
                 $data['date_created'] = now();
 
+                if (!empty($obj['offline_local_id'])) {
+                    $data['offline_local_id'] = $obj['offline_local_id'];
+                }
+
                 $expense = $this->model_expense->create($data);
 
                 $this->logActivity('expense', $expense->expense_id, 'created', null, $expense->only(['amount', 'expense_category_id', 'payment_method', 'description']));

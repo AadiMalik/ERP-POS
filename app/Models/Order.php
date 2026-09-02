@@ -45,6 +45,8 @@ class Order extends Model
         'payment_confirmed_at',
         'payment_confirmed_by_id',
         'client_request_id',
+        'pos_device_id',
+        'offline_local_id',
         'status',
         'fbr_invoice_number',
         'fbr_status',

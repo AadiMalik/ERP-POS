@@ -39,6 +39,16 @@ class ThermalPrintConfig
         return $this->paper_width_mm;
     }
 
+    public function fieldConfig(): array
+    {
+        return $this->field_config;
+    }
+
+    public function footerConfig(): array
+    {
+        return $this->footer_config;
+    }
+
     /**
      * A missing key or an explicit null both fall through to $default.
      */

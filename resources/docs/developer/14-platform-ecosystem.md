@@ -1,23 +1,23 @@
 # Platform Ecosystem: Companion Repos & Their API Contracts
 
-This ERP backend is consumed by three separate frontend repositories, each on
-its own tech stack, its own repo, and (for the two Vue apps) its own
+This ERP backend is consumed by separate frontend/client repositories, each on
+its own tech stack, its own repo, and (for the Vue/web apps) its own
 deployment. This page maps the ecosystem and states where each client's
 contract with this backend actually lives in code — useful whenever a change
 here needs to be checked against a consumer, or vice versa.
 
-## The Four Repos
+## The Five Repos
 
 | Repo | Path | Stack | Talks to |
 |---|---|---|---|
 | ERP + POS (this repo) | `c:\xampp\htdocs\erp` | Laravel 8 | — (the backend) |
+| Offline desktop POS | `c:\xampp\htdocs\erp-desktop-pos` | Electron + Vue 3 + SQLite | `routes/offline.php` (`/api/offline/...`) |
 | Per-business storefront | `c:\xampp\htdocs\smart-mart` | Vue 3 + Vite | `routes/api.php` (`/api/v1/...`) |
 | Public intro / sign-up site | `c:\xampp\htdocs\dukanaz-command-center` | Vue 3 + Vite | `routes/intro.php` (`/api/intro/...`) |
 | Customer mobile app | `D:\smart_mart_mobile` | Flutter (Dio) | `routes/mobile.php` (`/api/mobile/...`) |
 
-One ERP backend, one shared database — each of the three clients is a
-different *view* onto the same tenant data, never a separate system with its
-own copy.
+One ERP backend, one shared database — each client is a different *view* onto
+the same tenant data, never a separate system with its own copy.
 
 ## smart-mart & the Mobile App Are Deliberately Identical Contracts
 

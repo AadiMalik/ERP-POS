@@ -156,5 +156,26 @@ tracked per customer, feeding the Customer Ledger and Aging reports.
 Each branch can run its own POS Register(s). Reporting can be broken down by branch,
 register, or cashier for accountability.
 
+## Desktop POS (Windows, offline)
+
+In addition to the browser POS, you can install the **ERP Desktop POS** Windows
+application (separate **`erp-desktop-pos`** repo at
+`C:\xampp\htdocs\erp-desktop-pos`). It looks and works like the
+web POS for day-to-day selling, but keeps a local copy of products, prices,
+stock, customers, settings, and staff permissions so cashiers can keep working
+when the internet drops.
+
+**First install (internet required once):** connect to your ERP URL, log in,
+register the PC as a POS device, and download data. After that, the app opens
+and sells offline using the last synced data.
+
+**When internet returns:** orders, register sessions, cash movements, and new
+customers queue up and sync automatically to the central ERP (you can also tap
+**Sync Now**). The status bar shows Online, Offline, Syncing, Pending orders,
+or Sync errors without blocking checkout.
+
+The web POS is not replaced — website, mobile, other registers, and back-office
+changes still flow through the same central inventory and orders.
+
 See also: [Purchasing & Suppliers](04-purchasing-suppliers.md),
 [Inventory & Warehouses](05-inventory.md), [Reports](09-reports.md).

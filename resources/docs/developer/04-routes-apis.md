@@ -165,3 +165,52 @@ Center forms include a hidden `website` input for this:
 All content here is managed through the **Intro CMS** admin screens, kept
 deliberately separate from a tenant's own Website CMS since it represents the
 platform, not any one business.
+
+## Offline Desktop POS API (`routes/offline.php`)
+
+Registered in `RouteServiceProvider` with prefix `/api/offline`. Powers the
+**Electron + Vue 3** desktop POS client in the separate **`erp-desktop-pos`**
+repository (`C:\xampp\htdocs\erp-desktop-pos` — not inside this ERP repo).
+Controllers live under `App\Http\Controllers\Api\Offline\` and services under
+`App\Services\Concrete\Api\Offline\`.
+
+The web POS (`/admin/pos-screen`) is unchanged — the desktop app is an
+additional offline-first client that reuses `OrderService`,
+`PosRegisterSessionService`, and related Admin services on push/sync.
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| POST | `/api/offline/auth/ping` | — | Reachability check |
+| POST | `/api/offline/auth/login` | — | Staff login → Sanctum token + permission map + bcrypt hash for offline cache |
+| POST | `/api/offline/device/register` | Sanctum + `module:pos` | Register installation (`pos_devices` table) → device ID + plain token (stored hashed) |
+| GET | `/api/offline/device/info` | Sanctum + device headers | Current device metadata |
+| GET | `/api/offline/sync/bootstrap` | Sanctum + device + `module:pos` | Full initial download (settings, catalog, stock, users, registers, …) |
+| POST | `/api/offline/sync/pull` | Sanctum + device + `module:pos` | Incremental pull via per-entity `date_updated` cursors |
+| POST | `/api/offline/sync/push` | Sanctum + device + `module:pos` | Batch push of queued offline transactions (idempotent) |
+| GET | `/api/offline/sync/health` | Sanctum + device + `module:pos` | Online/health probe |
+| POST | `/api/offline/orders`, `/complete`, `/hold` | Sanctum + device + permissions | Direct order endpoints (also used by push worker) |
+| POST | `/api/offline/register-sessions/{open,close,cash-movement}` | Sanctum + device + permissions | Register session lifecycle |
+| POST | `/api/offline/customers` | Sanctum + device + `order.customer.change` | Quick customer create from desktop POS |
+| GET | `/api/offline/stock/levels` | Sanctum + device | Warehouse stock snapshot |
+
+Device auth uses headers `X-Pos-Device-Id` and `X-Pos-Device-Token` (middleware
+`offline.pos.device` → `EnsureOfflinePosDevice`). Orders pushed from desktop
+include `client_request_id` / `offline_local_id` for idempotency and
+`pos_device_id` for multi-device tracing.
+
+**Migration required:** `2026_09_02_100000_create_pos_devices_table.php` (also
+adds `pos_device_id` / `offline_local_id` columns on `orders`,
+`pos_register_sessions`, and `pos_register_cash_movements`).
+
+**Setup flow (desktop client):** Step 1 lock `business_id` and download staff +
+locations via `POST /api/offline/setup/bootstrap-business` (saves users with
+password hashes to local SQLite) → Step 2 **local** staff login against SQLite →
+Step 3 branch/warehouse/register from local data → Step 4
+`POST /api/offline/setup/register-device` (staff credentials + location; returns
+device token + auth token) → bootstrap sync.
+
+Legacy authenticated endpoints remain: `POST /api/offline/setup/validate-business`,
+`GET /api/offline/setup/location-options`, `POST /api/offline/device/register`.
+
+**Local SQLite path (Windows):** `%APPDATA%\ERP Desktop POS\pos.sqlite` — exposed
+in the desktop app via `app:get-database-path` IPC.

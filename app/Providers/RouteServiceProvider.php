@@ -41,6 +41,10 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('api/mobile')
                 ->group(base_path('routes/mobile.php'));
 
+            Route::middleware('api')
+                ->prefix('api/offline')
+                ->group(base_path('routes/offline.php'));
+
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });

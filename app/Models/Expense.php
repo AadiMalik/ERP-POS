@@ -38,6 +38,7 @@ class Expense extends Model
         'status',
         'postedby_id',
         'date_posted',
+        'offline_local_id',
 
         'is_deleted',
         'createdby_id',

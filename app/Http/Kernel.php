@@ -70,5 +70,6 @@ class Kernel extends HttpKernel
         'superadmin' => \App\Http\Middleware\EnsureSuperAdmin::class,
         'must-change-password' => \App\Http\Middleware\ForcePasswordChange::class,
         'module' => \App\Http\Middleware\EnsureModuleEnabled::class,
+        'offline.pos.device' => \App\Http\Middleware\EnsureOfflinePosDevice::class,
     ];
 }
