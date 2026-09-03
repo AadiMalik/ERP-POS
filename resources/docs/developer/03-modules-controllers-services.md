@@ -537,6 +537,29 @@ See [The Documentation System Itself](12-documentation-system.md).
 `ActivityLogController`, `LoginHistoryController`, `NotificationController` —
 `admin/activity-log`, `admin/login-history`, `admin/notifications`.
 
+`ActivityLogController@index` sources its Module and Action filter option lists
+by running `ActivityLog::distinct()` on the `module`/`action` columns (cached
+5 min via `Cache::remember`) instead of a hand-maintained array, so the
+dropdowns can't drift out of sync as new `logActivity()` call sites are added —
+see `App\Traits\Auditable` and `App\Models\ActivityLog::prettifyLabel()` (the
+`ucfirst(str_replace(['_','-'], ' ', $value))` label formatter, shared with
+`ActivityLogService::getData()`'s module/action DataTable columns). The screen
+also filters by `causer_id` (a business-scoped user dropdown, hidden for
+Superadmin the same way `OrderCorrectionReportController@index` scopes its
+`managers` list) and by an exact-match `record_id` text filter, in addition to
+business/branch/module/action/date. There is no update or destroy route/method
+for `activity_logs` anywhere in the app — it is intentionally append-only.
+
+Two action-naming fixes worth knowing when querying `activity_logs` directly:
+`OrderService::recordStatusHistory()` now logs order void/cancel as their own
+distinct actions (`voided` / `cancelled`) rather than the generic
+`status_changed` it used for every non-`posted` transition before — do not
+assume `status_changed` still covers void/cancel in older reporting queries.
+`StockTakingService::save()`/`delete()` now also call `logActivity()` (module
+`stock-taking`, actions `created`/`updated`/`deleted`) — previously only the
+approve/reject transition (`status()`) was logged, leaving the count entry
+itself untraced.
+
 ## Push Notifications (FCM)
 `NotificationTemplateController`, `BroadcastNotificationController` —
 `admin/notification-template`, `admin/broadcast-notification`.

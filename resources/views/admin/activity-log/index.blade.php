@@ -50,6 +50,21 @@
                                 @endforeach
                             </select>
                         </div>
+                        @if ($causers->isNotEmpty())
+                            <div class="col-md-3">
+                                <label class="form-label">User</label>
+                                <select id="causer_id" class="form-select">
+                                    <option value="">--All Users--</option>
+                                    @foreach ($causers as $item)
+                                        <option value="{{ $item->user_id }}">{{ $item->name ?? '' }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+                        <div class="col-md-3">
+                            <label class="form-label">Record ID</label>
+                            <input type="text" id="record_id" class="form-control" placeholder="e.g. order/JV ID">
+                        </div>
                         <div class="col-md-3">
                             <label class="form-label">Date</label>
                             @include('admin.partials.date_filter')
@@ -101,7 +116,7 @@
         'class' => 'activity_log_table',
         'variable' => 'activity_log_table',
         'datefilter' => true,
-        'params' => "business_id:$('#business_id').val(),module:$('#module').val(),action:$('#action').val()",
+        'params' => "business_id:$('#business_id').val(),module:$('#module').val(),action:$('#action').val(),causer_id:$('#causer_id').val(),record_id:$('#record_id').val()",
     ])
 
     <script>
@@ -109,12 +124,14 @@
             $('#business_id').select2();
             $('#module').select2();
             $('#action').select2();
+            $('#causer_id').select2();
         });
         $('#search_btn').click(function() {
             initDataTableactivity_log_table();
         });
         $('#reset_filter').click(function() {
-            $('#business_id, #module, #action').val('').trigger('change');
+            $('#business_id, #module, #action, #causer_id').val('').trigger('change');
+            $('#record_id').val('');
             initDataTableactivity_log_table();
         });
     </script>

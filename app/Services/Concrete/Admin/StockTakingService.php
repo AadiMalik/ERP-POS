@@ -203,13 +203,23 @@ class StockTakingService
             // Update
             //====================================
 
-            if (!empty($obj['stock_taking_id'])) {
+            $is_update = !empty($obj['stock_taking_id']);
+            $old_snapshot = null;
+
+            if ($is_update) {
 
                 $stock_taking = $this->model_stock_taking->getModel()::findOrFail($obj['stock_taking_id']);
 
                 if ($stock_taking->status !== Status::PENDING) {
                     throw new Exception('Only pending stock takings can be updated.');
                 }
+
+                $old_snapshot = [
+                    'warehouse_id'               => $stock_taking->warehouse_id,
+                    'stock_taking_date'          => $stock_taking->stock_taking_date,
+                    'total_difference_quantity'  => $stock_taking->total_difference_quantity,
+                    'total_difference_value'     => $stock_taking->total_difference_value,
+                ];
 
                 $stock_taking->update([
                     'business_id'         => $business_id,
@@ -306,6 +316,22 @@ class StockTakingService
             ]);
 
             DB::commit();
+
+            $this->logActivity(
+                'stock-taking',
+                $stock_taking->stock_taking_id,
+                $is_update ? 'updated' : 'created',
+                $old_snapshot,
+                [
+                    'warehouse_id'              => $stock_taking->warehouse_id,
+                    'stock_taking_date'         => $stock_taking->stock_taking_date,
+                    'total_difference_quantity' => $total_difference_quantity,
+                    'total_difference_value'    => $total_difference_value,
+                ],
+                null,
+                $business_id,
+                $branch_id
+            );
 
             return $stock_taking;
         } catch (Exception $e) {
@@ -445,6 +471,7 @@ class StockTakingService
 
         try {
             $stock_taking = $this->model_stock_taking->getModel()::with($this->with)->findOrFail($stock_taking_id);
+            $old_status = $stock_taking->status;
 
             if ($stock_taking->status === Status::APPROVED) {
                 $this->reverseStockTakingPosting($stock_taking);
@@ -458,6 +485,21 @@ class StockTakingService
             ]);
 
             DB::commit();
+
+            $this->logActivity(
+                'stock-taking',
+                $stock_taking->stock_taking_id,
+                'deleted',
+                [
+                    'status'                     => $old_status,
+                    'total_difference_quantity'  => $stock_taking->total_difference_quantity,
+                    'total_difference_value'     => $stock_taking->total_difference_value,
+                ],
+                null,
+                null,
+                $stock_taking->business_id,
+                $stock_taking->branch_id
+            );
 
             return true;
         } catch (Exception $e) {

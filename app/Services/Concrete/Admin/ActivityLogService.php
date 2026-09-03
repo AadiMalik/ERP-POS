@@ -45,6 +45,9 @@ class ActivityLogService
         if (isset($obj['causer_id']) && $obj['causer_id'] != 0 && $obj['causer_id'] != "") {
             $wh[] = ['causer_id', $obj['causer_id']];
         }
+        if (!empty($obj['record_id'])) {
+            $wh[] = ['record_id', trim($obj['record_id'])];
+        }
         if (!empty($obj['start_date'])) {
             $wh[] = ['date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
         }
@@ -62,7 +65,7 @@ class ActivityLogService
                 return !empty($item->date_created) ? localDateTime($item->date_created) : 'N/A';
             })
             ->addColumn('module', function ($item) {
-                return ucfirst(str_replace('_', ' ', $item->module ?? ''));
+                return ActivityLog::prettifyLabel($item->module ?? '');
             })
             ->addColumn('action', function ($item) {
                 $colors = [
@@ -79,9 +82,14 @@ class ActivityLogService
                     'rejected' => 'danger',
                     'login'    => 'secondary',
                     'logout'   => 'secondary',
+                    'voided'   => 'dark',
+                    'cancelled' => 'dark',
+                    'reverse'  => 'warning',
+                    'reversed' => 'warning',
+                    'dispose'  => 'danger',
                 ];
                 $color = $colors[$item->action] ?? 'secondary';
-                $label = ucfirst(str_replace('_', ' ', $item->action ?? ''));
+                $label = ActivityLog::prettifyLabel($item->action ?? '');
 
                 return "<span class='badge bg-{$color}'>{$label}</span>";
             })

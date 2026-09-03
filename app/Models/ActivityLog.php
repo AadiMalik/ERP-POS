@@ -48,4 +48,9 @@ class ActivityLog extends Model
     {
         return $this->belongsTo(User::class, 'causer_id');
     }
+
+    public static function prettifyLabel(string $value): string
+    {
+        return ucfirst(str_replace(['_', '-'], ' ', $value));
+    }
 }

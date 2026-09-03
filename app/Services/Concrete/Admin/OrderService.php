@@ -1943,7 +1943,15 @@ class OrderService
             'date_created' => now(),
         ]);
 
-        $action = $from_status === null ? 'created' : ($to_status === Status::POSTED ? 'posted' : 'status_changed');
+        $action = $from_status === null
+            ? 'created'
+            : ($to_status === Status::POSTED
+                ? 'posted'
+                : ($to_status === Status::VOID
+                    ? 'voided'
+                    : ($to_status === Status::CANCELLED
+                        ? 'cancelled'
+                        : 'status_changed')));
 
         $this->logActivity(
             'order',

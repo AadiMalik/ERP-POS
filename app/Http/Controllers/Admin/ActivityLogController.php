@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\RoleNames;
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
+use App\Models\User;
 use App\Services\Concrete\Admin\ActivityLogService;
 use App\Services\Concrete\Admin\BusinessService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class ActivityLogController extends Controller
 {
@@ -23,68 +28,34 @@ class ActivityLogController extends Controller
     public function index()
     {
         $business = $this->business_service->getAll();
-        $modules = [
-            'expense'                    => 'Expense',
-            'order'                      => 'Order',
-            'supplier'                   => 'Supplier',
-            'customer'                   => 'Customer',
-            'journal_entry'              => 'Journal Entry',
-            'purchase_request_quotation' => 'Purchase Request Quotation',
-            'purchase_return'            => 'Purchase Return',
-            'auth'                       => 'Auth',
-            // Import/Export-eligible modules (App\Support\ImportExport\ImportExportModuleRegistry)
-            'user'                    => 'Admin Users',
-            'warehouse'               => 'Warehouses',
-            'brand'                   => 'Brands',
-            'category'                => 'Categories',
-            'sub-category'            => 'Sub Categories',
-            'product'                 => 'Products',
-            'opening-stock'           => 'Opening Stock',
-            'transfer-note'           => 'Transfer Notes',
-            'journal-entry'           => 'Journal Entries',
-            'recurring-transaction'   => 'Recurring Transactions',
-            'expense-category'        => 'Expense Categories',
-            'admin-expense'           => 'Admin Expenses',
-            'department'              => 'Departments',
-            'designation'             => 'Designations',
-            'shift'                   => 'Shifts',
-            'employee'                => 'Employees',
-            'attendance'              => 'Attendance',
-            'employee-advance'        => 'Employee Advances',
-            'asset'                   => 'Assets',
-            'asset-allocation'        => 'Asset Allocation',
-            'supplier-payment'        => 'Supplier Payments',
-            'purchase-request'        => 'Purchase Requests',
-            'discount'                => 'Discounts',
-            'voucher'                 => 'Vouchers',
-            'asset-allocation'        => 'Asset Allocation',
-            'order'                   => 'Orders',
-            'fiscal-year'             => 'Fiscal Year',
-            'accounting-period'       => 'Accounting Period',
-            'budget'                  => 'Budget',
-            'pos_register'                 => 'POS Registers',
-            'pos_register_session'         => 'POS Register Sessions',
-            'pos_register_cash_movement'   => 'POS Cash Movements',
-        ];
-        $actions = [
-            'created'                       => 'Created',
-            'updated'                       => 'Updated',
-            'deleted'                       => 'Deleted',
-            'posted'                        => 'Posted',
-            'unposted'                      => 'Unposted',
-            'approved'                      => 'Approved',
-            'rejected'                      => 'Rejected',
-            'exported'                      => 'Exported',
-            'import_completed'              => 'Import Completed',
-            'import_completed_with_errors'  => 'Import Completed (with errors)',
-            'import_failed'                 => 'Import Failed',
-            'opened'                        => 'Opened',
-            'closed'                        => 'Closed',
-            'voided'                        => 'Voided',
-            'status_changed'                => 'Status Changed',
-        ];
 
-        return view('admin.activity-log.index', compact('business', 'modules', 'actions'));
+        // Module/action options are sourced from the actual logged data
+        // (cached briefly) instead of a hand-maintained list, so the filters
+        // never drift out of sync as new modules/actions start logging.
+        $modules = Cache::remember('activity_log_filter_modules', 300, function () {
+            return ActivityLog::query()
+                ->whereNotNull('module')
+                ->distinct()
+                ->orderBy('module')
+                ->pluck('module')
+                ->mapWithKeys(fn ($module) => [$module => ActivityLog::prettifyLabel($module)]);
+        });
+
+        $actions = Cache::remember('activity_log_filter_actions', 300, function () {
+            return ActivityLog::query()
+                ->whereNotNull('action')
+                ->distinct()
+                ->orderBy('action')
+                ->pluck('action')
+                ->mapWithKeys(fn ($action) => [$action => ActivityLog::prettifyLabel($action)]);
+        });
+
+        $is_superadmin = RoleNames::SUPERADMIN == getRoleName();
+        $causers = $is_superadmin ? collect() : User::where('business_id', Auth::user()->business_id)
+            ->where('is_deleted', 0)
+            ->get();
+
+        return view('admin.activity-log.index', compact('business', 'modules', 'actions', 'causers'));
     }
 
     public function getData(Request $request)

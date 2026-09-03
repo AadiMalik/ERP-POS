@@ -14,9 +14,27 @@ Admins can send marketing push notifications to mobile customers under
 ## Activity Log
 
 Every significant action across the system — creating, updating, deleting,
-approving, rejecting, exporting, or importing a record — is recorded with **who**
-did it, **when**, and **what changed**. Filter by business, module, or action type
-to investigate a specific change or keep a general audit trail for compliance.
+approving, rejecting, voiding, cancelling, posting/unposting, disposing, exporting,
+or importing a record — is recorded with **who** did it, **when**, **which
+business/branch**, and **what changed** (previous vs. new values, plus a reason
+where one was entered). Filter by business, module, action type, user, or a
+specific record ID to investigate a specific change or keep a general audit
+trail for compliance. The Module and Action filter lists always reflect the
+actions actually being logged, so they stay current as new modules start
+recording activity.
+
+Sale **void** and **cancellation** are each logged under the Orders module with
+their own distinct action (**voided** / **cancelled**) rather than a generic
+status change, so they can be filtered and reported on directly. The same
+applies to sale returns/refunds, purchase returns, stock counts (see below),
+journal voucher posting/unposting, customer/supplier payment posting/reversal,
+POS register open/close/void, and fixed asset transfer/depreciation/disposal —
+each of these records both the before and after state.
+
+**Stock Taking** (the current stock-count/adjustment workflow) logs the count
+itself — created, updated, or deleted, with the counted quantities and total
+variance — in addition to its approval/rejection, so a discrepancy can always be
+traced back to who entered it and when, not just who approved it.
 
 Same-day **POS order corrections** are logged under the Orders module with action
 **corrected**, including the original and new line/payment totals, the manager who
@@ -25,6 +43,10 @@ Status History also records each correction. For a manager-facing view scoped ju
 to corrections - how many orders were corrected, by whom, and a before/after
 comparison of each one - see the **Order Correction Report** under
 [Reports](09-reports.md#order--pos-reports).
+
+The Activity Log is append-only: there is no screen or action anywhere in the
+system to edit or delete an existing entry, so it cannot be tampered with by a
+normal user, an accountant, or even a Business Admin.
 
 ## Login History
 
