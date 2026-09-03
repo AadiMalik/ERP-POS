@@ -19,6 +19,7 @@ use App\Models\JournalEntry;
 use App\Models\JournalEntryDetail;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\OrderDetailBatch;
 use App\Models\OrderPayment;
 use App\Models\OrderStatusHistory;
 use App\Models\OrderType;
@@ -2303,10 +2304,39 @@ class OrderService
             }
 
             // Per line: snapshot cost, decrement stock, write the stock
-            // transaction, and accumulate the COGS total.
+            // transaction(s), and accumulate the COGS total.
             $total_cost = 0;
+            $inventory_setting = InventorySetting::where('business_id', $order->business_id)->first();
 
             foreach ($order->details as $detail) {
+                $variation = $detail->productVariation;
+                $is_batch_tracked = $variation && $detail->product && $detail->product->is_track_stock
+                    && ($variation->track_batch || $variation->track_expiry);
+
+                $picks = null;
+
+                if ($is_batch_tracked) {
+                    $picks = $this->stock_service->pickBatchesForSale(
+                        $order->business_id,
+                        $order->warehouse_id,
+                        $detail->product_id,
+                        $detail->product_variation_id,
+                        $detail->base_quantity,
+                        $inventory_setting
+                    );
+
+                    if ($picks === null && !$allow_negative_stock) {
+                        throw new Exception('Insufficient available (non-expired) batch stock for "' . ($detail->product->name ?? 'product') . '".');
+                    }
+
+                    // ponytail: negative stock is allowed but no batch combination
+                    // covers the line - fall back to the plain aggregate
+                    // decrement below rather than picking a batch to force
+                    // negative, so the sale still goes through unattributed to
+                    // any batch. Revisit if batch-accurate negative-stock sales
+                    // are ever needed.
+                }
+
                 $stock = ProductVariationStock::where('business_id', $order->business_id)
                     ->where('warehouse_id', $order->warehouse_id)
                     ->where('product_id', $detail->product_id)
@@ -2349,29 +2379,94 @@ class OrderService
                     ]);
                 }
 
-                ProductVariationStockTransaction::create([
-                    'product_variation_stock_transaction_id' => generateUuid(),
-                    'transaction_date' => now(),
-                    'transaction_type' => TransactionType::SALE,
-                    'business_id' => $order->business_id,
-                    'product_id' => $detail->product_id,
-                    'product_variation_id' => $detail->product_variation_id,
-                    'warehouse_id' => $order->warehouse_id,
-                    'unit_id' => $detail->unit_id,
-                    'product_variation_unit_conversion_id' => $detail->product_variation_unit_conversion_id,
-                    'conversion_factor' => $detail->conversion_factor,
-                    'quantity' => $detail->quantity,
-                    'base_quantity' => $detail->base_quantity,
-                    'unit_price' => $detail->unit_price,
-                    'total_price' => $line_cost,
-                    'quantity_after' => $new_qty,
-                    'avg_price_after' => $existing_avg,
-                    'reference_id' => $order->order_id,
-                    'reference_type' => ReferenceType::SALE,
-                    'remarks' => 'Auto-created on posting of order #' . $order->daily_order_id,
-                    'createdby_id' => Auth::id(),
-                    'date_created' => now(),
-                ]);
+                if (empty($picks)) {
+                    ProductVariationStockTransaction::create([
+                        'product_variation_stock_transaction_id' => generateUuid(),
+                        'transaction_date' => now(),
+                        'transaction_type' => TransactionType::SALE,
+                        'business_id' => $order->business_id,
+                        'product_id' => $detail->product_id,
+                        'product_variation_id' => $detail->product_variation_id,
+                        'warehouse_id' => $order->warehouse_id,
+                        'unit_id' => $detail->unit_id,
+                        'product_variation_unit_conversion_id' => $detail->product_variation_unit_conversion_id,
+                        'conversion_factor' => $detail->conversion_factor,
+                        'quantity' => $detail->quantity,
+                        'base_quantity' => $detail->base_quantity,
+                        'unit_price' => $detail->unit_price,
+                        'total_price' => $line_cost,
+                        'quantity_after' => $new_qty,
+                        'avg_price_after' => $existing_avg,
+                        'reference_id' => $order->order_id,
+                        'reference_type' => ReferenceType::SALE,
+                        'remarks' => 'Auto-created on posting of order #' . $order->daily_order_id,
+                        'createdby_id' => Auth::id(),
+                        'date_created' => now(),
+                    ]);
+
+                    continue;
+                }
+
+                // FEFO/FIFO draw-down: one stock transaction per batch drawn
+                // from, each stamped with its own batch id. A single-batch
+                // line stamps the batch straight onto order_details; a line
+                // split across batches records the breakdown in
+                // order_detail_batches instead (needed so a later return can
+                // restore the right quantity into the right batch(es)).
+                $single_batch_id = count($picks) === 1 ? $picks[0]['batch']->product_variation_batch_id : null;
+
+                if ($single_batch_id) {
+                    $detail->update(['product_variation_batch_id' => $single_batch_id]);
+                }
+
+                $picked_cost_remaining = $line_cost;
+
+                foreach ($picks as $index => $pick) {
+                    $pick_base_quantity = (float) $pick['base_quantity'];
+                    $pick_quantity = $detail->conversion_factor > 0 ? $pick_base_quantity / $detail->conversion_factor : $pick_base_quantity;
+                    $is_last_pick = $index === array_key_last($picks);
+                    $pick_cost = $is_last_pick ? $picked_cost_remaining : round($pick_base_quantity * $existing_avg, 3);
+                    $picked_cost_remaining -= $pick_cost;
+
+                    $pick['batch']->decrement('quantity', $pick_base_quantity);
+
+                    ProductVariationStockTransaction::create([
+                        'product_variation_stock_transaction_id' => generateUuid(),
+                        'transaction_date' => now(),
+                        'transaction_type' => TransactionType::SALE,
+                        'business_id' => $order->business_id,
+                        'product_id' => $detail->product_id,
+                        'product_variation_id' => $detail->product_variation_id,
+                        'warehouse_id' => $order->warehouse_id,
+                        'unit_id' => $detail->unit_id,
+                        'product_variation_unit_conversion_id' => $detail->product_variation_unit_conversion_id,
+                        'conversion_factor' => $detail->conversion_factor,
+                        'quantity' => $pick_quantity,
+                        'base_quantity' => $pick_base_quantity,
+                        'unit_price' => $detail->unit_price,
+                        'total_price' => $pick_cost,
+                        'quantity_after' => $new_qty,
+                        'avg_price_after' => $existing_avg,
+                        'reference_id' => $order->order_id,
+                        'reference_type' => ReferenceType::SALE,
+                        'remarks' => 'Auto-created on posting of order #' . $order->daily_order_id,
+                        'product_variation_batch_id' => $pick['batch']->product_variation_batch_id,
+                        'createdby_id' => Auth::id(),
+                        'date_created' => now(),
+                    ]);
+
+                    if (!$single_batch_id) {
+                        OrderDetailBatch::create([
+                            'order_detail_batch_id' => generateUuid(),
+                            'order_detail_id' => $detail->order_detail_id,
+                            'product_variation_batch_id' => $pick['batch']->product_variation_batch_id,
+                            'quantity' => $pick_quantity,
+                            'base_quantity' => $pick_base_quantity,
+                            'createdby_id' => Auth::id(),
+                            'date_created' => now(),
+                        ]);
+                    }
+                }
             }
 
             if ($total_cost > 0) {
@@ -2544,29 +2639,11 @@ class OrderService
                 ->where('is_deleted', 0)
                 ->get();
 
-            if ($stock_transactions->isNotEmpty()) {
-                $stock_transactions->each(function ($transaction) {
-                    $transaction->update([
-                        'is_deleted' => 1,
-                        'deletedby_id' => Auth::id(),
-                        'date_deleted' => now(),
-                    ]);
-                });
-
-                $affected = $stock_transactions->unique(function ($transaction) {
-                    return $transaction->business_id . '|' . $transaction->warehouse_id . '|' .
-                        $transaction->product_id . '|' . $transaction->product_variation_id;
-                });
-
-                foreach ($affected as $transaction) {
-                    $this->stock_service->recomputeLedger(
-                        $transaction->business_id,
-                        $transaction->warehouse_id,
-                        $transaction->product_id,
-                        $transaction->product_variation_id
-                    );
-                }
-            }
+            // Soft-deletes the transactions, restores any batch quantity they
+            // drew down (each transaction carries its own batch id when the
+            // line was fulfilled from a tracked batch), and recomputes the
+            // aggregate stock + ledger running balances.
+            $this->stock_service->reverseStockTransactions($stock_transactions);
 
             if (!empty($order->voucher_id)) {
                 $this->voucher_service->reverseRedemption($order->order_id);

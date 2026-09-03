@@ -508,11 +508,11 @@
                     <table class="table table-sm" id="closeSummaryTable">
                         <tbody>
                             <tr><th>Opening Cash</th><td class="text-end" id="sumOpeningCash">0.00</td></tr>
-                            <tr><th>Cash Sales</th><td class="text-end" id="sumCashSales">0.00</td></tr>
-                            <tr><th>Cash Refunds</th><td class="text-end" id="sumCashRefunds">0.00</td></tr>
-                            <tr><th>Cash In</th><td class="text-end" id="sumCashIn">0.00</td></tr>
-                            <tr><th>Cash Out</th><td class="text-end" id="sumCashOut">0.00</td></tr>
-                            <tr><th>Expenses</th><td class="text-end" id="sumExpenses">0.00</td></tr>
+                            <tr><th>Cash Sales (+)</th><td class="text-end" id="sumCashSales">0.00</td></tr>
+                            <tr><th>Cash Refunds (&minus;)</th><td class="text-end" id="sumCashRefunds">0.00</td></tr>
+                            <tr><th>Cash In (+)</th><td class="text-end" id="sumCashIn">0.00</td></tr>
+                            <tr><th>Cash Out (&minus;)</th><td class="text-end" id="sumCashOut">0.00</td></tr>
+                            <tr><th>Expenses (&minus;)</th><td class="text-end" id="sumExpenses">0.00</td></tr>
                             <tr class="fw-bold"><th>Expected Cash</th><td class="text-end" id="sumExpectedCash">0.00</td></tr>
                         </tbody>
                     </table>
@@ -547,8 +547,8 @@
                         <input type="number" step="0.01" min="0.01" class="form-control" id="cash_movement_amount">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Reason</label>
-                        <input type="text" class="form-control" id="cash_movement_reason">
+                        <label class="form-label">Reason <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="cash_movement_reason" maxlength="255">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -632,9 +632,10 @@
                             <tr><td>Discount</td><td class="text-end" id="repDiscountOrderCount">0</td><td class="text-end" id="repTotalDiscount">0.00</td></tr>
                             <tr><td>Tax</td><td class="text-end" id="repTaxOrderCount">0</td><td class="text-end" id="repTotalTax">0.00</td></tr>
                             <tr><td>Opening Amount</td><td class="text-end">-</td><td class="text-end" id="repOpeningCash">0.00</td></tr>
-                            <tr><td>Cash In</td><td class="text-end">-</td><td class="text-end" id="repCashIn">0.00</td></tr>
-                            <tr><td>Cash Out</td><td class="text-end">-</td><td class="text-end" id="repCashOut">0.00</td></tr>
-                            <tr><td>Expenses</td><td class="text-end">-</td><td class="text-end" id="repExpenses">0.00</td></tr>
+                            <tr><td>Cash Refunds (&minus;)</td><td class="text-end">-</td><td class="text-end" id="repCashRefunds">0.00</td></tr>
+                            <tr><td>Cash In (+)</td><td class="text-end">-</td><td class="text-end" id="repCashIn">0.00</td></tr>
+                            <tr><td>Cash Out (&minus;)</td><td class="text-end">-</td><td class="text-end" id="repCashOut">0.00</td></tr>
+                            <tr><td>Expenses (&minus;)</td><td class="text-end">-</td><td class="text-end" id="repExpenses">0.00</td></tr>
                             <tr class="fw-bold"><td>Cash Amount</td><td class="text-end">-</td><td class="text-end" id="repExpectedCash">0.00</td></tr>
                             <tr><td>Actual</td><td class="text-end">-</td><td class="text-end" id="repActualCash">0.00</td></tr>
                         </tbody>

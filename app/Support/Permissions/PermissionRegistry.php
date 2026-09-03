@@ -560,6 +560,8 @@ class PermissionRegistry
                 'edit'   => ['name' => 'transfer-note.edit', 'label' => 'Edit', 'is_system' => false],
                 'delete' => ['name' => 'transfer-note.delete', 'label' => 'Delete', 'is_system' => false],
                 'status' => ['name' => 'transfer-note.status', 'label' => 'Change Status', 'is_system' => false],
+                'send' => ['name' => 'transfer-note.send', 'label' => 'Send', 'is_system' => false],
+                'receive' => ['name' => 'transfer-note.receive', 'label' => 'Receive', 'is_system' => false],
                 'print'  => ['name' => 'transfer-note.print', 'label' => 'Print', 'is_system' => false],
                 'import' => ['name' => 'transfer-note.import', 'label' => 'Import', 'is_system' => false],
                 'export' => ['name' => 'transfer-note.export', 'label' => 'Export', 'is_system' => false],

@@ -5,6 +5,7 @@ namespace App\Services\Concrete\Admin;
 use App\Enums\Filter;
 use App\Enums\RoleNames;
 use App\Enums\Status;
+use App\Models\InventorySetting;
 use App\Models\ProductVariationBatch;
 use App\Models\ProductVariationUnitConversion;
 use App\Repository\Repository;
@@ -54,11 +55,36 @@ class ProductVariationBatchService
             RoleNames::SUPERADMIN,
             RoleNames::BUSINESSADMIN
         ];
+
+        // Business-level threshold for what counts as "near expiry". Batches
+        // span businesses for a Super Admin's unfiltered view, so this uses
+        // the current user's own business setting as a reasonable default
+        // rather than resolving it per-row.
+        $near_expiry_days = (int) (InventorySetting::where('business_id', $obj['business_id'] ?? Auth::user()->business_id)
+            ->value('near_expiry_days') ?? 30);
+        $today = Carbon::today();
+
         $datatable = $this->model_product_variation_batch->getModel()::where($wh)
             ->with($this->with)
             ->where('is_deleted', 0)
             ->orderBy('date_created', $orderBy);
         $datatable = applyRoleScope($datatable, $allow_roles);
+
+        if (!empty($obj['expiry_status'])) {
+            $datatable->where(function ($q) use ($obj, $today, $near_expiry_days) {
+                if ($obj['expiry_status'] === 'expired') {
+                    $q->whereNotNull('expiry_date')->whereDate('expiry_date', '<', $today);
+                } elseif ($obj['expiry_status'] === 'near_expiry') {
+                    $q->whereNotNull('expiry_date')
+                        ->whereDate('expiry_date', '>=', $today)
+                        ->whereDate('expiry_date', '<=', $today->copy()->addDays($near_expiry_days));
+                } else {
+                    $q->whereNull('expiry_date')
+                        ->orWhereDate('expiry_date', '>', $today->copy()->addDays($near_expiry_days));
+                }
+            });
+        }
+
         return DataTables::of($datatable)
         ->addColumn('product', function ($item) {
 
@@ -75,6 +101,24 @@ class ProductVariationBatchService
             ->addColumn('warehouse', function ($item) {
 
                 return $item->warehouse?->name ?? '-';
+            })
+            ->addColumn('expiry_status', function ($item) use ($today, $near_expiry_days) {
+
+                if (empty($item->expiry_date)) {
+                    return '-';
+                }
+
+                $expiry_date = Carbon::parse($item->expiry_date);
+
+                if ($expiry_date->lt($today)) {
+                    return '<span class="badge bg-danger">Expired</span>';
+                }
+
+                if ($expiry_date->lte($today->copy()->addDays($near_expiry_days))) {
+                    return '<span class="badge bg-warning">Near Expiry</span>';
+                }
+
+                return '<span class="badge bg-success">Active</span>';
             })
             ->addColumn('status', function ($item) {
 
@@ -105,7 +149,7 @@ class ProductVariationBatchService
                     </a>
                 ";
             })
-            ->rawColumns(['business','product', 'productVariation', 'warehouse', 'status', 'action'])
+            ->rawColumns(['business','product', 'productVariation', 'warehouse', 'expiry_status', 'status', 'action'])
             ->make(true);
     }
 

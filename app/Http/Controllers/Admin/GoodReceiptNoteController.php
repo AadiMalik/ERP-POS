@@ -107,6 +107,17 @@ class GoodReceiptNoteController extends Controller
 
     public function store(Request $request)
     {
+        $products = $request->input('products', []);
+        foreach ($products as $index => $product) {
+            if (!empty($product['manufacturing_date'])) {
+                $products[$index]['manufacturing_date'] = utcDate($product['manufacturing_date']);
+            }
+            if (!empty($product['expiry_date'])) {
+                $products[$index]['expiry_date'] = utcDate($product['expiry_date']);
+            }
+        }
+        $request->merge(['products' => $products]);
+
         $validator = Validator::make($request->all(), [
             'purchase_id' => ['required', Rule::exists('purchases', 'purchase_id')->where('is_deleted', 0)],
             'good_receipt_note_no' => [
@@ -121,6 +132,9 @@ class GoodReceiptNoteController extends Controller
             'products' => ['required', 'array', 'min:1'],
             'products.*.purchase_detail_id' => ['required', Rule::exists('purchase_details', 'purchase_detail_id')],
             'products.*.received_quantity' => ['required', 'numeric', 'min:0'],
+            'products.*.batch_no' => ['nullable', 'string', 'max:255'],
+            'products.*.manufacturing_date' => ['nullable', 'date'],
+            'products.*.expiry_date' => ['nullable', 'date'],
         ]);
 
         if ($validator->fails()) {

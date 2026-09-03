@@ -37,6 +37,8 @@
         default_sale_type_id: null,
         credit_payment_modal: null,
         credit_payment_order_id: null,
+        cash_movement_request_id: null,
+        cash_movement_submitting: false,
     };
 
     function can(perm) {
@@ -112,6 +114,19 @@
         v = parseFloat(v || 0);
         if (isNaN(v)) v = 0;
         return v.toFixed(2);
+    }
+
+    // Client-generated idempotency key for a single logical submission (e.g.
+    // one cash-in/cash-out) - reused across retries of the same submit so a
+    // double-click or network retry resolves to the original record server-side
+    // instead of creating a duplicate. Native crypto.randomUUID() when
+    // available (every modern/localhost browser); falls back to a
+    // timestamp+random string otherwise.
+    function generateRequestId() {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+            return window.crypto.randomUUID();
+        }
+        return 'req-' + Date.now() + '-' + Math.random().toString(16).slice(2);
     }
 
     // ==============================
@@ -758,16 +773,31 @@
         $('#cashMovementModalTitle').text(type === 'in' ? 'Add Cash (In)' : 'Remove Cash (Out)');
         $('#cash_movement_amount').val('');
         $('#cash_movement_reason').val('');
+        // Fresh key per modal open - reused across retries of this one
+        // submission so a double-click/network retry can't create two
+        // movements (see PosRegisterSessionService::addCashMovement()).
+        state.cash_movement_request_id = generateRequestId();
         state.cash_movement_modal.show();
     }
 
     function submitCashMovement() {
         var amount = $('#cash_movement_amount').val();
+        var reason = $.trim($('#cash_movement_reason').val() || '');
 
         if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
             errorMessage('Please enter a valid amount.');
             return;
         }
+        if (!reason) {
+            errorMessage('Please enter a reason for this cash movement.');
+            return;
+        }
+        if (state.cash_movement_submitting) {
+            return;
+        }
+
+        state.cash_movement_submitting = true;
+        $('#cashMovementSubmitBtn').prop('disabled', true);
 
         ajaxRequest({
             url: URLS.session_cash_movement,
@@ -776,7 +806,8 @@
                 pos_register_session_id: state.session.pos_register_session_id,
                 type: $('#cash_movement_type').val(),
                 amount: amount,
-                reason: $('#cash_movement_reason').val(),
+                reason: reason,
+                offline_local_id: state.cash_movement_request_id,
             },
         })
             .then(function () {
@@ -785,6 +816,10 @@
             })
             .catch(function (err) {
                 errorMessage(err.Message || 'Unable to record cash movement.');
+            })
+            .finally(function () {
+                state.cash_movement_submitting = false;
+                $('#cashMovementSubmitBtn').prop('disabled', false);
             });
     }
 
@@ -2371,6 +2406,7 @@
                 $('#repTotalTax').text(money(s.total_tax));
 
                 $('#repOpeningCash').text(money(s.opening_cash));
+                $('#repCashRefunds').text(money(s.cash_refunds));
                 $('#repCashIn').text(money(s.cash_movements_in));
                 $('#repCashOut').text(money(s.cash_movements_out));
                 $('#repExpenses').text(money(s.total_expenses));

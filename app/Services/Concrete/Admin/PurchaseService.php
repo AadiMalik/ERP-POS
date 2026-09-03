@@ -356,6 +356,9 @@ class PurchaseService
                     'tax'                                   => $product['tax'],
                     'tax_amount'                            => $product['tax_amount'],
                     'total'                                 => $product['total'],
+                    'batch_no'                              => $product['batch_no'] ?? null,
+                    'manufacturing_date'                    => $product['manufacturing_date'] ?? null,
+                    'expiry_date'                           => $product['expiry_date'] ?? null,
                 ]);
             }
 
@@ -572,6 +575,22 @@ class PurchaseService
                 ]);
             }
 
+            $product_variation_batch_id = app(ProductVariationStockService::class)->upsertReceiptBatch(
+                $purchase->business_id,
+                $purchase->warehouse_id,
+                $detail->product_id,
+                $detail->product_variation_id,
+                $detail->batch_no,
+                $detail->manufacturing_date,
+                $detail->expiry_date,
+                $base_quantity,
+                $line_cost
+            );
+
+            if ($product_variation_batch_id) {
+                $detail->update(['product_variation_batch_id' => $product_variation_batch_id]);
+            }
+
             ProductVariationStockTransaction::create([
                 'product_variation_stock_transaction_id' => generateUuid(),
                 'transaction_date'                       => now(),
@@ -592,6 +611,7 @@ class PurchaseService
                 'reference_id'                              => $purchase->purchase_id,
                 'reference_type'                            => ReferenceType::PURCHASE,
                 'remarks'                                   => 'Auto-created on approval of direct purchase ' . $purchase->purchase_no,
+                'product_variation_batch_id'                => $product_variation_batch_id,
                 'createdby_id'                              => Auth::id(),
                 'date_created'                              => now(),
             ]);
@@ -631,33 +651,10 @@ class PurchaseService
             return;
         }
 
-        $stock_transactions->each(function ($transaction) {
-            $transaction->update([
-                'is_deleted'   => 1,
-                'deletedby_id' => Auth::id(),
-                'date_deleted' => now(),
-            ]);
-        });
-
-        // Recompute each affected stock row (and rewrite the running-balance
-        // snapshot on every remaining transaction) from scratch rather than
-        // reversing the moving-average formula in place, so both the Stock
-        // table and the stock ledger stay exact and in sync.
-        $affected = $stock_transactions->unique(function ($transaction) {
-            return $transaction->business_id . '|' . $transaction->warehouse_id . '|' .
-                $transaction->product_id . '|' . $transaction->product_variation_id;
-        });
-
-        $stock_service = app(ProductVariationStockService::class);
-
-        foreach ($affected as $transaction) {
-            $stock_service->recomputeLedger(
-                $transaction->business_id,
-                $transaction->warehouse_id,
-                $transaction->product_id,
-                $transaction->product_variation_id
-            );
-        }
+        // Soft-deletes the transactions, reverses any batch deltas they
+        // carried, and recomputes the aggregate stock row + ledger running
+        // balances for everything affected.
+        app(ProductVariationStockService::class)->reverseStockTransactions($stock_transactions);
     }
 
     /**
@@ -758,6 +755,11 @@ class PurchaseService
                     'tax_amount' => $detail->tax_amount,
                     'total' => $detail->total,
                     'conversions' => $conversions,
+                    'track_batch' => (bool) ($detail->productVariation->track_batch ?? false),
+                    'track_expiry' => (bool) ($detail->productVariation->track_expiry ?? false),
+                    'batch_no' => $detail->batch_no,
+                    'manufacturing_date' => localDate($detail->manufacturing_date),
+                    'expiry_date' => localDate($detail->expiry_date),
                 ];
             }
 

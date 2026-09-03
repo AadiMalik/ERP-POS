@@ -18,6 +18,7 @@ class OrderDetail extends Model
         'product_id',
         'product_variation_id',
         'product_variation_unit_conversion_id',
+        'product_variation_batch_id',
         'unit_id',
         'quantity',
         'conversion_factor',
@@ -73,5 +74,15 @@ class OrderDetail extends Model
     public function voucher()
     {
         return $this->belongsTo(Voucher::class, 'voucher_id', 'voucher_id');
+    }
+
+    public function productVariationBatch()
+    {
+        return $this->belongsTo(ProductVariationBatch::class, 'product_variation_batch_id', 'product_variation_batch_id');
+    }
+
+    public function orderDetailBatches()
+    {
+        return $this->hasMany(OrderDetailBatch::class, 'order_detail_id', 'order_detail_id');
     }
 }

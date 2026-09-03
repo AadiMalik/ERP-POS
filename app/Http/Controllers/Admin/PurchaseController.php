@@ -127,6 +127,12 @@ class PurchaseController extends Controller
             if (($product['product_variation_unit_conversion_id'] ?? '') === '') {
                 $products[$index]['product_variation_unit_conversion_id'] = null;
             }
+            if (!empty($product['manufacturing_date'])) {
+                $products[$index]['manufacturing_date'] = utcDate($product['manufacturing_date']);
+            }
+            if (!empty($product['expiry_date'])) {
+                $products[$index]['expiry_date'] = utcDate($product['expiry_date']);
+            }
         }
         $request->merge(['products' => $products]);
 
@@ -164,6 +170,9 @@ class PurchaseController extends Controller
             'products.*.tax' => ['required', 'numeric', 'min:0'],
             'products.*.tax_amount' => ['required', 'numeric', 'min:0'],
             'products.*.total' => ['required', 'numeric', 'min:0'],
+            'products.*.batch_no' => ['nullable', 'string', 'max:255'],
+            'products.*.manufacturing_date' => ['nullable', 'date'],
+            'products.*.expiry_date' => ['nullable', 'date'],
         ]);
 
         if ($validator->fails()) {

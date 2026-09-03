@@ -91,13 +91,15 @@
                                         <th style="min-width:120px;">Already Received</th>
                                         <th style="min-width:110px;">Remaining</th>
                                         <th style="min-width:130px;">Receive Qty</th>
+                                        <th style="min-width:130px;">Batch No</th>
+                                        <th style="min-width:150px;">Expiry Date</th>
                                         <th style="min-width:120px;">Unit Price</th>
                                         <th style="min-width:130px">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody id="productRows">
                                     <tr id="emptyRow">
-                                        <td colspan="9" class="text-center text-muted">
+                                        <td colspan="11" class="text-center text-muted">
                                             Select a Purchase
                                         </td>
                                     </tr>
@@ -181,7 +183,7 @@
             $('#warehouse_name').val('');
             $('#productRows').html(`
                 <tr id="emptyRow">
-                    <td colspan="9" class="text-center text-muted">
+                    <td colspan="11" class="text-center text-muted">
                         Select a Purchase
                     </td>
                 </tr>
@@ -201,7 +203,7 @@
                 beforeSend: function() {
                     $('#productRows').html(`
                         <tr>
-                            <td colspan="9" class="text-center">
+                            <td colspan="11" class="text-center">
                                 <div class="spinner-border spinner-border-sm"></div>
                                 Loading...
                             </td>
@@ -234,7 +236,7 @@
             if (!lines || !lines.length) {
                 $('#productRows').html(`
                     <tr id="emptyRow">
-                        <td colspan="9" class="text-center text-muted">
+                        <td colspan="11" class="text-center text-muted">
                             Nothing remaining to receive for this purchase.
                         </td>
                     </tr>
@@ -257,6 +259,9 @@
         function addProductRow(line, received_quantity) {
             received_quantity = received_quantity ?? 0;
 
+            let showBatch = line.track_batch == true || line.track_batch == 1;
+            let showExpiry = line.track_expiry == true || line.track_expiry == 1;
+
             let row = $(`
                 <tr class="product-row">
                     <td>
@@ -274,6 +279,16 @@
                             value="${decimal(received_quantity)}"
                             data-remaining="${line.remaining_quantity}">
                     </td>
+                    <td class="batch-cell">
+                        <input type="text" class="form-control batch-no" name="products[${$('#productRows tr.product-row').length}][batch_no]"
+                            value="${line.batch_no ?? ''}" placeholder="Batch No." style="${showBatch ? '' : 'display:none;'}">
+                        <span class="batch-no-na text-muted" style="${showBatch ? 'display:none;' : ''}">N/A</span>
+                    </td>
+                    <td class="expiry-cell">
+                        <input type="text" class="form-control datepicker expiry-date" name="products[${$('#productRows tr.product-row').length}][expiry_date]"
+                            value="${line.expiry_date ?? ''}" placeholder="Expiry Date" style="${showExpiry ? '' : 'display:none;'}">
+                        <span class="expiry-date-na text-muted" style="${showExpiry ? 'display:none;' : ''}">N/A</span>
+                    </td>
                     <td class="unit-price">${decimal(line.unit_price)}</td>
                     <td class="row-total">${decimal(received_quantity * (line.conversion_factor || 1) * line.unit_price)}</td>
                 </tr>
@@ -286,12 +301,24 @@
 
             $('#productRows').append(row);
             reindexRows();
+
+            if (showExpiry) {
+                let expiryInput = row.find('.expiry-date').get(0);
+                if (expiryInput && typeof flatpickr === 'function' && !expiryInput._flatpickr) {
+                    flatpickr(expiryInput, {
+                        dateFormat: "{{ session('business_setting.date_format', 'd-m-Y') }}",
+                        allowInput: true
+                    });
+                }
+            }
         }
 
         function reindexRows() {
             $('#productRows tr.product-row').each(function(index) {
                 $(this).find('input[name*="[purchase_detail_id]"]').attr('name', `products[${index}][purchase_detail_id]`);
                 $(this).find('input.receive-qty').attr('name', `products[${index}][received_quantity]`);
+                $(this).find('input.batch-no').attr('name', `products[${index}][batch_no]`);
+                $(this).find('input.expiry-date').attr('name', `products[${index}][expiry_date]`);
             });
         }
 
@@ -365,7 +392,11 @@
                     remaining_quantity: item.remaining_quantity,
                     unit_name: item.unit_name,
                     unit_price: item.unit_price,
-                    conversion_factor: item.conversion_factor
+                    conversion_factor: item.conversion_factor,
+                    track_batch: item.track_batch,
+                    track_expiry: item.track_expiry,
+                    batch_no: item.batch_no,
+                    expiry_date: item.expiry_date
                 }, item.received_quantity);
             });
 

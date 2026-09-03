@@ -91,7 +91,10 @@ class PosRegisterSessionController extends Controller
             return $this->error('This register session was not found.');
         }
 
-        if (Auth::id() != $session->cashier_id && !Auth::user()->can('pos.register.close')) {
+        $user = Auth::user();
+        $same_business = getRoleName() == \App\Enums\RoleNames::SUPERADMIN || $user->business_id == $session->business_id;
+
+        if (Auth::id() != $session->cashier_id && (!$same_business || !$user->can('pos.register.close'))) {
             return $this->error('You do not have permission to close this register session.', 403);
         }
 
@@ -189,6 +192,8 @@ class PosRegisterSessionController extends Controller
             'pos_register_session_id' => ['required', 'string'],
             'type' => ['required', 'in:in,out'],
             'amount' => ['required', 'numeric', 'min:0.01'],
+            'reason' => ['required', 'string', 'max:255'],
+            'offline_local_id' => ['nullable', 'string', 'max:64'],
         ];
 
         $validate = Validator::make($request->all(), $rules);
@@ -202,7 +207,10 @@ class PosRegisterSessionController extends Controller
             return $this->error('This register session was not found.');
         }
 
-        if (Auth::id() != $session->cashier_id && !Auth::user()->can('pos.register.cash-movement.manage')) {
+        $user = Auth::user();
+        $same_business = getRoleName() == \App\Enums\RoleNames::SUPERADMIN || $user->business_id == $session->business_id;
+
+        if (Auth::id() != $session->cashier_id && (!$same_business || !$user->can('pos.register.cash-movement.manage'))) {
             return $this->error('You do not have permission to record cash movements for this register session.', 403);
         }
 
@@ -211,6 +219,7 @@ class PosRegisterSessionController extends Controller
             'type',
             'amount',
             'reason',
+            'offline_local_id',
         ]);
 
         try {

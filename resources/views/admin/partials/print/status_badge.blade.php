@@ -6,6 +6,8 @@
 @php
     $status_map = [
         'pending' => ['label' => 'Pending', 'color' => 'warning'],
+        'draft' => ['label' => 'Draft', 'color' => 'secondary'],
+        'in_transit' => ['label' => 'In Transit', 'color' => 'warning'],
         'approved' => ['label' => 'Approved', 'color' => 'success'],
         'posted' => ['label' => 'Posted', 'color' => 'success'],
         'completed' => ['label' => 'Completed', 'color' => 'success'],

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
+use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
+use App\Models\TransferNote;
 use App\Traits\ResponseAPI;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\DocumentSendLogService;
@@ -45,7 +47,8 @@ class TransferNoteController extends Controller
         $this->middleware('permission:transfer-note.create|transfer-note.edit')->only(['store']);
         $this->middleware('permission:transfer-note.edit')->only(['edit']);
         $this->middleware('permission:transfer-note.delete')->only(['destroy']);
-        $this->middleware('permission:transfer-note.status')->only(['status']);
+        $this->middleware('permission:transfer-note.send')->only(['send']);
+        $this->middleware('permission:transfer-note.receive')->only(['receive']);
         $this->middleware('permission:transfer-note.print')->only(['print']);
         $this->middleware('permission:transfer-note.import')->only(['importSample', 'importPreview', 'importConfirm']);
         $this->middleware('permission:transfer-note.export')->only(['export']);
@@ -68,12 +71,41 @@ class TransferNoteController extends Controller
         $business = $this->business_service->getAll();
         $warehouses = $this->warehouse_service->getAllActive();
         $statuses = [
-            Status::PENDING   => ucfirst(Status::PENDING),
-            Status::APPROVED  => ucfirst(Status::APPROVED),
-            Status::CANCELLED => ucfirst(Status::CANCELLED),
+            Status::DRAFT      => 'Draft',
+            Status::IN_TRANSIT => 'In Transit',
+            Status::RECEIVED   => 'Received',
+            Status::CANCELLED  => ucfirst(Status::CANCELLED),
         ];
 
         return view('admin.transfer_note.index', compact('business', 'warehouses', 'statuses'));
+    }
+
+    /**
+     * Mirrors OrderController::assertOrderAccessible() - the actual
+     * authorization boundary for Send/Receive/Cancel. $branch_column is
+     * 'branch_id' (source) for Send/Cancel, or 'destination_branch_id' for
+     * Receive, so a source-branch user can never Receive and vice versa.
+     */
+    protected function assertTransferNoteAccessible($transfer_note_id, string $branch_column)
+    {
+        $allow_roles = [
+            RoleNames::SUPERADMIN,
+            RoleNames::BUSINESSADMIN,
+            RoleNames::INVENTORYMANAGER,
+            RoleNames::BRANCHADMIN,
+            RoleNames::POSMANAGER,
+        ];
+
+        $accessible = applyRoleScope(
+            TransferNote::where('transfer_note_id', $transfer_note_id),
+            $allow_roles,
+            'business_id',
+            $branch_column
+        )->exists();
+
+        if (!$accessible) {
+            abort(403, 'You are not authorized to perform this action on this transfer note.');
+        }
     }
 
     public function getData(Request $request)
@@ -96,9 +128,9 @@ class TransferNoteController extends Controller
     {
         $transfer_note = $this->transfer_note_service->getById($transfer_note_id);
 
-        if (!$transfer_note || $transfer_note->status !== Status::PENDING) {
+        if (!$transfer_note || $transfer_note->status !== Status::DRAFT) {
             return redirect('admin/transfer-note')
-                ->with('error', 'Only pending transfer notes can be edited.');
+                ->with('error', 'Only draft transfer notes can be edited.');
         }
 
         $transfer_note_details = $this->transfer_note_service->getDetails($transfer_note_id);
@@ -161,19 +193,36 @@ class TransferNoteController extends Controller
         }
     }
 
-    public function status(Request $request)
+    public function send($transfer_note_id)
+    {
+        $this->assertTransferNoteAccessible($transfer_note_id, 'branch_id');
+
+        try {
+            $this->transfer_note_service->send($transfer_note_id);
+            return $this->success(Message::STATUS, []);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function receive(Request $request)
     {
         $rules = [
             'transfer_note_id' => 'required|exists:transfer_notes,transfer_note_id',
-            'status' => 'required|in:' . Status::PENDING . ',' . Status::APPROVED . ',' . Status::CANCELLED,
+            'products' => 'required|array|min:1',
+            'products.*.transfer_note_detail_id' => 'required|exists:transfer_note_details,transfer_note_detail_id',
+            'products.*.receive_quantity' => 'required|numeric|min:0',
         ];
 
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
             return $this->validationResponse($validate->errors()->first());
         }
+
+        $this->assertTransferNoteAccessible($request->transfer_note_id, 'destination_branch_id');
+
         try {
-            $this->transfer_note_service->status($request->all());
+            $this->transfer_note_service->receive($request->all());
             return $this->success(Message::STATUS, []);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
@@ -182,6 +231,8 @@ class TransferNoteController extends Controller
 
     public function destroy($transfer_note_id)
     {
+        $this->assertTransferNoteAccessible($transfer_note_id, 'branch_id');
+
         try {
             $this->transfer_note_service->delete($transfer_note_id);
             return $this->success(Message::DELETE, []);

@@ -109,6 +109,41 @@
             </div>
         </div>
         @include('admin.partials.import-export-modal')
+
+        <div class="modal fade" id="receiveTransferModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Receive Transfer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted mb-2">Enter the quantity actually received for each product. Defaults to
+                            the full remaining quantity - reduce it to receive partially.</p>
+                        <div class="table-responsive">
+                            <table class="table" id="receiveTransferTable">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Variation</th>
+                                        <th>Unit</th>
+                                        <th class="text-end">Sent</th>
+                                        <th class="text-end">Already Received</th>
+                                        <th class="text-end">Remaining</th>
+                                        <th style="width:140px;">Receive Now</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="submitReceiveTransfer">Receive</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 @section('js')
@@ -143,35 +178,95 @@
         $('#search_btn').click(function() {
             initDataTabletransfer_note_table();
         });
-        //status
-        $(document).on('change', '.change-status', function() {
-
+        //send
+        $(document).on('click', '.sendTransferNote', function() {
             let transfer_note_id = $(this).data('id');
-            let status = $(this).val();
-            let select = $(this);
 
-            $.ajax({
-                url: url_local + "/admin/transfer-note/change-status", // route
-                type: 'POST',
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content'),
-                    transfer_note_id: transfer_note_id,
-                    status: status
-                },
-                success: function(response) {
+            if (!confirm('Send this transfer? Stock will be deducted from the source warehouse and held as in-transit.')) {
+                return;
+            }
 
-                    successMessage(response.Message);
-                    initDataTabletransfer_note_table();
-                },
-                error: function() {
+            ajaxRequest({
+                url: url_local + "/admin/transfer-note/" + transfer_note_id + "/send",
+                method: 'POST',
+            }).then(function(res) {
+                successMessage(res.Message);
+                initDataTabletransfer_note_table();
+            }).catch(function(err) {
+                errorMessage(err.Message || 'Unable to send this transfer note.');
+            });
+        });
 
-                    errorMessage(error.Message || 'Something went wrong.');
-                    initDataTabletransfer_note_table();
-                    // Previous value restore
-                    select.val(select.data('old'));
+        //receive
+        let receiveTransferNoteId = null;
+
+        $(document).on('click', '.receiveTransferNote', function() {
+            receiveTransferNoteId = $(this).data('id');
+
+            ajaxRequest({
+                url: url_local + "/admin/transfer-note/details/" + receiveTransferNoteId,
+                method: 'GET',
+            }).then(function(res) {
+                let rows = '';
+
+                (res.Data.details || []).forEach(function(line) {
+                    if (parseFloat(line.remaining_quantity) <= 0) {
+                        return;
+                    }
+
+                    rows += '<tr data-detail-id="' + line.transfer_note_detail_id + '">' +
+                        '<td>' + line.product_name + '</td>' +
+                        '<td>' + line.product_variation_name + '</td>' +
+                        '<td>' + line.unit_name + '</td>' +
+                        '<td class="text-end">' + line.transfer_quantity + '</td>' +
+                        '<td class="text-end">' + line.received_quantity + '</td>' +
+                        '<td class="text-end">' + line.remaining_quantity + '</td>' +
+                        '<td><input type="number" class="form-control form-control-sm receive-qty-input" min="0" max="' +
+                        line.remaining_quantity + '" step="any" value="' + line.remaining_quantity + '"></td>' +
+                        '</tr>';
+                });
+
+                $('#receiveTransferTable tbody').html(rows || '<tr><td colspan="7" class="text-center">Nothing left to receive.</td></tr>');
+                new bootstrap.Modal(document.getElementById('receiveTransferModal')).show();
+            }).catch(function() {
+                errorMessage('Unable to load transfer note details.');
+            });
+        });
+
+        $('#submitReceiveTransfer').on('click', function() {
+            let products = [];
+
+            $('#receiveTransferTable tbody tr').each(function() {
+                let detailId = $(this).data('detail-id');
+                let qty = parseFloat($(this).find('.receive-qty-input').val()) || 0;
+
+                if (detailId && qty > 0) {
+                    products.push({
+                        transfer_note_detail_id: detailId,
+                        receive_quantity: qty
+                    });
                 }
             });
 
+            if (!products.length) {
+                errorMessage('Please enter a quantity to receive for at least one product.');
+                return;
+            }
+
+            ajaxRequest({
+                url: url_local + "/admin/transfer-note/receive",
+                method: 'POST',
+                data: {
+                    transfer_note_id: receiveTransferNoteId,
+                    products: products
+                },
+            }).then(function(res) {
+                successMessage(res.Message);
+                bootstrap.Modal.getInstance(document.getElementById('receiveTransferModal')).hide();
+                initDataTabletransfer_note_table();
+            }).catch(function(err) {
+                errorMessage(err.Message || 'Unable to receive this transfer note.');
+            });
         });
         //delete
         deleteRecord({

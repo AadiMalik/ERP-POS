@@ -18,6 +18,7 @@ class TransferNote extends Model
         'branch_id',
         'source_warehouse_id',
         'destination_warehouse_id',
+        'destination_branch_id',
         'transfer_note_no',
         'transfer_note_date',
         'reference',
@@ -29,9 +30,13 @@ class TransferNote extends Model
         'createdby_id',
         'updatedby_id',
         'deletedby_id',
+        'sentby_id',
+        'receivedby_id',
         'date_created',
         'date_updated',
         'date_deleted',
+        'date_sent',
+        'date_received',
     ];
 
     public function business()
@@ -42,6 +47,11 @@ class TransferNote extends Model
     public function branch()
     {
         return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
+    public function destinationBranch()
+    {
+        return $this->belongsTo(Branch::class, 'destination_branch_id');
     }
 
     public function sourceWarehouse()
@@ -72,5 +82,15 @@ class TransferNote extends Model
     public function deletedby()
     {
         return $this->belongsTo(User::class, 'deletedby_id');
+    }
+
+    public function sentby()
+    {
+        return $this->belongsTo(User::class, 'sentby_id');
+    }
+
+    public function receivedby()
+    {
+        return $this->belongsTo(User::class, 'receivedby_id');
     }
 }

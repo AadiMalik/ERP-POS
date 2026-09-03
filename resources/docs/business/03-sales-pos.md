@@ -23,6 +23,32 @@ vs. counted cash. This is required before the POS screen can be used
 cashier's own business (and branch, when their account is branch-scoped) —
 staff cannot open a register under another business.
 
+## Cash In / Cash Out
+
+During a shift, a cashier can record **Cash In** (adding money to the drawer —
+e.g. a float top-up) or **Cash Out** (removing money — e.g. a cash drop to the
+safe), each with a required reason. A cashier can only record these against
+**their own currently open shift**; recording one against someone else's shift
+requires a manager/admin-level permission. Every cash movement is timestamped
+and attributed to the person who recorded it, and feeds directly into that
+shift's Expected Cash figure below — it can never be entered twice from the
+same button click or a repeated request.
+
+## Closing a POS Register
+
+The closing screen (and the printed Session Summary) shows exactly how the
+expected cash figure is built, so the cashier can see why it changed:
+
+```
+Expected Cash = Opening Cash + Cash Sales − Cash Refunds + Cash In − Cash Out − Cash Expenses
+```
+
+Each line is labelled with **(+)** or **(−)** to show whether it adds to or
+subtracts from the drawer. Only **cash** sales, refunds, and expenses move this
+number — a card, bank, or store-credit sale or refund never touches it. The
+cashier then counts the till and enters **Actual Cash**; the difference
+(**Actual − Expected**) is recorded as the session's cash variance.
+
 ## Taking a Sale
 
 The **POS Screen** is the main selling interface: search or scan products, add a
@@ -98,6 +124,34 @@ checked once more, authoritatively, the instant the sale is completed, so
 two cashiers racing for the last unit of the same product can never both
 succeed.
 
+## Batch & Expiry Aware Selling
+
+Products don't require batch/expiry tracking by default — this only activates
+for a product variation that has **Track Batch** and/or **Track Expiry**
+turned on (see [Inventory & Warehouses](05-inventory.md)).
+For those products, completing a sale automatically picks which batch to sell
+from — the cashier never has to choose one:
+
+- **First Expiry, First Out (FEFO)** — the batch expiring soonest is sold
+  first, so stock doesn't sit until it expires. Businesses that don't track
+  expiry (batch-only, no expiry date) instead sell **First In, First Out
+  (FIFO)** — the oldest-received batch first. Which one applies is set once
+  per business under **Settings → Inventory → Batch Selection Strategy**.
+- If a single sale line needs more than one batch to fully cover the
+  quantity, it's automatically split across batches (still FEFO/FIFO order)
+  and each batch's contribution is recorded, so a later return can restore
+  the right amount to the right batch.
+- **Settings → Inventory → Block Selling Expired Batches** (on by default)
+  stops a sale from being fulfilled out of a batch whose expiry date has
+  passed. If enough non-expired stock exists across other batches, the sale
+  still goes through from those; if not, it's blocked with an insufficient
+  stock message, the same as running out of stock entirely.
+
+An **Order Return** on a batch-tracked product restores the returned quantity
+back into the same batch(es) the original sale drew from (proportionally, if
+the original sale had been split across more than one batch) — not just back
+into the warehouse's overall total.
+
 ## Vouchers & Promotions
 
 A voucher can be as simple as "10% off with code SAVE10", or as targeted as a
@@ -138,7 +192,16 @@ voucher's discount that applied to the returned items.
 ## Order Returns
 
 A completed sale can be returned in full or in part via **Order Returns**, which
-restores the returned stock and reverses the sale's financial impact.
+restores the returned stock and reverses the sale's financial impact. A return
+sits as **Pending** until someone with return-approval rights approves it — that
+approval is the moment stock is restocked and accounting/cash impact is posted.
+
+If the chosen refund method is **Cash**, approving the return reduces that till's
+**Expected Cash** for whichever POS shift the cash came out of (see *Closing a
+POS Register* above) — it is never treated as a new sale or a cash-in. A refund
+on any other method (card, bank, store credit, etc.) never touches the physical
+till. If no POS shift is open to attribute the cash to, the refund still posts to
+accounting but won't appear on any shift's closing reconciliation.
 
 ## Customers
 

@@ -1192,7 +1192,8 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     Route::resource('transfer-note', App\Http\Controllers\Admin\TransferNoteController::class)->except(['show']);
     Route::group(['prefix' => 'transfer-note'], function () {
         Route::post('data', [App\Http\Controllers\Admin\TransferNoteController::class, 'getData']);
-        Route::post('change-status', [App\Http\Controllers\Admin\TransferNoteController::class, 'status']);
+        Route::post('{transfer_note_id}/send', [App\Http\Controllers\Admin\TransferNoteController::class, 'send'])->name('transfer-note.send');
+        Route::post('receive', [App\Http\Controllers\Admin\TransferNoteController::class, 'receive'])->name('transfer-note.receive');
         Route::get('details/{transfer_note_id}', [App\Http\Controllers\Admin\TransferNoteController::class, 'details']);
         Route::get('source-stock/{warehouse_id}', [App\Http\Controllers\Admin\TransferNoteController::class, 'sourceStock']);
         Route::get('{transfer_note_id}/print', [App\Http\Controllers\Admin\TransferNoteController::class, 'print'])->name('transfer-note.print');

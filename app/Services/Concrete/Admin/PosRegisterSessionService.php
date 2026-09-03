@@ -8,6 +8,7 @@ use App\Models\PosRegisterCashMovement;
 use App\Models\PosRegisterSession;
 use App\Models\PosSetting;
 use App\Repository\Repository;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +18,8 @@ use Yajra\DataTables\DataTables;
 
 class PosRegisterSessionService
 {
+    use Auditable;
+
     protected $model_pos_register_session;
 
     protected $pos_register_service;
@@ -169,12 +172,10 @@ class PosRegisterSessionService
 
     /**
      * Closes an open register session, computing expected cash vs the counted
-     * actual cash.
-     *
-     // TODO: pos.register.close permission check - the controller should verify
-     // Auth::id() == $session->cashier_id OR the acting user holds the
-     // pos.register.close permission before calling this, per this codebase's
-     // convention of doing authorization in controllers rather than services.
+     * actual cash. Authorization (own session, or `pos.register.close` within
+     * the same business) is enforced by the caller -
+     * PosRegisterSessionController::close() - per this codebase's convention
+     * of doing authorization in controllers rather than services.
      */
     public function close($obj)
     {
@@ -433,7 +434,14 @@ class PosRegisterSessionService
 
     /**
      * Adds a manual till-cash adjustment (e.g. cash drop, float top-up) against an
-     * open session.
+     * open session. Idempotent on offline_local_id (same key/column the desktop
+     * POS's offline sync already uses for this table via
+     * OfflinePushService::pushCashMovement() - reused here so a retried/double
+     * web submission of the same client-generated key returns the original
+     * movement instead of creating a duplicate one). Authorization (own
+     * session, or `pos.register.cash-movement.manage` within the same
+     * business) is enforced by the caller -
+     * PosRegisterSessionController::addCashMovement().
      */
     public function addCashMovement($obj)
     {
@@ -443,9 +451,18 @@ class PosRegisterSessionService
             throw new Exception('Cash movements can only be added to an open session.');
         }
 
-        return PosRegisterCashMovement::create([
+        if (!empty($obj['offline_local_id'])) {
+            $existing = PosRegisterCashMovement::where('offline_local_id', $obj['offline_local_id'])->first();
+
+            if ($existing) {
+                return $existing;
+            }
+        }
+
+        $movement = PosRegisterCashMovement::create([
             'pos_register_cash_movement_id' => generateUuid(),
             'pos_register_session_id' => $obj['pos_register_session_id'],
+            'offline_local_id' => $obj['offline_local_id'] ?? null,
             'type' => $obj['type'],
             'amount' => $obj['amount'],
             'reason' => $obj['reason'] ?? null,
@@ -453,6 +470,24 @@ class PosRegisterSessionService
             'createdby_id' => Auth::id(),
             'date_created' => now(),
         ]);
+
+        $this->logActivity(
+            'pos_register_cash_movement',
+            $movement->pos_register_cash_movement_id,
+            'created',
+            null,
+            [
+                'pos_register_session_id' => $movement->pos_register_session_id,
+                'type' => $movement->type,
+                'amount' => $movement->amount,
+                'reason' => $movement->reason,
+            ],
+            null,
+            $session->business_id,
+            $session->branch_id
+        );
+
+        return $movement;
     }
 
     /**

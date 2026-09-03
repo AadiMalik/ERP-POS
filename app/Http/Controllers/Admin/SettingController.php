@@ -582,6 +582,8 @@ $this->middleware('permission:setting.manage');
     {
         $rules = [
             'low_stock_quantity' => 'nullable|integer|min:0',
+            'batch_selection_strategy' => 'nullable|in:fefo,fifo',
+            'near_expiry_days' => 'nullable|integer|min:1',
         ];
 
         $validate = Validator::make($request->all(), $rules);
@@ -599,6 +601,9 @@ $this->middleware('permission:setting.manage');
             'low_stock_quantity' => $request->low_stock_quantity,
             'enable_batch_no'    => $request->has('enable_batch_no') ? 1 : 0,
             'enable_expiry_date' => $request->has('enable_expiry_date') ? 1 : 0,
+            'block_expired_sale' => $request->has('block_expired_sale') ? 1 : 0,
+            'batch_selection_strategy' => $request->batch_selection_strategy ?? 'fefo',
+            'near_expiry_days'   => $request->near_expiry_days ?? 30,
         ];
         $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
 

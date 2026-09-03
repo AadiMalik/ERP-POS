@@ -17,10 +17,14 @@ requesting a quote to paying the supplier.
    Purchase (goods often arrive in partial batches). Every GRN **increases stock**
    for the received quantities and automatically posts the corresponding accounting
    entry, so your inventory value and books stay in sync as goods physically arrive
-   — not just when the purchase order is raised.
+   — not just when the purchase order is raised. For a product with batch/expiry
+   tracking enabled, both a direct Purchase and a GRN also ask for the **Batch No.**
+   and **Expiry Date** being received — see
+   [Inventory & Warehouses](05-inventory.md).
 5. **Purchase Return** — send goods back to a supplier, either against a specific
    GRN or a direct purchase; this reverses the stock increase and its accounting
-   entry.
+   entry. For a batch-tracked product, the return is deducted from the same batch
+   it was originally received into.
 6. **Supplier Payment** — pay the supplier for what's been received, tracked
    against the supplier's running ledger (Accounts Payable).
 

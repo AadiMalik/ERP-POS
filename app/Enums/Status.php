@@ -25,6 +25,7 @@ class  Status
     const RETURNED = 'returned';
     const REFUNDED = 'refunded';
     const SENT='sent';
+    const IN_TRANSIT='in_transit';
     const SELECTED='selected';
     const AVAILABLE='available';
     const OUT_OF_STOCK='out of stock';

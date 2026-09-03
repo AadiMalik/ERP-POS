@@ -647,7 +647,8 @@ function applyRoleScope(
     Builder $query,
     array $allowed_roles = [],
     string $business_column = 'business_id',
-    string $branch_column = 'branch_id'
+    string $branch_column = 'branch_id',
+    ?string $extra_branch_column = null
 ) {
 
     $user = Auth::user();
@@ -724,7 +725,13 @@ function applyRoleScope(
     elseif (in_array($role, $branch_roles)) {
 
         $query->where($business_column, $user->business_id)
-            ->where($branch_column, $user->branch_id);
+            ->where(function ($q) use ($branch_column, $extra_branch_column, $user) {
+                $q->where($branch_column, $user->branch_id);
+
+                if ($extra_branch_column) {
+                    $q->orWhere($extra_branch_column, $user->branch_id);
+                }
+            });
     }
 
     // Mixed Access
@@ -734,7 +741,13 @@ function applyRoleScope(
 
         if (!empty($user->branch_id)) {
 
-            $query->where($branch_column, $user->branch_id);
+            $query->where(function ($q) use ($branch_column, $extra_branch_column, $user) {
+                $q->where($branch_column, $user->branch_id);
+
+                if ($extra_branch_column) {
+                    $q->orWhere($extra_branch_column, $user->branch_id);
+                }
+            });
         }
     }
 

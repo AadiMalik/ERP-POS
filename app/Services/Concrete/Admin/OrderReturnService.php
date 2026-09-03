@@ -619,7 +619,13 @@ class OrderReturnService
                 $order_return->order_return_id,
                 $new_status === Status::APPROVED ? 'approved' : 'status_changed',
                 ['status' => $old_status],
-                ['status' => $new_status]
+                [
+                    'status' => $new_status,
+                    // Records which shift's expected cash absorbed this refund
+                    // (null = not a cash refund, or no open session could be
+                    // resolved - see resolveCashRefundSession()).
+                    'pos_register_session_id' => $order_return->pos_register_session_id,
+                ]
             );
         } catch (Exception $e) {
             DB::rollBack();
@@ -720,6 +726,49 @@ class OrderReturnService
     }
 
     /**
+     * Resolves which open PosRegisterSession a cash refund's physical cash
+     * comes out of, so PosRegisterSessionService::getSummary() can deduct it
+     * from that shift's expected cash. Tried in order:
+     * 1. The approving user's own open session (the common case: a cashier
+     *    refunds a customer from their own till).
+     * 2. The original sale's own register session, if that shift is still open
+     *    (an on-duty colleague approving a same-shift return).
+     * 3. The single open session business-wide, if there is exactly one (a
+     *    back-office approval while only one register is trading - still
+     *    unambiguous which drawer the cash left).
+     * Returns null (no attribution, matching prior behaviour) when none of
+     * the above resolves to exactly one session - e.g. no register is open,
+     * or several are open and none match the approver/original sale.
+     */
+    protected function resolveCashRefundSession(OrderReturn $order_return, Order $order): ?PosRegisterSession
+    {
+        $own_session = PosRegisterSession::where('cashier_id', Auth::id())
+            ->where('business_id', $order_return->business_id)
+            ->where('status', 'open')
+            ->first();
+
+        if ($own_session) {
+            return $own_session;
+        }
+
+        if (!empty($order->register_session_id)) {
+            $sale_session = PosRegisterSession::where('pos_register_session_id', $order->register_session_id)
+                ->where('status', 'open')
+                ->first();
+
+            if ($sale_session) {
+                return $sale_session;
+            }
+        }
+
+        $open_sessions = PosRegisterSession::where('business_id', $order_return->business_id)
+            ->where('status', 'open')
+            ->get();
+
+        return $open_sessions->count() === 1 ? $open_sessions->first() : null;
+    }
+
+    /**
      * Auto-post a Sale Return Voucher, restock the returned quantities and
      * reverse their COGS/Inventory legs when an Order Return is approved.
      * Idempotent: a no-op if an active voucher already exists for this
@@ -795,14 +844,7 @@ class OrderReturnService
                     throw new Exception('Cash Account is not configured in Accounting Settings.');
                 }
 
-                // Attribute this cash refund to whichever register session is
-                // currently open for the approving user, if any, so it can be
-                // deducted from expected cash at that shift's closing - see
-                // PosRegisterSessionService::getSummary().
-                $open_session = PosRegisterSession::where('cashier_id', Auth::id())
-                    ->where('business_id', $order_return->business_id)
-                    ->where('status', 'open')
-                    ->first();
+                $open_session = $this->resolveCashRefundSession($order_return, $order);
 
                 if ($open_session) {
                     $order_return->update(['pos_register_session_id' => $open_session->pos_register_session_id]);
@@ -957,29 +999,76 @@ class OrderReturnService
                 ]);
             }
 
-            ProductVariationStockTransaction::create([
-                'product_variation_stock_transaction_id' => generateUuid(),
-                'transaction_date'                       => now(),
-                'transaction_type'                        => TransactionType::SALE_RETURN,
-                'business_id'                             => $order_return->business_id,
-                'product_id'                              => $detail->product_id,
-                'product_variation_id'                    => $detail->product_variation_id,
-                'warehouse_id'                             => $order_return->warehouse_id,
-                'unit_id'                                  => $detail->unit_id,
-                'product_variation_unit_conversion_id'     => $detail->product_variation_unit_conversion_id,
-                'conversion_factor'                        => $detail->conversion_factor,
-                'quantity'                                 => $detail->return_quantity,
-                'base_quantity'                            => $base_quantity,
-                'unit_price'                               => $detail->unit_price,
-                'total_price'                              => $line_cost,
-                'quantity_after'                           => $new_qty,
-                'avg_price_after'                          => $new_avg,
-                'reference_id'                              => $order_return->order_return_id,
-                'reference_type'                            => ReferenceType::SALE_RETURN,
-                'remarks'                                   => 'Auto-created on approval of order return ' . $order_return->order_return_no,
-                'createdby_id'                              => Auth::id(),
-                'date_created'                              => now(),
-            ]);
+            // Restore into whichever batch(es) the original sale line drew
+            // from - a single batch if the sale wasn't split, or
+            // proportionally across order_detail_batches (by their share of
+            // the original line's base_quantity) if it was.
+            $order_detail = $detail->orderDetail;
+            $batch_restores = [];
+
+            if ($order_detail && $order_detail->product_variation_batch_id) {
+                $batch_restores[] = [
+                    'product_variation_batch_id' => $order_detail->product_variation_batch_id,
+                    'base_quantity'               => $base_quantity,
+                ];
+            } elseif ($order_detail) {
+                $split_rows = $order_detail->orderDetailBatches;
+                $original_base_quantity = (float) $order_detail->base_quantity;
+
+                if ($split_rows->isNotEmpty() && $original_base_quantity > 0) {
+                    $remaining_to_restore = $base_quantity;
+
+                    foreach ($split_rows as $index => $split_row) {
+                        $is_last = $index === $split_rows->count() - 1;
+                        $share = $is_last
+                            ? $remaining_to_restore
+                            : round($base_quantity * ((float) $split_row->base_quantity / $original_base_quantity), 3);
+                        $remaining_to_restore -= $share;
+
+                        if ($share > 0) {
+                            $batch_restores[] = [
+                                'product_variation_batch_id' => $split_row->product_variation_batch_id,
+                                'base_quantity'               => $share,
+                            ];
+                        }
+                    }
+                }
+            }
+
+            if (empty($batch_restores)) {
+                $batch_restores[] = ['product_variation_batch_id' => null, 'base_quantity' => $base_quantity];
+            }
+
+            foreach ($batch_restores as $restore) {
+                app(ProductVariationStockService::class)->adjustBatchQuantity($restore['product_variation_batch_id'], $restore['base_quantity']);
+
+                $restore_quantity = $detail->conversion_factor > 0 ? $restore['base_quantity'] / $detail->conversion_factor : $restore['base_quantity'];
+
+                ProductVariationStockTransaction::create([
+                    'product_variation_stock_transaction_id' => generateUuid(),
+                    'transaction_date'                       => now(),
+                    'transaction_type'                        => TransactionType::SALE_RETURN,
+                    'business_id'                             => $order_return->business_id,
+                    'product_id'                              => $detail->product_id,
+                    'product_variation_id'                    => $detail->product_variation_id,
+                    'warehouse_id'                             => $order_return->warehouse_id,
+                    'unit_id'                                  => $detail->unit_id,
+                    'product_variation_unit_conversion_id'     => $detail->product_variation_unit_conversion_id,
+                    'conversion_factor'                        => $detail->conversion_factor,
+                    'quantity'                                 => $restore_quantity,
+                    'base_quantity'                            => $restore['base_quantity'],
+                    'unit_price'                               => $detail->unit_price,
+                    'total_price'                              => round($restore['base_quantity'] * $cost_price, 3),
+                    'quantity_after'                           => $new_qty,
+                    'avg_price_after'                          => $new_avg,
+                    'reference_id'                              => $order_return->order_return_id,
+                    'reference_type'                            => ReferenceType::SALE_RETURN,
+                    'remarks'                                   => 'Auto-created on approval of order return ' . $order_return->order_return_no,
+                    'product_variation_batch_id'                => $restore['product_variation_batch_id'],
+                    'createdby_id'                              => Auth::id(),
+                    'date_created'                              => now(),
+                ]);
+            }
         }
 
         if ($total_cost > 0) {
@@ -1049,31 +1138,7 @@ class OrderReturnService
             ->where('is_deleted', 0)
             ->get();
 
-        if ($stock_transactions->isNotEmpty()) {
-            $stock_transactions->each(function ($transaction) {
-                $transaction->update([
-                    'is_deleted'   => 1,
-                    'deletedby_id' => Auth::id(),
-                    'date_deleted' => now(),
-                ]);
-            });
-
-            $affected = $stock_transactions->unique(function ($transaction) {
-                return $transaction->business_id . '|' . $transaction->warehouse_id . '|' .
-                    $transaction->product_id . '|' . $transaction->product_variation_id;
-            });
-
-            $stock_service = app(ProductVariationStockService::class);
-
-            foreach ($affected as $transaction) {
-                $stock_service->recomputeLedger(
-                    $transaction->business_id,
-                    $transaction->warehouse_id,
-                    $transaction->product_id,
-                    $transaction->product_variation_id
-                );
-            }
-        }
+        app(ProductVariationStockService::class)->reverseStockTransactions($stock_transactions);
 
         $order = Order::with('details')->find($order_return->order_id);
 

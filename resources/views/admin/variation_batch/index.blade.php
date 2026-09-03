@@ -72,6 +72,15 @@
                             </select>
                         </div>
                         <div class="col-md-3">
+                            <label class="form-label">Expiry Status</label>
+                            <select id="filter_expiry_status" class="form-select">
+                                <option value="">--All--</option>
+                                <option value="active">Active</option>
+                                <option value="near_expiry">Near Expiry</option>
+                                <option value="expired">Expired</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label">Date</label>
                             @include('admin.partials.date_filter')
                         </div>
@@ -96,6 +105,7 @@
                                 <th>Quantity</th>
                                 <th>Manufacturer</th>
                                 <th>Expiry</th>
+                                <th>Expiry Status</th>
                                 <th>Business</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -124,6 +134,7 @@
         {data: 'quantity' , name: 'quantity'},
         {data: 'manufacturer_date' , name: 'manufacturer_date'},
         {data: 'expiry_date' , name: 'expiry_date'},
+        {data: 'expiry_status' , name: 'expiry_status', 'sortable': false , searchable: false},
         {data: 'business' , name: 'business', 'sortable': false , searchable: false},
         {data: 'status' , name: 'status', 'sortable': false , searchable: false},
         {data: 'action' , name: 'action' , 'sortable': false , searchable: false},",
@@ -133,7 +144,7 @@
         'class' => 'product_variation_batch_table',
         'variable' => 'product_variation_batch_table',
         'datefilter' => true,
-        'params' => "business_id:$('#filter_business_id').val(),product_id:$('#filter_product_id').val(),product_variation_id:$('#filter_product_variation_id').val(),warehouse_id:$('#filter_warehouse_id').val()",
+        'params' => "business_id:$('#filter_business_id').val(),product_id:$('#filter_product_id').val(),product_variation_id:$('#filter_product_variation_id').val(),warehouse_id:$('#filter_warehouse_id').val(),expiry_status:$('#filter_expiry_status').val()",
     ])
 
     <script>
@@ -154,6 +165,7 @@
             $('#filter_product_id').select2();
             $('#filter_product_variation_id').select2();
             $('#filter_warehouse_id').select2();
+            $('#filter_expiry_status').select2();
         });
         $('#search_btn').click(function() {
             initDataTableproduct_variation_batch_table();

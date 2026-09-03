@@ -156,6 +156,8 @@
                                         <th style="min-width:90px;">Unit</th>
                                         <th style="min-width:120px;">Ordered Qty</th>
                                         <th style="min-width:120px;">Received Qty</th>
+                                        <th style="min-width:130px;">Batch No</th>
+                                        <th style="min-width:150px;">Expiry Date</th>
                                         <th style="min-width:120px;">Unit Price</th>
                                         <th style="min-width:130px;">Subtotal</th>
                                         <th style="min-width:90px;">Disc %</th>
@@ -170,7 +172,7 @@
                                     {{-- JS will append rows --}}
                                     @if (!isset($purchase))
                                         <tr id="emptyRow">
-                                            <td colspan="14" class="text-center text-muted">
+                                            <td colspan="16" class="text-center text-muted">
                                                 No Products Added
                                             </td>
                                         </tr>
@@ -303,7 +305,7 @@
                 if (!$('#purchase_request_id').val()) {
                     $('#productRows').html(`
                 <tr id="emptyRow">
-                    <td colspan="14"
+                    <td colspan="16"
                         class="text-center text-muted">
                         Select Purchase Request
                     </td>
@@ -392,7 +394,7 @@
             if (!$('#purchase_request_id').val()) {
                 $('#productRows').html(`
             <tr id="emptyRow">
-                <td colspan="14"
+                <td colspan="16"
                     class="text-center text-muted">
                     Select Purchase Request
                 </td>
@@ -474,6 +476,16 @@
                 name="products[${index}][received_quantity]"
                 value="${data.received_quantity ?? data.ordered_quantity ?? 0}"
                 readonly>
+        </td>
+        <td class="batch-cell">
+            <input type="text" class="form-control batch-no" name="products[${index}][batch_no]"
+                value="${data.batch_no ?? ''}" placeholder="Batch No." style="display:none;">
+            <span class="batch-no-na text-muted">N/A</span>
+        </td>
+        <td class="expiry-cell">
+            <input type="text" class="form-control datepicker expiry-date" name="products[${index}][expiry_date]"
+                value="${data.expiry_date ?? ''}" placeholder="Expiry Date" style="display:none;">
+            <span class="expiry-date-na text-muted">N/A</span>
         </td>
         <td>
             <input
@@ -559,7 +571,7 @@
                 } else {
                     $('#productRows').html(`
             <tr id="emptyRow">
-                <td colspan="14"
+                <td colspan="16"
                     class="text-center text-muted">
                     Select Purchase Request
                 </td>
@@ -847,6 +859,8 @@
                         data-unit-id="${variation.purchase_unit?.unit_id ?? ''}"
                         data-unit-name="${variation.purchase_unit?.name ?? ''}"
                         data-price="${decimal(variation.purchase_price ?? 0)}"
+                        data-track-batch="${variation.track_batch ? 1 : 0}"
+                        data-track-expiry="${variation.track_expiry ? 1 : 0}"
                     >
                         ${variation.name}
 
@@ -888,6 +902,8 @@
 
             row.find('.conversion-factor').val(1);
 
+            setBatchExpiryState(row, option.data('track-batch') == 1, option.data('track-expiry') == 1);
+
             row.find('.conversion-select').html(`
     <option value="">Loading...</option>
 `);
@@ -899,6 +915,35 @@
             loadConversions(variationId, row);
 
         });
+
+        // The batch/expiry <td>s always stay in the row so every row keeps
+        // the same number of cells as the header (hiding a <td> itself would
+        // shift the remaining cells in that row into the wrong columns).
+        // Only the input inside is toggled, with a muted "N/A" shown instead.
+        function setBatchExpiryState(row, showBatch, showExpiry) {
+            if (showBatch) {
+                row.find('.batch-no').show();
+                row.find('.batch-no-na').hide();
+            } else {
+                row.find('.batch-no').val('').hide();
+                row.find('.batch-no-na').show();
+            }
+
+            if (showExpiry) {
+                row.find('.expiry-date').show();
+                row.find('.expiry-date-na').hide();
+                let expiryInput = row.find('.expiry-date').get(0);
+                if (expiryInput && typeof flatpickr === 'function' && !expiryInput._flatpickr) {
+                    flatpickr(expiryInput, {
+                        dateFormat: "{{ session('business_setting.date_format', 'd-m-Y') }}",
+                        allowInput: true
+                    });
+                }
+            } else {
+                row.find('.expiry-date').val('').hide();
+                row.find('.expiry-date-na').show();
+            }
+        }
 
         // ======================================================
         // LOAD CONVERSIONS
@@ -1052,7 +1097,7 @@
         function showSelectPurchaseRequestRow() {
             $('#productRows').html(`
         <tr id="emptyRow">
-            <td colspan="14" class="text-center text-muted">
+            <td colspan="16" class="text-center text-muted">
                 Select Purchase Request
             </td>
         </tr>
@@ -1062,7 +1107,7 @@
         function showSelectQuotationRow() {
             $('#productRows').html(`
         <tr id="emptyRow">
-            <td colspan="14" class="text-center text-muted">
+            <td colspan="16" class="text-center text-muted">
                 Select Quotation
             </td>
         </tr>
@@ -1098,7 +1143,7 @@
                     } else {
                         $('#productRows').html(`
             <tr>
-                <td colspan="14" class="text-center">
+                <td colspan="16" class="text-center">
                     No approved quotation found for this purchase request.
                 </td>
             </tr>
@@ -1148,7 +1193,7 @@
                 beforeSend: function() {
                     $('#productRows').html(`
             <tr>
-                <td colspan="14" class="text-center">
+                <td colspan="16" class="text-center">
                     <div class="spinner-border spinner-border-sm"></div>
                     Loading...
                 </td>
@@ -1205,7 +1250,7 @@
             if (!details.length) {
                 $('#productRows').html(`
         <tr>
-            <td colspan="14"
+            <td colspan="16"
                 class="text-center text-muted">
                 No Products Found
 
@@ -1369,6 +1414,9 @@
                         .append(`<option value="${item.product_variation_id}">${item.product_variation_name}</option>`);
                 }
                 row.find('.variation-select').val(item.product_variation_id);
+
+                let selectedOption = row.find('.variation-select option[value="' + item.product_variation_id + '"]');
+                setBatchExpiryState(row, selectedOption.data('track-batch') == 1, selectedOption.data('track-expiry') == 1);
 
                 // Conversions are already supplied by getDetails(); no extra AJAX call needed.
                 let conversionOptions = `<option value="">--Select Conversion--</option>`;

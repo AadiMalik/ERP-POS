@@ -117,15 +117,19 @@
                 <span class="tr-value">{{ currency($summary['opening_cash'] ?? 0) }}</span>
             </div>
             <div class="tr-row">
-                <span class="tr-label">Cash In</span>
+                <span class="tr-label">Cash Refunds (-)</span>
+                <span class="tr-value">{{ currency($summary['cash_refunds'] ?? 0) }}</span>
+            </div>
+            <div class="tr-row">
+                <span class="tr-label">Cash In (+)</span>
                 <span class="tr-value">{{ currency($summary['cash_movements_in'] ?? 0) }}</span>
             </div>
             <div class="tr-row">
-                <span class="tr-label">Cash Out</span>
+                <span class="tr-label">Cash Out (-)</span>
                 <span class="tr-value">{{ currency($summary['cash_movements_out'] ?? 0) }}</span>
             </div>
             <div class="tr-row">
-                <span class="tr-label">Expenses</span>
+                <span class="tr-label">Expenses (-)</span>
                 <span class="tr-value">{{ currency($summary['total_expenses'] ?? 0) }}</span>
             </div>
             <div class="tr-row tr-grand-total">

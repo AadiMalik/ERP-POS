@@ -8,8 +8,11 @@ use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Enums\TransactionType;
 use App\Models\GoodReceiptNote;
+use App\Models\InventorySetting;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
+use App\Models\ProductVariation;
+use App\Models\ProductVariationBatch;
 use App\Models\ProductVariationStock;
 use App\Models\ProductVariationStockTransaction;
 use App\Repository\Repository;
@@ -262,6 +265,7 @@ class ProductVariationStockService
             ->where('warehouse_id', $warehouse_id)
             ->where('product_id', $product_id)
             ->where('product_variation_id', $product_variation_id)
+            ->lockForUpdate()
             ->first();
 
         if ($stock) {
@@ -333,5 +337,189 @@ class ProductVariationStockService
     protected function resolveReferenceNo($reference_type, $reference_id)
     {
         return app(ReferenceResolverService::class)->resolveDocNo($reference_type, $reference_id);
+    }
+
+    /**
+     * Find-or-create the ProductVariationBatch a receiving line (direct
+     * Purchase, GRN, Opening Stock) belongs to, rolling its quantity/avg_price
+     * forward the same way the aggregate ProductVariationStock row is. No-op
+     * (returns null) for a variation that doesn't opt into batch/expiry
+     * tracking, or a line that didn't supply a batch_no - batch tracking
+     * stays fully optional per product.
+     */
+    public function upsertReceiptBatch($business_id, $warehouse_id, $product_id, $product_variation_id, $batch_no, $manufacturing_date, $expiry_date, $base_quantity, $line_cost)
+    {
+        if (empty($batch_no)) {
+            return null;
+        }
+
+        $variation = ProductVariation::find($product_variation_id);
+
+        if (!$variation || (!$variation->track_batch && !$variation->track_expiry)) {
+            return null;
+        }
+
+        $batch = ProductVariationBatch::where('business_id', $business_id)
+            ->where('warehouse_id', $warehouse_id)
+            ->where('product_id', $product_id)
+            ->where('product_variation_id', $product_variation_id)
+            ->where('batch_no', $batch_no)
+            ->lockForUpdate()
+            ->first();
+
+        $existing_qty = $batch->quantity ?? 0;
+        $existing_avg = $batch->avg_price ?? 0;
+        $new_qty = $existing_qty + $base_quantity;
+        $new_avg = $new_qty > 0 ? ((($existing_qty * $existing_avg) + $line_cost) / $new_qty) : 0;
+
+        if ($batch) {
+            $batch->update([
+                'quantity'  => $new_qty,
+                'avg_price' => $new_avg,
+            ]);
+        } else {
+            $batch = ProductVariationBatch::create([
+                'product_variation_batch_id' => generateUuid(),
+                'batch_no'                   => $batch_no,
+                'business_id'                => $business_id,
+                'product_id'                 => $product_id,
+                'product_variation_id'       => $product_variation_id,
+                'warehouse_id'               => $warehouse_id,
+                'avg_price'                  => $new_avg,
+                'quantity'                   => $base_quantity,
+                'manufacturing_date'         => $manufacturing_date,
+                'expiry_date'                => $expiry_date,
+                'status'                     => 'active',
+                'createdby_id'               => Auth::id(),
+                'date_created'               => now(),
+            ]);
+        }
+
+        return $batch->product_variation_batch_id;
+    }
+
+    /**
+     * Soft-delete a set of active stock transactions (reversing a purchase,
+     * GRN, purchase return, sale, sale return, or void), reverse each
+     * transaction's batch delta when it carries a product_variation_batch_id,
+     * and recompute the aggregate ProductVariationStock + ledger running
+     * balances for every product/variation/warehouse touched. Every apply-
+     * and-reverse pair in Purchase/Grn/PurchaseReturn/Order/OrderReturn
+     * services funnels its reversal through here so the aggregate table, the
+     * ledger, and per-batch quantities never drift out of sync.
+     */
+    public function reverseStockTransactions($transactions)
+    {
+        $transactions = $transactions instanceof \Illuminate\Support\Collection ? $transactions : collect($transactions);
+
+        if ($transactions->isEmpty()) {
+            return;
+        }
+
+        $transactions->each(function ($transaction) {
+            $transaction->update([
+                'is_deleted'   => 1,
+                'deletedby_id' => Auth::id(),
+                'date_deleted' => now(),
+            ]);
+
+            if ($transaction->product_variation_batch_id) {
+                // An inbound transaction (purchase/GRN/sale return) had added
+                // stock to its batch, so reversing it subtracts; an outbound
+                // transaction (sale, purchase return) had drawn the batch
+                // down, so reversing it adds back.
+                $sign = TransactionType::isInbound($transaction->transaction_type) ? -1 : 1;
+                $this->adjustBatchQuantity($transaction->product_variation_batch_id, $sign * (float) $transaction->base_quantity);
+            }
+        });
+
+        $affected = $transactions->unique(function ($transaction) {
+            return $transaction->business_id . '|' . $transaction->warehouse_id . '|' .
+                $transaction->product_id . '|' . $transaction->product_variation_id;
+        });
+
+        foreach ($affected as $transaction) {
+            $this->recomputeLedger(
+                $transaction->business_id,
+                $transaction->warehouse_id,
+                $transaction->product_id,
+                $transaction->product_variation_id
+            );
+        }
+    }
+
+    /**
+     * Increment/decrement one batch's on-hand quantity by $delta (negative to
+     * decrement), floored at zero as a guard. Used to reverse a receipt, post
+     * a purchase return, or restore stock from a sale return/void - every
+     * caller that isn't the initial receipt or the FEFO sale draw-down.
+     */
+    public function adjustBatchQuantity($product_variation_batch_id, $delta)
+    {
+        if (empty($product_variation_batch_id) || abs((float) $delta) < 0.0001) {
+            return;
+        }
+
+        $batch = ProductVariationBatch::lockForUpdate()->find($product_variation_batch_id);
+
+        if (!$batch) {
+            return;
+        }
+
+        $batch->update([
+            'quantity' => max(0, (float) $batch->quantity + (float) $delta),
+        ]);
+    }
+
+    /**
+     * FEFO/FIFO draw-down: lock and return the ordered list of batches (each
+     * paired with the quantity to consume from it) needed to cover
+     * $base_quantity for a batch/expiry-tracked variation, honoring the
+     * business's batch_selection_strategy and block_expired_sale settings.
+     * Returns null (never a partial list) when the tracked batches on hand
+     * can't cover the full quantity, so the caller's existing
+     * "insufficient stock" handling applies the same whether or not batches
+     * are involved.
+     */
+    public function pickBatchesForSale($business_id, $warehouse_id, $product_id, $product_variation_id, $base_quantity, ?InventorySetting $setting = null)
+    {
+        $query = ProductVariationBatch::where('business_id', $business_id)
+            ->where('warehouse_id', $warehouse_id)
+            ->where('product_id', $product_id)
+            ->where('product_variation_id', $product_variation_id)
+            ->where('status', Status::ACTIVE)
+            ->where('quantity', '>', 0)
+            ->lockForUpdate();
+
+        if ($setting && $setting->enable_expiry_date && $setting->block_expired_sale) {
+            $query->where(function ($q) {
+                $q->whereNull('expiry_date')->orWhereDate('expiry_date', '>=', now()->toDateString());
+            });
+        }
+
+        if (($setting?->batch_selection_strategy ?? 'fefo') === 'fifo') {
+            $query->orderBy('date_created', 'asc');
+        } else {
+            $query->orderByRaw('expiry_date IS NULL')->orderBy('expiry_date', 'asc')->orderBy('date_created', 'asc');
+        }
+
+        $remaining = (float) $base_quantity;
+        $picks = [];
+
+        foreach ($query->get() as $batch) {
+            if ($remaining <= 0.0001) {
+                break;
+            }
+
+            $take = min((float) $batch->quantity, $remaining);
+            $picks[] = ['batch' => $batch, 'base_quantity' => $take];
+            $remaining -= $take;
+        }
+
+        if ($remaining > 0.0001) {
+            return null;
+        }
+
+        return $picks;
     }
 }

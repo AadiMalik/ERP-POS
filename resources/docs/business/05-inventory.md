@@ -26,9 +26,67 @@ exactly why your stock level is what it is and who/what changed it.
 - **Opening Stock** sets the starting balance when a warehouse or product is first
   set up.
 - **Stock Taking** lets you record a physical count and reconcile it against what
-  the system expects, generating adjustment entries for any difference.
-- **Transfer Notes** move stock between warehouses or branches.
-- **Batches** track expiry/lot numbers where relevant.
+  the system expects, generating adjustment entries for any difference. It
+  reconciles the overall per-warehouse total only; it does not currently
+  break the count down by batch.
+- **Transfer Notes** move stock between warehouses or branches, through a controlled
+  workflow so stock is never lost or double-counted in transit:
+  - **Draft** — build the transfer (source/destination warehouse, products, quantities).
+    Nothing happens to stock yet, and it can still be freely edited or deleted.
+  - **Send** — the source branch dispatches it. The quantity is deducted from the
+    source warehouse right away and held as **In Transit** — it's no longer available
+    to sell or transfer again at the source, but it hasn't landed at the destination
+    yet either.
+  - **Receive** — the destination branch confirms what actually arrived. Only at this
+    point does the stock become available at the destination. If a shipment arrives
+    short (breakage, a partial delivery), the destination can receive less than what
+    was sent — the transfer stays "In Transit" showing the remaining quantity until
+    the rest is received (or never, if it's not coming). The system won't let a
+    destination receive more than was sent, and won't let the same quantity be
+    received twice.
+  - **Cancel** — allowed while still Draft or In Transit, but only before the
+    destination has received anything; once any quantity has been received the
+    transfer can no longer be cancelled.
+
+  Only the source branch can Send or Cancel a transfer, and only the destination
+  branch can Receive it (Business Admins and Inventory Managers can act on either
+  side). The Transfer Note print-out shows who sent it and when, and who received it
+  and when, in addition to the products and quantities.
+
+  Batch/lot quantities are not currently moved by a Transfer Note — a
+  batch-tracked product can still be transferred, but its batch record stays
+  parked at the source warehouse. This is a known gap, planned as a follow-up.
+
+## Batches & Expiry Tracking
+
+Batch/lot and expiry tracking is **optional per product variation** — turn on
+**Track Batch** and/or **Track Expiry** on a variation's form only for
+products that actually need it (e.g. food, pharmaceuticals, cosmetics).
+Products without either flag continue to work exactly as before: one stock
+quantity per warehouse, no batch number or expiry date anywhere.
+
+For a batch/expiry-enabled variation:
+
+- **Receiving** (a direct Purchase, or a GRN against a Purchase Request) asks
+  for a **Batch No.**, and an **Expiry Date** if the variation tracks expiry,
+  alongside the quantity received. Receiving the same batch number again for
+  the same product/warehouse adds to that batch rather than creating a
+  duplicate.
+- **Stock** for that variation is tracked both as one overall total per
+  warehouse (as before) and broken down per batch, so you always know not
+  just *how much* you have but *which batch* it's in and *when it expires*.
+- **Selling** automatically draws from the right batch (see
+  [Sales & Point of Sale](03-sales-pos.md) for
+  the FEFO/FIFO and expired-stock rules) — there's nothing extra for the
+  cashier to do.
+- **Purchase Returns** and **Order (Sale) Returns** adjust the specific
+  batch the stock came from, not just the warehouse total.
+
+**Batch Stock report:** the **Batches** screen under Inventory lists every
+batch with its product, warehouse, quantity, cost, and expiry date, and can
+be filtered by an **Expiry Status** of Active, **Near Expiry**, or
+**Expired** — the Near Expiry window (default 30 days) is configurable under
+**Settings → Inventory → Near Expiry Threshold**.
 
 ## Barcodes & Labels
 

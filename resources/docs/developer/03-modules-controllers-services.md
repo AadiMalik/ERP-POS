@@ -87,6 +87,100 @@ Fillers never duplicate a product inside the same section. Themes hide empty
 product sections (`v-if` on length) so the homepage never shows a blank rail
 or a “Products Not Found” empty state for these groups.
 
+### Batch & Expiry Tracking
+
+Optional per `product_variations.track_batch` / `track_expiry` (opt-in per
+variation; a product without either flag is untouched by any of this). The
+business-level master switches are `inventory_settings.enable_batch_no` /
+`enable_expiry_date`, plus `block_expired_sale` (default `true`),
+`batch_selection_strategy` (`fefo`|`fifo`, default `fefo`), and
+`near_expiry_days` (default `30`, used only by the Batches report filter).
+
+**Model:** `ProductVariationBatch` (`product_variation_batches` table) is a
+warehouse-scoped batch ledger — `batch_no`, `avg_price`, `quantity`,
+`manufacturing_date`, `expiry_date` — one row per
+business+warehouse+product+variation+batch_no, alongside the pre-existing
+aggregate `ProductVariationStock` row (unchanged, still one row per
+business+warehouse+product+variation). CRUD: `ProductVariationBatchController`
+/ `ProductVariationBatchService`.
+
+**Receiving → batch (find-or-create-and-roll-forward pattern):**
+`ProductVariationStockService::upsertReceiptBatch()` is the one shared
+implementation of the pattern originally established by
+`OpeningStockService::applyOpeningStockPosting()` (still the reference
+implementation for how a single receiving line resolves to a batch) — it
+no-ops (returns `null`) unless the variation tracks batch/expiry and a
+`batch_no` was supplied, otherwise finds-or-creates the
+`ProductVariationBatch` row and rolls its `quantity`/`avg_price` forward the
+same way the aggregate stock row is. Called from
+`PurchaseService::applyDirectPurchaseApproval()` (batch fields live on
+`purchase_details`: `batch_no`, `manufacturing_date`, `expiry_date`,
+`product_variation_batch_id`) and `GrnService::applyGrnApproval()` (same
+fields on `good_receipt_note_details`) — a direct Purchase posts stock (and
+so captures batch info) immediately on approval, a `purchase_request`-type
+Purchase only does so via its GRN, so batch info is captured wherever the
+actual receipt happens.
+
+**Reversal:** `ProductVariationStockService::reverseStockTransactions()` is
+the one shared implementation every `reverse*` method
+(`PurchaseService::reverseDirectPurchaseApproval()`,
+`GrnService::reverseGrnApproval()`,
+`PurchaseReturnService::reversePurchaseReturnPosting()`,
+`OrderService::void()`, `OrderReturnService::reverseOrderReturnPosting()`)
+now calls instead of hand-rolling the soft-delete-transactions +
+`recomputeLedger()` loop inline: it soft-deletes the given transactions,
+reverses each one's batch delta (sign picked from
+`TransactionType::isInbound()` — inbound reversed = decrement the batch,
+outbound reversed = increment it) via `adjustBatchQuantity()`, then calls
+`recomputeLedger()` per affected business/warehouse/product/variation exactly
+as before. `recomputeLedger()`/`getLedger()` themselves are unchanged —
+batch quantities are maintained directly by the apply/reverse paths, not
+replayed from the ledger.
+
+**Purchase Return → batch:** `PurchaseReturnService::applyPurchaseReturnPosting()`
+resolves the batch to decrement via the return line's linked
+`purchase_detail_id`/`good_receipt_note_detail_id` → `product_variation_batch_id`
+(a return never picks its own batch, it reverses whichever one the original
+receipt used).
+
+**POS Sale → FEFO/FIFO draw-down:** `ProductVariationStockService::pickBatchesForSale()`
+locks and returns the ordered list of batches (with quantity to draw from
+each) needed to cover a line's `base_quantity`, honoring
+`batch_selection_strategy` and `block_expired_sale`; returns `null` (never a
+partial list) if the tracked batches on hand can't cover it, which
+`OrderService::post()` treats as "insufficient stock" the same as an
+untracked product (unless `allowsNegativeStock()` is on, in which case it
+falls back to a plain aggregate decrement with no batch attributed — a
+`ponytail:`-flagged simplification for a rare edge case). A line drawn from
+a single batch stamps `order_details.product_variation_batch_id` and the
+matching `ProductVariationStockTransaction` directly; a line split across
+multiple batches instead writes one `order_detail_batches` row per batch
+consumed (`order_detail_id`, `product_variation_batch_id`, `quantity`,
+`base_quantity`) and one stock transaction per batch, each carrying its own
+`product_variation_batch_id` — `order_details.product_variation_batch_id`
+stays `null` in that case.
+
+**Sale Return → batch:** `OrderReturnService::applyOrderReturnPosting()`
+restores into `orderDetail.product_variation_batch_id` directly for a
+single-batch line, or proportionally across `orderDetail.orderDetailBatches`
+(by each row's share of the original line's `base_quantity`, last row
+absorbing the rounding remainder) for a split line — one stock transaction
+per batch restored.
+
+**Reports:** `ProductVariationBatchService::getData()` (the Batches screen)
+doubles as the batch-stock report — it takes an `expiry_status` filter
+(`active`/`near_expiry`/`expired`, computed from `expiry_date` vs.
+`near_expiry_days`) and renders a matching status badge column. The Stock
+Ledger report (`StockLedgerReportService` /
+`StockConsumptionViewController`) needed no changes — it already
+eager-loads and displays `productVariationBatch` whenever a transaction
+carries a `product_variation_batch_id`, which every path above now
+populates.
+
+**Not covered (documented gap, not silently dropped):** Transfer Note and
+Stock Taking remain aggregate-only — see the Business docs
+(`resources/docs/business/05-inventory.md`).
+
 ## Purchasing / Procurement (`module:inventory`)
 `SupplierController`, `PurchaseRequestController`,
 `PurchaseRequestQuotationController`, `PurchaseController` (service:
@@ -94,6 +188,51 @@ or a “Products Not Found” empty state for these groups.
 `PurchaseReturnController` (service: `PurchaseReturnService`),
 `OpeningStockController`, `StockTakingController`, `TransferNoteController`,
 `SupplierPaymentController`.
+
+### Transfer Notes (`TransferNoteController` / `TransferNoteService`)
+Inter-branch/inter-warehouse stock transfers follow a controlled 4-state workflow,
+mirroring the Purchase → GRN partial-receiving pattern rather than a one-shot move:
+
+| Status | Meaning | Stock effect |
+|---|---|---|
+| `draft` | Header/lines editable, only the creator's changes | None |
+| `in_transit` | Reached via **Send** (`TransferNoteService::send()`) | Deducts the source warehouse (`TRANSFER_OUT` ledger entry per line); destination untouched |
+| `received` | Every line's `received_quantity` has caught up to `transfer_quantity` | N/A — set automatically once fully caught up |
+| `cancelled` | Reached via **Cancel** (`destroy()` → `delete()`) | If cancelled while `in_transit`, reverses the `TRANSFER_OUT` entries via `ProductVariationStockService::recomputeLedger()`; blocked entirely once anything has been received |
+
+**Receive** (`TransferNoteService::receive()`) adds to the destination warehouse
+(`TRANSFER_IN` ledger entry per line, both entries sharing
+`reference_type = STOCK_TRANSFER` / `reference_id = transfer_note_id`) and can be
+called repeatedly for partial receiving — each call's `receive_quantity` per line is
+capped at `transfer_quantity - received_quantity` on `transfer_note_details`, which is
+what prevents both over-receiving and double-receiving an already-completed line.
+Status flips to `received` only once every line is fully caught up
+(`Status::RECEIVED`), otherwise it stays `in_transit` — exactly like a Purchase stays
+`approved` while partially GRN'd (`PurchaseService::syncPurchaseCompletionStatus()`).
+
+`transfer_notes.branch_id` is the source branch (denormalized from
+`source_warehouse.branch_id`, as before); `destination_branch_id` is the new column
+denormalized from `destination_warehouse.branch_id`. Authorization for Send/Cancel
+checks the acting user against `branch_id`; Receive checks against
+`destination_branch_id` — both via
+`TransferNoteController::assertTransferNoteAccessible()`, which mirrors
+`OrderController::assertOrderAccessible()` (an `applyRoleScope()` existence check,
+`abort(403)` on failure). This is also why `applyRoleScope()`
+(`app/Helpers/CommonFunctions.php`) gained an optional `$extra_branch_column`
+parameter: without it, a branch-scoped role's list view was implicitly scoped only to
+the source `branch_id`, hiding incoming transfers from destination-branch staff.
+`TransferNoteService::getData()` now passes `'destination_branch_id'` as that extra
+column so both sides of a transfer see it. The parameter defaults to `null` and every
+other `applyRoleScope()` call site is unaffected.
+
+Permissions: `transfer-note.send` and `transfer-note.receive` were added alongside
+the existing `transfer-note.{view,create,edit,delete,print,import,export}` (the old
+freeform `transfer-note.status` permission/route is retired from use but the
+permission name itself is kept, per the permission-name-permanence rule). Cancel
+reuses the existing `transfer-note.delete` permission. Milestone columns
+`sentby_id`/`date_sent` and `receivedby_id`/`date_received` on `transfer_notes`
+follow the same `<action>by_id`/`date_<action>` idiom as `createdby_id`/`date_created`
+and `JournalEntry.postedby_id`/`date_posted`.
 
 ## Service Management (`module:service-management`)
 `ServicePurchaseController`, `ServicePurchaseReturnController`,
@@ -121,6 +260,59 @@ the (now server-enforced) business/branch.
 `$this->middleware('permission:pos.access')` in their constructors (in addition
 to the route-group middleware), matching the project convention so a future
 route outside the group cannot ship ungated.
+
+**Cash-in/cash-out authorization & idempotency:**
+`PosRegisterSessionController::addCashMovement()`/`close()` both require either
+`Auth::id() == $session->cashier_id` (the session's own cashier) or the acting
+user to be in the **same business** as the session **and** hold
+`pos.register.cash-movement.manage` / `pos.register.close` respectively — the
+same same-business guard `summary()`/`printSummary()` already used, so a
+manager's permission on their own business's role can no longer be replayed
+against another tenant's session id. `PosRegisterSessionService::addCashMovement()`
+still independently re-checks the session is `status = 'open'` (defense in
+depth if ever called from elsewhere). It's idempotent on `offline_local_id` —
+the same column/pattern the desktop's offline sync already uses on this table
+(`OfflinePushService::pushCashMovement()`) — reused here for the web POS
+screen: `pos-screen.js` generates one client-side key per modal open
+(`generateRequestId()`) and disables the submit button while the request is in
+flight, so a double-click or a retried request resolves to the original
+movement instead of creating a duplicate one. Every movement is also written
+to `ActivityLog` via the `Auditable` trait (`module = 'pos_register_cash_movement'`),
+recording the causer, business/branch, and old/new values alongside the row's
+own `createdby_id`/`date_created`.
+
+The same ownership rule is enforced a second time on the Offline Desktop POS
+API, which reaches `close()`/`addCashMovement()` through two routes of its
+own and previously had **no** object-level authorization on either (only the
+device-token + `auth:sanctum` + coarse `permission:` middleware, none of
+which checks whose shift is being acted on): the direct
+`POST /api/offline/register-sessions/{close,cash-movement}` endpoints
+(`RegisterSessionController`) and the batched `session.close`/
+`session.cash_movement` transactions replayed by
+`OfflinePushService::push()`. Both now carry their own
+`authorizedForSession()` helper (same own-session-or-same-business-permission
+check as the web controller, duplicated rather than shared since the two
+classes authenticate differently) before calling into
+`PosRegisterSessionService`.
+
+**Cash refund → shift reconciliation:** `PosRegisterSessionService::getSummary()`
+computes `expected_cash = opening_cash + cash_sales - cash_refunds +
+cash_movements_in - cash_movements_out - cash_expenses` (all four `cash_*`
+figures are `payment_methods.type = 'cash'` only — a card/bank/wallet/store-credit
+sale, refund, or expense never moves this number). `cash_refunds` sums approved
+`order_returns` whose `refund_payment_method_id` is a cash method **and** whose
+`pos_register_session_id` points at this session. That column is set once, at
+approval time, by `OrderReturnService::resolveCashRefundSession()` (called from
+`applyOrderReturnPosting()`), which is idempotent the same way the return's
+journal entry is — `applyOrderReturnPosting()` no-ops entirely on a second
+approval attempt if a JournalEntry already exists for the return, so a cash
+refund can never be attributed twice. It tries, in order: (1) the approving
+user's own open session, (2) the original order's own `register_session_id` if
+that session is still open, (3) the single open session business-wide if there
+is exactly one. Only when none of those resolve does the refund post to
+accounting with no session link (and consequently doesn't reduce any shift's
+expected cash) — this can happen for a back-office approval with several
+registers open at once and no obvious owner.
 
 **Offline Desktop POS API** (`routes/offline.php`, prefix `/api/offline`):
 `App\Http\Controllers\Api\Offline\*` controllers delegate to

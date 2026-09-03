@@ -11,6 +11,7 @@
         'low_stock_alert' => 'Low Stock Alert',
         'enable_batch_no' => 'Batch No',
         'enable_expiry_date' => 'Expiry Date',
+        'block_expired_sale' => 'Block Selling Expired Batches',
     ] as $field => $label)
             <div class="col-md-6 mb-3">
                 <div class="form-check form-switch">
@@ -23,6 +24,17 @@
         <div class="col-md-6">
             <label>Low Stock Quantity</label>
             <input type="text" onkeypress="return isNumberKey(event)" class="form-control" name="low_stock_quantity" value="{{ $inventory_setting->low_stock_quantity }}">
+        </div>
+        <div class="col-md-6">
+            <label>Batch Selection Strategy</label>
+            <select class="form-select" name="batch_selection_strategy">
+                <option value="fefo" {{ ($inventory_setting->batch_selection_strategy ?? 'fefo') == 'fefo' ? 'selected' : '' }}>First Expiry, First Out (FEFO)</option>
+                <option value="fifo" {{ ($inventory_setting->batch_selection_strategy ?? 'fefo') == 'fifo' ? 'selected' : '' }}>First In, First Out (FIFO)</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label>Near Expiry Threshold (Days)</label>
+            <input type="text" onkeypress="return isNumberKey(event)" class="form-control" name="near_expiry_days" value="{{ $inventory_setting->near_expiry_days ?? 30 }}">
         </div>
         <div class="col-md-12">
             <hr>

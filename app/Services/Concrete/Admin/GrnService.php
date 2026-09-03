@@ -315,6 +315,9 @@ class GrnService
                     'conversion_factor'                      => $conversion_factor,
                     'unit_price'                              => $purchase_detail->unit_price,
                     'total'                                   => $line_total,
+                    'batch_no'                                => $product['batch_no'] ?? null,
+                    'manufacturing_date'                      => $product['manufacturing_date'] ?? null,
+                    'expiry_date'                              => $product['expiry_date'] ?? null,
                 ]);
             }
 
@@ -374,6 +377,11 @@ class GrnService
                     'product_name'                => $detail->product->name ?? '',
                     'product_variation_id'        => $detail->product_variation_id,
                     'product_variation_name'      => $detail->productVariation->name ?? '',
+                    'track_batch'                 => (bool) ($detail->productVariation->track_batch ?? false),
+                    'track_expiry'                => (bool) ($detail->productVariation->track_expiry ?? false),
+                    'batch_no'                    => $detail->batch_no,
+                    'manufacturing_date'          => localDate($detail->manufacturing_date),
+                    'expiry_date'                 => localDate($detail->expiry_date),
                     'ordered_quantity'            => $ordered_quantity,
                     'already_received_quantity'   => $already_received,
                     'remaining_quantity'          => $ordered_quantity - $already_received,
@@ -425,6 +433,8 @@ class GrnService
                 'product_name'               => $detail->product->name ?? '',
                 'product_variation_id'       => $detail->product_variation_id,
                 'product_variation_name'     => $detail->productVariation->name ?? '',
+                'track_batch'                => (bool) ($detail->productVariation->track_batch ?? false),
+                'track_expiry'               => (bool) ($detail->productVariation->track_expiry ?? false),
                 'ordered_quantity'           => $ordered_quantity,
                 'already_received_quantity'  => $already_received,
                 'remaining_quantity'         => $remaining,
@@ -646,6 +656,22 @@ class GrnService
                 ]);
             }
 
+            $product_variation_batch_id = app(ProductVariationStockService::class)->upsertReceiptBatch(
+                $grn->business_id,
+                $grn->warehouse_id,
+                $detail->product_id,
+                $detail->product_variation_id,
+                $detail->batch_no,
+                $detail->manufacturing_date,
+                $detail->expiry_date,
+                $base_quantity,
+                $line_cost
+            );
+
+            if ($product_variation_batch_id) {
+                $detail->update(['product_variation_batch_id' => $product_variation_batch_id]);
+            }
+
             ProductVariationStockTransaction::create([
                 'product_variation_stock_transaction_id' => generateUuid(),
                 'transaction_date'                       => now(),
@@ -666,6 +692,7 @@ class GrnService
                 'reference_id'                              => $grn->good_receipt_note_id,
                 'reference_type'                            => ReferenceType::GRN,
                 'remarks'                                   => 'Auto-created on approval of GRN ' . $grn->good_receipt_note_no,
+                'product_variation_batch_id'                => $product_variation_batch_id,
                 'createdby_id'                              => Auth::id(),
                 'date_created'                              => now(),
             ]);
@@ -716,31 +743,7 @@ class GrnService
             ->where('is_deleted', 0)
             ->get();
 
-        if ($stock_transactions->isNotEmpty()) {
-            $stock_transactions->each(function ($transaction) {
-                $transaction->update([
-                    'is_deleted'   => 1,
-                    'deletedby_id' => Auth::id(),
-                    'date_deleted' => now(),
-                ]);
-            });
-
-            $affected = $stock_transactions->unique(function ($transaction) {
-                return $transaction->business_id . '|' . $transaction->warehouse_id . '|' .
-                    $transaction->product_id . '|' . $transaction->product_variation_id;
-            });
-
-            $stock_service = app(ProductVariationStockService::class);
-
-            foreach ($affected as $transaction) {
-                $stock_service->recomputeLedger(
-                    $transaction->business_id,
-                    $transaction->warehouse_id,
-                    $transaction->product_id,
-                    $transaction->product_variation_id
-                );
-            }
-        }
+        app(ProductVariationStockService::class)->reverseStockTransactions($stock_transactions);
 
         app(PurchaseService::class)->syncPurchaseCompletionStatus($grn->purchase_id);
     }

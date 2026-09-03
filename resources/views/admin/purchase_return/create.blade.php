@@ -124,6 +124,7 @@
                                     <tr>
                                         <th style="min-width:220px;">Product</th>
                                         <th style="min-width:150px;">Variation</th>
+                                        <th style="min-width:150px;">Batch / Expiry</th>
                                         <th style="min-width:90px;">Unit</th>
                                         <th style="min-width:110px;">Received Qty</th>
                                         <th style="min-width:120px;">Already Returned</th>
@@ -137,7 +138,7 @@
                                 </thead>
                                 <tbody id="productRows">
                                     <tr id="emptyRow">
-                                        <td colspan="11" class="text-center text-muted">
+                                        <td colspan="12" class="text-center text-muted">
                                             Select a Purchase or GRN
                                         </td>
                                     </tr>
@@ -275,7 +276,7 @@
             $('#warehouse_name').val('');
             $('#productRows').html(`
                 <tr id="emptyRow">
-                    <td colspan="11" class="text-center text-muted">
+                    <td colspan="12" class="text-center text-muted">
                         Select a Purchase or GRN
                     </td>
                 </tr>
@@ -295,7 +296,7 @@
                 beforeSend: function() {
                     $('#productRows').html(`
                         <tr>
-                            <td colspan="11" class="text-center">
+                            <td colspan="12" class="text-center">
                                 <div class="spinner-border spinner-border-sm"></div>
                                 Loading...
                             </td>
@@ -328,7 +329,7 @@
             if (!lines || !lines.length) {
                 $('#productRows').html(`
                     <tr id="emptyRow">
-                        <td colspan="11" class="text-center text-muted">
+                        <td colspan="12" class="text-center text-muted">
                             Nothing remaining to return for this source.
                         </td>
                     </tr>
@@ -360,6 +361,7 @@
                         ${line.product_name}
                     </td>
                     <td>${line.product_variation_name}</td>
+                    <td>${line.batch_no ? line.batch_no + (line.expiry_date ? ' (exp. ' + line.expiry_date + ')' : '') : '-'}</td>
                     <td>${line.unit_name}</td>
                     <td class="received-qty">${decimal(line.received_quantity)}</td>
                     <td class="already-returned-qty">${decimal(line.already_returned_quantity)}</td>
@@ -507,7 +509,9 @@
                     unit_price: item.unit_price,
                     conversion_factor: item.conversion_factor,
                     discount: item.discount,
-                    tax: item.tax
+                    tax: item.tax,
+                    batch_no: item.batch_no,
+                    expiry_date: item.expiry_date
                 }, item.return_quantity);
             });
 

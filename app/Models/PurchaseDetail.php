@@ -34,6 +34,10 @@ class PurchaseDetail extends Model
         'subtotal',
         'total',
         'description',
+        'batch_no',
+        'manufacturing_date',
+        'expiry_date',
+        'product_variation_batch_id',
 
         'createdby_id',
         'updatedby_id',
@@ -59,6 +63,11 @@ class PurchaseDetail extends Model
     public function unit()
     {
         return $this->belongsTo(Unit::class, 'unit_id');
+    }
+
+    public function productVariationBatch()
+    {
+        return $this->belongsTo(ProductVariationBatch::class, 'product_variation_batch_id', 'product_variation_batch_id');
     }
 
     public function createdby()

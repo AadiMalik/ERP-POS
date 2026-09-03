@@ -229,8 +229,20 @@ class PurchaseReturnService
      * line for this purchase line, scoped to a specific GRN when returning
      * against a GRN (the same purchase_detail_id can be spread across
      * multiple GRNs over time) or to direct-purchase returns only when not.
+     *
+     * $lock=true makes this a locking read (SELECT ... FOR UPDATE), used only
+     * by the authoritative status()-time re-check. Under MySQL REPEATABLE
+     * READ, a plain SELECT inside an open transaction keeps reading the
+     * snapshot taken at that transaction's first query, so two *different*
+     * pending Purchase Returns against the same purchase line, approved by
+     * concurrent requests, could otherwise each see 0 already-approved and
+     * both pass the "does not exceed received quantity" check, over-returning
+     * the line. A locking read blocks the second transaction on the first
+     * approved row until the first transaction commits, then reads the fresh
+     * committed total - closing that race. Not used by the advisory
+     * save()-time / UI checks, which are outside any lock-worthy transaction.
      */
-    protected function getAlreadyReturnedQuantity($purchase_detail_id, $good_receipt_note_id = null)
+    protected function getAlreadyReturnedQuantity($purchase_detail_id, $good_receipt_note_id = null, $lock = false)
     {
         $query = PurchaseReturnDetail::query()
             ->join('purchase_returns', 'purchase_returns.purchase_return_id', '=', 'purchase_return_details.purchase_return_id')
@@ -242,6 +254,10 @@ class PurchaseReturnService
             $query->where('purchase_return_details.good_receipt_note_id', $good_receipt_note_id);
         } else {
             $query->whereNull('purchase_return_details.good_receipt_note_id');
+        }
+
+        if ($lock) {
+            $query->lockForUpdate();
         }
 
         return (float) $query->sum('purchase_return_details.return_quantity');
@@ -307,6 +323,8 @@ class PurchaseReturnService
                 'unit_price'                             => $detail->unit_price,
                 'discount'                               => $detail->discount ?? 0,
                 'tax'                                    => $detail->tax ?? 0,
+                'batch_no'                               => $detail->batch_no,
+                'expiry_date'                            => localDate($detail->expiry_date),
             ];
         }
 
@@ -379,6 +397,8 @@ class PurchaseReturnService
                 'unit_price'                             => $detail->unit_price,
                 'discount'                               => $purchase_detail->discount ?? 0,
                 'tax'                                    => $purchase_detail->tax ?? 0,
+                'batch_no'                               => $detail->batch_no,
+                'expiry_date'                            => localDate($detail->expiry_date),
             ];
         }
 
@@ -692,6 +712,8 @@ class PurchaseReturnService
                     'subtotal'                    => $detail->subtotal,
                     'total'                       => $detail->total,
                     'reason'                      => $detail->reason,
+                    'batch_no'                    => $detail->purchaseDetail->batch_no ?? $detail->goodReceiptNoteDetail->batch_no ?? null,
+                    'expiry_date'                 => localDate($detail->purchaseDetail->expiry_date ?? $detail->goodReceiptNoteDetail->expiry_date ?? null),
                 ];
             }
 
@@ -706,7 +728,18 @@ class PurchaseReturnService
         DB::beginTransaction();
 
         try {
-            $purchase_return = $this->model_purchase_return->getModel()::with($this->with)->findOrFail($obj['purchase_return_id']);
+            // lockForUpdate() here (rather than a plain findOrFail) is what
+            // makes this method safe against two concurrent/duplicate status
+            // requests for the *same* return (double-click, retried request,
+            // two users). A plain SELECT would read the transaction's
+            // REPEATABLE READ snapshot, so a second concurrent request could
+            // still see this row as "pending" even after the first request's
+            // approval has committed, and would re-run the posting below. A
+            // locking read blocks until any in-flight update to this row
+            // commits, then returns the true current status.
+            $purchase_return = $this->model_purchase_return->getModel()::with($this->with)
+                ->lockForUpdate()
+                ->findOrFail($obj['purchase_return_id']);
             $old_status = $purchase_return->status;
             $new_status = $obj['status'];
 
@@ -722,11 +755,14 @@ class PurchaseReturnService
                 // check only guards against already-approved returns that
                 // existed at save time, so two pending returns approved
                 // concurrently (or in sequence) could otherwise both pass and
-                // together over-return a purchase line. Mirrors
+                // together over-return a purchase line. lock=true makes this
+                // a locking read so a concurrent approval of a sibling return
+                // against the same purchase line is correctly serialized
+                // rather than racing on a stale snapshot. Mirrors
                 // OrderReturnService::status()'s equivalent guard.
                 foreach ($purchase_return->purchaseReturnDetails as $detail) {
                     $received_quantity = (float) ($detail->received_quantity ?? 0);
-                    $already_returned = $this->getAlreadyReturnedQuantity($detail->purchase_detail_id, $detail->good_receipt_note_id);
+                    $already_returned = $this->getAlreadyReturnedQuantity($detail->purchase_detail_id, $detail->good_receipt_note_id, true);
 
                     if (($already_returned + (float) $detail->return_quantity) > $received_quantity + 0.0009) {
                         throw new Exception('Cannot approve this return: another approved return already covers part of this purchase line, and approving this one would exceed the received quantity.');
@@ -740,13 +776,19 @@ class PurchaseReturnService
 
             DB::commit();
 
-            $this->logActivity(
-                'purchase_return',
-                $purchase_return->purchase_return_id,
-                $new_status === Status::APPROVED ? 'approved' : 'status_changed',
-                ['status' => $old_status],
-                ['status' => $new_status]
-            );
+            // Only log a real transition - a duplicate request that lands on
+            // an already-applied status (see the lockForUpdate note above)
+            // is a no-op and shouldn't leave a misleading "approved again"
+            // audit entry.
+            if ($old_status !== $new_status) {
+                $this->logActivity(
+                    'purchase_return',
+                    $purchase_return->purchase_return_id,
+                    $new_status === Status::APPROVED ? 'approved' : 'status_changed',
+                    ['status' => $old_status],
+                    ['status' => $new_status]
+                );
+            }
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -761,7 +803,20 @@ class PurchaseReturnService
         DB::beginTransaction();
 
         try {
-            $purchase_return = $this->model_purchase_return->getModel()::with($this->with)->findOrFail($purchase_return_id);
+            // Same lockForUpdate reasoning as status(): serializes a
+            // duplicate/concurrent delete request against this exact row
+            // instead of racing on a stale snapshot.
+            $purchase_return = $this->model_purchase_return->getModel()::with($this->with)
+                ->lockForUpdate()
+                ->findOrFail($purchase_return_id);
+
+            if ((int) $purchase_return->is_deleted === 1) {
+                // Already deleted by a prior (possibly concurrent) request -
+                // idempotent no-op, nothing left to reverse or log again.
+                DB::commit();
+
+                return true;
+            }
 
             if ($purchase_return->status === Status::APPROVED) {
                 $this->reversePurchaseReturnPosting($purchase_return);
@@ -902,6 +957,15 @@ class PurchaseReturnService
                 ]);
             }
 
+            // The batch being returned is whichever one the original receipt
+            // (direct purchase or GRN line) stamped onto its detail row -
+            // a return never picks its own batch, it just reverses one.
+            $product_variation_batch_id = $detail->purchaseDetail->product_variation_batch_id
+                ?? $detail->goodReceiptNoteDetail->product_variation_batch_id
+                ?? null;
+
+            app(ProductVariationStockService::class)->adjustBatchQuantity($product_variation_batch_id, -1 * $base_quantity);
+
             ProductVariationStockTransaction::create([
                 'product_variation_stock_transaction_id' => generateUuid(),
                 'transaction_date'                       => now(),
@@ -922,6 +986,7 @@ class PurchaseReturnService
                 'reference_id'                              => $purchase_return->purchase_return_id,
                 'reference_type'                            => ReferenceType::PURCHASE_RETURN,
                 'remarks'                                   => 'Auto-created on approval of purchase return ' . $purchase_return->purchase_return_no,
+                'product_variation_batch_id'                => $product_variation_batch_id,
                 'createdby_id'                              => Auth::id(),
                 'date_created'                              => now(),
             ]);
@@ -959,29 +1024,7 @@ class PurchaseReturnService
             return;
         }
 
-        $stock_transactions->each(function ($transaction) {
-            $transaction->update([
-                'is_deleted'   => 1,
-                'deletedby_id' => Auth::id(),
-                'date_deleted' => now(),
-            ]);
-        });
-
-        $affected = $stock_transactions->unique(function ($transaction) {
-            return $transaction->business_id . '|' . $transaction->warehouse_id . '|' .
-                $transaction->product_id . '|' . $transaction->product_variation_id;
-        });
-
-        $stock_service = app(ProductVariationStockService::class);
-
-        foreach ($affected as $transaction) {
-            $stock_service->recomputeLedger(
-                $transaction->business_id,
-                $transaction->warehouse_id,
-                $transaction->product_id,
-                $transaction->product_variation_id
-            );
-        }
+        app(ProductVariationStockService::class)->reverseStockTransactions($stock_transactions);
     }
 
     public function getByBusiness($business_id)

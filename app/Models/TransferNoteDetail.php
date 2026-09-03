@@ -22,6 +22,7 @@ class TransferNoteDetail extends Model
         'conversion_factor',
         'available_quantity',
         'transfer_quantity',
+        'received_quantity',
         'base_quantity',
         'unit_cost',
         'total_value',

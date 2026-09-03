@@ -23,6 +23,11 @@
             'Source Warehouse' => $transfer_note->sourceWarehouse->name ?? 'N/A',
             'Destination Warehouse' => $transfer_note->destinationWarehouse->name ?? 'N/A',
             'Reference' => $transfer_note->reference ?? 'N/A',
+            'Status' => ucfirst(str_replace('_', ' ', $transfer_note->status)),
+            'Sent By' => $transfer_note->sentby->name ?? 'N/A',
+            'Sent Date' => $transfer_note->date_sent ? localDate($transfer_note->date_sent) : 'N/A',
+            'Received By' => $transfer_note->receivedby->name ?? 'N/A',
+            'Received Date' => $transfer_note->date_received ? localDate($transfer_note->date_received) : 'N/A',
         ],
         'print_config' => $print_config,
     ])
@@ -34,6 +39,7 @@
                 <th>Product</th>
                 <th>Variation</th>
                 <th class="text-right">Transfer Qty</th>
+                <th class="text-right">Received Qty</th>
                 <th>Unit</th>
                 <th class="text-right">Unit Cost</th>
                 <th class="text-right">Total Value</th>
@@ -46,13 +52,14 @@
                     <td>{{ $detail->product->name ?? 'N/A' }}</td>
                     <td>{{ $detail->productVariation->name ?? 'N/A' }}</td>
                     <td class="text-right">{{ decimal($detail->transfer_quantity) }}</td>
+                    <td class="text-right">{{ decimal($detail->received_quantity) }}</td>
                     <td>{{ $detail->unit->name ?? 'N/A' }}</td>
                     <td class="text-right">{{ currency($detail->unit_cost) }}</td>
                     <td class="text-right">{{ currency($detail->total_value) }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center">No items found</td>
+                    <td colspan="8" class="text-center">No items found</td>
                 </tr>
             @endforelse
         </tbody>

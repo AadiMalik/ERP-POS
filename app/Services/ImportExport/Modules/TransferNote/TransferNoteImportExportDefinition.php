@@ -234,12 +234,13 @@ class TransferNoteImportExportDefinition extends AbstractImportExportDefinition
         $destinationWarehouse = Warehouse::findOrFail($row->attributes['destination_warehouse_id']);
         $businessId = $sourceWarehouse->business_id;
         $branchId = $sourceWarehouse->branch_id;
+        $destinationBranchId = $destinationWarehouse->branch_id;
 
         if ($row->action === 'update') {
             $transferNote = TransferNote::findOrFail($row->matchedId);
 
-            if ($transferNote->status !== Status::PENDING) {
-                throw new \Exception('Only pending transfer notes can be updated via import.');
+            if ($transferNote->status !== Status::DRAFT) {
+                throw new \Exception('Only draft transfer notes can be updated via import.');
             }
 
             $transferNote->update([
@@ -247,6 +248,7 @@ class TransferNoteImportExportDefinition extends AbstractImportExportDefinition
                 'branch_id' => $branchId,
                 'source_warehouse_id' => $sourceWarehouse->warehouse_id,
                 'destination_warehouse_id' => $destinationWarehouse->warehouse_id,
+                'destination_branch_id' => $destinationBranchId,
                 'transfer_note_date' => $row->attributes['transfer_note_date'],
                 'reference' => $row->attributes['reference'] ?? null,
                 'description' => $row->attributes['description'] ?? null,
@@ -263,11 +265,12 @@ class TransferNoteImportExportDefinition extends AbstractImportExportDefinition
                 'branch_id' => $branchId,
                 'source_warehouse_id' => $sourceWarehouse->warehouse_id,
                 'destination_warehouse_id' => $destinationWarehouse->warehouse_id,
+                'destination_branch_id' => $destinationBranchId,
                 'transfer_note_no' => $row->attributes['transfer_note_no'],
                 'transfer_note_date' => $row->attributes['transfer_note_date'],
                 'reference' => $row->attributes['reference'] ?? null,
                 'description' => $row->attributes['description'] ?? null,
-                'status' => Status::PENDING,
+                'status' => Status::DRAFT,
                 'createdby_id' => $ctx->userId,
                 'date_created' => now(),
             ]);

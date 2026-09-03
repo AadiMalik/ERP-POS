@@ -8,6 +8,7 @@ use App\Services\Concrete\Admin\PosRegisterSessionService;
 use App\Traits\ResponseAPI;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterSessionController extends Controller
@@ -76,6 +77,16 @@ class RegisterSessionController extends Controller
             return $this->validationResponse($validate->errors()->first());
         }
 
+        $session = PosRegisterSession::find($request->pos_register_session_id);
+
+        if (!$session) {
+            return $this->error('This register session was not found.');
+        }
+
+        if (!$this->authorizedForSession($session, 'pos.register.close')) {
+            return $this->error('You do not have permission to close this register session.', 403);
+        }
+
         try {
             $session = $this->session_service->close($request->all());
 
@@ -91,19 +102,57 @@ class RegisterSessionController extends Controller
             'pos_register_session_id' => ['required', 'string'],
             'type' => ['required', 'in:in,out'],
             'amount' => ['required', 'numeric', 'min:0.01'],
-            'reason' => ['nullable', 'string'],
+            'reason' => ['required', 'string', 'max:255'],
+            'idempotency_key' => ['nullable', 'string', 'max:64'],
         ]);
 
         if ($validate->fails()) {
             return $this->validationResponse($validate->errors()->first());
         }
 
+        $session = PosRegisterSession::find($request->pos_register_session_id);
+
+        if (!$session) {
+            return $this->error('This register session was not found.');
+        }
+
+        if (!$this->authorizedForSession($session, 'pos.register.cash-movement.manage')) {
+            return $this->error('You do not have permission to record cash movements for this register session.', 403);
+        }
+
         try {
-            $movement = $this->session_service->addCashMovement($request->all());
+            $payload = $request->all();
+            $payload['offline_local_id'] = $request->input('idempotency_key') ?: $request->input('local_id');
+
+            $movement = $this->session_service->addCashMovement($payload);
 
             return $this->success('Cash movement recorded.', $movement);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }
+    }
+
+    /**
+     * Same ownership rule as the web PosRegisterSessionController: the acting
+     * cashier's own session, or - within their own business only - a user
+     * holding $permission. Mirrored here rather than shared because this
+     * controller authenticates via device token + Sanctum (see
+     * EnsureOfflinePosDevice) rather than the web session guard.
+     */
+    protected function authorizedForSession(PosRegisterSession $session, string $permission): bool
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->id == $session->cashier_id) {
+            return true;
+        }
+
+        $same_business = getRoleName() == \App\Enums\RoleNames::SUPERADMIN || $user->business_id == $session->business_id;
+
+        return $same_business && $user->can($permission);
     }
 }

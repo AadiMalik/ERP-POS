@@ -27,6 +27,7 @@ class TransferNoteService
     protected $with = [
         'business',
         'branch',
+        'destinationBranch',
         'sourceWarehouse',
         'destinationWarehouse',
         'transferNoteDetails',
@@ -34,6 +35,9 @@ class TransferNoteService
         'transferNoteDetails.productVariation',
         'transferNoteDetails.productVariationUnitConversion',
         'transferNoteDetails.unit',
+        'createdby',
+        'sentby',
+        'receivedby',
     ];
 
     public function __construct()
@@ -85,7 +89,10 @@ class TransferNoteService
             ->where($wh)
             ->where('is_deleted', 0)
             ->orderBy('transfer_note_date', $orderBy);
-        $datatable = applyRoleScope($datatable, $allow_roles);
+
+        // A destination-branch user needs to see transfers being sent *to* them too,
+        // not just ones sourced from their own branch - see destination_branch_id.
+        $datatable = applyRoleScope($datatable, $allow_roles, 'business_id', 'branch_id', 'destination_branch_id');
 
         return DataTables::of($datatable)
             ->addColumn('transfer_note_date', function ($item) {
@@ -112,44 +119,61 @@ class TransferNoteService
                 return currency($item->total_value ?? 0);
             })
             ->addColumn('status', function ($item) {
-
-                $statuses = [
-                    Status::PENDING   => ucfirst(Status::PENDING),
-                    Status::APPROVED  => ucfirst(Status::APPROVED),
-                    Status::CANCELLED => ucfirst(Status::CANCELLED),
+                $badges = [
+                    Status::DRAFT      => 'secondary',
+                    Status::IN_TRANSIT => 'warning',
+                    Status::RECEIVED   => 'success',
+                    Status::CANCELLED  => 'danger',
                 ];
+                $labels = [
+                    Status::DRAFT      => 'Draft',
+                    Status::IN_TRANSIT => 'In Transit',
+                    Status::RECEIVED   => 'Received',
+                    Status::CANCELLED  => 'Cancelled',
+                ];
+                $color = $badges[$item->status] ?? 'secondary';
+                $label = $labels[$item->status] ?? ucfirst($item->status);
 
-                $html = "<select class='form-select form-select-sm change-status'
-                data-id='{$item->transfer_note_id}'>";
-
-                foreach ($statuses as $value => $label) {
-                    $selected = $item->status == $value ? 'selected' : '';
-                    $html .= "<option value='{$value}' {$selected}>{$label}</option>";
-                }
-
-                $html .= "</select>";
-
-                return $html;
+                return "<span class='badge bg-{$color}'>{$label}</span>";
             })
             ->addColumn('action', function ($item) {
+                $user = auth()->user();
+                $has_received_qty = $item->transferNoteDetails->sum('received_quantity') > 0;
 
-                $editButton = $item->status === Status::PENDING
+                $editButton = $item->status === Status::DRAFT
                     ? "<a class='btn btn-icon btn-outline-primary mr-2'
                         href='" . route('transfer-note.edit', $item->transfer_note_id) . "'
                         id='editTransferNote'>
                         <i class='fa fa-pencil'></i>
                         </a>"
                     : "<button type='button' class='btn btn-icon btn-outline-primary mr-2' disabled
-                        title='Only pending transfer notes can be edited'>
+                        title='Only draft transfer notes can be edited'>
                         <i class='fa fa-pencil'></i>
                         </button>";
+
+                $sendButton = '';
+                if ($item->status === Status::DRAFT && $user?->can('transfer-note.send') && $this->canActOnBranch($item->branch_id)) {
+                    $sendButton = "<button type='button' class='btn btn-icon btn-outline-success mr-2 sendTransferNote'
+                        data-id='{$item->transfer_note_id}' title='Send'>
+                        <i class='fa fa-paper-plane'></i>
+                        </button>";
+                }
+
+                $receiveButton = '';
+                if ($item->status === Status::IN_TRANSIT && $user?->can('transfer-note.receive') && $this->canActOnBranch($item->destination_branch_id)) {
+                    $receiveButton = "<button type='button' class='btn btn-icon btn-outline-success mr-2 receiveTransferNote'
+                        data-id='{$item->transfer_note_id}' title='Receive'>
+                        <i class='fa fa-truck-loading'></i>
+                        </button>";
+                }
 
                 $printButton = "<a class='btn btn-icon btn-outline-secondary mr-2' target='_blank'
                     href='" . route('transfer-note.print', $item->transfer_note_id) . "' title='Print'>
                     <i class='fa fa-print'></i>
                     </a>";
 
-                $deleteButton = $item->status !== Status::CANCELLED
+                $canCancel = in_array($item->status, [Status::DRAFT, Status::IN_TRANSIT], true) && !$has_received_qty;
+                $deleteButton = $canCancel && $user?->can('transfer-note.delete') && $this->canActOnBranch($item->branch_id)
                     ? "<a class='btn btn-icon btn-outline-danger'
                     id='deleteTransferNote'
                     data-id='{$item->transfer_note_id}'>
@@ -157,10 +181,33 @@ class TransferNoteService
                     </a>"
                     : '';
 
-                return $editButton . $printButton . $deleteButton;
+                return $editButton . $sendButton . $receiveButton . $printButton . $deleteButton;
             })
             ->rawColumns(['transfer_note_date', 'business', 'branch', 'source_warehouse', 'destination_warehouse', 'total_products', 'total_value', 'status', 'action'])
             ->make(true);
+    }
+
+    /**
+     * In-memory mirror of applyRoleScope()'s role classification (see
+     * app/Helpers/CommonFunctions.php), used only to decide whether to render
+     * the Send/Receive/Cancel buttons for a given branch. Not itself an
+     * authorization boundary - the controller re-checks via applyRoleScope()
+     * against the database before any action actually runs.
+     */
+    protected function canActOnBranch($branch_id)
+    {
+        $user = Auth::user();
+        $role = getRoleName();
+
+        if ($role === RoleNames::SUPERADMIN || $role === RoleNames::BUSINESSADMIN) {
+            return true;
+        }
+
+        if (in_array($role, RoleNames::businessLevelRoles(), true)) {
+            return true;
+        }
+
+        return $user && !empty($branch_id) && $user->branch_id === $branch_id;
     }
 
     /**
@@ -215,6 +262,7 @@ class TransferNoteService
 
             $business_id = $source_warehouse->business_id;
             $branch_id = $source_warehouse->branch_id;
+            $destination_branch_id = $destination_warehouse->branch_id;
 
             //====================================
             // Update
@@ -224,8 +272,8 @@ class TransferNoteService
 
                 $transfer_note = $this->model_transfer_note->getModel()::findOrFail($obj['transfer_note_id']);
 
-                if ($transfer_note->status !== Status::PENDING) {
-                    throw new Exception('Only pending transfer notes can be updated.');
+                if ($transfer_note->status !== Status::DRAFT) {
+                    throw new Exception('Only draft transfer notes can be updated.');
                 }
 
                 $transfer_note->update([
@@ -233,6 +281,7 @@ class TransferNoteService
                     'branch_id'                 => $branch_id,
                     'source_warehouse_id'       => $source_warehouse->warehouse_id,
                     'destination_warehouse_id'  => $destination_warehouse->warehouse_id,
+                    'destination_branch_id'     => $destination_branch_id,
                     'transfer_note_date'        => $obj['transfer_note_date'],
                     'reference'                 => $obj['reference'] ?? null,
                     'description'               => $obj['description'] ?? null,
@@ -256,11 +305,12 @@ class TransferNoteService
                     'branch_id'                 => $branch_id,
                     'source_warehouse_id'       => $source_warehouse->warehouse_id,
                     'destination_warehouse_id'  => $destination_warehouse->warehouse_id,
+                    'destination_branch_id'     => $destination_branch_id,
                     'transfer_note_no'          => $obj['transfer_note_no'],
                     'transfer_note_date'        => $obj['transfer_note_date'],
                     'reference'                 => $obj['reference'] ?? null,
                     'description'               => $obj['description'] ?? null,
-                    'status'                    => Status::PENDING,
+                    'status'                    => Status::DRAFT,
                     'createdby_id'              => Auth::id(),
                     'date_created'              => now(),
                 ]);
@@ -321,6 +371,7 @@ class TransferNoteService
                     'conversion_factor'                       => $conversion_factor,
                     'available_quantity'                      => $available_quantity,
                     'transfer_quantity'                       => $transfer_quantity,
+                    'received_quantity'                       => 0,
                     'base_quantity'                            => $base_quantity,
                     'unit_cost'                                => $unit_cost,
                     'total_value'                              => $line_total,
@@ -366,6 +417,9 @@ class TransferNoteService
                     'source_warehouse_id'       => $transfer_note->source_warehouse_id,
                     'destination_warehouse_id'  => $transfer_note->destination_warehouse_id,
                     'branch_id'                 => $transfer_note->branch_id,
+                    'branch_name'               => $transfer_note->branch->name ?? '',
+                    'destination_branch_id'     => $transfer_note->destination_branch_id,
+                    'destination_branch_name'   => $transfer_note->destinationBranch->name ?? '',
                     'transfer_note_no'          => $transfer_note->transfer_note_no,
                     'transfer_note_date'        => $transfer_note->transfer_note_date,
                     'reference'                 => $transfer_note->reference,
@@ -373,6 +427,12 @@ class TransferNoteService
                     'total_quantity'            => $transfer_note->total_quantity,
                     'total_value'               => $transfer_note->total_value,
                     'status'                    => $transfer_note->status,
+                    'createdby_name'            => $transfer_note->createdby->name ?? '',
+                    'date_created'              => $transfer_note->date_created,
+                    'sentby_name'               => $transfer_note->sentby->name ?? '',
+                    'date_sent'                 => $transfer_note->date_sent,
+                    'receivedby_name'           => $transfer_note->receivedby->name ?? '',
+                    'date_received'             => $transfer_note->date_received,
                 ],
                 'details' => []
             ];
@@ -387,6 +447,8 @@ class TransferNoteService
                     'product_variation_unit_conversion_id'   => $detail->product_variation_unit_conversion_id,
                     'available_quantity'                      => $detail->available_quantity,
                     'transfer_quantity'                       => $detail->transfer_quantity,
+                    'received_quantity'                       => $detail->received_quantity,
+                    'remaining_quantity'                      => max(0, (float) $detail->transfer_quantity - (float) $detail->received_quantity),
                     'unit_id'                                 => $detail->unit_id,
                     'unit_name'                                => $detail->unit->name ?? 'N/A',
                     'conversion_factor'                        => $detail->conversion_factor,
@@ -401,35 +463,237 @@ class TransferNoteService
         }
     }
 
-    public function status($obj)
+    /**
+     * Draft -> In Transit. Re-validates available quantity at the source
+     * warehouse (stock may have moved since the draft was created) and
+     * deducts it, writing a TRANSFER_OUT ledger entry per line - the
+     * destination is intentionally left untouched until receive().
+     */
+    public function send($transfer_note_id)
     {
         DB::beginTransaction();
 
         try {
-            $transfer_note = $this->model_transfer_note->getModel()::with($this->with)->findOrFail($obj['transfer_note_id']);
-            $old_status = $transfer_note->status;
-            $new_status = $obj['status'];
+            $transfer_note = $this->model_transfer_note->getModel()::with('transferNoteDetails.product')
+                ->findOrFail($transfer_note_id);
+
+            if ($transfer_note->status !== Status::DRAFT) {
+                throw new Exception('Only draft transfer notes can be sent.');
+            }
+
+            foreach ($transfer_note->transferNoteDetails as $detail) {
+                $base_quantity = $detail->base_quantity;
+
+                if ($base_quantity <= 0) {
+                    continue;
+                }
+
+                $source_stock = ProductVariationStock::where('business_id', $transfer_note->business_id)
+                    ->where('warehouse_id', $transfer_note->source_warehouse_id)
+                    ->where('product_id', $detail->product_id)
+                    ->where('product_variation_id', $detail->product_variation_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                $source_available = $source_stock->quantity ?? 0;
+
+                if ($base_quantity > $source_available) {
+                    throw new Exception('Insufficient stock for "' . ($detail->product->name ?? 'a product') . '" at the source warehouse to send this transfer.');
+                }
+
+                $unit_cost = $source_stock->avg_price ?? 0;
+                $line_value = $base_quantity * $unit_cost;
+                $source_new_qty = $source_available - $base_quantity;
+
+                $source_stock->update(['quantity' => $source_new_qty]);
+
+                ProductVariationStockTransaction::create([
+                    'product_variation_stock_transaction_id' => generateUuid(),
+                    'transaction_date'                       => now(),
+                    'transaction_type'                        => TransactionType::TRANSFER_OUT,
+                    'business_id'                             => $transfer_note->business_id,
+                    'product_id'                              => $detail->product_id,
+                    'product_variation_id'                    => $detail->product_variation_id,
+                    'warehouse_id'                             => $transfer_note->source_warehouse_id,
+                    'unit_id'                                  => $detail->unit_id,
+                    'product_variation_unit_conversion_id'     => $detail->product_variation_unit_conversion_id,
+                    'conversion_factor'                        => $detail->conversion_factor,
+                    'quantity'                                 => $detail->transfer_quantity,
+                    'base_quantity'                            => $base_quantity,
+                    'unit_price'                               => $unit_cost,
+                    'total_price'                              => $line_value,
+                    'quantity_after'                           => $source_new_qty,
+                    'avg_price_after'                          => $unit_cost,
+                    'reference_id'                              => $transfer_note->transfer_note_id,
+                    'reference_type'                            => ReferenceType::STOCK_TRANSFER,
+                    'remarks'                                   => 'Sent on transfer note ' . $transfer_note->transfer_note_no . ' (out, in transit)',
+                    'createdby_id'                              => Auth::id(),
+                    'date_created'                              => now(),
+                ]);
+            }
 
             $transfer_note->update([
-                'status'       => $new_status,
+                'status'       => Status::IN_TRANSIT,
+                'sentby_id'    => Auth::id(),
+                'date_sent'    => now(),
                 'updatedby_id' => Auth::id(),
                 'date_updated' => now(),
             ]);
 
-            if ($new_status === Status::APPROVED && $old_status !== Status::APPROVED) {
-                $this->applyTransferNotePosting($transfer_note);
-            } elseif ($old_status === Status::APPROVED && $new_status !== Status::APPROVED) {
-                $this->reverseTransferNotePosting($transfer_note);
-            }
-
             DB::commit();
+
+            return $transfer_note;
         } catch (Exception $e) {
             DB::rollBack();
 
             throw $e;
         }
+    }
 
-        return $transfer_note;
+    /**
+     * In Transit -> partially/fully Received. $obj['products'] is
+     * [{transfer_note_detail_id, receive_quantity}, ...] - each line's
+     * receive_quantity is capped at (transfer_quantity - received_quantity)
+     * so this can never over-receive or double-receive an already-completed
+     * line, and can be called repeatedly for partial receiving.
+     */
+    public function receive($obj)
+    {
+        DB::beginTransaction();
+
+        try {
+            $transfer_note = $this->model_transfer_note->getModel()::with('transferNoteDetails.product')
+                ->findOrFail($obj['transfer_note_id']);
+
+            if ($transfer_note->status !== Status::IN_TRANSIT) {
+                throw new Exception('Only in-transit transfer notes can be received.');
+            }
+
+            $has_quantity = false;
+
+            foreach ($obj['products'] as $product) {
+                $detail = $transfer_note->transferNoteDetails
+                    ->firstWhere('transfer_note_detail_id', $product['transfer_note_detail_id'] ?? null);
+
+                if (!$detail) {
+                    throw new Exception('One of the selected lines does not belong to this transfer note.');
+                }
+
+                $receive_quantity = (float) ($product['receive_quantity'] ?? 0);
+
+                if ($receive_quantity < 0) {
+                    throw new Exception('Received quantity cannot be negative.');
+                }
+
+                $remaining = (float) $detail->transfer_quantity - (float) $detail->received_quantity;
+
+                if ($receive_quantity > $remaining) {
+                    throw new Exception('Received quantity for "' . ($detail->product->name ?? 'a product') . '" exceeds the remaining quantity to receive.');
+                }
+
+                if ($receive_quantity <= 0) {
+                    continue;
+                }
+
+                $has_quantity = true;
+
+                $conversion_factor = $detail->conversion_factor > 0 ? $detail->conversion_factor : 1;
+                $base_quantity = $receive_quantity * $conversion_factor;
+                $unit_cost = $detail->unit_cost;
+                $line_value = $base_quantity * $unit_cost;
+
+                $destination_stock = ProductVariationStock::where('business_id', $transfer_note->business_id)
+                    ->where('warehouse_id', $transfer_note->destination_warehouse_id)
+                    ->where('product_id', $detail->product_id)
+                    ->where('product_variation_id', $detail->product_variation_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                $destination_existing_qty = $destination_stock->quantity ?? 0;
+                $destination_existing_avg = $destination_stock->avg_price ?? 0;
+                $destination_new_qty = $destination_existing_qty + $base_quantity;
+                $destination_new_avg = $destination_new_qty > 0
+                    ? (($destination_existing_qty * $destination_existing_avg) + $line_value) / $destination_new_qty
+                    : 0;
+
+                if ($destination_stock) {
+                    $destination_stock->update([
+                        'quantity'  => $destination_new_qty,
+                        'avg_price' => $destination_new_avg,
+                    ]);
+                } else {
+                    $destination_stock = ProductVariationStock::create([
+                        'product_variation_stock_id' => generateUuid(),
+                        'business_id'                => $transfer_note->business_id,
+                        'warehouse_id'               => $transfer_note->destination_warehouse_id,
+                        'product_id'                 => $detail->product_id,
+                        'product_variation_id'       => $detail->product_variation_id,
+                        'quantity'                   => $destination_new_qty,
+                        'avg_price'                  => $destination_new_avg,
+                        'status'                     => 'active',
+                        'createdby_id'               => Auth::id(),
+                        'date_created'               => now(),
+                    ]);
+                }
+
+                ProductVariationStockTransaction::create([
+                    'product_variation_stock_transaction_id' => generateUuid(),
+                    'transaction_date'                       => now(),
+                    'transaction_type'                        => TransactionType::TRANSFER_IN,
+                    'business_id'                             => $transfer_note->business_id,
+                    'product_id'                              => $detail->product_id,
+                    'product_variation_id'                    => $detail->product_variation_id,
+                    'warehouse_id'                             => $transfer_note->destination_warehouse_id,
+                    'unit_id'                                  => $detail->unit_id,
+                    'product_variation_unit_conversion_id'     => $detail->product_variation_unit_conversion_id,
+                    'conversion_factor'                        => $conversion_factor,
+                    'quantity'                                 => $receive_quantity,
+                    'base_quantity'                            => $base_quantity,
+                    'unit_price'                               => $unit_cost,
+                    'total_price'                              => $line_value,
+                    'quantity_after'                           => $destination_new_qty,
+                    'avg_price_after'                          => $destination_new_avg,
+                    'reference_id'                              => $transfer_note->transfer_note_id,
+                    'reference_type'                            => ReferenceType::STOCK_TRANSFER,
+                    'remarks'                                   => 'Received on transfer note ' . $transfer_note->transfer_note_no . ' (in)',
+                    'createdby_id'                              => Auth::id(),
+                    'date_created'                              => now(),
+                ]);
+
+                $detail->update([
+                    'received_quantity' => (float) $detail->received_quantity + $receive_quantity,
+                    'updatedby_id'      => Auth::id(),
+                    'date_updated'      => now(),
+                ]);
+            }
+
+            if (!$has_quantity) {
+                throw new Exception('Please enter a quantity to receive for at least one product.');
+            }
+
+            // Each $detail->update() above also mutates that same in-memory
+            // model (Eloquent updates the instance, not just the row), so the
+            // already-loaded relation reflects every change made in this call.
+            $fully_received = $transfer_note->transferNoteDetails->every(
+                fn ($detail) => (float) $detail->received_quantity >= (float) $detail->transfer_quantity
+            );
+
+            $transfer_note->update([
+                'status'        => $fully_received ? Status::RECEIVED : Status::IN_TRANSIT,
+                'receivedby_id' => Auth::id(),
+                'date_received' => now(),
+                'updatedby_id'  => Auth::id(),
+                'date_updated'  => now(),
+            ]);
+
+            DB::commit();
+
+            return $transfer_note;
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            throw $e;
+        }
     }
 
     public function delete($transfer_note_id)
@@ -439,8 +703,18 @@ class TransferNoteService
         try {
             $transfer_note = $this->model_transfer_note->getModel()::with($this->with)->findOrFail($transfer_note_id);
 
-            if ($transfer_note->status === Status::APPROVED) {
-                $this->reverseTransferNotePosting($transfer_note);
+            if (!in_array($transfer_note->status, [Status::DRAFT, Status::IN_TRANSIT], true)) {
+                throw new Exception('Only draft or in-transit transfer notes can be cancelled.');
+            }
+
+            $has_received_qty = $transfer_note->transferNoteDetails->sum('received_quantity') > 0;
+
+            if ($has_received_qty) {
+                throw new Exception('Cannot cancel a transfer note that has already been partially or fully received.');
+            }
+
+            if ($transfer_note->status === Status::IN_TRANSIT) {
+                $this->reverseTransferOutPosting($transfer_note);
             }
 
             $transfer_note->update([
@@ -461,145 +735,15 @@ class TransferNoteService
     }
 
     /**
-     * Move stock from the source warehouse to the destination warehouse when
-     * a Transfer Note is approved, creating a linked TRANSFER_OUT/TRANSFER_IN
-     * pair per line. No JournalEntry is created for a Transfer Note (a
-     * same-business warehouse move doesn't change total inventory value), so
-     * idempotency is guarded directly on the stock transactions instead.
+     * Reverses the TRANSFER_OUT ledger entries created by send() when an
+     * in-transit (never-received) transfer note is cancelled. Idempotent: a
+     * no-op if nothing active remains to reverse.
      */
-    protected function applyTransferNotePosting(TransferNote $transfer_note)
-    {
-        $existing = ProductVariationStockTransaction::where('reference_type', ReferenceType::STOCK_TRANSFER)
-            ->where('reference_id', $transfer_note->transfer_note_id)
-            ->where('transaction_type', TransactionType::TRANSFER_OUT)
-            ->where('is_deleted', 0)
-            ->exists();
-
-        if ($existing) {
-            return;
-        }
-
-        foreach ($transfer_note->transferNoteDetails as $detail) {
-            $base_quantity = $detail->base_quantity;
-
-            if ($base_quantity <= 0) {
-                continue;
-            }
-
-            $source_stock = ProductVariationStock::where('business_id', $transfer_note->business_id)
-                ->where('warehouse_id', $transfer_note->source_warehouse_id)
-                ->where('product_id', $detail->product_id)
-                ->where('product_variation_id', $detail->product_variation_id)
-                ->lockForUpdate()
-                ->first();
-
-            $source_available = $source_stock->quantity ?? 0;
-
-            if ($base_quantity > $source_available) {
-                throw new Exception('Insufficient stock for "' . ($detail->product->name ?? 'a product') . '" at the source warehouse to complete this transfer.');
-            }
-
-            $unit_cost = $source_stock->avg_price ?? 0;
-            $line_value = $base_quantity * $unit_cost;
-
-            // Deduct from source (avg cost unchanged, mirrors an outbound issue).
-            $source_new_qty = $source_available - $base_quantity;
-            $source_stock->update(['quantity' => $source_new_qty]);
-
-            ProductVariationStockTransaction::create([
-                'product_variation_stock_transaction_id' => generateUuid(),
-                'transaction_date'                       => now(),
-                'transaction_type'                        => TransactionType::TRANSFER_OUT,
-                'business_id'                             => $transfer_note->business_id,
-                'product_id'                              => $detail->product_id,
-                'product_variation_id'                    => $detail->product_variation_id,
-                'warehouse_id'                             => $transfer_note->source_warehouse_id,
-                'unit_id'                                  => $detail->unit_id,
-                'product_variation_unit_conversion_id'     => $detail->product_variation_unit_conversion_id,
-                'conversion_factor'                        => $detail->conversion_factor,
-                'quantity'                                 => $detail->transfer_quantity,
-                'base_quantity'                            => $base_quantity,
-                'unit_price'                               => $unit_cost,
-                'total_price'                              => $line_value,
-                'quantity_after'                           => $source_new_qty,
-                'avg_price_after'                          => $unit_cost,
-                'reference_id'                              => $transfer_note->transfer_note_id,
-                'reference_type'                            => ReferenceType::STOCK_TRANSFER,
-                'remarks'                                   => 'Auto-created on approval of transfer note ' . $transfer_note->transfer_note_no . ' (out)',
-                'createdby_id'                              => Auth::id(),
-                'date_created'                              => now(),
-            ]);
-
-            // Add to destination (weighted-avg using the source's cost).
-            $destination_stock = ProductVariationStock::where('business_id', $transfer_note->business_id)
-                ->where('warehouse_id', $transfer_note->destination_warehouse_id)
-                ->where('product_id', $detail->product_id)
-                ->where('product_variation_id', $detail->product_variation_id)
-                ->lockForUpdate()
-                ->first();
-
-            $destination_existing_qty = $destination_stock->quantity ?? 0;
-            $destination_existing_avg = $destination_stock->avg_price ?? 0;
-            $destination_new_qty = $destination_existing_qty + $base_quantity;
-            $destination_new_avg = $destination_new_qty > 0
-                ? (($destination_existing_qty * $destination_existing_avg) + $line_value) / $destination_new_qty
-                : 0;
-
-            if ($destination_stock) {
-                $destination_stock->update([
-                    'quantity'  => $destination_new_qty,
-                    'avg_price' => $destination_new_avg,
-                ]);
-            } else {
-                $destination_stock = ProductVariationStock::create([
-                    'product_variation_stock_id' => generateUuid(),
-                    'business_id'                => $transfer_note->business_id,
-                    'warehouse_id'               => $transfer_note->destination_warehouse_id,
-                    'product_id'                 => $detail->product_id,
-                    'product_variation_id'       => $detail->product_variation_id,
-                    'quantity'                   => $destination_new_qty,
-                    'avg_price'                  => $destination_new_avg,
-                    'status'                     => 'active',
-                    'createdby_id'               => Auth::id(),
-                    'date_created'               => now(),
-                ]);
-            }
-
-            ProductVariationStockTransaction::create([
-                'product_variation_stock_transaction_id' => generateUuid(),
-                'transaction_date'                       => now(),
-                'transaction_type'                        => TransactionType::TRANSFER_IN,
-                'business_id'                             => $transfer_note->business_id,
-                'product_id'                              => $detail->product_id,
-                'product_variation_id'                    => $detail->product_variation_id,
-                'warehouse_id'                             => $transfer_note->destination_warehouse_id,
-                'unit_id'                                  => $detail->unit_id,
-                'product_variation_unit_conversion_id'     => $detail->product_variation_unit_conversion_id,
-                'conversion_factor'                        => $detail->conversion_factor,
-                'quantity'                                 => $detail->transfer_quantity,
-                'base_quantity'                            => $base_quantity,
-                'unit_price'                               => $unit_cost,
-                'total_price'                              => $line_value,
-                'quantity_after'                           => $destination_new_qty,
-                'avg_price_after'                          => $destination_new_avg,
-                'reference_id'                              => $transfer_note->transfer_note_id,
-                'reference_type'                            => ReferenceType::STOCK_TRANSFER,
-                'remarks'                                   => 'Auto-created on approval of transfer note ' . $transfer_note->transfer_note_no . ' (in)',
-                'createdby_id'                              => Auth::id(),
-                'date_created'                              => now(),
-            ]);
-        }
-    }
-
-    /**
-     * Reverse both the TRANSFER_OUT and TRANSFER_IN stock effects created
-     * when a Transfer Note was approved. Idempotent: a no-op if nothing
-     * active remains to reverse.
-     */
-    protected function reverseTransferNotePosting(TransferNote $transfer_note)
+    protected function reverseTransferOutPosting(TransferNote $transfer_note)
     {
         $stock_transactions = ProductVariationStockTransaction::where('reference_type', ReferenceType::STOCK_TRANSFER)
             ->where('reference_id', $transfer_note->transfer_note_id)
+            ->where('transaction_type', TransactionType::TRANSFER_OUT)
             ->where('is_deleted', 0)
             ->get();
 
@@ -615,14 +759,9 @@ class TransferNoteService
             ]);
         });
 
-        $affected = $stock_transactions->unique(function ($transaction) {
-            return $transaction->business_id . '|' . $transaction->warehouse_id . '|' .
-                $transaction->product_id . '|' . $transaction->product_variation_id;
-        });
-
         $stock_service = app(ProductVariationStockService::class);
 
-        foreach ($affected as $transaction) {
+        foreach ($stock_transactions as $transaction) {
             $stock_service->recomputeLedger(
                 $transaction->business_id,
                 $transaction->warehouse_id,

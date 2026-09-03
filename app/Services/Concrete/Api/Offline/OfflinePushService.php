@@ -266,9 +266,40 @@ class OfflinePushService
             throw new Exception('Register session has not synced yet. Will retry.');
         }
 
+        $existing_session = PosRegisterSession::find($payload['pos_register_session_id']);
+
+        if (!$existing_session || !$this->authorizedForSession($existing_session, 'pos.register.close')) {
+            throw new Exception('You do not have permission to close this register session.');
+        }
+
         $session = $this->session_service->close($payload);
 
         return $this->sessionResult($session, $local_id, $idempotency_key, 'synced');
+    }
+
+    /**
+     * Same cashier-owns-their-shift rule as
+     * PosRegisterSessionController::close()/addCashMovement(): the acting
+     * user's own session, or - within their own business only - a user
+     * holding $permission. Applied here too since the queued offline sync
+     * path is a second route to the same close/cash-movement actions and
+     * must not be a way around the web controller's authorization.
+     */
+    protected function authorizedForSession(PosRegisterSession $session, string $permission): bool
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->id == $session->cashier_id) {
+            return true;
+        }
+
+        $same_business = getRoleName() == RoleNames::SUPERADMIN || $user->business_id == $session->business_id;
+
+        return $same_business && $user->can($permission);
     }
 
     protected function pushCashMovement(PosDevice $device, array $payload, ?string $idempotency_key, ?string $local_id): array
@@ -289,6 +320,12 @@ class OfflinePushService
 
         if (empty($payload['pos_register_session_id'])) {
             throw new Exception('Register session has not synced yet. Will retry.');
+        }
+
+        $session = PosRegisterSession::find($payload['pos_register_session_id']);
+
+        if (!$session || !$this->authorizedForSession($session, 'pos.register.cash-movement.manage')) {
+            throw new Exception('You do not have permission to record cash movements for this register session.');
         }
 
         $payload['offline_local_id'] = $idempotency_key ?: $local_id;
