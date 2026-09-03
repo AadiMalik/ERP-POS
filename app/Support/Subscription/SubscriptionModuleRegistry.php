@@ -125,9 +125,11 @@ class SubscriptionModuleRegistry
             'order-source'   => ['label' => 'Order Sources', 'category' => 'Sales & POS', 'type' => 'feature', 'parent' => 'pos', 'default_enabled' => true],
             'discount'       => ['label' => 'Discounts', 'category' => 'Sales & POS', 'type' => 'limited', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'customer'       => ['label' => 'Customers', 'category' => 'Sales & POS', 'type' => 'limited', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'offline-pos'    => ['label' => 'Offline Desktop POS', 'category' => 'Sales & POS', 'type' => 'feature', 'parent' => 'pos', 'default_enabled' => true],
 
             // ---- Orders ----
             'order' => ['label' => 'Orders', 'category' => 'Orders', 'type' => 'limited', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'order-reports' => ['label' => 'Order Reports', 'category' => 'Orders', 'type' => 'feature', 'parent' => 'pos', 'default_enabled' => true],
 
             // ---- HRM & Payroll (umbrellas: is_hrm_enabled / is_payroll_enabled) ----
             'hrm'                 => ['label' => 'HRM Module', 'category' => 'HRM & Payroll', 'type' => 'feature', 'parent' => null, 'default_enabled' => false],

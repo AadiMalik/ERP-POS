@@ -40,6 +40,10 @@ class OfflineSetupService
             throw new \Exception('POS module is not enabled for this business subscription.');
         }
 
+        if (!$business->package->moduleEnabled('offline-pos')) {
+            throw new \Exception('Offline Desktop POS is not enabled for this business subscription.');
+        }
+
         return [
             'business_id' => $business->business_id,
             'name' => $business->name,
@@ -101,6 +105,10 @@ class OfflineSetupService
         $user = User::where('id', $login['user']['id'])->where('is_deleted', 0)->first();
         if (!$user) {
             throw new \Exception('Authenticated user could not be loaded.');
+        }
+
+        if (!$this->feature_limit_service->hasModule('offline-pos', $user->business)) {
+            throw new \Exception('Offline Desktop POS is not enabled for this business subscription.');
         }
 
         $device = app(OfflineDeviceService::class)->register($user, $payload);

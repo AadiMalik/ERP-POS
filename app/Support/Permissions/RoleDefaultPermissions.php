@@ -178,7 +178,7 @@ class RoleDefaultPermissions
                 // payroll-reports (salary/payroll-run/cost data) deliberately is not -
                 // see PermissionRegistry's "HRM & Payroll Reports" comment.
                 return array_merge(
-                    PermissionRegistry::namesForModules(['reports', 'hrm-reports']),
+                    PermissionRegistry::namesForModules(['reports', 'hrm-reports', 'order-reports']),
                     ['dashboard.view']
                 );
 

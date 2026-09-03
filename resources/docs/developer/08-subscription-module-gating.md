@@ -83,11 +83,24 @@ public function handle(Request $request, Closure $next, string $module)
     return $next($request);
 }
 ```
-Gating happens **only at the umbrella level** in route groups (`hrm`, `payroll`,
-`inventory`, `accounting`, `pos`, `service-management`) — the many finer-grained
-"limited" sub-keys in the Registry (e.g. `warehouse`, `employee`, `payslip`) back
-per-record numeric limits via `FeatureLimitService::check()`, not their own route
-middleware.
+Gating mostly happens **only at the umbrella level** in route groups (`hrm`,
+`payroll`, `inventory`, `accounting`, `pos`, `service-management`) — the many
+finer-grained "limited" sub-keys in the Registry (e.g. `warehouse`, `employee`,
+`payslip`) back per-record numeric limits via `FeatureLimitService::check()`,
+not their own route middleware. Report-type "feature" sub-keys (`hrm-reports`,
+`payroll-reports`, `order-reports`) are visibility-gated only — not enabled on
+the package means the permission group is stripped from
+`PermissionRegistry::grouped()` (via `SubscriptionModuleRegistry::enabledPermissionModuleKeysFor()`)
+so no role can be granted it, but there is no dedicated `module:order-reports`
+route middleware (same as `hrm-reports`/`payroll-reports`).
+
+`offline-pos` (parent: `pos`) is the one sub-key with its **own** route
+middleware, `module:offline-pos`, layered onto `module:pos` on
+`routes/offline.php`'s two authenticated groups and checked directly in
+`OfflineSetupService::validateBusiness()`/`registerDeviceWithCredentials()` —
+because it gates a genuinely separate client (the Electron desktop app), a
+downgrade needs to hard-block sync/device-registration immediately rather than
+just hide a permission checkbox.
 
 ## Dashboard widget gating
 
@@ -159,3 +172,11 @@ PDFs asynchronously. See [Jobs, Commands & Scheduling](09-jobs-commands.md).
 3. Wrap its route group in `module:<key>` middleware.
 4. Layer `permission:` middleware on top as normal — module gating and permission
    gating are independent and both required.
+5. **Backfill `package_modules` for every existing package** — `Package::moduleEnabled()`
+   returns `false` when a package has no row for the key, so a business with an
+   otherwise-enabled parent umbrella loses the new sub-feature the instant the
+   key is registered, until a row exists. `IntroPackageCatalogSeeder` only
+   covers its own 4 named catalog packages; write a small one-off migration
+   (see `2026_09_03_070000_backfill_order_reports_offline_pos_bank_reconciliation_modules.php`
+   for the pattern) that upserts a row per existing package, inheriting the
+   parent's already-synced `is_enabled` state.
