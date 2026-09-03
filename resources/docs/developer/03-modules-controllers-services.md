@@ -261,7 +261,8 @@ loop over a controller map in `routes/web.php`. ~90 report classes across HRM
 Customer/POS (`module:pos`), Orders/POS sales
 (`Reports\Orders\*`, `BaseOrderReportController` /
 `BaseOrderReportService`, also `module:pos`), Service Management
-(`module:service-management`), and Accounting/Financial (`module:accounting`). See
+(`module:service-management`), and Accounting/Financial (`module:accounting` —
+includes statement reports Profit & Loss, Balance Sheet, and Cash Flow). See
 [Reports Infrastructure](06-reports-infrastructure.md).
 
 ## Settings (Core)

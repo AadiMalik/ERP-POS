@@ -130,5 +130,5 @@ Reports: **Fixed Asset Register**, **Depreciation Report**, **Asset Valuation /
 Book Value**, and **Asset Disposal / Sale** under Accounting Reports.
 
 See [Reports](09-reports.md) for the full set of financial statements (Trial
-Balance, General Ledger, Profit & Loss, Balance Sheet, Day Book, Tax Report, and
-more) generated from this data.
+Balance, General Ledger, Profit & Loss, Balance Sheet, Cash Flow Statement, Day
+Book, Tax Report, and more) generated from this data.

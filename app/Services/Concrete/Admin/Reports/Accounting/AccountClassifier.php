@@ -70,6 +70,64 @@ class AccountClassifier
     ];
     protected const BS_LONG_TERM_LIABILITY = [AccountSubTypes::CODES[AccountSubTypes::LOANS_BORROWINGS]];
 
+    /**
+     * Cash Flow Statement sections keyed by counterparty (non-cash) account
+     * sub-type. Direct-method CFS attributes each cash movement to the
+     * offsetting account's bucket so multi-cash transfers cancel out and
+     * never inflate Operating/Investing/Financing totals.
+     */
+    protected const CF_INVESTING = [
+        AccountSubTypes::CODES[AccountSubTypes::FIXED_ASSETS],
+        AccountSubTypes::CODES[AccountSubTypes::ACCUMULATED_DEPRECIATION],
+        AccountSubTypes::CODES[AccountSubTypes::INTANGIBLE_ASSETS],
+        AccountSubTypes::CODES[AccountSubTypes::INVESTMENTS],
+    ];
+
+    protected const CF_FINANCING = [
+        AccountSubTypes::CODES[AccountSubTypes::LOANS_BORROWINGS],
+        AccountSubTypes::CODES[AccountSubTypes::CAPITAL],
+        AccountSubTypes::CODES[AccountSubTypes::DRAWINGS],
+        AccountSubTypes::CODES[AccountSubTypes::RETAINED_EARNINGS],
+        AccountSubTypes::CODES[AccountSubTypes::CURRENT_YEAR_EARNINGS],
+        AccountSubTypes::CODES[AccountSubTypes::RESERVES],
+    ];
+
+    protected const CF_OPERATING_CUSTOMERS = [
+        AccountSubTypes::CODES[AccountSubTypes::ACCOUNTS_RECEIVABLE],
+        AccountSubTypes::CODES[AccountSubTypes::UNEARNED_REVENUE],
+        AccountSubTypes::CODES[AccountSubTypes::OPERATING_REVENUE],
+        AccountSubTypes::CODES[AccountSubTypes::SALES_REVENUE],
+        AccountSubTypes::CODES[AccountSubTypes::SERVICE_REVENUE],
+        AccountSubTypes::CODES[AccountSubTypes::OTHER_REVENUE],
+    ];
+
+    protected const CF_OPERATING_SUPPLIERS = [
+        AccountSubTypes::CODES[AccountSubTypes::ACCOUNTS_PAYABLE],
+        AccountSubTypes::CODES[AccountSubTypes::INVENTORY],
+        AccountSubTypes::CODES[AccountSubTypes::COST_OF_GOODS_SOLD],
+    ];
+
+    protected const CF_OPERATING_EXPENSES = [
+        AccountSubTypes::CODES[AccountSubTypes::DIRECT_EXPENSES],
+        AccountSubTypes::CODES[AccountSubTypes::ADMINISTRATIVE_EXPENSES],
+        AccountSubTypes::CODES[AccountSubTypes::SELLING_DISTRIBUTION_EXPENSES],
+        AccountSubTypes::CODES[AccountSubTypes::FINANCIAL_EXPENSES],
+        AccountSubTypes::CODES[AccountSubTypes::PAYROLL_EXPENSES],
+        AccountSubTypes::CODES[AccountSubTypes::DEPRECIATION_AMORTIZATION],
+        AccountSubTypes::CODES[AccountSubTypes::TAX_EXPENSES],
+        AccountSubTypes::CODES[AccountSubTypes::OTHER_EXPENSES],
+        AccountSubTypes::CODES[AccountSubTypes::PREPAID_EXPENSES],
+        AccountSubTypes::CODES[AccountSubTypes::ADVANCES_DEPOSITS],
+        AccountSubTypes::CODES[AccountSubTypes::ACCRUED_LIABILITIES],
+        AccountSubTypes::CODES[AccountSubTypes::TAXES_PAYABLE],
+    ];
+
+    protected const CF_OPERATING_OTHER = [
+        AccountSubTypes::CODES[AccountSubTypes::CURRENT_ASSETS],
+        AccountSubTypes::CODES[AccountSubTypes::CURRENT_LIABILITIES],
+        AccountSubTypes::CODES[AccountSubTypes::OTHER_LIABILITIES],
+    ];
+
     public function isDebitNormal(?string $accountTypeCode): bool
     {
         return in_array($accountTypeCode, self::DEBIT_NORMAL_TYPE_CODES, true);
@@ -168,6 +226,104 @@ class AccountClassifier
 
         return $account->account_id === $settings->default_cash_account_id
             || $account->account_id === $settings->default_bank_account_id;
+    }
+
+    /**
+     * Maps a non-cash counterparty account onto a Cash Flow Statement line.
+     * Returns null for cash/bank accounts themselves (internal transfers are
+     * excluded by the Cash Flow service). Classification is by stable
+     * type/sub-type codes, never by free-text name.
+     *
+     * @return array{section: string, key: string, label: string}|null
+     */
+    public function cashFlowBucket(?string $typeCode, ?string $subTypeCode): ?array
+    {
+        if ($subTypeCode === AccountSubTypes::CODES[AccountSubTypes::CASH_CASH_EQUIVALENTS]) {
+            return null;
+        }
+
+        if (in_array($subTypeCode, self::CF_INVESTING, true)) {
+            return [
+                'section' => 'investing',
+                'key'     => 'investing_' . $subTypeCode,
+                'label'   => $this->cashFlowLabel('investing', $subTypeCode),
+            ];
+        }
+
+        if (in_array($subTypeCode, self::CF_FINANCING, true)) {
+            return [
+                'section' => 'financing',
+                'key'     => 'financing_' . $subTypeCode,
+                'label'   => $this->cashFlowLabel('financing', $subTypeCode),
+            ];
+        }
+
+        if (in_array($subTypeCode, self::CF_OPERATING_CUSTOMERS, true)
+            || $typeCode === AccountTypes::CODES[AccountTypes::REVENUE]) {
+            return [
+                'section' => 'operating',
+                'key'     => 'customers',
+                'label'   => 'Cash received from customers',
+            ];
+        }
+
+        if (in_array($subTypeCode, self::CF_OPERATING_SUPPLIERS, true)) {
+            return [
+                'section' => 'operating',
+                'key'     => 'suppliers',
+                'label'   => 'Cash paid to suppliers',
+            ];
+        }
+
+        if (in_array($subTypeCode, self::CF_OPERATING_EXPENSES, true)
+            || $typeCode === AccountTypes::CODES[AccountTypes::EXPENSES]) {
+            return [
+                'section' => 'operating',
+                'key'     => 'operating_expenses',
+                'label'   => 'Cash paid for operating expenses',
+            ];
+        }
+
+        if (in_array($subTypeCode, self::CF_OPERATING_OTHER, true)
+            || $typeCode === AccountTypes::CODES[AccountTypes::ASSETS]
+            || $typeCode === AccountTypes::CODES[AccountTypes::LIABILITIES]
+            || $typeCode === AccountTypes::CODES[AccountTypes::EQUITY]) {
+            return [
+                'section' => 'operating',
+                'key'     => 'other_operating',
+                'label'   => 'Other operating cash flows',
+            ];
+        }
+
+        return [
+            'section' => 'operating',
+            'key'     => 'other_operating',
+            'label'   => 'Other operating cash flows',
+        ];
+    }
+
+    protected function cashFlowLabel(string $section, ?string $subTypeCode): string
+    {
+        $labels = [
+            AccountSubTypes::CODES[AccountSubTypes::FIXED_ASSETS] => 'Purchase / sale of fixed assets',
+            AccountSubTypes::CODES[AccountSubTypes::ACCUMULATED_DEPRECIATION] => 'Fixed asset depreciation adjustments',
+            AccountSubTypes::CODES[AccountSubTypes::INTANGIBLE_ASSETS] => 'Purchase / sale of intangible assets',
+            AccountSubTypes::CODES[AccountSubTypes::INVESTMENTS] => 'Purchase / sale of investments',
+            AccountSubTypes::CODES[AccountSubTypes::LOANS_BORROWINGS] => 'Proceeds from / repayment of loans',
+            AccountSubTypes::CODES[AccountSubTypes::CAPITAL] => 'Owner capital contributions',
+            AccountSubTypes::CODES[AccountSubTypes::DRAWINGS] => 'Owner drawings',
+            AccountSubTypes::CODES[AccountSubTypes::RETAINED_EARNINGS] => 'Dividends / retained earnings movements',
+            AccountSubTypes::CODES[AccountSubTypes::CURRENT_YEAR_EARNINGS] => 'Current year earnings movements',
+            AccountSubTypes::CODES[AccountSubTypes::RESERVES] => 'Reserve movements',
+        ];
+
+        if ($subTypeCode && isset($labels[$subTypeCode])) {
+            return $labels[$subTypeCode];
+        }
+
+        return $section === 'investing'
+            ? 'Other investing cash flows'
+            : 'Other financing cash flows';
     }
 
     public function isTaxAccount(Account $account, ?AccountingSetting $settings): bool

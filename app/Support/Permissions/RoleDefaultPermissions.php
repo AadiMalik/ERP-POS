@@ -83,7 +83,7 @@ class RoleDefaultPermissions
                             'general-ledger', 'trial-balance', 'journal-register', 'account-ledger',
                             'account-balance', 'day-book', 'cash-bank-ledger', 'income-report',
                             'expense-report', 'expense-detail-report', 'tax-report', 'equity-report',
-                            'profit-loss', 'balance-sheet', 'accounts-payable', 'accounts-receivable',
+                            'profit-loss', 'balance-sheet', 'cash-flow', 'accounts-payable', 'accounts-receivable',
                             'service-transaction-summary', 'service-payment-report',
                             'fixed-asset-register', 'depreciation-report', 'asset-valuation-report', 'asset-disposal-report',
                         ]),

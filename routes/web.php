@@ -1593,7 +1593,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\EquityReportController::class, 'exportCsv'])->name('reports.equity-report.export-csv');
         });
 
-        // Profit & Loss and Balance Sheet render as computed statements (no DataTables data() endpoint).
+        // Profit & Loss, Balance Sheet and Cash Flow render as computed statements (no DataTables data() endpoint).
         Route::group(['prefix' => 'profit-loss'], function () {
             Route::get('/', [App\Http\Controllers\Admin\Reports\ProfitLossReportController::class, 'index']);
             Route::get('print', [App\Http\Controllers\Admin\Reports\ProfitLossReportController::class, 'print'])->name('reports.profit-loss.print');
@@ -1608,6 +1608,15 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('pdf', [App\Http\Controllers\Admin\Reports\BalanceSheetReportController::class, 'pdf'])->name('reports.balance-sheet.pdf');
             Route::get('export', [App\Http\Controllers\Admin\Reports\BalanceSheetReportController::class, 'export'])->name('reports.balance-sheet.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\BalanceSheetReportController::class, 'exportCsv'])->name('reports.balance-sheet.export-csv');
+        });
+
+        // Cash Flow Statement — direct-method statement (no DataTables data() endpoint).
+        Route::group(['prefix' => 'cash-flow'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\CashFlowReportController::class, 'index']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\CashFlowReportController::class, 'print'])->name('reports.cash-flow.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\CashFlowReportController::class, 'pdf'])->name('reports.cash-flow.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\CashFlowReportController::class, 'export'])->name('reports.cash-flow.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\CashFlowReportController::class, 'exportCsv'])->name('reports.cash-flow.export-csv');
         });
 
         Route::group(['prefix' => 'budget-vs-actual'], function () {

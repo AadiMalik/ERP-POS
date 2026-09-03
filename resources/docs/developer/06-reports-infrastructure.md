@@ -9,8 +9,24 @@ same `Pdf::loadView(...)->setPaper(...)->stream(...)` pattern described here.
 Every report controller under `App\Http\Controllers\Admin\Reports\**` implements:
 `index` (renders the filter/table screen), `data` (server-side DataTable feed,
 `POST`), `print` (browser `window.print()` view), `pdf`, `export` (Excel), and
-`export-csv`. Two exceptions render as computed statements instead of a DataTable
-(no `data()` action): Profit & Loss and Balance Sheet.
+`export-csv`. Three exceptions render as computed statements instead of a DataTable
+(no `data()` action): Profit & Loss, Balance Sheet, and Cash Flow Statement.
+
+### Cash Flow Statement
+
+Direct-method statement under `module:accounting`:
+
+- Controller: `CashFlowReportController`
+- Service: `CashFlowReportService::build()`
+- Classification: `AccountClassifier::cashFlowBucket()` (counterparty account
+  type/sub-type codes → Operating / Investing / Financing)
+- Cash universe: `AccountClassifier::isCashOrBank()` (Cash & Cash Equivalents
+  sub-type + `accounting_settings` default cash/bank) — never hard-coded IDs
+- Ledger engine: `AccountingLedgerQueryService` for opening/closing balances;
+  period movements attributed per journal entry so cash↔cash transfers are
+  excluded and cash is never double-counted
+- Permissions: `reports.cash-flow.{view,print,pdf,export,export-csv}`
+- Route prefix: `/admin/reports/cash-flow`
 
 ## PDF Generation Pattern
 

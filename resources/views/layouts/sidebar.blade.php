@@ -387,7 +387,7 @@
             'fiscal-year.view', 'accounting-period.view', 'period-closing-rule.manage', 'budget.view',
             'reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
             'reports.journal-register.view', 'reports.account-ledger.view', 'reports.account-balance.view',
-            'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view',
+            'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view', 'reports.cash-flow.view',
             'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.sales-report.view', 'reports.voucher-usage.view', 'reports.expense-report.view',
             'reports.tax-report.view', 'reports.equity-report.view', 'reports.budget-vs-actual.view',
             'reports.fixed-asset-register.view', 'reports.depreciation-report.view', 'reports.asset-valuation-report.view', 'reports.asset-disposal-report.view'])
@@ -502,7 +502,7 @@
                     @endif
                     @canAccessAny(['reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
                         'reports.journal-register.view', 'reports.account-ledger.view', 'reports.account-balance.view',
-                        'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view',
+                        'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view', 'reports.cash-flow.view',
                         'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.sales-report.view', 'reports.voucher-usage.view', 'reports.expense-report.view',
                         'reports.tax-report.view', 'reports.equity-report.view', 'reports.budget-vs-actual.view',
                         'reports.fixed-asset-register.view', 'reports.depreciation-report.view', 'reports.asset-valuation-report.view', 'reports.asset-disposal-report.view'])
@@ -571,6 +571,13 @@
                                     <li class="menu-item">
                                         <a href="{{ url('/admin/reports/balance-sheet') }}" class="menu-link">
                                             <div data-i18n="Balance Sheet">Balance Sheet</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.cash-flow.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/cash-flow') }}" class="menu-link">
+                                            <div data-i18n="Cash Flow Statement">Cash Flow Statement</div>
                                         </a>
                                     </li>
                                 @endcanAccess

@@ -9,9 +9,18 @@ export.
 ## Financial Reports (Accounting)
 General Ledger, Trial Balance, Journal Register, Account Ledger, Account Balance,
 Day Book, Cash & Bank Ledger, Income Report, Expense Report, Expense Detail
-Report, Tax Report, Equity Report, **Profit & Loss**, **Balance Sheet**, Budget
-vs. Actual, plus Fixed Asset reports: **Fixed Asset Register**, **Depreciation
-Report**, **Asset Valuation / Book Value**, and **Asset Disposal / Sale**.
+Report, Tax Report, Equity Report, **Profit & Loss**, **Balance Sheet**, **Cash
+Flow Statement**, Budget vs. Actual, plus Fixed Asset reports: **Fixed Asset
+Register**, **Depreciation Report**, **Asset Valuation / Book Value**, and
+**Asset Disposal / Sale**.
+
+The **Cash Flow Statement** shows cash inflows and outflows for a date range,
+classified into Operating, Investing, and Financing activities from your posted
+journal entries. It includes opening and closing cash/bank balances and a
+reconciliation that opening plus net cash movement equals closing. Cash and bank
+accounts are taken from the Cash & Cash Equivalents Chart of Accounts category
+(and any default cash/bank accounts in Accounting Settings). Transfers between
+cash/bank accounts are excluded so they do not inflate activity totals.
 
 Bank statement matching and clearance history live under **Accounting → Bank
 Reconciliation** (Print/PDF from that screen), not as a separate report menu item.
