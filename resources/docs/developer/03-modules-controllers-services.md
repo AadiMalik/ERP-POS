@@ -255,8 +255,10 @@ Uniform `index / data / print / pdf / export / export-csv` shape registered via 
 loop over a controller map in `routes/web.php`. ~90 report classes across HRM
 (`Reports\Hrm\{Employee,Attendance,Leave,Lifecycle}`, `module:hrm`), Payroll
 (`Reports\Hrm\PayrollFinance`, `module:payroll`), Procurement (`module:inventory`),
-Customer/POS (`module:pos`), Service Management (`module:service-management`), and
-Accounting/Financial (`module:accounting`). See
+Customer/POS (`module:pos`), Orders/POS sales
+(`Reports\Orders\*`, `BaseOrderReportController` /
+`BaseOrderReportService`, also `module:pos`), Service Management
+(`module:service-management`), and Accounting/Financial (`module:accounting`). See
 [Reports Infrastructure](06-reports-infrastructure.md).
 
 ## Settings (Core)

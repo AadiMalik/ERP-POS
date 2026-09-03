@@ -1,0 +1,205 @@
+@php
+    use App\Enums\RoleNames;
+@endphp
+@extends('layouts.app')
+@section('content')
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4">
+            Branch-wise Sales Report
+        </h4>
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <button type="button" id="toggleFilter" class="btn btn-outline-primary">
+                        <i class="fa fa-filter"></i>
+                        Filters
+                    </button>
+                </div>
+                <div class="d-flex gap-2">
+                    @canAccess('reports.branch-sales.print')
+                    <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary">
+                        <i class="fa fa-print"></i> Print
+                    </a>
+                    @endcanAccess
+                    @canAccess('reports.branch-sales.pdf')
+                    <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger">
+                        <i class="fa fa-file-pdf"></i> PDF
+                    </a>
+                    @endcanAccess
+                    @canAccess('reports.branch-sales.export')
+                    <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
+                        <i class="fa fa-file-excel"></i> Excel
+                    </a>
+                    @endcanAccess
+                    @canAccess('reports.branch-sales.export-csv')
+                    <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
+                        <i class="fa fa-file-text"></i> CSV
+                    </a>
+                    @endcanAccess
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="filterSection" class="card-body border-bottom">
+                    <div class="row g-3">
+                        @if (RoleNames::SUPERADMIN == getRoleName())
+                            <div class="col-md-3">
+                                <label class="form-label">Business</label>
+                                <select id="business_id" class="form-select">
+                                    <option value="">--All Businesses--</option>
+                                    @foreach ($business as $item)
+                                        <option value="{{ $item->business_id }}">{{ $item->code ?? '' }}
+                                            {{ $item->name ?? '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+                        <div class="col-md-3">
+                            <label class="form-label">Order Source</label>
+                            <select id="order_source_id" class="form-select">
+                                <option value="">--All Sources--</option>
+                                @foreach ($order_sources as $item)
+                                    <option value="{{ $item->order_source_id }}">{{ $item->name ?? '' }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Period</label>
+                            @include('admin.partials.date_filter')
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end gap-2">
+                            <button type="button" id="search_btn" class="btn btn-primary">
+                                Search
+                            </button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 p-4 pb-0">
+                    <div class="col-md-3">
+                        <div class="alert alert-info mb-0">
+                            <strong>Orders:</strong> <span id="grand_orders_display">-</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-secondary mb-0">
+                            <strong>Gross:</strong> <span id="grand_gross_display">-</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-success mb-0">
+                            <strong>Net Sales:</strong> <span id="grand_net_display">-</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-warning mb-0">
+                            <strong>Due:</strong> <span id="grand_due_display">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive p-4">
+                    <table id="branch_sales_table" class="table datatables">
+                        <thead>
+                            <tr>
+                                <th>Branch</th>
+                                <th class="text-end">Orders</th>
+                                <th class="text-end">Qty Sold</th>
+                                <th class="text-end">Gross Sales</th>
+                                <th class="text-end">Discount</th>
+                                <th class="text-end">Tax</th>
+                                <th class="text-end">Net Sales</th>
+                                <th class="text-end">Paid</th>
+                                <th class="text-end">Due</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+@section('js')
+    @include('admin.partials.datatable', [
+        'columns' => "
+                        {data:'branch',name:'branch',sortable:false},
+                        {data:'order_count',name:'order_count',sortable:false,className:'text-end'},
+                        {data:'total_qty',name:'total_qty',sortable:false,className:'text-end'},
+                        {data:'gross',name:'gross',sortable:false,className:'text-end'},
+                        {data:'discount',name:'discount',sortable:false,className:'text-end'},
+                        {data:'tax',name:'tax',sortable:false,className:'text-end'},
+                        {data:'net',name:'net',sortable:false,className:'text-end'},
+                        {data:'paid_amount',name:'paid_amount',sortable:false,className:'text-end'},
+                        {data:'due_amount',name:'due_amount',sortable:false,className:'text-end'}",
+        'route' => 'branch-sales/data',
+        'buttons' => false,
+        'pageLength' => 50,
+        'notordering' => true,
+        'class' => 'branch_sales_table',
+        'variable' => 'branch_sales_table',
+        'datefilter' => true,
+        'params' => "business_id:$('#business_id').val(),order_source_id:$('#order_source_id').val()",
+    ])
+
+    <script>
+        function currentReportParams() {
+            return {
+                business_id: $('#business_id').val() || '',
+                order_source_id: $('#order_source_id').val() || '',
+                start_date: (typeof filterStartDate !== 'undefined') ? filterStartDate : '',
+                end_date: (typeof filterEndDate !== 'undefined') ? filterEndDate : '',
+            };
+        }
+
+        function buildReportUrl(path) {
+            let query = $.param(currentReportParams());
+            return url_local + path + '?' + query;
+        }
+
+        $(document).ready(function() {
+            $('#business_id').select2();
+            $('#order_source_id').select2();
+            refreshTotals();
+        });
+
+        $('#search_btn').click(function() {
+            initDataTablebranch_sales_table();
+            refreshTotals();
+        });
+
+        function refreshTotals() {
+            $.ajax({
+                url: url_local + '/admin/reports/branch-sales/data',
+                type: 'POST',
+                data: $.extend({
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    draw: 1,
+                    start: 0,
+                    length: 1,
+                }, currentReportParams()),
+                success: function(response) {
+                    $('#grand_orders_display').text(response.grand_orders ?? '-');
+                    $('#grand_gross_display').text(response.grand_gross ?? '-');
+                    $('#grand_net_display').text(response.grand_net ?? '-');
+                    $('#grand_due_display').text(response.grand_due ?? '-');
+                }
+            });
+        }
+
+        $('#btn_print').click(function() {
+            window.open(buildReportUrl('/admin/reports/branch-sales/print'), '_blank');
+        });
+        $('#btn_pdf').click(function() {
+            window.open(buildReportUrl('/admin/reports/branch-sales/pdf'), '_blank');
+        });
+        $('#btn_excel').click(function() {
+            window.location.href = buildReportUrl('/admin/reports/branch-sales/export');
+        });
+        $('#btn_csv').click(function() {
+            window.location.href = buildReportUrl('/admin/reports/branch-sales/export-csv');
+        });
+    </script>
+@endsection

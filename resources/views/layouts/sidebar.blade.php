@@ -1609,7 +1609,11 @@
         @endcanAccessAny
 
         {{-- Orders (centralized - shared by POS, Website, Mobile App, API) --}}
-        @canAccessAny(['pos.access', 'order-return.view', 'order-type.view', 'order-source.view', 'payment-method.view', 'discount.view', 'voucher.view'])
+        @canAccessAny(['pos.access', 'order-return.view', 'order-type.view', 'order-source.view', 'payment-method.view', 'discount.view', 'voucher.view',
+            'reports.order-detail.view', 'reports.product-sales.view', 'reports.variation-sales.view', 'reports.customer-sales.view',
+            'reports.branch-sales.view', 'reports.order-source-sales.view', 'reports.payment-method-sales.view',
+            'reports.order-status-report.view', 'reports.cancelled-orders.view', 'reports.due-credit-sales.view',
+            'reports.discount-report.view', 'reports.order-tax-report.view', 'reports.top-selling.view', 'reports.offline-orders-report.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons fa fa-receipt"></i>
@@ -1666,6 +1670,117 @@
                             </a>
                         </li>
                     @endcanAccess
+                    @canAccessAny(['reports.order-detail.view', 'reports.product-sales.view', 'reports.variation-sales.view',
+                        'reports.customer-sales.view', 'reports.branch-sales.view', 'reports.order-source-sales.view',
+                        'reports.payment-method-sales.view', 'reports.order-status-report.view', 'reports.cancelled-orders.view',
+                        'reports.due-credit-sales.view', 'reports.discount-report.view', 'reports.order-tax-report.view',
+                        'reports.top-selling.view', 'reports.offline-orders-report.view'])
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Order Reports">Reports</div>
+                            </a>
+                            <ul class="menu-sub">
+                                @canAccess('reports.order-detail.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/order-detail') }}" class="menu-link">
+                                            <div data-i18n="Order Detail Report">Order Detail Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.product-sales.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/product-sales') }}" class="menu-link">
+                                            <div data-i18n="Product Sales">Product-wise Sales</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.variation-sales.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/variation-sales') }}" class="menu-link">
+                                            <div data-i18n="Variation Sales">Variation-wise Sales</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.customer-sales.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/customer-sales') }}" class="menu-link">
+                                            <div data-i18n="Customer Sales">Customer-wise Sales</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.branch-sales.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/branch-sales') }}" class="menu-link">
+                                            <div data-i18n="Branch Sales">Branch-wise Sales</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.order-source-sales.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/order-source-sales') }}" class="menu-link">
+                                            <div data-i18n="Order Source Sales">Order Source Sales</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.payment-method-sales.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/payment-method-sales') }}" class="menu-link">
+                                            <div data-i18n="Payment Method Sales">Payment Method Sales</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.order-status-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/order-status-report') }}" class="menu-link">
+                                            <div data-i18n="Order Status Report">Order Status Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.cancelled-orders.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/cancelled-orders') }}" class="menu-link">
+                                            <div data-i18n="Cancelled Orders">Cancelled Orders</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.due-credit-sales.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/due-credit-sales') }}" class="menu-link">
+                                            <div data-i18n="Due Credit Sales">Due / Credit Sales</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.discount-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/discount-report') }}" class="menu-link">
+                                            <div data-i18n="Discount Report">Discount Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.order-tax-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/order-tax-report') }}" class="menu-link">
+                                            <div data-i18n="Order Tax Report">Order Tax Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.top-selling.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/top-selling') }}" class="menu-link">
+                                            <div data-i18n="Top Selling">Top Selling</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.offline-orders-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/offline-orders-report') }}" class="menu-link">
+                                            <div data-i18n="Offline Orders Report">Offline Orders</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                            </ul>
+                        </li>
+                    @endcanAccessAny
                 </ul>
             </li>
         @endcanAccessAny

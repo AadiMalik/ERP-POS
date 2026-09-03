@@ -1038,8 +1038,37 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
                 Route::get('export', [App\Http\Controllers\Admin\Reports\CustomerPaymentHistoryReportController::class, 'export'])->name('reports.customer-payment-history.export');
                 Route::get('export-csv', [App\Http\Controllers\Admin\Reports\CustomerPaymentHistoryReportController::class, 'exportCsv'])->name('reports.customer-payment-history.export-csv');
             });
+
+            // Orders reports (POS/order-side aggregates) - same module:pos
+            // grouping as customer reports above.
+            $orderReportRoutes = [
+                'order-detail' => App\Http\Controllers\Admin\Reports\Orders\OrderDetailReportController::class,
+                'product-sales' => App\Http\Controllers\Admin\Reports\Orders\ProductSalesReportController::class,
+                'variation-sales' => App\Http\Controllers\Admin\Reports\Orders\VariationSalesReportController::class,
+                'customer-sales' => App\Http\Controllers\Admin\Reports\Orders\CustomerSalesReportController::class,
+                'branch-sales' => App\Http\Controllers\Admin\Reports\Orders\BranchSalesReportController::class,
+                'order-source-sales' => App\Http\Controllers\Admin\Reports\Orders\OrderSourceSalesReportController::class,
+                'payment-method-sales' => App\Http\Controllers\Admin\Reports\Orders\PaymentMethodSalesReportController::class,
+                'order-status-report' => App\Http\Controllers\Admin\Reports\Orders\OrderStatusReportController::class,
+                'cancelled-orders' => App\Http\Controllers\Admin\Reports\Orders\CancelledOrdersReportController::class,
+                'due-credit-sales' => App\Http\Controllers\Admin\Reports\Orders\DueCreditSalesReportController::class,
+                'discount-report' => App\Http\Controllers\Admin\Reports\Orders\DiscountReportController::class,
+                'order-tax-report' => App\Http\Controllers\Admin\Reports\Orders\OrderTaxReportController::class,
+                'top-selling' => App\Http\Controllers\Admin\Reports\Orders\TopSellingReportController::class,
+                'offline-orders-report' => App\Http\Controllers\Admin\Reports\Orders\OfflineOrdersReportController::class,
+            ];
+            foreach ($orderReportRoutes as $prefix => $controller) {
+                Route::group(['prefix' => $prefix], function () use ($prefix, $controller) {
+                    Route::get('/', [$controller, 'index']);
+                    Route::post('data', [$controller, 'data']);
+                    Route::get('print', [$controller, 'print'])->name("reports.{$prefix}.print");
+                    Route::get('pdf', [$controller, 'pdf'])->name("reports.{$prefix}.pdf");
+                    Route::get('export', [$controller, 'export'])->name("reports.{$prefix}.export");
+                    Route::get('export-csv', [$controller, 'exportCsv'])->name("reports.{$prefix}.export-csv");
+                });
+            }
         });
-    }); // end module:pos (customer reports)
+    }); // end module:pos (customer + order reports)
 
     Route::group(['middleware' => ['module:pos']], function () {
     //pos screen

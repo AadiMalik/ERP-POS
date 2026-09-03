@@ -16,6 +16,13 @@ Report**, **Asset Valuation / Book Value**, and **Asset Disposal / Sale**.
 ## Sales Report
 Overall sales performance, with the ability to reconcile against payments received.
 
+## Order / POS Reports
+Order Detail, Product-wise Sales, Variation-wise Sales, Customer-wise Sales,
+Branch-wise Sales, Order Source Sales, Payment Method Sales, Order Status,
+Cancelled Orders, Due / Credit Sales, Discount Report, Order Tax Report,
+Top Selling, and Offline Orders. These live under the Orders menu and respect
+the same Print / PDF / Excel / CSV permission split as every other report.
+
 ## Customer Reports
 Customer Ledger, Customer Aging (how overdue customer balances are), Customer
 Payment History.

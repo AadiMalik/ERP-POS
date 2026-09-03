@@ -82,3 +82,25 @@ Excel::download(new XxxReportExport($rows), 'xxx-report.csv', \Maatwebsite\Excel
 4. Add the route to the report-controller loop/group in `routes/web.php`.
 5. Add views: `index.blade.php`, `pdf.blade.php`, `print/print.blade.php`.
 6. Add an `App\Exports\XxxReportExport` class if Excel/CSV export is needed.
+
+## Orders / POS Reports
+
+Order-side reports live under `App\Http\Controllers\Admin\Reports\Orders\` and
+`App\Services\Concrete\Admin\Reports\Orders\`, sharing:
+
+- `BaseOrderReportController` — same six-action plumbing as HRM base report
+  controllers (permission middleware, print/pdf/export/export-csv, audit log).
+- `BaseOrderReportService` — shared `applyCommonFilters()` (business / branch /
+  sale_date range / order source / status / customer / product / variation),
+  `dueOf()`, `paymentStatusOf()`, and `filterByPaymentStatus()`. Date filtering
+  uses `orders.sale_date` by default (override the `date` column when joining).
+
+Routes are registered under `module:pos` next to customer reports in
+`routes/web.php`. Sidebar entries sit under **Orders → Reports**. Permissions
+use slugs such as `reports.product-sales.*`, `reports.branch-sales.*`,
+`reports.offline-orders-report.*`.
+
+Current set: Order Detail, Product Sales, Variation Sales, Customer Sales,
+Branch Sales, Order Source Sales, Payment Method Sales, Order Status, Cancelled
+Orders, Due/Credit Sales, Discount Report, Order Tax Report, Top Selling,
+Offline Orders.

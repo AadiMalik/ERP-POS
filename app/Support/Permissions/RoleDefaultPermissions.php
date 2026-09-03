@@ -96,7 +96,12 @@ class RoleDefaultPermissions
                     PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment', 'service-sale', 'service-sale-return']),
                     array_merge(
                         ['dashboard.view'],
-                        self::formatVariants(['customer-ledger', 'customer-aging', 'customer-payment-history', 'sales-report', 'service-sale-report'])
+                        self::formatVariants([
+                            'customer-ledger', 'customer-aging', 'customer-payment-history', 'sales-report', 'service-sale-report',
+                            'order-detail', 'product-sales', 'variation-sales', 'customer-sales', 'branch-sales',
+                            'order-source-sales', 'payment-method-sales', 'order-status-report', 'cancelled-orders',
+                            'due-credit-sales', 'discount-report', 'order-tax-report', 'top-selling', 'offline-orders-report',
+                        ])
                     )
                 );
 

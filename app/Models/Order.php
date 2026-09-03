@@ -86,6 +86,11 @@ class Order extends Model
         return $this->belongsTo(PosRegisterSession::class, 'register_session_id');
     }
 
+    public function posDevice()
+    {
+        return $this->belongsTo(PosDevice::class, 'pos_device_id', 'pos_device_id');
+    }
+
     public function cashier()
     {
         return $this->belongsTo(User::class, 'cashier_id');
