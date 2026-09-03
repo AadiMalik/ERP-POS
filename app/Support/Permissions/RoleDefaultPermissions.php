@@ -101,6 +101,7 @@ class RoleDefaultPermissions
                             'order-detail', 'product-sales', 'variation-sales', 'customer-sales', 'branch-sales',
                             'order-source-sales', 'payment-method-sales', 'order-status-report', 'cancelled-orders',
                             'due-credit-sales', 'discount-report', 'order-tax-report', 'top-selling', 'offline-orders-report',
+                            'order-correction-report',
                         ])
                     )
                 );
@@ -201,6 +202,7 @@ class RoleDefaultPermissions
                     'order.hold',
                     'order.cancel',
                     'order.void',
+                    'order.correct',
                     'order.delete',
                     'order.refund.process',
                     'order.payment.credit',

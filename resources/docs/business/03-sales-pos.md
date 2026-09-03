@@ -67,8 +67,16 @@ panel shows the delivery address and payment method on the same row.
 
 An order can also be:
 - **Held** and **resumed** later (e.g. a customer steps away).
-- **Reopened** after completion (to add items or fix a mistake), subject to
-  permission.
+- **Reopened** after **cancellation** only (cancelled → draft), subject to
+  permission — not after a completed/posted sale.
+- **Corrected** on the **same business day** by a manager with the
+  **Correct Same-Day Order** permission: the posted POS sale stays the same
+  order number, but stock, discounts, tax, payments, and accounting are
+  fully reversed and then recalculated/reposted from the corrected cart.
+  A reason is required. Correction is blocked after the sale date window,
+  for non-POS channels, and if the order already has a return or a customer
+  payment settlement. Cashiers without this permission cannot change posted
+  sales (including via API).
 - **Cancelled** or **voided**, each a distinct, individually-permissioned action so
   you can allow "cancel before payment" without allowing "void after payment" for
   the same staff member.
@@ -81,6 +89,9 @@ buttons at the top depend on the current status and your permissions:
 - **Cancel Order** — for Draft/Hold only; requires a reason.
 - **Void Order** — for Posted orders only; reverses stock/accounting; requires a
   reason.
+- **Correct Order** — for same-day posted POS orders only (manager permission);
+  opens the POS screen in correction mode so lines, discounts, and payments can
+  be rebuilt, then reverses and reposts stock/accounting.
 - **Mark Shipped / Out for Delivery / Mark Delivered** — for **Delivery** order
   type only, after the order is posted. These are fulfilment tracking steps and
   do not change stock or accounting again.

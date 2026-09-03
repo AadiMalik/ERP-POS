@@ -99,6 +99,7 @@ function openOrderDetailModal(rowData) {
 
     $('#odThermalPrintBtn').attr('href', ORDER_HISTORY_URLS.print + '/' + rowData.order_id + '/thermal-print');
     $('#odReorderBtn').attr('href', ORDER_HISTORY_URLS.pos_screen + '?reorder_from=' + rowData.order_id);
+    $('#odCorrectBtn').addClass('d-none').attr('href', '#');
 
     $('#odItemsBody').html('<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>');
     $('#odPaymentsBody').html('<tr><td colspan="3" class="text-center text-muted">Loading...</td></tr>');
@@ -189,6 +190,14 @@ function renderOrderDetail(data) {
 
     currentOrderDetail = { order_id: header.order_id, due_amount: due };
     $('#odReceivePaymentBtn').toggleClass('d-none', !(CAN_RECEIVE_PAYMENT && due > 0));
+
+    if (typeof CAN_CORRECT_ORDER !== 'undefined' && CAN_CORRECT_ORDER && header.can_correct) {
+        $('#odCorrectBtn')
+            .removeClass('d-none')
+            .attr('href', ORDER_HISTORY_URLS.pos_screen + '?correct=' + header.order_id);
+    } else {
+        $('#odCorrectBtn').addClass('d-none').attr('href', '#');
+    }
 }
 
 /* =========================================================

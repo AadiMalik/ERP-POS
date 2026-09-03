@@ -1628,7 +1628,8 @@
             'reports.order-detail.view', 'reports.product-sales.view', 'reports.variation-sales.view', 'reports.customer-sales.view',
             'reports.branch-sales.view', 'reports.order-source-sales.view', 'reports.payment-method-sales.view',
             'reports.order-status-report.view', 'reports.cancelled-orders.view', 'reports.due-credit-sales.view',
-            'reports.discount-report.view', 'reports.order-tax-report.view', 'reports.top-selling.view', 'reports.offline-orders-report.view'])
+            'reports.discount-report.view', 'reports.order-tax-report.view', 'reports.top-selling.view', 'reports.offline-orders-report.view',
+            'reports.order-correction-report.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons fa fa-receipt"></i>
@@ -1689,7 +1690,7 @@
                         'reports.customer-sales.view', 'reports.branch-sales.view', 'reports.order-source-sales.view',
                         'reports.payment-method-sales.view', 'reports.order-status-report.view', 'reports.cancelled-orders.view',
                         'reports.due-credit-sales.view', 'reports.discount-report.view', 'reports.order-tax-report.view',
-                        'reports.top-selling.view', 'reports.offline-orders-report.view'])
+                        'reports.top-selling.view', 'reports.offline-orders-report.view', 'reports.order-correction-report.view'])
                         <li class="menu-item">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
                                 <div data-i18n="Order Reports">Reports</div>
@@ -1790,6 +1791,13 @@
                                     <li class="menu-item">
                                         <a href="{{ url('/admin/reports/offline-orders-report') }}" class="menu-link">
                                             <div data-i18n="Offline Orders Report">Offline Orders</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.order-correction-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/order-correction-report') }}" class="menu-link">
+                                            <div data-i18n="Order Correction Report">Order Corrections</div>
                                         </a>
                                     </li>
                                 @endcanAccess

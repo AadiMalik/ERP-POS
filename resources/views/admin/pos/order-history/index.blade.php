@@ -342,6 +342,9 @@
                     <a href="#" id="odReorderBtn" target="_blank" class="btn btn-outline-success">
                         <i class="fa fa-rotate-right"></i> Reorder
                     </a>
+                    <a href="#" id="odCorrectBtn" class="btn btn-outline-primary d-none">
+                        <i class="fa fa-pencil"></i> Correct
+                    </a>
                     <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -395,6 +398,7 @@
     <script>
         var IS_ORDER_TAKER = @json($is_order_taker);
         var CAN_RECEIVE_PAYMENT = @json(auth()->user()->can('customer-payment.create'));
+        var CAN_CORRECT_ORDER = @json(auth()->user()->can('order.correct'));
         var ORDER_HISTORY_URLS = {
             details: "{{ url('admin/order/details') }}",
             print: "{{ url('admin/order') }}",

@@ -178,12 +178,13 @@ class OrderController extends Controller
 
         $sale_type_badge = $this->order_service->formatSaleTypeBadge($order->details);
         $payment_method_label = $this->order_service->resolvePaymentMethodLabel($order);
+        $can_correct = Auth::user()->can('order.correct') && $this->order_service->canCorrect($order);
 
         foreach ($order->details as $detail) {
             $detail->setAttribute('sale_type_label', $this->order_service->resolveSaleTypeLabel($detail));
         }
 
-        return view('admin.order.show', compact('order', 'sale_type_badge', 'payment_method_label'));
+        return view('admin.order.show', compact('order', 'sale_type_badge', 'payment_method_label', 'can_correct'));
     }
 
     /**
@@ -437,6 +438,60 @@ class OrderController extends Controller
 
         try {
             $order = $this->order_service->void($request->all());
+            return $this->success(Message::UPDATE, $order);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * Same-day manager correction of a posted POS order. Reverses stock/JV,
+     * rebuilds cart lines/payments, and reposts on the same order_id.
+     * Sub-permissions (discount/coupon/price/customer) are stripped here the
+     * same way as store() - the service does not authorize them.
+     */
+    public function correct(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:orders,order_id',
+            'reason' => 'required|string|max:1000',
+            'products' => 'required|array|min:1',
+            'payments' => 'required|array|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationResponse($validator->errors()->first());
+        }
+
+        $this->assertOrderAccessible($request->order_id);
+
+        $obj = $request->all();
+
+        if (!empty($obj['discount_id']) && !Auth::user()->can('order.discount.apply')) {
+            unset($obj['discount_id']);
+        }
+
+        if ((!empty($obj['voucher_code']) || !empty($obj['voucher_id'])) && !Auth::user()->can('order.coupon.apply')) {
+            unset($obj['voucher_code']);
+            unset($obj['voucher_id']);
+        }
+
+        if (!empty($obj['products']) && !Auth::user()->can('order.price.change')) {
+            foreach ($obj['products'] as $index => $line) {
+                unset($obj['products'][$index]['unit_price']);
+            }
+        }
+
+        if (array_key_exists('customer_id', $obj) && !Auth::user()->can('order.customer.change')) {
+            unset($obj['customer_id']);
+        }
+
+        if (!empty($obj['override_minimum_price']) && !Auth::user()->can('order.price.override-minimum')) {
+            $obj['override_minimum_price'] = false;
+        }
+
+        try {
+            $order = $this->order_service->correct($obj);
             return $this->success(Message::UPDATE, $order);
         } catch (Exception $e) {
             return $this->error($e->getMessage());

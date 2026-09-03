@@ -18,6 +18,14 @@ approving, rejecting, exporting, or importing a record — is recorded with **wh
 did it, **when**, and **what changed**. Filter by business, module, or action type
 to investigate a specific change or keep a general audit trail for compliance.
 
+Same-day **POS order corrections** are logged under the Orders module with action
+**corrected**, including the original and new line/payment totals, the manager who
+authorized it, the reason, and the permission used (`order.correct`). The order's
+Status History also records each correction. For a manager-facing view scoped just
+to corrections - how many orders were corrected, by whom, and a before/after
+comparison of each one - see the **Order Correction Report** under
+[Reports](09-reports.md#order--pos-reports).
+
 ## Login History
 
 A record of sign-in activity is kept for security review — useful for spotting

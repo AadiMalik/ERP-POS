@@ -10,6 +10,7 @@ use App\Enums\Status;
 use App\Enums\TransactionType;
 use App\Models\AccountingSetting;
 use App\Models\BusinessSetting;
+use App\Models\CustomerPayment;
 use App\Models\CustomerProfile;
 use App\Models\CustomerSetting;
 use App\Models\Discount;
@@ -21,6 +22,7 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\OrderDetailBatch;
 use App\Models\OrderPayment;
+use App\Models\OrderReturn;
 use App\Models\OrderStatusHistory;
 use App\Models\OrderType;
 use App\Models\PaymentMethod;
@@ -54,7 +56,9 @@ use Yajra\DataTables\DataTables;
  * idempotency-guarded on the JournalEntry(source_type=POS_SALE,
  * source_id=order_id); void() is the exact mirror, reusing
  * ProductVariationStockService::recomputeLedger() for the stock-reversal
- * replay rather than reimplementing it.
+ * replay rather than reimplementing it. correct() is a same-day manager
+ * cart rebuild that reversePostedEffects() + rebuilds lines/payments +
+ * applyPostedEffects() while keeping the same order_id and posted status.
  *
  * A register/register-session is only required for the POS channel - when
  * `register_session_id` is absent from the payload, business_id/branch_id/
@@ -394,9 +398,21 @@ class OrderService
                 // POS Order History only ever needs View + Thermal Print -
                 // the normal Print and JV buttons stay for the main Admin
                 // Order List (which shares this same getData() endpoint but
-                // never sends context=pos).
+                // never sends context=pos). Same-day Correct is manager-only.
                 if (($obj['context'] ?? null) === 'pos') {
-                    return $viewButton . $thermalPrintButton;
+                    $correctButton = '';
+
+                    if (
+                        Auth::user()?->can('order.correct')
+                        && $this->canCorrect($item)
+                    ) {
+                        $correctButton = "<a class='btn btn-icon btn-outline-primary mr-2'
+                            href='" . route('pos-screen') . '?correct=' . $item->order_id . "' title='Correct Same-Day Order'>
+                            <i class='fa fa-pencil'></i>
+                            </a>";
+                    }
+
+                    return $viewButton . $correctButton . $thermalPrintButton;
                 }
 
                 $viewJvButton = in_array($item->status, ['posted', 'returned'])
@@ -427,7 +443,19 @@ class OrderService
                         </a>"
                     : '';
 
-                return $viewButton . $viewJvButton . $cancelButton . $returnButton . $printButton . $thermalPrintButton;
+                $correctButton = '';
+
+                if (
+                    Auth::user()?->can('order.correct')
+                    && $this->canCorrect($item)
+                ) {
+                    $correctButton = "<a class='btn btn-icon btn-outline-primary mr-2'
+                        href='" . route('pos-screen') . '?correct=' . $item->order_id . "' title='Correct Same-Day Order'>
+                        <i class='fa fa-pencil'></i>
+                        </a>";
+                }
+
+                return $viewButton . $viewJvButton . $cancelButton . $correctButton . $returnButton . $printButton . $thermalPrintButton;
             })
             ->rawColumns(['business', 'branch', 'warehouse', 'register', 'cashier', 'customer', 'order_type', 'order_source', 'total', 'status', 'payment_status', 'sale_type', 'action', 'row_detail'])
             ->make(true);
@@ -669,6 +697,7 @@ class OrderService
                 'fbr_status' => $order->fbr_status,
                 'pra_invoice_number' => $order->pra_invoice_number,
                 'pra_status' => $order->pra_status,
+                'can_correct' => $this->canCorrect($order),
             ],
             'details' => [],
             'payments' => [],
@@ -684,6 +713,25 @@ class OrderService
             // attachAvailableStock() uses for search/browse.
             $product = $detail->product;
             $is_tracked = (bool) ($product->is_track_stock ?? false);
+            $available_stock = null;
+
+            if ($is_tracked) {
+                $available_stock = $this->getAvailableStock(
+                    $order->business_id,
+                    $order->warehouse_id,
+                    $detail->product_id,
+                    $detail->product_variation_id
+                );
+
+                // Posted sales already deducted this line's base_quantity. When
+                // the manager opens a same-day correction, reversePostedEffects()
+                // will restore that stock before reposting - surface it as
+                // available here so the cart does not falsely block keeping
+                // (or modestly increasing) the original qty.
+                if ($order->status === Status::POSTED) {
+                    $available_stock = (float) $available_stock + (float) $detail->base_quantity;
+                }
+            }
 
             $data['details'][] = [
                 'order_detail_id' => $detail->order_detail_id,
@@ -709,7 +757,7 @@ class OrderService
                 'cost_price' => $detail->cost_price,
                 'notes' => $detail->notes,
                 'is_track_stock' => $is_tracked,
-                'available_stock' => $is_tracked ? $this->getAvailableStock($order->business_id, $order->warehouse_id, $detail->product_id, $detail->product_variation_id) : null,
+                'available_stock' => $available_stock,
             ];
         }
 
@@ -1926,6 +1974,577 @@ class OrderService
     }
 
     /**
+     * Recomputes tax from final payments, validates tender vs total, and
+     * asserts accounting configuration required to post a POS sale.
+     * Shared by post() and correct().
+     *
+     * @return array{order_total: float, paid_amount: float, change_amount: float, cash_applied: float, applied_total: float, has_cash: bool, has_credit_payment: bool, has_store_credit_payment: bool, has_cod_payment: bool, accounting_setting: \App\Models\AccountingSetting}
+     */
+    protected function validatePaymentsForPosting(Order $order, $payments): array
+    {
+        // The rate used while the cart was being built was only ever a working
+        // estimate (payments aren't known until checkout) - re-resolve it now
+        // that the final payment methods are known and reconcile the order
+        // before anything is posted to the ledger.
+        $this->recomputeOrderTax($order, $payments);
+
+        // Payment-method voucher restrictions are unknowable until payments are
+        // finalized (they weren't chosen yet at draft/save time) - the last
+        // possible point to enforce them server-side is here, before anything
+        // is booked to the ledger.
+        if (!empty($order->voucher_id)) {
+            $voucher = Voucher::with('paymentMethods')->find($order->voucher_id);
+
+            if ($voucher && $voucher->paymentMethods->isNotEmpty()) {
+                $allowed = $voucher->paymentMethods->pluck('payment_method_id')->all();
+                $used = $payments->pluck('payment_method_id')->filter()->all();
+
+                if (empty(array_intersect($allowed, $used))) {
+                    throw new Exception('The applied voucher does not support the payment method used for this order.');
+                }
+            }
+        }
+
+        $order_total = round((float) $order->total, 2);
+
+        // Cash may be tendered above the order total (change); every other
+        // method must exactly cover its allocated portion - so only the cash
+        // leg is allowed to carry the surplus that becomes change_amount.
+        $non_cash_total = 0;
+        $cash_tendered = 0;
+        $has_cash = false;
+
+        foreach ($payments as $payment) {
+            $method = PaymentMethod::find($payment->payment_method_id);
+
+            if (!$method) {
+                throw new Exception('One of the selected payment methods no longer exists.');
+            }
+
+            if ($method->type === 'cash') {
+                $has_cash = true;
+                $cash_tendered += (float) $payment->amount;
+            } else {
+                $non_cash_total += (float) $payment->amount;
+            }
+        }
+
+        $non_cash_total = round($non_cash_total, 2);
+
+        if ($non_cash_total > $order_total + 0.01) {
+            throw new Exception('Non-cash payment total (' . $non_cash_total . ') exceeds the order total (' . $order_total . ').');
+        }
+
+        $cash_required = round($order_total - $non_cash_total, 2);
+        $change_amount = 0;
+        $cash_applied = $cash_tendered;
+
+        if ($cash_required > 0.01) {
+            if (round($cash_tendered, 2) < $cash_required - 0.01) {
+                $payments_total = round($non_cash_total + $cash_tendered, 2);
+                throw new Exception('Payment total (' . $payments_total . ') does not cover the order total (' . $order_total . ').');
+            }
+
+            $change_amount = round($cash_tendered - $cash_required, 3);
+            $cash_applied = $cash_required;
+        } elseif ($cash_tendered > 0) {
+            // No cash was actually needed to cover the total (fully paid by
+            // other methods) but a cash line was still submitted - the whole
+            // amount is handed straight back as change.
+            $change_amount = round($cash_tendered, 3);
+            $cash_applied = 0;
+        }
+
+        if ($change_amount > 0 && !$has_cash) {
+            throw new Exception('Change can only be given against a cash payment.');
+        }
+
+        $paid_amount = round($non_cash_total + $cash_tendered, 3);
+        // Net amount actually applied to the sale (excludes change handed
+        // back) - this is what the JV/order_payments must reconcile to.
+        $applied_total = round($non_cash_total + $cash_applied, 2);
+
+        if (abs($applied_total - $order_total) > 0.01) {
+            throw new Exception('Payment total (' . $applied_total . ') does not match the order total (' . $order_total . ').');
+        }
+
+        $accounting_setting = AccountingSetting::where('business_id', $order->business_id)->first();
+
+        if (!$accounting_setting || !$accounting_setting->enable_accounting) {
+            throw new Exception('Accounting is not enabled for this business. Please configure Accounting Settings before completing sales.');
+        }
+
+        app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($order->business_id, now());
+
+        if (empty($accounting_setting->default_sale_account_id)) {
+            throw new Exception('Sale Account is not configured in Accounting Settings.');
+        }
+
+        if ((float) $order->tax_amount > 0 && empty($accounting_setting->default_tax_account_id)) {
+            throw new Exception('Tax Account is not configured in Accounting Settings.');
+        }
+
+        if ((float) $order->discount_amount > 0 && empty($accounting_setting->default_discount_account_id)) {
+            throw new Exception('Discount Account is not configured in Accounting Settings.');
+        }
+
+        if (empty($accounting_setting->default_inventory_account_id) || empty($accounting_setting->default_cogs_account_id)) {
+            throw new Exception('Inventory and COGS Accounts must be configured in Accounting Settings before completing sales.');
+        }
+
+        $has_credit_payment = false;
+        $has_store_credit_payment = false;
+        $has_cod_payment = false;
+
+        foreach ($payments as $payment) {
+            $method = PaymentMethod::find($payment->payment_method_id);
+
+            if ($method->type === 'credit') {
+                $has_credit_payment = true;
+                continue;
+            }
+
+            if ($method->type === 'cod') {
+                $has_cod_payment = true;
+                continue;
+            }
+
+            if ($method->type === 'store_credit') {
+                $has_store_credit_payment = true;
+                continue;
+            }
+
+            if ($method->type !== 'cash' && empty($method->account_id)) {
+                throw new Exception('Payment method "' . $method->name . '" is not mapped to an account.');
+            }
+        }
+
+        if ($has_cash && empty($accounting_setting->default_cash_account_id)) {
+            throw new Exception('Cash Account is not configured in Accounting Settings.');
+        }
+
+        if ($has_credit_payment || $has_cod_payment) {
+            if (empty($accounting_setting->default_customer_account_id)) {
+                throw new Exception(
+                    'Customer Account is not configured in Settings → Accounting. '
+                    . 'Set Customer Account, save settings (existing customers are updated), '
+                    . 'then complete the credit/COD sale again.'
+                );
+            }
+
+            if ($has_credit_payment) {
+                $this->validateCreditLimit($order, $payments);
+            }
+        }
+
+        if ($has_store_credit_payment) {
+            if (empty($accounting_setting->default_store_credit_account_id)) {
+                throw new Exception('Store Credit Account is not configured in Accounting Settings, required for store credit payments.');
+            }
+
+            if (empty($order->user_id)) {
+                throw new Exception('Store credit cannot be applied to a walk-in sale - select a customer first.');
+            }
+
+            $this->validateStoreCreditPayment($order, $payments);
+        }
+
+
+        return [
+            'order_total' => $order_total,
+            'paid_amount' => $paid_amount,
+            'change_amount' => $change_amount,
+            'cash_applied' => $cash_applied,
+            'applied_total' => $applied_total,
+            'has_cash' => $has_cash,
+            'has_credit_payment' => $has_credit_payment,
+            'has_store_credit_payment' => $has_store_credit_payment,
+            'has_cod_payment' => $has_cod_payment,
+            'accounting_setting' => $accounting_setting,
+        ];
+    }
+
+    /**
+     * Creates the POS Sale journal entry, decrements stock, and redeems
+     * voucher/store-credit. Does not change order status - callers do.
+     * Shared by post() and correct().
+     */
+    protected function applyPostedEffects(Order $order, $payments, array $meta): void
+    {
+        $order_total = $meta['order_total'];
+        $paid_amount = $meta['paid_amount'];
+        $change_amount = $meta['change_amount'];
+        $cash_applied = $meta['cash_applied'];
+        $applied_total = $meta['applied_total'];
+        $has_cash = $meta['has_cash'];
+        $has_credit_payment = $meta['has_credit_payment'];
+        $has_store_credit_payment = $meta['has_store_credit_payment'];
+        $has_cod_payment = $meta['has_cod_payment'];
+        $accounting_setting = $meta['accounting_setting'];
+
+        $journal = Journal::where('short', 'SV')->where('is_deleted', 0)->first();
+
+        if (!$journal) {
+            throw new Exception('No "Sale Voucher" journal category found. Please run the POS journal setup migration.');
+        }
+
+        $entry_no = generateJVNum($journal->journal_id);
+
+        $journal_entry = JournalEntry::create([
+            'journal_entry_id' => generateUuid(),
+            'journal_id' => $journal->journal_id,
+            'business_id' => $order->business_id,
+            'branch_id' => $order->branch_id,
+            'entry_no' => $entry_no,
+            'reference_no' => 'ORD-' . $order->daily_order_id,
+            'entry_date' => now(),
+            'description' => 'Auto-generated sale voucher for order #' . $order->daily_order_id,
+            'source_type' => JournalSourceTypes::POS_SALE,
+            'source_id' => $order->order_id,
+            'status' => Status::POSTED,
+            'postedby_id' => Auth::id(),
+            'date_posted' => now(),
+            'createdby_id' => Auth::id(),
+            'date_created' => now(),
+        ]);
+
+        // Debit: each payment's mapped account (Credit-type payments debit the
+        // shared customer receivable account, tagged with user_id - the
+        // exact technique SupplierPaymentService uses for the payable side,
+        // and what CustomerService::getCustomerLedger() sums back up later).
+        // Cash is debited net of change handed back - change is a cash-drawer
+        // movement only and is never booked as sales revenue.
+        foreach ($payments as $payment) {
+            $method = PaymentMethod::find($payment->payment_method_id);
+
+            if ($method->type === 'cash') {
+                $debit = $cash_applied;
+                $account_id = $accounting_setting->default_cash_account_id;
+            } elseif ($method->type === 'credit' || $method->type === 'cod') {
+                $debit = (float) $payment->amount;
+                $account_id = $accounting_setting->default_customer_account_id;
+            } elseif ($method->type === 'store_credit') {
+                $debit = (float) $payment->amount;
+                $account_id = $accounting_setting->default_store_credit_account_id;
+            } else {
+                $debit = (float) $payment->amount;
+                $account_id = $method->account_id;
+            }
+
+            if ($debit <= 0) {
+                continue;
+            }
+
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id' => $journal_entry->journal_entry_id,
+                'account_id' => $account_id,
+                'debit' => $debit,
+                'credit' => 0,
+                'user_id' => in_array($method->type, ['credit', 'store_credit', 'cod'], true) ? $order->user_id : null,
+                'description' => 'Order #' . $order->daily_order_id . ' - ' . $method->name,
+            ]);
+        }
+
+        // Debit: discount given (contra-revenue).
+        if ((float) $order->discount_amount > 0) {
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id' => $journal_entry->journal_entry_id,
+                'account_id' => $accounting_setting->default_discount_account_id,
+                'debit' => $order->discount_amount,
+                'credit' => 0,
+                'description' => 'Order #' . $order->daily_order_id . ' - Discount',
+            ]);
+        }
+
+        // Credit: gross sales revenue (subtotal, before discount).
+        JournalEntryDetail::create([
+            'journal_entry_detail_id' => generateUuid(),
+            'journal_entry_id' => $journal_entry->journal_entry_id,
+            'account_id' => $accounting_setting->default_sale_account_id,
+            'debit' => 0,
+            'credit' => $order->subtotal,
+            'description' => 'Order #' . $order->daily_order_id,
+        ]);
+
+        // Credit: tax collected.
+        if ((float) $order->tax_amount > 0) {
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id' => $journal_entry->journal_entry_id,
+                'account_id' => $accounting_setting->default_tax_account_id,
+                'debit' => 0,
+                'credit' => $order->tax_amount,
+                'description' => 'Order #' . $order->daily_order_id . ' - Tax',
+            ]);
+        }
+
+        // applied_total was already validated to equal order_total above
+        // (within a 1-cent tolerance since cash tendering is never sub-cent
+        // precise), but every leg above was posted from the order's stored
+        // total/subtotal/tax/discount, not the literal applied amounts - so
+        // any such difference must be absorbed into a round-off leg or the
+        // JV would be left unbalanced by that same fraction of a cent.
+        $rounding_diff = round($applied_total - $order_total, 3);
+
+        if (abs($rounding_diff) > 0.0001) {
+            if (empty($accounting_setting->default_round_off_account_id)) {
+                throw new Exception('Round Off Account is not configured in Accounting Settings, required to reconcile a rounding difference of ' . $rounding_diff . '.');
+            }
+
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id' => $journal_entry->journal_entry_id,
+                'account_id' => $accounting_setting->default_round_off_account_id,
+                'debit' => $rounding_diff < 0 ? abs($rounding_diff) : 0,
+                'credit' => $rounding_diff > 0 ? $rounding_diff : 0,
+                'description' => 'Order #' . $order->daily_order_id . ' - Rounding',
+            ]);
+        }
+
+        // Stock sufficiency check - tracked products only, and only
+        // enforced when this business hasn't opted into
+        // InventorySetting::negative_stock ("allow selling below/at
+        // zero stock" - see allowsNegativeStock()). This is a fast-fail
+        // UX pass only (unlocked read) so an obviously-doomed sale
+        // aborts early without taking any row locks; it is NOT the
+        // authoritative check under concurrency - the locked re-check
+        // inside the decrement loop below is what actually prevents
+        // overselling when two sales race for the same stock.
+        $allow_negative_stock = $this->allowsNegativeStock($order->business_id);
+
+        if (!$allow_negative_stock) {
+            foreach ($order->details as $detail) {
+                $product = $detail->product;
+
+                if (!$product || !$product->is_track_stock) {
+                    continue;
+                }
+
+                $available_qty = $this->getAvailableStock($order->business_id, $order->warehouse_id, $detail->product_id, $detail->product_variation_id);
+
+                if ((float) $detail->base_quantity > $available_qty) {
+                    throw new Exception('Insufficient stock for "' . ($product->name ?? 'product') . '". Available: ' . $available_qty . ', required: ' . $detail->base_quantity . '.');
+                }
+            }
+        }
+
+        // Per line: snapshot cost, decrement stock, write the stock
+        // transaction(s), and accumulate the COGS total.
+        $total_cost = 0;
+        $inventory_setting = InventorySetting::where('business_id', $order->business_id)->first();
+
+        foreach ($order->details as $detail) {
+            $variation = $detail->productVariation;
+            $is_batch_tracked = $variation && $detail->product && $detail->product->is_track_stock
+                && ($variation->track_batch || $variation->track_expiry);
+
+            $picks = null;
+
+            if ($is_batch_tracked) {
+                $picks = $this->stock_service->pickBatchesForSale(
+                    $order->business_id,
+                    $order->warehouse_id,
+                    $detail->product_id,
+                    $detail->product_variation_id,
+                    $detail->base_quantity,
+                    $inventory_setting
+                );
+
+                if ($picks === null && !$allow_negative_stock) {
+                    throw new Exception('Insufficient available (non-expired) batch stock for "' . ($detail->product->name ?? 'product') . '".');
+                }
+
+                // ponytail: negative stock is allowed but no batch combination
+                // covers the line - fall back to the plain aggregate
+                // decrement below rather than picking a batch to force
+                // negative, so the sale still goes through unattributed to
+                // any batch. Revisit if batch-accurate negative-stock sales
+                // are ever needed.
+            }
+
+            $stock = ProductVariationStock::where('business_id', $order->business_id)
+                ->where('warehouse_id', $order->warehouse_id)
+                ->where('product_id', $detail->product_id)
+                ->where('product_variation_id', $detail->product_variation_id)
+                ->lockForUpdate()
+                ->first();
+
+            $existing_qty = $stock->quantity ?? 0;
+            $existing_avg = $stock->avg_price ?? 0;
+
+            // Authoritative check, now that the row is locked - the
+            // earlier pre-check above is only a fast-fail optimization
+            // and can be stale under concurrent checkouts. Still
+            // skipped entirely when this business allows negative
+            // stock, same as the pre-check.
+            if (!$allow_negative_stock && $detail->product && $detail->product->is_track_stock && (float) $detail->base_quantity > (float) $existing_qty) {
+                throw new Exception('Insufficient stock for "' . ($detail->product->name ?? 'product') . '". Available: ' . $existing_qty . ', required: ' . $detail->base_quantity . '.');
+            }
+
+            $new_qty = $existing_qty - $detail->base_quantity;
+            $line_cost = round($detail->base_quantity * $existing_avg, 3);
+            $total_cost += $line_cost;
+
+            $detail->update(['cost_price' => $existing_avg]);
+
+            if ($stock) {
+                $stock->update(['quantity' => $new_qty]);
+            } else {
+                $stock = ProductVariationStock::create([
+                    'product_variation_stock_id' => generateUuid(),
+                    'business_id' => $order->business_id,
+                    'warehouse_id' => $order->warehouse_id,
+                    'product_id' => $detail->product_id,
+                    'product_variation_id' => $detail->product_variation_id,
+                    'quantity' => $new_qty,
+                    'avg_price' => 0,
+                    'status' => 'active',
+                    'createdby_id' => Auth::id(),
+                    'date_created' => now(),
+                ]);
+            }
+
+            if (empty($picks)) {
+                ProductVariationStockTransaction::create([
+                    'product_variation_stock_transaction_id' => generateUuid(),
+                    'transaction_date' => now(),
+                    'transaction_type' => TransactionType::SALE,
+                    'business_id' => $order->business_id,
+                    'product_id' => $detail->product_id,
+                    'product_variation_id' => $detail->product_variation_id,
+                    'warehouse_id' => $order->warehouse_id,
+                    'unit_id' => $detail->unit_id,
+                    'product_variation_unit_conversion_id' => $detail->product_variation_unit_conversion_id,
+                    'conversion_factor' => $detail->conversion_factor,
+                    'quantity' => $detail->quantity,
+                    'base_quantity' => $detail->base_quantity,
+                    'unit_price' => $detail->unit_price,
+                    'total_price' => $line_cost,
+                    'quantity_after' => $new_qty,
+                    'avg_price_after' => $existing_avg,
+                    'reference_id' => $order->order_id,
+                    'reference_type' => ReferenceType::SALE,
+                    'remarks' => 'Auto-created on posting of order #' . $order->daily_order_id,
+                    'createdby_id' => Auth::id(),
+                    'date_created' => now(),
+                ]);
+
+                continue;
+            }
+
+            // FEFO/FIFO draw-down: one stock transaction per batch drawn
+            // from, each stamped with its own batch id. A single-batch
+            // line stamps the batch straight onto order_details; a line
+            // split across batches records the breakdown in
+            // order_detail_batches instead (needed so a later return can
+            // restore the right quantity into the right batch(es)).
+            $single_batch_id = count($picks) === 1 ? $picks[0]['batch']->product_variation_batch_id : null;
+
+            if ($single_batch_id) {
+                $detail->update(['product_variation_batch_id' => $single_batch_id]);
+            }
+
+            $picked_cost_remaining = $line_cost;
+
+            foreach ($picks as $index => $pick) {
+                $pick_base_quantity = (float) $pick['base_quantity'];
+                $pick_quantity = $detail->conversion_factor > 0 ? $pick_base_quantity / $detail->conversion_factor : $pick_base_quantity;
+                $is_last_pick = $index === array_key_last($picks);
+                $pick_cost = $is_last_pick ? $picked_cost_remaining : round($pick_base_quantity * $existing_avg, 3);
+                $picked_cost_remaining -= $pick_cost;
+
+                $pick['batch']->decrement('quantity', $pick_base_quantity);
+
+                ProductVariationStockTransaction::create([
+                    'product_variation_stock_transaction_id' => generateUuid(),
+                    'transaction_date' => now(),
+                    'transaction_type' => TransactionType::SALE,
+                    'business_id' => $order->business_id,
+                    'product_id' => $detail->product_id,
+                    'product_variation_id' => $detail->product_variation_id,
+                    'warehouse_id' => $order->warehouse_id,
+                    'unit_id' => $detail->unit_id,
+                    'product_variation_unit_conversion_id' => $detail->product_variation_unit_conversion_id,
+                    'conversion_factor' => $detail->conversion_factor,
+                    'quantity' => $pick_quantity,
+                    'base_quantity' => $pick_base_quantity,
+                    'unit_price' => $detail->unit_price,
+                    'total_price' => $pick_cost,
+                    'quantity_after' => $new_qty,
+                    'avg_price_after' => $existing_avg,
+                    'reference_id' => $order->order_id,
+                    'reference_type' => ReferenceType::SALE,
+                    'remarks' => 'Auto-created on posting of order #' . $order->daily_order_id,
+                    'product_variation_batch_id' => $pick['batch']->product_variation_batch_id,
+                    'createdby_id' => Auth::id(),
+                    'date_created' => now(),
+                ]);
+
+                if (!$single_batch_id) {
+                    OrderDetailBatch::create([
+                        'order_detail_batch_id' => generateUuid(),
+                        'order_detail_id' => $detail->order_detail_id,
+                        'product_variation_batch_id' => $pick['batch']->product_variation_batch_id,
+                        'quantity' => $pick_quantity,
+                        'base_quantity' => $pick_base_quantity,
+                        'createdby_id' => Auth::id(),
+                        'date_created' => now(),
+                    ]);
+                }
+            }
+        }
+
+        if ($total_cost > 0) {
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id' => $journal_entry->journal_entry_id,
+                'account_id' => $accounting_setting->default_cogs_account_id,
+                'debit' => $total_cost,
+                'credit' => 0,
+                'description' => 'Order #' . $order->daily_order_id . ' - COGS',
+            ]);
+
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id' => $journal_entry->journal_entry_id,
+                'account_id' => $accounting_setting->default_inventory_account_id,
+                'debit' => 0,
+                'credit' => $total_cost,
+                'description' => 'Order #' . $order->daily_order_id . ' - Inventory',
+            ]);
+        }
+
+        \App\Services\Concrete\Admin\JournalEntryService::assertBalanced($journal_entry->journal_entry_id);
+
+        if (!empty($order->voucher_id)) {
+            $this->voucher_service->redeem(
+                $order->voucher_id,
+                $order->order_id,
+                $order->user_id,
+                max(0, $order->voucher_discount_amount)
+            );
+        }
+
+        if ($has_store_credit_payment) {
+            $store_credit_amount = (float) $payments
+                ->filter(fn ($payment) => optional(PaymentMethod::find($payment->payment_method_id))->type === 'store_credit')
+                ->sum('amount');
+
+            app(CustomerStoreCreditService::class)->redeem(
+                $order->business_id,
+                $order->user_id,
+                $store_credit_amount,
+                'order',
+                $order->order_id,
+                'Redeemed at Order #' . $order->daily_order_id
+            );
+        }
+
+    }
+
+    /**
      * Posts a draft/held order: validates payments cover the order total (a
      * cash payment may tender more than the total, in which case the excess
      * becomes change_amount and is never booked as revenue), then atomically
@@ -1982,172 +2601,7 @@ class OrderService
                 throw new Exception('At least one payment is required to complete the sale.');
             }
 
-            // The rate used while the cart was being built was only ever a working
-            // estimate (payments aren't known until checkout) - re-resolve it now
-            // that the final payment methods are known and reconcile the order
-            // before anything is posted to the ledger.
-            $this->recomputeOrderTax($order, $payments);
-
-            // Payment-method voucher restrictions are unknowable until payments are
-            // finalized (they weren't chosen yet at draft/save time) - the last
-            // possible point to enforce them server-side is here, before anything
-            // is booked to the ledger.
-            if (!empty($order->voucher_id)) {
-                $voucher = Voucher::with('paymentMethods')->find($order->voucher_id);
-
-                if ($voucher && $voucher->paymentMethods->isNotEmpty()) {
-                    $allowed = $voucher->paymentMethods->pluck('payment_method_id')->all();
-                    $used = $payments->pluck('payment_method_id')->filter()->all();
-
-                    if (empty(array_intersect($allowed, $used))) {
-                        throw new Exception('The applied voucher does not support the payment method used for this order.');
-                    }
-                }
-            }
-
-            $order_total = round((float) $order->total, 2);
-
-            // Cash may be tendered above the order total (change); every other
-            // method must exactly cover its allocated portion - so only the cash
-            // leg is allowed to carry the surplus that becomes change_amount.
-            $non_cash_total = 0;
-            $cash_tendered = 0;
-            $has_cash = false;
-
-            foreach ($payments as $payment) {
-                $method = PaymentMethod::find($payment->payment_method_id);
-
-                if (!$method) {
-                    throw new Exception('One of the selected payment methods no longer exists.');
-                }
-
-                if ($method->type === 'cash') {
-                    $has_cash = true;
-                    $cash_tendered += (float) $payment->amount;
-                } else {
-                    $non_cash_total += (float) $payment->amount;
-                }
-            }
-
-            $non_cash_total = round($non_cash_total, 2);
-
-            if ($non_cash_total > $order_total + 0.01) {
-                throw new Exception('Non-cash payment total (' . $non_cash_total . ') exceeds the order total (' . $order_total . ').');
-            }
-
-            $cash_required = round($order_total - $non_cash_total, 2);
-            $change_amount = 0;
-            $cash_applied = $cash_tendered;
-
-            if ($cash_required > 0.01) {
-                if (round($cash_tendered, 2) < $cash_required - 0.01) {
-                    $payments_total = round($non_cash_total + $cash_tendered, 2);
-                    throw new Exception('Payment total (' . $payments_total . ') does not cover the order total (' . $order_total . ').');
-                }
-
-                $change_amount = round($cash_tendered - $cash_required, 3);
-                $cash_applied = $cash_required;
-            } elseif ($cash_tendered > 0) {
-                // No cash was actually needed to cover the total (fully paid by
-                // other methods) but a cash line was still submitted - the whole
-                // amount is handed straight back as change.
-                $change_amount = round($cash_tendered, 3);
-                $cash_applied = 0;
-            }
-
-            if ($change_amount > 0 && !$has_cash) {
-                throw new Exception('Change can only be given against a cash payment.');
-            }
-
-            $paid_amount = round($non_cash_total + $cash_tendered, 3);
-            // Net amount actually applied to the sale (excludes change handed
-            // back) - this is what the JV/order_payments must reconcile to.
-            $applied_total = round($non_cash_total + $cash_applied, 2);
-
-            if (abs($applied_total - $order_total) > 0.01) {
-                throw new Exception('Payment total (' . $applied_total . ') does not match the order total (' . $order_total . ').');
-            }
-
-            $accounting_setting = AccountingSetting::where('business_id', $order->business_id)->first();
-
-            if (!$accounting_setting || !$accounting_setting->enable_accounting) {
-                throw new Exception('Accounting is not enabled for this business. Please configure Accounting Settings before completing sales.');
-            }
-
-            app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($order->business_id, now());
-
-            if (empty($accounting_setting->default_sale_account_id)) {
-                throw new Exception('Sale Account is not configured in Accounting Settings.');
-            }
-
-            if ((float) $order->tax_amount > 0 && empty($accounting_setting->default_tax_account_id)) {
-                throw new Exception('Tax Account is not configured in Accounting Settings.');
-            }
-
-            if ((float) $order->discount_amount > 0 && empty($accounting_setting->default_discount_account_id)) {
-                throw new Exception('Discount Account is not configured in Accounting Settings.');
-            }
-
-            if (empty($accounting_setting->default_inventory_account_id) || empty($accounting_setting->default_cogs_account_id)) {
-                throw new Exception('Inventory and COGS Accounts must be configured in Accounting Settings before completing sales.');
-            }
-
-            $has_credit_payment = false;
-            $has_store_credit_payment = false;
-            $has_cod_payment = false;
-
-            foreach ($payments as $payment) {
-                $method = PaymentMethod::find($payment->payment_method_id);
-
-                if ($method->type === 'credit') {
-                    $has_credit_payment = true;
-                    continue;
-                }
-
-                if ($method->type === 'cod') {
-                    $has_cod_payment = true;
-                    continue;
-                }
-
-                if ($method->type === 'store_credit') {
-                    $has_store_credit_payment = true;
-                    continue;
-                }
-
-                if ($method->type !== 'cash' && empty($method->account_id)) {
-                    throw new Exception('Payment method "' . $method->name . '" is not mapped to an account.');
-                }
-            }
-
-            if ($has_cash && empty($accounting_setting->default_cash_account_id)) {
-                throw new Exception('Cash Account is not configured in Accounting Settings.');
-            }
-
-            if ($has_credit_payment || $has_cod_payment) {
-                if (empty($accounting_setting->default_customer_account_id)) {
-                    throw new Exception(
-                        'Customer Account is not configured in Settings → Accounting. '
-                        . 'Set Customer Account, save settings (existing customers are updated), '
-                        . 'then complete the credit/COD sale again.'
-                    );
-                }
-
-                if ($has_credit_payment) {
-                    $this->validateCreditLimit($order, $payments);
-                }
-            }
-
-            if ($has_store_credit_payment) {
-                if (empty($accounting_setting->default_store_credit_account_id)) {
-                    throw new Exception('Store Credit Account is not configured in Accounting Settings, required for store credit payments.');
-                }
-
-                if (empty($order->user_id)) {
-                    throw new Exception('Store credit cannot be applied to a walk-in sale - select a customer first.');
-                }
-
-                $this->validateStoreCreditPayment($order, $payments);
-            }
+            $meta = $this->validatePaymentsForPosting($order, $payments);
 
             $limit = checkPackageLimit('sales');
 
@@ -2155,365 +2609,10 @@ class OrderService
                 throw new Exception($limit['message']);
             }
 
-            $journal = Journal::where('short', 'SV')->where('is_deleted', 0)->first();
+            $this->applyPostedEffects($order, $payments, $meta);
 
-            if (!$journal) {
-                throw new Exception('No "Sale Voucher" journal category found. Please run the POS journal setup migration.');
-            }
-
-            $entry_no = generateJVNum($journal->journal_id);
-
-            $journal_entry = JournalEntry::create([
-                'journal_entry_id' => generateUuid(),
-                'journal_id' => $journal->journal_id,
-                'business_id' => $order->business_id,
-                'branch_id' => $order->branch_id,
-                'entry_no' => $entry_no,
-                'reference_no' => 'ORD-' . $order->daily_order_id,
-                'entry_date' => now(),
-                'description' => 'Auto-generated sale voucher for order #' . $order->daily_order_id,
-                'source_type' => JournalSourceTypes::POS_SALE,
-                'source_id' => $order->order_id,
-                'status' => Status::POSTED,
-                'postedby_id' => Auth::id(),
-                'date_posted' => now(),
-                'createdby_id' => Auth::id(),
-                'date_created' => now(),
-            ]);
-
-            // Debit: each payment's mapped account (Credit-type payments debit the
-            // shared customer receivable account, tagged with user_id - the
-            // exact technique SupplierPaymentService uses for the payable side,
-            // and what CustomerService::getCustomerLedger() sums back up later).
-            // Cash is debited net of change handed back - change is a cash-drawer
-            // movement only and is never booked as sales revenue.
-            foreach ($payments as $payment) {
-                $method = PaymentMethod::find($payment->payment_method_id);
-
-                if ($method->type === 'cash') {
-                    $debit = $cash_applied;
-                    $account_id = $accounting_setting->default_cash_account_id;
-                } elseif ($method->type === 'credit' || $method->type === 'cod') {
-                    $debit = (float) $payment->amount;
-                    $account_id = $accounting_setting->default_customer_account_id;
-                } elseif ($method->type === 'store_credit') {
-                    $debit = (float) $payment->amount;
-                    $account_id = $accounting_setting->default_store_credit_account_id;
-                } else {
-                    $debit = (float) $payment->amount;
-                    $account_id = $method->account_id;
-                }
-
-                if ($debit <= 0) {
-                    continue;
-                }
-
-                JournalEntryDetail::create([
-                    'journal_entry_detail_id' => generateUuid(),
-                    'journal_entry_id' => $journal_entry->journal_entry_id,
-                    'account_id' => $account_id,
-                    'debit' => $debit,
-                    'credit' => 0,
-                    'user_id' => in_array($method->type, ['credit', 'store_credit', 'cod'], true) ? $order->user_id : null,
-                    'description' => 'Order #' . $order->daily_order_id . ' - ' . $method->name,
-                ]);
-            }
-
-            // Debit: discount given (contra-revenue).
-            if ((float) $order->discount_amount > 0) {
-                JournalEntryDetail::create([
-                    'journal_entry_detail_id' => generateUuid(),
-                    'journal_entry_id' => $journal_entry->journal_entry_id,
-                    'account_id' => $accounting_setting->default_discount_account_id,
-                    'debit' => $order->discount_amount,
-                    'credit' => 0,
-                    'description' => 'Order #' . $order->daily_order_id . ' - Discount',
-                ]);
-            }
-
-            // Credit: gross sales revenue (subtotal, before discount).
-            JournalEntryDetail::create([
-                'journal_entry_detail_id' => generateUuid(),
-                'journal_entry_id' => $journal_entry->journal_entry_id,
-                'account_id' => $accounting_setting->default_sale_account_id,
-                'debit' => 0,
-                'credit' => $order->subtotal,
-                'description' => 'Order #' . $order->daily_order_id,
-            ]);
-
-            // Credit: tax collected.
-            if ((float) $order->tax_amount > 0) {
-                JournalEntryDetail::create([
-                    'journal_entry_detail_id' => generateUuid(),
-                    'journal_entry_id' => $journal_entry->journal_entry_id,
-                    'account_id' => $accounting_setting->default_tax_account_id,
-                    'debit' => 0,
-                    'credit' => $order->tax_amount,
-                    'description' => 'Order #' . $order->daily_order_id . ' - Tax',
-                ]);
-            }
-
-            // applied_total was already validated to equal order_total above
-            // (within a 1-cent tolerance since cash tendering is never sub-cent
-            // precise), but every leg above was posted from the order's stored
-            // total/subtotal/tax/discount, not the literal applied amounts - so
-            // any such difference must be absorbed into a round-off leg or the
-            // JV would be left unbalanced by that same fraction of a cent.
-            $rounding_diff = round($applied_total - $order_total, 3);
-
-            if (abs($rounding_diff) > 0.0001) {
-                if (empty($accounting_setting->default_round_off_account_id)) {
-                    throw new Exception('Round Off Account is not configured in Accounting Settings, required to reconcile a rounding difference of ' . $rounding_diff . '.');
-                }
-
-                JournalEntryDetail::create([
-                    'journal_entry_detail_id' => generateUuid(),
-                    'journal_entry_id' => $journal_entry->journal_entry_id,
-                    'account_id' => $accounting_setting->default_round_off_account_id,
-                    'debit' => $rounding_diff < 0 ? abs($rounding_diff) : 0,
-                    'credit' => $rounding_diff > 0 ? $rounding_diff : 0,
-                    'description' => 'Order #' . $order->daily_order_id . ' - Rounding',
-                ]);
-            }
-
-            // Stock sufficiency check - tracked products only, and only
-            // enforced when this business hasn't opted into
-            // InventorySetting::negative_stock ("allow selling below/at
-            // zero stock" - see allowsNegativeStock()). This is a fast-fail
-            // UX pass only (unlocked read) so an obviously-doomed sale
-            // aborts early without taking any row locks; it is NOT the
-            // authoritative check under concurrency - the locked re-check
-            // inside the decrement loop below is what actually prevents
-            // overselling when two sales race for the same stock.
-            $allow_negative_stock = $this->allowsNegativeStock($order->business_id);
-
-            if (!$allow_negative_stock) {
-                foreach ($order->details as $detail) {
-                    $product = $detail->product;
-
-                    if (!$product || !$product->is_track_stock) {
-                        continue;
-                    }
-
-                    $available_qty = $this->getAvailableStock($order->business_id, $order->warehouse_id, $detail->product_id, $detail->product_variation_id);
-
-                    if ((float) $detail->base_quantity > $available_qty) {
-                        throw new Exception('Insufficient stock for "' . ($product->name ?? 'product') . '". Available: ' . $available_qty . ', required: ' . $detail->base_quantity . '.');
-                    }
-                }
-            }
-
-            // Per line: snapshot cost, decrement stock, write the stock
-            // transaction(s), and accumulate the COGS total.
-            $total_cost = 0;
-            $inventory_setting = InventorySetting::where('business_id', $order->business_id)->first();
-
-            foreach ($order->details as $detail) {
-                $variation = $detail->productVariation;
-                $is_batch_tracked = $variation && $detail->product && $detail->product->is_track_stock
-                    && ($variation->track_batch || $variation->track_expiry);
-
-                $picks = null;
-
-                if ($is_batch_tracked) {
-                    $picks = $this->stock_service->pickBatchesForSale(
-                        $order->business_id,
-                        $order->warehouse_id,
-                        $detail->product_id,
-                        $detail->product_variation_id,
-                        $detail->base_quantity,
-                        $inventory_setting
-                    );
-
-                    if ($picks === null && !$allow_negative_stock) {
-                        throw new Exception('Insufficient available (non-expired) batch stock for "' . ($detail->product->name ?? 'product') . '".');
-                    }
-
-                    // ponytail: negative stock is allowed but no batch combination
-                    // covers the line - fall back to the plain aggregate
-                    // decrement below rather than picking a batch to force
-                    // negative, so the sale still goes through unattributed to
-                    // any batch. Revisit if batch-accurate negative-stock sales
-                    // are ever needed.
-                }
-
-                $stock = ProductVariationStock::where('business_id', $order->business_id)
-                    ->where('warehouse_id', $order->warehouse_id)
-                    ->where('product_id', $detail->product_id)
-                    ->where('product_variation_id', $detail->product_variation_id)
-                    ->lockForUpdate()
-                    ->first();
-
-                $existing_qty = $stock->quantity ?? 0;
-                $existing_avg = $stock->avg_price ?? 0;
-
-                // Authoritative check, now that the row is locked - the
-                // earlier pre-check above is only a fast-fail optimization
-                // and can be stale under concurrent checkouts. Still
-                // skipped entirely when this business allows negative
-                // stock, same as the pre-check.
-                if (!$allow_negative_stock && $detail->product && $detail->product->is_track_stock && (float) $detail->base_quantity > (float) $existing_qty) {
-                    throw new Exception('Insufficient stock for "' . ($detail->product->name ?? 'product') . '". Available: ' . $existing_qty . ', required: ' . $detail->base_quantity . '.');
-                }
-
-                $new_qty = $existing_qty - $detail->base_quantity;
-                $line_cost = round($detail->base_quantity * $existing_avg, 3);
-                $total_cost += $line_cost;
-
-                $detail->update(['cost_price' => $existing_avg]);
-
-                if ($stock) {
-                    $stock->update(['quantity' => $new_qty]);
-                } else {
-                    $stock = ProductVariationStock::create([
-                        'product_variation_stock_id' => generateUuid(),
-                        'business_id' => $order->business_id,
-                        'warehouse_id' => $order->warehouse_id,
-                        'product_id' => $detail->product_id,
-                        'product_variation_id' => $detail->product_variation_id,
-                        'quantity' => $new_qty,
-                        'avg_price' => 0,
-                        'status' => 'active',
-                        'createdby_id' => Auth::id(),
-                        'date_created' => now(),
-                    ]);
-                }
-
-                if (empty($picks)) {
-                    ProductVariationStockTransaction::create([
-                        'product_variation_stock_transaction_id' => generateUuid(),
-                        'transaction_date' => now(),
-                        'transaction_type' => TransactionType::SALE,
-                        'business_id' => $order->business_id,
-                        'product_id' => $detail->product_id,
-                        'product_variation_id' => $detail->product_variation_id,
-                        'warehouse_id' => $order->warehouse_id,
-                        'unit_id' => $detail->unit_id,
-                        'product_variation_unit_conversion_id' => $detail->product_variation_unit_conversion_id,
-                        'conversion_factor' => $detail->conversion_factor,
-                        'quantity' => $detail->quantity,
-                        'base_quantity' => $detail->base_quantity,
-                        'unit_price' => $detail->unit_price,
-                        'total_price' => $line_cost,
-                        'quantity_after' => $new_qty,
-                        'avg_price_after' => $existing_avg,
-                        'reference_id' => $order->order_id,
-                        'reference_type' => ReferenceType::SALE,
-                        'remarks' => 'Auto-created on posting of order #' . $order->daily_order_id,
-                        'createdby_id' => Auth::id(),
-                        'date_created' => now(),
-                    ]);
-
-                    continue;
-                }
-
-                // FEFO/FIFO draw-down: one stock transaction per batch drawn
-                // from, each stamped with its own batch id. A single-batch
-                // line stamps the batch straight onto order_details; a line
-                // split across batches records the breakdown in
-                // order_detail_batches instead (needed so a later return can
-                // restore the right quantity into the right batch(es)).
-                $single_batch_id = count($picks) === 1 ? $picks[0]['batch']->product_variation_batch_id : null;
-
-                if ($single_batch_id) {
-                    $detail->update(['product_variation_batch_id' => $single_batch_id]);
-                }
-
-                $picked_cost_remaining = $line_cost;
-
-                foreach ($picks as $index => $pick) {
-                    $pick_base_quantity = (float) $pick['base_quantity'];
-                    $pick_quantity = $detail->conversion_factor > 0 ? $pick_base_quantity / $detail->conversion_factor : $pick_base_quantity;
-                    $is_last_pick = $index === array_key_last($picks);
-                    $pick_cost = $is_last_pick ? $picked_cost_remaining : round($pick_base_quantity * $existing_avg, 3);
-                    $picked_cost_remaining -= $pick_cost;
-
-                    $pick['batch']->decrement('quantity', $pick_base_quantity);
-
-                    ProductVariationStockTransaction::create([
-                        'product_variation_stock_transaction_id' => generateUuid(),
-                        'transaction_date' => now(),
-                        'transaction_type' => TransactionType::SALE,
-                        'business_id' => $order->business_id,
-                        'product_id' => $detail->product_id,
-                        'product_variation_id' => $detail->product_variation_id,
-                        'warehouse_id' => $order->warehouse_id,
-                        'unit_id' => $detail->unit_id,
-                        'product_variation_unit_conversion_id' => $detail->product_variation_unit_conversion_id,
-                        'conversion_factor' => $detail->conversion_factor,
-                        'quantity' => $pick_quantity,
-                        'base_quantity' => $pick_base_quantity,
-                        'unit_price' => $detail->unit_price,
-                        'total_price' => $pick_cost,
-                        'quantity_after' => $new_qty,
-                        'avg_price_after' => $existing_avg,
-                        'reference_id' => $order->order_id,
-                        'reference_type' => ReferenceType::SALE,
-                        'remarks' => 'Auto-created on posting of order #' . $order->daily_order_id,
-                        'product_variation_batch_id' => $pick['batch']->product_variation_batch_id,
-                        'createdby_id' => Auth::id(),
-                        'date_created' => now(),
-                    ]);
-
-                    if (!$single_batch_id) {
-                        OrderDetailBatch::create([
-                            'order_detail_batch_id' => generateUuid(),
-                            'order_detail_id' => $detail->order_detail_id,
-                            'product_variation_batch_id' => $pick['batch']->product_variation_batch_id,
-                            'quantity' => $pick_quantity,
-                            'base_quantity' => $pick_base_quantity,
-                            'createdby_id' => Auth::id(),
-                            'date_created' => now(),
-                        ]);
-                    }
-                }
-            }
-
-            if ($total_cost > 0) {
-                JournalEntryDetail::create([
-                    'journal_entry_detail_id' => generateUuid(),
-                    'journal_entry_id' => $journal_entry->journal_entry_id,
-                    'account_id' => $accounting_setting->default_cogs_account_id,
-                    'debit' => $total_cost,
-                    'credit' => 0,
-                    'description' => 'Order #' . $order->daily_order_id . ' - COGS',
-                ]);
-
-                JournalEntryDetail::create([
-                    'journal_entry_detail_id' => generateUuid(),
-                    'journal_entry_id' => $journal_entry->journal_entry_id,
-                    'account_id' => $accounting_setting->default_inventory_account_id,
-                    'debit' => 0,
-                    'credit' => $total_cost,
-                    'description' => 'Order #' . $order->daily_order_id . ' - Inventory',
-                ]);
-            }
-
-            \App\Services\Concrete\Admin\JournalEntryService::assertBalanced($journal_entry->journal_entry_id);
-
-            if (!empty($order->voucher_id)) {
-                $this->voucher_service->redeem(
-                    $order->voucher_id,
-                    $order->order_id,
-                    $order->user_id,
-                    max(0, $order->voucher_discount_amount)
-                );
-            }
-
-            if ($has_store_credit_payment) {
-                $store_credit_amount = (float) $payments
-                    ->filter(fn ($payment) => optional(PaymentMethod::find($payment->payment_method_id))->type === 'store_credit')
-                    ->sum('amount');
-
-                app(CustomerStoreCreditService::class)->redeem(
-                    $order->business_id,
-                    $order->user_id,
-                    $store_credit_amount,
-                    'order',
-                    $order->order_id,
-                    'Redeemed at Order #' . $order->daily_order_id
-                );
-            }
+            $paid_amount = $meta['paid_amount'];
+            $change_amount = $meta['change_amount'];
 
             $this->recordStatusHistory($order->order_id, $order->status, Status::POSTED, 'Order posted');
 
@@ -2599,14 +2698,61 @@ class OrderService
     }
 
     /**
-     * Reverses a posted order exactly once: soft-deletes the linked
-     * JournalEntry and ProductVariationStockTransaction rows, replays the
-     * remaining ledger via ProductVariationStockService::recomputeLedger()
-     * for every affected product/variation/warehouse, reverses any voucher
-     * redemption, and marks the order void. Idempotent - if no active
-     * JournalEntry/stock transactions remain, this is a safe no-op (mirrors
-     * PurchaseReturnService::reversePurchaseReturnPosting()). Posted orders
-     * are NEVER hard-deleted - void() is the only way to undo one.
+     * Soft-deletes the linked POS Sale JournalEntry and SALE stock
+     * transactions, reverses voucher/store-credit redemptions. Does not
+     * change order status - callers decide void vs correct. Idempotent when
+     * no active JE/stock txs remain.
+     */
+    protected function reversePostedEffects(Order $order, string $storeCreditReason = 'Restored - Order posting reversed'): void
+    {
+        $journal_entry = JournalEntry::where('source_type', JournalSourceTypes::POS_SALE)
+            ->where('source_id', $order->order_id)
+            ->where('is_deleted', 0)
+            ->first();
+
+        if ($journal_entry) {
+            app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
+
+            $journal_entry->update([
+                'is_deleted' => 1,
+                'deletedby_id' => Auth::id(),
+                'date_deleted' => now(),
+            ]);
+        }
+
+        $stock_transactions = ProductVariationStockTransaction::where('reference_type', ReferenceType::SALE)
+            ->where('reference_id', $order->order_id)
+            ->where('is_deleted', 0)
+            ->get();
+
+        // Soft-deletes the transactions, restores any batch quantity they
+        // drew down (each transaction carries its own batch id when the
+        // line was fulfilled from a tracked batch), and recomputes the
+        // aggregate stock + ledger running balances.
+        $this->stock_service->reverseStockTransactions($stock_transactions);
+
+        if (!empty($order->voucher_id)) {
+            $this->voucher_service->reverseRedemption($order->order_id);
+        }
+
+        $redeemed_store_credit = app(CustomerStoreCreditService::class)->redeemedForOrder($order->order_id);
+
+        if ($redeemed_store_credit > 0 && !empty($order->user_id)) {
+            app(CustomerStoreCreditService::class)->reverse(
+                $order->business_id,
+                $order->user_id,
+                $redeemed_store_credit,
+                'order',
+                $order->order_id,
+                $storeCreditReason
+            );
+        }
+    }
+
+    /**
+     * Reverses a posted order exactly once via reversePostedEffects(), then
+     * marks the order void. Posted orders are NEVER hard-deleted - void() is
+     * the only way to fully undo one (same-day line fixes use correct()).
      */
     public function void($obj)
     {
@@ -2619,48 +2765,10 @@ class OrderService
                 throw new Exception('Only a posted order can be voided.');
             }
 
-            $journal_entry = JournalEntry::where('source_type', JournalSourceTypes::POS_SALE)
-                ->where('source_id', $order->order_id)
-                ->where('is_deleted', 0)
-                ->first();
-
-            if ($journal_entry) {
-                app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
-
-                $journal_entry->update([
-                    'is_deleted' => 1,
-                    'deletedby_id' => Auth::id(),
-                    'date_deleted' => now(),
-                ]);
-            }
-
-            $stock_transactions = ProductVariationStockTransaction::where('reference_type', ReferenceType::SALE)
-                ->where('reference_id', $order->order_id)
-                ->where('is_deleted', 0)
-                ->get();
-
-            // Soft-deletes the transactions, restores any batch quantity they
-            // drew down (each transaction carries its own batch id when the
-            // line was fulfilled from a tracked batch), and recomputes the
-            // aggregate stock + ledger running balances.
-            $this->stock_service->reverseStockTransactions($stock_transactions);
-
-            if (!empty($order->voucher_id)) {
-                $this->voucher_service->reverseRedemption($order->order_id);
-            }
-
-            $redeemed_store_credit = app(CustomerStoreCreditService::class)->redeemedForOrder($order->order_id);
-
-            if ($redeemed_store_credit > 0 && !empty($order->user_id)) {
-                app(CustomerStoreCreditService::class)->reverse(
-                    $order->business_id,
-                    $order->user_id,
-                    $redeemed_store_credit,
-                    'order',
-                    $order->order_id,
-                    'Restored - Order #' . $order->daily_order_id . ' was voided'
-                );
-            }
+            $this->reversePostedEffects(
+                $order,
+                'Restored - Order #' . $order->daily_order_id . ' was voided'
+            );
 
             $this->recordStatusHistory($order->order_id, $order->status, 'void', $obj['reason'] ?? 'Order voided');
 
@@ -2678,6 +2786,289 @@ class OrderService
 
             throw $e;
         }
+    }
+
+    /**
+     * Whether a posted POS order is eligible for same-day manager correction
+     * (UI flag). Does not throw - correct() re-checks via assertCorrectable().
+     */
+    public function canCorrect(Order $order): bool
+    {
+        try {
+            $this->assertCorrectable($order);
+
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Hard gates for same-day POS order correction. Throws on any failure.
+     */
+    public function assertCorrectable(Order $order): void
+    {
+        if ($order->status !== Status::POSTED) {
+            throw new Exception('Only a posted order can be corrected.');
+        }
+
+        if (empty($order->register_session_id)) {
+            throw new Exception('Only POS orders can be corrected. Use void or return for other sales channels.');
+        }
+
+        $sale_date = Carbon::parse($order->sale_date)->toDateString();
+        $today = Carbon::today()->toDateString();
+
+        if ($sale_date !== $today) {
+            throw new Exception('Orders can only be corrected on the same business day as the sale date.');
+        }
+
+        $has_return = OrderReturn::where('order_id', $order->order_id)
+            ->where('is_deleted', 0)
+            ->exists();
+
+        if ($has_return) {
+            throw new Exception('This order has a return and cannot be corrected. Adjust via the return workflow instead.');
+        }
+
+        $has_settlement = CustomerPayment::where('order_id', $order->order_id)
+            ->where('is_deleted', 0)
+            ->exists();
+
+        if ($has_settlement) {
+            throw new Exception('This order has customer payment settlements and cannot be corrected.');
+        }
+
+        app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($order->business_id, now());
+    }
+
+    /**
+     * Same-day manager correction: reverse posted stock/JV/voucher effects,
+     * rebuild cart lines/payments on the same order_id, then repost. Status
+     * stays posted. Never widens save() to edit posted orders.
+     */
+    public function correct(array $obj)
+    {
+        DB::beginTransaction();
+
+        try {
+            $reason = trim((string) ($obj['reason'] ?? ''));
+
+            if ($reason === '') {
+                throw new Exception('A correction reason is required.');
+            }
+
+            if (empty($obj['products']) || !is_array($obj['products'])) {
+                throw new Exception('At least one product line is required to correct the order.');
+            }
+
+            if (empty($obj['payments']) || !is_array($obj['payments'])) {
+                throw new Exception('At least one payment is required to correct the order.');
+            }
+
+            $order = $this->model_order->getModel()::with([
+                'details.product',
+                'details.productVariation',
+                'payments.paymentMethod',
+                'voucher',
+            ])->findOrFail($obj['order_id']);
+
+            $this->assertCorrectable($order);
+
+            $old_snapshot = $this->snapshotOrderForAudit($order);
+
+            $this->reversePostedEffects(
+                $order,
+                'Restored - Order #' . $order->daily_order_id . ' was corrected'
+            );
+
+            $this->rebuildPostedOrderCart($order, $obj);
+
+            $order = $this->model_order->getModel()::with(['details.product', 'details.productVariation', 'payments'])
+                ->findOrFail($order->order_id);
+
+            $payments = OrderPayment::where('order_id', $order->order_id)->where('is_deleted', 0)->get();
+
+            if ($payments->isEmpty()) {
+                throw new Exception('At least one payment is required to correct the order.');
+            }
+
+            $meta = $this->validatePaymentsForPosting($order, $payments);
+            $this->applyPostedEffects($order, $payments, $meta);
+
+            $order->update([
+                'paid_amount' => $meta['paid_amount'],
+                'change_amount' => $meta['change_amount'],
+                'status' => Status::POSTED,
+                'updatedby_id' => Auth::id(),
+                'date_updated' => now(),
+            ]);
+
+            $order->refresh();
+            $order->load(['details.product', 'details.productVariation', 'payments.paymentMethod', 'voucher']);
+
+            $new_snapshot = $this->snapshotOrderForAudit($order);
+            $new_snapshot['reason'] = $reason;
+            $new_snapshot['authorized_permission'] = 'order.correct';
+            $new_snapshot['authorized_by'] = Auth::id();
+
+            $this->recordCorrectionHistory($order->order_id, $reason);
+
+            $this->logActivity(
+                'order',
+                $order->order_id,
+                'corrected',
+                $old_snapshot,
+                $new_snapshot,
+                'Order corrected: ' . $reason,
+                $order->business_id,
+                $order->branch_id
+            );
+
+            DB::commit();
+
+            return $this->getById($order->order_id);
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Rebuilds mutable cart fields on a posted order after reversePostedEffects().
+     * Identity fields (order_id, daily_order_id, business/branch/warehouse,
+     * register/session, sale_date, cashier) stay unchanged.
+     */
+    protected function rebuildPostedOrderCart(Order $order, array $obj): void
+    {
+        $pos_setting = PosSetting::firstOrCreate(['business_id' => $order->business_id]);
+
+        $user_id = array_key_exists('customer_id', $obj)
+            ? ($obj['customer_id'] ?: null)
+            : $order->user_id;
+
+        if (empty($user_id)) {
+            $walkin = CustomerProfile::where('business_id', $order->business_id)
+                ->where('is_walkin', 1)
+                ->where('is_deleted', 0)
+                ->first();
+            $user_id = $walkin->user_id ?? null;
+        }
+
+        $order_type_id = $obj['order_type_id'] ?? $order->order_type_id;
+        $sale_type_id = $obj['sale_type_id'] ?? $order->sale_type_id;
+
+        $is_delivery_order = !empty($order_type_id)
+            && OrderType::where('order_type_id', $order_type_id)->value('code') === 'DELIVERY';
+
+        if ($is_delivery_order && empty(trim($obj['delivery_address'] ?? $order->delivery_address ?? ''))) {
+            throw new Exception('Delivery address is required for delivery orders.');
+        }
+
+        $order->update([
+            'user_id' => $user_id,
+            'order_type_id' => $order_type_id,
+            'sale_type_id' => $sale_type_id,
+            'notes' => $obj['notes'] ?? $order->notes,
+            'delivery_address' => $obj['delivery_address'] ?? $order->delivery_address,
+            'updatedby_id' => Auth::id(),
+            'date_updated' => now(),
+        ]);
+
+        $detail_ids = OrderDetail::where('order_id', $order->order_id)->pluck('order_detail_id');
+
+        if ($detail_ids->isNotEmpty()) {
+            OrderDetailBatch::whereIn('order_detail_id', $detail_ids)->delete();
+        }
+
+        OrderDetail::where('order_id', $order->order_id)->delete();
+        OrderPayment::where('order_id', $order->order_id)->delete();
+
+        $totals = $this->saveLinesAndComputeTotals($order, $obj, $pos_setting);
+
+        $order->update([
+            'subtotal' => $totals['subtotal'],
+            'discount' => $totals['discount_display'],
+            'discount_amount' => $totals['discount_amount'],
+            'tax' => $totals['tax_display'],
+            'tax_amount' => $totals['tax_amount'],
+            'total' => $totals['total'],
+            'discount_id' => $totals['discount_id'],
+            'voucher_id' => $totals['voucher_id'],
+            'voucher_discount_amount' => $totals['voucher_discount_amount'],
+        ]);
+
+        $this->saveLinePayments($order->order_id, $obj['payments']);
+    }
+
+    protected function snapshotOrderForAudit(Order $order): array
+    {
+        return [
+            'order_id' => $order->order_id,
+            'daily_order_id' => $order->daily_order_id,
+            'status' => $order->status,
+            'sale_date' => $order->sale_date,
+            'user_id' => $order->user_id,
+            'order_type_id' => $order->order_type_id,
+            'sale_type_id' => $order->sale_type_id,
+            'subtotal' => $order->subtotal,
+            'discount' => $order->discount,
+            'discount_amount' => $order->discount_amount,
+            'tax' => $order->tax,
+            'tax_amount' => $order->tax_amount,
+            'total' => $order->total,
+            'paid_amount' => $order->paid_amount,
+            'change_amount' => $order->change_amount,
+            'discount_id' => $order->discount_id,
+            'voucher_id' => $order->voucher_id,
+            'voucher_discount_amount' => $order->voucher_discount_amount,
+            'notes' => $order->notes,
+            'delivery_address' => $order->delivery_address,
+            'details' => $order->details->map(function ($detail) {
+                return [
+                    'order_detail_id' => $detail->order_detail_id,
+                    'product_id' => $detail->product_id,
+                    'product_variation_id' => $detail->product_variation_id,
+                    'quantity' => $detail->quantity,
+                    'unit_price' => $detail->unit_price,
+                    'final_unit_price' => $detail->final_unit_price,
+                    'discount' => $detail->discount,
+                    'discount_amount' => $detail->discount_amount,
+                    'tax' => $detail->tax,
+                    'tax_amount' => $detail->tax_amount,
+                    'subtotal' => $detail->subtotal,
+                    'total' => $detail->total,
+                    'sale_type_id' => $detail->sale_type_id,
+                ];
+            })->values()->all(),
+            'payments' => $order->payments->map(function ($payment) {
+                return [
+                    'order_payment_id' => $payment->order_payment_id,
+                    'payment_method_id' => $payment->payment_method_id,
+                    'amount' => $payment->amount,
+                    'reference_no' => $payment->reference_no,
+                ];
+            })->values()->all(),
+        ];
+    }
+
+    /**
+     * Status history row for a same-day correction (posted stays posted).
+     * Intentionally does not go through recordStatusHistory() so we avoid a
+     * misleading "posted" activity-log action and duplicate notifications.
+     */
+    protected function recordCorrectionHistory(string $order_id, string $reason): void
+    {
+        OrderStatusHistory::create([
+            'order_status_history_id' => generateUuid(),
+            'order_id' => $order_id,
+            'from_status' => Status::POSTED,
+            'to_status' => Status::POSTED,
+            'reason' => 'Corrected: ' . $reason,
+            'changedby_id' => Auth::id(),
+            'date_created' => now(),
+        ]);
     }
 
     /**

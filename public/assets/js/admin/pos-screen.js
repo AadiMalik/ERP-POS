@@ -39,6 +39,8 @@
         credit_payment_order_id: null,
         cash_movement_request_id: null,
         cash_movement_submitting: false,
+        correction_mode: false,
+        correction_reason_modal: null,
     };
 
     function can(perm) {
@@ -167,6 +169,9 @@
         state.product_picker_modal = new bootstrap.Modal(document.getElementById('productPickerModal'));
         state.add_customer_modal = new bootstrap.Modal(document.getElementById('addCustomerModal'));
         state.credit_payment_modal = new bootstrap.Modal(document.getElementById('creditPaymentModal'), { backdrop: 'static', keyboard: false });
+        if ($('#correctionReasonModal').length) {
+            state.correction_reason_modal = new bootstrap.Modal(document.getElementById('correctionReasonModal'), { backdrop: 'static' });
+        }
         if ($('#addExpenseModal').length) {
             state.add_expense_modal = new bootstrap.Modal(document.getElementById('addExpenseModal'));
         }
@@ -238,7 +243,13 @@
         loadHeldOrdersCount();
         loadProductsByCategory('');
 
-        if (CFG.reorder_from) {
+        if (CFG.correct_order_id) {
+            if (!can('order.correct')) {
+                errorMessage('You do not have permission to correct orders.');
+            } else {
+                loadCorrectionOrder(CFG.correct_order_id);
+            }
+        } else if (CFG.reorder_from) {
             reorderFromOrder(CFG.reorder_from);
         }
     }
@@ -433,6 +444,8 @@
 
         $('#holdOrderBtn').on('click', holdOrder);
         $('#completeSaleBtn').on('click', completeSale);
+        $('#correctionReasonSubmitBtn').on('click', submitCorrectionWithReason);
+        $('#cancelCorrectionBtn').on('click', cancelCorrectionMode);
 
         $('#heldOrdersBtn').on('click', function () {
             loadHeldOrders();
@@ -2199,6 +2212,10 @@
     // HOLD / RESUME
     // ==============================
     function holdOrder() {
+        if (state.correction_mode) {
+            errorMessage('Hold is not available while correcting a posted order.');
+            return;
+        }
         if (!state.session) {
             errorMessage('Open a register session before placing an order.');
             return;
@@ -2613,7 +2630,7 @@
     }
 
     // ==============================
-    // COMPLETE SALE
+    // COMPLETE SALE / CORRECT
     // ==============================
     function completeSale() {
         if (!state.session) {
@@ -2654,6 +2671,11 @@
                 errorMessage('This customer only has ' + money(storeCreditBalance) + ' in store credit available.');
                 return;
             }
+        }
+
+        if (state.correction_mode) {
+            openCorrectionReasonModal();
+            return;
         }
 
         var payload = buildStorePayload('draft');
@@ -2708,6 +2730,115 @@
             .catch(function (err) {
                 errorMessage(err.Message || 'Unable to save order.');
             });
+    }
+
+    function openCorrectionReasonModal() {
+        if (!can('order.correct')) {
+            errorMessage('You do not have permission to correct orders.');
+            return;
+        }
+
+        if (!state.order_id) {
+            errorMessage('No order loaded for correction.');
+            return;
+        }
+
+        $('#correction_reason').val('');
+        if (state.correction_reason_modal) {
+            state.correction_reason_modal.show();
+        }
+    }
+
+    function submitCorrectionWithReason() {
+        var reason = ($('#correction_reason').val() || '').trim();
+
+        if (!reason) {
+            errorMessage('A correction reason is required.');
+            return;
+        }
+
+        var payload = buildStorePayload('posted');
+        payload.order_id = state.order_id;
+        payload.reason = reason;
+        payload.payments = state.payments;
+
+        if (!payload.payments || !payload.payments.length) {
+            errorMessage('At least one payment is required.');
+            return;
+        }
+
+        ajaxRequest({ url: URLS.order_correct, method: 'POST', data: payload })
+            .then(function (response) {
+                var order = response.Data;
+
+                if (state.correction_reason_modal) {
+                    state.correction_reason_modal.hide();
+                }
+
+                successMessage('Order corrected.');
+
+                if (SETTING.auto_print_invoice) {
+                    silentPrintReceipt(order.order_id);
+                }
+
+                resetForNewSale();
+            })
+            .catch(function (err) {
+                errorMessage(err.Message || 'Unable to correct order.');
+            });
+    }
+
+    function loadCorrectionOrder(order_id) {
+        ajaxRequest({ url: URLS.order_details + '/' + order_id })
+            .then(function (response) {
+                var data = response.Data || {};
+                var header = data.header || {};
+
+                if (!header.can_correct) {
+                    errorMessage('This order cannot be corrected (same-day POS posted orders only, with no returns or settlements).');
+                    clearCorrectQueryParam();
+                    return;
+                }
+
+                loadCartFromDetails(data);
+                enterCorrectionMode(header.daily_order_id || '');
+                clearCorrectQueryParam();
+                successMessage('Order #' + (header.daily_order_id || '') + ' loaded for same-day correction.');
+            })
+            .catch(function (err) {
+                errorMessage(err.Message || 'Unable to load order for correction.');
+                clearCorrectQueryParam();
+            });
+    }
+
+    function enterCorrectionMode(dailyOrderId) {
+        state.correction_mode = true;
+        $('#posCorrectionBanner').removeClass('d-none').addClass('d-flex');
+        $('#posCorrectionOrderLabel').text(dailyOrderId ? ('#' + dailyOrderId) : '');
+        $('#holdOrderBtn').addClass('d-none');
+        $('#completeSaleBtn').html('<i class="fa fa-pencil"></i> Apply Correction');
+        $('#cancelCorrectionBtn').removeClass('d-none');
+    }
+
+    function cancelCorrectionMode() {
+        if (!state.correction_mode) {
+            return;
+        }
+
+        resetForNewSale();
+        successMessage('Correction cancelled.');
+    }
+
+    function clearCorrectQueryParam() {
+        try {
+            var url = new URL(window.location.href);
+            if (url.searchParams.has('correct')) {
+                url.searchParams.delete('correct');
+                window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+            }
+        } catch (e) {
+            // Ignore history API failures in older browsers.
+        }
     }
 
     // ==============================
@@ -2828,6 +2959,12 @@
         state.payments = [];
         state.order_id = null;
         state.order_daily_id = null;
+        state.correction_mode = false;
+        $('#posCorrectionBanner').addClass('d-none').removeClass('d-flex');
+        $('#posCorrectionOrderLabel').text('');
+        $('#holdOrderBtn').removeClass('d-none');
+        $('#cancelCorrectionBtn').addClass('d-none');
+        $('#completeSaleBtn').html('<i class="fa fa-check"></i> Pay <span class="pos-key-hint">(F9)</span>');
         $('#voucher_code').val('');
         $('#voucher_id').val('');
         $('#voucherSearchResults').hide().empty();

@@ -52,6 +52,8 @@ class PosScreenController extends Controller
         'order.price.override-minimum',
         'order.hold',
         'order.cancel_void',
+        'order.void',
+        'order.correct',
         'order.refund.process',
         'order.payment.credit',
         'order.customer.change',
@@ -183,6 +185,7 @@ class PosScreenController extends Controller
         // reorderFromOrder() there). Never trusted as-is beyond an ID -
         // OrderController::details() re-checks access when it's fetched.
         $reorder_from = request()->query('reorder_from');
+        $correct_order_id = request()->query('correct');
 
         // Change-Branch modal data - only needed for roles that are allowed to
         // switch (see $fixed_context_roles); OT/PosManager stay fixed to their
@@ -224,7 +227,8 @@ class PosScreenController extends Controller
             'context_businesses',
             'context_branches',
             'context_warehouses',
-            'reorder_from'
+            'reorder_from',
+            'correct_order_id'
         ));
     }
 

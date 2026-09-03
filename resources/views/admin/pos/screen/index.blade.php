@@ -17,6 +17,15 @@
              keeps reading #order_source_id unchanged. --}}
         <input type="hidden" id="order_source_id" value="{{ $pos_order_source_id }}">
 
+        <div id="posCorrectionBanner" class="alert alert-warning mb-2 py-2 px-3 d-none justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <i class="fa fa-pencil"></i>
+                Correcting order <strong id="posCorrectionOrderLabel"></strong> — same-day manager correction.
+                Stock, payments, and accounting will be reversed and reposted.
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="cancelCorrectionBtn">Cancel Correction</button>
+        </div>
+
         {{-- Shown until a register session is confirmed open --}}
         <div id="posNoSessionArea" class="card">
             <div class="card-body pos-disabled-overlay">
@@ -460,6 +469,29 @@
         </div>
     </div>
 
+    {{-- Same-day manager correction requires a reason before reverse/repost. --}}
+    <div class="modal fade" id="correctionReasonModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Correction Reason</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-2">
+                        This will reverse stock and accounting for the posted sale, apply your cart changes, and repost on the same order number.
+                    </p>
+                    <label class="form-label">Reason <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="correction_reason" rows="3" maxlength="1000" placeholder="Why is this order being corrected?"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="correctionReasonSubmitBtn">Apply Correction</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ================= Open Register Session Modal ================= --}}
     <div class="modal fade" id="openSessionModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -663,6 +695,7 @@
             ],
             'permissions' => $permissions,
             'reorder_from' => $reorder_from,
+            'correct_order_id' => $correct_order_id ?? null,
             'urls' => [
                 'session_current' => url('admin/pos-register-session/current'),
                 'session_open' => url('admin/pos-register-session/open'),
@@ -681,6 +714,7 @@
                 'order_hold' => url('admin/order/hold'),
                 'order_resume' => url('admin/order/resume'),
                 'order_complete' => url('admin/order/complete'),
+                'order_correct' => url('admin/order/correct'),
                 'order_credit_info' => url('admin/order/credit-info'),
                 'order_details' => url('admin/order/details'),
                 'order_data' => url('admin/order/data'),

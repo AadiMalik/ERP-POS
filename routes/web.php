@@ -982,6 +982,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::post('reopen', [App\Http\Controllers\Admin\OrderController::class, 'reopen'])->middleware('permission:order.reopen');
             Route::post('cancel', [App\Http\Controllers\Admin\OrderController::class, 'cancel'])->middleware('permission:order.cancel');
             Route::post('complete', [App\Http\Controllers\Admin\OrderController::class, 'complete'])->middleware('permission:order.complete');
+            Route::post('correct', [App\Http\Controllers\Admin\OrderController::class, 'correct'])->middleware('permission:order.correct');
             Route::post('credit-info', [App\Http\Controllers\Admin\OrderController::class, 'updateCreditInfo']);
             Route::post('void', [App\Http\Controllers\Admin\OrderController::class, 'void'])->middleware('permission:order.void');
             Route::post('change-status', [App\Http\Controllers\Admin\OrderController::class, 'changeStatus'])->middleware('permission:order.complete|order.cancel|order.void');
@@ -1078,6 +1079,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
                 'order-tax-report' => App\Http\Controllers\Admin\Reports\Orders\OrderTaxReportController::class,
                 'top-selling' => App\Http\Controllers\Admin\Reports\Orders\TopSellingReportController::class,
                 'offline-orders-report' => App\Http\Controllers\Admin\Reports\Orders\OfflineOrdersReportController::class,
+                'order-correction-report' => App\Http\Controllers\Admin\Reports\Orders\OrderCorrectionReportController::class,
             ];
             foreach ($orderReportRoutes as $prefix => $controller) {
                 Route::group(['prefix' => $prefix], function () use ($prefix, $controller) {

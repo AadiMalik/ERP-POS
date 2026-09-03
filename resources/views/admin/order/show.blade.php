@@ -97,6 +97,13 @@
                         </button>
                     @endif
                 @endcan
+                @if (!empty($can_correct))
+                    <a href="{{ route('pos-screen') }}?correct={{ $order->order_id }}"
+                        class="btn btn-outline-primary">
+                        <i class="fa fa-pencil"></i>
+                        Correct Order
+                    </a>
+                @endif
                 <a href="{{ url('admin/order') }}" class="btn btn-outline-primary">
                     <i class="fa fa-arrow-left"></i>
                     Back

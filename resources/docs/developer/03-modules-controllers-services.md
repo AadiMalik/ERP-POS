@@ -402,6 +402,30 @@ hit). Website hold orders have no `cashier_id`; POS Held Orders passes
 holds. `CustomerOrderService::mapStatus()` maps ERP `posted` → storefront
 `processing` so fulfilment steps can advance before `delivered`.
 
+**Same-day POS order correction:** `OrderService::correct()` (route
+`POST admin/order/correct`, permission `order.correct`) is the only path that
+mutates a posted POS order in place. It does **not** widen `save()` (draft/hold
+only). Flow: `assertCorrectable()` (posted, POS `register_session_id`,
+`sale_date` = today, no `order_returns`, no `customer_payments`, accounting
+period open) → snapshot for audit → `reversePostedEffects()` (shared with
+`void()`: soft-delete `POS_SALE` JE, reverse SALE stock txs, reverse
+voucher/store-credit) → rebuild lines/payments via
+`rebuildPostedOrderCart()` / `saveLinesAndComputeTotals()` (identity fields
+immutable) → `validatePaymentsForPosting()` + `applyPostedEffects()` (shared
+with `post()`) → status stays `posted` → `order_status_history` + Activity Log
+action `corrected` (old/new values, reason, `authorized_permission`).
+`reopen()` remains cancelled→draft only. Offline API has no correct endpoint.
+UI: Order Show / Order History / `?correct={order_id}` on the POS screen.
+`OrderCorrectionReportController`/`OrderCorrectionReportService` (route prefix
+`admin/reports/order-correction-report`, permission
+`reports.order-correction-report.*`) is a read-only report over these same
+`activity_logs` rows (module `order`, action `corrected`) - it does not touch
+`orders` directly, joining `record_id` back to `Order` only for display
+(order/branch/business filters + role scope on `activity_logs.business_id`/
+`branch_id`). `old_values`/`new_values` are enriched with product/variation/
+payment-method names for the "View Changes" before/after diff in
+`admin.reports.order_correction.index`.
+
 ## Accounting (`module:accounting`)
 Core: `AccountTypeController`, `AccountSubTypeController`,
 `ExpenseCategoryController`, `AccountController`, `JournalController`,

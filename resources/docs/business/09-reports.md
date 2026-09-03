@@ -32,8 +32,16 @@ Overall sales performance, with the ability to reconcile against payments receiv
 Order Detail, Product-wise Sales, Variation-wise Sales, Customer-wise Sales,
 Branch-wise Sales, Order Source Sales, Payment Method Sales, Order Status,
 Cancelled Orders, Due / Credit Sales, Discount Report, Order Tax Report,
-Top Selling, and Offline Orders. These live under the Orders menu and respect
-the same Print / PDF / Excel / CSV permission split as every other report.
+Top Selling, Offline Orders, and Order Correction Report. These live under
+the Orders menu and respect the same Print / PDF / Excel / CSV permission
+split as every other report.
+
+The **Order Correction Report** shows every same-day manager correction of a
+posted POS sale: which order, who corrected it, their reason, and the order's
+total before and after. A **View Changes** action opens a full before/after
+comparison (line items, quantities, prices, and payments) for that
+correction, straight off the Activity Log entry the correction created - see
+[Activity Log](12-audit-security.md#activity-log).
 
 ## Customer Reports
 Customer Ledger, Customer Aging (how overdue customer balances are), Customer
