@@ -93,7 +93,7 @@ class RoleDefaultPermissions
 
             case RoleNames::SALEMANAGER:
                 return array_merge(
-                    PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment', 'service-sale', 'service-sale-return']),
+                    PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment', 'service-sale', 'service-sale-return', 'loyalty']),
                     array_merge(
                         ['dashboard.view'],
                         self::formatVariants([
@@ -101,7 +101,7 @@ class RoleDefaultPermissions
                             'order-detail', 'product-sales', 'variation-sales', 'customer-sales', 'branch-sales',
                             'order-source-sales', 'payment-method-sales', 'order-status-report', 'cancelled-orders',
                             'due-credit-sales', 'discount-report', 'order-tax-report', 'top-selling', 'offline-orders-report',
-                            'order-correction-report',
+                            'order-correction-report', 'loyalty-report', 'customer-loyalty-report',
                         ])
                     )
                 );
@@ -199,6 +199,7 @@ class RoleDefaultPermissions
                     'order.complete',
                     'order.discount.apply',
                     'order.coupon.apply',
+                    'order.loyalty.apply',
                     'order.price.change',
                     'order.price.override-minimum',
                     'order.hold',

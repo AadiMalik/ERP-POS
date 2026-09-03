@@ -11,6 +11,7 @@
     var CFG = window.POS_CONFIG || {};
     var PERM = CFG.permissions || {};
     var SETTING = CFG.pos_setting || {};
+    var CUSTOMER_SETTING = CFG.customer_setting || {};
     var URLS = CFG.urls || {};
 
     var state = {
@@ -407,6 +408,7 @@
         $('#customer_id').on('change', function () {
             updateCreditHint();
             updateCreditCustomerSummary();
+            updateLoyaltyPointsHint();
             // Store Credit's tile/row visibility depends on the selected
             // customer's balance, unlike every other payment type - re-render
             // whenever the customer changes so switching to/from a customer
@@ -417,6 +419,7 @@
             }
         });
         updateCreditHint();
+        updateLoyaltyPointsHint();
 
         $('#creditCustomerChangeLink').on('click', function () {
             openCustomerSelect();
@@ -438,6 +441,11 @@
         });
 
         $('#discount_id').on('change', function () {
+            recalcLocal();
+            previewVoucherApply();
+        });
+
+        $('#use_loyalty_points').on('change', function () {
             recalcLocal();
             previewVoucherApply();
         });
@@ -728,6 +736,7 @@
                     .attr('data-walkin', customer.is_walkin ? 1 : 0)
                     .attr('data-credit-days', customer.credit_days || 0)
                     .attr('data-store-credit-balance', customer.store_credit_balance || 0)
+                    .attr('data-loyalty-points', customer.loyalty_points || 0)
                     .attr('data-phone', customer.phone || '')
                     .attr('data-email', customer.email || '')
                     .text(formatCustomerLabel(customer.code, customer.name, customer.is_walkin));
@@ -1104,7 +1113,7 @@
         clearTimeout(voucherPreviewTimer);
 
         if (!state.session || !state.cart.length
-            || (!$('#voucher_code').val() && !$('#voucher_id').val() && !$('#discount_id').val())) {
+            || (!$('#voucher_code').val() && !$('#voucher_id').val() && !$('#discount_id').val() && !$('#use_loyalty_points').is(':checked'))) {
             clearVoucherFeedback();
             return;
         }
@@ -1780,6 +1789,11 @@
         $('#sumSubtotal').text(money(subtotal));
         $('#sumItemDiscount').text(money(lineDiscount));
         $('#sumOrderDiscount').text(money(orderDiscount));
+        // Loyalty discount, like order discount/voucher, is only known
+        // authoritatively from the server response after store() - see
+        // renderFromServerOrder().
+        $('#sumLoyaltyDiscountRow').addClass('d-none');
+        $('#sumLoyaltyDiscount').text(money(0));
         $('#sumTax').text(money(tax));
         $('#sumTotal').text(money(total));
 
@@ -1799,6 +1813,37 @@
         } else {
             $('#creditLimitHint').addClass('d-none');
         }
+    }
+
+    // Loyalty points balance for the selected customer - #loyaltyWrap (and
+    // therefore #loyaltyPointsHint) only exists in the DOM when the Loyalty
+    // Program is active for this business (see PosScreenController::index()/
+    // $customer_setting->loyalty_program), so this is a no-op elsewhere.
+    // The balance itself comes from a data attribute baked onto each
+    // <option> at page load (data-loyalty-points), the same way
+    // data-store-credit-balance already works for Store Credit - not a
+    // dedicated AJAX lookup. The redemption cap is still resolved
+    // server-side (LoyaltyPointService::calculateRedemption()) regardless of
+    // what this hint shows, so a stale balance here (e.g. from points
+    // reserved elsewhere earlier in this same session) never lets a
+    // cashier over-redeem.
+    function updateLoyaltyPointsHint() {
+        var $hint = $('#loyaltyPointsHint');
+        if (!$hint.length) return;
+
+        var $opt = $('#customer_id').find(':selected');
+        var isWalkin = $opt.data('walkin') == 1;
+        var available = parseFloat($opt.data('loyalty-points') || 0);
+
+        if (isWalkin || available <= 0) {
+            $hint.hide().text('');
+            return;
+        }
+
+        var rate = parseFloat(CUSTOMER_SETTING.loyalty_redemption_value || 0);
+        var valueText = rate > 0 ? ' (~' + money(available * rate) + ')' : '';
+
+        $hint.show().text(available + ' pts available' + valueText);
     }
 
     // ==============================
@@ -2186,6 +2231,9 @@
         if (voucher_id) {
             payload.voucher_id = voucher_id;
         }
+        if ($('#use_loyalty_points').is(':checked')) {
+            payload.use_loyalty_points = true;
+        }
 
         if (state.payments && state.payments.length) {
             payload.payments = state.payments;
@@ -2198,11 +2246,19 @@
         var itemDiscount = (order.details || []).reduce(function (sum, d) {
             return sum + (parseFloat(d.discount_amount) || 0);
         }, 0);
-        var orderDiscount = Math.max(0, (parseFloat(order.discount_amount) || 0) - itemDiscount);
+        // order.discount_amount is the combined line+order+voucher+loyalty
+        // total (see OrderService::saveLinesAndComputeTotals()) - loyalty is
+        // broken back out into its own row here, same as item discount is,
+        // so "Order Discount" only ever shows the named-discount/voucher
+        // portion.
+        var loyaltyDiscount = parseFloat(order.loyalty_discount_amount) || 0;
+        var orderDiscount = Math.max(0, (parseFloat(order.discount_amount) || 0) - itemDiscount - loyaltyDiscount);
 
         $('#sumSubtotal').text(money(order.subtotal));
         $('#sumItemDiscount').text(money(itemDiscount));
         $('#sumOrderDiscount').text(money(orderDiscount));
+        $('#sumLoyaltyDiscountRow').toggleClass('d-none', loyaltyDiscount <= 0);
+        $('#sumLoyaltyDiscount').text(money(loyaltyDiscount));
         $('#sumTax').text(money(order.tax_amount));
         $('#sumTotal').text(money(order.total));
         recalcPayments(parseFloat(order.total) || 0);
@@ -2600,6 +2656,9 @@
         if (header.voucher_code) {
             $('#voucher_code').val(header.voucher_code);
         }
+        if (parseFloat(header.loyalty_points_used) > 0) {
+            $('#use_loyalty_points').prop('checked', true);
+        }
 
         state.payments = payments.map(function (p) {
             return {
@@ -2969,6 +3028,9 @@
         $('#voucher_id').val('');
         $('#voucherSearchResults').hide().empty();
         $('#discount_id').val('').trigger('change');
+        $('#use_loyalty_points').prop('checked', false);
+        $('#sumLoyaltyDiscountRow').addClass('d-none');
+        $('#sumLoyaltyDiscount').text(money(0));
         $('#delivery_address').val('');
         $('#sale_type_id').val(state.default_sale_type_id);
         syncPillsFromSelect();

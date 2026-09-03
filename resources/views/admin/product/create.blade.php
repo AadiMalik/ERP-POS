@@ -279,22 +279,30 @@ use App\Enums\RoleNames;
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="is_featured"
-                                                    id="featured"
+                                                    id="featured" value="1"
                                                     {{ isset($product) && $product->is_featured ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="featured">Featured</label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="is_trending"
-                                                    id="trending"
+                                                    id="trending" value="1"
                                                     {{ isset($product) && $product->is_trending ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="trending">Trending</label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="is_best_seller"
-                                                    id="bestSeller"
+                                                    id="bestSeller" value="1"
                                                     {{ isset($product) && $product->is_best_seller ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="bestSeller">Best Seller</label>
                                             </div>
+                                            @if (($customer_setting->loyalty_program ?? false) && ($customer_setting->loyalty_earning_mode ?? null) == 'product')
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="is_loyalty_enabled"
+                                                    id="loyaltyEnabled" value="1"
+                                                    {{ old('is_loyalty_enabled', $product->is_loyalty_enabled ?? false) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="loyaltyEnabled">Loyalty Enabled</label>
+                                            </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -497,6 +505,11 @@ use App\Enums\RoleNames;
                                     <label class="form-check-label" for="modalVariationTrackExpiry">Track
                                         Expiry</label>
                                 </div>
+                                <div class="form-check" id="modalVariationLoyaltyWrap" style="display:none;">
+                                    <input class="form-check-input" type="checkbox" id="modalVariationIsLoyaltyEnabled">
+                                    <label class="form-check-label" for="modalVariationIsLoyaltyEnabled">Loyalty
+                                        Enabled</label>
+                                </div>
                             </div>
                         </div>
                         <div class="col-12">
@@ -605,6 +618,11 @@ use App\Enums\RoleNames;
 @endif
 
 <script>
+    window.loyaltyProductModeEnabled = {{ (($customer_setting->loyalty_program ?? false) && ($customer_setting->loyalty_earning_mode ?? null) == 'product') ? 'true' : 'false' }};
+    if (window.loyaltyProductModeEnabled) {
+        document.getElementById('modalVariationLoyaltyWrap').style.display = '';
+    }
+
     @if(isset($product))
     var selectedCategoryId = "{{ $product->category_id }}";
     var selectedBrandId = "{{ $product->brand_id }}";
@@ -654,6 +672,7 @@ use App\Enums\RoleNames;
         discount_percentage: {{ $var->discount_percentage ?? 0 }},
         minimum_selling_price: {{ $var->minimum_selling_price !== null ? $var->minimum_selling_price : 'null' }},
         discount_apply_all: {{ $var->discount_apply_all ? 'true' : 'false' }},
+        is_loyalty_enabled: {{ $var->is_loyalty_enabled ? 'true' : 'false' }},
         discount_sale_type_ids: @json($var->discountSaleTypes->pluck('sale_type_id')),
         attributes: @json(
         $var->attributes->pluck('value', 'name')
@@ -816,6 +835,8 @@ use App\Enums\RoleNames;
         const minStock = parseInt(document.getElementById('modalVariationMinStock').value) || 0;
         const trackBatch = document.getElementById('modalVariationTrackBatch').checked;
         const trackExpiry = document.getElementById('modalVariationTrackExpiry').checked;
+        const isLoyaltyEnabled = window.loyaltyProductModeEnabled ?
+            document.getElementById('modalVariationIsLoyaltyEnabled').checked : false;
 
         const prices = {};
         document.querySelectorAll('.modal-variation-price').forEach(el => {
@@ -895,6 +916,7 @@ use App\Enums\RoleNames;
             discount_percentage: discountPercentage,
             minimum_selling_price: minimumSellingPrice,
             discount_apply_all: discountApplyAll,
+            is_loyalty_enabled: isLoyaltyEnabled,
             discount_sale_type_ids: discountSaleTypeIds,
             attributes: attributes
         };
@@ -938,6 +960,9 @@ use App\Enums\RoleNames;
         document.getElementById('modalVariationMinStock').value = variation.minimum_stock || 0;
         document.getElementById('modalVariationTrackBatch').checked = variation.track_batch || false;
         document.getElementById('modalVariationTrackExpiry').checked = variation.track_expiry || false;
+        if (window.loyaltyProductModeEnabled) {
+            document.getElementById('modalVariationIsLoyaltyEnabled').checked = variation.is_loyalty_enabled || false;
+        }
 
         document.querySelectorAll('.modal-variation-price').forEach(el => {
             const row = (variation.prices || {})[el.dataset.saleTypeId];
@@ -1021,6 +1046,9 @@ use App\Enums\RoleNames;
         document.getElementById('modalVariationMinStock').value = '0';
         document.getElementById('modalVariationTrackBatch').checked = false;
         document.getElementById('modalVariationTrackExpiry').checked = false;
+        if (window.loyaltyProductModeEnabled) {
+            document.getElementById('modalVariationIsLoyaltyEnabled').checked = false;
+        }
         document.querySelectorAll('.modal-variation-price').forEach(el => el.value = '');
         document.querySelectorAll('.modal-variation-min-price').forEach(el => el.value = '');
         document.getElementById('modalVariationDiscountPercentage').value = '0';

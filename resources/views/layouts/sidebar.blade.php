@@ -1567,7 +1567,7 @@
         @endif
 
         {{-- Customers (business-scoped Customer CRUD + Customer Payments + Customer Reports) --}}
-        @canAccessAny(['customer.view', 'customer-payment.view', 'reports.customer-ledger.view', 'reports.customer-aging.view', 'reports.customer-payment-history.view'])
+        @canAccessAny(['customer.view', 'customer-payment.view', 'reports.customer-ledger.view', 'reports.customer-aging.view', 'reports.customer-payment-history.view', 'reports.customer-loyalty-report.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons fa fa-users"></i>
@@ -1589,7 +1589,7 @@
                             </a>
                         </li>
                     @endcanAccess
-                    @canAccessAny(['reports.customer-ledger.view', 'reports.customer-aging.view', 'reports.customer-payment-history.view'])
+                    @canAccessAny(['reports.customer-ledger.view', 'reports.customer-aging.view', 'reports.customer-payment-history.view', 'reports.customer-loyalty-report.view'])
                         <li class="menu-item">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
                                 <div data-i18n="Reports">Reports</div>
@@ -1616,6 +1616,13 @@
                                         </a>
                                     </li>
                                 @endcanAccess
+                                @canAccess('reports.customer-loyalty-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/customer-loyalty-report') }}" class="menu-link">
+                                            <div data-i18n="Customer Loyalty History">Customer Loyalty History</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
                             </ul>
                         </li>
                     @endcanAccessAny
@@ -1628,7 +1635,7 @@
             'reports.order-detail.view', 'reports.product-sales.view', 'reports.variation-sales.view', 'reports.customer-sales.view',
             'reports.branch-sales.view', 'reports.order-source-sales.view', 'reports.payment-method-sales.view',
             'reports.order-status-report.view', 'reports.cancelled-orders.view', 'reports.due-credit-sales.view',
-            'reports.discount-report.view', 'reports.order-tax-report.view', 'reports.top-selling.view', 'reports.offline-orders-report.view',
+            'reports.discount-report.view', 'reports.loyalty-report.view', 'reports.order-tax-report.view', 'reports.top-selling.view', 'reports.offline-orders-report.view',
             'reports.order-correction-report.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -1689,7 +1696,7 @@
                     @canAccessAny(['reports.order-detail.view', 'reports.product-sales.view', 'reports.variation-sales.view',
                         'reports.customer-sales.view', 'reports.branch-sales.view', 'reports.order-source-sales.view',
                         'reports.payment-method-sales.view', 'reports.order-status-report.view', 'reports.cancelled-orders.view',
-                        'reports.due-credit-sales.view', 'reports.discount-report.view', 'reports.order-tax-report.view',
+                        'reports.due-credit-sales.view', 'reports.discount-report.view', 'reports.loyalty-report.view', 'reports.order-tax-report.view',
                         'reports.top-selling.view', 'reports.offline-orders-report.view', 'reports.order-correction-report.view'])
                         <li class="menu-item">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -1770,6 +1777,13 @@
                                     <li class="menu-item">
                                         <a href="{{ url('/admin/reports/discount-report') }}" class="menu-link">
                                             <div data-i18n="Discount Report">Discount Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.loyalty-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/loyalty-report') }}" class="menu-link">
+                                            <div data-i18n="Loyalty Report">Loyalty Report</div>
                                         </a>
                                     </li>
                                 @endcanAccess

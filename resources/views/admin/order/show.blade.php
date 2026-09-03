@@ -174,6 +174,17 @@
                             {{ $order->voucher->code ?? '-' }} (-{{ currency($order->voucher_discount_amount ?? 0) }})
                         </div>
                     @endif
+                    @if (($order->loyalty_points_used ?? 0) > 0 || ($order->loyalty_points_earned ?? 0) > 0)
+                        <div class="col-md-3">
+                            <strong>Loyalty Points:</strong><br>
+                            @if (($order->loyalty_points_used ?? 0) > 0)
+                                {{ decimal($order->loyalty_points_used) }} redeemed (-{{ currency($order->loyalty_discount_amount ?? 0) }})<br>
+                            @endif
+                            @if (($order->loyalty_points_earned ?? 0) > 0)
+                                {{ decimal($order->loyalty_points_earned) }} earned
+                            @endif
+                        </div>
+                    @endif
                     <div class="col-md-3">
                         <strong>Business:</strong><br>
                         {{ $order->business->name ?? '-' }}
@@ -339,6 +350,15 @@
                                         </small>
                                     </td>
                                     <td class="text-end">{{ currency($order->voucher_discount_amount ?? 0) }}</td>
+                                </tr>
+                            @endif
+                            @if (($order->loyalty_discount_amount ?? 0) > 0)
+                                <tr>
+                                    <td>
+                                        Loyalty Discount
+                                        <small class="text-muted d-block">{{ decimal($order->loyalty_points_used ?? 0) }} points redeemed</small>
+                                    </td>
+                                    <td class="text-end">{{ currency($order->loyalty_discount_amount ?? 0) }}</td>
                                 </tr>
                             @endif
                             <tr>

@@ -34,6 +34,11 @@
             </small>
         </div>
 
+        <div class="col-md-12">
+            <h4>Loyalty Program</h4>
+            <hr>
+        </div>
+
         <div class="col-md-6 mb-3">
             <label>Enable Loyalty Program</label>
             <select class="form-select select2" name="loyalty_program">
@@ -44,6 +49,25 @@
                     No
                 </option>
             </select>
+            <small class="text-muted">
+                When disabled, loyalty functionality is hidden everywhere - POS, website, mobile app, customer profile, product listing, checkout and reports.
+            </small>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label>Earn Points Based On</label>
+            <select class="form-select select2" name="loyalty_earning_mode">
+                <option value="order" {{ $customer_setting->loyalty_earning_mode == 'order' ? 'selected' : '' }}>
+                    Overall Order
+                </option>
+                <option value="product" {{ $customer_setting->loyalty_earning_mode == 'product' ? 'selected' : '' }}>
+                    Individual Product / Variation
+                </option>
+            </select>
+            <small class="text-muted">
+                "Overall Order" earns on the whole order total. "Individual Product / Variation" only counts
+                products/variations you've marked as loyalty-enabled on their Create/Edit screen.
+            </small>
         </div>
 
         <div class="col-md-6 mb-3">
@@ -54,7 +78,8 @@
                     name="loyalty_every_amount" value="{{ $customer_setting->loyalty_every_amount }}">
             </div>
             <small class="text-muted">
-                Customer earns points for every entered purchase amount.
+                Customer earns points for every entered purchase amount (of the whole order, or of the
+                loyalty-eligible products/variations only, depending on the mode above).
             </small>
         </div>
 
@@ -76,6 +101,19 @@
             </div>
             <small class="text-muted">
                 Minimum order amount required to earn loyalty points.
+            </small>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label>Point Redemption Value</label>
+            <div class="input-group">
+                <span class="input-group-text">Rs</span>
+                <input type="text" onkeypress="return isNumberKey(event)" class="form-control"
+                    name="loyalty_redemption_value" value="{{ $customer_setting->loyalty_redemption_value }}">
+                <span class="input-group-text">per point</span>
+            </div>
+            <small class="text-muted">
+                Monetary value of 1 loyalty point when redeemed as a discount at checkout.
             </small>
         </div>
 

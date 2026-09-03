@@ -7,6 +7,7 @@ use App\Models\CustomerAddress;
 use App\Models\CustomerProfile;
 use App\Models\User;
 use App\Services\Concrete\Admin\CustomerService;
+use App\Services\Concrete\Admin\LoyaltyPointService;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -18,10 +19,12 @@ use Illuminate\Validation\Rules\Password;
 class CustomerAccountService
 {
     protected $customer_service;
+    protected $loyalty_point_service;
 
-    public function __construct(CustomerService $customer_service)
+    public function __construct(CustomerService $customer_service, LoyaltyPointService $loyalty_point_service)
     {
         $this->customer_service = $customer_service;
+        $this->loyalty_point_service = $loyalty_point_service;
     }
 
     public static function passwordRules(): array
@@ -125,6 +128,11 @@ class CustomerAccountService
             ->values()
             ->all();
 
+        $loyalty_enabled = $this->loyalty_point_service->isEnabled($business_id);
+        $loyalty_balances = $loyalty_enabled
+            ? $this->loyalty_point_service->getBalances($business_id, $user->id)
+            : ['available' => 0, 'reserved' => 0];
+
         return [
             'id' => $user->id,
             'name' => $user->name,
@@ -133,6 +141,11 @@ class CustomerAccountService
             'status' => $user->status,
             'createdAt' => optional($user->created_at)->toIso8601String(),
             'addresses' => $addresses,
+            'loyalty' => [
+                'enabled' => $loyalty_enabled,
+                'available' => (float) $loyalty_balances['available'],
+                'reserved' => (float) $loyalty_balances['reserved'],
+            ],
         ];
     }
 

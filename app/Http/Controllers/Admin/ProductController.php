@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
+use App\Enums\RoleNames;
 use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
+use App\Models\CustomerSetting;
 use App\Models\ProductVariation;
 use App\Services\Concrete\Admin\BarcodeService;
 use App\Services\Concrete\Admin\BrandService;
@@ -84,7 +86,9 @@ class ProductController extends Controller
         $brands = $this->brand_service->getAllActive();
         $units = $this->unit_service->getAllActive();
         $sale_types = $this->sale_type_service->getAllActive();
-        return view('admin.product.create', compact('businesses', 'categories', 'brands', 'units', 'sale_types'));
+        $business_id = getRoleName() !== RoleNames::SUPERADMIN ? Auth::user()->business_id : null;
+        $customer_setting = $business_id ? CustomerSetting::where('business_id', $business_id)->first() : null;
+        return view('admin.product.create', compact('businesses', 'categories', 'brands', 'units', 'sale_types', 'customer_setting'));
     }
 
     public function store(Request $request)
@@ -135,6 +139,8 @@ class ProductController extends Controller
             'sub_category_id' => 'nullable|exists:sub_categories,sub_category_id',
             'is_trending' => 'nullable|boolean',
             'is_best_seller' => 'nullable|boolean',
+            'is_loyalty_enabled' => 'nullable|boolean',
+            'variations.*.is_loyalty_enabled' => 'nullable|boolean',
             'type' => 'required|in:single,variable,service',
             'usage_type' => 'required|in:saleable,consumable,asset,service',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
@@ -196,6 +202,7 @@ class ProductController extends Controller
             'is_featured' => $request->has('is_featured') ? 1 : 0,
             'is_trending' => $request->has('is_trending') ? 1 : 0,
             'is_best_seller' => $request->has('is_best_seller') ? 1 : 0,
+            'is_loyalty_enabled' => $request->has('is_loyalty_enabled') ? 1 : 0,
             'short_description' => $request->short_description,
             'description' => $request->description,
             'features' => $features,
@@ -218,7 +225,8 @@ class ProductController extends Controller
         $brands = $this->brand_service->getAllActive();
         $units = $this->unit_service->getAllActive();
         $sale_types = $this->sale_type_service->getAllActive();
-        return view('admin.product.create', compact('product', 'businesses', 'categories', 'brands', 'units', 'sale_types'));
+        $customer_setting = CustomerSetting::where('business_id', $product->business_id)->first();
+        return view('admin.product.create', compact('product', 'businesses', 'categories', 'brands', 'units', 'sale_types', 'customer_setting'));
     }
 
     public function status($product_id)

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\Message;
 use App\Enums\RoleNames;
 use App\Http\Controllers\Controller;
+use App\Models\CustomerLoyaltyTransaction;
+use App\Models\CustomerSetting;
 use App\Models\Role;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CustomerService;
@@ -186,8 +188,16 @@ class CustomerController extends Controller
         $history = $business_id ? $this->customer_service->getCustomerHistory($user_id, $business_id) : [];
         $timeline = $business_id ? $this->customer_service->getCustomerTimeline($user_id, $business_id) : [];
         $ledger = $business_id ? $this->customer_service->getCustomerLedger($user_id, $business_id) : null;
+        $customer_setting = $business_id ? CustomerSetting::where('business_id', $business_id)->first() : null;
+        $loyalty_transactions = $business_id
+            ? CustomerLoyaltyTransaction::where('business_id', $business_id)
+                ->where('customer_id', $user_id)
+                ->orderByDesc('date_created')
+                ->limit(50)
+                ->get()
+            : [];
 
-        return view('admin.customer.show', compact('user', 'customer_profile', 'history', 'timeline', 'ledger', 'business_id'));
+        return view('admin.customer.show', compact('user', 'customer_profile', 'history', 'timeline', 'ledger', 'business_id', 'customer_setting', 'loyalty_transactions'));
     }
 
     public function status($user_id)

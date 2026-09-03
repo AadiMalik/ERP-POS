@@ -203,6 +203,10 @@ class WebsiteCheckoutService
                 $order_data['voucher_code'] = $cart->voucher_code;
             }
 
+            if (!empty($payload['use_loyalty_points'])) {
+                $order_data['use_loyalty_points'] = true;
+            }
+
             $order_model = $this->order_service->save($order_data);
 
             if (!$order_model) {

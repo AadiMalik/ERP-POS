@@ -259,6 +259,7 @@ class ProductService
                             'minimum_selling_price' => $variation['minimum_selling_price'] ?? null,
                             'discount_percentage' => $variation['discount_percentage'] ?? 0,
                             'discount_apply_all' => array_key_exists('discount_apply_all', $variation) ? (bool) $variation['discount_apply_all'] : true,
+                            'is_loyalty_enabled' => array_key_exists('is_loyalty_enabled', $variation) ? (bool) $variation['is_loyalty_enabled'] : false,
                             'business_id' => $obj['business_id'],
                             'updatedby_id' => Auth::id(),
                             'date_updated' => now(),
@@ -315,6 +316,7 @@ class ProductService
                             'minimum_selling_price' => $variation['minimum_selling_price'] ?? null,
                             'discount_percentage' => $variation['discount_percentage'] ?? 0,
                             'discount_apply_all' => array_key_exists('discount_apply_all', $variation) ? (bool) $variation['discount_apply_all'] : true,
+                            'is_loyalty_enabled' => array_key_exists('is_loyalty_enabled', $variation) ? (bool) $variation['is_loyalty_enabled'] : false,
                             'createdby_id' => Auth::id(),
                             'date_created' => now(),
                         ]);
@@ -437,6 +439,7 @@ class ProductService
                     'minimum_selling_price' => $variation['minimum_selling_price'] ?? null,
                     'discount_percentage' => $variation['discount_percentage'] ?? 0,
                     'discount_apply_all' => array_key_exists('discount_apply_all', $variation) ? (bool) $variation['discount_apply_all'] : true,
+                    'is_loyalty_enabled' => array_key_exists('is_loyalty_enabled', $variation) ? (bool) $variation['is_loyalty_enabled'] : false,
                     'business_id' => $obj['business_id'],
                     'createdby_id' => Auth::id(),
                     'date_created' => now(),
@@ -819,10 +822,14 @@ class ProductService
             $products->pluck('product_id')->all()
         );
 
-        $rows = $products->map(function ($product) use ($price_map, $stock_map, $wishlist_flags) {
+        // Resolved once per request (not per-product) so the "coin badge"
+        // eligibility flag never re-queries CustomerSetting per row.
+        $loyalty_context = $this->loyaltyEligibilityContext($business_id);
+
+        $rows = $products->map(function ($product) use ($price_map, $stock_map, $wishlist_flags, $loyalty_context) {
             return [
                 'product' => $product,
-                'summary' => $this->mapProductSummary($product, $price_map, $stock_map, $wishlist_flags),
+                'summary' => $this->mapProductSummary($product, $price_map, $stock_map, $wishlist_flags, $loyalty_context),
             ];
         });
 
@@ -907,9 +914,13 @@ class ProductService
 
         $wishlist_flags = $this->resolveWishlistFlags($business_id, $user_id, [$product->product_id]);
 
+        // Resolved once per request (not per-variation) so the "coin badge"
+        // eligibility flag never re-queries CustomerSetting per option.
+        $loyalty_context = $this->loyaltyEligibilityContext($business_id);
+
         $variations = $product->productVariations;
 
-        $options = $variations->map(function ($variation) use ($price_map, $stock_map, $wishlist_flags) {
+        $options = $variations->map(function ($variation) use ($price_map, $stock_map, $wishlist_flags, $loyalty_context) {
             $entry = $price_map[$variation->product_variation_id] ?? ['price' => 0.0, 'oldPrice' => null, 'discount' => 0];
 
             return [
@@ -921,6 +932,7 @@ class ProductService
                 'discount' => $entry['discount'],
                 'stock' => $stock_map[$variation->product_variation_id] ?? null,
                 'is_wishlisted' => !empty($wishlist_flags['variation_ids'][$variation->product_variation_id]),
+                'loyaltyEligible' => $this->resolveLoyaltyEligible($loyalty_context, $variation->is_loyalty_enabled),
                 'attributes' => $variation->attributes->map(function ($attr) {
                     return ['name' => $attr->name, 'value' => $attr->value];
                 })->values()->all(),
@@ -944,8 +956,8 @@ class ProductService
             $related_products->pluck('product_id')->all()
         );
 
-        $related_mapped = $related_products->map(function ($p) use ($related_price_map, $related_stock_map, $related_flags) {
-            return $this->mapProductSummary($p, $related_price_map, $related_stock_map, $related_flags);
+        $related_mapped = $related_products->map(function ($p) use ($related_price_map, $related_stock_map, $related_flags, $loyalty_context) {
+            return $this->mapProductSummary($p, $related_price_map, $related_stock_map, $related_flags, $loyalty_context);
         })->values()->all();
 
         $is_product_wishlisted = !empty($wishlist_flags['product_ids'][$product->product_id]);
@@ -985,6 +997,7 @@ class ProductService
             'discount' => $primary_option['discount'] ?? 0,
             'stock' => $primary_option['stock'] ?? null,
             'default_variation_id' => $primary_option['id'] ?? null,
+            'loyaltyEligible' => $primary_option['loyaltyEligible'] ?? $this->resolveLoyaltyEligible($loyalty_context, $product->is_loyalty_enabled),
             'related_products' => $related_mapped,
         ];
     }
@@ -1137,7 +1150,45 @@ class ProductService
      * variation resolves to the lowest net price (the single-variation case
      * degenerates to just that variation).
      */
-    private function mapProductSummary(Product $product, array $price_map, array $stock_map, array $wishlist_flags = []): array
+    /**
+     * Resolves the storefront "coin badge" eligibility context once per
+     * request - whether the Loyalty Program is on for this business, and
+     * whether it earns per-product (vs. per-order). Callers reuse this
+     * across every product/variation in the response instead of each row
+     * re-querying CustomerSetting via LoyaltyPointService::productEligible().
+     * Mirrors, and must stay identical to, the rule in
+     * LoyaltyPointService::productEligible().
+     */
+    private function loyaltyEligibilityContext(string $business_id): array
+    {
+        $setting = app(LoyaltyPointService::class)->getSetting($business_id);
+        $enabled = (bool) ($setting->loyalty_program ?? false);
+
+        return [
+            'enabled' => $enabled,
+            'mode_product' => $enabled && $setting && $setting->loyalty_earning_mode === 'product',
+        ];
+    }
+
+    /**
+     * Applies the LoyaltyPointService::productEligible() rule using an
+     * already-resolved context (see loyaltyEligibilityContext()) plus the
+     * product/variation's own is_loyalty_enabled flag.
+     */
+    private function resolveLoyaltyEligible(array $loyalty_context, $is_loyalty_enabled): bool
+    {
+        if (!$loyalty_context['enabled']) {
+            return false;
+        }
+
+        if (!$loyalty_context['mode_product']) {
+            return true;
+        }
+
+        return (bool) $is_loyalty_enabled;
+    }
+
+    private function mapProductSummary(Product $product, array $price_map, array $stock_map, array $wishlist_flags = [], array $loyalty_context = ['enabled' => false, 'mode_product' => false]): array
     {
         $variations = $product->productVariations;
 
@@ -1201,6 +1252,7 @@ class ProductService
             'discount' => $price_entry['discount'] ?? 0,
             'stock' => $stock_value,
             'default_variation_id' => $primary->product_variation_id ?? null,
+            'loyaltyEligible' => $this->resolveLoyaltyEligible($loyalty_context, $product->is_loyalty_enabled),
             'is_single_variation' => $variations->count() <= 1,
             'badges' => $badges,
             'images' => $product->productImages->pluck('image_url')->values()->all(),
@@ -1303,9 +1355,13 @@ class ProductService
             $all->pluck('product_id')->unique()->values()->all()
         );
 
-        $map = function (Collection $collection) use ($price_map, $stock_map, $wishlist_flags) {
-            return $collection->map(function ($product) use ($price_map, $stock_map, $wishlist_flags) {
-                return $this->mapProductSummary($product, $price_map, $stock_map, $wishlist_flags);
+        // Resolved once per request (not per-product) so the "coin badge"
+        // eligibility flag never re-queries CustomerSetting per row.
+        $loyalty_context = $this->loyaltyEligibilityContext($business_id);
+
+        $map = function (Collection $collection) use ($price_map, $stock_map, $wishlist_flags, $loyalty_context) {
+            return $collection->map(function ($product) use ($price_map, $stock_map, $wishlist_flags, $loyalty_context) {
+                return $this->mapProductSummary($product, $price_map, $stock_map, $wishlist_flags, $loyalty_context);
             })->values()->all();
         };
 

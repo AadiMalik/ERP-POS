@@ -222,7 +222,7 @@
         </table>
         <hr class="tr-divider">
 
-        @if ($thermal_config->isVisible('subtotal') || $thermal_config->isVisible('discount') || $thermal_config->isVisible('tax') || $thermal_config->isVisible('voucher') || $thermal_config->isVisible('total'))
+        @if ($thermal_config->isVisible('subtotal') || $thermal_config->isVisible('discount') || $thermal_config->isVisible('tax') || $thermal_config->isVisible('voucher') || $thermal_config->isVisible('loyalty') || $thermal_config->isVisible('total'))
             <div class="tr-totals">
                 @if ($thermal_config->isVisible('subtotal'))
                     <div class="tr-row">
@@ -252,6 +252,13 @@
                     </div>
                 @endif
 
+                @if ($thermal_config->isVisible('loyalty') && (float) $order->loyalty_discount_amount > 0)
+                    <div class="tr-row">
+                        <span class="tr-label">Loyalty ({{ decimal($order->loyalty_points_used) }} pts)</span>
+                        <span class="tr-value">-{{ currency($order->loyalty_discount_amount) }}</span>
+                    </div>
+                @endif
+
                 @if ($thermal_config->isVisible('total'))
                     <div class="tr-row tr-grand-total">
                         <span class="tr-label">TOTAL</span>
@@ -261,7 +268,7 @@
             </div>
         @endif
 
-        @if ($thermal_config->isVisible('paid_amount') || $thermal_config->isVisible('due_amount') || $thermal_config->isVisible('payment_status'))
+        @if ($thermal_config->isVisible('paid_amount') || $thermal_config->isVisible('due_amount') || $thermal_config->isVisible('payment_status') || ($thermal_config->isVisible('loyalty') && (float) $order->loyalty_points_earned > 0))
             <hr class="tr-divider">
             <div class="tr-payment">
                 @if ($thermal_config->isVisible('paid_amount'))
@@ -282,6 +289,13 @@
                     <div class="tr-row">
                         <span class="tr-label">Status</span>
                         <span class="tr-value">{{ $payment_status_label }}</span>
+                    </div>
+                @endif
+
+                @if ($thermal_config->isVisible('loyalty') && (float) $order->loyalty_points_earned > 0)
+                    <div class="tr-row">
+                        <span class="tr-label">Points Earned</span>
+                        <span class="tr-value">{{ decimal($order->loyalty_points_earned) }}</span>
                     </div>
                 @endif
             </div>

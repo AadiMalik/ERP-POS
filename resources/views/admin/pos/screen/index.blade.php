@@ -222,6 +222,16 @@
                                                 <input type="hidden" id="voucher_id" value="">
                                                 <div id="voucherSearchResults" class="list-group pos-search-results" style="display:none;"></div>
                                             </div>
+                                            @if ($customer_setting->loyalty_program ?? false)
+                                                <div class="pos-field pos-field-loyalty" id="loyaltyWrap">
+                                                    <span class="pos-field-label">Loyalty Points</span>
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input" id="use_loyalty_points">
+                                                        <label class="form-check-label" for="use_loyalty_points">Redeem available points</label>
+                                                    </div>
+                                                    <div id="loyaltyPointsHint" class="small text-muted mt-1" style="display:none;"></div>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -249,6 +259,7 @@
                                             data-credit-limit="{{ $item->credit_limit ?? 0 }}"
                                             data-walkin="{{ $item->is_walkin ? 1 : 0 }}" data-credit-days="{{ $item->credit_days ?? 0 }}"
                                             data-store-credit-balance="{{ $item->store_credit_balance ?? 0 }}"
+                                            data-loyalty-points="{{ $item->loyalty_points ?? 0 }}"
                                             data-phone="{{ $item->user->phone ?? '' }}" data-email="{{ $item->user->email ?? '' }}"
                                             {{ $item->is_walkin ? 'selected' : '' }}>
                                             {{ $customer_label }}
@@ -296,6 +307,7 @@
                         <div class="pos-totals-row"><span>Subtotal</span><span id="sumSubtotal">0.00</span></div>
                         <div class="pos-totals-row"><span>Item Discounts</span><span id="sumItemDiscount">0.00</span></div>
                         <div class="pos-totals-row"><span>Order Discount</span><span id="sumOrderDiscount">0.00</span></div>
+                        <div class="pos-totals-row d-none" id="sumLoyaltyDiscountRow"><span>Loyalty Discount</span><span id="sumLoyaltyDiscount">0.00</span></div>
                         <div class="pos-totals-row"><span>Tax</span><span id="sumTax">0.00</span></div>
                         <div class="pos-totals-row pos-grand-total"><span>Total ({{ session('accounting_setting.currency_symbol', 'Rs') }})</span><span id="sumTotal">0.00</span></div>
                     </div>
@@ -686,6 +698,14 @@
             'business_id' => $business_id,
             'branch_id' => $branch_id,
             'pos_setting' => $pos_setting,
+            // Only the piece the "Use Loyalty Points" control needs client-
+            // side (the redemption rate, to show "~Rs X" next to the points
+            // balance) - the redemption cap/eligibility itself is always
+            // resolved server-side (LoyaltyPointService::calculateRedemption()).
+            'customer_setting' => [
+                'loyalty_program' => (bool) ($customer_setting->loyalty_program ?? false),
+                'loyalty_redemption_value' => $customer_setting->loyalty_redemption_value ?? 0,
+            ],
             'allow_negative_stock' => (bool) $inventory_setting->negative_stock,
             'payment_methods' => $payment_methods,
             'sale_types' => $sale_types,

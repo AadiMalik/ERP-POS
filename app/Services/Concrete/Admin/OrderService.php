@@ -1027,6 +1027,14 @@ class OrderService
                     throw new Exception('Only draft or held orders can be edited.');
                 }
 
+                // Captured before user_id is possibly reassigned below - any
+                // loyalty points already reserved for this order were locked
+                // against THIS customer's balance, so releasing them (right
+                // before recomputing totals) must target the same customer,
+                // not whichever customer ends up on the order after this
+                // update.
+                $previous_user_id = $order->user_id;
+
                 $order->update([
                     'warehouse_id' => $warehouse_id,
                     'register_id' => $register_id,
@@ -1090,6 +1098,23 @@ class OrderService
                 ]);
 
                 $this->recordStatusHistory($order->order_id, null, $status, 'Order created');
+                $previous_user_id = null;
+            }
+
+            // Release any loyalty points already reserved for this order
+            // BEFORE recomputing totals - saveLinesAndComputeTotals() reads
+            // the customer's CURRENT available balance to size the new
+            // redemption, so an old reservation still sitting on the balance
+            // would make it look artificially smaller than it really is
+            // (e.g. a cart edit that lowers the total would wrongly compute
+            // 0 redeemable points instead of re-offering the freed-up ones).
+            if (!empty($previous_user_id)) {
+                app(LoyaltyPointService::class)->releaseReservedForOrder(
+                    $order->business_id,
+                    $previous_user_id,
+                    $order->order_id,
+                    'Reservation resynced for Order #' . $order->daily_order_id
+                );
             }
 
             $totals = $this->saveLinesAndComputeTotals($order, $obj, $pos_setting);
@@ -1104,7 +1129,20 @@ class OrderService
                 'discount_id' => $totals['discount_id'],
                 'voucher_id' => $totals['voucher_id'],
                 'voucher_discount_amount' => $totals['voucher_discount_amount'],
+                'loyalty_points_used' => $totals['loyalty_points_used'],
+                'loyalty_discount_amount' => $totals['loyalty_discount_amount'],
             ]);
+
+            if (!empty($order->user_id) && $totals['loyalty_points_used'] > 0) {
+                app(LoyaltyPointService::class)->reserve(
+                    $order->business_id,
+                    $order->user_id,
+                    $totals['loyalty_points_used'],
+                    'order',
+                    $order->order_id,
+                    'Reserved at Order #' . $order->daily_order_id
+                );
+            }
 
             if (!empty($obj['payments'])) {
                 $this->saveLinePayments($order->order_id, $obj['payments']);
@@ -1488,6 +1526,25 @@ class OrderService
             $voucher_id = $voucher->voucher_id;
         }
 
+        // Loyalty point redemption - computed last, on top of every other
+        // discount, exactly like the voucher block above. Capped at the
+        // order's payable total before loyalty (never lets the total go
+        // negative) and at the customer's available balance (the
+        // authoritative check lives in LoyaltyPointService::reserve(),
+        // called by save() right after this method returns - this is only
+        // the calculation, no balance is touched here).
+        $loyalty_points_used = 0.0;
+        $loyalty_discount_amount = 0.0;
+
+        if (!empty($obj['use_loyalty_points']) && !empty($order->user_id)) {
+            $pre_loyalty_discount_amount = $line_discount_total + $order_discount_amount + $voucher_discount_amount;
+            $loyalty_cap = $subtotal - $pre_loyalty_discount_amount + $tax_amount_total;
+
+            $redemption = app(LoyaltyPointService::class)->calculateRedemption($order->business_id, $order->user_id, $loyalty_cap);
+            $loyalty_points_used = $redemption['points'];
+            $loyalty_discount_amount = $redemption['value'];
+        }
+
         foreach ($order_lines as &$line) {
             unset($line['_category_id'], $line['_brand_id']);
 
@@ -1497,7 +1554,7 @@ class OrderService
         }
         unset($line);
 
-        $discount_amount = $line_discount_total + $order_discount_amount + $voucher_discount_amount;
+        $discount_amount = $line_discount_total + $order_discount_amount + $voucher_discount_amount + $loyalty_discount_amount;
         $total = $subtotal - $discount_amount + $tax_amount_total;
 
         return [
@@ -1510,6 +1567,8 @@ class OrderService
             'discount_id' => $discount_id,
             'voucher_id' => $voucher_id,
             'voucher_discount_amount' => round($voucher_discount_amount, 3),
+            'loyalty_points_used' => round($loyalty_points_used, 3),
+            'loyalty_discount_amount' => round($loyalty_discount_amount, 3),
             // Only populated meaningfully for callers that need the per-line
             // breakdown without persisting (see previewVoucher()) - always
             // returned since it costs nothing extra to include.
@@ -1855,6 +1914,14 @@ class OrderService
         return $this->transitionStatus($order_id, $delivery_steps[$to_status], $to_status, $note);
     }
 
+    /**
+     * Cancels a draft/held order. Unlike a posted order (void() reverses
+     * stock/GL), a draft/held order never touched stock or accounting - but
+     * it may already have loyalty points reserved against it (save()
+     * reserves immediately, before payment). Runs its own transaction
+     * (rather than delegating straight to transitionStatus()) so releasing
+     * that reservation and the status change commit atomically.
+     */
     public function cancel($obj)
     {
         $order_id = $obj['order_id'] ?? null;
@@ -1864,17 +1931,44 @@ class OrderService
             throw new Exception('A cancellation reason is required.');
         }
 
-        $order = $this->model_order->getModel()::findOrFail($order_id);
+        DB::beginTransaction();
 
-        if ($order->status === Status::POSTED) {
-            throw new Exception('A posted order cannot be cancelled directly - void it instead.');
+        try {
+            $order = $this->model_order->getModel()::findOrFail($order_id);
+
+            if ($order->status === Status::POSTED) {
+                throw new Exception('A posted order cannot be cancelled directly - void it instead.');
+            }
+
+            if (!in_array($order->status, ['draft', 'hold'], true)) {
+                throw new Exception('Only draft or held orders can be cancelled.');
+            }
+
+            app(LoyaltyPointService::class)->releaseReservedForOrder(
+                $order->business_id,
+                $order->user_id,
+                $order->order_id,
+                'Order #' . $order->daily_order_id . ' cancelled'
+            );
+
+            $from_status = $order->status;
+
+            $order->update([
+                'status' => 'cancelled',
+                'updatedby_id' => Auth::id(),
+                'date_updated' => now(),
+            ]);
+
+            $this->recordStatusHistory($order_id, $from_status, 'cancelled', $reason);
+
+            DB::commit();
+
+            return $this->getById($order_id);
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            throw $e;
         }
-
-        if (!in_array($order->status, ['draft', 'hold'], true)) {
-            throw new Exception('Only draft or held orders can be cancelled.');
-        }
-
-        return $this->transitionStatus($order_id, ['draft', 'hold'], 'cancelled', $reason);
     }
 
     /**
@@ -2096,6 +2190,10 @@ class OrderService
             throw new Exception('Discount Account is not configured in Accounting Settings.');
         }
 
+        if ((float) $order->loyalty_discount_amount > 0 && empty($accounting_setting->default_loyalty_discount_account_id)) {
+            throw new Exception('Loyalty Discount Account is not configured in Accounting Settings.');
+        }
+
         if (empty($accounting_setting->default_inventory_account_id) || empty($accounting_setting->default_cogs_account_id)) {
             throw new Exception('Inventory and COGS Accounts must be configured in Accounting Settings before completing sales.');
         }
@@ -2254,15 +2352,35 @@ class OrderService
             ]);
         }
 
-        // Debit: discount given (contra-revenue).
-        if ((float) $order->discount_amount > 0) {
+        // Debit: discount given (contra-revenue). $order->discount_amount is
+        // the combined line+order+voucher+loyalty discount total (loyalty is
+        // folded in exactly like voucher, so the order's grand total nets
+        // out correctly) - but loyalty gets its OWN dedicated account/leg
+        // below, so it must be excluded here or it would be double-debited.
+        $non_loyalty_discount_amount = round((float) $order->discount_amount - (float) $order->loyalty_discount_amount, 3);
+
+        if ($non_loyalty_discount_amount > 0) {
             JournalEntryDetail::create([
                 'journal_entry_detail_id' => generateUuid(),
                 'journal_entry_id' => $journal_entry->journal_entry_id,
                 'account_id' => $accounting_setting->default_discount_account_id,
-                'debit' => $order->discount_amount,
+                'debit' => $non_loyalty_discount_amount,
                 'credit' => 0,
                 'description' => 'Order #' . $order->daily_order_id . ' - Discount',
+            ]);
+        }
+
+        // Debit: loyalty points redeemed (contra-revenue, separate account
+        // from the general Discount account so an accountant can see exactly
+        // how much revenue was given up to loyalty redemptions).
+        if ((float) $order->loyalty_discount_amount > 0) {
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id' => $journal_entry->journal_entry_id,
+                'account_id' => $accounting_setting->default_loyalty_discount_account_id,
+                'debit' => $order->loyalty_discount_amount,
+                'credit' => 0,
+                'description' => 'Order #' . $order->daily_order_id . ' - Loyalty Points Redeemed',
             ]);
         }
 
@@ -2550,6 +2668,22 @@ class OrderService
             );
         }
 
+        if ((float) $order->loyalty_points_used > 0 && !empty($order->user_id)) {
+            app(LoyaltyPointService::class)->consume(
+                $order->business_id,
+                $order->user_id,
+                (float) $order->loyalty_points_used,
+                'order',
+                $order->order_id,
+                'Redeemed at Order #' . $order->daily_order_id
+            );
+        }
+
+        // Earning happens after payment/completion only - never on a
+        // draft/held order - and is frozen onto the order (loyalty_points_earned)
+        // so later changes to Loyalty Program settings never alter this
+        // order's history. The caller (post()/correct()) persists this value.
+        $order->loyalty_points_earned = app(LoyaltyPointService::class)->earn($order);
     }
 
     /**
@@ -2627,6 +2761,7 @@ class OrderService
             $order->update([
                 'paid_amount' => $paid_amount,
                 'change_amount' => $change_amount,
+                'loyalty_points_earned' => $order->loyalty_points_earned,
                 'status' => Status::POSTED,
                 'updatedby_id' => Auth::id(),
                 'date_updated' => now(),
@@ -2754,6 +2889,22 @@ class OrderService
                 $order->order_id,
                 $storeCreditReason
             );
+        }
+
+        if (!empty($order->user_id)) {
+            $loyalty_service = app(LoyaltyPointService::class);
+
+            $consumed_loyalty = $loyalty_service->consumedForOrder($order->order_id);
+
+            if ($consumed_loyalty > 0) {
+                $loyalty_service->reverse($order->business_id, $order->user_id, $consumed_loyalty, 'order', $order->order_id, $storeCreditReason);
+            }
+
+            $earned_loyalty = $loyalty_service->earnedForOrder($order->order_id);
+
+            if ($earned_loyalty > 0) {
+                $loyalty_service->revokeEarned($order->business_id, $order->user_id, $earned_loyalty, 'order', $order->order_id, $storeCreditReason);
+            }
         }
     }
 
@@ -2907,6 +3058,7 @@ class OrderService
             $order->update([
                 'paid_amount' => $meta['paid_amount'],
                 'change_amount' => $meta['change_amount'],
+                'loyalty_points_earned' => $order->loyalty_points_earned,
                 'status' => Status::POSTED,
                 'updatedby_id' => Auth::id(),
                 'date_updated' => now(),
@@ -3005,7 +3157,26 @@ class OrderService
             'discount_id' => $totals['discount_id'],
             'voucher_id' => $totals['voucher_id'],
             'voucher_discount_amount' => $totals['voucher_discount_amount'],
+            'loyalty_points_used' => $totals['loyalty_points_used'],
+            'loyalty_discount_amount' => $totals['loyalty_discount_amount'],
         ]);
+
+        // reversePostedEffects() (called just before this, by correct())
+        // already returned any previously-consumed points to available - the
+        // freshly recomputed amount above must be re-reserved here (exactly
+        // like save() does for a draft) so applyPostedEffects()'s consume()
+        // call, right after this method returns, has something reserved to
+        // consume.
+        if (!empty($order->user_id)) {
+            app(LoyaltyPointService::class)->syncReservation(
+                $order->business_id,
+                $order->user_id,
+                $order->order_id,
+                'Order #' . $order->daily_order_id,
+                $totals['loyalty_points_used'],
+                'Reserved at Order #' . $order->daily_order_id . ' correction'
+            );
+        }
 
         $this->saveLinePayments($order->order_id, $obj['payments']);
     }

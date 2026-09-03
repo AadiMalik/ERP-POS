@@ -104,6 +104,7 @@ class ChartOfAccountsTemplateSeeder extends Seeder
             'default_cash_account_id' => '111001-001',
             'default_bank_account_id' => '111002-001',
             'default_discount_account_id' => '530002-001',
+            'default_loyalty_discount_account_id' => '530003-001',
             'default_tax_account_id' => '240001-001',
             'default_revenue_account_id' => '420001-001',
             'default_purchase_account_id' => '520001-001',
@@ -482,6 +483,15 @@ class ChartOfAccountsTemplateSeeder extends Seeder
                 'parent_name' => 'Discount Allowed',
                 'children' => [
                     ['code' => '530002-001', 'name' => 'Discount Allowed'],
+                ],
+            ],
+            [
+                'account_type' => AccountTypes::EXPENSES,
+                'account_sub_type' => AccountSubTypes::ADMINISTRATIVE_EXPENSES,
+                'parent_code' => '530003',
+                'parent_name' => 'Loyalty Points Discount',
+                'children' => [
+                    ['code' => '530003-001', 'name' => 'Loyalty Points Discount'],
                 ],
             ],
             [

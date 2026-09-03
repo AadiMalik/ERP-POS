@@ -1063,6 +1063,15 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
                 Route::get('export-csv', [App\Http\Controllers\Admin\Reports\CustomerPaymentHistoryReportController::class, 'exportCsv'])->name('reports.customer-payment-history.export-csv');
             });
 
+            Route::group(['prefix' => 'customer-loyalty-report'], function () {
+                Route::get('/', [App\Http\Controllers\Admin\Reports\LoyaltyHistoryReportController::class, 'index']);
+                Route::post('data', [App\Http\Controllers\Admin\Reports\LoyaltyHistoryReportController::class, 'data']);
+                Route::get('print', [App\Http\Controllers\Admin\Reports\LoyaltyHistoryReportController::class, 'print'])->name('reports.customer-loyalty-report.print');
+                Route::get('pdf', [App\Http\Controllers\Admin\Reports\LoyaltyHistoryReportController::class, 'pdf'])->name('reports.customer-loyalty-report.pdf');
+                Route::get('export', [App\Http\Controllers\Admin\Reports\LoyaltyHistoryReportController::class, 'export'])->name('reports.customer-loyalty-report.export');
+                Route::get('export-csv', [App\Http\Controllers\Admin\Reports\LoyaltyHistoryReportController::class, 'exportCsv'])->name('reports.customer-loyalty-report.export-csv');
+            });
+
             // Orders reports (POS/order-side aggregates) - same module:pos
             // grouping as customer reports above.
             $orderReportRoutes = [
@@ -1077,6 +1086,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
                 'cancelled-orders' => App\Http\Controllers\Admin\Reports\Orders\CancelledOrdersReportController::class,
                 'due-credit-sales' => App\Http\Controllers\Admin\Reports\Orders\DueCreditSalesReportController::class,
                 'discount-report' => App\Http\Controllers\Admin\Reports\Orders\DiscountReportController::class,
+                'loyalty-report' => App\Http\Controllers\Admin\Reports\Orders\LoyaltyReportController::class,
                 'order-tax-report' => App\Http\Controllers\Admin\Reports\Orders\OrderTaxReportController::class,
                 'top-selling' => App\Http\Controllers\Admin\Reports\Orders\TopSellingReportController::class,
                 'offline-orders-report' => App\Http\Controllers\Admin\Reports\Orders\OfflineOrdersReportController::class,

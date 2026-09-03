@@ -45,6 +45,7 @@ class CustomerProfile extends Model
 
         'is_walkin',
         'loyalty_points',
+        'loyalty_points_reserved',
         'store_credit_balance',
 
         'status',

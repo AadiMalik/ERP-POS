@@ -952,6 +952,33 @@ class OrderReturnService
             );
         }
 
+        // Reverse a proportional share of the loyalty points the original
+        // order earned - a customer should not keep points earned on a
+        // portion of an order that's since been returned. Proportional to
+        // this return's share of the order total (capped at whatever is
+        // still net-earned for the order, so repeated/partial returns on the
+        // same order never over-revoke).
+        if (!empty($order->user_id)) {
+            $loyalty_service = app(LoyaltyPointService::class);
+            $remaining_earned = $loyalty_service->earnedForOrder($order->order_id);
+
+            if ($remaining_earned > 0 && (float) $order->total > 0) {
+                $share = min(1, (float) $order_return->total / (float) $order->total);
+                $points_to_revoke = round($remaining_earned * $share, 3);
+
+                if ($points_to_revoke > 0) {
+                    $loyalty_service->revokeEarned(
+                        $order_return->business_id,
+                        $order->user_id,
+                        $points_to_revoke,
+                        'order_return',
+                        $order_return->order_return_id,
+                        'Reversed for Order Return ' . $order_return->order_return_no
+                    );
+                }
+            }
+        }
+
         // Per line: return stock to inventory at its original cost basis
         // (the order_detail.cost_price snapshot from the original sale) and
         // accumulate the COGS/Inventory reversal total.
@@ -1123,6 +1150,19 @@ class OrderReturnService
                     'order_return',
                     $order_return->order_return_id,
                     'Store credit revoked - Order Return ' . $order_return->order_return_no . ' was reversed'
+                );
+            }
+
+            $revoked_loyalty = abs(app(LoyaltyPointService::class)->sumPointsForReference('order_return', $order_return->order_return_id, 'adjusted'));
+
+            if ($revoked_loyalty > 0 && !empty($order_return->customer_id)) {
+                app(LoyaltyPointService::class)->reverse(
+                    $order_return->business_id,
+                    $order_return->customer_id,
+                    $revoked_loyalty,
+                    'order_return',
+                    $order_return->order_return_id,
+                    'Loyalty points restored - Order Return ' . $order_return->order_return_no . ' was reversed'
                 );
             }
 

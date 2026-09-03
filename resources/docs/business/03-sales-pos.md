@@ -82,7 +82,9 @@ and complete the sale.
 customer) sits on the same line as the cart title, styled like the Sale Type
 dropdown. Customers appear as **Code - Name** and the list is searchable
 (by code, name, phone, or email). **Payment & Options** (payment method, order
-discount, voucher/coupon) opens from a small bookmark-style clip on the side
+discount, voucher/coupon, and — when the Loyalty Program is on — a "Use
+Loyalty Points" checkbox showing the selected customer's available points)
+opens from a small bookmark-style clip on the side
 of the product area — collapsed by default so more room is left for browsing
 products. The clip label shows the current payment method (Cash is selected
 automatically on a fresh sale). For **Delivery** order types, opening that

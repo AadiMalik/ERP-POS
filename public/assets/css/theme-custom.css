@@ -872,3 +872,13 @@ body[data-sidebar-skin="gradient"] .bg-menu-theme .app-brand-text .dukanaz-wordm
 .layout-menu-collapsed:not(.layout-menu-hover) .app-brand-text {
     display: none;
 }
+
+/* SweetAlert2 toast notifications (successMessage()/errorMessage() in
+   universal.js) were rendering underneath the fixed top navbar - the
+   navbar sits inside its own stacking context (see the "Navbar page
+   z-index issue" note in demo.css) that SweetAlert2's default toast
+   z-index doesn't reliably clear. Force it above everything else in
+   the admin layout. */
+.swal2-container {
+    z-index: 20000 !important;
+}

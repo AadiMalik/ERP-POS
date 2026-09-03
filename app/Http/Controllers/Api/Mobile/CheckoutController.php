@@ -59,6 +59,7 @@ class CheckoutController extends Controller
                 'notes' => 'nullable|string|max:1000',
                 'client_request_id' => 'nullable|string|max:64',
                 'payment_receipt' => 'nullable|file|mimes:jpg,jpeg,png,pdf,webp|max:5120',
+                'use_loyalty_points' => 'nullable|boolean',
             ]
         );
 
@@ -85,6 +86,7 @@ class CheckoutController extends Controller
                 'country',
                 'notes',
                 'client_request_id',
+                'use_loyalty_points',
             ]);
 
             if (empty($payload['client_request_id'])) {

@@ -291,6 +291,10 @@ class OrderController extends Controller
             unset($obj['voucher_id']);
         }
 
+        if (!empty($obj['use_loyalty_points']) && !Auth::user()->can('order.loyalty.apply')) {
+            unset($obj['use_loyalty_points']);
+        }
+
         if (!empty($obj['products']) && !Auth::user()->can('order.price.change')) {
             // Only strip the manual price override here - picking a per-line
             // Sale Type is independently gated by pos_setting.allow_mixed_sale_types
@@ -447,8 +451,8 @@ class OrderController extends Controller
     /**
      * Same-day manager correction of a posted POS order. Reverses stock/JV,
      * rebuilds cart lines/payments, and reposts on the same order_id.
-     * Sub-permissions (discount/coupon/price/customer) are stripped here the
-     * same way as store() - the service does not authorize them.
+     * Sub-permissions (discount/coupon/loyalty/price/customer) are stripped
+     * here the same way as store() - the service does not authorize them.
      */
     public function correct(Request $request)
     {
@@ -474,6 +478,10 @@ class OrderController extends Controller
         if ((!empty($obj['voucher_code']) || !empty($obj['voucher_id'])) && !Auth::user()->can('order.coupon.apply')) {
             unset($obj['voucher_code']);
             unset($obj['voucher_id']);
+        }
+
+        if (!empty($obj['use_loyalty_points']) && !Auth::user()->can('order.loyalty.apply')) {
+            unset($obj['use_loyalty_points']);
         }
 
         if (!empty($obj['products']) && !Auth::user()->can('order.price.change')) {
@@ -699,8 +707,8 @@ class OrderController extends Controller
      * runs the exact same server-side eligibility/calculation OrderService
      * uses when actually saving an order, so the cashier gets authoritative
      * feedback (amount, matched items, BOGO free units, or the precise
-     * rejection reason) before anything is saved. Same discount_id/voucher_id
-     * permission stripping as store(), since this reveals what a voucher
+     * rejection reason) before anything is saved. Same discount_id/voucher_id/
+     * use_loyalty_points permission stripping as store(), since this reveals what a voucher
      * would apply.
      */
     public function previewVoucher(Request $request)
@@ -714,6 +722,10 @@ class OrderController extends Controller
         if ((!empty($obj['voucher_code']) || !empty($obj['voucher_id'])) && !Auth::user()->can('order.coupon.apply')) {
             unset($obj['voucher_code']);
             unset($obj['voucher_id']);
+        }
+
+        if (!empty($obj['use_loyalty_points']) && !Auth::user()->can('order.loyalty.apply')) {
+            unset($obj['use_loyalty_points']);
         }
 
         try {
@@ -754,7 +766,18 @@ class OrderController extends Controller
         $this->assertOrderAccessible($order_id);
 
         try {
-            return $this->success(Message::FETCH, $this->order_service->getDetails($order_id));
+            $data = $this->order_service->getDetails($order_id);
+
+            // OrderService::getDetails()'s header doesn't carry these two -
+            // POS needs them to restore the "Use Loyalty Points" checkbox
+            // when a held/draft order is resumed (see loadCartFromDetails()
+            // in pos-screen.js), the same way header.voucher_code already
+            // restores the voucher field.
+            $loyalty = Order::where('order_id', $order_id)->first(['loyalty_points_used', 'loyalty_discount_amount']);
+            $data['header']['loyalty_points_used'] = $loyalty->loyalty_points_used ?? 0;
+            $data['header']['loyalty_discount_amount'] = $loyalty->loyalty_discount_amount ?? 0;
+
+            return $this->success(Message::FETCH, $data);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }

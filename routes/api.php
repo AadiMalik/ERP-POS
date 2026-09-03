@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\VoucherController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\CustomerOrderController;
+use App\Http\Controllers\Api\LoyaltyController;
 use App\Http\Controllers\Api\NewsletterSubscriberController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductReviewController;
@@ -106,6 +107,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->prefix('v1')->group(functi
     // Customer orders (own orders only for the given business).
     Route::get('orders/{business_id}', [CustomerOrderController::class, 'index']);
     Route::get('orders/{business_id}/{order_id}', [CustomerOrderController::class, 'show']);
+
+    // Customer Loyalty Program - balance summary + transaction history.
+    Route::get('loyalty/{business_id}', [LoyaltyController::class, 'show']);
+    Route::get('loyalty/{business_id}/history', [LoyaltyController::class, 'history']);
 
     // Website cart (authenticated, business-scoped).
     Route::get('cart/{business_id}', [CartController::class, 'show']);

@@ -60,6 +60,27 @@
                 </div>
             </div>
         </div>
+        @can('loyalty.view')
+            @if ($customer_setting->loyalty_program ?? false)
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">Loyalty Points Available</div>
+                            <div class="fw-semibold">{{ decimal($customer_profile->loyalty_points ?? 0) }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">Loyalty Points Reserved</div>
+                            <div class="fw-semibold">{{ decimal($customer_profile->loyalty_points_reserved ?? 0) }}</div>
+                            <div class="text-muted small">Locked to an unpaid order</div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        @endcan
     </div>
 
     <div class="card">
@@ -74,6 +95,13 @@
                 <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="tab" href="#timeline">Transaction Timeline</a>
                 </li>
+                @can('loyalty.history')
+                    @if ($customer_setting->loyalty_program ?? false)
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#loyalty">Loyalty History</a>
+                        </li>
+                    @endif
+                @endcan
             </ul>
         </div>
         <div class="card-body">
@@ -189,6 +217,49 @@
                         @endforelse
                     </ul>
                 </div>
+
+                @can('loyalty.history')
+                @if ($customer_setting->loyalty_program ?? false)
+                <div class="tab-pane fade" id="loyalty">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th class="text-end">Points</th>
+                                    <th class="text-end">Value</th>
+                                    <th class="text-end">Available Balance After</th>
+                                    <th>Reference</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse (($loyalty_transactions ?? []) as $tx)
+                                <tr>
+                                    <td>{{ localDateTime($tx->date_created ?? null) }}</td>
+                                    <td class="text-capitalize">{{ $tx->transaction_type }}</td>
+                                    <td class="text-end">{{ decimal($tx->points) }}</td>
+                                    <td class="text-end">{{ $tx->monetary_value !== null ? currency($tx->monetary_value) : '-' }}</td>
+                                    <td class="text-end">{{ decimal($tx->available_balance_after) }}</td>
+                                    <td>
+                                        @if ($tx->reference_type == 'order' && !empty($tx->reference_id))
+                                            <a href="{{ route('order.show', $tx->reference_id) }}">Order</a>
+                                        @else
+                                            {{ $tx->reference_type ? ucfirst($tx->reference_type) : '-' }}
+                                        @endif
+                                    </td>
+                                    <td>{{ $tx->description ?? '-' }}</td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="7" class="text-center text-muted">No loyalty transactions found.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @endif
+                @endcan
             </div>
         </div>
     </div>

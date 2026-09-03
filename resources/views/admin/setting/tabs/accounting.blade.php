@@ -3,6 +3,7 @@
         'default_cash_account_id' => 'Cash Account',
         'default_bank_account_id' => 'Bank Account',
         'default_discount_account_id' => 'Discount Account',
+        'default_loyalty_discount_account_id' => 'Loyalty Discount Account',
         'default_tax_account_id' => 'Tax Account',
         'default_revenue_account_id' => 'Revenue Account',
         'default_purchase_account_id' => 'Purchase Account',

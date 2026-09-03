@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Mobile\CategoryController;
 use App\Http\Controllers\Api\Mobile\CheckoutController;
 use App\Http\Controllers\Api\Mobile\ContactMessageController;
 use App\Http\Controllers\Api\Mobile\CustomerOrderController;
+use App\Http\Controllers\Api\Mobile\LoyaltyController;
 use App\Http\Controllers\Api\Mobile\NewsletterSubscriberController;
 use App\Http\Controllers\Api\Mobile\ProductController;
 use App\Http\Controllers\Api\Mobile\ProductReviewController;
@@ -88,6 +89,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
     Route::get('orders/{business_id}', [CustomerOrderController::class, 'index']);
     Route::get('orders/{business_id}/{order_id}', [CustomerOrderController::class, 'show']);
+
+    // Customer Loyalty Program - balance summary + transaction history.
+    Route::get('loyalty/{business_id}', [LoyaltyController::class, 'show']);
+    Route::get('loyalty/{business_id}/history', [LoyaltyController::class, 'history']);
 
     Route::get('cart/{business_id}', [CartController::class, 'show']);
     Route::post('cart/{business_id}', [CartController::class, 'store']);

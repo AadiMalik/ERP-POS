@@ -18,6 +18,8 @@ class CustomerSetting extends Model
         'loyalty_every_amount',
         'loyalty_point_rate',
         'loyalty_min_order_amount',
+        'loyalty_earning_mode',
+        'loyalty_redemption_value',
         'createdby_id',
         'updatedby_id',
         'date_created',

@@ -31,6 +31,7 @@ class Product extends Model
         'is_featured',
         'is_trending',
         'is_best_seller',
+        'is_loyalty_enabled',
         'status',
         'is_deleted',
         'createdby_id',

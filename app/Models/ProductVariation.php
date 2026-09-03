@@ -32,6 +32,7 @@ class ProductVariation extends Model
         'minimum_selling_price',
         'discount_percentage',
         'discount_apply_all',
+        'is_loyalty_enabled',
         'minimum_stock',
         'track_batch',
         'track_expiry',

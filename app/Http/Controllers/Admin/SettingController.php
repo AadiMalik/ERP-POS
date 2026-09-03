@@ -181,6 +181,7 @@ $this->middleware('permission:setting.manage');
             'default_cash_account_id'            => 'nullable|exists:accounts,account_id',
             'default_bank_account_id'            => 'nullable|exists:accounts,account_id',
             'default_discount_account_id'        => 'nullable|exists:accounts,account_id',
+            'default_loyalty_discount_account_id' => 'nullable|exists:accounts,account_id',
             'default_tax_account_id'             => 'nullable|exists:accounts,account_id',
             'default_revenue_account_id'         => 'nullable|exists:accounts,account_id',
             'default_purchase_account_id'        => 'nullable|exists:accounts,account_id',
@@ -254,6 +255,8 @@ $this->middleware('permission:setting.manage');
             'loyalty_every_amount'      => 'required_if:loyalty_program,1|nullable|numeric|min:0',
             'loyalty_point_rate'        => 'required_if:loyalty_program,1|nullable|numeric|min:0',
             'loyalty_min_order_amount'  => 'required_if:loyalty_program,1|nullable|numeric|min:0',
+            'loyalty_earning_mode'      => 'required_if:loyalty_program,1|nullable|in:order,product',
+            'loyalty_redemption_value'  => 'required_if:loyalty_program,1|nullable|numeric|min:0.001',
         ];
 
         $validate = Validator::make($request->all(), $rules);
