@@ -41,6 +41,35 @@ manually, and **Vouchers** (Cash Payment, Bank Payment, Cash Receipt, Bank Recei
 and other standard voucher types) provide guided forms for the most common manual
 postings.
 
+## Bank Reconciliation
+
+**Bank Reconciliation** (under Accounting) lets you match your bank statement to
+what the ERP already recorded for a cash or bank Chart of Accounts account — it does
+**not** create new accounting entries.
+
+Typical workflow:
+1. Start a reconciliation: pick the bank/cash account, period, and enter the
+   **bank statement closing balance** (opening can default from the last completed
+   reconciliation).
+2. Import statement lines from CSV/Excel (`date`, `amount`, `reference`,
+   `description` — positive amount = money in, negative = money out) or add lines
+   manually.
+3. Match each statement line to an ERP journal line (same amount). Prior uncleared
+   items from earlier dates also appear so they can be cleared when they show on
+   the bank statement. Use **Suggest Matches** for candidates based on amount,
+   date (±3 days), and reference; confirm each match yourself.
+4. Watch the **Difference** panel: Statement Closing − Adjusted Book. Adjusted Book
+   is the ERP balance as of the period end after treating unmatched ERP deposits/
+   withdrawals as not yet on the bank statement. Complete only when the difference
+   is **0.00**.
+5. Completed reconciliations are read-only history (who completed them and when).
+   You can **Reopen** a completed session to edit matches if needed. Ignore a
+   statement-only line (e.g. a bank fee not yet booked) until you post it in the
+   books and match it later.
+
+Print or PDF the reconciliation summary for your records. Use the Cash & Bank
+Ledger report for a continuous ledger view of the same accounts.
+
 ## Recurring Transactions
 
 Set up a **Recurring Transaction** template (e.g. monthly rent) and the system will

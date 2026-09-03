@@ -72,7 +72,7 @@ class RoleDefaultPermissions
             case RoleNames::FINANCEMANAGER:
                 return array_merge(
                     PermissionRegistry::namesForModules([
-                        'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction',
+                        'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'bank-reconciliation', 'recurring-transaction',
                         'fixed-asset-category', 'fixed-asset', 'fixed-asset-depreciation',
                         'expense', 'expense-category', 'admin-expense', 'supplier-payment', 'customer-payment',
                         'fiscal-year', 'accounting-period', 'period-closing-rule', 'budget',
@@ -137,7 +137,7 @@ class RoleDefaultPermissions
                 return array_merge(
                     PermissionRegistry::namesForModulesExcludingActions(
                         [
-                            'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction',
+                            'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'bank-reconciliation', 'recurring-transaction',
                             'fixed-asset-category', 'fixed-asset', 'fixed-asset-depreciation',
                             'expense', 'expense-category', 'admin-expense',
                             'fiscal-year', 'accounting-period', 'period-closing-rule', 'budget',

@@ -302,6 +302,16 @@ class PermissionRegistry
                 'export' => ['name' => 'journal-entry.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
+            'bank-reconciliation' => ['label' => 'Bank Reconciliation', 'actions' => [
+                'view'     => ['name' => 'bank-reconciliation.view', 'label' => 'View', 'is_system' => false],
+                'create'   => ['name' => 'bank-reconciliation.create', 'label' => 'Create', 'is_system' => false],
+                'edit'     => ['name' => 'bank-reconciliation.edit', 'label' => 'Edit / Match', 'is_system' => false],
+                'delete'   => ['name' => 'bank-reconciliation.delete', 'label' => 'Delete', 'is_system' => false],
+                'complete' => ['name' => 'bank-reconciliation.complete', 'label' => 'Complete / Reopen', 'is_system' => false],
+                'import'   => ['name' => 'bank-reconciliation.import', 'label' => 'Import Statement', 'is_system' => false],
+                'print'    => ['name' => 'bank-reconciliation.print', 'label' => 'Print / PDF', 'is_system' => false],
+            ]],
+
             // Accounting Fixed Assets (PPE) — distinct from HRM employee assets (asset.*)
             'fixed-asset-category' => ['label' => 'Fixed Asset Categories', 'actions' => [
                 'view'   => ['name' => 'fixed-asset-category.view', 'label' => 'View', 'is_system' => false],
@@ -1578,7 +1588,7 @@ class PermissionRegistry
         return [
             'dashboard', 'warehouse', 'brand', 'category', 'sub-category', 'unit', 'product',
             'barcode', 'unit-conversion', 'batch', 'stock', 'stock-transaction',
-            'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'recurring-transaction',
+            'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'bank-reconciliation', 'recurring-transaction',
             'fixed-asset-category', 'fixed-asset', 'fixed-asset-depreciation',
             'supplier', 'customer', 'order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher',
             'purchase-request', 'purchase-request-quotation', 'purchase', 'good-receipt-note',

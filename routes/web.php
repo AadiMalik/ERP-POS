@@ -799,6 +799,28 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     });
     Route::resource('journal-entry', App\Http\Controllers\Admin\JournalEntryController::class)->except(['show']);
 
+    // Bank Reconciliation
+    Route::group(['prefix' => 'bank-reconciliation'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\BankReconciliationController::class, 'getData'])->name('bank-reconciliation-data');
+        Route::get('import/sample', [App\Http\Controllers\Admin\BankReconciliationController::class, 'importSample'])->name('bank-reconciliation.import-sample');
+        Route::post('{bank_reconciliation_id}/import', [App\Http\Controllers\Admin\BankReconciliationController::class, 'import'])->name('bank-reconciliation.import');
+        Route::get('{bank_reconciliation_id}/balances', [App\Http\Controllers\Admin\BankReconciliationController::class, 'balances'])->name('bank-reconciliation.balances');
+        Route::post('{bank_reconciliation_id}/statement-line', [App\Http\Controllers\Admin\BankReconciliationController::class, 'storeStatementLine'])->name('bank-reconciliation.statement-line.store');
+        Route::delete('{bank_reconciliation_id}/statement-line/{bank_statement_line_id}', [App\Http\Controllers\Admin\BankReconciliationController::class, 'destroyStatementLine'])->name('bank-reconciliation.statement-line.destroy');
+        Route::post('{bank_reconciliation_id}/match', [App\Http\Controllers\Admin\BankReconciliationController::class, 'match'])->name('bank-reconciliation.match');
+        Route::post('{bank_reconciliation_id}/unmatch', [App\Http\Controllers\Admin\BankReconciliationController::class, 'unmatch'])->name('bank-reconciliation.unmatch');
+        Route::post('{bank_reconciliation_id}/ignore', [App\Http\Controllers\Admin\BankReconciliationController::class, 'ignore'])->name('bank-reconciliation.ignore');
+        Route::post('{bank_reconciliation_id}/unignore', [App\Http\Controllers\Admin\BankReconciliationController::class, 'unignore'])->name('bank-reconciliation.unignore');
+        Route::get('{bank_reconciliation_id}/suggest-matches', [App\Http\Controllers\Admin\BankReconciliationController::class, 'suggestMatches'])->name('bank-reconciliation.suggest-matches');
+        Route::post('{bank_reconciliation_id}/complete', [App\Http\Controllers\Admin\BankReconciliationController::class, 'complete'])->name('bank-reconciliation.complete');
+        Route::post('{bank_reconciliation_id}/reopen', [App\Http\Controllers\Admin\BankReconciliationController::class, 'reopen'])->name('bank-reconciliation.reopen');
+        Route::get('{bank_reconciliation_id}/print', [App\Http\Controllers\Admin\BankReconciliationController::class, 'print'])->name('bank-reconciliation.print');
+        Route::get('{bank_reconciliation_id}/pdf', [App\Http\Controllers\Admin\BankReconciliationController::class, 'pdf'])->name('bank-reconciliation.pdf');
+    });
+    Route::resource('bank-reconciliation', App\Http\Controllers\Admin\BankReconciliationController::class)
+        ->except(['edit'])
+        ->parameters(['bank-reconciliation' => 'bank_reconciliation_id']);
+
     //recurring transactions
     Route::resource('recurring-transaction', App\Http\Controllers\Admin\RecurringTransactionController::class)->except(['show']);
     Route::group(['prefix' => 'recurring-transaction'], function () {

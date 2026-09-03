@@ -382,6 +382,7 @@
         </li>
         {{-- Accounting --}}
         @canAccessAny(['account-type.view', 'account-sub-type.view', 'journal.view', 'account.view', 'journal-entry.view',
+            'bank-reconciliation.view',
             'recurring-transaction.view', 'fixed-asset.view', 'fixed-asset-category.view', 'fixed-asset-depreciation.view',
             'fiscal-year.view', 'accounting-period.view', 'period-closing-rule.manage', 'budget.view',
             'reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
@@ -429,6 +430,13 @@
                         <li class="menu-item">
                             <a href="{{ url('/admin/journal-entry') }}" class="menu-link">
                                 <div data-i18n="Journal Entries">Journal Entries</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('bank-reconciliation.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/bank-reconciliation') }}" class="menu-link">
+                                <div data-i18n="Bank Reconciliation">Bank Reconciliation</div>
                             </a>
                         </li>
                     @endcanAccess

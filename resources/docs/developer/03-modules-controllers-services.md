@@ -213,7 +213,10 @@ holds. `CustomerOrderService::mapStatus()` maps ERP `posted` → storefront
 ## Accounting (`module:accounting`)
 Core: `AccountTypeController`, `AccountSubTypeController`,
 `ExpenseCategoryController`, `AccountController`, `JournalController`,
-`JournalEntryController`, `RecurringTransactionController`, `VoucherController`
+`JournalEntryController`, `BankReconciliationController` (service:
+`BankReconciliationService` — reconciliation sessions over COA cash/bank accounts
+and posted `journal_entry_details`; statement import + 1:1 match; no new JEs),
+`RecurringTransactionController`, `VoucherController`
 (service: `VoucherService` — the full promotional rule engine: percent/fixed/
 BOGO/buy-X-get-Y, scheduling, min-order/max-discount, usage limits, and
 product/category/brand/variation/customer/branch/sale-type/order-type/order-

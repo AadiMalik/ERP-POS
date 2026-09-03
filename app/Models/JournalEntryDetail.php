@@ -23,7 +23,16 @@ class JournalEntryDetail extends Model
         'bill_no',
         'cheque_no',
         'cheque_date',
-        'description'
+        'description',
+        'is_reconciled',
+        'bank_reconciliation_id',
+        'reconciled_at',
+        'reconciled_by_id',
+    ];
+
+    protected $casts = [
+        'is_reconciled' => 'boolean',
+        'reconciled_at' => 'datetime',
     ];
 
     public function journalEntry()
@@ -36,13 +45,23 @@ class JournalEntryDetail extends Model
         return $this->belongsTo(Account::class, 'account_id');
     }
 
-    // public function supplier()
-    // {
-    //     return $this->belongsTo(Supplier::class, 'supplier_id');
-    // }
-
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function bankReconciliation()
+    {
+        return $this->belongsTo(BankReconciliation::class, 'bank_reconciliation_id', 'bank_reconciliation_id');
+    }
+
+    public function reconciledBy()
+    {
+        return $this->belongsTo(User::class, 'reconciled_by_id');
+    }
+
+    public function signedAmount(): float
+    {
+        return (float) $this->debit - (float) $this->credit;
     }
 }

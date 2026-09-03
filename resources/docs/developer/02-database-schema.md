@@ -123,7 +123,10 @@ eligibility/calculation logic lives in `VoucherService::isApplicable()`/
 
 `account_types`, `account_sub_types`, `accounts` (chart of accounts,
 self-referencing `parent_account_id`), `journals` (journal *types* — CPV/BPV/PRV/
-OSV/ICV/SV/SRV/CRV/BRV/OBV/FAV/FDV/FXD), `journal_entries`/`journal_entry_details`,
+OSV/ICV/SV/SRV/CRV/BRV/OBV/FAV/FDV/FXD), `journal_entries`/`journal_entry_details`
+(details also store bank-reconcile flags: `is_reconciled`, `bank_reconciliation_id`,
+`reconciled_at`, `reconciled_by_id`), `bank_reconciliations` /
+`bank_statement_lines` (external statement side + match status; no duplicate ledger),
 `expense_categories`, `expenses`, `recurring_transactions`/`_runs`, `fiscal_years`,
 `accounting_periods`, `period_closing_rules`/`_attempts`/`_issues`, `budgets`/
 `budget_lines`, `document_send_logs` (generic doc-emailing log),

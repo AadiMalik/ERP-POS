@@ -13,6 +13,9 @@ Report, Tax Report, Equity Report, **Profit & Loss**, **Balance Sheet**, Budget
 vs. Actual, plus Fixed Asset reports: **Fixed Asset Register**, **Depreciation
 Report**, **Asset Valuation / Book Value**, and **Asset Disposal / Sale**.
 
+Bank statement matching and clearance history live under **Accounting → Bank
+Reconciliation** (Print/PDF from that screen), not as a separate report menu item.
+
 ## Sales Report
 Overall sales performance, with the ability to reconcile against payments received.
 

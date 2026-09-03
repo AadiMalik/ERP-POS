@@ -103,6 +103,7 @@ class SubscriptionModuleRegistry
             'account'            => ['label' => 'Chart of Accounts', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'journal'            => ['label' => 'Journals', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
             'journal-entry'      => ['label' => 'Journal Entries', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'bank-reconciliation' => ['label' => 'Bank Reconciliation', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
             'recurring-transaction' => ['label' => 'Recurring Transactions', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'voucher'            => ['label' => 'Vouchers', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'fiscal-year'        => ['label' => 'Fiscal Years', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
