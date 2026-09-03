@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BusinessSetting;
 use App\Models\InventorySetting;
 use App\Models\PosRegister;
+use App\Models\PosRegisterSession;
 use App\Models\PosSetting;
 use App\Models\Role;
 use App\Services\Concrete\Admin\BranchService;
@@ -42,7 +43,9 @@ class PosScreenController extends Controller
     // `permissions` table rows everywhere else too.
     protected $permission_keys = [
         'pos.access',
+        'pos.register.open.any',
         'pos.register.close',
+        'pos.register.void',
         'pos.register.report.view',
         'order.create',
         'order.edit',
@@ -444,6 +447,19 @@ class PosScreenController extends Controller
 
         if ($validate->fails()) {
             return $this->validationResponse($validate->errors()->first());
+        }
+
+        $session = PosRegisterSession::find($request->pos_register_session_id);
+
+        if (!$session) {
+            return $this->error('This register session was not found.');
+        }
+
+        $user = Auth::user();
+        $in_scope = userInBusinessBranchScope($user, $session->business_id, $session->branch_id);
+
+        if (Auth::id() != $session->cashier_id && (!$in_scope || !$user->can('pos.register.cash-movement.manage'))) {
+            return $this->error('You do not have permission to record an expense against this register session.', 403);
         }
 
         try {

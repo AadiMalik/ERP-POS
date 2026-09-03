@@ -97,6 +97,22 @@ use this form for anything that also needs a `module:` check.
    [The Documentation System Itself](12-documentation-system.md) and CLAUDE.md's
    "Documentation" section.
 
+## Branch-scoped single-record authorization (sanctioned exception)
+
+`applyRoleScope()` (`app/Helpers/CommonFunctions.php`) scopes a **query** to what
+a role should see (Super Admin: unrestricted; business-level roles: their
+business; branch-level and branch-anchored mixed roles: their business **and**
+branch). Some actions authorize one already-loaded **record** instead — e.g.
+"close this specific register session" — where a query scope doesn't apply.
+For that case use the record-level counterpart,
+`userInBusinessBranchScope($user, $business_id, $branch_id)`, which applies the
+exact same role groupings to a single record's business/branch pair. The
+canonical pattern (see the POS Register/Session module in
+[Modules, Controllers & Services](03-modules-controllers-services.md)) is: the
+record's owner may always act on their own record with no extra permission,
+and anyone else needs both to be in scope of the record's business/branch
+**and** to hold the specific permission for that action.
+
 ## Context-dependent permission checks (sanctioned exception)
 
 Constructor `->only([...])` middleware cannot express "this permission applies

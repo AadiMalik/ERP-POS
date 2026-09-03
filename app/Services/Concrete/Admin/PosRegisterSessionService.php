@@ -7,6 +7,7 @@ use App\Enums\RoleNames;
 use App\Models\PosRegisterCashMovement;
 use App\Models\PosRegisterSession;
 use App\Models\PosSetting;
+use App\Models\User;
 use App\Repository\Repository;
 use App\Traits\Auditable;
 use Carbon\Carbon;
@@ -80,7 +81,20 @@ class PosRegisterSessionService
                 $badge = $item->status == 'open' ? 'bg-label-success' : 'bg-label-secondary';
                 return '<span class="badge ' . $badge . '">' . ucfirst($item->status) . '</span>';
             })
-            ->rawColumns(['status'])
+            ->addColumn('action', function ($item) {
+                if ($item->status != 'closed' || !Auth::user()->can('pos.register.void')) {
+                    return '';
+                }
+
+                return "
+                    <a class='btn btn-icon btn-outline-danger'
+                    id='voidPosRegisterSession'
+                    data-id='{$item->pos_register_session_id}'>
+                    <i title='Void' class='fa fa-ban'></i>
+                    </a>
+                ";
+            })
+            ->rawColumns(['status', 'action'])
             ->make(true);
     }
 
@@ -91,23 +105,39 @@ class PosRegisterSessionService
      * 1. The target register must not already have an open session.
      * 2. The cashier must not already have an open session on ANY OTHER register
      *    (one active session per cashier at a time).
+     * 3. A register locked to one cashier via assigned_user_id can only be opened
+     *    for that cashier (Super Admin excepted).
      */
     public function open($obj)
     {
         $user = Auth::user();
         $is_superadmin = getRoleName() == RoleNames::SUPERADMIN;
+        $can_open_for_others = $is_superadmin || $user->can('pos.register.open.any');
 
-        // Non-Super-Admin callers cannot spoof tenant/cashier identity via the
-        // request body — force business/cashier (and branch when the user is
-        // branch-scoped) to the authenticated user. Business Admins with a
-        // null branch_id may still pick a branch inside their own business;
-        // resolveRegisterForUser still requires the register to match both ids.
+        // Non-Super-Admin callers cannot spoof tenant identity via the request
+        // body — force business (and branch when the user is branch-scoped) to
+        // the authenticated user. Business Admins with a null branch_id may
+        // still pick a branch inside their own business; resolveRegisterForUser
+        // still requires the register to match both ids.
         if (!$is_superadmin) {
             $obj['business_id'] = $user->business_id;
             if (!empty($user->branch_id)) {
                 $obj['branch_id'] = $user->branch_id;
             }
-            $obj['cashier_id'] = $user->id;
+
+            // Only pos.register.open.any holders may open a session for someone
+            // other than themselves, and only for a cashier within their own
+            // business/branch scope - everyone else is forced to self, same as
+            // before.
+            if (!$can_open_for_others || empty($obj['cashier_id']) || $obj['cashier_id'] == $user->id) {
+                $obj['cashier_id'] = $user->id;
+            } else {
+                $target = User::find($obj['cashier_id']);
+
+                if (empty($target) || !userInBusinessBranchScope($user, $target->business_id, $target->branch_id)) {
+                    throw new Exception('You cannot open a register session for that user.');
+                }
+            }
         }
 
         $cashier_id = $obj['cashier_id'] ?? $user->id;
@@ -124,6 +154,10 @@ class PosRegisterSessionService
 
         if (empty($register)) {
             throw new Exception('Unable to resolve a register for this session.');
+        }
+
+        if (!$is_superadmin && !empty($register->assigned_user_id) && $register->assigned_user_id != $cashier_id) {
+            throw new Exception('This register is assigned to another user.');
         }
 
         $register_open = PosRegisterSession::where('pos_register_id', $register->pos_register_id)
@@ -167,13 +201,28 @@ class PosRegisterSessionService
             'date_created' => now(),
         ]);
 
+        $this->logActivity(
+            'pos_register_session',
+            $session->pos_register_session_id,
+            'opened',
+            null,
+            [
+                'pos_register_id' => $session->pos_register_id,
+                'cashier_id' => $session->cashier_id,
+                'opening_cash' => $session->opening_cash,
+            ],
+            null,
+            $session->business_id,
+            $session->branch_id
+        );
+
         return $session;
     }
 
     /**
      * Closes an open register session, computing expected cash vs the counted
      * actual cash. Authorization (own session, or `pos.register.close` within
-     * the same business) is enforced by the caller -
+     * the same business/branch) is enforced by the caller -
      * PosRegisterSessionController::close() - per this codebase's convention
      * of doing authorization in controllers rather than services.
      */
@@ -203,6 +252,21 @@ class PosRegisterSessionService
                 'updatedby_id' => Auth::id(),
                 'date_updated' => now(),
             ]);
+
+            $this->logActivity(
+                'pos_register_session',
+                $session->pos_register_session_id,
+                'closed',
+                ['status' => 'open'],
+                [
+                    'expected_cash' => $expected_cash,
+                    'actual_cash' => $actual_cash,
+                    'cash_difference' => $cash_difference,
+                ],
+                null,
+                $session->business_id,
+                $session->branch_id
+            );
 
             DB::commit();
 
@@ -493,10 +557,9 @@ class PosRegisterSessionService
     /**
      * Voids a closed session. Registers don't touch stock/accounting directly
      * (only orders do), so this is kept minimal: soft-delete plus an audit note,
-     * with no compensating session or stock/JV interaction.
-     *
-     * TODO: link to a formal audit/status-history table once one exists for
-     * register sessions.
+     * with no compensating session or stock/JV interaction. Authorization
+     * (`pos.register.void`, same-business/branch scope, no owning-cashier
+     * bypass) is enforced by the caller - PosRegisterSessionController::void().
      */
     public function reverse($pos_register_session_id, $reason = null)
     {
@@ -506,12 +569,25 @@ class PosRegisterSessionService
             throw new Exception('Only a closed session can be voided.');
         }
 
-        return $this->model_pos_register_session->update([
+        $this->model_pos_register_session->update([
             'is_deleted' => 1,
             'closing_notes' => trim(($session->closing_notes ?? '') . "\nVoided: " . ($reason ?? '')),
             'deletedby_id' => Auth::id(),
             'date_deleted' => now(),
         ], $pos_register_session_id);
+
+        $this->logActivity(
+            'pos_register_session',
+            $session->pos_register_session_id,
+            'voided',
+            ['status' => $session->status],
+            ['is_deleted' => 1],
+            $reason,
+            $session->business_id,
+            $session->branch_id
+        );
+
+        return $this->model_pos_register_session->find($pos_register_session_id);
     }
 
     /**

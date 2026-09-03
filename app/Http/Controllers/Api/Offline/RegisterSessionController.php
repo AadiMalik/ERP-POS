@@ -151,8 +151,6 @@ class RegisterSessionController extends Controller
             return true;
         }
 
-        $same_business = getRoleName() == \App\Enums\RoleNames::SUPERADMIN || $user->business_id == $session->business_id;
-
-        return $same_business && $user->can($permission);
+        return userInBusinessBranchScope($user, $session->business_id, $session->branch_id) && $user->can($permission);
     }
 }

@@ -44,6 +44,7 @@
                             <th>Closed</th>
                             <th>Opening Cash</th>
                             <th>Status</th>
+                            <th>Action</th>
                         </tr>
                         <!-- end table row-->
                     </thead>
@@ -66,7 +67,8 @@
 {data: 'opening_datetime' , name: 'opening_datetime'},
 {data: 'closing_datetime' , name: 'closing_datetime', 'sortable': false , searchable: false},
 {data: 'opening_cash' , name: 'opening_cash', 'sortable': false , searchable: false},
-{data: 'status' , name: 'status' , 'sortable': false , searchable: false},",
+{data: 'status' , name: 'status' , 'sortable': false , searchable: false},
+{data: 'action' , name: 'action', 'sortable': false , searchable: false},",
 'route' => 'pos-register-session/data',
 'buttons' => false,
 'pageLength' => 10,
@@ -80,4 +82,5 @@
         initDataTablepos_register_session_table();
     });
 </script>
+<script src="{{ asset('public/assets/js/admin/pos-register-session.js') }}"></script>
 @endsection

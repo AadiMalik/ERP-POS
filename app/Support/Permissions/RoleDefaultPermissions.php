@@ -188,7 +188,9 @@ class RoleDefaultPermissions
             case RoleNames::POSMANAGER:
                 return [
                     'pos.access',
+                    'pos.register.open.any',
                     'pos.register.close',
+                    'pos.register.void',
                     'pos.register.report.view',
                     'pos.register.cash-movement.manage',
                     'pos-register.view',

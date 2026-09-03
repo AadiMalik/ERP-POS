@@ -252,23 +252,48 @@ Rs 10.61 vs Rs 10.61, are accepted).
 `PosRegisterSessionService::open()` forces `business_id`, branch-scoped
 `branch_id`, and `cashier_id` to the authenticated user for every non-Super-Admin
 caller, so a crafted request cannot open a POS session under another tenant or
-as another cashier. Super Admin may still supply those fields explicitly.
-`resolveRegisterForUser()` continues to require the selected register to match
-the (now server-enforced) business/branch.
+as another cashier — unless the caller holds `pos.register.open.any`, in which
+case a different `cashier_id` may be supplied provided that target user is
+within the caller's own business/branch scope (checked via
+`userInBusinessBranchScope()`, same helper as everywhere else in this module).
+Super Admin may still supply those fields explicitly. `resolveRegisterForUser()`
+continues to require the selected register to match the (now server-enforced)
+business/branch, and `open()` additionally rejects opening a manual-mode
+register whose `assigned_user_id` is set to someone other than the target
+cashier (Super Admin excepted) — a register "assigned" to one cashier in the
+UI is now actually enforced as that cashier's dedicated till.
 
 `PosRegisterSessionController` and `PosScreenController` also apply
 `$this->middleware('permission:pos.access')` in their constructors (in addition
 to the route-group middleware), matching the project convention so a future
 route outside the group cannot ship ungated.
 
+**Single-record branch-scoped authorization:** `userInBusinessBranchScope($user,
+$business_id, $branch_id)` (`app/Helpers/CommonFunctions.php`) is the
+single-record counterpart to `applyRoleScope()` — same role groupings (Super
+Admin unrestricted; business-level roles need only a business match;
+branch-level and branch-anchored mixed roles need both business **and**
+branch to match), used wherever a controller authorizes one record instead of
+scoping a listing query. `PosRegisterSessionController::close()`/`summary()`/
+`printSummary()`/`addCashMovement()`/`void()` all use it: each requires either
+`Auth::id() == $session->cashier_id` (the session's own cashier — not accepted
+at all for `void()`, which is always a supervisory action) or the acting user
+to be in scope of the session's business **and branch**, holding the relevant
+permission (`pos.register.close`, `pos.register.report.view`,
+`pos.register.cash-movement.manage`, `pos.register.void`). This closes what
+was previously a business-wide (not branch-scoped) check, so a POS Manager
+confined to one branch can no longer act on another branch's session just
+because it's the same business. `PosRegisterController::store()` uses the same
+helper to stop a branch-scoped role from creating/editing a register outside
+their own branch, and to force `business_id` server-side for every
+non-Super-Admin caller (previously trusted from the request body).
+
 **Cash-in/cash-out authorization & idempotency:**
 `PosRegisterSessionController::addCashMovement()`/`close()` both require either
 `Auth::id() == $session->cashier_id` (the session's own cashier) or the acting
-user to be in the **same business** as the session **and** hold
-`pos.register.cash-movement.manage` / `pos.register.close` respectively — the
-same same-business guard `summary()`/`printSummary()` already used, so a
-manager's permission on their own business's role can no longer be replayed
-against another tenant's session id. `PosRegisterSessionService::addCashMovement()`
+user to be in scope of the session's business **and branch** (see above) and
+hold `pos.register.cash-movement.manage` / `pos.register.close` respectively.
+`PosRegisterSessionService::addCashMovement()`
 still independently re-checks the session is `status = 'open'` (defense in
 depth if ever called from elsewhere). It's idempotent on `offline_local_id` —
 the same column/pattern the desktop's offline sync already uses on this table
@@ -290,10 +315,27 @@ which checks whose shift is being acted on): the direct
 (`RegisterSessionController`) and the batched `session.close`/
 `session.cash_movement` transactions replayed by
 `OfflinePushService::push()`. Both now carry their own
-`authorizedForSession()` helper (same own-session-or-same-business-permission
-check as the web controller, duplicated rather than shared since the two
-classes authenticate differently) before calling into
-`PosRegisterSessionService`.
+`authorizedForSession()` helper (same own-session-or-in-scope-permission check
+as the web controller via `userInBusinessBranchScope()`, duplicated rather
+than shared since the two classes authenticate differently) before calling
+into `PosRegisterSessionService`. `pushSessionOpen()` needs no equivalent
+duplication — it calls `PosRegisterSessionService::open()` directly, so the
+`assigned_user_id`/`pos.register.open.any` enforcement described above already
+applies to the offline path for free.
+
+**Voiding a closed session:** `PosRegisterSessionController::void()`
+(`POST pos-register-session/void`) wraps
+`PosRegisterSessionService::reverse()` — a soft-delete of a closed session
+plus an audit note, gated by `pos.register.void` with no owning-cashier
+bypass (unlike close/cash-movement, this is always a supervisory action).
+Registers don't touch stock/accounting directly, so voiding has no
+compensating session or stock/JV interaction — it exists purely to correct
+the operational record and is logged to `ActivityLog` (module
+`pos_register_session`, action `voided`). `open()`/`close()`/`reverse()` on
+`PosRegisterSessionService` and `save()`/`status()`/`delete()` on
+`PosRegisterService` (module `pos_register`) are all now audited the same way
+`addCashMovement()` already was, closing the gap where register CRUD and
+session open/close/void previously left no trace of who performed them.
 
 **Cash refund → shift reconciliation:** `PosRegisterSessionService::getSummary()`
 computes `expected_cash = opening_cash + cash_sales - cash_refunds +

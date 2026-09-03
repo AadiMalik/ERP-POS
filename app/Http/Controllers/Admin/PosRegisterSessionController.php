@@ -92,9 +92,9 @@ class PosRegisterSessionController extends Controller
         }
 
         $user = Auth::user();
-        $same_business = getRoleName() == \App\Enums\RoleNames::SUPERADMIN || $user->business_id == $session->business_id;
+        $in_scope = userInBusinessBranchScope($user, $session->business_id, $session->branch_id);
 
-        if (Auth::id() != $session->cashier_id && (!$same_business || !$user->can('pos.register.close'))) {
+        if (Auth::id() != $session->cashier_id && (!$in_scope || !$user->can('pos.register.close'))) {
             return $this->error('You do not have permission to close this register session.', 403);
         }
 
@@ -121,11 +121,11 @@ class PosRegisterSessionController extends Controller
         }
 
         $user = Auth::user();
-        $same_business = getRoleName() == \App\Enums\RoleNames::SUPERADMIN || $user->business_id == $session->business_id;
+        $in_scope = userInBusinessBranchScope($user, $session->business_id, $session->branch_id);
 
         if (
             Auth::id() != $session->cashier_id
-            && (!$same_business || (!$user->can('pos.register.close') && !$user->can('pos.register.report.view')))
+            && (!$in_scope || (!$user->can('pos.register.close') && !$user->can('pos.register.report.view')))
         ) {
             return $this->error('You do not have permission to view this register session.', 403);
         }
@@ -153,11 +153,11 @@ class PosRegisterSessionController extends Controller
         }
 
         $user = Auth::user();
-        $same_business = getRoleName() == \App\Enums\RoleNames::SUPERADMIN || $user->business_id == $session->business_id;
+        $in_scope = userInBusinessBranchScope($user, $session->business_id, $session->branch_id);
 
         if (
             Auth::id() != $session->cashier_id
-            && (!$same_business || (!$user->can('pos.register.close') && !$user->can('pos.register.report.view')))
+            && (!$in_scope || (!$user->can('pos.register.close') && !$user->can('pos.register.report.view')))
         ) {
             abort(403, 'You are not authorized to view this register session.');
         }
@@ -208,9 +208,9 @@ class PosRegisterSessionController extends Controller
         }
 
         $user = Auth::user();
-        $same_business = getRoleName() == \App\Enums\RoleNames::SUPERADMIN || $user->business_id == $session->business_id;
+        $in_scope = userInBusinessBranchScope($user, $session->business_id, $session->branch_id);
 
-        if (Auth::id() != $session->cashier_id && (!$same_business || !$user->can('pos.register.cash-movement.manage'))) {
+        if (Auth::id() != $session->cashier_id && (!$in_scope || !$user->can('pos.register.cash-movement.manage'))) {
             return $this->error('You do not have permission to record cash movements for this register session.', 403);
         }
 
@@ -235,6 +235,43 @@ class PosRegisterSessionController extends Controller
         try {
             $session = $this->pos_register_session_service->resolveSessionForUser(Auth::user());
             return $this->success(Message::FETCH, $session);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * Voids/reverses a closed session. Unlike close()/summary()/addCashMovement(),
+     * there is no "owning cashier" bypass here - voiding the official record of a
+     * shift is a supervisory action even for the cashier who ran it.
+     */
+    public function void(Request $request)
+    {
+        $rules = [
+            'pos_register_session_id' => ['required', 'string'],
+            'reason' => ['nullable', 'string', 'max:255'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $session = \App\Models\PosRegisterSession::find($request->pos_register_session_id);
+
+        if (!$session) {
+            return $this->error('This register session was not found.');
+        }
+
+        $user = Auth::user();
+
+        if (!userInBusinessBranchScope($user, $session->business_id, $session->branch_id) || !$user->can('pos.register.void')) {
+            return $this->error('You do not have permission to void this register session.', 403);
+        }
+
+        try {
+            $session = $this->pos_register_session_service->reverse($request->pos_register_session_id, $request->reason);
+            return $this->success(Message::UPDATE, $session);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }

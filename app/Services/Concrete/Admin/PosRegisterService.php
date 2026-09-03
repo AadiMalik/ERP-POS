@@ -11,6 +11,7 @@ use App\Models\PosSetting;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Repository\Repository;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,8 @@ use Yajra\DataTables\DataTables;
 
 class PosRegisterService
 {
+    use Auditable;
+
     protected $model_pos_register;
 
     public function __construct()
@@ -102,16 +105,44 @@ class PosRegisterService
     {
 
         if (!empty($obj['pos_register_id'])) {
+            $old = $this->model_pos_register->find($obj['pos_register_id']);
+            $old_values = $old->only(['name', 'code', 'branch_id', 'warehouse_id', 'assigned_user_id', 'mode', 'status']);
+
             $obj['updatedby_id'] = Auth::user()->id;
             $obj['date_updated'] = now();
             $this->model_pos_register->update($obj, $obj['pos_register_id']);
-            return $this->model_pos_register->find($obj['pos_register_id']);
+            $saved_obj = $this->model_pos_register->find($obj['pos_register_id']);
+
+            $this->logActivity(
+                'pos_register',
+                $saved_obj->pos_register_id,
+                'updated',
+                $old_values,
+                $saved_obj->only(['name', 'code', 'branch_id', 'warehouse_id', 'assigned_user_id', 'mode', 'status']),
+                null,
+                $saved_obj->business_id,
+                $saved_obj->branch_id
+            );
+
+            return $saved_obj;
         }
 
         $obj['pos_register_id'] = generateUuid();
         $obj['createdby_id'] = Auth::user()->id;
         $obj['date_created'] = now();
         $saved_obj = $this->model_pos_register->create($obj);
+
+        $this->logActivity(
+            'pos_register',
+            $saved_obj->pos_register_id,
+            'created',
+            null,
+            $saved_obj->only(['name', 'code', 'branch_id', 'warehouse_id', 'assigned_user_id', 'mode', 'status']),
+            null,
+            $saved_obj->business_id,
+            $saved_obj->branch_id
+        );
+
         return $saved_obj;
     }
 
@@ -122,20 +153,51 @@ class PosRegisterService
 
     public function status($pos_register_id)
     {
-        return $this->model_pos_register->update([
-            'status' => ($this->model_pos_register->find($pos_register_id)->status == Status::ACTIVE ? Status::INACTIVE : Status::ACTIVE),
+        $register = $this->model_pos_register->find($pos_register_id);
+        $new_status = $register->status == Status::ACTIVE ? Status::INACTIVE : Status::ACTIVE;
+
+        $result = $this->model_pos_register->update([
+            'status' => $new_status,
             'updatedby_id' => Auth::id(),
             'date_updated' => now()
         ], $pos_register_id);
+
+        $this->logActivity(
+            'pos_register',
+            $pos_register_id,
+            'status_changed',
+            ['status' => $register->status],
+            ['status' => $new_status],
+            null,
+            $register->business_id,
+            $register->branch_id
+        );
+
+        return $result;
     }
 
     public function delete($pos_register_id)
     {
-        return $this->model_pos_register->update([
+        $register = $this->model_pos_register->find($pos_register_id);
+
+        $result = $this->model_pos_register->update([
             'is_deleted' => 1,
             'deletedby_id' => Auth::id(),
             'date_deleted' => now()
         ], $pos_register_id);
+
+        $this->logActivity(
+            'pos_register',
+            $pos_register_id,
+            'deleted',
+            null,
+            null,
+            null,
+            $register->business_id,
+            $register->branch_id
+        );
+
+        return $result;
     }
 
     /**

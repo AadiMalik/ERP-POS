@@ -1905,11 +1905,13 @@
                             <div data-i18n="POS Screen">POS Screen</div>
                         </a>
                     </li>
-                    <li class="menu-item">
-                        <a href="{{ url('/admin/pos-register') }}" class="menu-link">
-                            <div data-i18n="Registers">Registers</div>
-                        </a>
-                    </li>
+                    @canAccess('pos-register.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/pos-register') }}" class="menu-link">
+                                <div data-i18n="Registers">Registers</div>
+                            </a>
+                        </li>
+                    @endcanAccess
                     <li class="menu-item">
                         <a href="{{ url('/admin/pos-register-session') }}" class="menu-link">
                             <div data-i18n="Register Sessions">Register Sessions</div>

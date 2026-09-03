@@ -755,6 +755,45 @@ function applyRoleScope(
 }
 
 /**
+ * Single-record equivalent of applyRoleScope() - whether $user's role/business/
+ * branch scope covers a record belonging to $business_id/$branch_id. Uses the
+ * exact same role groupings so a single-record authorization check (e.g. closing
+ * one register session) stays consistent with the datatable-scoped listing
+ * endpoints that already use applyRoleScope().
+ */
+function userInBusinessBranchScope($user, $business_id, $branch_id = null): bool
+{
+    $role = getRoleName();
+
+    if ($role == RoleNames::SUPERADMIN) {
+        return true;
+    }
+
+    if (empty($user) || (string) $user->business_id !== (string) $business_id) {
+        return false;
+    }
+
+    $branch_roles = [
+        RoleNames::BRANCHADMIN,
+        RoleNames::POSMANAGER,
+        RoleNames::ORDERTAKER,
+        RoleNames::STAFF,
+    ];
+
+    $mixed_roles = [
+        RoleNames::SALEMANAGER,
+        RoleNames::ACCOUNTANT,
+        RoleNames::OPERATIONMANAGER,
+    ];
+
+    if (in_array($role, $branch_roles) || (in_array($role, $mixed_roles) && !empty($user->branch_id))) {
+        return (string) $user->branch_id === (string) $branch_id;
+    }
+
+    return true;
+}
+
+/**
  * Compatibility wrapper - the real logic now lives in FeatureLimitService,
  * which centralizes every subscription limit/module check in one place
  * instead of duplicating it across module services. Kept as a free function

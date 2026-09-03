@@ -280,7 +280,7 @@ class OfflinePushService
     /**
      * Same cashier-owns-their-shift rule as
      * PosRegisterSessionController::close()/addCashMovement(): the acting
-     * user's own session, or - within their own business only - a user
+     * user's own session, or - within their own business/branch scope - a user
      * holding $permission. Applied here too since the queued offline sync
      * path is a second route to the same close/cash-movement actions and
      * must not be a way around the web controller's authorization.
@@ -297,9 +297,7 @@ class OfflinePushService
             return true;
         }
 
-        $same_business = getRoleName() == RoleNames::SUPERADMIN || $user->business_id == $session->business_id;
-
-        return $same_business && $user->can($permission);
+        return userInBusinessBranchScope($user, $session->business_id, $session->branch_id) && $user->can($permission);
     }
 
     protected function pushCashMovement(PosDevice $device, array $payload, ?string $idempotency_key, ?string $local_id): array

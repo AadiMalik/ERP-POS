@@ -62,6 +62,9 @@ class ActivityLogController extends Controller
             'fiscal-year'             => 'Fiscal Year',
             'accounting-period'       => 'Accounting Period',
             'budget'                  => 'Budget',
+            'pos_register'                 => 'POS Registers',
+            'pos_register_session'         => 'POS Register Sessions',
+            'pos_register_cash_movement'   => 'POS Cash Movements',
         ];
         $actions = [
             'created'                       => 'Created',
@@ -75,6 +78,10 @@ class ActivityLogController extends Controller
             'import_completed'              => 'Import Completed',
             'import_completed_with_errors'  => 'Import Completed (with errors)',
             'import_failed'                 => 'Import Failed',
+            'opened'                        => 'Opened',
+            'closed'                        => 'Closed',
+            'voided'                        => 'Voided',
+            'status_changed'                => 'Status Changed',
         ];
 
         return view('admin.activity-log.index', compact('business', 'modules', 'actions'));

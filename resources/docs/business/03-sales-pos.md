@@ -21,7 +21,14 @@ payments are tracked against that session. Closing the session reconciles expect
 vs. counted cash. This is required before the POS screen can be used
 (`pos.access` permission). The session is always opened for the signed-in
 cashier's own business (and branch, when their account is branch-scoped) —
-staff cannot open a register under another business.
+staff cannot open a register under another business or branch. If a register
+was created with a specific cashier **assigned** to it (set on the register
+itself under Registers), only that cashier can open a session on it — anyone
+else opening it is turned away, keeping a dedicated till dedicated. A manager
+holding the "Open Register Shift For Any Cashier" permission can open a
+session on behalf of another cashier in their own branch (e.g. getting a
+register ready before the cashier's shift starts) — without that permission,
+every user can only open a session for themselves.
 
 ## Cash In / Cash Out
 
@@ -29,7 +36,8 @@ During a shift, a cashier can record **Cash In** (adding money to the drawer —
 e.g. a float top-up) or **Cash Out** (removing money — e.g. a cash drop to the
 safe), each with a required reason. A cashier can only record these against
 **their own currently open shift**; recording one against someone else's shift
-requires a manager/admin-level permission. Every cash movement is timestamped
+requires a manager/admin-level permission for a shift in that manager's own
+branch. Every cash movement is timestamped
 and attributed to the person who recorded it, and feeds directly into that
 shift's Expected Cash figure below — it can never be entered twice from the
 same button click or a repeated request.
@@ -48,6 +56,21 @@ subtracts from the drawer. Only **cash** sales, refunds, and expenses move this
 number — a card, bank, or store-credit sale or refund never touches it. The
 cashier then counts the till and enters **Actual Cash**; the difference
 (**Actual − Expected**) is recorded as the session's cash variance.
+
+A cashier can always close their own shift. Closing, viewing the reconciliation
+report, or recording a cash movement on **someone else's** shift needs both the
+matching permission (Close Register / View Register Report / Record Cash
+In/Out For Any Cashier) and being in that shift's own branch — a manager
+confined to one branch cannot reach into another branch's till even within the
+same business.
+
+Once a shift is closed, it can still be **voided** (e.g. it was closed by
+mistake, or needs to be struck from the record) by a user holding the "Void /
+Reverse Closed Register Session" permission from the Register Sessions screen —
+this is a supervisor-only action; even the cashier who ran the shift can't void
+their own closed session without it. A voided session is removed from the
+active list but every action on it — open, close, void — remains visible in
+the **Activity Log** with who did it and when.
 
 ## Taking a Sale
 

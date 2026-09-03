@@ -1108,7 +1108,9 @@ class PermissionRegistry
 
             'pos' => ['label' => 'POS', 'actions' => [
                 'access'                => ['name' => 'pos.access', 'label' => 'Access POS', 'is_system' => false],
+                'register_open_any'     => ['name' => 'pos.register.open.any', 'label' => 'Open Register Shift For Any Cashier', 'is_system' => false],
                 'register_close'        => ['name' => 'pos.register.close', 'label' => 'Close Register', 'is_system' => false],
+                'register_void'         => ['name' => 'pos.register.void', 'label' => 'Void / Reverse Closed Register Session', 'is_system' => false],
                 'register_report'       => ['name' => 'pos.register.report.view', 'label' => 'View Register Report', 'is_system' => false],
                 'cash_movement_manage'  => ['name' => 'pos.register.cash-movement.manage', 'label' => 'Record Cash In/Out For Any Cashier', 'is_system' => false],
             ]],

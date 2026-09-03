@@ -960,6 +960,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('summary/{pos_register_session_id}', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'summary']);
             Route::get('summary/{pos_register_session_id}/print', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'printSummary'])->name('pos-register-session.summary.print');
             Route::post('cash-movement', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'addCashMovement']);
+            Route::post('void', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'void']);
             Route::get('current', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'current']);
             Route::get('my-history', [App\Http\Controllers\Admin\PosRegisterSessionController::class, 'myHistory']);
         });
@@ -983,7 +984,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::post('cancel', [App\Http\Controllers\Admin\OrderController::class, 'cancel'])->middleware('permission:order.cancel');
             Route::post('complete', [App\Http\Controllers\Admin\OrderController::class, 'complete'])->middleware('permission:order.complete');
             Route::post('correct', [App\Http\Controllers\Admin\OrderController::class, 'correct'])->middleware('permission:order.correct');
-            Route::post('credit-info', [App\Http\Controllers\Admin\OrderController::class, 'updateCreditInfo']);
+            Route::post('credit-info', [App\Http\Controllers\Admin\OrderController::class, 'updateCreditInfo'])->middleware('permission:order.payment.credit');
             Route::post('void', [App\Http\Controllers\Admin\OrderController::class, 'void'])->middleware('permission:order.void');
             Route::post('change-status', [App\Http\Controllers\Admin\OrderController::class, 'changeStatus'])->middleware('permission:order.complete|order.cancel|order.void');
             Route::post('confirm-payment', [App\Http\Controllers\Admin\OrderController::class, 'confirmPayment'])->middleware('permission:order.complete');

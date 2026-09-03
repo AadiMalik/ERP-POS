@@ -56,6 +56,29 @@ class PosRegisterController extends Controller
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+        $is_superadmin = getRoleName() == \App\Enums\RoleNames::SUPERADMIN;
+
+        // Non-Super-Admin callers cannot spoof tenant identity via the request
+        // body - the register always belongs to the caller's own business,
+        // regardless of what business_id was posted.
+        $business_id = $is_superadmin ? ($request->business_id ?? $user->business_id) : $user->business_id;
+
+        if (!empty($request->pos_register_id)) {
+            $existing = $this->pos_register_service->getById($request->pos_register_id);
+
+            if (empty($existing) || !userInBusinessBranchScope($user, $existing->business_id, $existing->branch_id)) {
+                return $this->error('This register was not found.');
+            }
+        }
+
+        // A branch-scoped role (POS Manager/Branch Admin/etc.) can never
+        // target a branch other than their own, whether creating a new
+        // register or moving an existing one they're allowed to edit.
+        if (!$is_superadmin && !userInBusinessBranchScope($user, $business_id, $request->branch_id)) {
+            return $this->error('You cannot save a register outside your own branch.');
+        }
+
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'branch_id' => ['required', 'string'],
@@ -66,8 +89,8 @@ class PosRegisterController extends Controller
                 'string',
                 'max:50',
                 Rule::unique('pos_registers', 'code')
-                    ->where(function ($query) use ($request) {
-                        return $query->where('business_id', $request->business_id ?? Auth::user()->business_id)
+                    ->where(function ($query) use ($business_id) {
+                        return $query->where('business_id', $business_id)
                             ->where('is_deleted', 0);
                     })
                     ->ignore($request->pos_register_id, 'pos_register_id')
@@ -87,7 +110,7 @@ class PosRegisterController extends Controller
             'warehouse_id',
             'mode',
         ]);
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $business_id;
         $obj['assigned_user_id'] = $request->mode == 'manual' ? ($request->assigned_user_id ?: null) : null;
         $obj['status'] = $request->status ?? 'active';
 
