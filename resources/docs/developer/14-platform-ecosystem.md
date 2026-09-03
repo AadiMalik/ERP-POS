@@ -13,7 +13,7 @@ here needs to be checked against a consumer, or vice versa.
 | ERP + POS (this repo) | `c:\xampp\htdocs\erp` | Laravel 8 | — (the backend) |
 | Offline desktop POS | `c:\xampp\htdocs\erp-desktop-pos` | Electron + Vue 3 + SQLite | `routes/offline.php` (`/api/offline/...`) |
 | Per-business storefront | `c:\xampp\htdocs\smart-mart` | Vue 3 + Vite | `routes/api.php` (`/api/v1/...`) |
-| Public intro / sign-up site | `c:\xampp\htdocs\dukanaz-command-center` | Vue 3 + Vite | `routes/intro.php` (`/api/intro/...`) |
+| Public intro / sign-up site | `c:\xampp\htdocs\erp-intro` | Vue 3 + Vite | `routes/intro.php` (`/api/intro/...`) |
 | Customer mobile app | `D:\smart_mart_mobile` | Flutter (Dio) | `routes/mobile.php` (`/api/mobile/...`) |
 
 One ERP backend, one shared database — each client is a different *view* onto

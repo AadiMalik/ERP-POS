@@ -493,7 +493,15 @@ Advanced (`App\Http\Controllers\Admin\Accounting`): `FiscalYearController`,
 `FixedAssetDepreciationController` (services: `FixedAssetCategoryService`,
 `FixedAssetService`, `FixedAssetDepreciationService`,
 `FixedAsset\FixedAssetAccountingService`, `FixedAsset\FixedAssetCalculator`).
-Depreciation cron: `fixed-assets:post-depreciation` daily at 00:15. Also two
+`FixedAssetService::pause()`/`resume()` toggle `FixedAssetStatuses::PAUSED`/
+`ACTIVE` (paused assets are skipped by the depreciation cron); `dispose()`
+retires an asset via `FixedAssetDisposalTypes` (sale/waste/damage/theft/
+write_off/other), computing gain/loss against current book value for a sale
+and posting the disposal JV through `FixedAssetAccountingService::postDisposal()`
+using the `AccountingSetting` gain/loss-on-disposal accounts (idempotent per
+`source_type`+`source_id`). Depreciation cron: `fixed-assets:post-depreciation`
+daily at 00:15 (idempotent per `fixed_asset_id`+period, catches up missed
+periods). Also two
 ungated cross-cutting popup controllers reused from Orders/Purchases/Expenses:
 `JournalVoucherViewController`, `StockConsumptionViewController`.
 

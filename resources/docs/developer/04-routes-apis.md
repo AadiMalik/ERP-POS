@@ -137,7 +137,7 @@ override only the Mobile subclasses when the app needs different rules.
 ## Public Intro/Marketing API (`routes/intro.php`)
 
 Registered with prefix `/api/intro`, powering the separate public marketing
-site (`dukanaz-command-center`, a Vue 3 app in its own repo — see
+site (`erp-intro`, a Vue 3 app in its own repo — see
 [Platform Ecosystem](14-platform-ecosystem.md)) that introduces the
 ERP/POS/Website/Mobile product to prospective businesses. Controllers live
 under `App\Http\Controllers\Api\Intro\`. Unlike `api.php`/`mobile.php`, every

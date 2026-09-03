@@ -119,4 +119,13 @@ use slugs such as `reports.product-sales.*`, `reports.branch-sales.*`,
 Current set: Order Detail, Product Sales, Variation Sales, Customer Sales,
 Branch Sales, Order Source Sales, Payment Method Sales, Order Status, Cancelled
 Orders, Due/Credit Sales, Discount Report, Order Tax Report, Top Selling,
-Offline Orders.
+Offline Orders. Order Correction Report sits alongside these under the same
+Orders → Reports menu and permission-slug convention, but reads `activity_logs`
+rows instead of `orders` — see `03-modules-controllers-services.md`.
+
+There is no Category-wise Sales report, no dedicated Returned/Refunded Orders
+report (Sales Returns is a full transactional module — see
+`OrderReturnService` — but has no aggregate report of its own yet), and no
+Profit/Margin report at product or variation level (`order_details.cost_price`
+is captured but not currently surfaced by any report; `ProfitLossReportService`
+is a GL-account-based financial statement, not a per-product margin report).

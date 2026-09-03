@@ -1402,6 +1402,12 @@
     },
     {
       "group": "finance",
+      "name": "Fixed Asset Management",
+      "desc": "Assets, depreciation & disposal",
+      "icon": "building"
+    },
+    {
+      "group": "finance",
       "name": "Receivables & Payables",
       "desc": "Always current",
       "icon": "rupee"

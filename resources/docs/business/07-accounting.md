@@ -142,6 +142,15 @@ entry if needed. A scheduled job also runs every day at **00:15** and posts due
 depreciation with `Dr Depreciation Expense / Cr Accumulated Depreciation`. You
 can pause, resume, or post depreciation from the asset detail screen as well.
 
+When an asset reaches the end of its life (or is lost, damaged, or no longer
+usable), **retire** it from the asset detail screen as a **Sale**, **Waste**,
+**Damage**, **Theft**, **Write-off**, or **Other** disposal. Depreciation stops
+automatically once an asset is retired. For a sale, enter the sale price — the
+system compares it to the asset's current book value and posts the resulting
+gain or loss to the Gain/Loss on Asset Disposal accounts automatically; the
+other disposal types simply write off the remaining book value. Every disposal
+is logged to the Activity Log — see [Audit Log](12-audit-security.md).
+
 Reports: **Fixed Asset Register**, **Depreciation Report**, **Asset Valuation /
 Book Value**, and **Asset Disposal / Sale** under Accounting Reports.
 
