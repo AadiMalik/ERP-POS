@@ -63,6 +63,11 @@ class AccountingSettingCloneService
      * default account reference onto the accounts
      * ChartOfAccountsCloneService just cloned for this business.
      *
+     * Idempotent: if this business already has an AccountingSetting row, it
+     * is reused rather than duplicated, and only fields the accountant/admin
+     * hasn't already configured are filled in from the template - a later
+     * manual remapping in Settings > Accounting is never overwritten.
+     *
      * @param array<string, string> $accountIdMap Template account_id => new
      *        business account_id, as returned by
      *        ChartOfAccountsCloneService::cloneTemplateToBusiness().
@@ -71,16 +76,29 @@ class AccountingSettingCloneService
     {
         $template = AccountingSetting::whereNull('business_id')->first();
 
-        $setting = new AccountingSetting();
-        $setting->business_id = $business_id;
+        $setting = AccountingSetting::where('business_id', $business_id)->first();
+        $isNew = !$setting;
+
+        if ($isNew) {
+            $setting = new AccountingSetting();
+            $setting->business_id = $business_id;
+        }
 
         foreach (self::SETTING_FIELDS as $field) {
+            if (!$isNew && $setting->$field !== null) {
+                continue;
+            }
+
             if ($template && $template->$field !== null) {
                 $setting->$field = $template->$field;
             }
         }
 
         foreach (self::ACCOUNT_FIELDS as $field) {
+            if (!$isNew && $setting->$field !== null) {
+                continue;
+            }
+
             $templateAccountId = $template?->$field;
 
             // Only ever point at an account cloned for THIS business - if
@@ -92,8 +110,14 @@ class AccountingSettingCloneService
                 : null;
         }
 
-        $setting->createdby_id = Auth::id();
-        $setting->date_created = now();
+        if ($isNew) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        } else {
+            $setting->updatedby_id = Auth::id();
+        }
+
+        $setting->date_updated = now();
         $setting->save();
     }
 }

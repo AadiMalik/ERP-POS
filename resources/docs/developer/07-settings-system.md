@@ -38,7 +38,55 @@ itself, but some are consumed elsewhere as real business-rule gates:
   `default_gain_on_asset_disposal_account_id`,
   `default_loss_on_asset_disposal_account_id`) used by
   `FixedAssetAccountingService` for acquisition, depreciation, and disposal JVs.
-  Cloned via `AccountingSettingCloneService` when a business is provisioned.
+  Populated automatically for every new business by the Accounting Setup
+  Wizard — see below.
+
+## Accounting Setup Wizard (Automatic Business Provisioning)
+
+A non-accountant business owner never has to build a Chart of Accounts or map
+default accounts by hand. `App\Services\Concrete\Admin\AccountingSetupWizardService::setupForBusiness($business_id)`
+runs automatically, inside the same `DB::transaction()` as `Business::create()`,
+from both business-creation paths:
+- `App\Services\Concrete\Admin\BusinessService::save()` (admin-created business)
+- `App\Services\Concrete\Admin\Intro\BusinessRegistrationService::registerFromIntro()`
+  (public self-registration)
+
+It composes two lower-level services:
+1. `ChartOfAccountsCloneService::cloneTemplateToBusiness($business_id)` — deep
+   clones the system-level Chart of Accounts template (`AccountType` →
+   `AccountSubType` → parent `Account` → child `Account`, any depth, all rows
+   with `business_id = NULL`) into brand-new rows owned by the business,
+   covering Cash, Bank, Accounts Receivable/Payable, Inventory, COGS, Sales,
+   Purchases, Expenses, Fixed Assets, Accumulated Depreciation, Depreciation
+   Expense, and Gain/Loss on Asset Disposal. Returns a
+   `template_account_id => new_account_id` map.
+2. `AccountingSettingCloneService::cloneTemplateToBusiness($business_id, $accountIdMap)` —
+   copies the template `AccountingSetting` row (`business_id = NULL`) into a
+   new row for the business, remapping every `default_*_account_id` field
+   through that map. A field is left `null` (never a global/template id) if
+   its template account wasn't cloned.
+
+The system-level template itself — both the account tree and which account
+each `default_*_account_id` field points at — is seeded by
+`database\seeders\ChartOfAccountsTemplateSeeder` (`php artisan db:seed --class=ChartOfAccountsTemplateSeeder`)
+and is editable afterwards by Super Admin through the same Settings >
+Accounting screen (Super Admin's own `business_id` is `NULL`). Account ids are
+never hard-coded anywhere in this pipeline — the seeder resolves accounts by
+their stable `code`, and the clone services resolve everything dynamically
+per business.
+
+**Idempotent by design** — both clone services can be called again for a
+business that was already provisioned without creating duplicates:
+`ChartOfAccountsCloneService` matches an existing type/sub-type by `name` and
+an existing account by `code` before cloning a new one, and
+`AccountingSettingCloneService` reuses an existing `AccountingSetting` row and
+only fills in fields that are still `null` — a mapping an accountant/admin has
+since changed via Settings > Accounting is never overwritten.
+
+Fiscal Year (`FiscalYearService::ensureCurrentFiscalYear()`) and Payment
+Methods (`PaymentMethodService::seedDefaults()`) are deliberately **not**
+part of this eager wizard — they're lazily seeded the first time the business
+touches the relevant screen/flow instead.
 
 ## Print Configuration (used beyond just the Settings screen)
 

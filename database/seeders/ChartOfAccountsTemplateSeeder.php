@@ -120,6 +120,11 @@ class ChartOfAccountsTemplateSeeder extends Seeder
             'default_opening_stock_account_id' => '113002-001',
             'default_stock_adjustment_account_id' => '520004-001',
             'default_withholding_tax_account_id' => '240002-001',
+            'default_fixed_asset_account_id' => '170001-001',
+            'default_accumulated_depreciation_account_id' => '180001-001',
+            'default_depreciation_expense_account_id' => '570001-001',
+            'default_gain_on_asset_disposal_account_id' => '490001-002',
+            'default_loss_on_asset_disposal_account_id' => '590002-002',
         ];
 
         $setting = AccountingSetting::firstOrNew(['business_id' => null]);
@@ -411,6 +416,7 @@ class ChartOfAccountsTemplateSeeder extends Seeder
                 'parent_name' => 'Other Income',
                 'children' => [
                     ['code' => '490001-001', 'name' => 'Other Income'],
+                    ['code' => '490001-002', 'name' => 'Gain on Disposal of Fixed Assets'],
                 ],
             ],
 
@@ -539,6 +545,7 @@ class ChartOfAccountsTemplateSeeder extends Seeder
                 'parent_name' => 'Miscellaneous Expenses',
                 'children' => [
                     ['code' => '590002-001', 'name' => 'Miscellaneous Expenses'],
+                    ['code' => '590002-002', 'name' => 'Loss on Disposal of Fixed Assets'],
                 ],
             ],
         ];

@@ -9,8 +9,7 @@ use App\Models\Package;
 use App\Models\SubscriptionInvoice;
 use App\Models\SubscriptionPayment;
 use App\Repository\Repository;
-use App\Services\Concrete\Admin\AccountingSettingCloneService;
-use App\Services\Concrete\Admin\ChartOfAccountsCloneService;
+use App\Services\Concrete\Admin\AccountingSetupWizardService;
 use App\Services\Concrete\Admin\PaymentService;
 use App\Services\Concrete\Admin\SubscriptionService;
 use App\Services\Concrete\Admin\WebsiteCmsDefaultsService;
@@ -23,22 +22,19 @@ class BusinessRegistrationService
 {
     protected $repo;
     protected $subscription_service;
-    protected $chart_of_accounts_clone_service;
-    protected $accounting_setting_clone_service;
+    protected $accounting_setup_wizard_service;
     protected $website_cms_defaults_service;
     protected $payment_service;
 
     public function __construct(
         SubscriptionService $subscription_service,
-        ChartOfAccountsCloneService $chart_of_accounts_clone_service,
-        AccountingSettingCloneService $accounting_setting_clone_service,
+        AccountingSetupWizardService $accounting_setup_wizard_service,
         WebsiteCmsDefaultsService $website_cms_defaults_service,
         PaymentService $payment_service
     ) {
         $this->repo = new Repository(new IntroBusinessRegistration());
         $this->subscription_service = $subscription_service;
-        $this->chart_of_accounts_clone_service = $chart_of_accounts_clone_service;
-        $this->accounting_setting_clone_service = $accounting_setting_clone_service;
+        $this->accounting_setup_wizard_service = $accounting_setup_wizard_service;
         $this->website_cms_defaults_service = $website_cms_defaults_service;
         $this->payment_service = $payment_service;
     }
@@ -265,8 +261,7 @@ class BusinessRegistrationService
                 ])->save();
             }
 
-            $accountMap = $this->chart_of_accounts_clone_service->cloneTemplateToBusiness($business->business_id);
-            $this->accounting_setting_clone_service->cloneTemplateToBusiness($business->business_id, $accountMap);
+            $this->accounting_setup_wizard_service->setupForBusiness($business->business_id);
             $this->website_cms_defaults_service->seed($business->business_id);
 
             return $this->repo->create([

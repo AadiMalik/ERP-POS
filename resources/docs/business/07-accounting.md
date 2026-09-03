@@ -1,12 +1,28 @@
 # Accounting & Bookkeeping
 
+## Automatic Accounting Setup
+
+You do not need any accounting knowledge to get started. The moment your business
+is created, a complete, properly structured accounting environment is set up for
+you automatically: a standard Chart of Accounts (Cash, Bank, Sales, Purchases,
+Accounts Receivable, Accounts Payable, Inventory, Cost of Goods Sold, Expenses,
+Fixed Assets, Accumulated Depreciation, Depreciation Expense, and more), with the
+right accounts already mapped in Accounting Settings so day-to-day sales,
+purchases, and payments post to the books correctly from day one. Running this
+setup again never creates duplicate accounts, so it's always safe.
+
+An accountant or admin can review and fine-tune any of these mappings later from
+**Settings > Accounting** — for example, pointing "Sale Account" at a different
+revenue account, or changing which accounts are used for Fixed Asset purchases,
+Accumulated Depreciation, and Depreciation Expense. Everyday users are never
+required to understand or touch this setup to use the ERP.
+
 ## Chart of Accounts
 
 Your books are organized around a **Chart of Accounts** — a tree of Account Types
 (Asset, Liability, Equity, Income, Expense), Sub-Types, and individual Accounts
 (which can have parent/child accounts, e.g. "Bank" as a parent with individual bank
-accounts underneath). A default chart of accounts can be applied from Accounting
-Settings to get started quickly.
+accounts underneath).
 
 Set **Customer Account** and **Supplier Account** in Accounting Settings before
 taking credit sales or posting customer/supplier payments. New customers (admin
