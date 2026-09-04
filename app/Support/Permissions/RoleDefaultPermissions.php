@@ -67,6 +67,22 @@ class RoleDefaultPermissions
                         'dashboard.view',
                         'reports.stock-ledger.view', 'reports.stock-ledger.print', 'reports.stock-ledger.pdf',
                         'reports.stock-ledger.export', 'reports.stock-ledger.export-csv',
+                        'reports.stock-summary.view', 'reports.stock-summary.print', 'reports.stock-summary.pdf',
+                        'reports.stock-summary.export', 'reports.stock-summary.export-csv',
+                        'reports.stock-valuation.view', 'reports.stock-valuation.print', 'reports.stock-valuation.pdf',
+                        'reports.stock-valuation.export', 'reports.stock-valuation.export-csv',
+                        'reports.stock-aging.view', 'reports.stock-aging.print', 'reports.stock-aging.pdf',
+                        'reports.stock-aging.export', 'reports.stock-aging.export-csv',
+                        'reports.stock-transfer-report.view', 'reports.stock-transfer-report.print', 'reports.stock-transfer-report.pdf',
+                        'reports.stock-transfer-report.export', 'reports.stock-transfer-report.export-csv',
+                        'reports.stock-reconciliation.view', 'reports.stock-reconciliation.print', 'reports.stock-reconciliation.pdf',
+                        'reports.stock-reconciliation.export', 'reports.stock-reconciliation.export-csv',
+                        'reports.batch-expiry.view', 'reports.batch-expiry.print', 'reports.batch-expiry.pdf',
+                        'reports.batch-expiry.export', 'reports.batch-expiry.export-csv',
+                        'reports.stock-loss.view', 'reports.stock-loss.print', 'reports.stock-loss.pdf',
+                        'reports.stock-loss.export', 'reports.stock-loss.export-csv',
+                        'reports.recipe-bom-report.view', 'reports.recipe-bom-report.print', 'reports.recipe-bom-report.pdf',
+                        'reports.recipe-bom-report.export', 'reports.recipe-bom-report.export-csv',
                     ]
                 );
 

@@ -61,6 +61,17 @@ use App\Enums\RoleNames;
                         <input type="text" id="batch_no" class="form-control">
                     </div>
                     <div class="col-md-3">
+                        <label class="form-label">Report View</label>
+                        <select id="report_mode" class="form-select">
+                            <option value="summary">Summary &amp; Detail</option>
+                            <option value="performance">Performance &amp; Yield</option>
+                            <option value="costing">Production Costing</option>
+                            <option value="variance">Production Variance</option>
+                            <option value="wastage_scrap">Wastage &amp; Scrap (Proxy)</option>
+                            <option value="traceability">Traceability</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
                         <label class="form-label">Date Range</label>
                         @include('admin.partials.date_filter')
                     </div>
@@ -74,9 +85,10 @@ use App\Enums\RoleNames;
                 <table id="production_report_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Business</th><th>Branch</th><th>Product</th><th>Warehouse</th>
-                            <th>Qty</th><th>Material Cost</th><th>Total Cost</th><th>Unit Cost</th>
-                            <th>Status</th>
+                            <th>Production #</th><th>Plan #</th><th>Business</th><th>Branch</th><th>Product</th><th>Warehouse</th>
+                            <th>Batch</th><th>Qty</th><th>Planned</th><th>Yield %</th><th>Variance</th>
+                            <th>Material</th><th>Labor</th><th>Overhead</th><th>Other</th><th>Total</th><th>Unit</th>
+                            <th>Expected Mat.</th><th>Actual Mat.</th><th>Wastage</th><th>Consumptions</th><th>Hours</th><th>Status</th>
                         </tr>
                     </thead>
                 </table>
@@ -88,29 +100,43 @@ use App\Enums\RoleNames;
 @section('js')
 @include('admin.partials.datatable', [
 'columns' => "
+{data:'production_no',name:'production_no',sortable:false},
+{data:'plan_no',name:'plan_no',sortable:false},
 {data:'business',name:'business',sortable:false},
 {data:'branch',name:'branch',sortable:false},
 {data:'product',name:'product',sortable:false},
 {data:'warehouse',name:'warehouse',sortable:false},
+{data:'batch_no',name:'batch_no',sortable:false},
 {data:'quantity',name:'quantity'},
+{data:'planned_quantity',name:'planned_quantity',sortable:false},
+{data:'yield_pct',name:'yield_pct',sortable:false},
+{data:'qty_variance',name:'qty_variance',sortable:false},
 {data:'material_cost',name:'material_cost'},
+{data:'labor_cost',name:'labor_cost',sortable:false},
+{data:'overhead_cost',name:'overhead_cost',sortable:false},
+{data:'other_cost',name:'other_cost',sortable:false},
 {data:'total_cost',name:'total_cost'},
 {data:'unit_cost',name:'unit_cost'},
+{data:'expected_material_qty',name:'expected_material_qty',sortable:false},
+{data:'actual_material_qty',name:'actual_material_qty',sortable:false},
+{data:'wastage_qty',name:'wastage_qty',sortable:false},
+{data:'consumption_count',name:'consumption_count',sortable:false},
+{data:'duration_hours',name:'duration_hours',sortable:false},
 {data:'status',name:'status',sortable:false}",
-'route' => 'production-report/data',
+'route' => 'production/data',
 'buttons' => false,
 'pageLength' => 10,
 'class' => 'production_report_table',
 'variable' => 'production_report_table',
 'datefilter' => true,
-'params' => "business_id:$('#business_id').val(),branch_id:$('#branch_id').val(),warehouse_id:$('#warehouse_id').val(),status:$('#status').val(),batch_no:$('#batch_no').val()",
+'params' => "business_id:$('#business_id').val(),branch_id:$('#branch_id').val(),warehouse_id:$('#warehouse_id').val(),status:$('#status').val(),batch_no:$('#batch_no').val(),report_mode:$('#report_mode').val()",
 ])
 <script>
     function currentReportParams() {
         return {
             business_id: $('#business_id').val(), branch_id: $('#branch_id').val(),
             warehouse_id: $('#warehouse_id').val(), status: $('#status').val(),
-            batch_no: $('#batch_no').val(),
+            batch_no: $('#batch_no').val(), report_mode: $('#report_mode').val(),
             start_date: typeof filterStartDate !== 'undefined' ? filterStartDate : '',
             end_date: typeof filterEndDate !== 'undefined' ? filterEndDate : '',
         };
@@ -118,10 +144,11 @@ use App\Enums\RoleNames;
     function buildReportUrl(action) {
         return url_local + '/admin/reports/production/' + action + '?' + $.param(currentReportParams());
     }
-    $(document).ready(function() { $('#business_id, #branch_id, #warehouse_id, #status').select2(); });
+    $(document).ready(function() { $('#business_id, #branch_id, #warehouse_id, #status, #report_mode').select2(); });
     $('#search_btn').click(function() { initDataTableproduction_report_table(); });
     $('#reset_filter').click(function() {
-        $('#business_id, #branch_id, #warehouse_id, #status').val('').trigger('change');
+        $('#business_id, #branch_id, #warehouse_id, #status, #report_mode').val('').trigger('change');
+        $('#report_mode').val('summary').trigger('change');
         $('#batch_no').val('');
         initDataTableproduction_report_table();
     });

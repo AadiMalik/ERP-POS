@@ -99,6 +99,40 @@ Excel::download(new XxxReportExport($rows), 'xxx-report.csv', \Maatwebsite\Excel
 5. Add views: `index.blade.php`, `pdf.blade.php`, `print/print.blade.php`.
 6. Add an `App\Exports\XxxReportExport` class if Excel/CSV export is needed.
 
+## Inventory Reporting System
+
+Inventory reports live under `App\Http\Controllers\Admin\Reports\Inventory\`
+(plus the pre-existing `StockLedgerReportController` and manufacturing report
+controllers). Stock-facing routes are gated `module:inventory`; manufacturing
+consumption/production/recipe report routes remain `module:manufacturing`, but
+the **sidebar nests all four report groups under Inventory → Reports** so
+manufacturing is reported as inventory flow.
+
+### Master reports (modes avoid duplicate pages)
+
+| Master report | Covers | Primary source |
+|---------------|--------|----------------|
+| Stock Summary | Summary, availability, warehouse/branch, low stock/reorder | `product_variation_stocks` |
+| Stock Ledger | Ledger, product ledger, movement filters | `product_variation_stock_transactions` |
+| Stock Valuation | Valuation at avg cost | `product_variation_stocks.avg_price` |
+| Stock Aging | Aging buckets + slow/fast/non-moving | stocks + last txn date |
+| Stock Transfer | Transfer notes | `transfer_notes` |
+| Stock Reconciliation | Stock taking + adjustment movements | `stock_taking_details` / ledger |
+| Stock Loss | Damage/wastage/expired txns | ledger `transaction_type` |
+| Batch/Expiry | Batch stock + near/expired | `product_variation_batches` |
+| Material Consumption | Detail, group-bys, expected vs actual | `production_consumptions` / plan materials |
+| Production | Summary, yield, costing, variance, wastage proxy, traceability | `productions` |
+| Manufacturing Plan | Plan progress | `manufacturing_plans` |
+| Recipe/BOM | BOM, cost, material requirement, coverage | `product_recipes` + items |
+
+Shared base: `BaseInventoryReportController`, `InventoryReportExport`,
+`AppliesInventoryReportScope`. Drill-down uses `ReferenceResolverService::resolveUrl()`
+and links into ledger / production / plan screens.
+
+**Known limits:** no recipe versioning (one recipe per variation); no scrap/rework
+tables — production wastage is expected-vs-actual material proxy; damage/wastage
+note CRUD does not exist (loss report reads ledger enums only).
+
 ## Orders / POS Reports
 
 Order-side reports live under `App\Http\Controllers\Admin\Reports\Orders\` and

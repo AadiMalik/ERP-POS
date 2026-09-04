@@ -49,7 +49,23 @@ Payment History.
 
 ## Procurement Reports
 Supplier Ledger, Supplier Aging, Accounts Payable, Supplier Payment History,
-Purchase Return Summary/Detail, Stock Ledger.
+Purchase Return Summary/Detail.
+
+## Inventory Reporting System
+Under **Inventory → Reports** (four sub-sections):
+
+- **Stock Reports** — Stock Summary/Availability/Low Stock, Stock Ledger/Product
+  Ledger, Valuation, Aging/Slow-Fast-Non-Moving, Transfer, Reconciliation &
+  Adjustment, Loss/Wastage/Damage, Batch/Lot & Expiry.
+- **Consumption Reports** (Manufacturing module) — Material Consumption Analysis
+  with grouping and Expected vs Actual variance.
+- **Manufacturing Reports** — Plan report; Production summary/cost/yield/
+  variance/wastage-proxy/traceability.
+- **Recipe/BOM Reports** — Recipe lines, cost analysis, material requirement,
+  coverage.
+
+Manufacturing operational screens stay under the Manufacturing menu; their
+reports are nested under Inventory so production stays tied to stock flow.
 
 ## Service Management Reports
 Service Sale Report, Service Purchase Report, Service Payment Report, Service

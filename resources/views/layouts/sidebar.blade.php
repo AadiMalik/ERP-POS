@@ -258,7 +258,11 @@
         @if (businessModuleEnabled('inventory'))
         @canAccessAny(['unit.view', 'warehouse.view', 'brand.view', 'category.view', 'sub-category.view', 'product.view',
             'unit-conversion.view', 'batch.view', 'stock.view', 'stock-transaction.view', 'opening-stock.view',
-            'stock-taking.view', 'transfer-note.view', 'reports.stock-ledger.view'])
+            'stock-taking.view', 'transfer-note.view', 'reports.stock-ledger.view', 'reports.stock-summary.view',
+            'reports.stock-valuation.view', 'reports.stock-aging.view', 'reports.stock-transfer-report.view',
+            'reports.stock-reconciliation.view', 'reports.batch-expiry.view', 'reports.stock-loss.view',
+            'reports.material-consumption-report.view', 'reports.manufacturing-plan-report.view',
+            'reports.production-report.view', 'reports.recipe-bom-report.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons fa fa-box"></i>
@@ -357,27 +361,110 @@
                             </a>
                         </li>
                     @endcanAccess
-                    @canAccess('reports.stock-ledger.view')
+                    @canAccessAny(['reports.stock-ledger.view', 'reports.stock-summary.view', 'reports.stock-valuation.view',
+                        'reports.stock-aging.view', 'reports.stock-transfer-report.view', 'reports.stock-reconciliation.view',
+                        'reports.batch-expiry.view', 'reports.stock-loss.view', 'reports.material-consumption-report.view',
+                        'reports.manufacturing-plan-report.view', 'reports.production-report.view', 'reports.recipe-bom-report.view'])
                         <li class="menu-item">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                                <div data-i18n="Stock Reports">Reports</div>
+                                <div data-i18n="Inventory Reports">Reports</div>
                             </a>
                             <ul class="menu-sub">
-                                <li class="menu-item">
-                                    <a href="{{ url('/admin/reports/stock-ledger') }}" class="menu-link">
-                                        <div data-i18n="Stock Ledger">Stock Ledger &amp; Movement</div>
-                                    </a>
-                                </li>
+                                {{-- Stock Reports --}}
+                                @canAccessAny(['reports.stock-ledger.view', 'reports.stock-summary.view', 'reports.stock-valuation.view',
+                                    'reports.stock-aging.view', 'reports.stock-transfer-report.view', 'reports.stock-reconciliation.view',
+                                    'reports.batch-expiry.view', 'reports.stock-loss.view'])
+                                    <li class="menu-item">
+                                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                            <div data-i18n="Stock Reports">Stock Reports</div>
+                                        </a>
+                                        <ul class="menu-sub">
+                                            @canAccess('reports.stock-summary.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/stock-summary') }}" class="menu-link"><div>Stock Summary / Availability / Low Stock</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.stock-ledger.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/stock-ledger') }}" class="menu-link"><div>Stock Ledger / Product Ledger</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.stock-valuation.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/stock-valuation') }}" class="menu-link"><div>Stock Valuation</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.stock-aging.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/stock-aging') }}" class="menu-link"><div>Stock Aging / Slow-Fast-Non-Moving</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.stock-transfer-report.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/stock-transfer-report') }}" class="menu-link"><div>Stock Transfer</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.stock-reconciliation.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/stock-reconciliation') }}" class="menu-link"><div>Reconciliation &amp; Adjustment</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.stock-loss.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/stock-loss') }}" class="menu-link"><div>Loss / Wastage / Damage</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.batch-expiry.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/batch-expiry') }}" class="menu-link"><div>Batch/Lot &amp; Expiry</div></a></li>
+                                            @endcanAccess
+                                        </ul>
+                                    </li>
+                                @endcanAccessAny
+
+                                {{-- Consumption Reports (manufacturing-gated screens, nested under Inventory) --}}
+                                @if (businessModuleEnabled('manufacturing'))
+                                @canAccess('reports.material-consumption-report.view')
+                                    <li class="menu-item">
+                                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                            <div data-i18n="Consumption Reports">Consumption Reports</div>
+                                        </a>
+                                        <ul class="menu-sub">
+                                            <li class="menu-item"><a href="{{ url('/admin/reports/material-consumption') }}" class="menu-link"><div>Material Consumption Analysis</div></a></li>
+                                            <li class="menu-item"><a href="{{ url('/admin/reports/material-consumption?report_mode=variance') }}" class="menu-link"><div>Expected vs Actual / Variance</div></a></li>
+                                        </ul>
+                                    </li>
+                                @endcanAccess
+                                @endif
+
+                                {{-- Manufacturing Reports --}}
+                                @if (businessModuleEnabled('manufacturing'))
+                                @canAccessAny(['reports.manufacturing-plan-report.view', 'reports.production-report.view'])
+                                    <li class="menu-item">
+                                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                            <div data-i18n="Manufacturing Reports">Manufacturing Reports</div>
+                                        </a>
+                                        <ul class="menu-sub">
+                                            @canAccess('reports.manufacturing-plan-report.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/manufacturing-plan') }}" class="menu-link"><div>Manufacturing Plan</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.production-report.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/production') }}" class="menu-link"><div>Production Summary / Cost / Yield / Traceability</div></a></li>
+                                            @endcanAccess
+                                        </ul>
+                                    </li>
+                                @endcanAccessAny
+                                @endif
+
+                                {{-- Recipe/BOM Reports --}}
+                                @if (businessModuleEnabled('manufacturing'))
+                                @canAccess('reports.recipe-bom-report.view')
+                                    <li class="menu-item">
+                                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                            <div data-i18n="Recipe BOM Reports">Recipe / BOM Reports</div>
+                                        </a>
+                                        <ul class="menu-sub">
+                                            <li class="menu-item"><a href="{{ url('/admin/reports/recipe-bom-report') }}" class="menu-link"><div>Recipe/BOM / Cost / Coverage</div></a></li>
+                                            <li class="menu-item"><a href="{{ url('/admin/reports/recipe-bom-report?report_mode=material_requirement') }}" class="menu-link"><div>Material Requirement</div></a></li>
+                                        </ul>
+                                    </li>
+                                @endcanAccess
+                                @endif
                             </ul>
                         </li>
-                    @endcanAccess
+                    @endcanAccessAny
                 </ul>
             </li>
         @endcanAccessAny
         @endif
 
         @if (businessModuleEnabled('manufacturing'))
-        @canAccessAny(['recipe.view', 'manufacturing-plan.view', 'production.view', 'reports.manufacturing-plan-report.view', 'reports.production-report.view', 'reports.material-consumption-report.view'])
+        @canAccessAny(['recipe.view', 'manufacturing-plan.view', 'production.view', 'reports.manufacturing-plan-report.view', 'reports.production-report.view', 'reports.material-consumption-report.view', 'reports.recipe-bom-report.view'])
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Manufacturing</span>
             </li>
@@ -409,36 +496,6 @@
                             </a>
                         </li>
                     @endcanAccess
-                    @canAccessAny(['reports.manufacturing-plan-report.view', 'reports.production-report.view', 'reports.material-consumption-report.view'])
-                        <li class="menu-item">
-                            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                                <div data-i18n="Manufacturing Reports">Reports</div>
-                            </a>
-                            <ul class="menu-sub">
-                                @canAccess('reports.manufacturing-plan-report.view')
-                                    <li class="menu-item">
-                                        <a href="{{ url('/admin/reports/manufacturing-plan') }}" class="menu-link">
-                                            <div data-i18n="Manufacturing Plan Report">Manufacturing Plan Report</div>
-                                        </a>
-                                    </li>
-                                @endcanAccess
-                                @canAccess('reports.production-report.view')
-                                    <li class="menu-item">
-                                        <a href="{{ url('/admin/reports/production') }}" class="menu-link">
-                                            <div data-i18n="Production Report">Production Report</div>
-                                        </a>
-                                    </li>
-                                @endcanAccess
-                                @canAccess('reports.material-consumption-report.view')
-                                    <li class="menu-item">
-                                        <a href="{{ url('/admin/reports/material-consumption') }}" class="menu-link">
-                                            <div data-i18n="Material Consumption Report">Material Consumption Report</div>
-                                        </a>
-                                    </li>
-                                @endcanAccess
-                            </ul>
-                        </li>
-                    @endcanAccessAny
                 </ul>
             </li>
         @endcanAccessAny

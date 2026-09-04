@@ -55,7 +55,9 @@ class StockLedgerQueryService
             $query->where('products.brand_id', $filters['brand_id']);
         }
 
-        if (!empty($filters['transaction_type'])) {
+        if (!empty($filters['transaction_types']) && is_array($filters['transaction_types'])) {
+            $query->whereIn('product_variation_stock_transactions.transaction_type', $filters['transaction_types']);
+        } elseif (!empty($filters['transaction_type'])) {
             $query->where('product_variation_stock_transactions.transaction_type', $filters['transaction_type']);
         }
 

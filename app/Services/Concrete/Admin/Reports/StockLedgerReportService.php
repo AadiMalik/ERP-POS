@@ -101,9 +101,23 @@ class StockLedgerReportService
         return DataTables::of($rows)
             ->addColumn('transaction_date', fn ($row) => localDate($row->transaction_date))
             ->addColumn('reference_type', fn ($row) => $row->source_module)
-            ->addColumn('reference_no', fn ($row) => $row->reference_no)
+            ->addColumn('reference_no', function ($row) {
+                $url = $this->reference_resolver->resolveUrl($row->reference_type ?? null, $row->reference_id ?? null);
+                if ($url) {
+                    return '<a href="' . e($url) . '">' . e($row->reference_no) . '</a>';
+                }
+                return e($row->reference_no);
+            })
             ->addColumn('warehouse_name', fn ($row) => $row->warehouse_name)
-            ->addColumn('product_name', fn ($row) => $row->product_name)
+            ->addColumn('product_name', function ($row) {
+                $url = url('/admin/reports/stock-summary') . '?' . http_build_query([
+                    'product_id' => $row->product_id,
+                    'product_variation_id' => $row->product_variation_id,
+                    'warehouse_id' => $row->warehouse_id,
+                    'business_id' => $row->business_id,
+                ]);
+                return '<a href="' . e($url) . '">' . e($row->product_name) . '</a>';
+            })
             ->addColumn('variation_name', fn ($row) => $row->variation_name)
             ->addColumn('transaction_type_label', fn ($row) => $row->transaction_type_label)
             ->addColumn('quantity_in', fn ($row) => $row->quantity_in > 0 ? decimal($row->quantity_in) : '')
@@ -111,6 +125,7 @@ class StockLedgerReportService
             ->addColumn('unit_price', fn ($row) => currency($row->unit_price))
             ->addColumn('value', fn ($row) => currency($row->value))
             ->addColumn('quantity_after', fn ($row) => decimal($row->quantity_after))
+            ->rawColumns(['reference_no', 'product_name'])
             ->with($totals)
             ->make(true);
     }

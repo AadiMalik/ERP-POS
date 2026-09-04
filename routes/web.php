@@ -1445,6 +1445,69 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('export', [App\Http\Controllers\Admin\Reports\StockLedgerReportController::class, 'export'])->name('reports.stock-ledger.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\StockLedgerReportController::class, 'exportCsv'])->name('reports.stock-ledger.export-csv');
         });
+
+        Route::group(['prefix' => 'stock-summary'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\StockSummaryReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\StockSummaryReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\StockSummaryReportController::class, 'print'])->name('reports.stock-summary.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\StockSummaryReportController::class, 'pdf'])->name('reports.stock-summary.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\StockSummaryReportController::class, 'export'])->name('reports.stock-summary.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\StockSummaryReportController::class, 'exportCsv'])->name('reports.stock-summary.export-csv');
+        });
+
+        Route::group(['prefix' => 'stock-valuation'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\StockValuationReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\StockValuationReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\StockValuationReportController::class, 'print'])->name('reports.stock-valuation.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\StockValuationReportController::class, 'pdf'])->name('reports.stock-valuation.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\StockValuationReportController::class, 'export'])->name('reports.stock-valuation.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\StockValuationReportController::class, 'exportCsv'])->name('reports.stock-valuation.export-csv');
+        });
+
+        Route::group(['prefix' => 'stock-aging'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\StockAgingReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\StockAgingReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\StockAgingReportController::class, 'print'])->name('reports.stock-aging.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\StockAgingReportController::class, 'pdf'])->name('reports.stock-aging.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\StockAgingReportController::class, 'export'])->name('reports.stock-aging.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\StockAgingReportController::class, 'exportCsv'])->name('reports.stock-aging.export-csv');
+        });
+
+        Route::group(['prefix' => 'stock-transfer-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\StockTransferReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\StockTransferReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\StockTransferReportController::class, 'print'])->name('reports.stock-transfer-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\StockTransferReportController::class, 'pdf'])->name('reports.stock-transfer-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\StockTransferReportController::class, 'export'])->name('reports.stock-transfer-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\StockTransferReportController::class, 'exportCsv'])->name('reports.stock-transfer-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'stock-reconciliation'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\StockReconciliationReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\StockReconciliationReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\StockReconciliationReportController::class, 'print'])->name('reports.stock-reconciliation.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\StockReconciliationReportController::class, 'pdf'])->name('reports.stock-reconciliation.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\StockReconciliationReportController::class, 'export'])->name('reports.stock-reconciliation.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\StockReconciliationReportController::class, 'exportCsv'])->name('reports.stock-reconciliation.export-csv');
+        });
+
+        Route::group(['prefix' => 'batch-expiry'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\BatchExpiryReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\BatchExpiryReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\BatchExpiryReportController::class, 'print'])->name('reports.batch-expiry.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\BatchExpiryReportController::class, 'pdf'])->name('reports.batch-expiry.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\BatchExpiryReportController::class, 'export'])->name('reports.batch-expiry.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\BatchExpiryReportController::class, 'exportCsv'])->name('reports.batch-expiry.export-csv');
+        });
+
+        Route::group(['prefix' => 'stock-loss'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\StockLossReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\StockLossReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\StockLossReportController::class, 'print'])->name('reports.stock-loss.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\StockLossReportController::class, 'pdf'])->name('reports.stock-loss.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\StockLossReportController::class, 'export'])->name('reports.stock-loss.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\StockLossReportController::class, 'exportCsv'])->name('reports.stock-loss.export-csv');
+        });
         }); // end module:inventory (procurement reports)
 
         Route::group(['middleware' => ['module:service-management']], function () {
@@ -1703,6 +1766,15 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('pdf', [App\Http\Controllers\Admin\Reports\MaterialConsumptionReportController::class, 'pdf'])->name('reports.material-consumption-report.pdf');
             Route::get('export', [App\Http\Controllers\Admin\Reports\MaterialConsumptionReportController::class, 'export'])->name('reports.material-consumption-report.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\MaterialConsumptionReportController::class, 'exportCsv'])->name('reports.material-consumption-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'recipe-bom-report'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\RecipeBomReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\RecipeBomReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\RecipeBomReportController::class, 'print'])->name('reports.recipe-bom-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\RecipeBomReportController::class, 'pdf'])->name('reports.recipe-bom-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\RecipeBomReportController::class, 'export'])->name('reports.recipe-bom-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\RecipeBomReportController::class, 'exportCsv'])->name('reports.recipe-bom-report.export-csv');
         });
         }); // end module:manufacturing (manufacturing reports)
     });

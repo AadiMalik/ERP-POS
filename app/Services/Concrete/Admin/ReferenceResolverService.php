@@ -56,4 +56,35 @@ class ReferenceResolverService
                 return $reference_id;
         }
     }
+
+    /**
+     * Best-effort admin edit URL for a stock ledger reference document.
+     * Returns null when the reference type has no dedicated screen.
+     */
+    public function resolveUrl($reference_type, $reference_id): ?string
+    {
+        if (empty($reference_id)) {
+            return null;
+        }
+
+        switch ($reference_type) {
+            case ReferenceType::PURCHASE:
+                return url('/admin/purchase/' . $reference_id . '/edit');
+            case ReferenceType::GRN:
+                return url('/admin/good-receipt-note/' . $reference_id . '/edit');
+            case ReferenceType::PURCHASE_RETURN:
+                return url('/admin/purchase-return/' . $reference_id . '/edit');
+            case ReferenceType::OPENING_STOCK:
+                return url('/admin/opening-stock/' . $reference_id . '/edit');
+            case ReferenceType::STOCK_TAKING:
+                return url('/admin/stock-taking/' . $reference_id . '/edit');
+            case ReferenceType::STOCK_TRANSFER:
+                return url('/admin/transfer-note/' . $reference_id . '/edit');
+            case ReferenceType::PRODUCTION:
+            case ReferenceType::CONSUMPTION:
+                return url('/admin/production/edit/' . $reference_id);
+            default:
+                return null;
+        }
+    }
 }

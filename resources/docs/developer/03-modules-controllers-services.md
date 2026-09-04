@@ -70,6 +70,13 @@ wrap Admin public helpers). Routes: `routes/mobile.php` → `/api/mobile/...`.
 `ProductVariationBatchController`, `ProductVariationStockController`,
 `ProductVariationStockTransactionController`.
 
+**Inventory Reporting System** (sidebar under Inventory → Reports with Stock /
+Consumption / Manufacturing / Recipe-BOM groups): controllers in
+`App\Http\Controllers\Admin\Reports\Inventory\` plus existing
+`StockLedgerReportController` and manufacturing report controllers. See
+[Reports Infrastructure](06-reports-infrastructure.md#inventory-reporting-system)
+and [Manufacturing](16-manufacturing.md#reports).
+
 Storefront homepage product rails are built by
 `ProductService::buildWebsiteSections()` (attached to
 `GET /api/v1/products/{business_id}` on unfiltered page 1, and reused by

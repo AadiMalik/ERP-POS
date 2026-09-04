@@ -57,6 +57,26 @@ use App\Enums\RoleNames;
                         </select>
                     </div>
                     <div class="col-md-3">
+                        <label class="form-label">Report Mode</label>
+                        <select id="report_mode" class="form-select">
+                            <option value="detail">Detail / Cost Analysis</option>
+                            <option value="variance">Expected vs Actual / Variance</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Group By</label>
+                        <select id="group_by" class="form-select">
+                            <option value="detail">No Grouping (Detail)</option>
+                            <option value="material">Material-wise</option>
+                            <option value="product">Product-wise (Finished)</option>
+                            <option value="category">Category-wise</option>
+                            <option value="warehouse">Warehouse-wise</option>
+                            <option value="production">Production-wise</option>
+                            <option value="recipe">Recipe-wise</option>
+                            <option value="plan">Plan / Order-wise</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
                         <label class="form-label">Date Range</label>
                         @include('admin.partials.date_filter')
                     </div>
@@ -70,7 +90,8 @@ use App\Enums\RoleNames;
                 <table id="material_consumption_report_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Date</th><th>Raw Material</th><th>Batch Consumed</th><th>Qty</th>
+                            <th>Date</th><th>Group</th><th>Raw Material</th><th>Finished</th><th>Batch</th>
+                            <th>Actual Qty</th><th>Expected</th><th>Variance</th><th>Var %</th><th>Efficiency</th>
                             <th>Unit Cost</th><th>Total Cost</th><th>Warehouse</th><th>Production #</th><th>Plan #</th>
                         </tr>
                     </thead>
@@ -84,27 +105,35 @@ use App\Enums\RoleNames;
 @include('admin.partials.datatable', [
 'columns' => "
 {data:'date',name:'date_created'},
+{data:'group_label',name:'group_label',sortable:false},
 {data:'raw_material',name:'raw_material',sortable:false},
+{data:'finished_product',name:'finished_product',sortable:false},
 {data:'batch_consumed',name:'batch_consumed',sortable:false},
 {data:'quantity',name:'quantity'},
+{data:'expected_qty',name:'expected_qty',sortable:false},
+{data:'variance_qty',name:'variance_qty',sortable:false},
+{data:'variance_pct',name:'variance_pct',sortable:false},
+{data:'efficiency_pct',name:'efficiency_pct',sortable:false},
 {data:'unit_cost',name:'unit_cost'},
 {data:'total_cost',name:'total_cost'},
 {data:'warehouse',name:'warehouse',sortable:false},
 {data:'production_no',name:'production_no',sortable:false},
 {data:'plan_no',name:'plan_no',sortable:false}",
-'route' => 'material-consumption-report/data',
+'route' => 'material-consumption/data',
 'buttons' => false,
 'pageLength' => 10,
 'class' => 'material_consumption_report_table',
 'variable' => 'material_consumption_report_table',
 'datefilter' => true,
-'params' => "business_id:$('#business_id').val(),branch_id:$('#branch_id').val(),product_id:$('#product_id').val(),warehouse_id:$('#warehouse_id').val()",
+'params' => "business_id:$('#business_id').val(),branch_id:$('#branch_id').val(),product_id:$('#product_id').val(),warehouse_id:$('#warehouse_id').val(),report_mode:$('#report_mode').val(),group_by:$('#group_by').val(),production_id:(new URLSearchParams(window.location.search)).get('production_id')",
 ])
 <script>
     function currentReportParams() {
         return {
             business_id: $('#business_id').val(), branch_id: $('#branch_id').val(),
             product_id: $('#product_id').val(), warehouse_id: $('#warehouse_id').val(),
+            report_mode: $('#report_mode').val(), group_by: $('#group_by').val(),
+            production_id: (new URLSearchParams(window.location.search)).get('production_id') || '',
             start_date: typeof filterStartDate !== 'undefined' ? filterStartDate : '',
             end_date: typeof filterEndDate !== 'undefined' ? filterEndDate : '',
         };
@@ -112,10 +141,16 @@ use App\Enums\RoleNames;
     function buildReportUrl(action) {
         return url_local + '/admin/reports/material-consumption/' + action + '?' + $.param(currentReportParams());
     }
-    $(document).ready(function() { $('#business_id, #branch_id, #product_id, #warehouse_id').select2(); });
+    $(document).ready(function() {
+        $('#business_id, #branch_id, #product_id, #warehouse_id, #report_mode, #group_by').select2();
+        let q = new URLSearchParams(window.location.search);
+        q.forEach(function(v, k) { if ($('#' + k).length) $('#' + k).val(v).trigger('change'); });
+    });
     $('#search_btn').click(function() { initDataTablematerial_consumption_report_table(); });
     $('#reset_filter').click(function() {
-        $('#business_id, #branch_id, #product_id, #warehouse_id').val('').trigger('change');
+        $('#business_id, #branch_id, #product_id, #warehouse_id, #report_mode, #group_by').val('').trigger('change');
+        $('#report_mode').val('detail').trigger('change');
+        $('#group_by').val('detail').trigger('change');
         initDataTablematerial_consumption_report_table();
     });
     $('#print_btn').click(function() { window.open(buildReportUrl('print'), '_blank'); });

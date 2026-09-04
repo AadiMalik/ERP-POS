@@ -128,18 +128,21 @@ consumed and how much of each. This gives you both directions of traceability:
 
 ## Where to Find It in Reports
 
+Manufacturing reports are listed under **Inventory → Reports** (Consumption,
+Manufacturing, and Recipe/BOM sub-sections) so production stays tied to stock
+flow. The Manufacturing menu still holds Recipes, Plans, and Productions.
+
 - **Manufacturing Plan Report** — every plan, its plan date, planned/produced/
   remaining quantity, and progress.
-- **Production Report** — every production run with batch and cost (this
-  doubles as your batch history and cost report).
-- **Material Consumption Report** — raw-material-first view: search for a raw
-  material and see everywhere it was consumed, by which production.
-- The existing **Stock Ledger** report also shows every Manufacturing movement
-  alongside Purchases, Sales, and Transfers — filter by Transaction Type
-  "Production In"/"Production Out" or Reference Type "Production"/"Consumption",
-  and its balance summary shows Reserved/Available quantity alongside Opening/
-  Closing balance.
-- The **Stock** listing (Inventory → Stock) now shows a Reserved and an Available
-  column for every product/variation/warehouse, so you can always see how much of
-  your on-hand stock is currently held by a Manufacturing Plan versus free to
-  sell/transfer.
+- **Production Report** — summary/detail with Report View modes for performance/
+  yield, costing, variance, wastage proxy (expected vs actual material), and
+  traceability links into consumption and the stock ledger.
+- **Material Consumption Report** — detail plus group-by (material, finished
+  product, category, warehouse, production, recipe, plan/order) and Expected vs
+  Actual / variance against plan materials.
+- **Recipe/BOM Report** — recipe lines, cost analysis, material requirement for
+  a produce quantity, and coverage (manufactured variations with/without a
+  recipe). Recipes are not versioned — one recipe per finished variation.
+- The existing **Stock Ledger** and other Stock Reports under Inventory also
+  show manufacturing movements (Production In/Out, Consumption) alongside
+  Purchases, Sales, and Transfers.

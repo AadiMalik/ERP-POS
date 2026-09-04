@@ -101,4 +101,44 @@ history is kept automatically whenever pricing changes, and sale-type-specific
 pricing (e.g. a wholesale price) can be configured per variation.
 
 See also: [Purchasing & Suppliers](04-purchasing-suppliers.md) (how stock arrives),
-[Sales & Point of Sale](03-sales-pos.md) (how stock leaves).
+[Sales & Point of Sale](03-sales-pos.md) (how stock leaves),
+[Manufacturing & Production](16-manufacturing.md) (how production consumes and creates stock).
+
+## Inventory Reporting System
+
+Under **Inventory → Reports**, stock, consumption, manufacturing, and recipe/BOM
+reports are grouped together so production is treated as part of inventory flow
+(raw materials → consumption → finished goods → ledger), not a separate reporting
+silo.
+
+### Stock Reports
+- **Stock Summary / Availability / Low Stock** — on-hand, reserved, available,
+  value, minimum stock, and reorder quantity. Switch the Report View filter for
+  availability-only or low-stock/reorder focus. Click a product to open its
+  Stock Ledger.
+- **Stock Ledger / Product Ledger** — every posted stock movement with opening/
+  closing balance when filtered to one item. Also serves Product Ledger when you
+  narrow to a product/variation/warehouse.
+- **Stock Valuation** — quantity × moving-average cost (`avg_price`).
+- **Stock Aging / Slow-Fast-Non-Moving** — days since last movement, age buckets,
+  and velocity class.
+- **Stock Transfer** — transfer notes between warehouses/branches.
+- **Reconciliation & Adjustment** — stock-taking differences, or posted adjustment
+  / stock-take movements.
+- **Loss / Wastage / Damage** — ledger rows typed as damage, wastage, or expired.
+  (Dedicated damage/wastage note documents are not a separate module yet.)
+- **Batch/Lot & Expiry** — batch quantities and near-expiry / expired filters.
+
+### Consumption, Manufacturing & Recipe Reports
+When the Manufacturing package module is enabled, these also appear under
+Inventory → Reports:
+- **Material Consumption Analysis** — detail plus material/product/category/
+  warehouse/production/recipe/plan grouping, and Expected vs Actual variance
+  against manufacturing plan materials.
+- **Manufacturing Plan** and **Production** (summary, yield, costing, variance,
+  wastage proxy, traceability via Report View).
+- **Recipe/BOM** — components, cost analysis, material requirement for a produce
+  quantity, and recipe coverage (manufactured variations with/without a recipe).
+
+All of these support Print / PDF / Excel / CSV where your role allows, and respect
+branch/warehouse access rules.

@@ -273,34 +273,27 @@ codes `PCV`/`PWV`, mirroring `2026_09_02_221520_seed_fixed_asset_journals`):
 
 ## Reports
 
-Three controllers under `App\Http\Controllers\Admin\Reports`
+Manufacturing report controllers remain under `App\Http\Controllers\Admin\Reports`
 (`ManufacturingPlanReportController`, `ProductionReportController`,
-`MaterialConsumptionReportController`) + matching
-`App\Services\Concrete\Admin\Reports\*ReportService` — consolidated from a
-longer report list (Manufacturing Plan Report; Production Report, which
-doubles as Batch History/Production Cost Report via its cost columns;
-Material Consumption Report, raw-material-centric backward traceability).
-Same `index`/`data`/`print`/`pdf`/`export`/`exportCsv` action shape as every
-other report controller, `Maatwebsite\Excel` + `DomPDF` export, routed under
-`admin/reports/{manufacturing-plan,production,material-consumption}` inside a
-`module:manufacturing` route group nested in the outer `reports` prefix
-group. `ManufacturingPlanReportService` reports on `plan_date` (not a
-warehouse — plans have none).
+`MaterialConsumptionReportController`) plus `Inventory\RecipeBomReportController`.
+They are enhanced as **master reports with modes** rather than duplicated pages:
 
-`ReferenceResolverService::resolveDocNo()` gained a
-`ReferenceType::PRODUCTION`/`CONSUMPTION` case resolving to
-`Production.production_no` — the pre-existing **Stock Ledger Report**
-(`StockLedgerReportController`) already rendered `production_in`/
-`production_out` rows (the enum values existed before this module), it just
-showed a raw UUID for the reference until now. That same report's balance
-summary now also surfaces `reserved_quantity`/`available_quantity` for a
-single product+variation+warehouse selection.
+- Production: `report_mode` = summary | performance | costing | variance |
+  wastage_scrap (expected-vs-actual material proxy — no scrap table) | traceability
+- Material Consumption: `group_by` + `report_mode=variance` (plan materials
+  expected vs consumed)
+- Recipe/BOM: `report_mode` = bom | cost_analysis | material_requirement | coverage
 
-`MaterialConsumptionReportService` is the one query that needs care: its base
-table (`production_consumptions`) has no `business_id`/`branch_id` of its own,
-so role/business/branch scoping (`applyRoleScope()`) is applied **inside** the
-`whereHas('production', ...)` closure against the related `productions` row,
-not on the outer query.
+Sidebar: nested under **Inventory → Reports** (Consumption / Manufacturing /
+Recipe-BOM). Routes stay in `module:manufacturing` group at
+`admin/reports/{manufacturing-plan,production,material-consumption,recipe-bom-report}`.
+
+`ReferenceResolverService` resolves production/consumption doc numbers **and**
+admin edit URLs for drill-down from Stock Ledger and related reports.
+
+`MaterialConsumptionReportService` applies `applyRoleScope()` inside
+`whereHas('production')` because `production_consumptions` has no business/branch
+columns of its own.
 
 ## Permissions & routes
 
