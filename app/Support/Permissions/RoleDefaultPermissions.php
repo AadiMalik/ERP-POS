@@ -61,6 +61,7 @@ class RoleDefaultPermissions
                         'warehouse', 'brand', 'category', 'sub-category', 'unit', 'product', 'barcode',
                         'unit-conversion', 'batch', 'stock', 'stock-transaction', 'opening-stock',
                         'stock-taking', 'transfer-note', 'purchase-return',
+                        'recipe', 'manufacturing-plan', 'production', 'manufacturing-reports',
                     ]),
                     [
                         'dashboard.view',

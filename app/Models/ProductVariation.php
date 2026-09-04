@@ -36,6 +36,10 @@ class ProductVariation extends Model
         'minimum_stock',
         'track_batch',
         'track_expiry',
+        'is_purchasable',
+        'is_sellable',
+        'is_raw_material',
+        'is_manufactured',
         'is_deleted',
         'status',
 

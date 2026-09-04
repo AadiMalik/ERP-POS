@@ -1504,6 +1504,49 @@ class PermissionRegistry
                 // BudgetVarianceReportController.
                 'budget_vs_actual' => ['name' => 'reports.budget-vs-actual.view', 'label' => 'Budget vs Actual', 'is_system' => false],
             ]],
+
+            // ---- Manufacturing modules ----
+
+            'recipe' => ['label' => 'Recipes / BOM', 'actions' => [
+                'view'   => ['name' => 'recipe.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'recipe.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'recipe.edit', 'label' => 'Edit', 'is_system' => false],
+            ]],
+
+            'manufacturing-plan' => ['label' => 'Manufacturing Plans', 'actions' => [
+                'view'    => ['name' => 'manufacturing-plan.view', 'label' => 'View', 'is_system' => false],
+                'create'  => ['name' => 'manufacturing-plan.create', 'label' => 'Create', 'is_system' => false],
+                'edit'    => ['name' => 'manufacturing-plan.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'  => ['name' => 'manufacturing-plan.delete', 'label' => 'Delete', 'is_system' => false],
+                'confirm' => ['name' => 'manufacturing-plan.confirm', 'label' => 'Confirm / Reserve Materials', 'is_system' => false],
+                'cancel'  => ['name' => 'manufacturing-plan.cancel', 'label' => 'Cancel', 'is_system' => false],
+            ]],
+
+            'production' => ['label' => 'Productions', 'actions' => [
+                'view'         => ['name' => 'production.view', 'label' => 'View', 'is_system' => false],
+                'create'       => ['name' => 'production.create', 'label' => 'Create', 'is_system' => false],
+                'edit'         => ['name' => 'production.edit', 'label' => 'Edit', 'is_system' => false],
+                'complete'     => ['name' => 'production.complete', 'label' => 'Approve / Complete', 'is_system' => false],
+                'cancel'       => ['name' => 'production.cancel', 'label' => 'Cancel / Revert', 'is_system' => false],
+            ]],
+
+            'manufacturing-reports' => ['label' => 'Manufacturing Reports', 'actions' => [
+                'plan_report' => ['name' => 'reports.manufacturing-plan-report.view', 'label' => 'Manufacturing Plan Report', 'is_system' => false],
+                'plan_report_print' => ['name' => 'reports.manufacturing-plan-report.print', 'label' => 'Manufacturing Plan Report - Print', 'is_system' => false],
+                'plan_report_pdf' => ['name' => 'reports.manufacturing-plan-report.pdf', 'label' => 'Manufacturing Plan Report - PDF', 'is_system' => false],
+                'plan_report_export' => ['name' => 'reports.manufacturing-plan-report.export', 'label' => 'Manufacturing Plan Report - Export (Excel)', 'is_system' => false],
+                'plan_report_export_csv' => ['name' => 'reports.manufacturing-plan-report.export-csv', 'label' => 'Manufacturing Plan Report - Export (CSV)', 'is_system' => false],
+                'production_report' => ['name' => 'reports.production-report.view', 'label' => 'Production Report', 'is_system' => false],
+                'production_report_print' => ['name' => 'reports.production-report.print', 'label' => 'Production Report - Print', 'is_system' => false],
+                'production_report_pdf' => ['name' => 'reports.production-report.pdf', 'label' => 'Production Report - PDF', 'is_system' => false],
+                'production_report_export' => ['name' => 'reports.production-report.export', 'label' => 'Production Report - Export (Excel)', 'is_system' => false],
+                'production_report_export_csv' => ['name' => 'reports.production-report.export-csv', 'label' => 'Production Report - Export (CSV)', 'is_system' => false],
+                'material_consumption_report' => ['name' => 'reports.material-consumption-report.view', 'label' => 'Material Consumption Report', 'is_system' => false],
+                'material_consumption_report_print' => ['name' => 'reports.material-consumption-report.print', 'label' => 'Material Consumption Report - Print', 'is_system' => false],
+                'material_consumption_report_pdf' => ['name' => 'reports.material-consumption-report.pdf', 'label' => 'Material Consumption Report - PDF', 'is_system' => false],
+                'material_consumption_report_export' => ['name' => 'reports.material-consumption-report.export', 'label' => 'Material Consumption Report - Export (Excel)', 'is_system' => false],
+                'material_consumption_report_export_csv' => ['name' => 'reports.material-consumption-report.export-csv', 'label' => 'Material Consumption Report - Export (CSV)', 'is_system' => false],
+            ]],
         ];
     }
 
@@ -1640,6 +1683,7 @@ class PermissionRegistry
             'employee-advance', 'employee-deduction', 'employee-ledger', 'employee-exit',
             'employee-clearance', 'asset', 'asset-allocation',
             'hrm-reports', 'payroll-reports',
+            'recipe', 'manufacturing-plan', 'production', 'manufacturing-reports',
             'website-section', 'website-page', 'website-faq', 'social-media',
             'website-hero-stat', 'website-benefit', 'website-testimonial',
             'contact-message', 'product-review', 'newsletter-subscriber',

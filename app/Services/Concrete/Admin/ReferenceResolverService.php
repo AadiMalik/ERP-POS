@@ -5,6 +5,7 @@ namespace App\Services\Concrete\Admin;
 use App\Enums\ReferenceType;
 use App\Models\GoodReceiptNote;
 use App\Models\OpeningStock;
+use App\Models\Production;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\StockTaking;
@@ -43,6 +44,13 @@ class ReferenceResolverService
 
             case ReferenceType::STOCK_TRANSFER:
                 return TransferNote::where('transfer_note_id', $reference_id)->value('transfer_note_no') ?? $reference_id;
+
+            // Both 'production' (finished-goods receipt) and 'consumption'
+            // (raw-material draw-down) reference the same Production row -
+            // see ProductionService::complete()/receiveOutput().
+            case ReferenceType::PRODUCTION:
+            case ReferenceType::CONSUMPTION:
+                return Production::where('production_id', $reference_id)->value('production_no') ?? $reference_id;
 
             default:
                 return $reference_id;

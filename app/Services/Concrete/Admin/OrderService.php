@@ -68,6 +68,7 @@ class OrderService
 {
     use Auditable;
     use Notifiable;
+    use \App\Traits\ValidatesWarehouse;
 
     protected $model_order;
     protected $model_order_detail;
@@ -816,32 +817,8 @@ class OrderService
      * warehouse deactivated between hold and checkout is caught at posting
      * time too, not just when the draft was first created.
      */
-    protected function assertValidWarehouse(?string $businessId, ?string $branchId, ?string $warehouseId): void
-    {
-        if (empty($businessId) || empty($branchId) || empty($warehouseId)) {
-            throw new Exception('A valid warehouse could not be determined for this sale.');
-        }
-
-        // A Warehouse's Branch is optional (see resources/views/admin/warehouse/
-        // create.blade.php - no branch means it's shared across every branch
-        // of the business), so a null branch_id on the warehouse is valid for
-        // any branch, not just an exact match.
-        $warehouse = Warehouse::where('warehouse_id', $warehouseId)
-            ->where('business_id', $businessId)
-            ->where(function ($q) use ($branchId) {
-                $q->whereNull('branch_id')->orWhere('branch_id', $branchId);
-            })
-            ->where('is_deleted', 0)
-            ->first();
-
-        if (!$warehouse) {
-            throw new Exception('The selected warehouse does not exist or does not belong to this business/branch.');
-        }
-
-        if ($warehouse->status !== Status::ACTIVE) {
-            throw new Exception('The selected warehouse "' . $warehouse->name . '" is inactive and cannot be used for a sale.');
-        }
-    }
+    // assertValidWarehouse() now lives in App\Traits\ValidatesWarehouse,
+    // shared with the Manufacturing Plan/Production services.
 
     /**
      * Business-level "allow selling below/at zero stock" toggle -
@@ -870,11 +847,16 @@ class OrderService
             return 0.0;
         }
 
-        return (float) (ProductVariationStock::where('business_id', $business_id)
+        // Available/free stock excludes whatever Manufacturing Plans have
+        // reserved (reserved_quantity is always 0 for a business that never
+        // enables Manufacturing, so this is a no-op everywhere else).
+        $stock = ProductVariationStock::where('business_id', $business_id)
             ->where('warehouse_id', $warehouse_id)
             ->where('product_id', $product_id)
             ->where('product_variation_id', $product_variation_id)
-            ->value('quantity') ?? 0);
+            ->first(['quantity', 'reserved_quantity']);
+
+        return (float) ($stock->quantity ?? 0) - (float) ($stock->reserved_quantity ?? 0);
     }
 
     /**
@@ -2499,14 +2481,17 @@ class OrderService
 
             $existing_qty = $stock->quantity ?? 0;
             $existing_avg = $stock->avg_price ?? 0;
+            $existing_reserved = $stock->reserved_quantity ?? 0;
+            $existing_available = $existing_qty - $existing_reserved;
 
             // Authoritative check, now that the row is locked - the
             // earlier pre-check above is only a fast-fail optimization
             // and can be stale under concurrent checkouts. Still
             // skipped entirely when this business allows negative
-            // stock, same as the pre-check.
-            if (!$allow_negative_stock && $detail->product && $detail->product->is_track_stock && (float) $detail->base_quantity > (float) $existing_qty) {
-                throw new Exception('Insufficient stock for "' . ($detail->product->name ?? 'product') . '". Available: ' . $existing_qty . ', required: ' . $detail->base_quantity . '.');
+            // stock, same as the pre-check. Excludes whatever a
+            // Manufacturing Plan has reserved, same as getAvailableStock().
+            if (!$allow_negative_stock && $detail->product && $detail->product->is_track_stock && (float) $detail->base_quantity > (float) $existing_available) {
+                throw new Exception('Insufficient stock for "' . ($detail->product->name ?? 'product') . '". Available: ' . $existing_available . ', required: ' . $detail->base_quantity . '.');
             }
 
             $new_qty = $existing_qty - $detail->base_quantity;

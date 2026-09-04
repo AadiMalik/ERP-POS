@@ -111,6 +111,7 @@ class SettingService
         return $this->model_inventory_setting->getModel()::firstOrCreate(['business_id' => $business_id]);
     }
 
+
     public function getNotificationSetting($business_id)
     {
         // firstOrCreate() does not reflect DB column defaults back onto the in-memory

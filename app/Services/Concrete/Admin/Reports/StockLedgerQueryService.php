@@ -145,6 +145,8 @@ class StockLedgerQueryService
             'opening_balance'   => $opening,
             'closing_balance'   => (float) ($stock->quantity ?? 0),
             'current_avg_price' => (float) ($stock->avg_price ?? 0),
+            'reserved_quantity' => (float) ($stock->reserved_quantity ?? 0),
+            'available_quantity' => (float) ($stock->quantity ?? 0) - (float) ($stock->reserved_quantity ?? 0),
         ];
     }
 }

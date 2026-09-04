@@ -1233,6 +1233,44 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     });
     }); // end module:inventory (procurement & stock)
 
+    //manufacturing - recipe/BOM, planning (reservation only), production
+    //execution (the only thing that moves stock). Gated on its own umbrella
+    //package module, independent of inventory, since a business may want
+    //Inventory without Manufacturing.
+    Route::group(['middleware' => ['module:manufacturing']], function () {
+        Route::group(['prefix' => 'recipe'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Manufacturing\ProductRecipeController::class, 'create']);
+            Route::get('for-variation/{product_variation_id}', [App\Http\Controllers\Admin\Manufacturing\ProductRecipeController::class, 'forVariation']);
+            Route::post('item', [App\Http\Controllers\Admin\Manufacturing\ProductRecipeController::class, 'storeItem']);
+            Route::delete('item/{product_recipe_item_id}', [App\Http\Controllers\Admin\Manufacturing\ProductRecipeController::class, 'destroyItem']);
+        });
+
+        Route::group(['prefix' => 'manufacturing-plan'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Manufacturing\ManufacturingPlanController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Manufacturing\ManufacturingPlanController::class, 'getData']);
+            Route::get('create', [App\Http\Controllers\Admin\Manufacturing\ManufacturingPlanController::class, 'create']);
+            Route::post('store', [App\Http\Controllers\Admin\Manufacturing\ManufacturingPlanController::class, 'store']);
+            Route::get('edit/{manufacturing_plan_id}', [App\Http\Controllers\Admin\Manufacturing\ManufacturingPlanController::class, 'edit']);
+            Route::get('show/{manufacturing_plan_id}', [App\Http\Controllers\Admin\Manufacturing\ManufacturingPlanController::class, 'show']);
+            Route::delete('{manufacturing_plan_id}', [App\Http\Controllers\Admin\Manufacturing\ManufacturingPlanController::class, 'destroy']);
+            Route::post('{manufacturing_plan_id}/confirm', [App\Http\Controllers\Admin\Manufacturing\ManufacturingPlanController::class, 'confirm']);
+            Route::post('{manufacturing_plan_id}/cancel', [App\Http\Controllers\Admin\Manufacturing\ManufacturingPlanController::class, 'cancel']);
+            Route::get('recipe-for-variation/{product_variation_id}', [App\Http\Controllers\Admin\Manufacturing\ManufacturingPlanController::class, 'recipeForVariation']);
+            Route::get('eligible', [App\Http\Controllers\Admin\Manufacturing\ManufacturingPlanController::class, 'eligible']);
+        });
+
+        Route::group(['prefix' => 'production'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Manufacturing\ProductionController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Manufacturing\ProductionController::class, 'getData']);
+            Route::get('create', [App\Http\Controllers\Admin\Manufacturing\ProductionController::class, 'create']);
+            Route::post('store', [App\Http\Controllers\Admin\Manufacturing\ProductionController::class, 'store']);
+            Route::get('edit/{production_id}', [App\Http\Controllers\Admin\Manufacturing\ProductionController::class, 'edit']);
+            Route::get('show/{production_id}', [App\Http\Controllers\Admin\Manufacturing\ProductionController::class, 'show']);
+            Route::post('{production_id}/complete', [App\Http\Controllers\Admin\Manufacturing\ProductionController::class, 'complete']);
+            Route::post('{production_id}/cancel', [App\Http\Controllers\Admin\Manufacturing\ProductionController::class, 'cancel']);
+        });
+    }); // end module:manufacturing
+
     //service management - non-stock purchase/sale (gas cylinders, rentals,
     //installation/delivery charges, etc). Gated on its own package module,
     //independent of inventory/pos, since these transactions never touch stock.
@@ -1638,6 +1676,35 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::post('data', [App\Http\Controllers\Admin\Reports\BudgetVarianceReportController::class, 'data']);
         });
         }); // end module:accounting (financial reports)
+
+        Route::group(['middleware' => ['module:manufacturing']], function () {
+        Route::group(['prefix' => 'manufacturing-plan'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\ManufacturingPlanReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\ManufacturingPlanReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\ManufacturingPlanReportController::class, 'print'])->name('reports.manufacturing-plan-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\ManufacturingPlanReportController::class, 'pdf'])->name('reports.manufacturing-plan-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\ManufacturingPlanReportController::class, 'export'])->name('reports.manufacturing-plan-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\ManufacturingPlanReportController::class, 'exportCsv'])->name('reports.manufacturing-plan-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'production'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\ProductionReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\ProductionReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\ProductionReportController::class, 'print'])->name('reports.production-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\ProductionReportController::class, 'pdf'])->name('reports.production-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\ProductionReportController::class, 'export'])->name('reports.production-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\ProductionReportController::class, 'exportCsv'])->name('reports.production-report.export-csv');
+        });
+
+        Route::group(['prefix' => 'material-consumption'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\MaterialConsumptionReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\MaterialConsumptionReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\MaterialConsumptionReportController::class, 'print'])->name('reports.material-consumption-report.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\MaterialConsumptionReportController::class, 'pdf'])->name('reports.material-consumption-report.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\MaterialConsumptionReportController::class, 'export'])->name('reports.material-consumption-report.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\MaterialConsumptionReportController::class, 'exportCsv'])->name('reports.material-consumption-report.export-csv');
+        });
+        }); // end module:manufacturing (manufacturing reports)
     });
 
     //Setting

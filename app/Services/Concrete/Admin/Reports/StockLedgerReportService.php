@@ -94,6 +94,8 @@ class StockLedgerReportService
             $totals['opening_balance'] = decimal(round($balance['opening_balance'], 3));
             $totals['closing_balance'] = decimal(round($balance['closing_balance'], 3));
             $totals['current_avg_price'] = currency(round($balance['current_avg_price'], 2));
+            $totals['reserved_quantity'] = decimal(round($balance['reserved_quantity'], 3));
+            $totals['available_quantity'] = decimal(round($balance['available_quantity'], 3));
         }
 
         return DataTables::of($rows)

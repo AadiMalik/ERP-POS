@@ -92,6 +92,8 @@
                                 <th>Warehouse</th>
                                 <th>Avg Cost</th>
                                 <th>Quantity</th>
+                                <th>Reserved</th>
+                                <th>Available</th>
                                 <th>Business</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -160,6 +162,8 @@
             {data: 'warehouse' , name: 'warehouse', 'sortable': false , searchable: false},
             {data: 'avg_price' , name: 'avg_price'},
             {data: 'quantity' , name: 'quantity'},
+            {data: 'reserved_quantity' , name: 'reserved_quantity', 'sortable': false , searchable: false},
+            {data: 'available_quantity' , name: 'available_quantity', 'sortable': false , searchable: false},
             {data: 'business' , name: 'business', 'sortable': false , searchable: false},
             {data: 'status' , name: 'status', 'sortable': false , searchable: false},
             {data: 'action' , name: 'action' , 'sortable': false , searchable: false},",

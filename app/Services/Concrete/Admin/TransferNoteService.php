@@ -233,11 +233,16 @@ class TransferNoteService
 
     protected function getAvailableQuantity($business_id, $warehouse_id, $product_id, $product_variation_id)
     {
-        return (float) ProductVariationStock::where('business_id', $business_id)
+        // Excludes whatever a Manufacturing Plan has reserved at this
+        // warehouse - reserved_quantity is always 0 for a business that never
+        // enables Manufacturing, so this is a no-op everywhere else.
+        $stock = ProductVariationStock::where('business_id', $business_id)
             ->where('warehouse_id', $warehouse_id)
             ->where('product_id', $product_id)
             ->where('product_variation_id', $product_variation_id)
-            ->value('quantity') ?? 0;
+            ->first(['quantity', 'reserved_quantity']);
+
+        return (float) ($stock->quantity ?? 0) - (float) ($stock->reserved_quantity ?? 0);
     }
 
     public function save($obj)
@@ -495,7 +500,11 @@ class TransferNoteService
                     ->lockForUpdate()
                     ->first();
 
-                $source_available = $source_stock->quantity ?? 0;
+                $source_quantity = $source_stock->quantity ?? 0;
+                // Excludes whatever a Manufacturing Plan has reserved at the
+                // source warehouse - reserved_quantity is always 0 for a
+                // business that never enables Manufacturing.
+                $source_available = $source_quantity - ($source_stock->reserved_quantity ?? 0);
 
                 if ($base_quantity > $source_available) {
                     throw new Exception('Insufficient stock for "' . ($detail->product->name ?? 'a product') . '" at the source warehouse to send this transfer.');
@@ -503,7 +512,7 @@ class TransferNoteService
 
                 $unit_cost = $source_stock->avg_price ?? 0;
                 $line_value = $base_quantity * $unit_cost;
-                $source_new_qty = $source_available - $base_quantity;
+                $source_new_qty = $source_quantity - $base_quantity;
 
                 $source_stock->update(['quantity' => $source_new_qty]);
 

@@ -513,6 +513,18 @@ use App\Enums\RoleNames;
                             </div>
                         </div>
                         <div class="col-12">
+                            <div class="d-flex gap-4 flex-wrap">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="modalVariationIsPurchasable" checked>
+                                    <label class="form-check-label" for="modalVariationIsPurchasable">Purchasable</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="modalVariationIsSellable" checked>
+                                    <label class="form-check-label" for="modalVariationIsSellable">Sellable</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
                             <hr>
                             <label class="form-label fw-semibold">Selling Prices</label>
                             <small class="text-muted d-block mb-2">
@@ -668,6 +680,8 @@ use App\Enums\RoleNames;
         sale_unit_id: "{{$var->sale_unit_id ?? 0}}",
         track_batch: {{$var->track_batch ? 'true' : 'false'}},
         track_expiry: {{$var->track_expiry ? 'true' : 'false'}},
+        is_purchasable: {{ $var->is_purchasable ? 'true' : 'false' }},
+        is_sellable: {{ $var->is_sellable ? 'true' : 'false' }},
         prices: @json($var->prices->mapWithKeys(fn($p) => [$p->sale_type_id => ['price' => $p->price, 'minimum_selling_price' => $p->minimum_selling_price]])),
         discount_percentage: {{ $var->discount_percentage ?? 0 }},
         minimum_selling_price: {{ $var->minimum_selling_price !== null ? $var->minimum_selling_price : 'null' }},
@@ -837,6 +851,8 @@ use App\Enums\RoleNames;
         const trackExpiry = document.getElementById('modalVariationTrackExpiry').checked;
         const isLoyaltyEnabled = window.loyaltyProductModeEnabled ?
             document.getElementById('modalVariationIsLoyaltyEnabled').checked : false;
+        const isPurchasable = document.getElementById('modalVariationIsPurchasable').checked;
+        const isSellable = document.getElementById('modalVariationIsSellable').checked;
 
         const prices = {};
         document.querySelectorAll('.modal-variation-price').forEach(el => {
@@ -912,6 +928,8 @@ use App\Enums\RoleNames;
             sale_unit_id: saleUnit,
             track_batch: trackBatch,
             track_expiry: trackExpiry,
+            is_purchasable: isPurchasable,
+            is_sellable: isSellable,
             prices: prices,
             discount_percentage: discountPercentage,
             minimum_selling_price: minimumSellingPrice,
@@ -960,6 +978,8 @@ use App\Enums\RoleNames;
         document.getElementById('modalVariationMinStock').value = variation.minimum_stock || 0;
         document.getElementById('modalVariationTrackBatch').checked = variation.track_batch || false;
         document.getElementById('modalVariationTrackExpiry').checked = variation.track_expiry || false;
+        document.getElementById('modalVariationIsPurchasable').checked = variation.is_purchasable !== false;
+        document.getElementById('modalVariationIsSellable').checked = variation.is_sellable !== false;
         if (window.loyaltyProductModeEnabled) {
             document.getElementById('modalVariationIsLoyaltyEnabled').checked = variation.is_loyalty_enabled || false;
         }
@@ -1046,6 +1066,8 @@ use App\Enums\RoleNames;
         document.getElementById('modalVariationMinStock').value = '0';
         document.getElementById('modalVariationTrackBatch').checked = false;
         document.getElementById('modalVariationTrackExpiry').checked = false;
+        document.getElementById('modalVariationIsPurchasable').checked = true;
+        document.getElementById('modalVariationIsSellable').checked = true;
         if (window.loyaltyProductModeEnabled) {
             document.getElementById('modalVariationIsLoyaltyEnabled').checked = false;
         }

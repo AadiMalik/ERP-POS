@@ -376,6 +376,74 @@
         @endcanAccessAny
         @endif
 
+        @if (businessModuleEnabled('manufacturing'))
+        @canAccessAny(['recipe.view', 'manufacturing-plan.view', 'production.view', 'reports.manufacturing-plan-report.view', 'reports.production-report.view', 'reports.material-consumption-report.view'])
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Manufacturing</span>
+            </li>
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-industry"></i>
+                    <div data-i18n="Manufacturing">Manufacturing</div>
+                </a>
+
+                <ul class="menu-sub">
+                    @canAccess('recipe.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/recipe') }}" class="menu-link">
+                                <div data-i18n="Recipes / BOM">Recipes / BOM</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('manufacturing-plan.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/manufacturing-plan') }}" class="menu-link">
+                                <div data-i18n="Manufacturing Plans">Manufacturing Plans</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('production.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/production') }}" class="menu-link">
+                                <div data-i18n="Productions">Productions</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccessAny(['reports.manufacturing-plan-report.view', 'reports.production-report.view', 'reports.material-consumption-report.view'])
+                        <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                <div data-i18n="Manufacturing Reports">Reports</div>
+                            </a>
+                            <ul class="menu-sub">
+                                @canAccess('reports.manufacturing-plan-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/manufacturing-plan') }}" class="menu-link">
+                                            <div data-i18n="Manufacturing Plan Report">Manufacturing Plan Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.production-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/production') }}" class="menu-link">
+                                            <div data-i18n="Production Report">Production Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.material-consumption-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/material-consumption') }}" class="menu-link">
+                                            <div data-i18n="Material Consumption Report">Material Consumption Report</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                            </ul>
+                        </li>
+                    @endcanAccessAny
+                </ul>
+            </li>
+        @endcanAccessAny
+        @endif
+
         @if (businessModuleEnabled('accounting'))
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Accounting</span>

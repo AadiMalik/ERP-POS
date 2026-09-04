@@ -150,6 +150,11 @@
                             <strong>Opening / Closing Balance:</strong> <span id="balance_display">-</span>
                         </div>
                     </div>
+                    <div class="col-md-3">
+                        <div class="alert alert-primary mb-0">
+                            <strong>Reserved / Available:</strong> <span id="reserved_display">-</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="table-responsive p-4">
@@ -280,8 +285,10 @@
 
                     if (response.opening_balance !== undefined) {
                         $('#balance_display').text(response.opening_balance + ' / ' + response.closing_balance);
+                        $('#reserved_display').text(response.reserved_quantity + ' / ' + response.available_quantity);
                     } else {
                         $('#balance_display').text('Select a single Product + Variation + Warehouse to view');
+                        $('#reserved_display').text('-');
                     }
                 }
             });

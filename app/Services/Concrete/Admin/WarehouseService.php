@@ -170,4 +170,29 @@ class WarehouseService
                   ->where('is_deleted', 0)
                   ->get();
       }
+
+      /**
+       * Warehouses the current user is allowed to pick from: a Business
+       * Admin (or any business-level role) sees every active warehouse of
+       * their business; a branch-level user only sees their own branch's
+       * warehouses plus shared warehouses (branch_id null - see
+       * assertValidWarehouse()'s identical rule). Used by Recipe/Plan/
+       * Production forms so a branch user can never reserve/consume/produce
+       * against a warehouse outside their branch.
+       */
+      public function getAllForCurrentUser()
+      {
+            $query = $this->model_warehouse->getModel()::with(['business', 'branch'])
+                  ->where('business_id', Auth::user()->business_id)
+                  ->where('status', Status::ACTIVE)
+                  ->where('is_deleted', 0);
+
+            if (in_array(getRoleName(), RoleNames::branchLevelRoles(), true)) {
+                  $query->where(function ($q) {
+                        $q->whereNull('branch_id')->orWhere('branch_id', Auth::user()->branch_id);
+                  });
+            }
+
+            return $query->get();
+      }
 }

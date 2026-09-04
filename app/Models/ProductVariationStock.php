@@ -20,6 +20,7 @@ class ProductVariationStock extends Model
         'product_variation_id',
         'avg_price',
         'quantity',
+        'reserved_quantity',
         'status',
         'is_deleted',
         'createdby_id',
@@ -63,5 +64,14 @@ class ProductVariationStock extends Model
     public function deletedby()
     {
         return $this->belongsTo(User::class, 'deletedby_id');
+    }
+
+    /**
+     * Free/sellable stock = on-hand minus whatever Manufacturing Plans have
+     * reserved. Zero for every business that never enables Manufacturing.
+     */
+    public function getAvailableQuantityAttribute()
+    {
+        return (float) $this->quantity - (float) $this->reserved_quantity;
     }
 }

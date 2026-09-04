@@ -155,6 +155,14 @@ class SubscriptionModuleRegistry
             'payroll'         => ['label' => 'Payroll', 'category' => 'HRM & Payroll', 'type' => 'limited', 'parent' => null, 'default_enabled' => false, 'default_limit' => 5, 'unlimited_allowed' => true],
             'payslip'         => ['label' => 'Salary Slips', 'category' => 'HRM & Payroll', 'type' => 'feature', 'parent' => 'payroll', 'default_enabled' => true],
             'payroll-reports' => ['label' => 'Payroll Reports', 'category' => 'HRM & Payroll', 'type' => 'feature', 'parent' => 'payroll', 'default_enabled' => true],
+
+            // ---- Manufacturing (umbrella - package-tier gate only, same as
+            // hrm/payroll; no separate business-level on/off toggle) ----
+            'manufacturing'       => ['label' => 'Manufacturing Module', 'category' => 'Manufacturing', 'type' => 'feature', 'parent' => null, 'default_enabled' => false],
+            'recipe'              => ['label' => 'Recipes / BOM', 'category' => 'Manufacturing', 'type' => 'limited', 'parent' => 'manufacturing', 'default_enabled' => true, 'default_limit' => 20, 'unlimited_allowed' => true],
+            'manufacturing-plan'  => ['label' => 'Manufacturing Plans', 'category' => 'Manufacturing', 'type' => 'limited', 'parent' => 'manufacturing', 'default_enabled' => true, 'default_limit' => 20, 'unlimited_allowed' => true],
+            'production'          => ['label' => 'Productions', 'category' => 'Manufacturing', 'type' => 'limited', 'parent' => 'manufacturing', 'default_enabled' => true, 'default_limit' => 50, 'unlimited_allowed' => true],
+            'manufacturing-reports' => ['label' => 'Manufacturing Reports', 'category' => 'Manufacturing', 'type' => 'feature', 'parent' => 'manufacturing', 'default_enabled' => true],
         ];
     }
 

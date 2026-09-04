@@ -39,6 +39,7 @@ class DocumentationService
             ['slug' => 'push-notifications', 'title' => 'Push Notifications (FCM)', 'file' => '13-push-notifications.md'],
             ['slug' => 'platform-ecosystem', 'title' => 'The Wider Platform: Website, Intro Site & Mobile App', 'file' => '14-platform-ecosystem.md'],
             ['slug' => 'loyalty-program', 'title' => 'Loyalty Program', 'file' => '15-loyalty-program.md'],
+            ['slug' => 'manufacturing', 'title' => 'Manufacturing & Production', 'file' => '16-manufacturing.md'],
         ];
     }
 
@@ -61,6 +62,7 @@ class DocumentationService
             ['slug' => 'fcm-broadcast-notifications', 'title' => 'FCM Broadcast Notifications', 'file' => '13-fcm-broadcast-notifications.md'],
             ['slug' => 'platform-ecosystem', 'title' => 'Platform Ecosystem: Companion Repos & Their API Contracts', 'file' => '14-platform-ecosystem.md'],
             ['slug' => 'loyalty-program', 'title' => 'Loyalty Program', 'file' => '15-loyalty-program.md'],
+            ['slug' => 'manufacturing', 'title' => 'Manufacturing & Production', 'file' => '16-manufacturing.md'],
         ];
     }
 

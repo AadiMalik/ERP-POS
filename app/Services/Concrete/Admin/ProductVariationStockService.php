@@ -102,6 +102,14 @@ class ProductVariationStockService
 
                 return decimal($item->quantity ?? 0);
             })
+            ->addColumn('reserved_quantity', function ($item) {
+
+                return decimal($item->reserved_quantity ?? 0);
+            })
+            ->addColumn('available_quantity', function ($item) {
+
+                return decimal($item->available_quantity);
+            })
             ->addColumn('status', function ($item) {
 
                 $checked = $item->status == Status::ACTIVE ? 'checked' : '';
