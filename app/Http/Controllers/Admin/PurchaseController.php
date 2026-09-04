@@ -173,6 +173,8 @@ class PurchaseController extends Controller
             'products.*.batch_no' => ['nullable', 'string', 'max:255'],
             'products.*.manufacturing_date' => ['nullable', 'date'],
             'products.*.expiry_date' => ['nullable', 'date'],
+            'products.*.serial_numbers' => ['nullable', 'array'],
+            'products.*.serial_numbers.*' => ['nullable', 'string', 'max:255'],
         ]);
 
         if ($validator->fails()) {

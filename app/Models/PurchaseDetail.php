@@ -38,6 +38,7 @@ class PurchaseDetail extends Model
         'manufacturing_date',
         'expiry_date',
         'product_variation_batch_id',
+        'serial_numbers',
 
         'createdby_id',
         'updatedby_id',

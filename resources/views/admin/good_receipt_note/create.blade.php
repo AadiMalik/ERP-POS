@@ -93,13 +93,14 @@
                                         <th style="min-width:130px;">Receive Qty</th>
                                         <th style="min-width:130px;">Batch No</th>
                                         <th style="min-width:150px;">Expiry Date</th>
+                                        <th style="min-width:160px;">Serial #</th>
                                         <th style="min-width:120px;">Unit Price</th>
                                         <th style="min-width:130px">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody id="productRows">
                                     <tr id="emptyRow">
-                                        <td colspan="11" class="text-center text-muted">
+                                        <td colspan="12" class="text-center text-muted">
                                             Select a Purchase
                                         </td>
                                     </tr>
@@ -183,7 +184,7 @@
             $('#warehouse_name').val('');
             $('#productRows').html(`
                 <tr id="emptyRow">
-                    <td colspan="11" class="text-center text-muted">
+                    <td colspan="12" class="text-center text-muted">
                         Select a Purchase
                     </td>
                 </tr>
@@ -203,7 +204,7 @@
                 beforeSend: function() {
                     $('#productRows').html(`
                         <tr>
-                            <td colspan="11" class="text-center">
+                            <td colspan="12" class="text-center">
                                 <div class="spinner-border spinner-border-sm"></div>
                                 Loading...
                             </td>
@@ -236,7 +237,7 @@
             if (!lines || !lines.length) {
                 $('#productRows').html(`
                     <tr id="emptyRow">
-                        <td colspan="11" class="text-center text-muted">
+                        <td colspan="12" class="text-center text-muted">
                             Nothing remaining to receive for this purchase.
                         </td>
                     </tr>
@@ -261,6 +262,11 @@
 
             let showBatch = line.track_batch == true || line.track_batch == 1;
             let showExpiry = line.track_expiry == true || line.track_expiry == 1;
+            let showSerial = line.track_serial_number == true || line.track_serial_number == 1;
+            let serialNumbers = line.serial_numbers || [];
+            let serialInputsHtml = serialNumbers.map(sn =>
+                `<input type="hidden" class="serial-hidden-input" name="products[${$('#productRows tr.product-row').length}][serial_numbers][]" value="${sn}">`
+            ).join('');
 
             let row = $(`
                 <tr class="product-row">
@@ -289,6 +295,13 @@
                             value="${line.expiry_date ?? ''}" placeholder="Expiry Date" style="${showExpiry ? '' : 'display:none;'}">
                         <span class="expiry-date-na text-muted" style="${showExpiry ? 'display:none;' : ''}">N/A</span>
                     </td>
+                    <td class="serial-cell" data-track-serial="${showSerial ? 1 : 0}">
+                        <button type="button" class="btn btn-sm btn-outline-primary serial-entry-btn" style="${showSerial ? '' : 'display:none;'}">
+                            <i class="fa fa-barcode"></i> <span class="serial-count-label">Enter Serials (${serialNumbers.length}/0)</span>
+                        </button>
+                        <span class="serial-na text-muted" style="${showSerial ? 'display:none;' : ''}">N/A</span>
+                        <div class="serial-hidden-inputs" style="display:none;">${serialInputsHtml}</div>
+                    </td>
                     <td class="unit-price">${decimal(line.unit_price)}</td>
                     <td class="row-total">${decimal(received_quantity * (line.conversion_factor || 1) * line.unit_price)}</td>
                 </tr>
@@ -301,6 +314,7 @@
 
             $('#productRows').append(row);
             reindexRows();
+            refreshSerialButtonLabel(row);
 
             if (showExpiry) {
                 let expiryInput = row.find('.expiry-date').get(0);
@@ -319,7 +333,16 @@
                 $(this).find('input.receive-qty').attr('name', `products[${index}][received_quantity]`);
                 $(this).find('input.batch-no').attr('name', `products[${index}][batch_no]`);
                 $(this).find('input.expiry-date').attr('name', `products[${index}][expiry_date]`);
+                $(this).find('input.serial-hidden-input').attr('name', `products[${index}][serial_numbers][]`);
             });
+        }
+
+        function refreshSerialButtonLabel(row) {
+            const entered = row.find('.serial-hidden-input').length;
+            const expected = decimal(row.find('.receive-qty').val()) || 0;
+            row.find('.serial-count-label').text(`Enter Serials (${entered}/${expected})`);
+            row.find('.serial-entry-btn').toggleClass('btn-outline-primary', entered == expected)
+                .toggleClass('btn-outline-danger', entered != expected);
         }
 
         // ======================================================
@@ -347,7 +370,56 @@
             row.find('.row-total').html(decimal(total));
             row.data('total', decimal(total));
 
+            refreshSerialButtonLabel(row);
             calculateGrandTotal();
+        });
+
+        // ======================================================
+        // SERIAL NUMBER ENTRY MODAL
+        // ======================================================
+        var grnSerialEntryModal = null;
+        var currentGrnSerialRow = null;
+
+        $(document).on('click', '.serial-entry-btn', function() {
+            currentGrnSerialRow = $(this).closest('tr');
+            const existing = currentGrnSerialRow.find('.serial-hidden-input').map(function() {
+                return $(this).val();
+            }).get();
+            $('#grnSerialModalTextarea').val(existing.join('\n'));
+            const expected = decimal(currentGrnSerialRow.find('.receive-qty').val()) || 0;
+            $('#grnSerialModalHint').text(`Enter exactly ${expected} serial number(s), one per line, matching the receive quantity.`);
+            grnSerialEntryModal = grnSerialEntryModal || new bootstrap.Modal(document.getElementById('grnSerialEntryModal'));
+            grnSerialEntryModal.show();
+        });
+
+        $(document).on('change', '#grnSerialScanHelperInput', function() {
+            const code = $(this).val();
+            if (!code) return;
+            const ta = $('#grnSerialModalTextarea');
+            const current = ta.val();
+            ta.val(current && !current.endsWith('\n') ? current + '\n' + code : current + code);
+            $(this).val('');
+        });
+
+        $('#grnSerialModalSaveBtn').on('click', function() {
+            if (!currentGrnSerialRow) return;
+            const lines = $('#grnSerialModalTextarea').val()
+                .split('\n')
+                .map(s => s.trim())
+                .filter(s => s !== '');
+
+            const duplicates = lines.filter((v, i) => lines.indexOf(v) !== i);
+            if (duplicates.length) {
+                errorMessage('Duplicate serial number(s) entered: ' + [...new Set(duplicates)].join(', '));
+                return;
+            }
+
+            currentGrnSerialRow.find('.serial-hidden-inputs').html(
+                lines.map(sn => `<input type="hidden" class="serial-hidden-input" value="${sn.replace(/"/g, '&quot;')}">`).join('')
+            );
+            reindexRows();
+            refreshSerialButtonLabel(currentGrnSerialRow);
+            bootstrap.Modal.getInstance(document.getElementById('grnSerialEntryModal')).hide();
         });
 
         $(document).on('blur', '.receive-qty', function() {
@@ -395,8 +467,10 @@
                     conversion_factor: item.conversion_factor,
                     track_batch: item.track_batch,
                     track_expiry: item.track_expiry,
+                    track_serial_number: item.track_serial_number,
                     batch_no: item.batch_no,
-                    expiry_date: item.expiry_date
+                    expiry_date: item.expiry_date,
+                    serial_numbers: item.serial_numbers || []
                 }, item.received_quantity);
             });
 
@@ -426,6 +500,51 @@
                 errorMessage('Please receive at least one product.');
                 return false;
             }
+
+            let serialMismatch = false;
+            $('#productRows tr.product-row').each(function() {
+                let row = $(this);
+                if (row.find('.serial-cell').data('track-serial') != 1) {
+                    return;
+                }
+                let receiveQty = parseFloat(row.find('.receive-qty').val()) || 0;
+                let enteredCount = row.find('.serial-hidden-input').length;
+                if (receiveQty > 0 && enteredCount !== receiveQty) {
+                    errorMessage(`Enter exactly ${receiveQty} serial number(s) for "${row.find('td').eq(0).text().trim()}" (currently ${enteredCount}).`);
+                    serialMismatch = true;
+                    return false;
+                }
+            });
+
+            if (serialMismatch) {
+                e.preventDefault();
+                return false;
+            }
         });
     </script>
+
+    {{-- ================= SERIAL NUMBER ENTRY MODAL ================= --}}
+    <div class="modal fade" id="grnSerialEntryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enter Serial Numbers</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-2" id="grnSerialModalHint">One serial number per line.</p>
+                    <textarea class="form-control" id="grnSerialModalTextarea" rows="8"
+                        placeholder="Scan or type serial numbers, one per line"></textarea>
+                    <div class="mt-2">
+                        <input type="text" class="form-control d-none" id="grnSerialScanHelperInput">
+                        @include('admin.partials.barcode_scanner', ['targetInputId' => '#grnSerialScanHelperInput'])
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="grnSerialModalSaveBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

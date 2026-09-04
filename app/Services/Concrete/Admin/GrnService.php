@@ -318,6 +318,7 @@ class GrnService
                     'batch_no'                                => $product['batch_no'] ?? null,
                     'manufacturing_date'                      => $product['manufacturing_date'] ?? null,
                     'expiry_date'                              => $product['expiry_date'] ?? null,
+                    'serial_numbers'                          => !empty($product['serial_numbers']) ? json_encode(array_values($product['serial_numbers'])) : null,
                 ]);
             }
 
@@ -379,9 +380,11 @@ class GrnService
                     'product_variation_name'      => $detail->productVariation->name ?? '',
                     'track_batch'                 => (bool) ($detail->productVariation->track_batch ?? false),
                     'track_expiry'                => (bool) ($detail->productVariation->track_expiry ?? false),
+                    'track_serial_number'         => (bool) ($detail->productVariation->track_serial_number ?? false),
                     'batch_no'                    => $detail->batch_no,
                     'manufacturing_date'          => localDate($detail->manufacturing_date),
                     'expiry_date'                 => localDate($detail->expiry_date),
+                    'serial_numbers'              => $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [],
                     'ordered_quantity'            => $ordered_quantity,
                     'already_received_quantity'   => $already_received,
                     'remaining_quantity'          => $ordered_quantity - $already_received,
@@ -435,6 +438,7 @@ class GrnService
                 'product_variation_name'     => $detail->productVariation->name ?? '',
                 'track_batch'                => (bool) ($detail->productVariation->track_batch ?? false),
                 'track_expiry'               => (bool) ($detail->productVariation->track_expiry ?? false),
+                'track_serial_number'        => (bool) ($detail->productVariation->track_serial_number ?? false),
                 'ordered_quantity'           => $ordered_quantity,
                 'already_received_quantity'  => $already_received,
                 'remaining_quantity'         => $remaining,
@@ -672,6 +676,22 @@ class GrnService
                 $detail->update(['product_variation_batch_id' => $product_variation_batch_id]);
             }
 
+            if ($detail->productVariation && $detail->productVariation->track_serial_number) {
+                app(ProductVariationSerialService::class)->receiveSerials(
+                    $grn->business_id,
+                    $grn->branch_id,
+                    $detail->product_id,
+                    $detail->product_variation_id,
+                    $grn->warehouse_id,
+                    $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [],
+                    $base_quantity,
+                    $detail->unit_price,
+                    'grn',
+                    $grn->good_receipt_note_id,
+                    $detail->good_receipt_note_detail_id
+                );
+            }
+
             ProductVariationStockTransaction::create([
                 'product_variation_stock_transaction_id' => generateUuid(),
                 'transaction_date'                       => now(),
@@ -742,6 +762,8 @@ class GrnService
             ->where('reference_id', $grn->good_receipt_note_id)
             ->where('is_deleted', 0)
             ->get();
+
+        app(ProductVariationSerialService::class)->reverseReceivedSerials('grn', $grn->good_receipt_note_id);
 
         app(ProductVariationStockService::class)->reverseStockTransactions($stock_transactions);
 

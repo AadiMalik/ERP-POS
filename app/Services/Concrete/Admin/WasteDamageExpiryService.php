@@ -181,6 +181,19 @@ class WasteDamageExpiryService
      * create form can show the available quantity before the user enters how
      * much to write off.
      */
+    /**
+     * Available serials for a product/variation in a warehouse, for the
+     * create form's serial picker when the variation is serial-tracked -
+     * mirrors getBatches() (manual selection, not FEFO).
+     */
+    public function getSerials($warehouse_id, $product_variation_id)
+    {
+        return app(ProductVariationSerialService::class)
+            ->availableSerialsFor($product_variation_id, $warehouse_id)
+            ->map(fn($s) => ['product_variation_serial_number_id' => $s->product_variation_serial_number_id, 'serial_no' => $s->serial_no])
+            ->values();
+    }
+
     public function getStock($warehouse_id, $product_variation_id)
     {
         $stock = ProductVariationStock::where('warehouse_id', $warehouse_id)
@@ -305,6 +318,13 @@ class WasteDamageExpiryService
                 $total_quantity += $quantity;
                 $total_value += $value;
 
+                $variation = \App\Models\ProductVariation::find($line['product_variation_id']);
+                $serial_numbers = $line['serial_numbers'] ?? [];
+
+                if ($variation && $variation->track_serial_number && count($serial_numbers) != $quantity) {
+                    throw new Exception('Select exactly ' . (int) $quantity . ' serial number(s) for "' . ($variation->product->name ?? 'a product') . '".');
+                }
+
                 $this->model_waste_damage_expiry_details->create([
                     'waste_damage_expiry_detail_id' => generateUuid(),
                     'waste_damage_expiry_id'        => $wde->waste_damage_expiry_id,
@@ -320,6 +340,7 @@ class WasteDamageExpiryService
                     'loss_type'                      => $line['loss_type'] ?? LossType::OTHER,
                     'loss_reason_id'                 => $line['loss_reason_id'] ?? null,
                     'notes'                          => $line['notes'] ?? null,
+                    'serial_numbers'                 => !empty($serial_numbers) ? json_encode(array_values($serial_numbers)) : null,
                     'createdby_id'                   => Auth::id(),
                     'date_created'                   => now(),
                 ]);
@@ -404,6 +425,8 @@ class WasteDamageExpiryService
                 'loss_reason_id'                 => $detail->loss_reason_id,
                 'loss_reason_name'               => $detail->lossReason->name ?? null,
                 'notes'                          => $detail->notes,
+                'track_serial_number'            => (bool) ($detail->productVariation->track_serial_number ?? false),
+                'serial_numbers'                 => $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [],
             ];
         }
 
@@ -602,6 +625,23 @@ class WasteDamageExpiryService
                 $stock_service->adjustBatchQuantity($batch->product_variation_batch_id, -1 * (float) $detail->quantity);
             }
 
+            $variation = $detail->productVariation;
+            if ($variation && $variation->track_serial_number) {
+                $serial_numbers = $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [];
+                $serial_ids = \App\Models\ProductVariationSerialNumber::where('product_variation_id', $detail->product_variation_id)
+                    ->where('warehouse_id', $wde->warehouse_id)
+                    ->where('status', \App\Enums\SerialStatus::AVAILABLE)
+                    ->whereIn('serial_no', $serial_numbers)
+                    ->pluck('product_variation_serial_number_id')
+                    ->toArray();
+
+                if (count($serial_ids) != count($serial_numbers)) {
+                    throw new Exception('One or more selected serial numbers for "' . ($detail->product->name ?? 'product') . '" are no longer available.');
+                }
+
+                app(ProductVariationSerialService::class)->markLoss($serial_ids, $detail->loss_type, $detail->waste_damage_expiry_detail_id, $detail->notes);
+            }
+
             $detail->update([
                 'unit_cost' => $unit_cost,
                 'value'     => $line_value,
@@ -703,6 +743,24 @@ class WasteDamageExpiryService
 
         if ($stock_transactions->isEmpty()) {
             return;
+        }
+
+        foreach ($wde->details as $detail) {
+            $variation = $detail->productVariation;
+            if (!$variation || !$variation->track_serial_number) {
+                continue;
+            }
+
+            $serial_ids = \App\Models\ProductVariationSerialNumber::whereIn('status', [
+                \App\Enums\SerialStatus::DAMAGED, \App\Enums\SerialStatus::WASTED, \App\Enums\SerialStatus::EXPIRED,
+            ])
+                ->whereIn('serial_no', $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [])
+                ->pluck('product_variation_serial_number_id')
+                ->toArray();
+
+            if (!empty($serial_ids)) {
+                app(ProductVariationSerialService::class)->cancelLoss($serial_ids);
+            }
         }
 
         app(ProductVariationStockService::class)->reverseStockTransactions($stock_transactions);

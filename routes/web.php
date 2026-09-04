@@ -990,6 +990,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::post('confirm-payment', [App\Http\Controllers\Admin\OrderController::class, 'confirmPayment'])->middleware('permission:order.complete');
             Route::get('search-products', [App\Http\Controllers\Admin\OrderController::class, 'searchProducts']);
             Route::get('search-vouchers', [App\Http\Controllers\Admin\OrderController::class, 'searchVouchers']);
+            Route::get('available-serials', [App\Http\Controllers\Admin\OrderController::class, 'availableSerials']);
             Route::get('eligible-vouchers', [App\Http\Controllers\Admin\OrderController::class, 'eligibleVouchers']);
             Route::post('preview-voucher', [App\Http\Controllers\Admin\OrderController::class, 'previewVoucher']);
             Route::get('products-by-category', [App\Http\Controllers\Admin\OrderController::class, 'productsByCategory']);
@@ -1011,6 +1012,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::post('change-status', [App\Http\Controllers\Admin\OrderReturnController::class, 'status']);
             Route::get('details/{order_return_id}', [App\Http\Controllers\Admin\OrderReturnController::class, 'details']);
             Route::get('source-lines/{order_id}', [App\Http\Controllers\Admin\OrderReturnController::class, 'sourceLines']);
+            Route::get('sold-serials/{order_detail_id}', [App\Http\Controllers\Admin\OrderReturnController::class, 'soldSerials']);
             Route::get('{order_return_id}/print', [App\Http\Controllers\Admin\OrderReturnController::class, 'print'])->name('order-return.print');
         });
     }); // end module:pos (order return)
@@ -1175,6 +1177,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('change-status', [App\Http\Controllers\Admin\PurchaseReturnController::class, 'status']);
         Route::get('details/{purchase_return_id}', [App\Http\Controllers\Admin\PurchaseReturnController::class, 'details']);
         Route::get('source-lines/{return_type}/{source_id}', [App\Http\Controllers\Admin\PurchaseReturnController::class, 'sourceLines']);
+        Route::get('available-serials/{purchase_detail_id}', [App\Http\Controllers\Admin\PurchaseReturnController::class, 'availableSerials']);
         Route::get('{purchase_return_id}/print', [App\Http\Controllers\Admin\PurchaseReturnController::class, 'print'])->name('purchase-return.print');
     });
 
@@ -1216,7 +1219,21 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('details/{waste_damage_expiry_id}', [App\Http\Controllers\Admin\WasteDamageExpiryController::class, 'details']);
         Route::get('batches/{warehouse_id}/{product_variation_id}', [App\Http\Controllers\Admin\WasteDamageExpiryController::class, 'batches']);
         Route::get('stock/{warehouse_id}/{product_variation_id}', [App\Http\Controllers\Admin\WasteDamageExpiryController::class, 'stock']);
+        Route::get('serials/{warehouse_id}/{product_variation_id}', [App\Http\Controllers\Admin\WasteDamageExpiryController::class, 'serials']);
         Route::get('{waste_damage_expiry_id}/print', [App\Http\Controllers\Admin\WasteDamageExpiryController::class, 'print'])->name('waste-damage-expiry.print');
+    });
+
+    //serial numbers
+    Route::group(['prefix' => 'serial-number'], function () {
+        Route::get('/', [App\Http\Controllers\Admin\SerialNumberController::class, 'index']);
+        Route::post('data', [App\Http\Controllers\Admin\SerialNumberController::class, 'getData']);
+        Route::get('lookup', [App\Http\Controllers\Admin\SerialNumberController::class, 'lookup']);
+        Route::get('by-variation/{product_variation_id}', [App\Http\Controllers\Admin\SerialNumberController::class, 'byProduct']);
+        Route::post('add-found-unit', [App\Http\Controllers\Admin\SerialNumberController::class, 'addFoundUnit']);
+        Route::post('{serial_id}/send-for-repair', [App\Http\Controllers\Admin\SerialNumberController::class, 'sendForRepair']);
+        Route::post('{serial_id}/return-from-repair', [App\Http\Controllers\Admin\SerialNumberController::class, 'returnFromRepair']);
+        Route::post('{serial_id}/replace', [App\Http\Controllers\Admin\SerialNumberController::class, 'replace']);
+        Route::get('{serial_id}', [App\Http\Controllers\Admin\SerialNumberController::class, 'show']);
     });
 
     //transfer note
@@ -1225,6 +1242,8 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('data', [App\Http\Controllers\Admin\TransferNoteController::class, 'getData']);
         Route::post('{transfer_note_id}/send', [App\Http\Controllers\Admin\TransferNoteController::class, 'send'])->name('transfer-note.send');
         Route::post('receive', [App\Http\Controllers\Admin\TransferNoteController::class, 'receive'])->name('transfer-note.receive');
+        Route::get('available-serials-for-send/{transfer_note_detail_id}', [App\Http\Controllers\Admin\TransferNoteController::class, 'availableSerialsForSend']);
+        Route::get('in-transit-serials/{transfer_note_detail_id}', [App\Http\Controllers\Admin\TransferNoteController::class, 'inTransitSerials']);
         Route::get('details/{transfer_note_id}', [App\Http\Controllers\Admin\TransferNoteController::class, 'details']);
         Route::get('source-stock/{warehouse_id}', [App\Http\Controllers\Admin\TransferNoteController::class, 'sourceStock']);
         Route::get('{transfer_note_id}/print', [App\Http\Controllers\Admin\TransferNoteController::class, 'print'])->name('transfer-note.print');
@@ -1534,6 +1553,51 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\WasteDamageExpiryReportController::class, 'pdf'])->name('reports.waste-damage-expiry.pdf');
             Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\WasteDamageExpiryReportController::class, 'export'])->name('reports.waste-damage-expiry.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\WasteDamageExpiryReportController::class, 'exportCsv'])->name('reports.waste-damage-expiry.export-csv');
+        });
+
+        Route::group(['prefix' => 'serial-number-register'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberRegisterReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberRegisterReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberRegisterReportController::class, 'print'])->name('reports.serial-number-register.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberRegisterReportController::class, 'pdf'])->name('reports.serial-number-register.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberRegisterReportController::class, 'export'])->name('reports.serial-number-register.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberRegisterReportController::class, 'exportCsv'])->name('reports.serial-number-register.export-csv');
+        });
+
+        Route::group(['prefix' => 'serial-number-available'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberAvailableReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberAvailableReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberAvailableReportController::class, 'print'])->name('reports.serial-number-available.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberAvailableReportController::class, 'pdf'])->name('reports.serial-number-available.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberAvailableReportController::class, 'export'])->name('reports.serial-number-available.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberAvailableReportController::class, 'exportCsv'])->name('reports.serial-number-available.export-csv');
+        });
+
+        Route::group(['prefix' => 'serial-number-sold'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberSoldReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberSoldReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberSoldReportController::class, 'print'])->name('reports.serial-number-sold.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberSoldReportController::class, 'pdf'])->name('reports.serial-number-sold.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberSoldReportController::class, 'export'])->name('reports.serial-number-sold.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberSoldReportController::class, 'exportCsv'])->name('reports.serial-number-sold.export-csv');
+        });
+
+        Route::group(['prefix' => 'serial-number-movement'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberMovementReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberMovementReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberMovementReportController::class, 'print'])->name('reports.serial-number-movement.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberMovementReportController::class, 'pdf'])->name('reports.serial-number-movement.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberMovementReportController::class, 'export'])->name('reports.serial-number-movement.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberMovementReportController::class, 'exportCsv'])->name('reports.serial-number-movement.export-csv');
+        });
+
+        Route::group(['prefix' => 'serial-number-customer'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberCustomerReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberCustomerReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberCustomerReportController::class, 'print'])->name('reports.serial-number-customer.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberCustomerReportController::class, 'pdf'])->name('reports.serial-number-customer.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberCustomerReportController::class, 'export'])->name('reports.serial-number-customer.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberCustomerReportController::class, 'exportCsv'])->name('reports.serial-number-customer.export-csv');
         });
         }); // end module:inventory (procurement reports)
 

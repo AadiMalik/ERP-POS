@@ -27,6 +27,7 @@ class OpeningStockDetail extends Model
         'batch_no',
         'expiry_date',
         'product_variation_batch_id',
+        'serial_numbers',
         'description',
         'createdby_id',
         'updatedby_id',

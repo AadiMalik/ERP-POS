@@ -85,6 +85,7 @@
                                         <th style="min-width:170px;">Batch/Lot</th>
                                         <th style="min-width:130px;">Expiry Date</th>
                                         <th style="min-width:110px;">Quantity</th>
+                                        <th style="min-width:160px;">Serial #</th>
                                         <th style="min-width:120px;">Value</th>
                                         <th style="min-width:130px;">Loss Type</th>
                                         <th style="min-width:170px;">Reason</th>
@@ -94,7 +95,7 @@
                                 </thead>
                                 <tbody id="productRows">
                                     <tr id="emptyRow">
-                                        <td colspan="12" class="text-center text-muted">
+                                        <td colspan="13" class="text-center text-muted">
                                             Select a warehouse, then "Add Product"
                                         </td>
                                     </tr>
@@ -166,7 +167,7 @@
         function resetProductRows() {
             $('#productRows').html(`
                 <tr id="emptyRow">
-                    <td colspan="12" class="text-center text-muted">Select a warehouse, then "Add Product"</td>
+                    <td colspan="13" class="text-center text-muted">Select a warehouse, then "Add Product"</td>
                 </tr>
             `);
             calculateGrandTotal();
@@ -229,6 +230,13 @@
             <td>
                 <input type="text" class="form-control quantity" name="lines[${index}][quantity]" value="0">
             </td>
+            <td class="serial-cell">
+                <button type="button" class="btn btn-sm btn-outline-primary serial-entry-btn" style="display:none;">
+                    <i class="fa fa-list-check"></i> <span class="serial-count-label">Select Serials (0/0)</span>
+                </button>
+                <span class="serial-na text-muted">N/A</span>
+                <div class="serial-hidden-inputs" style="display:none;"></div>
+            </td>
             <td class="row-value">${decimal(0)}</td>
             <td>
                 <select class="form-control loss-type" name="lines[${index}][loss_type]">
@@ -254,6 +262,23 @@
             $('#productRows').append(row);
             loadManualProductDropdown(row, prefill);
             rowIndex++;
+
+            if (prefill && prefill.track_serial_number && prefill.serial_numbers && prefill.serial_numbers.length) {
+                setTimeout(function() {
+                    row.find('.serial-hidden-inputs').html(
+                        prefill.serial_numbers.map(sn => `<input type="hidden" class="serial-hidden-input" name="${row.find('.quantity').attr('name').replace('[quantity]', '[serial_numbers][]')}" value="${sn}">`).join('')
+                    );
+                    refreshSerialButtonLabel(row);
+                }, 600);
+            }
+        }
+
+        function refreshSerialButtonLabel(row) {
+            const entered = row.find('.serial-hidden-input').length;
+            const expected = decimal(row.find('.quantity').val()) || 0;
+            row.find('.serial-count-label').text(`Select Serials (${entered}/${expected})`);
+            row.find('.serial-entry-btn').toggleClass('btn-outline-primary', entered == expected)
+                .toggleClass('btn-outline-danger', entered != expected);
         }
 
         function loadManualProductDropdown(row, prefill) {
@@ -305,7 +330,8 @@
                             let selected = prefill && prefill.product_variation_id == variation.product_variation_id ? 'selected' : '';
                             html += `<option value="${variation.product_variation_id}"
                                 data-unit-id="${variation.unit?.unit_id ?? variation.base_unit_id ?? ''}"
-                                data-unit-name="${variation.unit?.name ?? ''}" ${selected}>${variation.name}</option>`;
+                                data-unit-name="${variation.unit?.name ?? ''}"
+                                data-track-serial="${variation.track_serial_number ? 1 : 0}" ${selected}>${variation.name}</option>`;
                         });
                     }
                     row.find('.manual-variation-select').html(html);
@@ -331,6 +357,13 @@
             row.data('unit_cost', 0);
             row.data('available_quantity', 0);
             row.find('.available-qty').html('-');
+
+            let trackSerial = option.data('track-serial') == 1;
+            row.data('track-serial', trackSerial);
+            row.find('.serial-hidden-inputs').empty();
+            row.find('.serial-entry-btn').toggle(trackSerial);
+            row.find('.serial-na').toggle(!trackSerial);
+            refreshSerialButtonLabel(row);
 
             let warehouseId = currentWarehouseId();
             if (!variationId || !warehouseId) {
@@ -370,6 +403,9 @@
                     row.find('.batch-select').html(html);
                 }
             });
+
+            row.data('serial-warehouse-id', warehouseId);
+            row.data('serial-variation-id', variationId);
         });
 
         $(document).on('change', '.batch-select', function() {
@@ -403,7 +439,78 @@
         // ======================================================
 
         $(document).on('keyup change', '.quantity', function() {
-            calculateRow($(this).closest('tr'));
+            let row = $(this).closest('tr');
+            calculateRow(row);
+            refreshSerialButtonLabel(row);
+        });
+
+        // ======================================================
+        // SERIAL NUMBER PICKER MODAL
+        // ======================================================
+        var wdeSerialModal = null;
+        var currentWdeSerialRow = null;
+
+        $(document).on('click', '.serial-entry-btn', function() {
+            currentWdeSerialRow = $(this).closest('tr');
+            let warehouseId = currentWdeSerialRow.data('serial-warehouse-id');
+            let variationId = currentWdeSerialRow.data('serial-variation-id');
+            let expected = decimal(currentWdeSerialRow.find('.quantity').val()) || 0;
+            let alreadyChecked = currentWdeSerialRow.find('.serial-hidden-input').map(function() {
+                return $(this).val();
+            }).get();
+
+            $('#wdeSerialModalHint').text(`Select exactly ${expected} serial number(s).`);
+            $('#wdeSerialModalList').html('<div class="text-muted">Loading...</div>');
+            wdeSerialModal = wdeSerialModal || new bootstrap.Modal(document.getElementById('wdeSerialModal'));
+            wdeSerialModal.show();
+
+            $.ajax({
+                url: url_local + '/admin/waste-damage-expiry/serials/' + warehouseId + '/' + variationId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (!response.Success || !response.Data.length) {
+                        $('#wdeSerialModalList').html('<div class="text-muted">No available serial numbers found.</div>');
+                        return;
+                    }
+                    let html = '';
+                    $.each(response.Data, function(_, s) {
+                        let checked = alreadyChecked.includes(s.serial_no) ? 'checked' : '';
+                        html += `
+                            <div class="form-check">
+                                <input class="form-check-input wde-serial-checkbox" type="checkbox" value="${s.serial_no}" id="wdeSerial_${s.product_variation_serial_number_id}" ${checked}>
+                                <label class="form-check-label" for="wdeSerial_${s.product_variation_serial_number_id}">${s.serial_no}</label>
+                            </div>
+                        `;
+                    });
+                    $('#wdeSerialModalList').html(html);
+                },
+                error: function() {
+                    $('#wdeSerialModalList').html('<div class="text-danger">Unable to load serial numbers.</div>');
+                }
+            });
+        });
+
+        $('#wdeSerialModalSaveBtn').on('click', function() {
+            if (!currentWdeSerialRow) return;
+            let selected = $('.wde-serial-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            let expected = parseFloat(currentWdeSerialRow.find('.quantity').val()) || 0;
+            if (selected.length !== expected) {
+                errorMessage(`Select exactly ${expected} serial number(s) (currently ${selected.length}).`);
+                return;
+            }
+
+            let qtyInputName = currentWdeSerialRow.find('.quantity').attr('name');
+            let serialInputName = qtyInputName.replace('[quantity]', '[serial_numbers][]');
+
+            currentWdeSerialRow.find('.serial-hidden-inputs').html(
+                selected.map(sn => `<input type="hidden" class="serial-hidden-input" name="${serialInputName}" value="${sn.replace(/"/g, '&quot;')}">`).join('')
+            );
+            refreshSerialButtonLabel(currentWdeSerialRow);
+            wdeSerialModal.hide();
         });
 
         function calculateRow(row) {
@@ -453,6 +560,8 @@
                 addProductRow({
                     product_id: item.product_id,
                     product_variation_id: item.product_variation_id,
+                    track_serial_number: item.track_serial_number,
+                    serial_numbers: item.serial_numbers,
                 });
 
                 let row = $('#productRows tr.product-row').last();
@@ -481,6 +590,46 @@
                 errorMessage('Please add at least one product.');
                 return false;
             }
+
+            let serialMismatch = false;
+            $('#productRows tr.product-row').each(function() {
+                let row = $(this);
+                if (!row.data('track-serial')) {
+                    return;
+                }
+                let qty = parseFloat(row.find('.quantity').val()) || 0;
+                let enteredCount = row.find('.serial-hidden-input').length;
+                if (qty > 0 && enteredCount !== qty) {
+                    errorMessage(`Select exactly ${qty} serial number(s) for this line (currently ${enteredCount}).`);
+                    serialMismatch = true;
+                    return false;
+                }
+            });
+
+            if (serialMismatch) {
+                e.preventDefault();
+                return false;
+            }
         });
     </script>
+
+    {{-- ================= SERIAL NUMBER PICKER MODAL ================= --}}
+    <div class="modal fade" id="wdeSerialModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select Serial Numbers</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-2" id="wdeSerialModalHint">Select the serial numbers.</p>
+                    <div id="wdeSerialModalList" style="max-height:300px; overflow-y:auto;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="wdeSerialModalSaveBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

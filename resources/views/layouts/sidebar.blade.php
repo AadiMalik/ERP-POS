@@ -257,12 +257,14 @@
         <!-- Inventory -->
         @if (businessModuleEnabled('inventory'))
         @canAccessAny(['unit.view', 'warehouse.view', 'brand.view', 'category.view', 'sub-category.view', 'product.view',
-            'unit-conversion.view', 'batch.view', 'stock.view', 'stock-transaction.view', 'opening-stock.view',
+            'unit-conversion.view', 'batch.view', 'serial-number.view', 'stock.view', 'stock-transaction.view', 'opening-stock.view',
             'stock-taking.view', 'loss-reason.view', 'waste-damage-expiry.view', 'transfer-note.view', 'recipe.view', 'manufacturing-plan.view', 'production.view',
             'reports.stock-ledger.view', 'reports.stock-summary.view',
             'reports.stock-valuation.view', 'reports.stock-aging.view', 'reports.stock-transfer-report.view',
             'reports.stock-reconciliation.view', 'reports.batch-expiry.view', 'reports.stock-loss.view',
             'reports.waste-damage-expiry.view',
+            'reports.serial-number-register.view', 'reports.serial-number-available.view', 'reports.serial-number-sold.view',
+            'reports.serial-number-movement.view', 'reports.serial-number-customer.view',
             'reports.material-consumption-report.view', 'reports.manufacturing-plan-report.view',
             'reports.production-report.view', 'reports.recipe-bom-report.view'])
             <li class="menu-item">
@@ -325,6 +327,13 @@
                         <li class="menu-item">
                             <a href="{{ url('/admin/product-variation-batch') }}" class="menu-link">
                                 <div data-i18n="Batches">Batches</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('serial-number.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/serial-number') }}" class="menu-link">
+                                <div data-i18n="Serial Numbers">Serial Numbers</div>
                             </a>
                         </li>
                     @endcanAccess
@@ -413,6 +422,8 @@
                     @canAccessAny(['reports.stock-ledger.view', 'reports.stock-summary.view', 'reports.stock-valuation.view',
                         'reports.stock-aging.view', 'reports.stock-transfer-report.view', 'reports.stock-reconciliation.view',
                         'reports.batch-expiry.view', 'reports.stock-loss.view', 'reports.waste-damage-expiry.view', 'reports.material-consumption-report.view',
+                        'reports.serial-number-register.view', 'reports.serial-number-available.view', 'reports.serial-number-sold.view',
+                        'reports.serial-number-movement.view', 'reports.serial-number-customer.view',
                         'reports.manufacturing-plan-report.view', 'reports.production-report.view', 'reports.recipe-bom-report.view'])
                         <li class="menu-item">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -454,6 +465,33 @@
                                             @endcanAccess
                                             @canAccess('reports.waste-damage-expiry.view')
                                                 <li class="menu-item"><a href="{{ url('/admin/reports/waste-damage-expiry') }}" class="menu-link"><div>Waste / Damage / Expiry</div></a></li>
+                                            @endcanAccess
+                                        </ul>
+                                    </li>
+                                @endcanAccessAny
+
+                                {{-- Serial Number Reports --}}
+                                @canAccessAny(['reports.serial-number-register.view', 'reports.serial-number-available.view',
+                                    'reports.serial-number-sold.view', 'reports.serial-number-movement.view', 'reports.serial-number-customer.view'])
+                                    <li class="menu-item">
+                                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                            <div data-i18n="Serial Number Reports">Serial Number Reports</div>
+                                        </a>
+                                        <ul class="menu-sub">
+                                            @canAccess('reports.serial-number-register.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/serial-number-register') }}" class="menu-link"><div>Serial Number Register</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.serial-number-available.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/serial-number-available') }}" class="menu-link"><div>Available Serial Numbers</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.serial-number-sold.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/serial-number-sold') }}" class="menu-link"><div>Sold Serial Numbers</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.serial-number-movement.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/serial-number-movement') }}" class="menu-link"><div>Movement History</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.serial-number-customer.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/serial-number-customer') }}" class="menu-link"><div>Customer-wise Serial Numbers</div></a></li>
                                             @endcanAccess
                                         </ul>
                                     </li>

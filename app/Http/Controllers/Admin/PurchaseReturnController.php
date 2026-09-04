@@ -35,7 +35,7 @@ class PurchaseReturnController extends Controller
         WarehouseService $warehouse_service,
         DocumentSendLogService $document_send_log_service
     ) {
-        $this->middleware('permission:purchase-return.view')->only(['index', 'getData', 'details', 'sourceLines']);
+        $this->middleware('permission:purchase-return.view')->only(['index', 'getData', 'details', 'sourceLines', 'availableSerials']);
         $this->middleware('permission:purchase-return.create')->only(['create']);
         $this->middleware('permission:purchase-return.create|purchase-return.edit')->only(['store']);
         $this->middleware('permission:purchase-return.edit')->only(['edit']);
@@ -132,6 +132,8 @@ class PurchaseReturnController extends Controller
             'products.*.purchase_detail_id' => ['required', Rule::exists('purchase_details', 'purchase_detail_id')],
             'products.*.good_receipt_note_detail_id' => ['nullable', Rule::exists('good_receipt_note_details', 'good_receipt_note_detail_id')],
             'products.*.return_quantity' => ['required', 'numeric', 'min:0'],
+            'products.*.serial_numbers' => ['nullable', 'array'],
+            'products.*.serial_numbers.*' => ['nullable', 'string', 'max:255'],
         ]);
 
         if ($validator->fails()) {
@@ -197,6 +199,16 @@ class PurchaseReturnController extends Controller
         try {
             $data = $this->purchase_return_service->getSourceLines($return_type, $source_id);
             return $this->success(Message::SUCCESS, $data);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function availableSerials($purchase_detail_id)
+    {
+        try {
+            $serials = $this->purchase_return_service->getAvailableSerialsForPurchaseDetail($purchase_detail_id);
+            return $this->success(Message::SUCCESS, $serials);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }

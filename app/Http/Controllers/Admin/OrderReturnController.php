@@ -38,7 +38,7 @@ class OrderReturnController extends Controller
         PaymentMethodService $payment_method_service,
         DocumentSendLogService $document_send_log_service
     ) {
-        $this->middleware('permission:order-return.view')->only(['index', 'getData', 'details', 'sourceLines']);
+        $this->middleware('permission:order-return.view')->only(['index', 'getData', 'details', 'sourceLines', 'soldSerials']);
         $this->middleware('permission:order-return.create')->only(['create']);
         $this->middleware('permission:order-return.create|order-return.edit')->only(['store']);
         $this->middleware('permission:order-return.edit')->only(['edit']);
@@ -128,6 +128,8 @@ class OrderReturnController extends Controller
             'products' => ['required', 'array', 'min:1'],
             'products.*.order_detail_id' => ['required', Rule::exists('order_details', 'order_detail_id')],
             'products.*.return_quantity' => ['required', 'numeric', 'min:0'],
+            'products.*.serial_numbers' => ['nullable', 'array'],
+            'products.*.serial_numbers.*' => ['nullable', 'string', 'max:255'],
         ]);
 
         if ($validator->fails()) {
@@ -193,6 +195,16 @@ class OrderReturnController extends Controller
         try {
             $data = $this->order_return_service->getSourceLines($order_id);
             return $this->success(Message::SUCCESS, $data);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function soldSerials($order_detail_id)
+    {
+        try {
+            $serials = $this->order_return_service->getSoldSerialsForOrderDetail($order_detail_id);
+            return $this->success(Message::SUCCESS, $serials);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }

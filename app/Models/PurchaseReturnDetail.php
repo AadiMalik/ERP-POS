@@ -37,6 +37,7 @@ class PurchaseReturnDetail extends Model
         'total',
         'reason',
         'description',
+        'serial_numbers',
         'createdby_id',
         'updatedby_id',
         'date_created',

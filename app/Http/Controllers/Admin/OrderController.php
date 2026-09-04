@@ -650,6 +650,16 @@ class OrderController extends Controller
         }
     }
 
+    public function availableSerials(Request $request)
+    {
+        try {
+            $serials = $this->order_service->getAvailableSerials($request->all());
+            return $this->success(Message::FETCH, $serials);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
     public function searchVouchers(Request $request)
     {
         $term = trim((string) $request->input('term'));

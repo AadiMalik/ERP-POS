@@ -42,7 +42,7 @@ class TransferNoteController extends Controller
         UnitService $unit_service,
         DocumentSendLogService $document_send_log_service
     ) {
-        $this->middleware('permission:transfer-note.view')->only(['index', 'getData', 'details', 'sourceStock']);
+        $this->middleware('permission:transfer-note.view')->only(['index', 'getData', 'details', 'sourceStock', 'availableSerialsForSend', 'inTransitSerials']);
         $this->middleware('permission:transfer-note.create')->only(['create']);
         $this->middleware('permission:transfer-note.create|transfer-note.edit')->only(['store']);
         $this->middleware('permission:transfer-note.edit')->only(['edit']);
@@ -193,12 +193,41 @@ class TransferNoteController extends Controller
         }
     }
 
-    public function send($transfer_note_id)
+    public function availableSerialsForSend($transfer_note_detail_id)
+    {
+        try {
+            $serials = $this->transfer_note_service->getAvailableSerialsForSend($transfer_note_detail_id);
+            return $this->success(Message::SUCCESS, $serials);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function inTransitSerials($transfer_note_detail_id)
+    {
+        try {
+            $serials = $this->transfer_note_service->getInTransitSerials($transfer_note_detail_id);
+            return $this->success(Message::SUCCESS, $serials);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function send(Request $request, $transfer_note_id)
     {
         $this->assertTransferNoteAccessible($transfer_note_id, 'branch_id');
 
+        $validate = Validator::make($request->all(), [
+            'serials' => ['nullable', 'array'],
+            'serials.*' => ['nullable', 'array'],
+            'serials.*.*' => ['nullable', 'string', 'max:255'],
+        ]);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
         try {
-            $this->transfer_note_service->send($transfer_note_id);
+            $this->transfer_note_service->send($transfer_note_id, $request->input('serials', []));
             return $this->success(Message::STATUS, []);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
@@ -212,6 +241,8 @@ class TransferNoteController extends Controller
             'products' => 'required|array|min:1',
             'products.*.transfer_note_detail_id' => 'required|exists:transfer_note_details,transfer_note_detail_id',
             'products.*.receive_quantity' => 'required|numeric|min:0',
+            'products.*.serial_numbers' => ['nullable', 'array'],
+            'products.*.serial_numbers.*' => ['nullable', 'string', 'max:255'],
         ];
 
         $validate = Validator::make($request->all(), $rules);

@@ -39,7 +39,7 @@ class WasteDamageExpiryController extends Controller
         LossReasonService $loss_reason_service,
         DocumentSendLogService $document_send_log_service
     ) {
-        $this->middleware('permission:waste-damage-expiry.view')->only(['index', 'getData', 'details', 'batches', 'stock']);
+        $this->middleware('permission:waste-damage-expiry.view')->only(['index', 'getData', 'details', 'batches', 'stock', 'serials']);
         $this->middleware('permission:waste-damage-expiry.create')->only(['create']);
         $this->middleware('permission:waste-damage-expiry.create|waste-damage-expiry.edit')->only(['store']);
         $this->middleware('permission:waste-damage-expiry.edit')->only(['edit']);
@@ -129,6 +129,8 @@ class WasteDamageExpiryController extends Controller
             'lines.*.loss_type' => ['required', Rule::in(array_keys(LossType::getOptions()))],
             'lines.*.loss_reason_id' => ['nullable', Rule::exists('loss_reasons', 'loss_reason_id')->where('is_deleted', 0)],
             'lines.*.notes' => ['nullable', 'string'],
+            'lines.*.serial_numbers' => ['nullable', 'array'],
+            'lines.*.serial_numbers.*' => ['nullable', 'string', 'max:255'],
         ]);
 
         if ($validator->fails()) {
@@ -204,6 +206,16 @@ class WasteDamageExpiryController extends Controller
     {
         try {
             $data = $this->waste_damage_expiry_service->getStock($warehouse_id, $product_variation_id);
+            return $this->success(Message::SUCCESS, $data);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function serials($warehouse_id, $product_variation_id)
+    {
+        try {
+            $data = $this->waste_damage_expiry_service->getSerials($warehouse_id, $product_variation_id);
             return $this->success(Message::SUCCESS, $data);
         } catch (Exception $e) {
             return $this->error($e->getMessage());

@@ -301,6 +301,7 @@ class OrderReturnService
                 'unit_price'                             => $detail->unit_price,
                 'discount'                               => $detail->discount ?? 0,
                 'tax'                                    => $detail->tax ?? 0,
+                'track_serial_number'                    => (bool) ($detail->productVariation->track_serial_number ?? false),
             ];
         }
 
@@ -435,6 +436,13 @@ class OrderReturnService
                     $has_quantity = true;
                 }
 
+                $variation = $detail->productVariation;
+                $serial_numbers = $product['serial_numbers'] ?? [];
+
+                if ($variation && $variation->track_serial_number && $return_quantity > 0 && count($serial_numbers) != $return_quantity) {
+                    throw new Exception('Select exactly ' . (int) $return_quantity . ' serial number(s) to return for "' . $product_name . '".');
+                }
+
                 $base_quantity = $return_quantity * $conversion_factor;
 
                 $line_subtotal = $base_quantity * $unit_price;
@@ -490,6 +498,7 @@ class OrderReturnService
                     'cost_price'                               => $detail->cost_price ?? 0,
                     'reason'                                   => $product['reason'] ?? null,
                     'description'                              => $product['description'] ?? null,
+                    'serial_numbers'                           => !empty($serial_numbers) ? json_encode(array_values($serial_numbers)) : null,
                     'createdby_id'                             => Auth::id(),
                     'date_created'                             => now(),
                 ]);
@@ -571,6 +580,8 @@ class OrderReturnService
                     'subtotal'                 => $detail->subtotal,
                     'total'                    => $detail->total,
                     'reason'                   => $detail->reason,
+                    'track_serial_number'      => (bool) ($detail->productVariation->track_serial_number ?? false),
+                    'serial_numbers'           => $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [],
                 ];
             }
 
@@ -578,6 +589,18 @@ class OrderReturnService
         } catch (Exception $e) {
             throw $e;
         }
+    }
+
+    /**
+     * Serials currently sold under a specific order line - feeds the Sales
+     * Return serial picker.
+     */
+    public function getSoldSerialsForOrderDetail($order_detail_id)
+    {
+        return app(ProductVariationSerialService::class)
+            ->serialsCurrentlySoldUnder($order_detail_id)
+            ->map(fn($s) => ['product_variation_serial_number_id' => $s->product_variation_serial_number_id, 'serial_no' => $s->serial_no])
+            ->values();
     }
 
     public function status($obj)
@@ -1066,6 +1089,22 @@ class OrderReturnService
                 $batch_restores[] = ['product_variation_batch_id' => null, 'base_quantity' => $base_quantity];
             }
 
+            $variation = $detail->productVariation;
+            if ($variation && $variation->track_serial_number) {
+                $serial_numbers = $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [];
+                $serial_ids = \App\Models\ProductVariationSerialNumber::where('current_order_detail_id', $detail->order_detail_id)
+                    ->where('status', \App\Enums\SerialStatus::SOLD)
+                    ->whereIn('serial_no', $serial_numbers)
+                    ->pluck('product_variation_serial_number_id')
+                    ->toArray();
+
+                if (count($serial_ids) != count($serial_numbers)) {
+                    throw new Exception('One or more selected serial numbers for "' . ($detail->product->name ?? 'product') . '" are not currently sold under this order line.');
+                }
+
+                app(ProductVariationSerialService::class)->restockFromReturn($serial_ids, $detail->order_return_detail_id);
+            }
+
             foreach ($batch_restores as $restore) {
                 app(ProductVariationStockService::class)->adjustBatchQuantity($restore['product_variation_batch_id'], $restore['base_quantity']);
 
@@ -1177,6 +1216,22 @@ class OrderReturnService
             ->where('reference_id', $order_return->order_return_id)
             ->where('is_deleted', 0)
             ->get();
+
+        foreach ($order_return->orderReturnDetails as $detail) {
+            $variation = $detail->productVariation;
+            if (!$variation || !$variation->track_serial_number) {
+                continue;
+            }
+
+            $serial_ids = \App\Models\ProductVariationSerialNumber::where('status', \App\Enums\SerialStatus::AVAILABLE)
+                ->whereIn('serial_no', $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [])
+                ->pluck('product_variation_serial_number_id')
+                ->toArray();
+
+            if (!empty($serial_ids)) {
+                app(ProductVariationSerialService::class)->cancelSaleReturn($serial_ids, $order_return->order_id, $detail->order_detail_id, $order_return->customer_id);
+            }
+        }
 
         app(ProductVariationStockService::class)->reverseStockTransactions($stock_transactions);
 

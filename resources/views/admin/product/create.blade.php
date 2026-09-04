@@ -505,6 +505,11 @@ use App\Enums\RoleNames;
                                     <label class="form-check-label" for="modalVariationTrackExpiry">Track
                                         Expiry</label>
                                 </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="modalVariationTrackSerialNumber">
+                                    <label class="form-check-label" for="modalVariationTrackSerialNumber">Track Serial
+                                        Number</label>
+                                </div>
                                 <div class="form-check" id="modalVariationLoyaltyWrap" style="display:none;">
                                     <input class="form-check-input" type="checkbox" id="modalVariationIsLoyaltyEnabled">
                                     <label class="form-check-label" for="modalVariationIsLoyaltyEnabled">Loyalty
@@ -680,6 +685,7 @@ use App\Enums\RoleNames;
         sale_unit_id: "{{$var->sale_unit_id ?? 0}}",
         track_batch: {{$var->track_batch ? 'true' : 'false'}},
         track_expiry: {{$var->track_expiry ? 'true' : 'false'}},
+        track_serial_number: {{$var->track_serial_number ? 'true' : 'false'}},
         is_purchasable: {{ $var->is_purchasable ? 'true' : 'false' }},
         is_sellable: {{ $var->is_sellable ? 'true' : 'false' }},
         prices: @json($var->prices->mapWithKeys(fn($p) => [$p->sale_type_id => ['price' => $p->price, 'minimum_selling_price' => $p->minimum_selling_price]])),
@@ -849,6 +855,7 @@ use App\Enums\RoleNames;
         const minStock = parseInt(document.getElementById('modalVariationMinStock').value) || 0;
         const trackBatch = document.getElementById('modalVariationTrackBatch').checked;
         const trackExpiry = document.getElementById('modalVariationTrackExpiry').checked;
+        const trackSerialNumber = document.getElementById('modalVariationTrackSerialNumber').checked;
         const isLoyaltyEnabled = window.loyaltyProductModeEnabled ?
             document.getElementById('modalVariationIsLoyaltyEnabled').checked : false;
         const isPurchasable = document.getElementById('modalVariationIsPurchasable').checked;
@@ -928,6 +935,7 @@ use App\Enums\RoleNames;
             sale_unit_id: saleUnit,
             track_batch: trackBatch,
             track_expiry: trackExpiry,
+            track_serial_number: trackSerialNumber,
             is_purchasable: isPurchasable,
             is_sellable: isSellable,
             prices: prices,
@@ -978,6 +986,7 @@ use App\Enums\RoleNames;
         document.getElementById('modalVariationMinStock').value = variation.minimum_stock || 0;
         document.getElementById('modalVariationTrackBatch').checked = variation.track_batch || false;
         document.getElementById('modalVariationTrackExpiry').checked = variation.track_expiry || false;
+        document.getElementById('modalVariationTrackSerialNumber').checked = variation.track_serial_number || false;
         document.getElementById('modalVariationIsPurchasable').checked = variation.is_purchasable !== false;
         document.getElementById('modalVariationIsSellable').checked = variation.is_sellable !== false;
         if (window.loyaltyProductModeEnabled) {
@@ -1066,6 +1075,7 @@ use App\Enums\RoleNames;
         document.getElementById('modalVariationMinStock').value = '0';
         document.getElementById('modalVariationTrackBatch').checked = false;
         document.getElementById('modalVariationTrackExpiry').checked = false;
+        document.getElementById('modalVariationTrackSerialNumber').checked = false;
         document.getElementById('modalVariationIsPurchasable').checked = true;
         document.getElementById('modalVariationIsSellable').checked = true;
         if (window.loyaltyProductModeEnabled) {

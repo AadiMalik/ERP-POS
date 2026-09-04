@@ -36,6 +36,7 @@ class ProductVariation extends Model
         'minimum_stock',
         'track_batch',
         'track_expiry',
+        'track_serial_number',
         'is_purchasable',
         'is_sellable',
         'is_raw_material',
@@ -99,6 +100,11 @@ class ProductVariation extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id', 'product_id');
+    }
+
+    public function serialNumbers()
+    {
+        return $this->hasMany(ProductVariationSerialNumber::class, 'product_variation_id', 'product_variation_id');
     }
 
     public function createdby()

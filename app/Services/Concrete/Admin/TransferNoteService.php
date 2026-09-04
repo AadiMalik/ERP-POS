@@ -411,6 +411,32 @@ class TransferNoteService
         return $this->model_transfer_note->with($this->with)->find($transfer_note_id);
     }
 
+    /**
+     * Available serials at the source warehouse for a transfer note line -
+     * feeds the "Send" picker.
+     */
+    public function getAvailableSerialsForSend($transfer_note_detail_id)
+    {
+        $detail = TransferNoteDetail::with('transferNote')->findOrFail($transfer_note_detail_id);
+
+        return app(ProductVariationSerialService::class)
+            ->availableSerialsFor($detail->product_variation_id, $detail->transferNote->source_warehouse_id)
+            ->map(fn($s) => ['product_variation_serial_number_id' => $s->product_variation_serial_number_id, 'serial_no' => $s->serial_no])
+            ->values();
+    }
+
+    /**
+     * Serials currently in transit on a transfer note line - feeds the
+     * "Receive" picker.
+     */
+    public function getInTransitSerials($transfer_note_detail_id)
+    {
+        return \App\Models\ProductVariationSerialNumber::where('current_transfer_note_detail_id', $transfer_note_detail_id)
+            ->where('status', \App\Enums\SerialStatus::IN_TRANSIT)
+            ->get(['product_variation_serial_number_id', 'serial_no'])
+            ->values();
+    }
+
     public function getDetails($transfer_note_id)
     {
         try {
@@ -459,6 +485,7 @@ class TransferNoteService
                     'conversion_factor'                        => $detail->conversion_factor,
                     'unit_cost'                                 => $detail->unit_cost,
                     'total_value'                               => $detail->total_value,
+                    'track_serial_number'                       => (bool) ($detail->productVariation->track_serial_number ?? false),
                 ];
             }
 
@@ -474,12 +501,12 @@ class TransferNoteService
      * deducts it, writing a TRANSFER_OUT ledger entry per line - the
      * destination is intentionally left untouched until receive().
      */
-    public function send($transfer_note_id)
+    public function send($transfer_note_id, $serials_by_detail_id = [])
     {
         DB::beginTransaction();
 
         try {
-            $transfer_note = $this->model_transfer_note->getModel()::with('transferNoteDetails.product')
+            $transfer_note = $this->model_transfer_note->getModel()::with('transferNoteDetails.product', 'transferNoteDetails.productVariation')
                 ->findOrFail($transfer_note_id);
 
             if ($transfer_note->status !== Status::DRAFT) {
@@ -491,6 +518,28 @@ class TransferNoteService
 
                 if ($base_quantity <= 0) {
                     continue;
+                }
+
+                $variation = $detail->productVariation;
+                if ($variation && $variation->track_serial_number) {
+                    $serial_numbers = $serials_by_detail_id[$detail->transfer_note_detail_id] ?? [];
+
+                    if (count($serial_numbers) != $detail->transfer_quantity) {
+                        throw new Exception('Select exactly ' . (int) $detail->transfer_quantity . ' serial number(s) for "' . ($detail->product->name ?? 'a product') . '" to send.');
+                    }
+
+                    $serial_ids = \App\Models\ProductVariationSerialNumber::where('product_variation_id', $detail->product_variation_id)
+                        ->where('warehouse_id', $transfer_note->source_warehouse_id)
+                        ->where('status', \App\Enums\SerialStatus::AVAILABLE)
+                        ->whereIn('serial_no', $serial_numbers)
+                        ->pluck('product_variation_serial_number_id')
+                        ->toArray();
+
+                    if (count($serial_ids) != count($serial_numbers)) {
+                        throw new Exception('One or more selected serial numbers for "' . ($detail->product->name ?? 'a product') . '" are no longer available at the source warehouse.');
+                    }
+
+                    app(ProductVariationSerialService::class)->sendForTransfer($serial_ids, $detail->transfer_note_detail_id, $transfer_note->destination_warehouse_id);
                 }
 
                 $source_stock = ProductVariationStock::where('business_id', $transfer_note->business_id)
@@ -571,7 +620,7 @@ class TransferNoteService
         DB::beginTransaction();
 
         try {
-            $transfer_note = $this->model_transfer_note->getModel()::with('transferNoteDetails.product')
+            $transfer_note = $this->model_transfer_note->getModel()::with('transferNoteDetails.product', 'transferNoteDetails.productVariation')
                 ->findOrFail($obj['transfer_note_id']);
 
             if ($transfer_note->status !== Status::IN_TRANSIT) {
@@ -605,6 +654,27 @@ class TransferNoteService
                 }
 
                 $has_quantity = true;
+
+                $variation = $detail->productVariation;
+                if ($variation && $variation->track_serial_number) {
+                    $serial_numbers = $product['serial_numbers'] ?? [];
+
+                    if (count($serial_numbers) != $receive_quantity) {
+                        throw new Exception('Select exactly ' . (int) $receive_quantity . ' serial number(s) for "' . ($detail->product->name ?? 'a product') . '" to receive.');
+                    }
+
+                    $serial_ids = \App\Models\ProductVariationSerialNumber::where('current_transfer_note_detail_id', $detail->transfer_note_detail_id)
+                        ->where('status', \App\Enums\SerialStatus::IN_TRANSIT)
+                        ->whereIn('serial_no', $serial_numbers)
+                        ->pluck('product_variation_serial_number_id')
+                        ->toArray();
+
+                    if (count($serial_ids) != count($serial_numbers)) {
+                        throw new Exception('One or more selected serial numbers for "' . ($detail->product->name ?? 'a product') . '" are not in transit on this transfer note.');
+                    }
+
+                    app(ProductVariationSerialService::class)->receiveTransfer($serial_ids, $transfer_note->destination_warehouse_id, $detail->transfer_note_detail_id);
+                }
 
                 $conversion_factor = $detail->conversion_factor > 0 ? $detail->conversion_factor : 1;
                 $base_quantity = $receive_quantity * $conversion_factor;
@@ -758,6 +828,18 @@ class TransferNoteService
 
         if ($stock_transactions->isEmpty()) {
             return;
+        }
+
+        $in_transit_serial_ids = \App\Models\ProductVariationSerialNumber::whereIn(
+            'current_transfer_note_detail_id',
+            $transfer_note->transferNoteDetails->pluck('transfer_note_detail_id')
+        )
+            ->where('status', \App\Enums\SerialStatus::IN_TRANSIT)
+            ->pluck('product_variation_serial_number_id')
+            ->toArray();
+
+        if (!empty($in_transit_serial_ids)) {
+            app(ProductVariationSerialService::class)->cancelTransferSend($in_transit_serial_ids);
         }
 
         $stock_transactions->each(function ($transaction) {

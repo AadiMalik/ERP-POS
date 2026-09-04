@@ -46,7 +46,7 @@ class RoleDefaultPermissions
             case RoleNames::OPERATIONMANAGER:
                 return PermissionRegistry::namesForModulesExcludingActions(
                     ['warehouse', 'brand', 'category', 'sub-category', 'unit', 'product', 'barcode',
-                     'unit-conversion', 'batch', 'stock', 'stock-transaction', 'opening-stock',
+                     'unit-conversion', 'batch', 'serial-number', 'stock', 'stock-transaction', 'opening-stock',
                      'stock-taking', 'transfer-note', 'supplier', 'customer', 'purchase-request',
                      'purchase-request-quotation', 'purchase', 'good-receipt-note', 'purchase-return',
                      'supplier-payment', 'customer-payment', 'service-purchase', 'service-purchase-return',
@@ -59,7 +59,7 @@ class RoleDefaultPermissions
                 return array_merge(
                     PermissionRegistry::namesForModules([
                         'warehouse', 'brand', 'category', 'sub-category', 'unit', 'product', 'barcode',
-                        'unit-conversion', 'batch', 'stock', 'stock-transaction', 'opening-stock',
+                        'unit-conversion', 'batch', 'serial-number', 'stock', 'stock-transaction', 'opening-stock',
                         'stock-taking', 'loss-reason', 'waste-damage-expiry', 'transfer-note', 'purchase-return',
                         'recipe', 'manufacturing-plan', 'production', 'manufacturing-reports',
                     ]),
@@ -85,6 +85,16 @@ class RoleDefaultPermissions
                         'reports.waste-damage-expiry.export', 'reports.waste-damage-expiry.export-csv',
                         'reports.recipe-bom-report.view', 'reports.recipe-bom-report.print', 'reports.recipe-bom-report.pdf',
                         'reports.recipe-bom-report.export', 'reports.recipe-bom-report.export-csv',
+                        'reports.serial-number-register.view', 'reports.serial-number-register.print', 'reports.serial-number-register.pdf',
+                        'reports.serial-number-register.export', 'reports.serial-number-register.export-csv',
+                        'reports.serial-number-available.view', 'reports.serial-number-available.print', 'reports.serial-number-available.pdf',
+                        'reports.serial-number-available.export', 'reports.serial-number-available.export-csv',
+                        'reports.serial-number-sold.view', 'reports.serial-number-sold.print', 'reports.serial-number-sold.pdf',
+                        'reports.serial-number-sold.export', 'reports.serial-number-sold.export-csv',
+                        'reports.serial-number-movement.view', 'reports.serial-number-movement.print', 'reports.serial-number-movement.pdf',
+                        'reports.serial-number-movement.export', 'reports.serial-number-movement.export-csv',
+                        'reports.serial-number-customer.view', 'reports.serial-number-customer.print', 'reports.serial-number-customer.pdf',
+                        'reports.serial-number-customer.export', 'reports.serial-number-customer.export-csv',
                     ]
                 );
 

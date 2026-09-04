@@ -37,6 +37,7 @@ class OrderDetail extends Model
         'total',
         'cost_price',
         'notes',
+        'serial_numbers',
         'createdby_id',
         'date_created',
     ];

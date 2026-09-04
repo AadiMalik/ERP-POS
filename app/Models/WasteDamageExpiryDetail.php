@@ -27,6 +27,7 @@ class WasteDamageExpiryDetail extends Model
         'loss_type',
         'loss_reason_id',
         'notes',
+        'serial_numbers',
 
         'createdby_id',
         'updatedby_id',

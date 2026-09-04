@@ -359,6 +359,7 @@ class PurchaseService
                     'batch_no'                              => $product['batch_no'] ?? null,
                     'manufacturing_date'                    => $product['manufacturing_date'] ?? null,
                     'expiry_date'                           => $product['expiry_date'] ?? null,
+                    'serial_numbers'                        => !empty($product['serial_numbers']) ? json_encode(array_values($product['serial_numbers'])) : null,
                 ]);
             }
 
@@ -591,6 +592,22 @@ class PurchaseService
                 $detail->update(['product_variation_batch_id' => $product_variation_batch_id]);
             }
 
+            if ($detail->productVariation && $detail->productVariation->track_serial_number) {
+                app(ProductVariationSerialService::class)->receiveSerials(
+                    $purchase->business_id,
+                    $purchase->branch_id,
+                    $detail->product_id,
+                    $detail->product_variation_id,
+                    $purchase->warehouse_id,
+                    $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [],
+                    $base_quantity,
+                    $detail->unit_price,
+                    'purchase',
+                    $purchase->purchase_id,
+                    $detail->purchase_detail_id
+                );
+            }
+
             ProductVariationStockTransaction::create([
                 'product_variation_stock_transaction_id' => generateUuid(),
                 'transaction_date'                       => now(),
@@ -650,6 +667,11 @@ class PurchaseService
         if ($stock_transactions->isEmpty()) {
             return;
         }
+
+        // Throws (blocking the whole reversal) if any received serial has
+        // already moved on (sold/transferred/lost) - only untouched serials
+        // can be undone.
+        app(ProductVariationSerialService::class)->reverseReceivedSerials('purchase', $purchase->purchase_id);
 
         // Soft-deletes the transactions, reverses any batch deltas they
         // carried, and recomputes the aggregate stock row + ledger running
@@ -757,9 +779,11 @@ class PurchaseService
                     'conversions' => $conversions,
                     'track_batch' => (bool) ($detail->productVariation->track_batch ?? false),
                     'track_expiry' => (bool) ($detail->productVariation->track_expiry ?? false),
+                    'track_serial_number' => (bool) ($detail->productVariation->track_serial_number ?? false),
                     'batch_no' => $detail->batch_no,
                     'manufacturing_date' => localDate($detail->manufacturing_date),
                     'expiry_date' => localDate($detail->expiry_date),
+                    'serial_numbers' => $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [],
                 ];
             }
 

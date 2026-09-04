@@ -425,7 +425,12 @@
         // ======================================================
 
         function addProductRow(line, physical_quantity) {
-            physical_quantity = physical_quantity ?? line.system_quantity ?? 0;
+            const isSerialTracked = !!line.track_serial_number;
+            // Serial-tracked lines are reconciled unit-by-unit via the
+            // Serial Number screens, not a blind quantity override here -
+            // the physical count always mirrors system stock and can't be
+            // edited (server also enforces this, see StockTakingService::save()).
+            physical_quantity = isSerialTracked ? (line.system_quantity ?? 0) : (physical_quantity ?? line.system_quantity ?? 0);
             const index = productIndex;
 
             let row = $(`
@@ -445,7 +450,8 @@
             <td class="system-qty">${decimal(line.system_quantity)}</td>
             <td>
                 <input type="text" class="form-control physical-qty" name="products[${index}][physical_quantity]"
-                    value="${decimal(physical_quantity)}">
+                    value="${decimal(physical_quantity)}" ${isSerialTracked ? 'readonly' : ''}>
+                ${isSerialTracked ? '<small class="text-muted d-block">Serial-tracked - reconcile via Serial Number screens</small>' : ''}
             </td>
             <td class="difference-qty">${decimal(0)}</td>
             <td class="difference-value">${decimal(0)}</td>
@@ -535,6 +541,7 @@
                     unit_name: item.unit_name,
                     system_quantity: item.system_quantity,
                     unit_cost: item.unit_cost,
+                    track_serial_number: item.track_serial_number,
                 }, item.physical_quantity);
 
                 $('#productRows tr.product-row').last().find('.reason').val(item.reason ?? '');

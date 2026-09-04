@@ -385,6 +385,11 @@
             renderCart();
         });
 
+        $('#cartRows').on('click', '.manage-serials', function () {
+            var key = $(this).closest('.cart-line').data('key');
+            openSerialPickerForEdit(key);
+        });
+
         $('#cartRows').on('click', '.qty-inc, .qty-dec', function () {
             var $row = $(this).closest('.cart-line');
             var $qty = $row.find('.line-qty');
@@ -1217,6 +1222,15 @@
             return false;
         }
 
+        // Serial-tracked products can't be silently bumped/added - the
+        // cashier must pick which specific unit(s) are being sold, so this
+        // hands off to an async picker instead of mutating the cart
+        // synchronously. See openSerialPickerForAdd().
+        if (pv.track_serial_number) {
+            openSerialPickerForAdd(pv, unit_id, primary, quantity, existing, overrides);
+            return false;
+        }
+
         if (existing) {
             existing.quantity = newQty;
             existing.is_track_stock = pv.is_track_stock;
@@ -1260,11 +1274,169 @@
             manual_override: false,
             notes: '',
             image: overrides.image || null,
+            track_serial_number: !!pv.track_serial_number,
+            serial_numbers: [],
         });
 
         renderCart();
         return true;
     }
+
+    // ==============================
+    // SERIAL NUMBER PICKER (add-to-cart + cart-line management)
+    // ==============================
+    var state_serial_picker = { pv: null, unit_id: null, primary: null, requestedQty: null, existing: null, overrides: null, lineKey: null };
+
+    function openSerialPickerForAdd(pv, unit_id, primary, requestedQty, existing, overrides) {
+        state_serial_picker = { pv: pv, unit_id: unit_id, primary: primary, requestedQty: requestedQty, existing: existing || null, overrides: overrides || {}, lineKey: existing ? existing.line_key : null };
+
+        var alreadyChosen = existing ? (existing.serial_numbers || []) : [];
+        var totalNeeded = requestedQty + alreadyChosen.length;
+
+        $('#serialPickerHint').text('Select exactly ' + totalNeeded + ' serial number(s) for ' + ((pv.product && pv.product.name) || pv.name || 'this product') + '.');
+        $('#serialPickerList').html('<div class="text-muted p-2">Loading...</div>');
+        $('#serialPickerModal').data('total-needed', totalNeeded);
+        state.serial_picker_modal = state.serial_picker_modal || new bootstrap.Modal(document.getElementById('serialPickerModal'));
+        state.serial_picker_modal.show();
+
+        ajaxRequest({
+            url: URLS.available_serials,
+            data: {
+                product_variation_id: pv.product_variation_id,
+                register_session_id: state.session ? state.session.pos_register_session_id : null,
+            },
+        }).then(function (response) {
+            renderSerialPickerList(response.Data || [], alreadyChosen);
+        }).catch(function () {
+            $('#serialPickerList').html('<div class="text-danger p-2">Unable to load serial numbers.</div>');
+        });
+    }
+
+    // Opens the same picker to edit an already-cart-ed serial-tracked
+    // line's chosen units (add/remove) - quantity is derived from however
+    // many end up checked, rather than being entered separately.
+    function openSerialPickerForEdit(lineKey) {
+        var line = state.cart.find(function (l) { return l.line_key === lineKey; });
+        if (!line) return;
+
+        state_serial_picker = { pv: null, unit_id: line.unit_id, primary: null, requestedQty: null, existing: null, overrides: {}, lineKey: lineKey };
+
+        $('#serialPickerHint').text('Check/uncheck serial numbers for ' + line.product_name + '. At least one must remain selected.');
+        $('#serialPickerList').html('<div class="text-muted p-2">Loading...</div>');
+        $('#serialPickerModal').data('total-needed', null);
+        state.serial_picker_modal = state.serial_picker_modal || new bootstrap.Modal(document.getElementById('serialPickerModal'));
+        state.serial_picker_modal.show();
+
+        ajaxRequest({
+            url: URLS.available_serials,
+            data: {
+                product_variation_id: line.product_variation_id,
+                register_session_id: state.session ? state.session.pos_register_session_id : null,
+            },
+        }).then(function (response) {
+            renderSerialPickerList(response.Data || [], line.serial_numbers || []);
+        }).catch(function () {
+            $('#serialPickerList').html('<div class="text-danger p-2">Unable to load serial numbers.</div>');
+        });
+    }
+
+    function renderSerialPickerList(serials, alreadyChosen) {
+        if (!serials.length && !alreadyChosen.length) {
+            $('#serialPickerList').html('<div class="text-muted p-2">No available serial numbers found for this product.</div>');
+            return;
+        }
+        // Already-chosen serials (from an existing cart line) may not come
+        // back from the "available" list, since this session already holds
+        // them client-side - union them in so they still show up checked.
+        var known = {};
+        var html = '';
+        serials.forEach(function (s) {
+            known[s.serial_no] = true;
+            var checked = alreadyChosen.indexOf(s.serial_no) !== -1 ? 'checked' : '';
+            html += '<div class="form-check">' +
+                '<input class="form-check-input serial-picker-checkbox" type="checkbox" value="' + escapeHtml(s.serial_no) + '" id="sp_' + s.product_variation_serial_number_id + '" ' + checked + '>' +
+                '<label class="form-check-label" for="sp_' + s.product_variation_serial_number_id + '">' + escapeHtml(s.serial_no) + '</label>' +
+                '</div>';
+        });
+        alreadyChosen.forEach(function (sn, i) {
+            if (!known[sn]) {
+                html += '<div class="form-check">' +
+                    '<input class="form-check-input serial-picker-checkbox" type="checkbox" value="' + escapeHtml(sn) + '" id="sp_existing_' + i + '" checked>' +
+                    '<label class="form-check-label" for="sp_existing_' + i + '">' + escapeHtml(sn) + '</label>' +
+                    '</div>';
+            }
+        });
+        $('#serialPickerList').html(html);
+    }
+
+    $(document).on('change', '#posSerialScanHelperInput', function () {
+        var code = $(this).val();
+        $(this).val('');
+        if (!code) return;
+
+        var $checkbox = $('.serial-picker-checkbox[value="' + code.replace(/"/g, '\\"') + '"]');
+        if (!$checkbox.length) {
+            errorMessage('Serial number "' + code + '" is not in the available list for this product.');
+            return;
+        }
+        $checkbox.prop('checked', true);
+    });
+
+    $(document).on('click', '#serialPickerSaveBtn', function () {
+        var selected = $('.serial-picker-checkbox:checked').map(function () { return $(this).val(); }).get();
+        var totalNeeded = $('#serialPickerModal').data('total-needed');
+
+        if (totalNeeded !== null && totalNeeded !== undefined && selected.length !== totalNeeded) {
+            errorMessage('Select exactly ' + totalNeeded + ' serial number(s) (currently ' + selected.length + ').');
+            return;
+        }
+        if (!selected.length) {
+            errorMessage('Select at least one serial number.');
+            return;
+        }
+
+        if (state_serial_picker.lineKey) {
+            var line = state.cart.find(function (l) { return l.line_key === state_serial_picker.lineKey; });
+            if (line) {
+                line.serial_numbers = selected;
+                line.quantity = selected.length;
+            }
+        } else {
+            var pv = state_serial_picker.pv;
+            var overrides = state_serial_picker.overrides || {};
+
+            state.line_seq += 1;
+            state.cart.push({
+                line_key: 'line_' + state.line_seq,
+                product_variation_id: pv.product_variation_id,
+                product_name: (pv.product && pv.product.name) || '',
+                variation_name: pv.name || '',
+                unit_id: state_serial_picker.unit_id,
+                unit_name: state_serial_picker.primary.name,
+                quantity: selected.length,
+                unit_price: (pv.resolved_price !== undefined ? pv.resolved_price : pv.sale_price) || 0,
+                discount: pv.resolved_discount_percentage || 0,
+                minimum_selling_price: pv.minimum_selling_price !== undefined ? pv.minimum_selling_price : null,
+                is_track_stock: !!pv.is_track_stock,
+                available_stock: pv.available_stock !== undefined ? pv.available_stock : null,
+                sale_type_id: null,
+                manual_override: false,
+                notes: '',
+                image: overrides.image || null,
+                track_serial_number: true,
+                serial_numbers: selected,
+            });
+        }
+
+        state.serial_picker_modal.hide();
+        renderCart();
+
+        // The product picker (variation-choice) modal, if it was the one
+        // that led here, should also close now that the line is committed.
+        if (state.product_picker_modal) {
+            state.product_picker_modal.hide();
+        }
+    });
 
     // Changing the order-level Sale Type (via #saleTypeSelect) force-syncs
     // every line currently in the cart to it - including lines the cashier
@@ -1624,6 +1796,18 @@
                 ? '<img class="cart-line-img" src="' + line.image + '" alt="">'
                 : '<div class="cart-line-img-placeholder"><i class="fa fa-image"></i></div>';
 
+            var qtyCell = line.track_serial_number
+                ? '<div class="cart-line-qty-stepper">' +
+                    '<button type="button" class="btn btn-sm btn-outline-secondary manage-serials" title="Manage serial numbers">' +
+                        '<i class="fa fa-barcode"></i> ' + line.quantity +
+                    '</button>' +
+                  '</div>'
+                : '<div class="cart-line-qty-stepper">' +
+                    '<button type="button" class="qty-dec">-</button>' +
+                    '<input type="number" step="0.01" min="0.01" class="line-qty" value="' + line.quantity + '">' +
+                    '<button type="button" class="qty-inc">+</button>' +
+                  '</div>';
+
             var $row = $('<div class="cart-line"></div>').attr('data-key', line.line_key);
             $row.html(
                 imgHtml +
@@ -1634,11 +1818,7 @@
                 '</div>' +
                 '<div class="cart-line-price">' + priceCell + '</div>' +
                 discountCell +
-                '<div class="cart-line-qty-stepper">' +
-                    '<button type="button" class="qty-dec">-</button>' +
-                    '<input type="number" step="0.01" min="0.01" class="line-qty" value="' + line.quantity + '">' +
-                    '<button type="button" class="qty-inc">+</button>' +
-                '</div>' +
+                qtyCell +
                 '<div class="line-total">0.00</div>' +
                 '<button type="button" class="line-remove"><i class="fa fa-xmark"></i></button>'
             );
@@ -2171,6 +2351,10 @@
                 notes: line.notes || null,
             };
 
+            if (line.track_serial_number) {
+                item.serial_numbers = line.serial_numbers || [];
+            }
+
             // unit_price is only sent when the cashier actually edited the
             // price field - otherwise the server's VariationPricingService
             // resolves it fresh from this line's Sale Type. Always sending
@@ -2363,6 +2547,8 @@
                         notes: d.notes || '',
                         is_track_stock: !!d.is_track_stock,
                         available_stock: d.available_stock !== undefined ? d.available_stock : null,
+                        track_serial_number: !!d.track_serial_number,
+                        serial_numbers: d.serial_numbers || [],
                     });
                 });
 
@@ -2629,6 +2815,8 @@
                 notes: d.notes || '',
                 is_track_stock: !!d.is_track_stock,
                 available_stock: d.available_stock !== undefined ? d.available_stock : null,
+                track_serial_number: !!d.track_serial_number,
+                serial_numbers: d.serial_numbers || [],
             });
         });
 

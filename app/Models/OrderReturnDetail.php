@@ -39,6 +39,7 @@ class OrderReturnDetail extends Model
         'cost_price',
         'reason',
         'description',
+        'serial_numbers',
         'createdby_id',
         'updatedby_id',
         'date_created',

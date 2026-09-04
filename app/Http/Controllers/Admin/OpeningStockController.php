@@ -145,6 +145,8 @@ class OpeningStockController extends Controller
             'products.*.unit_cost' => ['required', 'numeric', 'min:0'],
             'products.*.batch_no' => ['nullable', 'string'],
             'products.*.expiry_date' => ['nullable', 'date'],
+            'products.*.serial_numbers' => ['nullable', 'array'],
+            'products.*.serial_numbers.*' => ['nullable', 'string', 'max:255'],
         ]);
 
         if ($validator->fails()) {

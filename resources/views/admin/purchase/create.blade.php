@@ -158,6 +158,7 @@
                                         <th style="min-width:120px;">Received Qty</th>
                                         <th style="min-width:130px;">Batch No</th>
                                         <th style="min-width:150px;">Expiry Date</th>
+                                        <th style="min-width:160px;">Serial #</th>
                                         <th style="min-width:120px;">Unit Price</th>
                                         <th style="min-width:130px;">Subtotal</th>
                                         <th style="min-width:90px;">Disc %</th>
@@ -172,7 +173,7 @@
                                     {{-- JS will append rows --}}
                                     @if (!isset($purchase))
                                         <tr id="emptyRow">
-                                            <td colspan="16" class="text-center text-muted">
+                                            <td colspan="17" class="text-center text-muted">
                                                 No Products Added
                                             </td>
                                         </tr>
@@ -233,6 +234,31 @@
     </div>
 
     @include('admin.supplier.model.quick-create', ['business' => $business ?? []])
+
+    {{-- ================= SERIAL NUMBER ENTRY MODAL ================= --}}
+    <div class="modal fade" id="serialEntryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enter Serial Numbers</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-2" id="serialModalHint">One serial number per line.</p>
+                    <textarea class="form-control" id="serialModalTextarea" rows="8"
+                        placeholder="Scan or type serial numbers, one per line"></textarea>
+                    <div class="mt-2">
+                        <input type="text" class="form-control d-none" id="serialScanHelperInput">
+                        @include('admin.partials.barcode_scanner', ['targetInputId' => '#serialScanHelperInput'])
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="serialModalSaveBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('js')
@@ -305,7 +331,7 @@
                 if (!$('#purchase_request_id').val()) {
                     $('#productRows').html(`
                 <tr id="emptyRow">
-                    <td colspan="16"
+                    <td colspan="17"
                         class="text-center text-muted">
                         Select Purchase Request
                     </td>
@@ -394,7 +420,7 @@
             if (!$('#purchase_request_id').val()) {
                 $('#productRows').html(`
             <tr id="emptyRow">
-                <td colspan="16"
+                <td colspan="17"
                     class="text-center text-muted">
                     Select Purchase Request
                 </td>
@@ -412,6 +438,10 @@
 
         function getRowTemplate(data = {}) {
             const index = productIndex;
+            const serialNumbers = data.serial_numbers || [];
+            const serialInputsHtml = serialNumbers.map(sn =>
+                `<input type="hidden" class="serial-hidden-input" name="products[${index}][serial_numbers][]" value="${sn}">`
+            ).join('');
             return `
     <tr class="product-row">
 
@@ -486,6 +516,13 @@
             <input type="text" class="form-control datepicker expiry-date" name="products[${index}][expiry_date]"
                 value="${data.expiry_date ?? ''}" placeholder="Expiry Date" style="display:none;">
             <span class="expiry-date-na text-muted">N/A</span>
+        </td>
+        <td class="serial-cell">
+            <button type="button" class="btn btn-sm btn-outline-primary serial-entry-btn" style="display:none;">
+                <i class="fa fa-barcode"></i> <span class="serial-count-label">Enter Serials (${serialNumbers.length}/0)</span>
+            </button>
+            <span class="serial-na text-muted">N/A</span>
+            <div class="serial-hidden-inputs" style="display:none;">${serialInputsHtml}</div>
         </td>
         <td>
             <input
@@ -571,7 +608,7 @@
                 } else {
                     $('#productRows').html(`
             <tr id="emptyRow">
-                <td colspan="16"
+                <td colspan="17"
                     class="text-center text-muted">
                     Select Purchase Request
                 </td>
@@ -861,6 +898,7 @@
                         data-price="${decimal(variation.purchase_price ?? 0)}"
                         data-track-batch="${variation.track_batch ? 1 : 0}"
                         data-track-expiry="${variation.track_expiry ? 1 : 0}"
+                        data-track-serial="${variation.track_serial_number ? 1 : 0}"
                     >
                         ${variation.name}
 
@@ -903,6 +941,7 @@
             row.find('.conversion-factor').val(1);
 
             setBatchExpiryState(row, option.data('track-batch') == 1, option.data('track-expiry') == 1);
+            setSerialState(row, option.data('track-serial') == 1);
 
             row.find('.conversion-select').html(`
     <option value="">Loading...</option>
@@ -944,6 +983,90 @@
                 row.find('.expiry-date-na').show();
             }
         }
+
+        // Same show/hide-in-place treatment as batch/expiry. Turning serial
+        // tracking off clears any already-entered serials for the row.
+        function setSerialState(row, showSerial) {
+            row.data('track-serial', !!showSerial);
+            if (showSerial) {
+                row.find('.serial-entry-btn').show();
+                row.find('.serial-na').hide();
+            } else {
+                row.find('.serial-hidden-inputs').empty();
+                row.find('.serial-entry-btn').hide();
+                row.find('.serial-na').show();
+            }
+            refreshSerialButtonLabel(row);
+        }
+
+        function refreshSerialButtonLabel(row) {
+            const entered = row.find('.serial-hidden-input').length;
+            const expected = decimal(row.find('.received-qty').val()) || 0;
+            row.find('.serial-count-label').text(`Enter Serials (${entered}/${expected})`);
+            row.find('.serial-entry-btn').toggleClass('btn-outline-primary', entered == expected)
+                .toggleClass('btn-outline-danger', entered != expected);
+        }
+
+        // Refresh the "X/Y" denominator whenever Received Qty changes.
+        $(document).on('change blur', '.received-qty', function() {
+            refreshSerialButtonLabel($(this).closest('tr'));
+        });
+
+        // ======================================================
+        // SERIAL NUMBER ENTRY MODAL
+        // ======================================================
+        var serialEntryModal = null;
+        var currentSerialRow = null;
+
+        $(document).on('click', '.serial-entry-btn', function() {
+            currentSerialRow = $(this).closest('tr');
+            const existing = currentSerialRow.find('.serial-hidden-input').map(function() {
+                return $(this).val();
+            }).get();
+            $('#serialModalTextarea').val(existing.join('\n'));
+            const expected = decimal(currentSerialRow.find('.received-qty').val()) || 0;
+            $('#serialModalHint').text(`Enter exactly ${expected} serial number(s), one per line, matching the received quantity.`);
+            serialEntryModal = serialEntryModal || new bootstrap.Modal(document.getElementById('serialEntryModal'));
+            serialEntryModal.show();
+        });
+
+        // A scan inside the serial modal appends the decoded code as a new
+        // line rather than replacing the textarea (barcode-scanner.js's
+        // default single-input replace behavior, reused unmodified).
+        $(document).on('change', '#serialScanHelperInput', function() {
+            const code = $(this).val();
+            if (!code) {
+                return;
+            }
+            const ta = $('#serialModalTextarea');
+            const current = ta.val();
+            ta.val(current && !current.endsWith('\n') ? current + '\n' + code : current + code);
+            $(this).val('');
+        });
+
+        $('#serialModalSaveBtn').on('click', function() {
+            if (!currentSerialRow) {
+                return;
+            }
+            const lines = $('#serialModalTextarea').val()
+                .split('\n')
+                .map(s => s.trim())
+                .filter(s => s !== '');
+
+            const duplicates = lines.filter((v, i) => lines.indexOf(v) !== i);
+            if (duplicates.length) {
+                errorMessage('Duplicate serial number(s) entered: ' + [...new Set(duplicates)].join(', '));
+                return;
+            }
+
+            const index = currentSerialRow.find('.product-select').attr('name').match(/products\[(\d+)\]/)[1];
+            currentSerialRow.find('.serial-hidden-inputs').html(
+                lines.map(sn => `<input type="hidden" class="serial-hidden-input" name="products[${index}][serial_numbers][]" value="${sn.replace(/"/g, '&quot;')}">`).join('')
+            );
+
+            refreshSerialButtonLabel(currentSerialRow);
+            bootstrap.Modal.getInstance(document.getElementById('serialEntryModal')).hide();
+        });
 
         // ======================================================
         // LOAD CONVERSIONS
@@ -1097,7 +1220,7 @@
         function showSelectPurchaseRequestRow() {
             $('#productRows').html(`
         <tr id="emptyRow">
-            <td colspan="16" class="text-center text-muted">
+            <td colspan="17" class="text-center text-muted">
                 Select Purchase Request
             </td>
         </tr>
@@ -1107,7 +1230,7 @@
         function showSelectQuotationRow() {
             $('#productRows').html(`
         <tr id="emptyRow">
-            <td colspan="16" class="text-center text-muted">
+            <td colspan="17" class="text-center text-muted">
                 Select Quotation
             </td>
         </tr>
@@ -1143,7 +1266,7 @@
                     } else {
                         $('#productRows').html(`
             <tr>
-                <td colspan="16" class="text-center">
+                <td colspan="17" class="text-center">
                     No approved quotation found for this purchase request.
                 </td>
             </tr>
@@ -1193,7 +1316,7 @@
                 beforeSend: function() {
                     $('#productRows').html(`
             <tr>
-                <td colspan="16" class="text-center">
+                <td colspan="17" class="text-center">
                     <div class="spinner-border spinner-border-sm"></div>
                     Loading...
                 </td>
@@ -1250,7 +1373,7 @@
             if (!details.length) {
                 $('#productRows').html(`
         <tr>
-            <td colspan="16"
+            <td colspan="17"
                 class="text-center text-muted">
                 No Products Found
 
@@ -1402,7 +1525,8 @@
                 total: decimal(item.total),
                 unit_id: item.unit_id,
                 unit_name: item.unit_name,
-                conversion_factor: item.conversion_factor
+                conversion_factor: item.conversion_factor,
+                serial_numbers: item.serial_numbers || []
             });
 
             let row = $('#productRows tr:last');
@@ -1417,6 +1541,7 @@
 
                 let selectedOption = row.find('.variation-select option[value="' + item.product_variation_id + '"]');
                 setBatchExpiryState(row, selectedOption.data('track-batch') == 1, selectedOption.data('track-expiry') == 1);
+                setSerialState(row, (selectedOption.data('track-serial') == 1) || item.track_serial_number);
 
                 // Conversions are already supplied by getDetails(); no extra AJAX call needed.
                 let conversionOptions = `<option value="">--Select Conversion--</option>`;
@@ -1773,6 +1898,24 @@
                     valid = false;
 
                     return false;
+
+                }
+
+                if (row.data('track-serial') && receivedQty > 0) {
+
+                    let enteredCount = row.find('.serial-hidden-input').length;
+
+                    if (enteredCount !== parseFloat(receivedQty)) {
+
+                        errorMessage(
+                            `Enter exactly ${receivedQty} serial number(s) for this line (currently ${enteredCount}).`
+                        );
+
+                        valid = false;
+
+                        return false;
+
+                    }
 
                 }
 

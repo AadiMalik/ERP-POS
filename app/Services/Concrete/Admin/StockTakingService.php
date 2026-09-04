@@ -181,6 +181,7 @@ class StockTakingService
                 'unit_name'            => $stock->productVariation->unit->name ?? 'N/A',
                 'system_quantity'      => $stock->quantity,
                 'unit_cost'            => $stock->avg_price,
+                'track_serial_number'  => (bool) ($stock->productVariation->track_serial_number ?? false),
             ];
         })->values();
     }
@@ -282,6 +283,18 @@ class StockTakingService
                 $system_quantity = (float) ($stock->quantity ?? 0);
                 $unit_cost = (float) ($stock->avg_price ?? 0);
                 $physical_quantity = (float) ($product['physical_quantity'] ?? 0);
+
+                // Serial-tracked variations are reconciled unit-by-unit via
+                // the Serial Number screens (mark lost/damaged, add a found
+                // unit), not by a blind quantity override here - force the
+                // physical count to match system stock so this line can
+                // never silently drift out of sync with the serial ledger,
+                // even if a tampered request submits a different value.
+                $variation = \App\Models\ProductVariation::find($product['product_variation_id']);
+                if ($variation && $variation->track_serial_number) {
+                    $physical_quantity = $system_quantity;
+                }
+
                 $difference_quantity = $physical_quantity - $system_quantity;
                 $difference_value = $difference_quantity * $unit_cost;
 
@@ -383,6 +396,7 @@ class StockTakingService
                     'unit_cost'              => $detail->unit_cost,
                     'difference_value'       => $detail->difference_value,
                     'reason'                 => $detail->reason,
+                    'track_serial_number'    => (bool) ($detail->productVariation->track_serial_number ?? false),
                 ];
             }
 

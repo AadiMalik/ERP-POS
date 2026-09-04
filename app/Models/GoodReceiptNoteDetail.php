@@ -21,6 +21,7 @@ class GoodReceiptNoteDetail extends Model
         'batch_no',
         'manufacturing_date',
         'expiry_date',
+        'serial_numbers',
         'product_id',
         'product_variation_id',
         'product_variation_unit_conversion_id',

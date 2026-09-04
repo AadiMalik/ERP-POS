@@ -268,6 +268,7 @@ class OpeningStockService
                     'batch_no'                                  => $product['batch_no'] ?? null,
                     'expiry_date'                               => !empty($product['expiry_date']) ? $product['expiry_date'] : null,
                     'description'                               => $product['description'] ?? null,
+                    'serial_numbers'                            => !empty($product['serial_numbers']) ? json_encode(array_values($product['serial_numbers'])) : null,
                     'createdby_id'                              => Auth::id(),
                     'date_created'                              => now(),
                 ]);
@@ -337,6 +338,8 @@ class OpeningStockService
                     'expiry_date'                             => !empty($detail->expiry_date) ? localDate($detail->expiry_date) : '',
                     'track_batch'                             => $detail->productVariation->track_batch ?? 0,
                     'track_expiry'                            => $detail->productVariation->track_expiry ?? 0,
+                    'track_serial_number'                     => $detail->productVariation->track_serial_number ?? 0,
+                    'serial_numbers'                          => $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [],
                 ];
             }
 
@@ -570,6 +573,22 @@ class OpeningStockService
                 $detail->update(['product_variation_batch_id' => $product_variation_batch_id]);
             }
 
+            if ($variation && $variation->track_serial_number) {
+                app(ProductVariationSerialService::class)->receiveSerials(
+                    $opening_stock->business_id,
+                    $opening_stock->branch_id,
+                    $detail->product_id,
+                    $detail->product_variation_id,
+                    $opening_stock->warehouse_id,
+                    $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [],
+                    $base_quantity,
+                    $detail->unit_cost,
+                    'opening_stock',
+                    $opening_stock->opening_stock_id,
+                    $detail->opening_stock_detail_id
+                );
+            }
+
             ProductVariationStockTransaction::create([
                 'product_variation_stock_transaction_id' => generateUuid(),
                 'transaction_date'                       => now(),
@@ -627,6 +646,8 @@ class OpeningStockService
         if ($stock_transactions->isEmpty()) {
             return;
         }
+
+        app(ProductVariationSerialService::class)->reverseReceivedSerials('opening_stock', $opening_stock->opening_stock_id);
 
         $stock_transactions->each(function ($transaction) {
             $transaction->update([

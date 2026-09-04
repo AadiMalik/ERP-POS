@@ -6,6 +6,7 @@ use App\Enums\Filter;
 use App\Enums\JournalSourceTypes;
 use App\Enums\ReferenceType;
 use App\Enums\RoleNames;
+use App\Enums\SerialStatus;
 use App\Enums\Status;
 use App\Enums\TransactionType;
 use App\Models\AccountingSetting;
@@ -30,6 +31,7 @@ use App\Models\PosRegisterSession;
 use App\Models\PosSetting;
 use App\Models\Product;
 use App\Models\ProductVariation;
+use App\Models\ProductVariationSerialNumber;
 use App\Models\ProductVariationStock;
 use App\Models\ProductVariationStockTransaction;
 use App\Models\ProductVariationUnitConversion;
@@ -759,6 +761,8 @@ class OrderService
                 'notes' => $detail->notes,
                 'is_track_stock' => $is_tracked,
                 'available_stock' => $available_stock,
+                'track_serial_number' => (bool) ($detail->productVariation->track_serial_number ?? false),
+                'serial_numbers' => $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [],
             ];
         }
 
@@ -1291,6 +1295,11 @@ class OrderService
             $has_line = true;
 
             $variation = ProductVariation::with('product')->findOrFail($line['product_variation_id']);
+
+            if ($persist && $variation->track_serial_number && count($line['serial_numbers'] ?? []) != $quantity) {
+                throw new Exception('Select exactly ' . (int) $quantity . ' serial number(s) for "' . ($variation->product->name ?? 'a product') . '".');
+            }
+
             $line_sale_type_id = $allow_mixed_sale_types ? ($line['sale_type_id'] ?? $order->sale_type_id) : $order->sale_type_id;
             $resolved = $resolved_prices[$variation->product_variation_id . '|' . $line_sale_type_id] ?? null;
 
@@ -1395,6 +1404,7 @@ class OrderService
                 'total' => $line_total,
                 'cost_price' => 0,
                 'notes' => $line['notes'] ?? null,
+                'serial_numbers' => !empty($line['serial_numbers']) ? json_encode(array_values($line['serial_numbers'])) : null,
                 'createdby_id' => Auth::id(),
                 'date_created' => now(),
                 // Transient fields for voucher matching/allocation only - stripped before create().
@@ -2500,6 +2510,29 @@ class OrderService
 
             $detail->update(['cost_price' => $existing_avg]);
 
+            if ($variation && $variation->track_serial_number) {
+                $serial_numbers = $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [];
+                $serial_ids = ProductVariationSerialNumber::where('product_variation_id', $detail->product_variation_id)
+                    ->where('warehouse_id', $order->warehouse_id)
+                    ->where('status', SerialStatus::AVAILABLE)
+                    ->whereIn('serial_no', $serial_numbers)
+                    ->pluck('product_variation_serial_number_id')
+                    ->toArray();
+
+                if (count($serial_ids) != count($serial_numbers)) {
+                    throw new Exception('One or more selected serial numbers for "' . ($detail->product->name ?? 'product') . '" are no longer available.');
+                }
+
+                app(ProductVariationSerialService::class)->allocateForSale(
+                    $serial_ids,
+                    $detail->product_variation_id,
+                    $order->warehouse_id,
+                    $order->order_id,
+                    $detail->order_detail_id,
+                    $order->user_id
+                );
+            }
+
             if ($stock) {
                 $stock->update(['quantity' => $new_qty]);
             } else {
@@ -2852,6 +2885,15 @@ class OrderService
             ->where('reference_id', $order->order_id)
             ->where('is_deleted', 0)
             ->get();
+
+        $sold_serial_ids = ProductVariationSerialNumber::where('current_order_id', $order->order_id)
+            ->where('status', SerialStatus::SOLD)
+            ->pluck('product_variation_serial_number_id')
+            ->toArray();
+
+        if (!empty($sold_serial_ids)) {
+            app(ProductVariationSerialService::class)->releaseFromSale($sold_serial_ids);
+        }
 
         // Soft-deletes the transactions, restores any batch quantity they
         // drew down (each transaction carries its own batch id when the
@@ -3285,6 +3327,20 @@ class OrderService
         $this->attachAvailableStock($variations, $business_id, $warehouse_id);
 
         return $variations;
+    }
+
+    /**
+     * Available serials for a serial-tracked variation at the register's
+     * resolved warehouse - feeds the POS serial picker.
+     */
+    public function getAvailableSerials($obj)
+    {
+        [$business_id, $warehouse_id] = $this->resolveWarehouseContext($obj);
+
+        return app(ProductVariationSerialService::class)
+            ->availableSerialsFor($obj['product_variation_id'] ?? null, $warehouse_id, $obj['term'] ?? null, $business_id)
+            ->map(fn($s) => ['product_variation_serial_number_id' => $s->product_variation_serial_number_id, 'serial_no' => $s->serial_no])
+            ->values();
     }
 
     /**

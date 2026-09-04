@@ -125,6 +125,7 @@
                                         <th style="min-width:220px;">Product</th>
                                         <th style="min-width:150px;">Variation</th>
                                         <th style="min-width:150px;">Batch / Expiry</th>
+                                        <th style="min-width:160px;">Serial #</th>
                                         <th style="min-width:90px;">Unit</th>
                                         <th style="min-width:110px;">Received Qty</th>
                                         <th style="min-width:120px;">Already Returned</th>
@@ -138,7 +139,7 @@
                                 </thead>
                                 <tbody id="productRows">
                                     <tr id="emptyRow">
-                                        <td colspan="12" class="text-center text-muted">
+                                        <td colspan="13" class="text-center text-muted">
                                             Select a Purchase or GRN
                                         </td>
                                     </tr>
@@ -276,7 +277,7 @@
             $('#warehouse_name').val('');
             $('#productRows').html(`
                 <tr id="emptyRow">
-                    <td colspan="12" class="text-center text-muted">
+                    <td colspan="13" class="text-center text-muted">
                         Select a Purchase or GRN
                     </td>
                 </tr>
@@ -296,7 +297,7 @@
                 beforeSend: function() {
                     $('#productRows').html(`
                         <tr>
-                            <td colspan="12" class="text-center">
+                            <td colspan="13" class="text-center">
                                 <div class="spinner-border spinner-border-sm"></div>
                                 Loading...
                             </td>
@@ -329,7 +330,7 @@
             if (!lines || !lines.length) {
                 $('#productRows').html(`
                     <tr id="emptyRow">
-                        <td colspan="12" class="text-center text-muted">
+                        <td colspan="13" class="text-center text-muted">
                             Nothing remaining to return for this source.
                         </td>
                     </tr>
@@ -362,6 +363,13 @@
                     </td>
                     <td>${line.product_variation_name}</td>
                     <td>${line.batch_no ? line.batch_no + (line.expiry_date ? ' (exp. ' + line.expiry_date + ')' : '') : '-'}</td>
+                    <td class="serial-cell" data-track-serial="${line.track_serial_number ? 1 : 0}" data-purchase-detail-id="${line.purchase_detail_id}">
+                        <button type="button" class="btn btn-sm btn-outline-primary serial-entry-btn" style="${line.track_serial_number ? '' : 'display:none;'}">
+                            <i class="fa fa-list-check"></i> <span class="serial-count-label">Select Serials (0/0)</span>
+                        </button>
+                        <span class="serial-na text-muted" style="${line.track_serial_number ? 'display:none;' : ''}">N/A</span>
+                        <div class="serial-hidden-inputs" style="display:none;"></div>
+                    </td>
                     <td>${line.unit_name}</td>
                     <td class="received-qty">${decimal(line.received_quantity)}</td>
                     <td class="already-returned-qty">${decimal(line.already_returned_quantity)}</td>
@@ -391,6 +399,15 @@
             $('#productRows').append(row);
             reindexRows();
             calculateRow(row.is(':last-child') ? $('#productRows tr.product-row').last() : row);
+
+            if (line.track_serial_number && line.serial_numbers && line.serial_numbers.length) {
+                let addedRow = $('#productRows tr.product-row').last();
+                addedRow.find('.serial-hidden-inputs').html(
+                    line.serial_numbers.map(sn => `<input type="hidden" class="serial-hidden-input" value="${sn}">`).join('')
+                );
+                reindexRows();
+                refreshSerialButtonLabel(addedRow);
+            }
         }
 
         function reindexRows() {
@@ -401,7 +418,16 @@
                     `products[${index}][good_receipt_note_detail_id]`);
                 $(this).find('input.return-qty').attr('name', `products[${index}][return_quantity]`);
                 $(this).find('input[name*="[reason]"]').attr('name', `products[${index}][reason]`);
+                $(this).find('input.serial-hidden-input').attr('name', `products[${index}][serial_numbers][]`);
             });
+        }
+
+        function refreshSerialButtonLabel(row) {
+            const entered = row.find('.serial-hidden-input').length;
+            const expected = decimal(row.find('.return-qty').val()) || 0;
+            row.find('.serial-count-label').text(`Select Serials (${entered}/${expected})`);
+            row.find('.serial-entry-btn').toggleClass('btn-outline-primary', entered == expected)
+                .toggleClass('btn-outline-danger', entered != expected);
         }
 
         // ======================================================
@@ -449,6 +475,75 @@
             let row = $(this).closest('tr');
             calculateRow(row);
             calculateGrandTotal();
+            refreshSerialButtonLabel(row);
+        });
+
+        // ======================================================
+        // SERIAL NUMBER PICKER MODAL (select from what's actually available
+        // for this purchase/GRN line, rather than freely typed like receiving)
+        // ======================================================
+        var prSerialModal = null;
+        var currentPrSerialRow = null;
+
+        $(document).on('click', '.serial-entry-btn', function() {
+            currentPrSerialRow = $(this).closest('tr');
+            let cell = currentPrSerialRow.find('.serial-cell');
+            let purchaseDetailId = cell.data('purchase-detail-id');
+            let expected = decimal(currentPrSerialRow.find('.return-qty').val()) || 0;
+            let alreadyChecked = currentPrSerialRow.find('.serial-hidden-input').map(function() {
+                return $(this).val();
+            }).get();
+
+            $('#prSerialModalHint').text(`Select exactly ${expected} serial number(s) to return.`);
+            $('#prSerialModalList').html('<div class="text-muted">Loading...</div>');
+            prSerialModal = prSerialModal || new bootstrap.Modal(document.getElementById('prSerialModal'));
+            prSerialModal.show();
+
+            $.ajax({
+                url: url_local + '/admin/purchase-return/available-serials/' + purchaseDetailId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (!response.Success || !response.Data.length) {
+                        $('#prSerialModalList').html('<div class="text-muted">No available serial numbers found for this line.</div>');
+                        return;
+                    }
+                    let html = '';
+                    $.each(response.Data, function(_, s) {
+                        let checked = alreadyChecked.includes(s.serial_no) ? 'checked' : '';
+                        html += `
+                            <div class="form-check">
+                                <input class="form-check-input pr-serial-checkbox" type="checkbox" value="${s.serial_no}" id="prSerial_${s.product_variation_serial_number_id}" ${checked}>
+                                <label class="form-check-label" for="prSerial_${s.product_variation_serial_number_id}">${s.serial_no}</label>
+                            </div>
+                        `;
+                    });
+                    $('#prSerialModalList').html(html);
+                },
+                error: function() {
+                    $('#prSerialModalList').html('<div class="text-danger">Unable to load serial numbers.</div>');
+                }
+            });
+        });
+
+        $('#prSerialModalSaveBtn').on('click', function() {
+            if (!currentPrSerialRow) return;
+            let selected = $('.pr-serial-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            let expected = parseFloat(currentPrSerialRow.find('.return-qty').val()) || 0;
+            if (selected.length !== expected) {
+                errorMessage(`Select exactly ${expected} serial number(s) (currently ${selected.length}).`);
+                return;
+            }
+
+            currentPrSerialRow.find('.serial-hidden-inputs').html(
+                selected.map(sn => `<input type="hidden" class="serial-hidden-input" value="${sn}">`).join('')
+            );
+            reindexRows();
+            refreshSerialButtonLabel(currentPrSerialRow);
+            bootstrap.Modal.getInstance(document.getElementById('prSerialModal')).hide();
         });
 
         $(document).on('blur', '.return-qty', function() {
@@ -511,7 +606,9 @@
                     discount: item.discount,
                     tax: item.tax,
                     batch_no: item.batch_no,
-                    expiry_date: item.expiry_date
+                    expiry_date: item.expiry_date,
+                    track_serial_number: item.track_serial_number,
+                    serial_numbers: item.serial_numbers || []
                 }, item.return_quantity);
             });
 
@@ -541,6 +638,46 @@
                 errorMessage('Please enter a return quantity for at least one product.');
                 return false;
             }
+
+            let serialMismatch = false;
+            $('#productRows tr.product-row').each(function() {
+                let row = $(this);
+                if (row.find('.serial-cell').data('track-serial') != 1) {
+                    return;
+                }
+                let qty = parseFloat(row.find('.return-qty').val()) || 0;
+                let enteredCount = row.find('.serial-hidden-input').length;
+                if (qty > 0 && enteredCount !== qty) {
+                    errorMessage(`Select exactly ${qty} serial number(s) for "${row.find('td').eq(0).text().trim()}" (currently ${enteredCount}).`);
+                    serialMismatch = true;
+                    return false;
+                }
+            });
+
+            if (serialMismatch) {
+                e.preventDefault();
+                return false;
+            }
         });
     </script>
+
+    {{-- ================= SERIAL NUMBER PICKER MODAL ================= --}}
+    <div class="modal fade" id="prSerialModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select Serial Numbers to Return</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-2" id="prSerialModalHint">Select the serial numbers to return.</p>
+                    <div id="prSerialModalList" style="max-height:300px; overflow-y:auto;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="prSerialModalSaveBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

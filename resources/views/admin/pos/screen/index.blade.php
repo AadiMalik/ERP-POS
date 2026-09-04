@@ -357,6 +357,29 @@
         </div>
     </div>
 
+    <div class="modal fade" id="serialPickerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select Serial Numbers</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-2" id="serialPickerHint"></p>
+                    <div id="serialPickerList" style="max-height:320px; overflow-y:auto;"></div>
+                    <div class="mt-2">
+                        <input type="text" class="form-control d-none" id="posSerialScanHelperInput">
+                        @include('admin.partials.barcode_scanner', ['targetInputId' => '#posSerialScanHelperInput'])
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="serialPickerSaveBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ================= Change Branch Modal (switches business/branch/warehouse
          context without leaving the POS screen - submits to the same
          pos-screen.context route the original full-page picker used) ================= --}}
@@ -726,6 +749,7 @@
                 'session_my_history' => url('admin/pos-register-session/my-history'),
                 'search_products' => url('admin/order/search-products'),
                 'search_vouchers' => url('admin/order/search-vouchers'),
+                'available_serials' => url('admin/order/available-serials'),
                 'eligible_vouchers' => url('admin/order/eligible-vouchers'),
                 'preview_voucher' => url('admin/order/preview-voucher'),
                 'products_by_category' => url('admin/order/products-by-category'),
