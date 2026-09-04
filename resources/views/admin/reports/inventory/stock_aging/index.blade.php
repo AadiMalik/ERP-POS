@@ -192,8 +192,6 @@
     <script>
         function currentReportParams() {
             let p = {};
-            business_id:$('#business_id').val(),branch_id:$('#branch_id').val(),warehouse_id:$('#warehouse_id').val(),product_id:$('#product_id').val(),product_variation_id:$('#product_variation_id').val(),category_id:$('#category_id').val(),report_mode:$('#report_mode').val(),age_bucket:$('#age_bucket').val(),movement_class:$('#movement_class').val();
-            // rebuild from params expression is awkward; collect known ids
             ['business_id','branch_id','warehouse_id','product_id','product_variation_id','category_id','brand_id','report_mode','age_bucket','movement_class','source_warehouse_id','destination_warehouse_id','batch_no','expiry_within_days','expired_only','transaction_type','quantity'].forEach(function(id) {
                 if ($('#' + id).length) p[id] = $('#' + id).val() || '';
             });
@@ -211,6 +209,7 @@
             @endif
             let q = new URLSearchParams(window.location.search);
             q.forEach(function(v, k) { if ($('#' + k).length) $('#' + k).val(v).trigger('change'); });
+            stock_aging_table.on('xhr.dt', function() { refreshTotals(); });
         });
         $('#product_id').change(function() {
             let product_id = $(this).val();
@@ -247,6 +246,5 @@
                 if (json.total_value !== undefined) $('#total_value_display').text(json.total_value);
             }, 400);
         }
-        stock_aging_table.on('xhr.dt', function() { refreshTotals(); });
     </script>
 @endsection

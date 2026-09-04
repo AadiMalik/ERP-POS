@@ -126,11 +126,14 @@ consumed and how much of each. This gives you both directions of traceability:
 - **Backward**: open a raw material (or one of its batches) → see every Production
   that ever consumed it, and which finished-goods batches came out of those runs.
 
-## Where to Find It in Reports
+## Where to Find It in the Menu
 
-Manufacturing reports are listed under **Inventory → Reports** (Consumption,
-Manufacturing, and Recipe/BOM sub-sections) so production stays tied to stock
-flow. The Manufacturing menu still holds Recipes, Plans, and Productions.
+Manufacturing is not a separate top-level menu — it lives entirely under
+**Inventory**, because production directly manages raw material stock, finished
+goods stock, and costing. Recipes/BOM, Manufacturing Plans, and Productions are
+a **Manufacturing** submenu inside Inventory, and their reports are listed under
+**Inventory → Reports** (Consumption, Manufacturing, and Recipe/BOM sub-sections)
+so production stays tied to stock flow.
 
 - **Manufacturing Plan Report** — every plan, its plan date, planned/produced/
   remaining quantity, and progress.

@@ -185,8 +185,6 @@
     <script>
         function currentReportParams() {
             let p = {};
-            business_id:$('#business_id').val(),warehouse_id:$('#warehouse_id').val(),product_id:$('#product_id').val(),product_variation_id:$('#product_variation_id').val(),report_mode:$('#report_mode').val(),quantity:$('#quantity').val();
-            // rebuild from params expression is awkward; collect known ids
             ['business_id','branch_id','warehouse_id','product_id','product_variation_id','category_id','brand_id','report_mode','age_bucket','movement_class','source_warehouse_id','destination_warehouse_id','batch_no','expiry_within_days','expired_only','transaction_type','quantity'].forEach(function(id) {
                 if ($('#' + id).length) p[id] = $('#' + id).val() || '';
             });
@@ -204,6 +202,7 @@
             @endif
             let q = new URLSearchParams(window.location.search);
             q.forEach(function(v, k) { if ($('#' + k).length) $('#' + k).val(v).trigger('change'); });
+            recipe_bom_table.on('xhr.dt', function() { refreshTotals(); });
         });
         $('#product_id').change(function() {
             let product_id = $(this).val();
@@ -240,6 +239,5 @@
                 if (json.total_shortfall !== undefined) $('#total_shortfall_display').text(json.total_shortfall);
             }, 400);
         }
-        recipe_bom_table.on('xhr.dt', function() { refreshTotals(); });
     </script>
 @endsection

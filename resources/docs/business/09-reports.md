@@ -64,8 +64,9 @@ Under **Inventory → Reports** (four sub-sections):
 - **Recipe/BOM Reports** — Recipe lines, cost analysis, material requirement,
   coverage.
 
-Manufacturing operational screens stay under the Manufacturing menu; their
-reports are nested under Inventory so production stays tied to stock flow.
+Manufacturing operational screens (Recipes/BOM, Manufacturing Plans,
+Productions) are a submenu inside Inventory, not a separate top-level menu,
+so production stays tied to stock flow the same way its reports are.
 
 ## Service Management Reports
 Service Sale Report, Service Purchase Report, Service Payment Report, Service
