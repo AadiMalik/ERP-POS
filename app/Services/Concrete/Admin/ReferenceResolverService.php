@@ -10,6 +10,7 @@ use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\StockTaking;
 use App\Models\TransferNote;
+use App\Models\WasteDamageExpiry;
 
 /**
  * Best-effort resolution of a human-readable document number for a stock
@@ -44,6 +45,13 @@ class ReferenceResolverService
 
             case ReferenceType::STOCK_TRANSFER:
                 return TransferNote::where('transfer_note_id', $reference_id)->value('transfer_note_no') ?? $reference_id;
+
+            // All 3 loss note types reference the same WasteDamageExpiry
+            // header - see LossType::toReferenceType().
+            case ReferenceType::DAMAGE_NOTE:
+            case ReferenceType::EXPIRY_NOTE:
+            case ReferenceType::WASTAGE_NOTE:
+                return WasteDamageExpiry::where('waste_damage_expiry_id', $reference_id)->value('reference_no') ?? $reference_id;
 
             // Both 'production' (finished-goods receipt) and 'consumption'
             // (raw-material draw-down) reference the same Production row -
@@ -80,6 +88,10 @@ class ReferenceResolverService
                 return url('/admin/stock-taking/' . $reference_id . '/edit');
             case ReferenceType::STOCK_TRANSFER:
                 return url('/admin/transfer-note/' . $reference_id . '/edit');
+            case ReferenceType::DAMAGE_NOTE:
+            case ReferenceType::EXPIRY_NOTE:
+            case ReferenceType::WASTAGE_NOTE:
+                return url('/admin/waste-damage-expiry/' . $reference_id . '/edit');
             case ReferenceType::PRODUCTION:
             case ReferenceType::CONSUMPTION:
                 return url('/admin/production/edit/' . $reference_id);

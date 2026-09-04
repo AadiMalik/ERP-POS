@@ -188,6 +188,14 @@ populates.
 Stock Taking remain aggregate-only — see the Business docs
 (`resources/docs/business/05-inventory.md`).
 
+### Waste / Damage / Expiry
+
+`WasteDamageExpiryController` / `WasteDamageExpiryService` (create → pending
+→ approve/cancel workflow, batch-aware) and `LossReasonController` /
+`LossReasonService` (configurable per-business loss reasons, a plain CRUD
+lookup). Full architecture, schema, and posting/reversal flow:
+[Waste / Damage / Expiry](17-waste-damage-expiry.md).
+
 ## Purchasing / Procurement (`module:inventory`)
 `SupplierController`, `PurchaseRequestController`,
 `PurchaseRequestQuotationController`, `PurchaseController` (service:

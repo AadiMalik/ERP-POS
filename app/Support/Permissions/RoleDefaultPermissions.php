@@ -60,7 +60,7 @@ class RoleDefaultPermissions
                     PermissionRegistry::namesForModules([
                         'warehouse', 'brand', 'category', 'sub-category', 'unit', 'product', 'barcode',
                         'unit-conversion', 'batch', 'stock', 'stock-transaction', 'opening-stock',
-                        'stock-taking', 'transfer-note', 'purchase-return',
+                        'stock-taking', 'loss-reason', 'waste-damage-expiry', 'transfer-note', 'purchase-return',
                         'recipe', 'manufacturing-plan', 'production', 'manufacturing-reports',
                     ]),
                     [
@@ -81,6 +81,8 @@ class RoleDefaultPermissions
                         'reports.batch-expiry.export', 'reports.batch-expiry.export-csv',
                         'reports.stock-loss.view', 'reports.stock-loss.print', 'reports.stock-loss.pdf',
                         'reports.stock-loss.export', 'reports.stock-loss.export-csv',
+                        'reports.waste-damage-expiry.view', 'reports.waste-damage-expiry.print', 'reports.waste-damage-expiry.pdf',
+                        'reports.waste-damage-expiry.export', 'reports.waste-damage-expiry.export-csv',
                         'reports.recipe-bom-report.view', 'reports.recipe-bom-report.print', 'reports.recipe-bom-report.pdf',
                         'reports.recipe-bom-report.export', 'reports.recipe-bom-report.export-csv',
                     ]

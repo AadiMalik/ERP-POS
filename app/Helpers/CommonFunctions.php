@@ -21,6 +21,7 @@ use App\Models\ServiceSaleReturn;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestQuotation;
 use App\Models\StockTaking;
+use App\Models\WasteDamageExpiry;
 use App\Models\Supplier;
 use App\Models\Expense;
 use App\Models\SupplierPayment;
@@ -460,6 +461,27 @@ function generateStockTakingNo($business_id = null)
 
     return sprintf(
         'STK-%04d',
+        $next_number
+    );
+}
+
+function generateWasteDamageExpiryNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $waste_damage_expiry = WasteDamageExpiry::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($waste_damage_expiry) {
+        $next_number = (int) substr($waste_damage_expiry->reference_no, strrpos($waste_damage_expiry->reference_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'WDE-%04d',
         $next_number
     );
 }

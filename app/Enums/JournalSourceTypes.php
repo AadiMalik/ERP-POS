@@ -33,6 +33,7 @@ class JournalSourceTypes
       const STOCK_TRANSFER = 'Stock Transfer';
       const OPENING_STOCK = 'Opening Stock';
       const INVENTORY_COUNT = 'Inventory Count';
+      const STOCK_LOSS = 'Stock Loss';
       const PRODUCTION = 'Production';
       const PRODUCTION_CONSUMPTION = 'Production Consumption';
       const PRODUCTION_FINISHED_GOODS = 'Production Finished Goods';

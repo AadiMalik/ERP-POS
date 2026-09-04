@@ -1201,6 +1201,24 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('{stock_taking_id}/print', [App\Http\Controllers\Admin\StockTakingController::class, 'print'])->name('stock-taking.print');
     });
 
+    //loss reason (configurable Waste/Damage/Expiry reasons)
+    Route::resource('loss-reason', App\Http\Controllers\Admin\LossReasonController::class)->except(['show', 'create']);
+    Route::group(['prefix' => 'loss-reason'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\LossReasonController::class, 'getData']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\LossReasonController::class, 'byBusiness']);
+    });
+
+    //waste / damage / expiry
+    Route::resource('waste-damage-expiry', App\Http\Controllers\Admin\WasteDamageExpiryController::class);
+    Route::group(['prefix' => 'waste-damage-expiry'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\WasteDamageExpiryController::class, 'getData']);
+        Route::post('change-status', [App\Http\Controllers\Admin\WasteDamageExpiryController::class, 'status']);
+        Route::get('details/{waste_damage_expiry_id}', [App\Http\Controllers\Admin\WasteDamageExpiryController::class, 'details']);
+        Route::get('batches/{warehouse_id}/{product_variation_id}', [App\Http\Controllers\Admin\WasteDamageExpiryController::class, 'batches']);
+        Route::get('stock/{warehouse_id}/{product_variation_id}', [App\Http\Controllers\Admin\WasteDamageExpiryController::class, 'stock']);
+        Route::get('{waste_damage_expiry_id}/print', [App\Http\Controllers\Admin\WasteDamageExpiryController::class, 'print'])->name('waste-damage-expiry.print');
+    });
+
     //transfer note
     Route::resource('transfer-note', App\Http\Controllers\Admin\TransferNoteController::class)->except(['show']);
     Route::group(['prefix' => 'transfer-note'], function () {
@@ -1507,6 +1525,15 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\StockLossReportController::class, 'pdf'])->name('reports.stock-loss.pdf');
             Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\StockLossReportController::class, 'export'])->name('reports.stock-loss.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\StockLossReportController::class, 'exportCsv'])->name('reports.stock-loss.export-csv');
+        });
+
+        Route::group(['prefix' => 'waste-damage-expiry'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\WasteDamageExpiryReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\WasteDamageExpiryReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\WasteDamageExpiryReportController::class, 'print'])->name('reports.waste-damage-expiry.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\WasteDamageExpiryReportController::class, 'pdf'])->name('reports.waste-damage-expiry.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\WasteDamageExpiryReportController::class, 'export'])->name('reports.waste-damage-expiry.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\WasteDamageExpiryReportController::class, 'exportCsv'])->name('reports.waste-damage-expiry.export-csv');
         });
         }); // end module:inventory (procurement reports)
 

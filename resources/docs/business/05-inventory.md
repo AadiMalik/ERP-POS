@@ -88,6 +88,44 @@ be filtered by an **Expiry Status** of Active, **Near Expiry**, or
 **Expired** — the Near Expiry window (default 30 days) is configurable under
 **Settings → Inventory → Near Expiry Threshold**.
 
+## Waste / Damage / Expiry
+
+Stock does not just disappear because it goes bad, gets damaged, or expires —
+it has to be **written off** through a controlled, approved transaction, so
+there is always a record of what was lost, from where, and why. This is
+completely separate from Manufacturing/Production; a write-off can be
+recorded for any product at any stage (storage, display, handling,
+transport, a branch) without any link to a production run.
+
+- **Record a loss** under **Inventory → Waste / Damage / Expiry**: pick the
+  warehouse/branch, then add one or more products, each with a quantity, a
+  **Loss Type** (Waste, Damaged, Expired, Spoiled, Broken, Lost/Missing, or
+  Other), and a **Reason** (your business's own configurable list, managed
+  under **Inventory → Loss Reasons**). For a batch/expiry-tracked product you
+  pick the exact batch affected, and the system won't let you write off more
+  than that batch actually has on hand.
+- **Nothing is removed from stock yet** — a new record stays **Pending**
+  until an authorized user (a Business Admin, Branch Admin, or Inventory
+  Manager, per your role/permission setup) **Approves** it. Only on approval
+  is the quantity actually deducted from the warehouse and the batch.
+- **Cancelling** an approved record reverses it completely — the stock (and
+  batch quantity, and any accounting entry) is restored, exactly as if it had
+  never been approved. A cancelled record can never be re-approved; a
+  mistake is corrected by creating a fresh record instead.
+- If your business tracks inventory value in Accounting, approving a
+  write-off with a value posts a **Stock Loss Voucher** (Dr Stock Adjustment
+  / Cr Inventory) automatically — the same accounting pattern Stock Taking
+  shortages already use. This never duplicates the original purchase cost;
+  it only removes the value of what was actually lost.
+- Every approved loss shows up in the **Stock Ledger**, **Product Ledger**,
+  and **Stock Movement** history like any other transaction, clearly marked
+  as a Waste/Damage/Expiry movement rather than a generic adjustment, with a
+  link back to the original record and its approval details.
+- Products approaching or past their expiry date do not disappear from stock
+  on their own — check the **Batch/Lot & Expiry** report's Near Expiry /
+  Expired filter, then create a Waste/Damage/Expiry record (loss type
+  Expired) to formally write them off once confirmed.
+
 ## Barcodes & Labels
 
 Each product variation can have a barcode/QR code, printable as labels for shelf or
@@ -125,8 +163,11 @@ silo.
 - **Stock Transfer** — transfer notes between warehouses/branches.
 - **Reconciliation & Adjustment** — stock-taking differences, or posted adjustment
   / stock-take movements.
-- **Loss / Wastage / Damage** — ledger rows typed as damage, wastage, or expired.
-  (Dedicated damage/wastage note documents are not a separate module yet.)
+- **Loss / Wastage / Damage** — ledger rows typed as damage, wastage, or expired,
+  posted by approved Waste/Damage/Expiry records.
+- **Waste / Damage / Expiry** — the dedicated write-off report: every record
+  regardless of status (pending/approved/cancelled), with batch/lot, expiry
+  date, loss type, reason, and who created/approved it.
 - **Batch/Lot & Expiry** — batch quantities and near-expiry / expired filters.
 
 ### Consumption, Manufacturing & Recipe Reports

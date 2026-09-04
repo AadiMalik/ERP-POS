@@ -561,6 +561,23 @@ class PermissionRegistry
                 'print'  => ['name' => 'stock-taking.print', 'label' => 'Print', 'is_system' => false],
             ]],
 
+            'loss-reason' => ['label' => 'Loss Reasons', 'actions' => [
+                'view'   => ['name' => 'loss-reason.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'loss-reason.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'loss-reason.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'loss-reason.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
+            'waste-damage-expiry' => ['label' => 'Waste / Damage / Expiry', 'actions' => [
+                'view'    => ['name' => 'waste-damage-expiry.view', 'label' => 'View', 'is_system' => false],
+                'create'  => ['name' => 'waste-damage-expiry.create', 'label' => 'Create', 'is_system' => false],
+                'edit'    => ['name' => 'waste-damage-expiry.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'  => ['name' => 'waste-damage-expiry.delete', 'label' => 'Delete', 'is_system' => false],
+                'approve' => ['name' => 'waste-damage-expiry.approve', 'label' => 'Approve', 'is_system' => false],
+                'cancel'  => ['name' => 'waste-damage-expiry.cancel', 'label' => 'Cancel', 'is_system' => false],
+                'print'   => ['name' => 'waste-damage-expiry.print', 'label' => 'Print', 'is_system' => false],
+            ]],
+
             'transfer-note' => ['label' => 'Transfer Note', 'actions' => [
                 'view'   => ['name' => 'transfer-note.view', 'label' => 'View', 'is_system' => false],
                 'create' => ['name' => 'transfer-note.create', 'label' => 'Create', 'is_system' => false],
@@ -1413,6 +1430,11 @@ class PermissionRegistry
                 'stock_loss_pdf' => ['name' => 'reports.stock-loss.pdf', 'label' => 'Stock Loss/Wastage/Damage - PDF', 'is_system' => false],
                 'stock_loss_export' => ['name' => 'reports.stock-loss.export', 'label' => 'Stock Loss/Wastage/Damage - Export (Excel)', 'is_system' => false],
                 'stock_loss_export_csv' => ['name' => 'reports.stock-loss.export-csv', 'label' => 'Stock Loss/Wastage/Damage - Export (CSV)', 'is_system' => false],
+                'waste_damage_expiry' => ['name' => 'reports.waste-damage-expiry.view', 'label' => 'Waste/Damage/Expiry', 'is_system' => false],
+                'waste_damage_expiry_print' => ['name' => 'reports.waste-damage-expiry.print', 'label' => 'Waste/Damage/Expiry - Print', 'is_system' => false],
+                'waste_damage_expiry_pdf' => ['name' => 'reports.waste-damage-expiry.pdf', 'label' => 'Waste/Damage/Expiry - PDF', 'is_system' => false],
+                'waste_damage_expiry_export' => ['name' => 'reports.waste-damage-expiry.export', 'label' => 'Waste/Damage/Expiry - Export (Excel)', 'is_system' => false],
+                'waste_damage_expiry_export_csv' => ['name' => 'reports.waste-damage-expiry.export-csv', 'label' => 'Waste/Damage/Expiry - Export (CSV)', 'is_system' => false],
                 'general_ledger'           => ['name' => 'reports.general-ledger.view', 'label' => 'General Ledger', 'is_system' => false],
                 'general_ledger_print' => ['name' => 'reports.general-ledger.print', 'label' => 'General Ledger - Print', 'is_system' => false],
                 'general_ledger_pdf' => ['name' => 'reports.general-ledger.pdf', 'label' => 'General Ledger - PDF', 'is_system' => false],
@@ -1713,7 +1735,7 @@ class PermissionRegistry
             'fixed-asset-category', 'fixed-asset', 'fixed-asset-depreciation',
             'supplier', 'customer', 'loyalty', 'order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher',
             'purchase-request', 'purchase-request-quotation', 'purchase', 'good-receipt-note',
-            'purchase-return', 'opening-stock', 'stock-taking', 'transfer-note', 'supplier-payment', 'customer-payment',
+            'purchase-return', 'opening-stock', 'stock-taking', 'loss-reason', 'waste-damage-expiry', 'transfer-note', 'supplier-payment', 'customer-payment',
             'service-purchase', 'service-purchase-return', 'service-sale', 'service-sale-return',
             'pos', 'pos-register', 'order', 'order-return', 'order-reports', 'expense', 'expense-category', 'admin-expense',
             'activity-log', 'login-history', 'notification', 'firebase-setting',

@@ -258,10 +258,11 @@
         @if (businessModuleEnabled('inventory'))
         @canAccessAny(['unit.view', 'warehouse.view', 'brand.view', 'category.view', 'sub-category.view', 'product.view',
             'unit-conversion.view', 'batch.view', 'stock.view', 'stock-transaction.view', 'opening-stock.view',
-            'stock-taking.view', 'transfer-note.view', 'recipe.view', 'manufacturing-plan.view', 'production.view',
+            'stock-taking.view', 'loss-reason.view', 'waste-damage-expiry.view', 'transfer-note.view', 'recipe.view', 'manufacturing-plan.view', 'production.view',
             'reports.stock-ledger.view', 'reports.stock-summary.view',
             'reports.stock-valuation.view', 'reports.stock-aging.view', 'reports.stock-transfer-report.view',
             'reports.stock-reconciliation.view', 'reports.batch-expiry.view', 'reports.stock-loss.view',
+            'reports.waste-damage-expiry.view',
             'reports.material-consumption-report.view', 'reports.manufacturing-plan-report.view',
             'reports.production-report.view', 'reports.recipe-bom-report.view'])
             <li class="menu-item">
@@ -355,6 +356,20 @@
                             </a>
                         </li>
                     @endcanAccess
+                    @canAccess('waste-damage-expiry.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/waste-damage-expiry') }}" class="menu-link">
+                                <div data-i18n="Waste / Damage / Expiry">Waste / Damage / Expiry</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('loss-reason.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/loss-reason') }}" class="menu-link">
+                                <div data-i18n="Loss Reasons">Loss Reasons</div>
+                            </a>
+                        </li>
+                    @endcanAccess
                     @canAccess('transfer-note.view')
                         <li class="menu-item">
                             <a href="{{ url('/admin/transfer-note') }}" class="menu-link">
@@ -397,7 +412,7 @@
                     @endif
                     @canAccessAny(['reports.stock-ledger.view', 'reports.stock-summary.view', 'reports.stock-valuation.view',
                         'reports.stock-aging.view', 'reports.stock-transfer-report.view', 'reports.stock-reconciliation.view',
-                        'reports.batch-expiry.view', 'reports.stock-loss.view', 'reports.material-consumption-report.view',
+                        'reports.batch-expiry.view', 'reports.stock-loss.view', 'reports.waste-damage-expiry.view', 'reports.material-consumption-report.view',
                         'reports.manufacturing-plan-report.view', 'reports.production-report.view', 'reports.recipe-bom-report.view'])
                         <li class="menu-item">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -407,7 +422,7 @@
                                 {{-- Stock Reports --}}
                                 @canAccessAny(['reports.stock-ledger.view', 'reports.stock-summary.view', 'reports.stock-valuation.view',
                                     'reports.stock-aging.view', 'reports.stock-transfer-report.view', 'reports.stock-reconciliation.view',
-                                    'reports.batch-expiry.view', 'reports.stock-loss.view'])
+                                    'reports.batch-expiry.view', 'reports.stock-loss.view', 'reports.waste-damage-expiry.view'])
                                     <li class="menu-item">
                                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                                             <div data-i18n="Stock Reports">Stock Reports</div>
@@ -436,6 +451,9 @@
                                             @endcanAccess
                                             @canAccess('reports.batch-expiry.view')
                                                 <li class="menu-item"><a href="{{ url('/admin/reports/batch-expiry') }}" class="menu-link"><div>Batch &amp; Expiry</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.waste-damage-expiry.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/waste-damage-expiry') }}" class="menu-link"><div>Waste / Damage / Expiry</div></a></li>
                                             @endcanAccess
                                         </ul>
                                     </li>

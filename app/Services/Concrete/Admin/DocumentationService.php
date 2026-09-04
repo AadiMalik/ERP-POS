@@ -63,6 +63,7 @@ class DocumentationService
             ['slug' => 'platform-ecosystem', 'title' => 'Platform Ecosystem: Companion Repos & Their API Contracts', 'file' => '14-platform-ecosystem.md'],
             ['slug' => 'loyalty-program', 'title' => 'Loyalty Program', 'file' => '15-loyalty-program.md'],
             ['slug' => 'manufacturing', 'title' => 'Manufacturing & Production', 'file' => '16-manufacturing.md'],
+            ['slug' => 'waste-damage-expiry', 'title' => 'Waste / Damage / Expiry', 'file' => '17-waste-damage-expiry.md'],
         ];
     }
 
