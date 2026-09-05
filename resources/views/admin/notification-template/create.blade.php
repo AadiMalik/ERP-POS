@@ -4,7 +4,7 @@ use App\Enums\RoleNames;
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Notification Template</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('Notification Template') }}</h4>
     <div class="card">
         <div class="card-header bg-white border-bottom">
             <h5 class="mb-0">{{ isset($template) ? 'Update' : 'New' }} Template</h5>
@@ -63,7 +63,7 @@ use App\Enums\RoleNames;
                 </div>
             </div>
             <div class="card-footer border-top d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">Cancel</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">{{ __('common.cancel') }}</button>
                 <button class="btn btn-primary px-4">Save Template</button>
             </div>
         </form>

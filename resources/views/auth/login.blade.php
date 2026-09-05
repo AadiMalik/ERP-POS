@@ -3,8 +3,8 @@
 @section('title', 'Login')
 
 @section('content')
-    <h4 class="mb-2">Welcome to @include('partials.brand-wordmark')! 👋</h4>
-    <p class="mb-4">Please sign-in to your account and start the adventure</p>
+    <h4 class="mb-2">{{ __('Welcome to') }} @include('partials.brand-wordmark')! 👋</h4>
+    <p class="mb-4">{{ __('Please sign-in to your account and start the adventure') }}</p>
     @if (session('success'))
         <div class="alert alert-success" role="alert">
             {{ session('success') }}
@@ -25,9 +25,9 @@
         </div>
         <div class="mb-3">
             <div class="d-flex justify-content-between">
-                <label class="form-label" for="password">Password</label>
+                <label class="form-label" for="password">{{ __('Password') }}</label>
                 <a href="{{ route('password.request') }}">
-                    <small>Forgot Password?</small>
+                    <small>{{ __('Forgot Password?') }}</small>
                 </a>
             </div>
             @include('partials.password-input', [

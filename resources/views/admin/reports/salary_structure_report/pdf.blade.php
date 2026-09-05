@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Salary Structure Report',
+        'title' => __('reports.salary_structure_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,14 +56,14 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Employee Code</th>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Effective From</th>
-                <th class="text-right">Basic Salary</th>
+                <th>{{ __('reports.col_employee_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_department') }}</th>
+                <th>{{ __('reports.col_effective_from') }}</th>
+                <th class="text-right">{{ __('reports.col_basic_salary') }}</th>
                 <th class="text-right">OT Rate/Hour</th>
-                <th>Components</th>
-                <th>Status</th>
+                <th>{{ __('reports.col_components') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

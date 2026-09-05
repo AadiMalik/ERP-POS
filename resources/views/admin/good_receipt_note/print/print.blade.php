@@ -22,7 +22,7 @@
         'reference' => [
             'Supplier' => $grn->supplier->name ?? 'N/A',
             'Warehouse' => $grn->warehouse->name ?? 'N/A',
-            'Purchase No.' => $grn->purchase->purchase_no ?? 'N/A',
+            '{{ __('purchases.purchase_no') }}' => $grn->purchase->purchase_no ?? 'N/A',
         ],
         'print_config' => $print_config,
     ])
@@ -31,13 +31,13 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>Product</th>
-                <th>Variation</th>
-                <th class="text-right">Ordered Qty</th>
-                <th class="text-right">Received Qty</th>
-                <th>Unit</th>
-                <th class="text-right">Unit Price</th>
-                <th class="text-right">Total</th>
+                <th>{{ __('common.product') }}</th>
+                <th>{{ __('common.variation') }}</th>
+                <th class="text-right">{{ __('common.ordered_qty') }}</th>
+                <th class="text-right">{{ __('common.received_qty') }}</th>
+                <th>{{ __('common.unit') }}</th>
+                <th class="text-right">{{ __('common.unit_price') }}</th>
+                <th class="text-right">{{ __('common.total') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -62,7 +62,7 @@
 
     <table class="print-totals">
         <tr class="grand-total">
-            <td>Total</td>
+            <td>{{ __('common.total') }}</td>
             <td class="text-right">{{ currency($grn->total) }}</td>
         </tr>
     </table>

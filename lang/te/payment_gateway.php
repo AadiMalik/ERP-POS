@@ -1,0 +1,10 @@
+<?php
+
+return [
+    'title' => 'చెల్లింపు గేట్‌వేలు',
+    'col_name' => 'Name',
+    'col_provider' => 'Provider',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'configure' => 'Configure',
+];

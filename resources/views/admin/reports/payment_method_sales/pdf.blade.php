@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Payment Method Sales Report',
+        'title' => __('reports.payment_method_sales'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,7 +56,7 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Payment Method</th>
+                <th>{{ __('reports.col_payment_method') }}</th>
                 <th class="text-right">Orders</th>
                 <th class="text-right">Total Amount</th>
             </tr>

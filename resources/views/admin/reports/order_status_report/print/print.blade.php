@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Order Status Report')
+@section('title', __('reports.order_status_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Order Status Report',
+        'title' => __('reports.order_status_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,14 +25,14 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Status</th>
+                <th>{{ __('reports.col_status') }}</th>
                 <th class="text-right">Orders</th>
                 <th class="text-right">Gross Sales</th>
-                <th class="text-right">Discount</th>
-                <th class="text-right">Tax</th>
+                <th class="text-right">{{ __('reports.col_discount') }}</th>
+                <th class="text-right">{{ __('reports.col_tax') }}</th>
                 <th class="text-right">Net Sales</th>
-                <th class="text-right">Paid</th>
-                <th class="text-right">Due</th>
+                <th class="text-right">{{ __('reports.col_paid') }}</th>
+                <th class="text-right">{{ __('reports.col_due') }}</th>
             </tr>
         </thead>
         <tbody>

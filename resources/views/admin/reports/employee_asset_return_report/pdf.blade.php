@@ -42,7 +42,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Employee Asset Return Report',
+        'title' => __('reports.employee_asset_return_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -52,14 +52,14 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Asset Tag</th>
-                <th>Asset Name</th>
-                <th>Employee</th>
-                <th>Department</th>
-                <th>Issue Date</th>
-                <th>Expected Return</th>
-                <th>Return Date</th>
-                <th>Status</th>
+                <th>{{ __('reports.col_asset_tag') }}</th>
+                <th>{{ __('reports.col_asset_name') }}</th>
+                <th>{{ __('reports.col_employee') }}</th>
+                <th>{{ __('reports.col_department') }}</th>
+                <th>{{ __('reports.col_issue_date') }}</th>
+                <th>{{ __('reports.col_expected_return') }}</th>
+                <th>{{ __('reports.col_return_date') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Service Payment Report',
+        'title' => __('reports.service_payment_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,12 +56,12 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Type</th>
-                <th>Payment No</th>
-                <th>Party</th>
-                <th>Reference</th>
-                <th>Method</th>
+                <th>{{ __('reports.col_date') }}</th>
+                <th>{{ __('reports.col_type') }}</th>
+                <th>{{ __('reports.col_payment_no_alt') }}</th>
+                <th>{{ __('reports.col_party') }}</th>
+                <th>{{ __('reports.col_reference') }}</th>
+                <th>{{ __('reports.col_method') }}</th>
                 <th class="text-right">Net Amount</th>
             </tr>
         </thead>

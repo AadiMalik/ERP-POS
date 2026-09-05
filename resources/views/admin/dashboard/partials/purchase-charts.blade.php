@@ -6,7 +6,7 @@
     <div class="col-lg-12 mb-4">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Purchase Trend</h5>
+                <h5 class="mb-0">{{ __('Purchase Trend') }}</h5>
             </div>
             <div class="card-body">
                 <div id="purchaseTrendChart"></div>

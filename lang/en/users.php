@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Admin Users',
+    'singular' => 'User',
+    'role' => 'Role',
+    'all_roles' => '--All Roles--',
+    'all_branches' => '--All Branches--',
+    'select_role' => '--Select Role--',
+    'select_branch' => '--Select Branch--',
+    'last_login' => 'Last Login',
+    'new_heading' => 'New User',
+    'update_heading' => 'Update User',
+    'save_user' => 'Save User',
+    'password' => 'Password',
+    'confirm_password' => 'Confirm Password',
+    'change_password' => 'Change Password',
+    'current_password' => 'Current Password',
+    'new_password' => 'New Password',
+    'update_password' => 'Update Password',
+    'customer_profile' => 'Customer Profile',
+    'password_optional_hint' => 'Optional for customers - they set their own password via the OTP onboarding flow.',
+    'code_auto_hint' => '(if blank, will be auto generated)',
+    'company_name' => 'Company Name',
+    'contact_person' => 'Contact Person',
+    'credit_limit' => 'Credit Limit',
+    'credit_days' => 'Credit Days',
+];

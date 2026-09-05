@@ -11,18 +11,18 @@
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label class="form-label">
-                                Name <span class="text-danger">*</span>
+                                {{ __('common.name') }} <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" id="name" name="name" placeholder="Enter Name" required>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="{{ __('common.enter_name') }}" required>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Close
+                        {{ __('common.close') }}
                     </button>
                     <button type="submit" id="saveBtn" class="btn btn-primary">
-                        Save
+                        {{ __('common.save') }}
                     </button>
                 </div>
 

@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Employee Cost Report',
+        'title' => __('reports.employee_cost_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,9 +56,9 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Employee Code</th>
-                <th>Name</th>
-                <th>Department</th>
+                <th>{{ __('reports.col_employee_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_department') }}</th>
                 <th class="text-right">Total Earnings</th>
                 <th class="text-right">Total Overtime</th>
                 <th class="text-right">Total Advances</th>

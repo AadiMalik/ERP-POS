@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'الورديات',
+    'singular' => 'وردية',
+    'new_heading' => 'وردية جديدة',
+    'update_heading' => 'تحديث الوردية',
+    'save_shift' => 'حفظ الوردية',
+    'create_new' => 'إنشاء وردية جديدة',
+    'edit_heading' => 'تعديل الوردية',
+    'start_time' => 'وقت البداية',
+    'end_time' => 'وقت النهاية',
+    'grace_minutes' => 'دقائق السماح',
+    'break_duration_minutes' => 'مدة الاستراحة (دقائق)',
+    'grace_period_minutes' => 'فترة السماح (دقائق)',
+    'grace_period_hint' => 'الدقائق التي يمكن للموظف التأخر فيها دون اعتباره متأخراً.',
+    'working_days' => 'أيام العمل',
+    'add_new_shift' => 'إضافة وردية جديدة',
+    'day_mon' => 'الإثنين',
+    'day_tue' => 'الثلاثاء',
+    'day_wed' => 'الأربعاء',
+    'day_thu' => 'الخميس',
+    'day_fri' => 'الجمعة',
+    'day_sat' => 'السبت',
+    'day_sun' => 'الأحد',
+];

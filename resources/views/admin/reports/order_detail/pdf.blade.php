@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Order Detail Report',
+        'title' => __('reports.order_detail'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,20 +56,20 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Order No</th>
-                <th>Date/Time</th>
-                <th>Customer</th>
-                <th>Branch</th>
-                <th>Order Source</th>
-                <th>Status</th>
-                <th>Payment Status</th>
-                <th>Product</th>
-                <th>Variation</th>
-                <th>SKU</th>
-                <th class="text-right">Qty</th>
+                <th>{{ __('reports.col_order_no') }}</th>
+                <th>{{ __('reports.col_date_time') }}</th>
+                <th>{{ __('reports.col_customer') }}</th>
+                <th>{{ __('reports.col_branch') }}</th>
+                <th>{{ __('reports.col_order_source') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
+                <th>{{ __('reports.col_payment_status') }}</th>
+                <th>{{ __('reports.col_product') }}</th>
+                <th>{{ __('reports.col_variation') }}</th>
+                <th>{{ __('reports.col_sku') }}</th>
+                <th class="text-right">{{ __('reports.col_qty') }}</th>
                 <th class="text-right">Unit Price</th>
-                <th class="text-right">Discount</th>
-                <th class="text-right">Tax</th>
+                <th class="text-right">{{ __('reports.col_discount') }}</th>
+                <th class="text-right">{{ __('reports.col_tax') }}</th>
                 <th class="text-right">Delivery</th>
                 <th class="text-right">Final Amount</th>
             </tr>

@@ -20,7 +20,7 @@
                     @include('admin.partials.import-export-buttons', [
                         'importExportModule' => 'user',
                         'importExportRouteSegment' => 'users',
-                        'importExportLabel' => 'Admin Users',
+                        'importExportLabel' => __('users.title'),
                         'importExportRefreshFn' => 'initDataTableusers_table',
                         'importExportExportParamsSelector' => '#business_id',
                     ])
@@ -35,9 +35,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}</option>
@@ -46,9 +46,9 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Branch</label>
+                            <label class="form-label">{{ __('common.branch') }}</label>
                             <select id="branch_id" class="form-select">
-                                <option value="">--All Branches--</option>
+                                <option value="">{{ __('common.all_branches') }}</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                     @foreach ($branches as $item)
                                         <option value="{{ $item->branch_id }}">{{ isset($item->code) ? $item->code : '' }}
@@ -58,9 +58,9 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Role</label>
+                            <label class="form-label">{{ __('common.role') }}</label>
                             <select id="role_id" class="form-select">
-                                <option value="">--All Roles--</option>
+                                <option value="">{{ __('users.all_roles') }}</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                     @foreach ($roles as $item)
                                         @continue($item->name === RoleNames::USER)
@@ -70,7 +70,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
@@ -87,15 +87,15 @@
                     <table id="users_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Role</th>
-                                <th>Business</th>
-                                <th>Branch</th>
-                                <th>Status</th>
-                                <th>Last Login</th>
-                                <th>Action</th>
+                                <th>{{ __('common.name') }}</th>
+                                <th>{{ __('common.email') }}</th>
+                                <th>{{ __('common.phone') }}</th>
+                                <th>{{ __('users.role') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.branch') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('users.last_login') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>
@@ -106,6 +106,15 @@
     </div>
 @endsection
 @section('js')
+    @php
+        $__i18nUsers = [
+            'all_branches' => __('common.all_branches'),
+            'all_roles' => __('users.all_roles'),
+            'select_branch' => __('users.select_branch'),
+            'select_role' => __('users.select_role'),
+        ];
+    @endphp
+    <script>window.i18n_users = @json($__i18nUsers);</script>
     @include('admin.partials.datatable', [
         'columns' => "
                                     {data:'name',name:'name'},
@@ -139,8 +148,8 @@
         $('#business_id').change(function() {
             let business_id = $(this).val();
             if (!business_id) {
-                $('#branch_id').html('<option value="">--All Branches--</option>');
-                $('#role_id').html('<option value="">--All Roles--</option>');
+                $('#branch_id').html('<option value="">' + (window.i18n_users.all_branches || '') + '</option>');
+                $('#role_id').html('<option value="">' + (window.i18n_users.all_roles || '') + '</option>');
                 return;
             }
             ajaxRequest({
@@ -149,7 +158,7 @@
                 })
                 .then((response) => {
                     let data = response.Data;
-                    let options = '<option value="">--Select Branch--</option>';
+                    let options = '<option value="">' + (window.i18n_users.select_branch || '') + '</option>';
                     $.each(data, function(index, item) {
                         options += `<option value="${item.branch_id}">
                                         ${item.name}
@@ -168,7 +177,7 @@
                 })
                 .then((response) => {
                     let data = response.Data;
-                    let options = '<option value="">--Select Role--</option>';
+                    let options = '<option value="">' + (window.i18n_users.select_role || '') + '</option>';
                     $.each(data, function(index, item) {
                         options += `<option value="${item.id}">
                                         ${item.name}

@@ -14,9 +14,9 @@
                     <div class="row">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-6">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="child_business_id" name="child_business_id" class="form-select">
-                                    <option value="">System Template (Global)</option>
+                                    <option value="">{{ __('accounts.system_template_global') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">
                                             {{ isset($item->code) ? $item->code : '' }}
@@ -27,9 +27,9 @@
                             </div>
                         @endif
                         <div class="col-md-6">
-                            <label class="form-label">Account Type <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('accounts.account_type') }} <span class="text-danger">*</span></label>
                             <select id="child_account_type_id" name="child_account_type_id" class="form-select" required>
-                                <option value="">--Select Account Type--</option>
+                                <option value="">{{ __('accounts.select_account_type') }}</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                     @foreach ($account_types as $item)
                                         <option value="{{ $item->account_type_id }}">
@@ -41,45 +41,45 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Account Sub Type <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('accounts.account_sub_type') }} <span class="text-danger">*</span></label>
                             <select id="child_account_sub_type_id" name="child_account_sub_type_id" class="form-select" required>
-                                <option value="">--Select Account Sub Type--</option>
+                                <option value="">{{ __('accounts.select_account_sub_type') }}</option>
                                 
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Parent Account <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('accounts.parent_account') }} <span class="text-danger">*</span></label>
                             <select id="child_parent_account_id" name="child_parent_account_id" class="form-select" required>
-                                <option value="">--Select Parent Account--</option>
+                                <option value="">{{ __('accounts.select_parent_account') }}</option>
                                 
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">
-                                Code <span class="text-danger">**</span>
+                                {{ __('common.code') }} <span class="text-danger">**</span>
                             </label>
                             <input type="text" class="form-control" id="child_code" name="child_code"
                                 placeholder="Auto-generated from parent account" readonly required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">
-                                Name <span class="text-danger">*</span>
+                                {{ __('common.name') }} <span class="text-danger">*</span>
                             </label>
                             <input type="text" class="form-control" id="child_name" name="child_name"
-                                placeholder="Enter Name" required>
+                                placeholder="{{ __('common.enter_name') }}" required>
                         </div>
                         <div class="col-md-12 mb-3">
-                            <label class="form-label">Description</label>
+                            <label class="form-label">{{ __('common.description') }}</label>
                             <textarea class="form-control"  name="child_description"  id="child_description"></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Close
+                        {{ __('common.close') }}
                     </button>
                     <button type="submit" id="childSaveBtn" class="btn btn-primary">
-                        Save
+                        {{ __('common.save') }}
                     </button>
                 </div>
             </form>

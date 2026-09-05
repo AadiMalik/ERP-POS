@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="modelHeading">Inquiry</h4>
+                <h4 class="modal-title" id="modelHeading">{{ __('Inquiry') }}</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -74,7 +74,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.close') }}</button>
                 <button type="button" id="btnUpdateStatus" class="btn btn-outline-primary">Update Status</button>
                 <button type="button" id="btnSendReply" class="btn btn-primary">Send Reply</button>
                 <button type="button" id="btnRegisterBusiness" class="btn btn-success">Register Business</button>

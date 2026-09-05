@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'Сторінки та політики',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'Відгуки клієнтів',
+    'hero_stats' => 'Основна статистика',
+    'homepage_sections' => 'Розділи головної сторінки',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'Контактні повідомлення',
+    'newsletter_subscribers' => 'Підписники розсилки',
+    'social_media' => 'Соціальні мережі',
+    'intro_cms' => 'CMS вступної сторінки',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

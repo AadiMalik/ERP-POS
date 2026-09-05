@@ -1,14 +1,14 @@
 @extends('layouts.print')
-@section('title', 'Stock Loss/Wastage/Damage Report')
+@section('title', __('reports.stock_loss'))
 @section('content')
-    <h3>Stock Loss/Wastage/Damage Report</h3>
+    <h3>{{ __('reports.stock_loss') }}</h3>
     <table class="table table-bordered table-sm">
-        <thead><tr><th>Date</th><th>Type</th><th>Source</th><th>Reference</th><th>Warehouse</th><th>Product</th><th>Variation</th><th>Qty</th><th>Unit Cost</th><th>Value</th></tr></thead>
+        <thead><tr><th>{{ __('reports.col_date') }}</th><th>{{ __('reports.col_type') }}</th><th>{{ __('reports.col_source') }}</th><th>{{ __('reports.col_reference') }}</th><th>{{ __('reports.col_warehouse') }}</th><th>{{ __('reports.col_product') }}</th><th>{{ __('reports.col_variation') }}</th><th>{{ __('reports.col_qty') }}</th><th>{{ __('reports.col_unit_cost') }}</th><th>{{ __('reports.col_value') }}</th></tr></thead>
         <tbody>
             @forelse ($rows as $row)
                 <tr><td>{{ is_object($row) ? ($row->transaction_date ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->transaction_type_label ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->source_module ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->reference_no ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->warehouse_name ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->product_name ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->variation_name ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->quantity ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->unit_price ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->value ?? '-') : '-' }}</td></tr>
             @empty
-                <tr><td colspan="12">No records found.</td></tr>
+                <tr><td colspan="12">{{ __('common.no_records_found') }}</td></tr>
             @endforelse
         </tbody>
     </table>

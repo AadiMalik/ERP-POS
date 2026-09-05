@@ -1,20 +1,20 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Departments</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('hrm_departments.title') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div></div>
             <div class="d-flex gap-2">
                 @include('admin.partials.import-export-buttons', [
                     'importExportModule' => 'department',
-                    'importExportLabel' => 'Departments',
+                    'importExportLabel' => __('hrm_departments.title'),
                     'importExportRefreshFn' => 'initDataTabledepartment_table',
                 ])
                 @can('department.create')
                 <a href="{{ url('admin/department/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
-                    Add New
+                    {{ __('common.add_new') }}
                 </a>
                 @endcan
             </div>
@@ -24,11 +24,11 @@
                 <table id="department_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.code') }}</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('common.description') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

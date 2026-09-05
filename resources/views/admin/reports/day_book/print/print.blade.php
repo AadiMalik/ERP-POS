@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Day Book')
+@section('title', __('reports.day_book'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Day Book',
+        'title' => __('reports.day_book'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,14 +25,14 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Voucher Type</th>
-                <th>JV Number</th>
-                <th>Account</th>
-                <th>Reference</th>
-                <th>Narration</th>
-                <th class="text-right">Debit</th>
-                <th class="text-right">Credit</th>
+                <th>{{ __('reports.col_date') }}</th>
+                <th>{{ __('reports.col_voucher_type') }}</th>
+                <th>{{ __('reports.col_jv_number') }}</th>
+                <th>{{ __('reports.col_account') }}</th>
+                <th>{{ __('reports.col_reference') }}</th>
+                <th>{{ __('reports.col_narration') }}</th>
+                <th class="text-right">{{ __('reports.col_debit') }}</th>
+                <th class="text-right">{{ __('reports.col_credit') }}</th>
             </tr>
         </thead>
         <tbody>

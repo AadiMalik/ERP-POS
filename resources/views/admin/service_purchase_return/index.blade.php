@@ -5,19 +5,19 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">
-            Service Purchase Returns
+            {{ __('service_purchase_returns.title') }}
         </h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 <a href="{{ url('admin/service-purchase-return/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
-                    Add New
+                    {{ __('common.add_new') }}
                 </a>
             </div>
             <div class="card-body">
@@ -25,9 +25,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }}
                                             {{ $item->name ?? '' }}
@@ -37,9 +37,9 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Supplier</label>
+                            <label class="form-label">{{ __('common.supplier') }}</label>
                             <select id="supplier_id" class="form-select">
-                                <option value="">--All Suppliers--</option>
+                                <option value="">{{ __('common.all_suppliers') }}</option>
                                 @foreach ($suppliers as $item)
                                     <option value="{{ $item->supplier_id }}">{{ $item->code ?? '' }}
                                         {{ $item->name ?? '' }}
@@ -48,9 +48,9 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
-                                <option value="">--All Statuses--</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
                                 @foreach ($statuses as $value => $label)
                                     <option value="{{ $value }}">{{ $label ?? '' }}
                                     </option>
@@ -58,7 +58,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
@@ -75,15 +75,15 @@
                     <table id="service_purchase_return_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Return No.</th>
-                                <th>Return Date</th>
-                                <th>Service Purchase No.</th>
-                                <th>Supplier</th>
-                                <th>Items</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Business</th>
-                                <th>Action</th>
+                                <th>{{ __('common.return_no') }}</th>
+                                <th>{{ __('common.return_date') }}</th>
+                                <th>{{ __('service_purchases.service_purchase_no') }}</th>
+                                <th>{{ __('common.supplier') }}</th>
+                                <th>{{ __('common.items') }}</th>
+                                <th>{{ __('common.total') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>

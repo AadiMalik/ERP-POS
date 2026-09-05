@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Top Selling Report')
+@section('title', __('reports.top_selling'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Top Selling Report',
+        'title' => __('reports.top_selling'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,11 +25,11 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Rank</th>
-                <th>Product</th>
-                <th>Variation</th>
-                <th>SKU</th>
-                <th class="text-right">Qty</th>
+                <th>{{ __('reports.col_rank') }}</th>
+                <th>{{ __('reports.col_product') }}</th>
+                <th>{{ __('reports.col_variation') }}</th>
+                <th>{{ __('reports.col_sku') }}</th>
+                <th class="text-right">{{ __('reports.col_qty') }}</th>
                 <th class="text-right">Net Sales</th>
             </tr>
         </thead>

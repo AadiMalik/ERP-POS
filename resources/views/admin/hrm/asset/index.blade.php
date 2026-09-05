@@ -1,20 +1,20 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Assets</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('hrm_assets.title') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div></div>
             <div class="d-flex gap-2">
                 @include('admin.partials.import-export-buttons', [
                     'importExportModule' => 'asset',
-                    'importExportLabel' => 'Assets',
+                    'importExportLabel' => __('hrm_assets.import_export_label'),
                     'importExportRefreshFn' => 'initDataTableasset_table',
                 ])
                 @can('asset.create')
                 <a href="{{ url('admin/asset/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
-                    Add New
+                    {{ __('common.add_new') }}
                 </a>
                 @endcan
             </div>
@@ -24,13 +24,13 @@
                 <table id="asset_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Tag</th>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th>Condition</th>
-                            <th>Allocated To</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('hrm_assets.tag') }}</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('common.category') }}</th>
+                            <th>{{ __('hrm_assets.condition') }}</th>
+                            <th>{{ __('hrm_assets.allocated_to') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

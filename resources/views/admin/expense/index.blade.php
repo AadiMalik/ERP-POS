@@ -5,26 +5,26 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">
-            Expense Details
+            {{ __('expenses.details_title') }}
         </h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @include('admin.partials.import-export-buttons', [
                         'importExportModule' => 'expense',
-                        'importExportLabel' => 'Expenses',
+                        'importExportLabel' => __('expenses.title'),
                         'importExportRefreshFn' => 'initDataTableexpense_table',
                         'importExportExportParamsSelector' => '#business_id',
                     ])
                     <a href="{{ url('admin/expense/create') }}" class="btn btn-primary rounded-pill">
                         <i class="fa fa-plus"></i>
-                        Add New
+                        {{ __('common.add_new') }}
                     </a>
                 </div>
             </div>
@@ -33,9 +33,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -45,41 +45,41 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Category</label>
+                            <label class="form-label">{{ __('common.category') }}</label>
                             <select id="expense_category_id" class="form-select">
-                                <option value="">--All Categories--</option>
+                                <option value="">{{ __('expenses.all_categories') }}</option>
                                 @foreach ($categories as $item)
                                     <option value="{{ $item->expense_category_id }}">{{ $item->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Source</label>
+                            <label class="form-label">{{ __('expenses.source') }}</label>
                             <select id="source" class="form-select">
-                                <option value="">--All Sources--</option>
+                                <option value="">{{ __('expenses.all_sources') }}</option>
                                 <option value="pos">POS</option>
                                 <option value="admin">Admin</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
-                                <option value="">--All Statuses--</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
                                 @foreach ($statuses as $value => $label)
                                     <option value="{{ $value }}">{{ $label ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
                             <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
+                                {{ __('common.search') }}
                             </button>
                             <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
+                                {{ __('common.reset') }}
                             </button>
                         </div>
                     </div>
@@ -88,17 +88,17 @@
                     <table id="expense_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Expense No.</th>
-                                <th>Date</th>
-                                <th>Category</th>
-                                <th>Amount</th>
-                                <th>OT / User</th>
-                                <th>Session</th>
-                                <th>Branch</th>
-                                <th>Source</th>
-                                <th>Status</th>
-                                <th>Business</th>
-                                <th>Action</th>
+                                <th>{{ __('expenses.expense_no') }}</th>
+                                <th>{{ __('common.date') }}</th>
+                                <th>{{ __('expenses.category') }}</th>
+                                <th>{{ __('common.amount') }}</th>
+                                <th>{{ __('expenses.ot_user') }}</th>
+                                <th>{{ __('expenses.session') }}</th>
+                                <th>{{ __('common.branch') }}</th>
+                                <th>{{ __('expenses.source') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>

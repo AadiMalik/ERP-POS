@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Service Transaction Summary')
+@section('title', __('reports.service_transaction_summary'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Service Transaction Summary',
+        'title' => __('reports.service_transaction_summary'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,7 +25,7 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Group</th>
+                <th>{{ __('reports.col_group') }}</th>
                 <th class="text-right">Sale</th>
                 <th class="text-right">Sale Return</th>
                 <th class="text-right">Net Sale</th>

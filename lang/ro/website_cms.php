@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'Pagini și politici',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'Testimoniale',
+    'hero_stats' => 'Statistici principale',
+    'homepage_sections' => 'Secțiuni pagină principală',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'Mesaje de contact',
+    'newsletter_subscribers' => 'Abonați newsletter',
+    'social_media' => 'Social media',
+    'intro_cms' => 'CMS pagină introductivă',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

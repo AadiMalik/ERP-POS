@@ -113,7 +113,7 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                <h6 class="mb-0">Order Information</h6>
+                <h6 class="mb-0">{{ __('orders.order_information') }}</h6>
             </div>
             <div class="card-body">
                 @php
@@ -133,11 +133,11 @@
                 @endphp
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <strong>Daily Order ID:</strong><br>
+                        <strong>{{ __('orders.daily_order_id') }}:</strong><br>
                         {{ $order->daily_order_id ?? '-' }}
                     </div>
                     <div class="col-md-3">
-                        <strong>Order Date:</strong><br>
+                        <strong>{{ __('orders.order_date') }}:</strong><br>
                         {{ $order->order_date ? localDateTime($order->order_date) : '-' }}
                     </div>
                     <div class="col-md-3">
@@ -149,34 +149,34 @@
                         <span class="badge bg-label-primary">{{ ucfirst($order->status ?? '-') }}</span>
                     </div>
                     <div class="col-md-3">
-                        <strong>Payment Status:</strong><br>
+                        <strong>{{ __('orders.payment_status') }}:</strong><br>
                         <span class="badge {{ $payment_status_badges[$payment_status] ?? 'bg-label-secondary' }}">
                             {{ ucwords(str_replace('_', ' ', $payment_status)) }}
                         </span>
                     </div>
                     <div class="col-md-3">
-                        <strong>Payment Method:</strong><br>
+                        <strong>{{ __('orders.payment_method') }}:</strong><br>
                         <span class="badge {{ $payment_method_label === 'Partial' ? 'bg-label-warning' : 'bg-label-info' }}">
                             {{ $payment_method_label }}
                         </span>
                     </div>
                     <div class="col-md-3">
-                        <strong>Paid Amount:</strong><br>
+                        <strong>{{ __('orders.paid_amount') }}:</strong><br>
                         {{ currency($order->paid_amount ?? 0) }}
                     </div>
                     <div class="col-md-3">
-                        <strong>Due Amount:</strong><br>
+                        <strong>{{ __('orders.due_amount') }}:</strong><br>
                         {{ currency($due) }}
                     </div>
                     @if (!empty($order->voucher))
                         <div class="col-md-3">
-                            <strong>Voucher:</strong><br>
+                            <strong>{{ __('orders.voucher') }}:</strong><br>
                             {{ $order->voucher->code ?? '-' }} (-{{ currency($order->voucher_discount_amount ?? 0) }})
                         </div>
                     @endif
                     @if (($order->loyalty_points_used ?? 0) > 0 || ($order->loyalty_points_earned ?? 0) > 0)
                         <div class="col-md-3">
-                            <strong>Loyalty Points:</strong><br>
+                            <strong>{{ __('orders.loyalty_points') }}:</strong><br>
                             @if (($order->loyalty_points_used ?? 0) > 0)
                                 {{ decimal($order->loyalty_points_used) }} redeemed (-{{ currency($order->loyalty_discount_amount ?? 0) }})<br>
                             @endif
@@ -202,7 +202,7 @@
                         {{ $order->register->name ?? '-' }}
                     </div>
                     <div class="col-md-3">
-                        <strong>Order Taker:</strong><br>
+                        <strong>{{ __('orders.order_taker') }}:</strong><br>
                         {{ $order->cashier->name ?? '-' }}
                     </div>
                     <div class="col-md-3">
@@ -210,20 +210,20 @@
                         {{ $order->user->name ?? '-' }}
                     </div>
                     <div class="col-md-3">
-                        <strong>Order Type:</strong><br>
+                        <strong>{{ __('orders.order_type') }}:</strong><br>
                         {{ $order->orderType->name ?? '-' }}
                     </div>
                     <div class="col-md-3">
-                        <strong>Order Source:</strong><br>
+                        <strong>{{ __('orders.order_source') }}:</strong><br>
                         {{ $order->orderSource->name ?? '-' }}
                     </div>
                     <div class="col-md-3">
-                        <strong>Sale Type:</strong><br>
+                        <strong>{{ __('orders.sale_type') }}:</strong><br>
                         {!! $sale_type_badge !!}
                     </div>
                     @if (!empty($order->delivery_address))
                         <div class="col-md-6">
-                            <strong>Delivery Address:</strong><br>
+                            <strong>{{ __('orders.delivery_address') }}:</strong><br>
                             {{ $order->delivery_address }}
                         </div>
                     @endif
@@ -251,24 +251,24 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                <h6 class="mb-0">Line Items</h6>
+                <h6 class="mb-0">{{ __('orders.line_items') }}</h6>
             </div>
             <div class="table-responsive p-4">
                 <table class="table">
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Product</th>
-                            <th>Variation</th>
-                            <th>Unit</th>
-                            <th class="text-end">Qty</th>
-                            <th class="text-end">Unit Price</th>
-                            <th>Sale Type</th>
+                            <th>{{ __('common.product') }}</th>
+                            <th>{{ __('common.variation') }}</th>
+                            <th>{{ __('common.unit') }}</th>
+                            <th class="text-end">{{ __('common.qty') }}</th>
+                            <th class="text-end">{{ __('common.unit_price') }}</th>
+                            <th>{{ __('orders.sale_type') }}</th>
                             <th class="text-end">Discount</th>
-                            <th class="text-end">Voucher</th>
-                            <th class="text-end">Final Unit Price</th>
+                            <th class="text-end">{{ __('orders.voucher') }}</th>
+                            <th class="text-end">{{ __('orders.final_unit_price') }}</th>
                             <th class="text-end">Tax</th>
-                            <th class="text-end">Total</th>
+                            <th class="text-end">{{ __('common.total') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -305,7 +305,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="12" class="text-center">No items found</td>
+                                <td colspan="12" class="text-center">{{ __('orders.no_items') }} found</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -324,11 +324,11 @@
                         @endphp
                         <table class="table table-borderless mb-0">
                             <tr>
-                                <td>Subtotal</td>
+                                <td>{{ __('common.subtotal') }}</td>
                                 <td class="text-end">{{ currency($order->subtotal) }}</td>
                             </tr>
                             <tr>
-                                <td>Item Discounts</td>
+                                <td>{{ __('orders.item_discounts') }}</td>
                                 <td class="text-end">{{ currency($item_discount_total) }}</td>
                             </tr>
                             <tr>
@@ -343,7 +343,7 @@
                             @if (!empty($order->voucher))
                                 <tr>
                                     <td>
-                                        Voucher Discount
+                                        {{ __('orders.voucher') }} Discount
                                         <small class="text-muted d-block">
                                             {{ $order->voucher->code }}{{ $order->voucher->name ? ' - ' . $order->voucher->name : '' }}
                                             <br>{{ $order->voucher->describeRule() }}
@@ -366,15 +366,15 @@
                                 <td class="text-end">{{ currency($order->tax_amount) }}</td>
                             </tr>
                             <tr class="fw-bold">
-                                <td>Total</td>
+                                <td>{{ __('common.total') }}</td>
                                 <td class="text-end">{{ currency($order->total) }}</td>
                             </tr>
                             <tr>
-                                <td>Paid Amount</td>
+                                <td>{{ __('orders.paid_amount') }}</td>
                                 <td class="text-end">{{ currency($order->paid_amount ?? 0) }}</td>
                             </tr>
                             <tr>
-                                <td>Due Amount</td>
+                                <td>{{ __('orders.due_amount') }}</td>
                                 <td class="text-end">{{ currency($due) }}</td>
                             </tr>
                         </table>
@@ -385,29 +385,29 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                <h6 class="mb-0">Payments</h6>
+                <h6 class="mb-0">{{ __('orders.payments') }}</h6>
             </div>
             <div class="table-responsive p-4">
                 <table class="table">
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Payment Method</th>
+                            <th>{{ __('orders.payment_method') }}</th>
                             <th>Reference No.</th>
-                            <th class="text-end">Amount</th>
+                            <th class="text-end">{{ __('common.amount') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($order->payments as $index => $payment)
                             <tr>
                                 <td>{{ $index + 1 }}</td>
-                                <td>{{ $payment->paymentMethod->name ?? '-' }}</td>
+                                <td>{{ $payment->payment{{ __('orders.method') }}->name ?? '-' }}</td>
                                 <td>{{ $payment->reference_no ?? '-' }}</td>
                                 <td class="text-end">{{ currency($payment->amount) }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center">No payments recorded</td>
+                                <td colspan="4" class="text-center">{{ __('orders.no_payments') }}</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -418,10 +418,10 @@
         @if (!empty($order->payment_proof) || optional($order->orderSource)->code === 'WEBSITE')
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">Website Payment Receipt</h6>
+                    <h6 class="mb-0">{{ __('orders.website_payment_receipt') }}</h6>
                     @php
                         $due_for_confirm = max(($order->total ?? 0) - ($order->paid_amount ?? 0), 0);
-                        $is_bank_website = $order->payments->contains(fn ($p) => optional($p->paymentMethod)->type === 'bank');
+                        $is_bank_website = $order->payments->contains(fn ($p) => optional($p->payment{{ __('orders.method') }})->type === 'bank');
                     @endphp
                     @if ($due_for_confirm > 0 && $is_bank_website && !empty($order->payment_proof))
                         <button type="button" class="btn btn-sm btn-success" id="confirmWebsitePaymentBtn"
@@ -438,7 +438,7 @@
                             $ext = strtolower(pathinfo($order->payment_proof, PATHINFO_EXTENSION));
                         @endphp
                         <p class="mb-2">
-                            <strong>Uploaded Receipt:</strong>
+                            <strong>{{ __('orders.uploaded_receipt') }}:</strong>
                             <a href="{{ $proof_url }}" target="_blank">{{ $order->payment_proof }}</a>
                         </p>
                         @if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif']))
@@ -450,23 +450,23 @@
                             </p>
                         @else
                             <p class="mt-3 mb-0 text-warning">
-                                Payment is pending verification. Confirming marks Payment Status as Paid without posting stock/GL.
+                                Payment is pending verification. Confirming marks {{ __('orders.payment_status') }} as Paid without posting stock/GL.
                             </p>
                         @endif
                     @else
-                        <p class="mb-0 text-muted">No payment receipt uploaded for this website order.</p>
+                        <p class="mb-0 text-muted">{{ __('orders.no_receipt_uploaded') }}</p>
                     @endif
                 </div>
             </div>
         @endif
 
         @php
-            $customer_payments = $order->customerPayments->sortBy('payment_date')->values();
+            $customer_payments = $order->customer{{ __('orders.payments') }}->sortBy('payment_date')->values();
             $running_paid = 0;
         @endphp
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">Payment History</h6>
+                <h6 class="mb-0">{{ __('orders.payment_history') }}</h6>
                 @can('customer-payment.create')
                     @if ($due > 0)
                         <a href="{{ route('customer-payment.create') }}?order_id={{ $order->order_id }}" class="btn btn-sm btn-primary">
@@ -481,13 +481,13 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Date</th>
-                            <th>Method</th>
-                            <th>Reference</th>
-                            <th>Status</th>
-                            <th class="text-end">Amount</th>
-                            <th class="text-end">Paid to Date</th>
-                            <th class="text-end">Remaining Balance</th>
+                            <th>{{ __('common.date') }}</th>
+                            <th>{{ __('orders.method') }}</th>
+                            <th>{{ __('common.reference') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th class="text-end">{{ __('common.amount') }}</th>
+                            <th class="text-end">{{ __('orders.paid_to_date') }}</th>
+                            <th class="text-end">{{ __('orders.remaining_balance') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -512,14 +512,14 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center">No partial/credit payments recorded yet</td>
+                                <td colspan="8" class="text-center">{{ __('orders.no_partial_payments') }}</td>
                             </tr>
                         @endforelse
                     </tbody>
                     @if ($customer_payments->isNotEmpty())
                         <tfoot>
                             <tr class="fw-bold">
-                                <td colspan="5" class="text-end">Total Paid to Date</td>
+                                <td colspan="5" class="text-end">Total {{ __('orders.paid_to_date') }}</td>
                                 <td class="text-end">{{ currency($running_paid) }}</td>
                                 <td colspan="2"></td>
                             </tr>
@@ -529,10 +529,10 @@
             </div>
         </div>
 
-        @if ($order->orderReturns->isNotEmpty())
+        @if ($order->order{{ __('orders.returns') }}->isNotEmpty())
             <div class="card mb-4">
                 <div class="card-header">
-                    <h6 class="mb-0">Returns</h6>
+                    <h6 class="mb-0">{{ __('orders.returns') }}</h6>
                 </div>
                 <div class="table-responsive">
                     <table class="table mb-0">
@@ -540,13 +540,13 @@
                             <tr>
                                 <th>Return No.</th>
                                 <th>Return Date</th>
-                                <th>Total</th>
-                                <th>Status</th>
+                                <th>{{ __('common.total') }}</th>
+                                <th>{{ __('common.status') }}</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($order->orderReturns as $order_return)
+                            @foreach ($order->order{{ __('orders.returns') }} as $order_return)
                                 <tr>
                                     <td>{{ $order_return->order_return_no }}</td>
                                     <td>{{ $order_return->order_return_date ? localDate($order_return->order_return_date) : 'N/A' }}</td>
@@ -579,7 +579,7 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                <h6 class="mb-0">Status History</h6>
+                <h6 class="mb-0">{{ __('orders.status_history') }}</h6>
             </div>
             <div class="card-body">
                 <ul class="list-group">
@@ -601,7 +601,7 @@
                             </div>
                         </li>
                     @empty
-                        <li class="list-group-item text-center">No status history found</li>
+                        <li class="list-group-item text-center">{{ __('orders.no_status_history') }}</li>
                     @endforelse
                 </ul>
             </div>
@@ -620,8 +620,8 @@
                     <textarea class="form-control" id="orderStatusReasonInput" rows="3" required></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" id="confirmOrderStatusReasonBtn">Confirm</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.close') }}</button>
+                    <button type="button" class="btn btn-danger" id="confirmOrderStatusReasonBtn">{{ __('common.confirm') }}</button>
                 </div>
             </div>
         </div>
@@ -652,7 +652,7 @@
     }
 
     function showStatusError(message) {
-        errorMessage(message || 'Unable to update order status.');
+        errorMessage(message || '{{ __('orders.unable_update_status') }}');
     }
 
     function confirmAction(text, confirmButtonText) {
@@ -661,7 +661,7 @@
             text: text,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: confirmButtonText || 'Yes, proceed',
+            confirmButtonText: confirmButtonText || '{{ __('orders.yes_proceed') }}',
             cancelButtonText: 'Cancel',
         });
     }
@@ -677,7 +677,7 @@
     document.querySelectorAll('.order-status-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             const status = btn.getAttribute('data-status');
-            const confirmMsg = btn.getAttribute('data-confirm') || 'Update order status?';
+            const confirmMsg = btn.getAttribute('data-confirm') || '{{ __('orders.update_order_status') }}';
 
             confirmAction(confirmMsg).then(function (result) {
                 if (!result.isConfirmed) {
@@ -751,7 +751,7 @@
             if (!orderId) return;
 
             confirmAction(
-                'Payment Status will become Paid.',
+                '{{ __('orders.payment_status') }} will become Paid.',
                 'Yes, confirm payment'
             ).then(function (result) {
                 if (!result.isConfirmed) {
@@ -774,12 +774,12 @@
                         if (data.Success) {
                             window.location.reload();
                         } else {
-                            errorMessage(data.Message || data.ErrorMessage || 'Unable to confirm payment.');
+                            errorMessage(data.Message || data.ErrorMessage || '{{ __('orders.unable_confirm_payment') }}');
                             btn.disabled = false;
                         }
                     })
                     .catch(function () {
-                        errorMessage('Unable to confirm payment.');
+                        errorMessage('{{ __('orders.unable_confirm_payment') }}');
                         btn.disabled = false;
                     });
             });

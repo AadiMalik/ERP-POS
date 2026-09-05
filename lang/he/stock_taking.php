@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'جرد المخزون',
+    'singular' => 'جرد المخزون',
+    'stock_taking_no' => 'رقم الجرد',
+    'system_qty' => 'كمية النظام',
+    'physical_qty' => 'الكمية الفعلية',
+    'difference' => 'الفرق',
+    'difference_value' => 'قيمة الفرق',
+    'diff_value' => 'قيمة الفرق',
+    'total_difference_qty' => 'إجمالي كمية الفرق',
+    'total_difference_quantity' => 'إجمالي كمية الفرق',
+    'total_difference_value' => 'إجمالي قيمة الفرق',
+    'available_qty' => 'الكمية المتاحة',
+    'serial_tracked_hint' => 'متتبع تسلسلياً - سوِّ عبر شاشات الأرقام التسلسلية',
+    'update_heading' => 'تحديث الجرد',
+    'new_heading' => 'جرد جديد',
+    'create_heading' => 'إنشاء جرد',
+    'save_stock_taking' => 'حفظ الجرد',
+    'update_stock_taking' => 'تحديث الجرد',
+    'stock_changed_title' => 'تغير المخزون منذ أخذ هذا العد',
+    'stock_changed_text' => 'سيستخدم التعديل النهائي كمية المخزون الحالية، وليس ما تم عده أصلاً:',
+    'approve_anyway' => 'الموافقة على أي حال',
+];

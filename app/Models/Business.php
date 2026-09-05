@@ -82,6 +82,11 @@ class Business extends Model
         return $this->hasOne(BusinessSetting::class, 'business_id', 'business_id');
     }
 
+    public function localizationSetting()
+    {
+        return $this->hasOne(LocalizationSetting::class, 'business_id', 'business_id');
+    }
+
     public function accountingSetting()
     {
         return $this->hasOne(AccountingSetting::class, 'business_id', 'business_id');

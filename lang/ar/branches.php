@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'الفروع',
+    'singular' => 'فرع',
+    'basic_information' => 'معلومات أساسية',
+    'address_information' => 'معلومات العنوان',
+    'branch_name' => 'اسم الفرع',
+    'branch_code' => 'رمز الفرع',
+    'branch_email' => 'بريد الفرع',
+    'branch_phone' => 'هاتف الفرع',
+    'state' => 'ولاية',
+    'pos_register_hours' => 'ساعات سجل نقطة البيع التلقائي',
+    'open_time' => 'وقت الفتح',
+    'close_time' => 'وقت الإغلاق',
+    'open_time_hint' => 'يتجاوز الافتراضي للعمل عند وضع السجل التلقائي. اتركه فارغًا لاستخدام افتراضي العمل.',
+    'branch_logo' => 'شعار الفرع',
+    'previous_logo' => 'الشعار السابق',
+    'jpg_png_supported' => 'يدعم JPG و PNG',
+    'please_select_valid_image' => 'يرجى اختيار ملف صورة صالح (JPG، PNG)',
+    'new_heading' => 'فرع جديد',
+    'update_heading' => 'تحديث الفرع',
+    'save_branch' => 'حفظ الفرع',
+    'select_business' => '-- اختر العمل --',
+];

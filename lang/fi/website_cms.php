@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'Sivut ja käytännöt',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'Suosittelut',
+    'hero_stats' => 'Päätilastot',
+    'homepage_sections' => 'Etusivun osiot',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'Yhteydenottoviestit',
+    'newsletter_subscribers' => 'Uutiskirjeen tilaajat',
+    'social_media' => 'Sosiaalinen media',
+    'intro_cms' => 'Esittely-CMS',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

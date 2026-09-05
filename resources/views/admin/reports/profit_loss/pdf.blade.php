@@ -47,7 +47,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Profit & Loss Statement',
+        'title' => __('reports.profit_loss'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [

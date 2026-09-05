@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Profit & Loss Statement')
+@section('title', __('reports.profit_loss'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Profit & Loss Statement',
+        'title' => __('reports.profit_loss'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [

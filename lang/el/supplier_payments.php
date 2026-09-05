@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Πληρωμές προμηθευτών',
+    'singular' => 'Supplier Zahlung',
+    'payment_no' => 'Zahlung No',
+    'new_heading' => 'Neu Supplier Zahlung',
+    'update_heading' => 'Aktualisieren Supplier Zahlung',
+    'save_payment' => 'Speichern Zahlung',
+    'select_supplier' => '--Auswählen Supplier--',
+    'payment_method' => 'Zahlung Method',
+    'select_payment_method' => '--Auswählen Zahlung Method--',
+    'paid_amount' => 'Paid Betrag',
+    'allocate_to_purchases' => 'Alleocate to Purchases',
+    'outstanding' => 'Outstanding',
+    'create_heading' => 'Create Supplier Payment',
+    'update_payment' => 'Update Payment',
+    'supplier_balance' => 'Supplier Balance',
+    'reference_purchase_optional' => 'Reference Purchase (Optional)',
+    'reference_service_purchase_optional' => 'Reference Service Purchase (Optional)',
+    'advance_on_account' => '--Advance / On Account--',
+    'cheque_date' => 'Cheque Date',
+    'supplier_coa' => 'Supplier COA',
+    'tax_withholding' => 'Tax Amount (Withholding)',
+];

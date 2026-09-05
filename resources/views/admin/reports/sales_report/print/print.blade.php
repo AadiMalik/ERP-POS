@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Sales Report')
+@section('title', __('reports.sales_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Sales Report',
+        'title' => __('reports.sales_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,16 +25,16 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Order No</th>
-                <th>Date</th>
-                <th>Customer</th>
-                <th>Warehouse</th>
-                <th class="text-right">Subtotal</th>
-                <th class="text-right">Discount</th>
+                <th>{{ __('reports.col_order_no') }}</th>
+                <th>{{ __('reports.col_date') }}</th>
+                <th>{{ __('reports.col_customer') }}</th>
+                <th>{{ __('reports.col_warehouse') }}</th>
+                <th class="text-right">{{ __('reports.col_subtotal') }}</th>
+                <th class="text-right">{{ __('reports.col_discount') }}</th>
                 <th class="text-right">Voucher</th>
-                <th class="text-right">Tax</th>
-                <th class="text-right">Total</th>
-                <th class="text-right">Paid</th>
+                <th class="text-right">{{ __('reports.col_tax') }}</th>
+                <th class="text-right">{{ __('reports.col_total') }}</th>
+                <th class="text-right">{{ __('reports.col_paid') }}</th>
             </tr>
         </thead>
         <tbody>

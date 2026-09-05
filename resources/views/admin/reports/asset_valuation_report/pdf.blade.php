@@ -20,7 +20,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Asset Valuation Report',
+        'title' => __('reports.asset_valuation_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -29,14 +29,14 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Branch</th>
+                <th>{{ __('reports.col_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_category') }}</th>
+                <th>{{ __('reports.col_branch') }}</th>
                 <th class="text-right">Cost</th>
                 <th class="text-right">Accum. Dep.</th>
                 <th class="text-right">Book Value</th>
-                <th>Status</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

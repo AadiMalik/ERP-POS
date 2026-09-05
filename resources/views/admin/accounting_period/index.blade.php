@@ -3,24 +3,23 @@
 @endsection
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Accounting Periods</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('accounting_periods.title') }}</h4>
 
         <div class="card">
             <div class="card-header">
-                <div>Advanced Accounting Mode &mdash; open/close/reopen periods manually. Reopening and overriding a
-                    blocked close both require a reason, which is recorded to the Activity Log.</div>
+                <div>{{ __('accounting_periods.intro') }}</div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table" id="accounting_period_table">
                         <thead>
                             <tr>
-                                <th>Period</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Status</th>
-                                <th>Closed Automatically</th>
-                                <th>Action</th>
+                                <th>{{ __('common.period') }}</th>
+                                <th>{{ __('common.start_date') }}</th>
+                                <th>{{ __('common.end_date') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('accounting_periods.closed_automatically') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -34,26 +33,26 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Close Period</h5>
+                        <h5 class="modal-title">{{ __('accounting_periods.close_period') }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" id="close_period_id">
                         <div id="closeIssuesBox" class="alert alert-warning d-none"></div>
                         <div class="mb-3">
-                            <label class="form-label">Reason (required if overriding pending items)</label>
+                            <label class="form-label">{{ __('accounting_periods.reason_override') }}</label>
                             <textarea class="form-control" id="close_reason"></textarea>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="close_override">
                             <label class="form-check-label" for="close_override">
-                                Close anyway, even though items are pending
+                                {{ __('accounting_periods.close_anyway') }}
                             </label>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="confirmClose">Close Period</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                        <button type="button" class="btn btn-primary" id="confirmClose">{{ __('accounting_periods.close_period') }}</button>
                     </div>
                 </div>
             </div>
@@ -64,19 +63,19 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Reopen Period</h5>
+                        <h5 class="modal-title">{{ __('accounting_periods.reopen_period') }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" id="reopen_period_id">
                         <div class="mb-3">
-                            <label class="form-label">Reason <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('common.reason') }} <span class="text-danger">*</span></label>
                             <textarea class="form-control" id="reopen_reason" required></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="confirmReopen">Reopen Period</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                        <button type="button" class="btn btn-primary" id="confirmReopen">{{ __('accounting_periods.reopen_period') }}</button>
                     </div>
                 </div>
             </div>
@@ -84,13 +83,36 @@
     </div>
 @endsection
 @section('js')
+    @php
+        $__i18nAp = [
+            'open' => __('common.open'),
+            'closed' => __('common.closed'),
+            'pending_close' => __('accounting_periods.pending_close'),
+            'upcoming' => __('common.upcoming'),
+            'open_btn' => __('accounting_periods.open_btn'),
+            'close_btn' => __('accounting_periods.close_btn'),
+            'reopen_btn' => __('accounting_periods.reopen_btn'),
+            'issues_btn' => __('accounting_periods.issues_btn'),
+            'no_periods' => __('accounting_periods.no_periods'),
+            'blocked_message' => __('accounting_periods.blocked_message'),
+            'reason_required_reopen' => __('accounting_periods.reason_required_reopen'),
+            'could_not_open' => __('accounting_periods.could_not_open'),
+            'could_not_close' => __('accounting_periods.could_not_close'),
+            'could_not_reopen' => __('accounting_periods.could_not_reopen'),
+            'no_pending_issues' => __('accounting_periods.no_pending_issues'),
+            'pending_items' => __('accounting_periods.pending_items'),
+            'yes' => __('common.yes'),
+            'no' => __('common.no'),
+        ];
+    @endphp
+    <script>window.i18n_accounting_periods = @json($__i18nAp);</script>
     <script>
         function statusBadge(status) {
             switch (status) {
-                case 'open': return '<span class="badge bg-success">Open</span>';
-                case 'closed': return '<span class="badge bg-secondary">Closed</span>';
-                case 'pending_close': return '<span class="badge bg-warning">Pending Close</span>';
-                default: return '<span class="badge bg-info">Upcoming</span>';
+                case 'open': return '<span class="badge bg-success">' + window.i18n_accounting_periods.open + '</span>';
+                case 'closed': return '<span class="badge bg-secondary">' + window.i18n_accounting_periods.closed + '</span>';
+                case 'pending_close': return '<span class="badge bg-warning">' + window.i18n_accounting_periods.pending_close + '</span>';
+                default: return '<span class="badge bg-info">' + window.i18n_accounting_periods.upcoming + '</span>';
             }
         }
 
@@ -104,15 +126,15 @@
                 rows.forEach(function(row) {
                     let actions = "";
                     if (row.status === 'upcoming') {
-                        actions += `<button class="btn btn-sm btn-outline-primary openPeriod" data-id="${row.accounting_period_id}">Open</button> `;
+                        actions += `<button class="btn btn-sm btn-outline-primary openPeriod" data-id="${row.accounting_period_id}">${window.i18n_accounting_periods.open_btn}</button> `;
                     }
                     if (row.status === 'open' || row.status === 'pending_close') {
-                        actions += `<button class="btn btn-sm btn-outline-danger closePeriodBtn" data-id="${row.accounting_period_id}">Close</button> `;
+                        actions += `<button class="btn btn-sm btn-outline-danger closePeriodBtn" data-id="${row.accounting_period_id}">${window.i18n_accounting_periods.close_btn}</button> `;
                     }
                     if (row.status === 'closed') {
-                        actions += `<button class="btn btn-sm btn-outline-warning reopenPeriodBtn" data-id="${row.accounting_period_id}">Reopen</button> `;
+                        actions += `<button class="btn btn-sm btn-outline-warning reopenPeriodBtn" data-id="${row.accounting_period_id}">${window.i18n_accounting_periods.reopen_btn}</button> `;
                     }
-                    actions += `<button class="btn btn-sm btn-outline-secondary viewIssuesBtn" data-id="${row.accounting_period_id}">Issues</button>`;
+                    actions += `<button class="btn btn-sm btn-outline-secondary viewIssuesBtn" data-id="${row.accounting_period_id}">${window.i18n_accounting_periods.issues_btn}</button>`;
 
                     html += `<tr>
                         <td>${row.name}</td>
@@ -123,7 +145,7 @@
                         <td>${actions}</td>
                     </tr>`;
                 });
-                $("#accounting_period_table tbody").html(html || '<tr><td colspan="6" class="text-center">No accounting periods yet.</td></tr>');
+                $("#accounting_period_table tbody").html(html || '<tr><td colspan="6" class="text-center">' + window.i18n_accounting_periods.no_periods + '</td></tr>');
             });
         }
 
@@ -139,7 +161,7 @@
                     successMessage(response.Message);
                     loadAccountingPeriods();
                 }).catch(function(err) {
-                    errorMessage(err.Message || "Could not open period");
+                    errorMessage(err.Message || window.i18n_accounting_periods.could_not_open);
                 });
             });
 
@@ -164,7 +186,7 @@
                     let data = response.Data;
                     if (data && data.result === 'blocked') {
                         $("#closeIssuesBox").removeClass("d-none").html(
-                            "This period has pending items and was not closed. Resolve them, or tick \"Close anyway\" with a reason to override."
+                            window.i18n_accounting_periods.blocked_message
                         );
                         loadAccountingPeriods();
                         return;
@@ -173,7 +195,7 @@
                     $("#closeModal").modal("hide");
                     loadAccountingPeriods();
                 }).catch(function(err) {
-                    errorMessage(err.Message || "Could not close period");
+                    errorMessage(err.Message || window.i18n_accounting_periods.could_not_close);
                 });
             });
 
@@ -187,7 +209,7 @@
                 let id = $("#reopen_period_id").val();
                 let reason = $("#reopen_reason").val();
                 if (!reason || !reason.trim()) {
-                    errorMessage("A reason is required to reopen this period.");
+                    errorMessage(window.i18n_accounting_periods.reason_required_reopen);
                     return;
                 }
                 ajaxRequest({
@@ -199,7 +221,7 @@
                     $("#reopenModal").modal("hide");
                     loadAccountingPeriods();
                 }).catch(function(err) {
-                    errorMessage(err.Message || "Could not reopen period");
+                    errorMessage(err.Message || window.i18n_accounting_periods.could_not_reopen);
                 });
             });
 
@@ -211,11 +233,11 @@
                 }).then(function(response) {
                     let issues = response.Data || [];
                     if (!issues.length) {
-                        successMessage("No pending issues for this period.");
+                        successMessage(window.i18n_accounting_periods.no_pending_issues);
                         return;
                     }
                     let list = issues.map(function(i) { return "- " + i.summary; }).join("\n");
-                    alert("Pending items:\n\n" + list);
+                    alert(window.i18n_accounting_periods.pending_items + "\n\n" + list);
                 });
             });
         });

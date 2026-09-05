@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'पृष्ठहरू र नीतिहरू',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'प्रशंसापत्रहरू',
+    'hero_stats' => 'मुख्य तथ्याङ्कहरू',
+    'homepage_sections' => 'गृहपृष्ठ खण्डहरू',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'सम्पर्क सन्देशहरू',
+    'newsletter_subscribers' => 'न्यूजलेटर सदस्यहरू',
+    'social_media' => 'सामाजिक सञ्जाल',
+    'intro_cms' => 'इन्ट्रो सीएमएस',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

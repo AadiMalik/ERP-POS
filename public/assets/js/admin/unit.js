@@ -3,7 +3,7 @@ $("#createNewUnit").click(function () {
       $("#unit_id").val('');
       $("#name").val('');
       $("#saveBtn").show();
-      $("#modelHeading").html("Create New Unit");
+      $("#modelHeading").html(window.i18n_units?.create_title || "Create New Unit");
       $("#ajaxModel").modal("show");
 });
 
@@ -14,7 +14,7 @@ editRecord({
             let data = response.Data;
             $("#unit_id").val(data.unit_id);
             $("#name").val(data.name);
-            $("#modelHeading").html("Edit Unit");
+            $("#modelHeading").html(window.i18n_units?.edit_title || "Edit Unit");
             $("#saveBtn").show();
             $("#ajaxModel").modal("show");
       }
@@ -29,7 +29,7 @@ saveRecord({
       },
       beforeSubmit: function () {
             if ($("#name").val() == "") {
-                  errorMessage("Please Enter Name");
+                  errorMessage(window.i18n_units?.please_enter_name || window.i18n?.please_enter_name || "Please Enter Name");
                   return false;
             }
             return true;

@@ -4,10 +4,10 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">{{ isset($order_return) ? 'Update' : 'New' }} Order Return</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ isset($order_return) ? 'Update' : 'New' }} {{ __('order_returns.singular') }}</h4>
         <div class="card">
             <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0">{{ isset($order_return) ? 'Update' : 'Create' }} Order Return</h5>
+                <h5 class="mb-0">{{ isset($order_return) ? 'Update' : 'Create' }} {{ __('order_returns.singular') }}</h5>
             </div>
             <div class="card-body">
                 <form action="{{ url('admin/order-return') }}" method="POST" id="orderReturnForm">
@@ -17,9 +17,9 @@
                     <div class="row">
                         @if (!empty($business) && RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3 mb-3">
-                                <label>Business <span class="text-danger">*</span></label>
+                                <label>{{ __('common.business') }} <span class="text-danger">*</span></label>
                                 <select class="form-control select2" name="business_id" id="business_id">
-                                    <option value="">--Select Business--</option>
+                                    <option value="">{{ __('common.select_business') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}"
                                             {{ old('business_id', $order_return->business_id ?? '') == $item->business_id ? 'selected' : '' }}>
@@ -35,7 +35,7 @@
                             </label>
                             <select class="form-control select2" name="order_id" id="order_id"
                                 {{ isset($order_return) ? 'disabled' : '' }}>
-                                <option value="">--Select Order--</option>
+                                <option value="">{{ __('order_returns.select_order') }}</option>
                                 @foreach ($orders as $item)
                                     <option value="{{ $item->order_id }}"
                                         {{ old('order_id', $order_return->order_id ?? ($preselected_order_id ?? '')) == $item->order_id ? 'selected' : '' }}>
@@ -48,27 +48,27 @@
                             @endif
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Customer</label>
+                            <label>{{ __('common.customer') }}</label>
                             <input type="text" class="form-control" id="customer_name" readonly
                                 value="{{ $order_return->customer->name ?? '' }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Warehouse</label>
+                            <label>{{ __('common.warehouse') }}</label>
                             <input type="text" class="form-control" id="warehouse_name" readonly
                                 value="{{ $order_return->warehouse->name ?? '' }}">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>Return Number</label>
                             <input type="text" class="form-control" name="order_return_no" readonly
-                                value="{{ $order_return->order_return_no ?? ($order_return_no ?? 'Auto Generated') }}">
+                                value="{{ $order_return->order_return_no ?? ($order_return_no ?? '{{ __('common.auto_generated') }}') }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Return Date</label>
+                            <label>{{ __('order_returns.return_date') }}</label>
                             <input type="text" class="form-control datepicker" name="order_return_date"
                                 value="{{ old('order_return_date', isset($order_return) ? localDate($order_return->order_return_date) : localDate(date('Y-m-d'))) }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Refund Method</label>
+                            <label>{{ __('order_returns.refund_method') }}</label>
                             <select class="form-control select2" name="refund_payment_method_id" id="refund_payment_method_id">
                                 <option value="">-- Credit Customer's Account --</option>
                                 @foreach ($payment_methods as $item)
@@ -79,15 +79,15 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <small class="text-muted">Leave blank to issue this return as a credit note against the customer's account instead of a cash/bank refund.</small>
+                            <small class="text-muted">{{ __('order_returns.credit_note_hint') }}'s account instead of a cash/bank refund.</small>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label>Reason</label>
+                            <label>{{ __('common.reason') }}</label>
                             <input type="text" class="form-control" name="reason"
                                 value="{{ old('reason', $order_return->reason ?? '') }}">
                         </div>
                         <div class="col-md-12">
-                            <label>Description</label>
+                            <label>{{ __('common.description') }}</label>
                             <textarea class="form-control" rows="3" name="description">{{ old('description', $order_return->description ?? '') }}</textarea>
                         </div>
                     </div>
@@ -103,18 +103,18 @@
                             <table class="table table-bordered table-striped" id="productTable">
                                 <thead>
                                     <tr>
-                                        <th style="min-width:220px;">Product</th>
-                                        <th style="min-width:150px;">Variation</th>
-                                        <th style="min-width:90px;">Unit</th>
-                                        <th style="min-width:110px;">Ordered Qty</th>
+                                        <th style="min-width:220px;">{{ __('common.product') }}</th>
+                                        <th style="min-width:150px;">{{ __('common.variation') }}</th>
+                                        <th style="min-width:90px;">{{ __('common.unit') }}</th>
+                                        <th style="min-width:110px;">{{ __('common.ordered_qty') }}</th>
                                         <th style="min-width:120px;">Already Returned</th>
                                         <th style="min-width:110px;">Returnable</th>
-                                        <th style="min-width:130px;">Return Qty</th>
-                                        <th style="min-width:160px;">Serial #</th>
-                                        <th style="min-width:120px;">Unit Price</th>
+                                        <th style="min-width:130px;">{{ __('order_returns.return_qty') }}</th>
+                                        <th style="min-width:160px;">{{ __('common.serial_number') }}</th>
+                                        <th style="min-width:120px;">{{ __('common.unit_price') }}</th>
                                         <th style="min-width:90px;">Discount %</th>
-                                        <th style="min-width:90px;">Tax %</th>
-                                        <th style="min-width:130px">Total</th>
+                                        <th style="min-width:90px;">{{ __('common.tax_percent') }}</th>
+                                        <th style="min-width:130px">{{ __('common.total') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody id="productRows">
@@ -133,7 +133,7 @@
                         <div class="offset-md-6 col-md-6">
                             <table class="table table-bordered">
                                 <tr>
-                                    <th>Subtotal</th>
+                                    <th>{{ __('common.subtotal') }}</th>
                                     <td>
                                         <input class="form-control" id="subtotal" readonly>
                                     </td>
@@ -151,7 +151,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>Total (Refund Amount)</th>
+                                    <th>{{ __('order_returns.total_refund') }}</th>
                                     <td>
                                         <input class="form-control fw-bold" id="total" name="total" readonly>
                                     </td>
@@ -162,7 +162,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <button class="text-end btn btn-primary" id="submitBtn">
-                                {{ isset($order_return) ? 'Update Order Return' : 'Save Order Return' }}
+                                {{ isset($order_return) ? 'Update {{ __('order_returns.singular') }}' : 'Save {{ __('order_returns.singular') }}' }}
                             </button>
                         </div>
                     </div>
@@ -603,16 +603,16 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Select Serial Numbers to Return</h5>
+                    <h5 class="modal-title">{{ __('order_returns.select_serials_to_return') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted mb-2" id="orSerialModalHint">Select the serial numbers to return.</p>
+                    <p class="text-muted mb-2" id="orSerialModalHint">{{ __('order_returns.select_serials_hint') }}</p>
                     <div id="orSerialModalList" style="max-height:300px; overflow-y:auto;"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="orSerialModalSaveBtn">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="orSerialModalSaveBtn">{{ __('common.save') }}</button>
                 </div>
             </div>
         </div>

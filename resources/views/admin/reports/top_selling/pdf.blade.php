@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Top Selling Report',
+        'title' => __('reports.top_selling'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,11 +56,11 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Rank</th>
-                <th>Product</th>
-                <th>Variation</th>
-                <th>SKU</th>
-                <th class="text-right">Qty</th>
+                <th>{{ __('reports.col_rank') }}</th>
+                <th>{{ __('reports.col_product') }}</th>
+                <th>{{ __('reports.col_variation') }}</th>
+                <th>{{ __('reports.col_sku') }}</th>
+                <th class="text-right">{{ __('reports.col_qty') }}</th>
                 <th class="text-right">Net Sales</th>
             </tr>
         </thead>

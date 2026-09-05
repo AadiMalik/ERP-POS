@@ -1,11 +1,11 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Designation</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('hrm_designations.singular') }}</h4>
 
     <div class="card">
         <div class="card-header bg-white border-bottom">
-            <h5 class="mb-0">{{ isset($designation) ? 'Update' : 'New' }} Designation</h5>
+            <h5 class="mb-0">{{ isset($designation) ? __('hrm_designations.update_heading') : __('hrm_designations.new_heading') }}</h5>
         </div>
 
         <form action="{{ url('admin/designation') }}" method="POST">
@@ -15,20 +15,20 @@
 
                 <div class="row g-4">
                     <div class="col-md-6">
-                        <label class="fw-semibold">Name <span class="text-danger">*</span></label>
+                        <label class="fw-semibold">{{ __('common.name') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="name" value="{{ old('name', $designation->name ?? '') }}" required>
                     </div>
                     <div class="col-md-6">
-                        <label class="fw-semibold">Code</label>
+                        <label class="fw-semibold">{{ __('common.code') }}</label>
                         <input type="text" class="form-control" name="code" value="{{ old('code', $designation->code ?? '') }}">
                     </div>
                     <div class="col-md-6">
                         <div class="d-flex align-items-center justify-content-between">
-                            <label class="fw-semibold mb-0">Department</label>
-                            @include('admin.partials.quick-add-btn', ['permission' => 'department.create', 'modal' => 'quickAddDepartmentModal', 'label' => 'Department'])
+                            <label class="fw-semibold mb-0">{{ __('hrm_designations.department') }}</label>
+                            @include('admin.partials.quick-add-btn', ['permission' => 'department.create', 'modal' => 'quickAddDepartmentModal', 'label' => __('hrm_designations.department')])
                         </div>
                         <select name="department_id" id="department_id" class="form-select">
-                            <option value="">-- Select Department --</option>
+                            <option value="">{{ __('hrm_designations.select_department') }}</option>
                             @foreach ($departments as $item)
                             <option value="{{ $item->department_id }}" {{ old('department_id', $designation->department_id ?? '') == $item->department_id ? 'selected' : '' }}>
                                 {{ $item->name }}
@@ -38,23 +38,23 @@
                     </div>
                     @if (isset($designation))
                     <div class="col-md-6">
-                        <label class="fw-semibold">Status</label>
+                        <label class="fw-semibold">{{ __('common.status') }}</label>
                         <select name="status" class="form-select">
-                            <option value="active" {{ ($designation->status ?? 'active') == 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ ($designation->status ?? '') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            <option value="active" {{ ($designation->status ?? 'active') == 'active' ? 'selected' : '' }}>{{ __('common.active') }}</option>
+                            <option value="inactive" {{ ($designation->status ?? '') == 'inactive' ? 'selected' : '' }}>{{ __('common.inactive') }}</option>
                         </select>
                     </div>
                     @endif
                     <div class="col-md-12">
-                        <label class="fw-semibold">Description</label>
+                        <label class="fw-semibold">{{ __('common.description') }}</label>
                         <textarea class="form-control" name="description" rows="2">{{ old('description', $designation->description ?? '') }}</textarea>
                     </div>
                 </div>
             </div>
             <div class="card-footer border-top">
                 <div class="d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">Cancel</button>
-                    <button class="btn btn-primary px-4">Save Designation</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">{{ __('common.cancel') }}</button>
+                    <button class="btn btn-primary px-4">{{ __('hrm_designations.save_designation') }}</button>
                 </div>
             </div>
         </form>

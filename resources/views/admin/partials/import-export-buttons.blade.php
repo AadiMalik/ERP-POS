@@ -29,13 +29,13 @@
         data-label="{{ $importExportLabel ?? ucfirst(str_replace('-', ' ', $importExportModule)) }}"
         data-export-params-selector="{{ $importExportExportParamsSelector ?? '' }}"
         @if (!empty($importExportRefreshFn)) data-refresh-fn="{{ $importExportRefreshFn }}" @endif>
-        <i class="fa fa-upload mr-5"></i>Import
+        <i class="fa fa-upload mr-5"></i>{{ __('common.import') }}
     </button>
 @endcan
 @can($importExportModule . '.export')
     <a href="javascript:void(0)" class="btn btn-outline-success import-export-export-btn"
         data-module="{{ $importExportRouteSegment }}"
         data-export-params-selector="{{ $importExportExportParamsSelector ?? '' }}">
-        <i class="fa fa-download mr-5"></i>Export
+        <i class="fa fa-download mr-5"></i>{{ __('common.export') }}
     </a>
 @endcan

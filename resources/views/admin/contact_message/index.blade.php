@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Contact Messages</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('website_cms.contact_messages') }}</h4>
 
     <div class="card">
         <div class="card-body">
@@ -9,12 +9,12 @@
                 <table id="contact_message_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Email</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('common.email') }}</th>
                             <th>Subject</th>
-                            <th>Status</th>
+                            <th>{{ __('common.status') }}</th>
                             <th>Received</th>
-                            <th>Action</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

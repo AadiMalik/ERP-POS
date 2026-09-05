@@ -22,7 +22,7 @@ $("#createNewPosRegister").click(function () {
       $("#status").val('active');
       togglePosRegisterAssignedUser();
       $("#saveBtn").show();
-      $("#modelHeading").html("Create New Register");
+      $("#modelHeading").html((window.i18n_pos && window.i18n_pos.create_register) || "Create New Register");
       $("#ajaxModel").modal("show");
 });
 
@@ -41,7 +41,7 @@ editRecord({
             togglePosRegisterAssignedUser();
             $("#assigned_user_id").val(data.assigned_user_id).trigger('change.select2');
             $("#status").val(data.status);
-            $("#modelHeading").html("Edit Register");
+            $("#modelHeading").html((window.i18n_pos && window.i18n_pos.edit_register) || "Edit Register");
             $("#saveBtn").show();
             $("#ajaxModel").modal("show");
       }
@@ -55,20 +55,21 @@ saveRecord({
             initDataTablepos_register_table();
       },
       beforeSubmit: function () {
+            const i18n = window.i18n_pos || {};
             if ($("#name").val() == "") {
-                  errorMessage("Please Enter Name");
+                  errorMessage(i18n.please_enter_name || "Please Enter Name");
                   return false;
             }
             if ($("#code").val() == "") {
-                  errorMessage("Please Enter Code");
+                  errorMessage(i18n.please_enter_code || "Please Enter Code");
                   return false;
             }
             if ($("#branch_id").val() == "") {
-                  errorMessage("Please Select Branch");
+                  errorMessage(i18n.please_select_branch || "Please Select Branch");
                   return false;
             }
             if ($("#warehouse_id").val() == "") {
-                  errorMessage("Please Select Warehouse");
+                  errorMessage(i18n.please_select_warehouse || "Please Select Warehouse");
                   return false;
             }
             return true;

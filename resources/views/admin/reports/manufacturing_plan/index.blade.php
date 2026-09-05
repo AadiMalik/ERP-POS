@@ -4,22 +4,22 @@ use App\Enums\RoleNames;
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Manufacturing Plan Report</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('reports.manufacturing_plan') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
-            <button type="button" id="toggleFilter" class="btn btn-outline-primary"><i class="fa fa-filter"></i> Filters</button>
+            <button type="button" id="toggleFilter" class="btn btn-outline-primary"><i class="fa fa-filter"></i> {{ __('common.filters') }}</button>
             <div class="d-flex gap-2">
                 @can('reports.manufacturing-plan-report.print')
-                <button type="button" id="print_btn" class="btn btn-outline-secondary"><i class="fa fa-print"></i> Print</button>
+                <button type="button" id="print_btn" class="btn btn-outline-secondary"><i class="fa fa-print"></i> {{ __('common.print') }}</button>
                 @endcan
                 @can('reports.manufacturing-plan-report.pdf')
-                <button type="button" id="pdf_btn" class="btn btn-outline-danger"><i class="fa fa-file-pdf"></i> PDF</button>
+                <button type="button" id="pdf_btn" class="btn btn-outline-danger"><i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}</button>
                 @endcan
                 @can('reports.manufacturing-plan-report.export')
-                <button type="button" id="export_btn" class="btn btn-outline-success"><i class="fa fa-file-excel"></i> Excel</button>
+                <button type="button" id="export_btn" class="btn btn-outline-success"><i class="fa fa-file-excel"></i> {{ __('common.excel') }}</button>
                 @endcan
                 @can('reports.manufacturing-plan-report.export-csv')
-                <button type="button" id="export_csv_btn" class="btn btn-outline-info"><i class="fa fa-file-csv"></i> CSV</button>
+                <button type="button" id="export_csv_btn" class="btn btn-outline-info"><i class="fa fa-file-csv"></i> {{ __('common.csv') }}</button>
                 @endcan
             </div>
         </div>
@@ -28,34 +28,34 @@ use App\Enums\RoleNames;
                 <div class="row g-3">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                     <div class="col-md-3">
-                        <label class="form-label">Business</label>
+                        <label class="form-label">{{ __('common.business') }}</label>
                         <select id="business_id" class="form-select">
-                            <option value="">--All Businesses--</option>
+                            <option value="">{{ __('common.all_businesses') }}</option>
                             @foreach ($business as $item)<option value="{{ $item->business_id }}">{{ $item->name ?? '' }}</option>@endforeach
                         </select>
                     </div>
                     @endif
                     <div class="col-md-3">
-                        <label class="form-label">Branch</label>
+                        <label class="form-label">{{ __('common.branch') }}</label>
                         <select id="branch_id" class="form-select">
-                            <option value="">--All Branches--</option>
+                            <option value="">{{ __('common.all_branches') }}</option>
                             @foreach ($branches as $item)<option value="{{ $item->branch_id }}">{{ $item->name ?? '' }}</option>@endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Status</label>
+                        <label class="form-label">{{ __('common.status') }}</label>
                         <select id="status" class="form-select">
-                            <option value="">--All Statuses--</option>
+                            <option value="">{{ __('common.all_statuses') }}</option>
                             @foreach ($statuses as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Date Range</label>
+                        <label class="form-label">{{ __('common.date_range') }}</label>
                         @include('admin.partials.date_filter')
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
-                        <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                        <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                     </div>
                 </div>
             </div>
@@ -63,8 +63,8 @@ use App\Enums\RoleNames;
                 <table id="mfg_plan_report_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Business</th><th>Branch</th><th>Product</th><th>Plan Date</th>
-                            <th>Planned Qty</th><th>Produced Qty</th><th>Remaining Qty</th><th>Progress</th><th>Status</th>
+                            <th>{{ __('common.business') }}</th><th>{{ __('common.branch') }}</th><th>{{ __('common.product') }}</th><th>Plan Date</th>
+                            <th>Planned Qty</th><th>Produced Qty</th><th>Remaining Qty</th><th>Progress</th><th>{{ __('common.status') }}</th>
                         </tr>
                     </thead>
                 </table>

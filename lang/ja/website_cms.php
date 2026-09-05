@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'ページとポリシー',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'お客様の声',
+    'hero_stats' => '主要統計',
+    'homepage_sections' => 'ホームページセクション',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'お問い合わせメッセージ',
+    'newsletter_subscribers' => 'ニュースレター購読者',
+    'social_media' => 'ソーシャルメディア',
+    'intro_cms' => '紹介用CMS',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

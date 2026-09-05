@@ -19,7 +19,7 @@ $("#createNewPaymentMethod").click(function () {
       $("#status").val('active');
       toggleAccountRequired();
       $("#saveBtn").show();
-      $("#modelHeading").html("Create New Payment Method");
+      $("#modelHeading").html(window.i18n_payment_methods?.create_new || "Create New Payment Method");
       $("#ajaxModel").modal("show");
 });
 
@@ -38,7 +38,7 @@ editRecord({
             $("#is_default").prop("checked", data.is_default == 1);
             $("#status").val(data.status);
             toggleAccountRequired();
-            $("#modelHeading").html("Edit Payment Method");
+            $("#modelHeading").html(window.i18n_payment_methods?.edit_heading || "Edit Payment Method");
             $("#saveBtn").show();
             $("#ajaxModel").modal("show");
       }
@@ -53,15 +53,15 @@ saveRecord({
       },
       beforeSubmit: function () {
             if ($("#name").val() == "") {
-                  errorMessage("Please Enter Name");
+                  errorMessage(window.i18n_payment_methods?.please_enter_name || "Please Enter Name");
                   return false;
             }
             if ($("#code").val() == "") {
-                  errorMessage("Please Enter Code");
+                  errorMessage(window.i18n_payment_methods?.please_enter_code || "Please Enter Code");
                   return false;
             }
             if ($("#type").val() !== "credit" && $("#account_id").val() == "") {
-                  errorMessage("Please Select Account");
+                  errorMessage(window.i18n_payment_methods?.please_select_account || "Please Select Account");
                   return false;
             }
             return true;

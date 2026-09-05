@@ -1,12 +1,12 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Asset Allocation</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('hrm_assets.allocation_title') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div>
                 <select id="employee_id" class="form-select select2" style="width:220px;">
-                    <option value="">--All Employees--</option>
+                    <option value="">{{ __('common.all_employees') }}</option>
                     @foreach ($employees as $item)
                     <option value="{{ $item->employee_id }}">{{ $item->user->name ?? '-' }}</option>
                     @endforeach
@@ -15,13 +15,13 @@
             <div class="d-flex gap-2">
                 @include('admin.partials.import-export-buttons', [
                     'importExportModule' => 'asset-allocation',
-                    'importExportLabel' => 'Asset Allocation',
+                    'importExportLabel' => __('hrm_assets.allocation_import_export_label'),
                     'importExportRefreshFn' => 'initDataTableasset_allocation_table',
                 ])
                 @can('asset-allocation.create')
                 <a href="{{ url('admin/asset-allocation/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
-                    Issue Asset
+                    {{ __('hrm_assets.issue_asset') }}
                 </a>
                 @endcan
             </div>
@@ -31,13 +31,13 @@
                 <table id="asset_allocation_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Asset</th>
-                            <th>Employee</th>
-                            <th>Issue Date</th>
-                            <th>Expected Return</th>
-                            <th>Return Date</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('hrm_assets.singular') }}</th>
+                            <th>{{ __('common.employee') }}</th>
+                            <th>{{ __('hrm_assets.issue_date') }}</th>
+                            <th>{{ __('hrm_assets.expected_return') }}</th>
+                            <th>{{ __('hrm_assets.return_date') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>
@@ -48,6 +48,11 @@
 </div>
 @endsection
 @section('js')
+<script>
+    window.i18n_hrm_assets = {
+        condition_on_return_prompt: @json(__('hrm_assets.condition_on_return_prompt')),
+    };
+</script>
 @include('admin.partials.datatable', [
 'columns' => "
 {data:'asset',name:'asset',sortable:false},
@@ -75,7 +80,7 @@
 
     $(document).on('click', '#returnAllocation', function() {
         let id = $(this).data('id');
-        let condition = prompt('Condition on return (new, good, fair, damaged, lost):', 'good');
+        let condition = prompt(window.i18n_hrm_assets.condition_on_return_prompt, 'good');
         if (condition === null) return;
         ajaxRequest({
                 url: url_local + '/admin/asset-allocation/' + id + '/return',

@@ -44,15 +44,16 @@ $('#reset_filter').click(function () {
 // dependent dropdowns.
 $('#business_id').on('change', function () {
     let business_id = $(this).val();
+    const i18n = window.i18n_orders || {};
 
-    $('#branch_id').html('<option value="">--All Branches--</option>');
-    $('#warehouse_id').html('<option value="">--All Warehouses--</option>');
-    $('#register_id').html('<option value="">--All Registers--</option>');
-    $('#cashier_id').html('<option value="">--All Cashiers--</option>');
-    $('#customer_id').html('<option value="">--All Customers--</option>');
-    $('#order_type_id').html('<option value="">--All Order Types--</option>');
-    $('#order_source_id').html('<option value="">--All Order Sources--</option>');
-    $('#payment_method_id').html('<option value="">--All Payment Methods--</option>');
+    $('#branch_id').html('<option value="">' + (i18n.all_branches || '--All Branches--') + '</option>');
+    $('#warehouse_id').html('<option value="">' + (i18n.all_warehouses || '--All Warehouses--') + '</option>');
+    $('#register_id').html('<option value="">' + (i18n.all_registers || '--All Registers--') + '</option>');
+    $('#cashier_id').html('<option value="">' + (i18n.all_cashiers || '--All Cashiers--') + '</option>');
+    $('#customer_id').html('<option value="">' + (i18n.all_customers || '--All Customers--') + '</option>');
+    $('#order_type_id').html('<option value="">' + (i18n.all_order_types || '--All Order Types--') + '</option>');
+    $('#order_source_id').html('<option value="">' + (i18n.all_order_sources || '--All Order Sources--') + '</option>');
+    $('#payment_method_id').html('<option value="">' + (i18n.all_payment_methods || '--All Payment Methods--') + '</option>');
 
     if (!business_id) {
         return;
@@ -64,55 +65,55 @@ $('#business_id').on('change', function () {
     }).then(function (response) {
         let data = response.Data;
 
-        let branchOptions = '<option value="">--All Branches--</option>';
+        let branchOptions = '<option value="">' + (i18n.all_branches || '--All Branches--') + '</option>';
         $.each(data.branches, function (_, item) {
             branchOptions += `<option value="${item.branch_id}">${item.name}</option>`;
         });
         $('#branch_id').html(branchOptions);
 
-        let warehouseOptions = '<option value="">--All Warehouses--</option>';
+        let warehouseOptions = '<option value="">' + (i18n.all_warehouses || '--All Warehouses--') + '</option>';
         $.each(data.warehouses, function (_, item) {
             warehouseOptions += `<option value="${item.warehouse_id}">${item.name}</option>`;
         });
         $('#warehouse_id').html(warehouseOptions);
 
-        let registerOptions = '<option value="">--All Registers--</option>';
+        let registerOptions = '<option value="">' + (i18n.all_registers || '--All Registers--') + '</option>';
         $.each(data.registers, function (_, item) {
             registerOptions += `<option value="${item.pos_register_id}">${item.name}</option>`;
         });
         $('#register_id').html(registerOptions);
 
-        let cashierOptions = '<option value="">--All Cashiers--</option>';
+        let cashierOptions = '<option value="">' + (i18n.all_cashiers || '--All Cashiers--') + '</option>';
         $.each(data.cashiers, function (_, item) {
             cashierOptions += `<option value="${item.id}">${item.name}</option>`;
         });
         $('#cashier_id').html(cashierOptions);
 
-        let customerOptions = '<option value="">--All Customers--</option>';
+        let customerOptions = '<option value="">' + (i18n.all_customers || '--All Customers--') + '</option>';
         $.each(data.customers, function (_, item) {
             customerOptions += `<option value="${item.customer_id}">${item.name}</option>`;
         });
         $('#customer_id').html(customerOptions);
 
-        let orderTypeOptions = '<option value="">--All Order Types--</option>';
+        let orderTypeOptions = '<option value="">' + (i18n.all_order_types || '--All Order Types--') + '</option>';
         $.each(data.order_types, function (_, item) {
             orderTypeOptions += `<option value="${item.order_type_id}">${item.name}</option>`;
         });
         $('#order_type_id').html(orderTypeOptions);
 
-        let orderSourceOptions = '<option value="">--All Order Sources--</option>';
+        let orderSourceOptions = '<option value="">' + (i18n.all_order_sources || '--All Order Sources--') + '</option>';
         $.each(data.order_sources, function (_, item) {
             orderSourceOptions += `<option value="${item.order_source_id}">${item.name}</option>`;
         });
         $('#order_source_id').html(orderSourceOptions);
 
-        let paymentMethodOptions = '<option value="">--All Payment Methods--</option>';
+        let paymentMethodOptions = '<option value="">' + (i18n.all_payment_methods || '--All Payment Methods--') + '</option>';
         $.each(data.payment_methods, function (_, item) {
             paymentMethodOptions += `<option value="${item.payment_method_id}">${item.name}</option>`;
         });
         $('#payment_method_id').html(paymentMethodOptions);
     }).catch(function (err) {
-        errorMessage(err.Message ?? 'Something went wrong.');
+        errorMessage(err.Message ?? (window.i18n_orders?.something_went_wrong || 'Something went wrong.'));
     });
 });
 
@@ -127,7 +128,7 @@ $('#confirmCancelOrder').click(function () {
     let reason = $('#cancel_order_reason').val();
 
     if (!reason || !reason.trim()) {
-        errorMessage('A cancellation reason is required.');
+        errorMessage(window.i18n_orders?.cancellation_reason_required || 'A cancellation reason is required.');
         return;
     }
 
@@ -140,6 +141,6 @@ $('#confirmCancelOrder').click(function () {
         $('#cancelOrderModal').modal('hide');
         initDataTableorder_table();
     }).catch(function (err) {
-        errorMessage(err.Message || 'Unable to cancel order.');
+        errorMessage(err.Message || window.i18n_orders?.unable_cancel || 'Unable to cancel order.');
     });
 });

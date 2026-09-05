@@ -371,7 +371,7 @@
 @endphp
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Chart of Accounts (COA)</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('accounts.coa_title') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 @if (RoleNames::SUPERADMIN == getRoleName())
@@ -379,7 +379,7 @@
                         <label class="form-label mb-1">Business</label>
                         <select id="coa_business_filter" class="form-select">
                             <option value="" {{ empty($selected_business_id) ? 'selected' : '' }}>
-                                System Template (Global)
+                                {{ __('accounts.system_template_global') }}
                             </option>
                             @foreach ($business as $item)
                                 <option value="{{ $item->business_id }}"
@@ -393,10 +393,10 @@
                 <div>
                     <!-- Action Buttons -->
                     <a href="javascript:void(0)" id="createParentAccount" class="btn rounded-pill btn-primary me-2">
-                        <i class="icon-base fa fa-plus mr-5"></i> Add Parent
+                        <i class="icon-base fa fa-plus mr-5"></i> {{ __('accounts.add_parent') }}
                     </a>
                     <a href="javascript:void(0)" id="createChildAccount" class="btn rounded-pill btn-primary">
-                        <i class="icon-base fa fa-plus mr-5"></i> Add Child
+                        <i class="icon-base fa fa-plus mr-5"></i> {{ __('accounts.add_child') }}
                     </a>
                 </div>
             </div>
@@ -418,14 +418,14 @@
                                             {{ $type->accountSubTypes->count() }}
                                         </span>
 
-                                        <a href="#" class="action-btn action-btn-ledger" title="Ledger">
+                                        <a href="#" class="action-btn action-btn-ledger" title="{{ __('accounts.ledger') }}">
                                             <i class="fa fa-book"></i>
                                         </a>
 
                                     </span>
                                 </div>
                                 <div>
-                                    <small class="text-success me-3">Balance: 0.00 DR</small>
+                                    <small class="text-success me-3">{{ __('accounts.balance_dr', ['amount' => '0.00']) }}</small>
                                     <i class="fa fa-chevron-right expand-icon"
                                         id="sectionIcon{{ $type->account_type_id }}"></i>
                                 </div>
@@ -506,6 +506,24 @@
     </div>
 @endsection
 @section('js')
+    @php
+        $__i18nAccounts = [
+            'create_parent' => __('accounts.create_parent'),
+            'create_child' => __('accounts.create_child'),
+            'edit_parent' => __('accounts.edit_parent'),
+            'edit_child' => __('accounts.edit_child'),
+            'please_select_account_type' => __('accounts.please_select_account_type'),
+            'please_select_account_sub_type' => __('accounts.please_select_account_sub_type'),
+            'please_select_parent_account' => __('accounts.please_select_parent_account'),
+            'please_enter_code' => __('accounts.please_enter_code'),
+            'please_enter_name' => __('accounts.please_enter_name'),
+            'select_account_type' => __('accounts.select_account_type'),
+            'select_account_sub_type' => __('accounts.select_account_sub_type'),
+            'select_parent_account' => __('accounts.select_parent_account'),
+            'system_template_global' => __('accounts.system_template_global'),
+        ];
+    @endphp
+    <script>window.i18n_accounts = @json($__i18nAccounts);</script>
     <script src="{{ asset('public/assets/js/admin/account.js') }}"></script>
     <script>
         (function() {

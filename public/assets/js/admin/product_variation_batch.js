@@ -10,7 +10,7 @@ $("#createNewProductVariationBatch").click(function () {
     $("#manufacturing_date").val('');
     $("#expiry_date").val('');
     $("#saveBtn").show();
-    $("#modelHeading").html("Create New Batch");
+    $("#modelHeading").html((window.i18n_variation_batches && window.i18n_variation_batches.create) || "Create New Batch");
     $("#ajaxModel").modal("show");
     enableForm();
 });
@@ -42,7 +42,7 @@ editRecord({
         $("#quantity").val(data.quantity);
         $("#manufacturing_date").val(data.manufacturing_date);
         $("#expiry_date").val(data.expiry_date);
-        $("#modelHeading").html("Edit Batch");
+        $("#modelHeading").html((window.i18n_variation_batches && window.i18n_variation_batches.edit) || "Edit Batch");
         $("#saveBtn").show();
         enableForm();
         $("#ajaxModel").modal("show");
@@ -57,20 +57,21 @@ saveRecord({
         initDataTableproduct_variation_batch_table();
     },
     beforeSubmit: function () {
+        const i18n = window.i18n_variation_batches || {};
         if ($("#avg_price").val() == "") {
-            errorMessage("Please enter average cost");
+            errorMessage(i18n.please_enter_avg_cost || "Please enter average cost");
             return false;
         }
         if ($("#quantity").val() == "") {
-            errorMessage("Please enter quantity");
+            errorMessage(i18n.please_enter_quantity || "Please enter quantity");
             return false;
         }
         if ($("#manufacturing_date").val() == "") {
-            errorMessage("Please enter manufacturing date");
+            errorMessage(i18n.please_enter_mfg_date || "Please enter manufacturing date");
             return false;
         }
         if ($("#expiry_date").val() == "") {
-            errorMessage("Please enter expiry date");
+            errorMessage(i18n.please_enter_expiry_date || "Please enter expiry date");
             return false;
         }
         return true;

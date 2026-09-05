@@ -7,7 +7,7 @@
 @section('content')
     <!-- ========== table components start ========== -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"> Roles</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('roles.title') }}</h4>
 
         <!-- Basic Bootstrap Table -->
         <div class="card">
@@ -16,10 +16,10 @@
                 <div class="d-flex gap-2">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                         <a href="{{ url('admin/roles/create') }}" class="btn rounded-pill btn-primary">
-                            <i class="icon-base fa fa-plus mr-5"></i>Add New</a>
+                            <i class="icon-base fa fa-plus mr-5"></i>{{ __('common.add_new') }}</a>
                     @endif
                     <button type="button" id="resetRolesBtn" class="btn rounded-pill btn-info">
-                        <i class="fa fa-refresh"></i> Reset Roles
+                        <i class="fa fa-refresh"></i> {{ __('roles.reset_roles') }}
                     </button>
                 </div>
             </div>
@@ -28,11 +28,11 @@
                     <thead>
                         <tr>
                             <th></th>
-                            <th>Role</th>
-                            <th>Description</th>
-                            <th>Permissions</th>
-                            <th>Business</th>
-                            <th>Action</th>
+                            <th>{{ __('roles.singular') }}</th>
+                            <th>{{ __('common.description') }}</th>
+                            <th>{{ __('roles.permissions') }}</th>
+                            <th>{{ __('common.business') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                         <!-- end table row-->
                     </thead>
@@ -46,6 +46,12 @@
     <!-- ========== table components end ========== -->
 @endsection
 @section('js')
+    @php
+        $__i18nRoles = [
+            'reset_success' => __('roles.reset_success'),
+        ];
+    @endphp
+    <script>window.i18n_roles = @json($__i18nRoles);</script>
     @include('admin.partials.datatable', [
         'columns' => "
     {data: null , defaultContent: ''},
@@ -93,7 +99,7 @@
 
                     $("#preloader").hide();
 
-                    successMessage(response.Message || "Roles reset successfully!");
+                    successMessage(response.Message || window.i18n_roles.reset_success);
 
                     if (typeof role_table !== "undefined") {
                         initDataTablerole_table();

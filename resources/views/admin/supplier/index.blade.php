@@ -5,27 +5,27 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">
-            Suplliers
+            {{ __('suppliers.title') }}
         </h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
 
                 </div>
                 <div class="d-flex gap-2">
                     @include('admin.partials.import-export-buttons', [
                         'importExportModule' => 'supplier',
-                        'importExportLabel' => 'Suppliers',
+                        'importExportLabel' => __('suppliers.title'),
                         'importExportRefreshFn' => 'initDataTablesupplier_table',
                         'importExportExportParamsSelector' => '#business_id',
                     ])
                     <a href="{{ url('admin/supplier/create') }}" class="btn btn-primary rounded-pill">
                         <i class="fa fa-plus"></i>
-                        Add New
+                        {{ __('common.add_new') }}
                     </a>
                 </div>
             </div>
@@ -34,9 +34,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -46,15 +46,15 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
                             <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
+                                {{ __('common.search') }}
                             </button>
                             <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
+                                {{ __('common.reset') }}
                             </button>
                         </div>
                     </div>
@@ -63,16 +63,16 @@
                     <table id="supplier_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Code</th>
-                                <th>Name</th>
-                                <th>Company</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Address</th>
-                                <th>Balance</th>
-                                <th>Status</th>
-                                <th>Business</th>
-                                <th>Action</th>
+                                <th>{{ __('common.code') }}</th>
+                                <th>{{ __('common.name') }}</th>
+                                <th>{{ __('suppliers.company') }}</th>
+                                <th>{{ __('common.email') }}</th>
+                                <th>{{ __('common.phone') }}</th>
+                                <th>{{ __('common.address') }}</th>
+                                <th>{{ __('common.balance') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>

@@ -2,7 +2,7 @@
     <div class="col-lg-6 mb-4">
         <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Inventory Summary</h5>
+                <h5 class="mb-0">{{ __('Inventory Summary') }}</h5>
                 <a href="{{ url('admin/product-variation-stock') }}" class="btn btn-sm btn-outline-primary">Manage Stock</a>
             </div>
             <div class="card-body">

@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'Sayfalar ve Politikalar',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'Referanslar',
+    'hero_stats' => 'Ana İstatistikler',
+    'homepage_sections' => 'Ana Sayfa Bölümleri',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'İletişim Mesajları',
+    'newsletter_subscribers' => 'Bülten Aboneleri',
+    'social_media' => 'Sosyal Medya',
+    'intro_cms' => 'Tanıtım CMS',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

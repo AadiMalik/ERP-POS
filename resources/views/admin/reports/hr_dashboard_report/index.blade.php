@@ -23,11 +23,11 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 py-3 mb-1">
-            <h4 class="fw-bold mb-0">HR Dashboard</h4>
+            <h4 class="fw-bold mb-0">{{ __('reports.hr_dashboard_report') }}</h4>
             @if (RoleNames::SUPERADMIN == getRoleName())
                 <div style="min-width: 260px;">
                     <select id="business_id" class="form-select">
-                        <option value="">--All Businesses--</option>
+                        <option value="">{{ __('common.all_businesses') }}</option>
                         @foreach ($business as $item)
                             <option value="{{ $item->business_id }}">{{ $item->code ?? '' }} {{ $item->name ?? '' }}</option>
                         @endforeach

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">My Leave</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('hrm_ess.my_leave') }}</h4>
 
     <div class="row g-3 mb-4">
         @foreach ($balances as $balance)
@@ -9,7 +9,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="text-muted">{{ $balance['leave_type'] }}</div>
-                    <h5>{{ $balance['remaining'] }} / {{ $balance['entitled'] }} days left</h5>
+                    <h5>{{ __('hrm_ess.days_left', ['remaining' => $balance['remaining'], 'entitled' => $balance['entitled']]) }}</h5>
                 </div>
             </div>
         </div>
@@ -21,13 +21,13 @@
             <div></div>
             @can('ess.leave.apply')
             <a href="{{ url('admin/ess/leave/create') }}" class="btn btn-primary rounded-pill">
-                <i class="fa fa-plus"></i> Apply for Leave
+                <i class="fa fa-plus"></i> {{ __('hrm_ess.apply_for_leave') }}
             </a>
             @endcan
         </div>
         <div class="card-body">
             <table class="table">
-                <thead><tr><th>Type</th><th>Start</th><th>End</th><th>Days</th><th>Status</th><th>Action</th></tr></thead>
+                <thead><tr><th>{{ __('common.type') }}</th><th>{{ __('hrm_ess.start') }}</th><th>{{ __('hrm_ess.end') }}</th><th>{{ __('hrm_ess.days') }}</th><th>{{ __('common.status') }}</th><th>{{ __('common.action') }}</th></tr></thead>
                 <tbody>
                     @forelse ($leave_requests as $leave)
                     <tr>
@@ -38,17 +38,24 @@
                         <td>
                             @php
                                 $map = ['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger', 'cancelled' => 'secondary'];
+                                $statusLabel = match ($leave->status) {
+                                    'pending' => __('hrm_ess.status_pending'),
+                                    'approved' => __('hrm_ess.status_approved'),
+                                    'rejected' => __('hrm_ess.status_rejected'),
+                                    'cancelled' => __('hrm_ess.status_cancelled'),
+                                    default => ucfirst($leave->status),
+                                };
                             @endphp
-                            <span class="badge bg-label-{{ $map[$leave->status] ?? 'secondary' }}">{{ ucfirst($leave->status) }}</span>
+                            <span class="badge bg-label-{{ $map[$leave->status] ?? 'secondary' }}">{{ $statusLabel }}</span>
                         </td>
                         <td>
                             @if ($leave->status == 'pending')
-                            <button type="button" class="btn btn-sm btn-outline-danger cancelLeaveBtn" data-id="{{ $leave->leave_request_id }}">Cancel</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger cancelLeaveBtn" data-id="{{ $leave->leave_request_id }}">{{ __('common.cancel') }}</button>
                             @endif
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="text-center text-muted">No leave requests yet.</td></tr>
+                    <tr><td colspan="6" class="text-center text-muted">{{ __('hrm_ess.no_leave_requests') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -68,12 +75,17 @@
 </script>
 @endif
 <script>
+    window.i18n_hrm_ess = Object.assign(window.i18n_hrm_ess || {}, {
+        cancel_leave_confirm: @json(__('hrm_ess.cancel_leave_confirm')),
+        yes_cancel_it: @json(__('hrm_ess.yes_cancel_it')),
+        leave_cancelled: @json(__('hrm_ess.leave_cancelled'))
+    });
     $('.cancelLeaveBtn').click(function() {
         let id = $(this).data('id');
         Swal.fire({
-            title: 'Cancel this leave request?',
+            title: (window.i18n_hrm_ess && window.i18n_hrm_ess.cancel_leave_confirm) || 'Cancel this leave request?',
             showCancelButton: true,
-            confirmButtonText: 'Yes, cancel it'
+            confirmButtonText: (window.i18n_hrm_ess && window.i18n_hrm_ess.yes_cancel_it) || 'Yes, cancel it'
         }).then((result) => {
             if (result.isConfirmed) {
                 ajaxRequest({
@@ -81,7 +93,7 @@
                         method: 'POST'
                     })
                     .then(() => {
-                        successMessage('Leave request cancelled.');
+                        successMessage((window.i18n_hrm_ess && window.i18n_hrm_ess.leave_cancelled) || 'Leave request cancelled.');
                         setTimeout(() => window.location.reload(), 800);
                     })
                     .catch((err) => errorMessage(err.Message));

@@ -43,7 +43,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Attendance Register',
+        'title' => __('reports.attendance_register'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -53,8 +53,8 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Code</th>
-                <th>Name</th>
+                <th>{{ __('reports.col_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
                 @foreach (array_keys($days) as $date)
                     <th class="text-center">{{ \Carbon\Carbon::parse($date)->format('d M') }}</th>
                 @endforeach

@@ -30,16 +30,16 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>Product</th>
-                <th>Variation</th>
-                <th>Unit</th>
+                <th>{{ __('common.product') }}</th>
+                <th>{{ __('common.variation') }}</th>
+                <th>{{ __('common.unit') }}</th>
                 <th>Batch</th>
                 <th>Expiry</th>
-                <th class="text-right">Quantity</th>
-                <th class="text-right">Unit Cost</th>
+                <th class="text-right">{{ __('common.quantity') }}</th>
+                <th class="text-right">{{ __('common.unit_cost') }}</th>
                 <th class="text-right">Value</th>
                 <th>Loss Type</th>
-                <th>Reason</th>
+                <th>{{ __('common.reason') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -78,7 +78,7 @@
 
     @if (!empty($waste_damage_expiry->notes))
         <div class="print-remarks">
-            <strong>Notes:</strong> {{ $waste_damage_expiry->notes }}
+            <strong>{{ __('common.notes') }}:</strong> {{ $waste_damage_expiry->notes }}
         </div>
     @endif
 

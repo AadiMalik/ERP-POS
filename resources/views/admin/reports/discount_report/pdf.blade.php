@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Discount Report',
+        'title' => __('reports.discount_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,13 +56,13 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Order No</th>
-                <th>Date</th>
-                <th>Customer</th>
-                <th>Product</th>
-                <th>Variation</th>
-                <th>SKU</th>
-                <th>Discount Type</th>
+                <th>{{ __('reports.col_order_no') }}</th>
+                <th>{{ __('reports.col_date') }}</th>
+                <th>{{ __('reports.col_customer') }}</th>
+                <th>{{ __('reports.col_product') }}</th>
+                <th>{{ __('reports.col_variation') }}</th>
+                <th>{{ __('reports.col_sku') }}</th>
+                <th>{{ __('reports.col_discount_type') }}</th>
                 <th class="text-right">Discount Amount</th>
                 <th class="text-right">Net Amount</th>
             </tr>

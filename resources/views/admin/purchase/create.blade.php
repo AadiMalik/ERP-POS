@@ -5,10 +5,10 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">{{ isset($purchase) ? 'Update' : 'New' }} Purchase</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ isset($purchase) ? __('common.update') : __('common.new') }} {{ __('purchases.singular') }}</h4>
         <div class="card">
             <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0">{{ isset($purchase) ? 'Update' : 'Create' }} Purchase</h5>
+                <h5 class="mb-0">{{ isset($purchase) ? __('common.update') : __('common.create') }} {{ __('purchases.singular') }}</h5>
             </div>
             <div class="card-body">
                 <form action="{{ url('admin/purchase') }}" method="POST" id="purchaseForm">
@@ -18,9 +18,9 @@
                     <div class="row">
                         @if (!empty($business) && RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3 mb-3">
-                                <label>Business <span class="text-danger">*</span></label>
+                                <label>{{ __('common.business') }} <span class="text-danger">*</span></label>
                                 <select class="form-control select2" name="business_id" id="business_id">
-                                    <option value="">--Select Business--</option>
+                                    <option value="">{{ __('common.select_business') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}"
                                             {{ old('business_id', $purchase->business_id ?? '') == $item->business_id ? 'selected' : '' }}>
@@ -32,17 +32,17 @@
                         @endif
                         <div class="col-md-3 mb-3">
                             <label>
-                                Purchase Type<span class="text-danger">*</span>
+                                {{ __('purchases.purchase_type') }}<span class="text-danger">*</span>
                             </label>
                             <select class="form-control" name="purchase_type" id="purchase_type"
                                 {{ isset($purchase) ? 'disabled' : '' }}>
                                 <option value="direct"
                                     {{ old('purchase_type', $purchase->purchase_type ?? 'direct') == 'direct' ? 'selected' : '' }}>
-                                    Direct Purchase
+                                    {{ __('purchases.direct_purchase') }}
                                 </option>
                                 <option value="purchase_request"
                                     {{ old('purchase_type', $purchase->purchase_type ?? '') == 'purchase_request' ? 'selected' : '' }}>
-                                    Purchase From Purchase Request
+                                    {{ __('purchases.from_purchase_request') }}
                                 </option>
                             </select>
                             @if (isset($purchase))
@@ -51,11 +51,11 @@
                         </div>
                         <div class="col-md-3 mb-3 purchase-request-area">
                             <label>
-                                Purchase Request<span class="text-danger">*</span>
+                                {{ __('purchases.purchase_request') }}<span class="text-danger">*</span>
                             </label>
                             <select class="form-control select2" name="purchase_request_id" id="purchase_request_id"
                                 {{ isset($purchase) && $purchase->purchase_type == 'purchase_request' ? 'disabled' : '' }}>
-                                <option value="">--Select Purchase Request--</option>
+                                <option value="">{{ __('purchases.select_purchase_request') }}</option>
                                 @foreach ($purchase_requests as $item)
                                     <option value="{{ $item->purchase_request_id }}"
                                         {{ old('purchase_request_id', $purchase->purchase_request_id ?? '') == $item->purchase_request_id ? 'selected' : '' }}>
@@ -70,22 +70,22 @@
                         </div>
                         <div class="col-md-3 mb-3 purchase-request-area">
                             <label>
-                                Quotation<span class="text-danger">*</span>
+                                {{ __('purchases.quotation') }}<span class="text-danger">*</span>
                             </label>
                             <select class="form-control" id="purchase_request_quotation_id"
                                 {{ isset($purchase) && $purchase->purchase_type == 'purchase_request' ? 'disabled' : '' }}>
-                                <option value="">--Select Quotation--</option>
+                                <option value="">{{ __('purchases.select_quotation') }}</option>
                             </select>
                         </div>
                         <div class="col-md-3 mb-3">
                             <div class="d-flex align-items-center justify-content-between">
                                 <label class="mb-0">
-                                    Supplier<span class="text-danger">*</span>
+                                    {{ __('common.supplier') }}<span class="text-danger">*</span>
                                 </label>
                                 @include('admin.partials.quick-add-btn', ['permission' => 'supplier.create', 'modal' => 'quickAddSupplierModal', 'label' => 'Supplier'])
                             </div>
                             <select class="form-control select2" name="supplier_id" id="supplier_id">
-                                <option value="">--Select Supplier--</option>
+                                <option value="">{{ __('common.select_supplier') }}</option>
                                 @foreach ($suppliers as $item)
                                     <option value="{{ $item->supplier_id }}"
                                         {{ old('supplier_id', $purchase->supplier_id ?? '') == $item->supplier_id ? 'selected' : '' }}>
@@ -96,10 +96,10 @@
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>
-                                Warehouse<span class="text-danger">*</span>
+                                {{ __('common.warehouse') }}<span class="text-danger">*</span>
                             </label>
                             <select class="form-control select2" name="warehouse_id" id="warehouse_id">
-                                <option value="">--Select Warehouse--</option>
+                                <option value="">{{ __('common.select_warehouse') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}"
                                         {{ old('warehouse_id', $purchase->warehouse_id ?? '') == $item->warehouse_id ? 'selected' : '' }}>
@@ -109,22 +109,22 @@
                             </select>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>PO Number</label>
+                            <label>{{ __('purchases.po_number') }}</label>
                             <input type="text" class="form-control" name="purchase_no" readonly
-                                value="{{ $purchase->purchase_no ?? ($purchase_no ?? 'Auto Generated') }}">
+                                value="{{ $purchase->purchase_no ?? ($purchase_no ?? '{{ __('common.auto_generated') }}') }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Purchase Date</label>
+                            <label>{{ __('purchases.purchase_date') }}</label>
                             <input type="text" class="form-control datepicker" name="purchase_date"
                                 value="{{ old('purchase_date', isset($purchase) ? localDate($purchase->purchase_date) : localDate(date('Y-m-d'))) }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Expected Delivery Date</label>
+                            <label>{{ __('purchases.expected_delivery_date') }}</label>
                             <input type="text" class="form-control datepicker" name="expected_delivery_date"
                                 value="{{ old('expected_delivery_date', isset($purchase) ? localDate($purchase->expected_delivery_date) : localDate(date('Y-m-d', strtotime('+7 days')))) }}">
                         </div>
                         <div class="col-md-12">
-                            <label>Description</label>
+                            <label>{{ __('common.description') }}</label>
                             <textarea class="form-control" rows="3" name="description">{{ old('description', $purchase->description ?? '') }}</textarea>
                         </div>
                     </div>
@@ -133,16 +133,16 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <h5 class="mb-0">
-                                Products
+                                {{ __('common.products') }}
                             </h5>
                             <div class="d-flex align-items-center gap-2">
                                 <div class="input-group" style="width:260px;">
                                     <input type="text" class="form-control" id="purchase_barcode_scan"
-                                        placeholder="Scan or enter barcode">
+                                        placeholder="{{ __('common.scan_barcode_placeholder') }}">
                                     @include('admin.partials.barcode_scanner', ['targetInputId' => '#purchase_barcode_scan'])
                                 </div>
                                 <button type="button" class="btn btn-primary" id="addProductBtn">
-                                    <i class="fa fa-plus"></i>Add Product
+                                    <i class="fa fa-plus"></i>{{ __('common.add_product') }}
                                 </button>
                             </div>
                         </div>
@@ -150,23 +150,23 @@
                             <table class="table table-bordered table-striped" id="productTable">
                                 <thead>
                                     <tr>
-                                        <th style="min-width:220px;">Product</th>
-                                        <th style="min-width:180px;">Variation</th>
-                                        <th style="min-width:170px;">Conversion</th>
-                                        <th style="min-width:90px;">Unit</th>
-                                        <th style="min-width:120px;">Ordered Qty</th>
-                                        <th style="min-width:120px;">Received Qty</th>
-                                        <th style="min-width:130px;">Batch No</th>
-                                        <th style="min-width:150px;">Expiry Date</th>
-                                        <th style="min-width:160px;">Serial #</th>
-                                        <th style="min-width:120px;">Unit Price</th>
-                                        <th style="min-width:130px;">Subtotal</th>
-                                        <th style="min-width:90px;">Disc %</th>
-                                        <th style="min-width:130px;">Disc Amount</th>
-                                        <th style="min-width:90px;">Tax %</th>
-                                        <th style="min-width:130px;">Tax Amount</th>
-                                        <th style="min-width:130px">Total</th>
-                                        <th style="min-width:60px;">Action</th>
+                                        <th style="min-width:220px;">{{ __('common.product') }}</th>
+                                        <th style="min-width:180px;">{{ __('common.variation') }}</th>
+                                        <th style="min-width:170px;">{{ __('common.conversion') }}</th>
+                                        <th style="min-width:90px;">{{ __('common.unit') }}</th>
+                                        <th style="min-width:120px;">{{ __('common.ordered_qty') }}</th>
+                                        <th style="min-width:120px;">{{ __('common.received_qty') }}</th>
+                                        <th style="min-width:130px;">{{ __('common.batch_no') }}</th>
+                                        <th style="min-width:150px;">{{ __('common.expiry_date') }}</th>
+                                        <th style="min-width:160px;">{{ __('common.serial_number') }}</th>
+                                        <th style="min-width:120px;">{{ __('common.unit_price') }}</th>
+                                        <th style="min-width:130px;">{{ __('common.subtotal') }}</th>
+                                        <th style="min-width:90px;">{{ __('common.discount_percent') }}</th>
+                                        <th style="min-width:130px;">{{ __('common.disc_amount') }}</th>
+                                        <th style="min-width:90px;">{{ __('common.tax_percent') }}</th>
+                                        <th style="min-width:130px;">{{ __('common.tax_amount') }}</th>
+                                        <th style="min-width:130px">{{ __('common.total') }}</th>
+                                        <th style="min-width:60px;">{{ __('common.action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody id="productRows">
@@ -174,7 +174,7 @@
                                     @if (!isset($purchase))
                                         <tr id="emptyRow">
                                             <td colspan="17" class="text-center text-muted">
-                                                No Products Added
+                                                {{ __('common.no_products_added') }}
                                             </td>
                                         </tr>
                                     @endif
@@ -188,32 +188,32 @@
                         <div class="offset-md-8 col-md-4">
                             <table class="table table-bordered">
                                 <tr>
-                                    <th>Subtotal</th>
+                                    <th>{{ __('common.subtotal') }}</th>
                                     <td>
                                         <input class="form-control" id="subtotal" name="subtotal" readonly>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>Discount Amount</th>
+                                    <th>{{ __('common.discount_amount') }}</th>
                                     <td>
                                         <input class="form-control" id="discount_amount" name="discount_amount" readonly>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>Tax Amount</th>
+                                    <th>{{ __('common.tax_amount') }}</th>
                                     <td>
                                         <input class="form-control" id="tax_amount" name="tax_amount" readonly>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>Shipping</th>
+                                    <th>{{ __('common.shipping') }}</th>
                                     <td>
                                         <input class="form-control" id="shipping_charge" name="shipping_charge"
                                             value="{{ old('shipping_charge', $purchase->shipping_charge ?? 0) }}">
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>Total</th>
+                                    <th>{{ __('common.total') }}</th>
                                     <td>
                                         <input class="form-control fw-bold" id="total" name="total" readonly>
                                     </td>
@@ -224,7 +224,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <button class="text-end btn btn-primary">
-                                {{ isset($purchase) ? 'Update Purchase' : 'Save Purchase' }}
+                                {{ isset($purchase) ? __('purchases.update_purchase') : __('purchases.save_purchase') }}
                             </button>
                         </div>
                     </div>
@@ -240,21 +240,21 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Enter Serial Numbers</h5>
+                    <h5 class="modal-title">{{ __('purchases.enter_serial_numbers') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted mb-2" id="serialModalHint">One serial number per line.</p>
+                    <p class="text-muted mb-2" id="serialModalHint">{{ __('purchases.one_serial_per_line') }}</p>
                     <textarea class="form-control" id="serialModalTextarea" rows="8"
-                        placeholder="Scan or type serial numbers, one per line"></textarea>
+                        placeholder="{{ __('purchases.serial_placeholder') }}"></textarea>
                     <div class="mt-2">
                         <input type="text" class="form-control d-none" id="serialScanHelperInput">
                         @include('admin.partials.barcode_scanner', ['targetInputId' => '#serialScanHelperInput'])
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="serialModalSaveBtn">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="serialModalSaveBtn">{{ __('common.save') }}</button>
                 </div>
             </div>
         </div>
@@ -281,6 +281,14 @@
         var productsData = [];
         var isEditMode = {{ isset($purchase) ? 'true' : 'false' }};
         var editPurchaseData = @json($purchase_details ?? null);
+        window.i18n_purchases = {
+            loading: @json(__('common.loading')),
+            na: @json(__('common.na')),
+            batch_no_placeholder: @json(__('purchases.batch_no_placeholder')),
+            expiry_date_placeholder: @json(__('purchases.expiry_date_placeholder')),
+            enter_serials: @json(__('purchases.enter_serials')),
+            select_purchase_request_hint: @json(__('purchases.select_purchase_request_hint')),
+        };
         // ======================================================
         // DOCUMENT READY
         // ======================================================
@@ -333,7 +341,7 @@
                 <tr id="emptyRow">
                     <td colspan="17"
                         class="text-center text-muted">
-                        Select Purchase Request
+                        Select {{ __('purchases.purchase_request') }}
                     </td>
                 </tr>
             `);
@@ -371,7 +379,7 @@
         function resetPurchaseForm() {
             productIndex = 0;
 
-            // Clear Purchase Request -> cascades to clear Quotation,
+            // Clear {{ __('purchases.purchase_request') }} -> cascades to clear {{ __('purchases.quotation') }},
             // remove all product rows and reset subtotal/discount/tax
             $('#purchase_request_id').val(null).trigger('change');
 
@@ -422,7 +430,7 @@
             <tr id="emptyRow">
                 <td colspan="17"
                     class="text-center text-muted">
-                    Select Purchase Request
+                    Select {{ __('purchases.purchase_request') }}
                 </td>
             </tr>
         `);
@@ -453,7 +461,7 @@
                 name="products[${index}][product_id]"
                 class="form-control product-select">
 
-                <option value="">--Select Product--</option>
+                <option value="">{{ __('common.select_product') }}</option>
 
             </select>
         </td>
@@ -461,14 +469,14 @@
             <select
                 name="products[${index}][product_variation_id]"
                 class="form-control variation-select">
-                <option value="">--Select Variation--</option>
+                <option value="">{{ __('common.select_variation') }}</option>
             </select>
         </td>
         <td>
             <select
                 name="products[${index}][product_variation_unit_conversion_id]"
                 class="form-control conversion-select">
-                <option value="">--Select Conversion--</option>
+                <option value="">{{ __('common.select_conversion') }}</option>
             </select>
             <input
                 type="hidden"
@@ -509,19 +517,19 @@
         </td>
         <td class="batch-cell">
             <input type="text" class="form-control batch-no" name="products[${index}][batch_no]"
-                value="${data.batch_no ?? ''}" placeholder="Batch No." style="display:none;">
-            <span class="batch-no-na text-muted">N/A</span>
+                value="${data.batch_no ?? ''}" placeholder="${(window.i18n_purchases && window.i18n_purchases.batch_no_placeholder) || 'Batch No.'}" style="display:none;">
+            <span class="batch-no-na text-muted">${(window.i18n_purchases && window.i18n_purchases.na) || 'N/A'}</span>
         </td>
         <td class="expiry-cell">
             <input type="text" class="form-control datepicker expiry-date" name="products[${index}][expiry_date]"
-                value="${data.expiry_date ?? ''}" placeholder="Expiry Date" style="display:none;">
-            <span class="expiry-date-na text-muted">N/A</span>
+                value="${data.expiry_date ?? ''}" placeholder="${(window.i18n_purchases && window.i18n_purchases.expiry_date_placeholder) || 'Expiry Date'}" style="display:none;">
+            <span class="expiry-date-na text-muted">${(window.i18n_purchases && window.i18n_purchases.na) || 'N/A'}</span>
         </td>
         <td class="serial-cell">
             <button type="button" class="btn btn-sm btn-outline-primary serial-entry-btn" style="display:none;">
-                <i class="fa fa-barcode"></i> <span class="serial-count-label">Enter Serials (${serialNumbers.length}/0)</span>
+                <i class="fa fa-barcode"></i> <span class="serial-count-label">${(window.i18n_purchases && window.i18n_purchases.enter_serials) || 'Enter Serials'} (${serialNumbers.length}/0)</span>
             </button>
-            <span class="serial-na text-muted">N/A</span>
+            <span class="serial-na text-muted">${(window.i18n_purchases && window.i18n_purchases.na) || 'N/A'}</span>
             <div class="serial-hidden-inputs" style="display:none;">${serialInputsHtml}</div>
         </td>
         <td>
@@ -610,7 +618,7 @@
             <tr id="emptyRow">
                 <td colspan="17"
                     class="text-center text-muted">
-                    Select Purchase Request
+                    Select {{ __('purchases.purchase_request') }}
                 </td>
             </tr>
         `);
@@ -626,7 +634,7 @@
         var productsData = @json($products);
 
         function loadProducts(index) {
-            let html = `<option value="">--Select Product--</option>`;
+            let html = `<option value="">{{ __('common.select_product') }}</option>`;
             $.each(productsData, function(_, product) {
                 html += `
         <option value="${product.product_id}">
@@ -660,11 +668,11 @@
         // ======================================================
 
         function resetBusinessData() {
-            $('#supplier_id').html('<option value="">--Select Supplier--</option>');
-            $('#warehouse_id').html('<option value="">--Select Warehouse--</option>');
+            $('#supplier_id').html('<option value="">{{ __('common.select_supplier') }}</option>');
+            $('#warehouse_id').html('<option value="">{{ __('common.select_warehouse') }}</option>');
             productsData = [];
             $('.product-select').each(function() {
-                $(this).html('<option value="">--Select Product--</option>');
+                $(this).html('<option value="">{{ __('common.select_product') }}</option>');
             });
         }
 
@@ -680,10 +688,10 @@
                 beforeSend: function() {
                     $('#supplier_id')
                         .prop('disabled', true)
-                        .html('<option>Loading...</option>');
+                        .html('<option>' + ((window.i18n_purchases && window.i18n_purchases.loading) || 'Loading...') + '</option>');
                 },
                 success: function(response) {
-                    let html = '<option value="">--Select Supplier--</option>';
+                    let html = '<option value="">{{ __('common.select_supplier') }}</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, supplier) {
                             html += `
@@ -699,7 +707,7 @@
                 },
                 error: function() {
                     $('#supplier_id')
-                        .html('<option value="">--Select Supplier--</option>')
+                        .html('<option value="">{{ __('common.select_supplier') }}</option>')
                         .prop('disabled', false);
                     errorMessage('Unable to load suppliers.');
                 }
@@ -718,10 +726,10 @@
                 beforeSend: function() {
                     $('#warehouse_id')
                         .prop('disabled', true)
-                        .html('<option>Loading...</option>');
+                        .html('<option>' + ((window.i18n_purchases && window.i18n_purchases.loading) || 'Loading...') + '</option>');
                 },
                 success: function(response) {
-                    let html = '<option value="">--Select Warehouse--</option>';
+                    let html = '<option value="">{{ __('common.select_warehouse') }}</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, warehouse) {
                             html += `
@@ -737,7 +745,7 @@
                 },
                 error: function() {
                     $('#warehouse_id')
-                        .html('<option value="">--Select Warehouse--</option>')
+                        .html('<option value="">{{ __('common.select_warehouse') }}</option>')
                         .prop('disabled', false);
                     errorMessage('Unable to load warehouses.');
                 }
@@ -772,7 +780,7 @@
         // ======================================================
 
         function refreshProductDropdowns() {
-            let options = `<option value="">--Select Product--</option>`;
+            let options = `<option value="">{{ __('common.select_product') }}</option>`;
             $.each(productsData, function(_, product) {
                 options += `
         <option value="${product.product_id}">
@@ -862,10 +870,10 @@
 
         function resetVariationSection(row) {
             row.find('.variation-select').html(`
-    <option value="">--Select Variation--</option>
+    <option value="">{{ __('common.select_variation') }}</option>
 `);
             row.find('.conversion-select').html(`
-    <option value="">--Select Conversion--</option>
+    <option value="">{{ __('common.select_conversion') }}</option>
 `);
             row.find('.selected-unit-id').val('');
             row.find('.selected-unit-name').html('-');
@@ -884,10 +892,10 @@
                 dataType: 'json',
                 beforeSend: function() {
                     row.find('.variation-select')
-                        .html('<option>Loading...</option>');
+                        .html('<option>' + ((window.i18n_purchases && window.i18n_purchases.loading) || 'Loading...') + '</option>');
                 },
                 success: function(response) {
-                    let html = '<option value="">--Select Variation--</option>';
+                    let html = '<option value="">{{ __('common.select_variation') }}</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, variation) {
                             html += `
@@ -944,7 +952,7 @@
             setSerialState(row, option.data('track-serial') == 1);
 
             row.find('.conversion-select').html(`
-    <option value="">Loading...</option>
+    <option value="">${(window.i18n_purchases && window.i18n_purchases.loading) || 'Loading...'}</option>
 `);
 
             if (!variationId) {
@@ -1002,7 +1010,7 @@
         function refreshSerialButtonLabel(row) {
             const entered = row.find('.serial-hidden-input').length;
             const expected = decimal(row.find('.received-qty').val()) || 0;
-            row.find('.serial-count-label').text(`Enter Serials (${entered}/${expected})`);
+            row.find('.serial-count-label').text(`${(window.i18n_purchases && window.i18n_purchases.enter_serials) || 'Enter Serials'} (${entered}/${expected})`);
             row.find('.serial-entry-btn').toggleClass('btn-outline-primary', entered == expected)
                 .toggleClass('btn-outline-danger', entered != expected);
         }
@@ -1086,7 +1094,7 @@
 
                     let html = `
             <option value="">
-                --Select Conversion--
+                {{ __('common.select_conversion') }}
             </option>
         `;
 
@@ -1193,14 +1201,14 @@
 
         $(document).on('change', '#purchase_request_id', function() {
             let purchase_request_id = $(this).val();
-            resetQuotationSelect();
+            reset{{ __('purchases.quotation') }}Select();
             showSelectPurchaseRequestRow();
             $('#shipping_charge').val(decimal(0));
             calculateGrandTotal();
             if (!purchase_request_id) {
                 return;
             }
-            loadQuotationsByPurchaseRequest(purchase_request_id);
+            load{{ __('purchases.quotation') }}sByPurchaseRequest(purchase_request_id);
 
         });
 
@@ -1208,9 +1216,9 @@
         // RESET QUOTATION SELECT
         // ======================================================
 
-        function resetQuotationSelect() {
+        function reset{{ __('purchases.quotation') }}Select() {
             $('#purchase_request_quotation_id')
-                .html('<option value="">--Select Quotation--</option>');
+                .html('<option value="">--Select {{ __('purchases.quotation') }}--</option>');
         }
 
         // ======================================================
@@ -1221,17 +1229,17 @@
             $('#productRows').html(`
         <tr id="emptyRow">
             <td colspan="17" class="text-center text-muted">
-                Select Purchase Request
+                Select {{ __('purchases.purchase_request') }}
             </td>
         </tr>
     `);
         }
 
-        function showSelectQuotationRow() {
+        function showSelect{{ __('purchases.quotation') }}Row() {
             $('#productRows').html(`
         <tr id="emptyRow">
             <td colspan="17" class="text-center text-muted">
-                Select Quotation
+                Select {{ __('purchases.quotation') }}
             </td>
         </tr>
     `);
@@ -1241,7 +1249,7 @@
         // LOAD QUOTATIONS FOR PURCHASE REQUEST
         // ======================================================
 
-        function loadQuotationsByPurchaseRequest(purchase_request_id) {
+        function load{{ __('purchases.quotation') }}sByPurchaseRequest(purchase_request_id) {
             $.ajax({
                 url: url_local +
                     '/admin/purchase-request-quotation/selected-by-purchase-request/' +
@@ -1251,10 +1259,10 @@
                 beforeSend: function() {
                     $('#purchase_request_quotation_id')
                         .prop('disabled', true)
-                        .html('<option>Loading...</option>');
+                        .html('<option>' + ((window.i18n_purchases && window.i18n_purchases.loading) || 'Loading...') + '</option>');
                 },
                 success: function(response) {
-                    let html = '<option value="">--Select Quotation--</option>';
+                    let html = '<option value="">--Select {{ __('purchases.quotation') }}--</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, quotation) {
                             html += `
@@ -1276,12 +1284,12 @@
                         .html(html)
                         .prop('disabled', false);
                     if (response.Success && response.Data.length) {
-                        showSelectQuotationRow();
+                        showSelect{{ __('purchases.quotation') }}Row();
                     }
                 },
                 error: function() {
                     $('#purchase_request_quotation_id')
-                        .html('<option value="">--Select Quotation--</option>')
+                        .html('<option value="">--Select {{ __('purchases.quotation') }}--</option>')
                         .prop('disabled', false);
                     errorMessage('Unable to load quotations.');
                 }
@@ -1295,18 +1303,18 @@
         $(document).on('change', '#purchase_request_quotation_id', function() {
             let purchase_request_quotation_id = $(this).val();
             if (!purchase_request_quotation_id) {
-                showSelectQuotationRow();
+                showSelect{{ __('purchases.quotation') }}Row();
                 calculateGrandTotal();
                 return;
             }
-            loadPurchaseRequestQuotationDetails(purchase_request_quotation_id);
+            loadPurchaseRequest{{ __('purchases.quotation') }}Details(purchase_request_quotation_id);
         });
 
         // ======================================================
         // LOAD SELECTED QUOTATION DETAILS
         // ======================================================
 
-        function loadPurchaseRequestQuotationDetails(purchase_request_quotation_id) {
+        function loadPurchaseRequest{{ __('purchases.quotation') }}Details(purchase_request_quotation_id) {
             $.ajax({
                 url: url_local +
                     '/admin/purchase-request-quotation/details/' +
@@ -1318,7 +1326,7 @@
             <tr>
                 <td colspan="17" class="text-center">
                     <div class="spinner-border spinner-border-sm"></div>
-                    Loading...
+                    ${(window.i18n_purchases && window.i18n_purchases.loading) || 'Loading...'}
                 </td>
             </tr>
         `);
@@ -1358,7 +1366,7 @@
                     .val(header.description);
             }
 
-            // Quotation's Other Charges populates Shipping Charges,
+            // {{ __('purchases.quotation') }}'s Other Charges populates Shipping Charges,
             // staying editable afterwards.
             $('#shipping_charge').val(decimal(header.other_charge ?? 0));
         }
@@ -1438,7 +1446,7 @@
                 .after(`<input type="hidden" name="${row.find('.variation-select').attr('name')}" value="${item.product_variation_id}">`);
             // Conversion
             let conversionOptions =
-                `<option value="">--Select Conversion--</option>`;
+                `<option value="">{{ __('common.select_conversion') }}</option>`;
             if (item.conversions) {
                 $.each(item.conversions, function(_, conversion) {
                     conversionOptions += `
@@ -1544,7 +1552,7 @@
                 setSerialState(row, (selectedOption.data('track-serial') == 1) || item.track_serial_number);
 
                 // Conversions are already supplied by getDetails(); no extra AJAX call needed.
-                let conversionOptions = `<option value="">--Select Conversion--</option>`;
+                let conversionOptions = `<option value="">{{ __('common.select_conversion') }}</option>`;
                 $.each(item.conversions || [], function(_, conversion) {
                     conversionOptions += `
                         <option

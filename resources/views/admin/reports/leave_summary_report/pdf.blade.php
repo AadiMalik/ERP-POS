@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Leave Summary Report',
+        'title' => __('reports.leave_summary_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,10 +56,10 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Employee Code</th>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Leave Type</th>
+                <th>{{ __('reports.col_employee_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_department') }}</th>
+                <th>{{ __('reports.col_leave_type') }}</th>
                 <th class="text-right">Entitlement</th>
                 <th class="text-right">Used</th>
                 <th class="text-right">Pending</th>

@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Phương thức thanh toán',
+    'singular' => '付款 Method',
+    'pos_title' => 'PT thanh toán POS',
+    'account' => '账户',
+    'default' => '默认',
+    'set_as_default' => 'Set as 默认',
+    'select_account' => '--选择 账户--',
+    'account_hint' => 'Not required for 信用 or Store 信用 - they route to the receivable/store-信用 账户 configured in 账户ing Settings at posting 时间.',
+    'create_new' => '创建 新建 付款 Method',
+    'edit_heading' => '编辑 付款 Method',
+    'please_enter_name' => '请 输入 名称',
+    'please_enter_code' => '请 输入 编码',
+    'please_select_account' => '请 选择 账户',
+    'enter_code' => '输入 编码',
+    'cash' => '现金',
+    'card' => '卡',
+    'bank' => '银行',
+    'credit' => '信用',
+    'store_credit' => 'Store 信用',
+    'wallet' => 'W全部et',
+    'other' => '其他',
+];

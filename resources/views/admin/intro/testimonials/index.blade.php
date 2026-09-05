@@ -5,7 +5,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="d-flex gap-2 flex-wrap align-items-center"></div>
-            <a href="javascript:void(0)" id="createIntroTestimonial" class="btn rounded-pill btn-primary"><i class="fa fa-plus me-1"></i>Add New</a>
+            <a href="javascript:void(0)" id="createIntroTestimonial" class="btn rounded-pill btn-primary"><i class="fa fa-plus me-1"></i> {{ __('common.add_new') }}</a>
         </div>
         <div class="card-body">
             <div class="table-responsive text-nowrap p-2">
@@ -13,11 +13,11 @@
                     <thead>
                         <tr>
                             <th>Customer</th>
-                            <th>Business</th>
+                            <th>{{ __('common.business') }}</th>
                             <th>Rating</th>
                             <th>Order</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

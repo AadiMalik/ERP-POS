@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Monthly Payroll Register')
+@section('title', __('reports.monthly_payroll_register'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Monthly Payroll Register',
+        'title' => __('reports.monthly_payroll_register'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,17 +25,17 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Employee Code</th>
-                <th>Name</th>
-                <th>Department</th>
-                <th class="text-right">Basic</th>
+                <th>{{ __('reports.col_employee_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_department') }}</th>
+                <th class="text-right">{{ __('reports.col_basic') }}</th>
                 <th class="text-right">Earnings</th>
-                <th class="text-right">Deductions</th>
+                <th class="text-right">{{ __('reports.col_deductions') }}</th>
                 <th class="text-right">Net Salary</th>
-                <th class="text-right">Present</th>
-                <th class="text-right">Absent</th>
-                <th class="text-right">Leave</th>
-                <th>Status</th>
+                <th class="text-right">{{ __('reports.col_present') }}</th>
+                <th class="text-right">{{ __('reports.col_absent') }}</th>
+                <th class="text-right">{{ __('reports.col_leave') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

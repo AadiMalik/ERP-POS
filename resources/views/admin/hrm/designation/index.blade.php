@@ -1,25 +1,25 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Designations</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('hrm_designations.title') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div>
                 <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                     <i class="fa fa-filter"></i>
-                    Filters
+                    {{ __('common.filters') }}
                 </button>
             </div>
             <div class="d-flex gap-2">
                 @include('admin.partials.import-export-buttons', [
                     'importExportModule' => 'designation',
-                    'importExportLabel' => 'Designations',
+                    'importExportLabel' => __('hrm_designations.title'),
                     'importExportRefreshFn' => 'initDataTabledesignation_table',
                 ])
                 @can('designation.create')
                 <a href="{{ url('admin/designation/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
-                    Add New
+                    {{ __('common.add_new') }}
                 </a>
                 @endcan
             </div>
@@ -37,8 +37,8 @@
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
-                        <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                        <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                     </div>
                 </div>
             </div>
@@ -46,11 +46,11 @@
                 <table id="designation_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Code</th>
-                            <th>Name</th>
+                            <th>{{ __('common.code') }}</th>
+                            <th>{{ __('common.name') }}</th>
                             <th>Department</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

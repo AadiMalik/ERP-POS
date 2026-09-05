@@ -30,13 +30,13 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>Product</th>
-                <th>Variation</th>
-                <th class="text-right">Quantity</th>
-                <th>Unit</th>
-                <th class="text-right">Unit Cost</th>
-                <th>Batch No.</th>
-                <th>Expiry Date</th>
+                <th>{{ __('common.product') }}</th>
+                <th>{{ __('common.variation') }}</th>
+                <th class="text-right">{{ __('common.quantity') }}</th>
+                <th>{{ __('common.unit') }}</th>
+                <th class="text-right">{{ __('common.unit_cost') }}</th>
+                <th>{{ __('common.batch_no') }}</th>
+                <th>{{ __('common.expiry_date') }}</th>
                 <th class="text-right">Total Value</th>
             </tr>
         </thead>

@@ -26,9 +26,9 @@ use App\Enums\RoleNames;
                 <div class="row g-3">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                     <div class="col-md-3">
-                        <label class="form-label">Business</label>
+                        <label class="form-label">{{ __('common.business') }}</label>
                         <select id="business_id" class="form-select">
-                            <option value="">--All Businesses--</option>
+                            <option value="">{{ __('common.all_businesses') }}</option>
                             @foreach ($business as $item)
                             <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                 {{ $item->name ?? '' }}
@@ -38,7 +38,7 @@ use App\Enums\RoleNames;
                     </div>
                     @endif
                     <div class="col-md-3">
-                        <label class="form-label">Date</label>
+                        <label class="form-label">{{ __('common.date') }}</label>
                         @include('admin.partials.date_filter')
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
@@ -55,13 +55,13 @@ use App\Enums\RoleNames;
                 <table id="branch_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Address</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.code') }}</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('common.email') }}</th>
+                            <th>{{ __('common.phone') }}</th>
+                            <th>{{ __('common.address') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

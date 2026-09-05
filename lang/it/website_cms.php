@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'Pagine e politiche',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'Testimonianze',
+    'hero_stats' => 'Statistiche principali',
+    'homepage_sections' => 'Sezioni homepage',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'Messaggi di contatto',
+    'newsletter_subscribers' => 'Iscritti alla newsletter',
+    'social_media' => 'Social media',
+    'intro_cms' => 'CMS introduttivo',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

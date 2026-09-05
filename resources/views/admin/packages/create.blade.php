@@ -6,15 +6,13 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
 
-    <h4 class="fw-bold py-3 mb-4">
-        Packages
-    </h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('packages.title') }}</h4>
 
     <div class="card">
 
         <div class="card-header bg-white border-bottom">
         <h5 class="mb-0">
-                {{ isset($package) ? 'Update' : 'New' }} Package
+                {{ isset($package) ? __('packages.update_package') : __('packages.new_package') }}
             </h5>
         </div>
 
@@ -36,7 +34,7 @@
                     {{-- Name --}}
                     <div class="col-md-6 mb-3">
                         <label class="form-label">
-                            Name
+                            {{ __('common.name') }}
                         </label>
 
                         <input type="text" class="form-control" name="name" required
@@ -170,7 +168,7 @@
             <div class="card-header bg-white border-top border-bottom">
                 <h5 class="mb-0">Module &amp; Limits</h5>
                 <small class="text-muted">Enable the modules this package includes. Limited modules get a numeric
-                    cap (default {{ 5 }}) unless marked Unlimited.</small>
+                    cap (default {{ 5 }}) unless marked {{ __('my_subscription.unlimited') }}.</small>
             </div>
 
             <div class="card-body">
@@ -183,7 +181,7 @@
                                     <th>Module</th>
                                     <th style="width:100px">Enabled</th>
                                     <th style="width:160px">Limit</th>
-                                    <th style="width:110px">Unlimited</th>
+                                    <th style="width:110px">{{ __('my_subscription.unlimited') }}</th>
                                 </tr>
                             </thead>
                             <tbody>

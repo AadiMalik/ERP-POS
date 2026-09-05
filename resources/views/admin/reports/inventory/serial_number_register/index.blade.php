@@ -5,33 +5,33 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">{{ $report_title ?? 'Inventory Report' }}</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ $report_title ?? __('reports.inventory_report') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
-                        <i class="fa fa-filter"></i> Filters
+                        <i class="fa fa-filter"></i> {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @canAccess('reports.serial-number-register.print')
                     <a href="javascript:void(0);" id="btn_print" target="_blank" class="btn btn-outline-secondary">
-                        <i class="fa fa-print"></i> Print
+                        <i class="fa fa-print"></i> {{ __('common.print') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.serial-number-register.pdf')
                     <a href="javascript:void(0);" id="btn_pdf" target="_blank" class="btn btn-outline-danger">
-                        <i class="fa fa-file-pdf"></i> PDF
+                        <i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.serial-number-register.export')
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
-                        <i class="fa fa-file-excel"></i> Excel
+                        <i class="fa fa-file-excel"></i> {{ __('common.excel') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.serial-number-register.export-csv')
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
-                        <i class="fa fa-file-text"></i> CSV
+                        <i class="fa fa-file-text"></i> {{ __('common.csv') }}
                     </a>
                     @endcanAccess
                 </div>
@@ -41,9 +41,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->name ?? '' }}</option>
                                     @endforeach
@@ -51,33 +51,33 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Warehouse</label>
+                            <label class="form-label">{{ __('common.warehouse') }}</label>
                             <select id="warehouse_id" class="form-select">
-                                <option value="">--All Warehouses--</option>
+                                <option value="">{{ __('common.all_warehouses') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Product</label>
+                            <label class="form-label">{{ __('common.product') }}</label>
                             <select id="product_id" class="form-select">
-                                <option value="">--All Products--</option>
+                                <option value="">{{ __('common.all_products') }}</option>
                                 @foreach ($products as $item)
                                     <option value="{{ $item->product_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Product Variation</label>
+                            <label class="form-label">{{ __('common.variation') }}</label>
                             <select id="product_variation_id" class="form-select">
-                                <option value="">--All Variations--</option>
+                                <option value="">{{ __('common.all_variations') }}</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
-                                <option value="">--All Statuses--</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
                                 @foreach (SerialStatus::getOptions() as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
@@ -88,8 +88,8 @@
                             <input type="text" id="serial_no" class="form-control" placeholder="Search serial no.">
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -97,14 +97,14 @@
                     <table id="serial_number_register_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Serial No.</th>
-                                <th>Product</th>
-                                <th>Variation</th>
-                                <th>Warehouse</th>
-                                <th>Status</th>
-                                <th>Unit Cost</th>
-                                <th>Customer</th>
-                                <th>Received On</th>
+                                <th>{{ __('reports.col_serial_no') }}</th>
+                                <th>{{ __('common.product') }}</th>
+                                <th>{{ __('reports.col_variation') }}</th>
+                                <th>{{ __('reports.col_warehouse') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('reports.col_unit_cost') }}</th>
+                                <th>{{ __('common.customer') }}</th>
+                                <th>{{ __('reports.col_received_on') }}</th>
                             </tr>
                         </thead>
                     </table>
@@ -149,12 +149,12 @@
         $('#product_id').change(function() {
             let product_id = $(this).val();
             if (!product_id) {
-                $('#product_variation_id').html('<option value="">--All Variations--</option>').trigger('change');
+                $('#product_variation_id').html('<option value="">{{ __('common.all_variations') }}</option>').trigger('change');
                 return;
             }
             ajaxRequest({ url: url_local + '/admin/product/variation-by-product/' + product_id, data: {} })
                 .then((response) => {
-                    let options = '<option value="">--All Variations--</option>';
+                    let options = '<option value="">{{ __('common.all_variations') }}</option>';
                     $.each(response.Data || [], function(i, item) {
                         options += '<option value="' + item.product_variation_id + '">' + item.name + '</option>';
                     });

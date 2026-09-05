@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'Stránky a zásady',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'Reference',
+    'hero_stats' => 'Hlavní statistiky',
+    'homepage_sections' => 'Sekce domovské stránky',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'Kontaktní zprávy',
+    'newsletter_subscribers' => 'Odběratelé newsletteru',
+    'social_media' => 'Sociální média',
+    'intro_cms' => 'Úvodní CMS',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

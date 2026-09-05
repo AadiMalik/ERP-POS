@@ -6,7 +6,7 @@
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Admin User</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('Admin User') }}</h4>
 
         <div class="card">
             <div class="card-header bg-white border-bottom">
@@ -41,7 +41,7 @@
                 <div class="card-footer border-top">
                     <div class="d-flex justify-content-end gap-2">
                         <button type="button" class="btn btn-outline-secondary"
-                            onclick="window.history.back()">Cancel</button>
+                            onclick="window.history.back()">{{ __('common.cancel') }}</button>
                         <button class="btn btn-primary px-4">Change</button>
                     </div>
                 </div>

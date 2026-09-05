@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Termination Report')
+@section('title', __('reports.termination_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Termination Report',
+        'title' => __('reports.termination_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,14 +25,14 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Employee Code</th>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Request Date</th>
-                <th>Last Working Date</th>
+                <th>{{ __('reports.col_employee_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_department') }}</th>
+                <th>{{ __('reports.col_request_date') }}</th>
+                <th>{{ __('reports.col_last_working_date') }}</th>
                 <th class="text-right">Settlement Amount</th>
-                <th>Approved By</th>
-                <th>Status</th>
+                <th>{{ __('reports.col_approved_by') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

@@ -43,12 +43,12 @@ $(document).ready(function () {
             let tbl_index = $("#tbl_index").val();
 
             if (account_id == "" || account_id == null) {
-                  errorMessage("Please Select Account!");
+                  errorMessage((window.i18n_journal_entries && window.i18n_journal_entries.please_select_account) || "Please Select Account!");
                   return;
             }
 
             if (parseFloat(debit) == 0 && parseFloat(credit) == 0) {
-                  errorMessage("Either Debit or Credit must be greater than zero.");
+                  errorMessage((window.i18n_journal_entries && window.i18n_journal_entries.debit_or_credit_required) || "Either Debit or Credit must be greater than zero.");
                   $("#debit").focus();
                   return;
             }
@@ -250,36 +250,36 @@ $(document).ready(function () {
                         $("#journal_id").val() == "" ||
                         $("#journal_id").val() == null
                   ) {
-                        errorMessage("Please Select Journal!");
+                        errorMessage((window.i18n_journal_entries && window.i18n_journal_entries.please_select_journal) || "Please Select Journal!");
                         $("#journal_id").focus();
                         return;
                   }
                   if (total_credit == "NaN" || total_debit == "NaN") {
-                        errorMessage("Please Add a Journal Entries!");
+                        errorMessage((window.i18n_journal_entries && window.i18n_journal_entries.please_add_entries) || "Please Add a Journal Entries!");
                         return;
                   }
                   if ($("#entry_no").val() == "") {
-                        errorMessage("Entry no filed required!");
+                        errorMessage((window.i18n_journal_entries && window.i18n_journal_entries.entry_no_required) || "Entry no filed required!");
                         $("#entry_no").focus();
                         return;
                   }
                   if ($("#entry_date").val() == "") {
-                        errorMessage("Entry date filed required!");
+                        errorMessage((window.i18n_journal_entries && window.i18n_journal_entries.entry_date_required) || "Entry date filed required!");
                         $("#entry_date").focus();
                         return;
                   }
                   if ($("#reference_no").val() == "") {
-                        errorMessage("Reference no filed required!");
+                        errorMessage((window.i18n_journal_entries && window.i18n_journal_entries.reference_no_required) || "Reference no filed required!");
                         $("#reference_no").focus();
                         return;
                   }
                   if ($("#description").val() == "") {
-                        errorMessage("description filed required!");
+                        errorMessage((window.i18n_journal_entries && window.i18n_journal_entries.description_required) || "description filed required!");
                         $("#description").focus();
                         return;
                   }
                   if (total_credit != total_debit) {
-                        errorMessage("Undifference Debit & Credit");
+                        errorMessage((window.i18n_journal_entries && window.i18n_journal_entries.debit_credit_mismatch) || "Undifference Debit & Credit");
                         return;
                   }
                   var journal_entry_id = $("#journal_entry_id").val();
@@ -314,7 +314,7 @@ $(document).ready(function () {
                                     details: obj,
                               },
                               success: function (response) {
-                                    successMessage("Journal Entry Saved Successfully!");
+                                    successMessage((window.i18n_journal_entries && window.i18n_journal_entries.saved_successfully) || "Journal Entry Saved Successfully!");
                                     setTimeout(function () {
                                           window.location.href = url_local + "/admin/journal-entry";
                                     }, 1000);
@@ -324,7 +324,7 @@ $(document).ready(function () {
                                     if (xhr.responseJSON && xhr.responseJSON.Message) {
                                           errorMessage(xhr.responseJSON.Message);
                                     } else {
-                                          errorMessage("Something went wrong.");
+                                          errorMessage((window.i18n_journal_entries && window.i18n_journal_entries.something_went_wrong) || "Something went wrong.");
                                     }
                               }
                         });

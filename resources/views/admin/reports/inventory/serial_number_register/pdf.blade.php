@@ -18,19 +18,19 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Serial Number Register',
+        'title' => __('reports.serial_number_register'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
         'print_config' => $print_config,
     ])
     <table class="data-table">
-        <thead><tr><th>Serial No</th><th>Product</th><th>Variation</th><th>Warehouse</th><th>Status</th><th>Unit Cost</th><th>Customer</th><th>Received On</th></tr></thead>
+        <thead><tr><th>{{ __('reports.col_serial_no') }}</th><th>{{ __('reports.col_product') }}</th><th>{{ __('reports.col_variation') }}</th><th>{{ __('reports.col_warehouse') }}</th><th>{{ __('reports.col_status') }}</th><th>{{ __('reports.col_unit_cost') }}</th><th>{{ __('reports.col_customer') }}</th><th>{{ __('reports.col_received_on') }}</th></tr></thead>
         <tbody>
             @forelse ($rows as $row)
                 <tr><td>{{ $row->serial_no ?? '-' }}</td><td>{{ $row->product_name ?? '-' }}</td><td>{{ $row->variation_name ?? '-' }}</td><td>{{ $row->warehouse_name ?? '-' }}</td><td>{{ $row->status_label ?? '-' }}</td><td>{{ $row->avg_price ?? '-' }}</td><td>{{ $row->customer_name ?? '-' }}</td><td>{{ $row->date_created ? localDate($row->date_created) : '-' }}</td></tr>
             @empty
-                <tr><td colspan="8">No records found.</td></tr>
+                <tr><td colspan="8">{{ __('common.no_records_found') }}</td></tr>
             @endforelse
         </tbody>
     </table>

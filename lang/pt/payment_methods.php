@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Métodos de pagamento',
+    'singular' => 'Pago Method',
+    'pos_title' => 'Métodos de pagamento PDV',
+    'account' => 'Cuenta',
+    'default' => 'Predeterminado',
+    'set_as_default' => 'Set as Predeterminado',
+    'select_account' => '--Seleccionar Cuenta--',
+    'account_hint' => 'Not required for Crédito or Store Crédito - they route to the receivable/store-Crédito Cuenta configured in Cuentaing Settings at posting Hora.',
+    'create_new' => 'Crear Nuevo Pago Method',
+    'edit_heading' => 'Editar Pago Method',
+    'please_enter_name' => 'Por favor Ingresar Nombre',
+    'please_enter_code' => 'Por favor Ingresar Código',
+    'please_select_account' => 'Por favor Seleccionar Cuenta',
+    'enter_code' => 'Ingresar Código',
+    'cash' => 'Efectivo',
+    'card' => 'Tarjeta',
+    'bank' => 'Banco',
+    'credit' => 'Crédito',
+    'store_credit' => 'Store Crédito',
+    'wallet' => 'WTodoset',
+    'other' => 'Otro',
+];

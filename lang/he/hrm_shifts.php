@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'משמרות',
+    'singular' => 'وردية',
+    'new_heading' => 'وردية جديدة',
+    'update_heading' => 'تحديث الوردية',
+    'save_shift' => 'حفظ الوردية',
+    'create_new' => 'إنشاء وردية جديدة',
+    'edit_heading' => 'تعديل الوردية',
+    'start_time' => 'وقت البداية',
+    'end_time' => 'وقت النهاية',
+    'grace_minutes' => 'دقائق السماح',
+    'break_duration_minutes' => 'Break Duration (minutes)',
+    'grace_period_minutes' => 'Grace Period (minutes)',
+    'grace_period_hint' => 'Minutes an employee may check in late without being marked "Late".',
+    'working_days' => 'Working Days',
+    'add_new_shift' => 'Add New Shift',
+    'day_mon' => 'Monday',
+    'day_tue' => 'Tuesday',
+    'day_wed' => 'Wednesday',
+    'day_thu' => 'Thursday',
+    'day_fri' => 'Friday',
+    'day_sat' => 'Saturday',
+    'day_sun' => 'Sunday',
+];

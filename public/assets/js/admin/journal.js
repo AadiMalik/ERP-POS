@@ -4,7 +4,7 @@ $("#createNewJournal").click(function () {
     $("#name").val('');
     $("#short").val('');
     $("#saveBtn").show();
-    $("#modelHeading").html("Create New journal");
+    $("#modelHeading").html(window.i18n_journals?.create_new || "Create New Journal");
     $("#ajaxModel").modal("show");
     enableForm();
 });
@@ -18,7 +18,7 @@ editRecord({
         $("#name").val(data.name);
         $("#short").val(data.short);
         $("#logo").prop("required", false);
-        $("#modelHeading").html("Edit Journal");
+        $("#modelHeading").html(window.i18n_journals?.edit_heading || "Edit Journal");
         $("#saveBtn").show();
         $("#ajaxModel").modal("show");
     }
@@ -33,11 +33,11 @@ saveRecord({
     },
     beforeSubmit: function () {
         if ($("#name").val() == "") {
-            errorMessage("Please Enter Name");
+            errorMessage(window.i18n_journals?.please_enter_name || "Please Enter Name");
             return false;
         }
         if ($("#short").val() == "") {
-            errorMessage("Please Enter Short");
+            errorMessage(window.i18n_journals?.please_enter_short || "Please Enter Short");
             return false;
         }
         return true;

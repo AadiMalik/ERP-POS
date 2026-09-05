@@ -10,7 +10,7 @@
                 @if ($invoice->status !== 'void')
                     <button type="button" id="voidBtn" class="btn btn-outline-danger">Void Invoice</button>
                 @endif
-                <button type="button" id="deleteBtn" class="btn btn-outline-danger">Delete</button>
+                <button type="button" id="deleteBtn" class="btn btn-outline-danger">{{ __('common.delete') }}</button>
             </div>
         </div>
 

@@ -4,21 +4,21 @@
         ->resolve(Auth::user()->business_id);
 @endphp
 @extends('layouts.print')
-@section('title', 'Production Report')
+@section('title', __('reports.production'))
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
 @endsection
 @section('content')
     @include('admin.partials.print.header', [
-        'business' => $business, 'branch' => null, 'title' => 'Production Report',
+        'business' => $business, 'branch' => null, 'title' => __('reports.production'),
         'doc_no' => '', 'doc_date' => localDate(now()), 'reference' => [], 'print_config' => $print_config,
     ])
     <table class="print-table">
         <thead>
             <tr>
-                <th>Production No.</th><th>Plan No.</th><th>Product</th><th>Warehouse</th><th>Batch</th>
-                <th class="text-right">Qty</th><th class="text-right">Total Cost</th>
-                <th class="text-right">Unit Cost</th><th>Status</th>
+                <th>{{ __('reports.col_production_no') }}</th><th>{{ __('reports.col_plan_no') }}</th><th>{{ __('reports.col_product') }}</th><th>{{ __('reports.col_warehouse') }}</th><th>{{ __('reports.col_batch') }}</th>
+                <th class="text-right">{{ __('reports.col_qty') }}</th><th class="text-right">Total Cost</th>
+                <th class="text-right">{{ __('reports.col_unit_cost') }}</th><th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

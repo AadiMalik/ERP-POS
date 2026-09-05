@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => '采购退货',
+    'singular' => 'Purchase Return',
+    'return_type' => 'Return Type',
+    'source_no' => 'Source No.',
+    'return_no' => '退货单号',
+    'return_date' => '退货日期',
+    'return_qty' => 'Return Qty',
+    'returnable' => 'Returnable',
+    'already_returned' => 'Already Returned',
+    'select_serials_to_return' => 'Select Serial Numbers to Return',
+    'select_serials_hint' => 'Select the serial numbers to return.',
+    'no_available_serials' => 'No available serial numbers found for this line.',
+    'no_available_serials_short' => 'No available serial numbers found.',
+    'unable_load_returnable' => 'Unable to load returnable lines.',
+    'update_heading' => 'Update Purchase Return',
+    'new_heading' => 'New Purchase Return',
+    'create_heading' => 'Create Purchase Return',
+    'save_return' => 'Save Purchase Return',
+    'update_return' => 'Update Purchase Return',
+    'select_purchase' => '--选择采购--',
+    'select_grn' => '--选择收货单--',
+];

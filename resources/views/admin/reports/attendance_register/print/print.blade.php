@@ -6,7 +6,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Attendance Register')
+@section('title', __('reports.attendance_register'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -16,7 +16,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Attendance Register',
+        'title' => __('reports.attendance_register'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -26,8 +26,8 @@
     <table class="print-table" style="font-size: 9px;">
         <thead>
             <tr>
-                <th>Code</th>
-                <th>Name</th>
+                <th>{{ __('reports.col_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
                 @foreach (array_keys($days) as $date)
                     <th class="text-center">{{ \Carbon\Carbon::parse($date)->format('d M') }}</th>
                 @endforeach

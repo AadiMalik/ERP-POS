@@ -33,16 +33,16 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>Product</th>
-                <th>Variation</th>
-                <th class="text-right">Ordered Qty</th>
+                <th>{{ __('common.product') }}</th>
+                <th>{{ __('common.variation') }}</th>
+                <th class="text-right">{{ __('common.ordered_qty') }}</th>
                 <th class="text-right">Already Returned</th>
                 <th class="text-right">Return Qty</th>
-                <th>Unit</th>
-                <th class="text-right">Unit Price</th>
+                <th>{{ __('common.unit') }}</th>
+                <th class="text-right">{{ __('common.unit_price') }}</th>
                 <th class="text-right">Discount</th>
                 <th class="text-right">Tax</th>
-                <th class="text-right">Total</th>
+                <th class="text-right">{{ __('common.total') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -70,7 +70,7 @@
 
     <table class="print-totals">
         <tr>
-            <td>Subtotal</td>
+            <td>{{ __('common.subtotal') }}</td>
             <td class="text-right">{{ currency($order_return->subtotal) }}</td>
         </tr>
         <tr>

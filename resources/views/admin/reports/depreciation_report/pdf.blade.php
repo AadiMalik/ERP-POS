@@ -20,7 +20,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Depreciation Report',
+        'title' => __('reports.depreciation_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -29,12 +29,12 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Period</th>
-                <th>Asset</th>
-                <th>Branch</th>
+                <th>{{ __('reports.col_date') }}</th>
+                <th>{{ __('reports.col_period') }}</th>
+                <th>{{ __('reports.col_asset') }}</th>
+                <th>{{ __('reports.col_branch') }}</th>
                 <th class="text-right">Previous</th>
-                <th class="text-right">Amount</th>
+                <th class="text-right">{{ __('reports.col_amount') }}</th>
                 <th class="text-right">New Value</th>
                 <th class="text-right">Accumulated</th>
             </tr>

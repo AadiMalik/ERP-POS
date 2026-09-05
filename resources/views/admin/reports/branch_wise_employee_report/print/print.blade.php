@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Branch-wise Employee Report')
+@section('title', __('reports.branch_wise_employee_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Branch-wise Employee Report',
+        'title' => __('reports.branch_wise_employee_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,7 +25,7 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Branch</th>
+                <th>{{ __('reports.col_branch') }}</th>
                 <th class="text-right">Total Employees</th>
                 <th class="text-right">Active</th>
                 <th class="text-right">On Leave</th>

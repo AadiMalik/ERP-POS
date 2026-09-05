@@ -4,15 +4,13 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            Activity Log
-        </h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('activity_log.title') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
             </div>
@@ -21,9 +19,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -33,18 +31,18 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Module</label>
+                            <label class="form-label">{{ __('common.module') }}</label>
                             <select id="module" class="form-select">
-                                <option value="">--All Modules--</option>
+                                <option value="">{{ __('common.all_modules') }}</option>
                                 @foreach ($modules as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Action</label>
+                            <label class="form-label">{{ __('common.action') }}</label>
                             <select id="action" class="form-select">
-                                <option value="">--All Actions--</option>
+                                <option value="">{{ __('activity_log.all_actions') }}</option>
                                 @foreach ($actions as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
@@ -52,9 +50,9 @@
                         </div>
                         @if ($causers->isNotEmpty())
                             <div class="col-md-3">
-                                <label class="form-label">User</label>
+                                <label class="form-label">{{ __('activity_log.user') }}</label>
                                 <select id="causer_id" class="form-select">
-                                    <option value="">--All Users--</option>
+                                    <option value="">{{ __('activity_log.all_users') }}</option>
                                     @foreach ($causers as $item)
                                         <option value="{{ $item->user_id }}">{{ $item->name ?? '' }}</option>
                                     @endforeach
@@ -66,16 +64,12 @@
                             <input type="text" id="record_id" class="form-control" placeholder="e.g. order/JV ID">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
-                            </button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
-                            </button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -85,11 +79,11 @@
                             <tr>
                                 <th>Date/Time</th>
                                 <th>Module</th>
-                                <th>Action</th>
-                                <th>Description</th>
+                                <th>{{ __('common.action') }}</th>
+                                <th>{{ __('common.description') }}</th>
                                 <th>User</th>
                                 <th>Branch</th>
-                                <th>Business</th>
+                                <th>{{ __('common.business') }}</th>
                                 <th>IP Address</th>
                             </tr>
                         </thead>

@@ -30,14 +30,14 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>Product</th>
-                <th>Variation</th>
-                <th>Unit</th>
+                <th>{{ __('common.product') }}</th>
+                <th>{{ __('common.variation') }}</th>
+                <th>{{ __('common.unit') }}</th>
                 <th class="text-right">System Qty</th>
                 <th class="text-right">Physical Qty</th>
                 <th class="text-right">Difference</th>
                 <th class="text-right">Diff. Value</th>
-                <th>Reason</th>
+                <th>{{ __('common.reason') }}</th>
             </tr>
         </thead>
         <tbody>

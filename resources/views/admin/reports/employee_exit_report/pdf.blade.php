@@ -42,7 +42,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Employee Exit Report',
+        'title' => __('reports.employee_exit_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -52,14 +52,14 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Employee Code</th>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Type</th>
-                <th>Request Date</th>
-                <th>Last Working Date</th>
-                <th>Reason</th>
-                <th>Status</th>
+                <th>{{ __('reports.col_employee_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_department') }}</th>
+                <th>{{ __('reports.col_type') }}</th>
+                <th>{{ __('reports.col_request_date') }}</th>
+                <th>{{ __('reports.col_last_working_date') }}</th>
+                <th>{{ __('reports.col_reason') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

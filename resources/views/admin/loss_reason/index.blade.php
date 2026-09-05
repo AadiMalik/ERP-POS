@@ -5,7 +5,7 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Loss Reasons</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('loss_reasons.title') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <div>
@@ -24,9 +24,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="filter_business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -36,7 +36,7 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
@@ -53,10 +53,10 @@
                     <table id="loss_reason_table" class="table display datatables" style="width:100%">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Status</th>
-                                <th>Business</th>
-                                <th>Action</th>
+                                <th>{{ __('common.name') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -69,6 +69,18 @@
     </div>
 @endsection
 @section('js')
+    @php
+        $__i18nLossReasons = [
+            'add_heading' => __('loss_reasons.add_heading'),
+            'edit_heading' => __('loss_reasons.edit_heading'),
+            'save' => __('common.save'),
+            'update' => __('common.update'),
+            'please_enter_name' => __('common.please_enter_name'),
+        ];
+    @endphp
+    <script>
+        window.i18n_loss_reasons = @json($__i18nLossReasons);
+    </script>
     @include('admin.partials.datatable', [
         'columns' => "
                     {data: 'name' , name: 'name'},
@@ -96,8 +108,8 @@
         $('#addLossReasonBtn').on('click', function() {
             $('#loss_reason_form')[0].reset();
             $('#loss_reason_id').val('');
-            $('#modelHeading').html('Add Loss Reason');
-            $('#saveBtn').show().text('Save');
+            $('#modelHeading').html(window.i18n_loss_reasons.add_heading);
+            $('#saveBtn').show().text(window.i18n_loss_reasons.save);
             $('#ajaxModel').modal('show');
         });
 
@@ -111,8 +123,8 @@
                 $("#name").val(data.name);
                 $("#status").val(data.status).trigger('change.select2');
 
-                $("#modelHeading").html("Edit Loss Reason");
-                $("#saveBtn").show().text('Update');
+                $("#modelHeading").html(window.i18n_loss_reasons.edit_heading);
+                $("#saveBtn").show().text(window.i18n_loss_reasons.update);
                 $("#ajaxModel").modal("show");
             }
         });
@@ -126,7 +138,7 @@
             },
             beforeSubmit: function() {
                 if ($("#name").val() == "") {
-                    errorMessage("Please Enter Name");
+                    errorMessage(window.i18n_loss_reasons.please_enter_name);
                     return false;
                 }
                 return true;

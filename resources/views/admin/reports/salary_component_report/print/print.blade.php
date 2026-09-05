@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Salary Component Report')
+@section('title', __('reports.salary_component_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Salary Component Report',
+        'title' => __('reports.salary_component_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,12 +25,12 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Code</th>
-                <th>Type</th>
-                <th>Calculation Type</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_code') }}</th>
+                <th>{{ __('reports.col_type') }}</th>
+                <th>{{ __('reports.col_calculation_type') }}</th>
                 <th class="text-right">Usage Count</th>
-                <th>Status</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

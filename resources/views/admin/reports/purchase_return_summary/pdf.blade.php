@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Purchase Return Summary Report',
+        'title' => __('reports.purchase_return_summary'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,14 +56,14 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Group</th>
+                <th>{{ __('reports.col_group') }}</th>
                 <th class="text-right">Returns</th>
-                <th class="text-right">Qty</th>
-                <th class="text-right">Subtotal</th>
-                <th class="text-right">Discount</th>
-                <th class="text-right">Tax</th>
-                <th class="text-right">Total</th>
-                <th>Accounting Status</th>
+                <th class="text-right">{{ __('reports.col_qty') }}</th>
+                <th class="text-right">{{ __('reports.col_subtotal') }}</th>
+                <th class="text-right">{{ __('reports.col_discount') }}</th>
+                <th class="text-right">{{ __('reports.col_tax') }}</th>
+                <th class="text-right">{{ __('reports.col_total') }}</th>
+                <th>{{ __('reports.col_accounting_status') }}</th>
             </tr>
         </thead>
         <tbody>

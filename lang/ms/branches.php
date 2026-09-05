@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Cawangan',
+    'singular' => '分支',
+    'basic_information' => 'Basic Information',
+    'address_information' => 'Address Information',
+    'branch_name' => '分支 名称',
+    'branch_code' => '分支 编码',
+    'branch_email' => '分支 Email',
+    'branch_phone' => '分支 Phone',
+    'state' => 'State',
+    'pos_register_hours' => 'POS Automatic Register Hours',
+    'open_time' => '打开 时间',
+    'close_time' => '关闭 时间',
+    'open_time_hint' => 'Overrides the 企业 默认 when Register Mode is Automatic. 请假 blank to use the 企业 默认.',
+    'branch_logo' => '分支 Logo',
+    'previous_logo' => 'Previous Logo',
+    'jpg_png_supported' => 'JPG, PNG supported',
+    'please_select_valid_image' => '请 选择 a valid image file (JPG, PNG)',
+    'new_heading' => '新建 分支',
+    'update_heading' => '更新 分支',
+    'save_branch' => '保存 分支',
+    'select_business' => '-- 选择 企业 --',
+];

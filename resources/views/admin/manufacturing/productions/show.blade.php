@@ -2,7 +2,7 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="d-flex justify-content-between align-items-center py-3 mb-4">
-        <h4 class="fw-bold mb-0">Production {{ $production->production_no }}</h4>
+        <h4 class="fw-bold mb-0">{{ __('manufacturing.productions_title') }} {{ $production->production_no }}</h4>
         <div class="d-flex gap-2">
             @can('production.complete')
             @if ($production->status === 'draft')

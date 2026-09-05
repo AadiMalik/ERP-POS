@@ -16,7 +16,7 @@
                             <th>Original Name</th>
                             <th>Collection</th>
                             <th>Mime</th>
-                            <th>Action</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

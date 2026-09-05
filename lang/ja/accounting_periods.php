@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => '会計期間',
+    'singular' => '会計 期間',
+    'intro' => 'Advanced 会計 モード — open/close/reopen periods manually. Reopening and overriding a blocked close both require a reason, which is recorded to the Activity Log.',
+    'closed_automatically' => 'クローズ Automatically',
+    'close_period' => '期間を締める',
+    'reopen_period' => '期間を再開',
+    'pending_close' => 'Pending 閉じる',
+    'reason_override' => '理由 (required if overriding pending items)',
+    'close_anyway' => '閉じる anyway, even though items are pending',
+    'blocked_message' => 'This period has pending items and was not closed. Resolve them, or tick "閉じる anyway" with a reason to override.',
+    'reason_required_reopen' => 'A reason is required to reopen this period.',
+    'could_not_open' => 'Could not open period',
+    'could_not_close' => 'Could not close period',
+    'could_not_reopen' => 'Could not reopen period',
+    'no_pending_issues' => 'No pending issues for this period.',
+    'pending_items' => 'Pending items:',
+    'no_periods' => 'No accounting periods yet.',
+    'open_btn' => 'オープン',
+    'close_btn' => '閉じる',
+    'reopen_btn' => 'Reopen',
+    'issues_btn' => 'Issues',
+];

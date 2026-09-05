@@ -6,7 +6,7 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="d-flex justify-content-between align-items-center py-3 mb-4">
-            <h4 class="fw-bold mb-0">Serial Number: {{ $serial['serial_no'] }}</h4>
+            <h4 class="fw-bold mb-0">{{ __('serial_numbers.singular') }}: {{ $serial['serial_no'] }}</h4>
             <a href="{{ url('admin/serial-number') }}" class="btn btn-outline-secondary">
                 <i class="fa fa-arrow-left"></i> Back to Search
             </a>
@@ -155,7 +155,7 @@
                     <p class="text-muted">Retires this serial number and, if it is currently sold, hands the same
                         order/customer a replacement unit instead.</p>
                     <div class="mb-3">
-                        <label class="form-label">Replacement Serial Number</label>
+                        <label class="form-label">Replacement {{ __('serial_numbers.singular') }}</label>
                         <select id="replace_new_serial_id" class="form-select">
                             <option value="">--Select an available serial--</option>
                         </select>

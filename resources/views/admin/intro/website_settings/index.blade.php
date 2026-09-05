@@ -35,7 +35,7 @@
                         <div class="mb-3"><label class="form-label">Account Title</label><input type="text" class="form-control" name="bank_account_title" value="{{ $map['bank_account_title'] ?? '' }}"></div>
                         <div class="mb-3"><label class="form-label">Account Number</label><input type="text" class="form-control" name="bank_account_number" value="{{ $map['bank_account_number'] ?? '' }}"></div>
                         <div class="mb-3"><label class="form-label">IBAN</label><input type="text" class="form-control" name="bank_iban" value="{{ $map['bank_iban'] ?? '' }}"></div>
-                        <div class="mb-3"><label class="form-label">Branch</label><input type="text" class="form-control" name="bank_branch" value="{{ $map['bank_branch'] ?? '' }}"></div>
+                        <div class="mb-3"><label class="form-label">{{ __('common.branch') }}</label><input type="text" class="form-control" name="bank_branch" value="{{ $map['bank_branch'] ?? '' }}"></div>
                         <div class="mb-3"><label class="form-label">Branch Code</label><input type="text" class="form-control" name="bank_branch_code" value="{{ $map['bank_branch_code'] ?? '' }}"></div>
                         <div class="mb-3"><label class="form-label">SWIFT</label><input type="text" class="form-control" name="bank_swift" value="{{ $map['bank_swift'] ?? '' }}"></div>
                         <div class="mb-3"><label class="form-label">Bank Instructions (JSON array)</label><textarea class="form-control font-monospace" name="bank_instructions" rows="5">{{ $map['bank_instructions'] ?? '[]' }}</textarea></div>

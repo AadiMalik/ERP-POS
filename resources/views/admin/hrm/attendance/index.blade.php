@@ -1,31 +1,31 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Attendance</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('hrm_attendance.title') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div>
                 <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                     <i class="fa fa-filter"></i>
-                    Filters
+                    {{ __('common.filters') }}
                 </button>
             </div>
             <div class="d-flex gap-2">
                 @include('admin.partials.import-export-buttons', [
                     'importExportModule' => 'attendance',
-                    'importExportLabel' => 'Attendance',
+                    'importExportLabel' => __('hrm_attendance.title'),
                     'importExportRefreshFn' => 'initDataTableattendance_table',
                 ])
                 @can('attendance.report.view')
                 <a href="{{ url('admin/attendance/report') }}" class="btn btn-outline-primary rounded-pill">
                     <i class="fa fa-chart-bar"></i>
-                    Report
+                    {{ __('hrm_attendance.report') }}
                 </a>
                 @endcan
                 @can('attendance.create')
                 <a href="{{ url('admin/attendance/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
-                    Add New
+                    {{ __('common.add_new') }}
                 </a>
                 @endcan
             </div>
@@ -34,33 +34,33 @@
             <div id="filterSection" class="card-body border-bottom" style="display:none;">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label class="form-label">Employee</label>
+                        <label class="form-label">{{ __('common.employee') }}</label>
                         <select id="employee_id" class="form-select">
-                            <option value="">--All Employees--</option>
+                            <option value="">{{ __('common.all_employees') }}</option>
                             @foreach ($employees as $item)
                             <option value="{{ $item->employee_id }}">{{ $item->user->name ?? '-' }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Status</label>
+                        <label class="form-label">{{ __('common.status') }}</label>
                         <select id="status" class="form-select">
-                            <option value="">--All Status--</option>
-                            <option value="present">Present</option>
-                            <option value="late">Late</option>
-                            <option value="half_day">Half Day</option>
-                            <option value="absent">Absent</option>
-                            <option value="on_leave">On Leave</option>
-                            <option value="holiday">Holiday</option>
+                            <option value="">{{ __('common.all_status') }}</option>
+                            <option value="present">{{ __('hrm_attendance.present') }}</option>
+                            <option value="late">{{ __('hrm_attendance.late') }}</option>
+                            <option value="half_day">{{ __('hrm_attendance.half_day') }}</option>
+                            <option value="absent">{{ __('hrm_attendance.absent') }}</option>
+                            <option value="on_leave">{{ __('hrm_attendance.on_leave') }}</option>
+                            <option value="holiday">{{ __('hrm_attendance.holiday') }}</option>
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Date</label>
+                        <label class="form-label">{{ __('common.date') }}</label>
                         @include('admin.partials.date_filter')
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
-                        <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                        <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                     </div>
                 </div>
             </div>
@@ -68,13 +68,13 @@
                 <table id="attendance_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Employee</th>
-                            <th>Date</th>
-                            <th>Check In</th>
-                            <th>Check Out</th>
-                            <th>Working Hours</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.employee') }}</th>
+                            <th>{{ __('common.date') }}</th>
+                            <th>{{ __('hrm_attendance.check_in') }}</th>
+                            <th>{{ __('hrm_attendance.check_out') }}</th>
+                            <th>{{ __('hrm_attendance.working_hours') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

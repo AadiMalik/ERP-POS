@@ -1,0 +1,9 @@
+<?php
+
+return [
+    'title' => 'Loss कारणs',
+    'singular' => 'Loss कारण',
+    'add_heading' => 'Add Loss कारण',
+    'edit_heading' => 'संपादित Loss कारण',
+    'name_placeholder' => 'e.g. Damaged in Transit, Broken Packaging, Fridge Failure',
+];

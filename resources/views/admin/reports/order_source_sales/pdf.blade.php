@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Order Source Sales Report',
+        'title' => __('reports.order_source_sales'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,11 +56,11 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Order Source</th>
+                <th>{{ __('reports.col_order_source') }}</th>
                 <th class="text-right">Orders</th>
-                <th class="text-right">Qty</th>
-                <th class="text-right">Gross</th>
-                <th class="text-right">Net</th>
+                <th class="text-right">{{ __('reports.col_qty') }}</th>
+                <th class="text-right">{{ __('reports.col_gross') }}</th>
+                <th class="text-right">{{ __('reports.col_net') }}</th>
             </tr>
         </thead>
         <tbody>

@@ -6,10 +6,10 @@
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">{{ isset($purchase_request) ? 'Update' : 'New' }} Purchase Request</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ isset($purchase_request) ? __('purchase_requests.update_heading') : __('purchase_requests.new_heading') }}</h4>
         <div class="card">
             <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0">{{ isset($purchase_request) ? 'Update' : 'Create' }} Purchase Request</h5>
+                <h5 class="mb-0">{{ isset($purchase_request) ? __('purchase_requests.update_heading') : __('purchase_requests.create_heading') }}</h5>
             </div>
             <form action="{{ url('admin/purchase-request') }}" method="POST">
                 @csrf
@@ -20,9 +20,9 @@
                     <div class="row g-4 mb-4">
                         @if (!empty($business) && RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="fw-semibold">Business <span class="text-danger">*</span></label>
+                                <label class="fw-semibold">{{ __('common.business') }} <span class="text-danger">*</span></label>
                                 <select class="form-select" name="business_id" id="business_id" required>
-                                    <option value="">-- Select Business --</option>
+                                    <option value="">{{ __('common.select_business') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}"
                                             {{ isset($purchase_request) ? ($purchase_request->business_id == $item->business_id ? 'selected' : '') : '' }}>
@@ -35,11 +35,11 @@
 
                         <div class="col-md-3">
                             <div class="d-flex align-items-center justify-content-between">
-                                <label class="fw-semibold mb-0">Supplier</label>
+                                <label class="fw-semibold mb-0">{{ __('common.supplier') }}</label>
                                 @include('admin.partials.quick-add-btn', ['permission' => 'supplier.create', 'modal' => 'quickAddSupplierModal', 'label' => 'Supplier'])
                             </div>
                             <select class="form-select" name="supplier_id" id="supplier_id">
-                                <option value="">-- Select Supplier --</option>
+                                <option value="">{{ __('common.select_supplier') }}</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                     @foreach ($suppliers as $item)
                                         <option value="{{ $item->supplier_id }}"
@@ -52,9 +52,9 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label class="fw-semibold">Warehouse <span class="text-danger">*</span></label>
+                            <label class="fw-semibold">{{ __('common.warehouse') }} <span class="text-danger">*</span></label>
                             <select class="form-select" name="warehouse_id" id="warehouse_id" required>
-                                <option value="">-- Select Warehouse --</option>
+                                <option value="">{{ __('common.select_warehouse') }}</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                     @foreach ($warehouses as $item)
                                         <option value="{{ $item->warehouse_id }}"
@@ -67,21 +67,21 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label class="fw-semibold">PR Number</label>
+                            <label class="fw-semibold">{{ __('purchase_requests.pr_number') }}</label>
                             <input type="text" class="form-control" name="purchase_request_no"
-                                value="{{ $purchase_request->purchase_request_no ?? ($purchase_request_no ?? 'Auto Generated') }}"
+                                value="{{ $purchase_request->purchase_request_no ?? ($purchase_request_no ?? __('common.auto_generated')) }}"
                                 readonly>
                         </div>
 
                         <div class="col-md-3">
-                            <label class="fw-semibold">PR Date <span class="text-danger">*</span></label>
+                            <label class="fw-semibold">{{ __('purchase_requests.pr_date') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control datepicker" name="purchase_request_date"
                                 value="{{ old('purchase_request_date', isset($purchase_request) ? localDate($purchase_request->purchase_request_date) : localDate(date('Y-m-d'))) }}"
                                 required>
                         </div>
 
                         <div class="col-md-3">
-                            <label class="fw-semibold">Expected Date <span class="text-danger">*</span></label>
+                            <label class="fw-semibold">{{ __('purchase_requests.expected_date') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control datepicker" name="purchase_expected_date"
                                 value="{{ old('purchase_expected_date', isset($purchase_request) ? localDate($purchase_request->purchase_expected_date) : localDate(date('Y-m-d', strtotime('+7 days')))) }}"
                                 required>
@@ -97,7 +97,7 @@
                         <div class="card-header bg-light d-flex justify-content-between align-items-center">
                             <h6 class="mb-0">Products</h6>
                             <button type="button" class="btn btn-sm btn-primary" onclick="addProductRow()">
-                                <i class="fa fa-plus"></i> Add Product
+                                <i class="fa fa-plus"></i> {{ __('common.add_product') }}
                             </button>
                         </div>
                         <div class="card-body">
@@ -178,8 +178,8 @@
                 <div class="card-footer border-top">
                     <div class="d-flex justify-content-end gap-2">
                         <button type="button" class="btn btn-outline-secondary"
-                            onclick="window.history.back()">Cancel</button>
-                        <button type="submit" class="btn btn-primary px-4">Save Purchase Request</button>
+                            onclick="window.history.back()">{{ __('common.cancel') }}</button>
+                        <button type="submit" class="btn btn-primary px-4">{{ isset($purchase_request) ? __('purchase_requests.update_request') : __('purchase_requests.save_request') }}</button>
                     </div>
                 </div>
             </form>

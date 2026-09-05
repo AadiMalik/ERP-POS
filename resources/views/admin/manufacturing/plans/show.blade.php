@@ -2,7 +2,7 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="d-flex justify-content-between align-items-center py-3 mb-4">
-        <h4 class="fw-bold mb-0">Plan {{ $plan->plan_no }} - {{ $plan->productVariation->name ?? $plan->product->name ?? '' }}</h4>
+        <h4 class="fw-bold mb-0">{{ __('manufacturing.plans_title') }} {{ $plan->plan_no }} - {{ $plan->productVariation->name ?? $plan->product->name ?? '' }}</h4>
         <div class="d-flex gap-2">
             @can('manufacturing-plan.confirm')
             @if ($plan->status === 'draft')

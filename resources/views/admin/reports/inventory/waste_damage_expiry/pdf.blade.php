@@ -18,14 +18,14 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Waste / Damage / Expiry Report',
+        'title' => __('reports.waste_damage_expiry_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
         'print_config' => $print_config,
     ])
     <table class="data-table">
-        <thead><tr><th>Reference No</th><th>Date</th><th>Warehouse</th><th>Product</th><th>Variation</th><th>Batch</th><th>Expiry</th><th>Qty</th><th>Unit</th><th>Unit Cost</th><th>Value</th><th>Loss Type</th><th>Reason</th><th>Status</th></tr></thead>
+        <thead><tr><th>{{ __('reports.col_reference_no_alt') }}</th><th>{{ __('reports.col_date') }}</th><th>{{ __('reports.col_warehouse') }}</th><th>{{ __('reports.col_product') }}</th><th>{{ __('reports.col_variation') }}</th><th>{{ __('reports.col_batch') }}</th><th>{{ __('reports.col_expiry') }}</th><th>{{ __('reports.col_qty') }}</th><th>{{ __('reports.col_unit') }}</th><th>{{ __('reports.col_unit_cost') }}</th><th>{{ __('reports.col_value') }}</th><th>{{ __('reports.col_loss_type') }}</th><th>{{ __('reports.col_reason') }}</th><th>{{ __('reports.col_status') }}</th></tr></thead>
         <tbody>
             @forelse ($rows as $row)
                 <tr>
@@ -45,7 +45,7 @@
                     <td>{{ ucfirst($row->status ?? '-') }}</td>
                 </tr>
             @empty
-                <tr><td colspan="14">No records found.</td></tr>
+                <tr><td colspan="14">{{ __('common.no_records_found') }}</td></tr>
             @endforelse
         </tbody>
     </table>

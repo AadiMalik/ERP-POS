@@ -21,6 +21,7 @@ class HomeController extends Controller
     {
         $this->middleware('auth');
         $this->middleware('check.subscription');
+        $this->middleware('setting');
         $this->access_service = $access_service;
         $this->dashboard_service = $dashboard_service;
     }

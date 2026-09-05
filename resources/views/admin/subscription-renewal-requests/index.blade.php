@@ -1,16 +1,16 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Renewal Requests</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('subscription_renewal_requests.title') }}</h4>
         <div class="card">
             <div class="table-responsive p-4">
                 <table id="renewal_requests_table" class="table datatables" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Business</th>
+                            <th>{{ __('common.business') }}</th>
                             <th>Requested Package</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>
@@ -50,7 +50,7 @@
                         successMessage('Renewal request approved.');
                         renewal_requests_table.destroy();
                         initDataTablerenewal_requests_table();
-                    }).catch((e) => errorMessage(e.Message ?? 'Something went wrong'));
+                    }).catch((e) => errorMessage(e.Message ?? __('common.something_went_wrong')));
                 }
             });
         });
@@ -73,7 +73,7 @@
                         successMessage('Renewal request rejected.');
                         renewal_requests_table.destroy();
                         initDataTablerenewal_requests_table();
-                    }).catch((e) => errorMessage(e.Message ?? 'Something went wrong'));
+                    }).catch((e) => errorMessage(e.Message ?? __('common.something_went_wrong')));
                 }
             });
         });
@@ -96,7 +96,7 @@
                         successMessage('Changes requested.');
                         renewal_requests_table.destroy();
                         initDataTablerenewal_requests_table();
-                    }).catch((e) => errorMessage(e.Message ?? 'Something went wrong'));
+                    }).catch((e) => errorMessage(e.Message ?? __('common.something_went_wrong')));
                 }
             });
         });

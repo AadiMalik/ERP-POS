@@ -4,20 +4,20 @@
         ->resolve(Auth::user()->business_id);
 @endphp
 @extends('layouts.print')
-@section('title', 'Material Consumption Report')
+@section('title', __('reports.material_consumption'))
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
 @endsection
 @section('content')
     @include('admin.partials.print.header', [
-        'business' => $business, 'branch' => null, 'title' => 'Material Consumption Report',
+        'business' => $business, 'branch' => null, 'title' => __('reports.material_consumption'),
         'doc_no' => '', 'doc_date' => localDate(now()), 'reference' => [], 'print_config' => $print_config,
     ])
     <table class="print-table">
         <thead>
             <tr>
-                <th>Date</th><th>Raw Material</th><th>Batch Consumed</th><th class="text-right">Qty</th>
-                <th class="text-right">Total Cost</th><th>Warehouse</th><th>Production #</th><th>Plan #</th>
+                <th>{{ __('reports.col_date') }}</th><th>{{ __('reports.col_raw_material') }}</th><th>{{ __('reports.col_batch_consumed') }}</th><th class="text-right">{{ __('reports.col_qty') }}</th>
+                <th class="text-right">Total Cost</th><th>{{ __('reports.col_warehouse') }}</th><th>{{ __('reports.col_production_hash') }}</th><th>{{ __('reports.col_plan_hash') }}</th>
             </tr>
         </thead>
         <tbody>

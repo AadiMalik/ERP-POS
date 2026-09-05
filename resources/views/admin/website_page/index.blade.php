@@ -5,14 +5,14 @@ use App\Enums\RoleNames;
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Pages & Policies</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('website_cms.pages_policies') }}</h4>
 
     <div class="card">
         @if (RoleNames::SUPERADMIN == getRoleName())
         <div class="card-header">
             <div class="row g-3">
                 <div class="col-md-3">
-                    <label class="form-label">Business</label>
+                    <label class="form-label">{{ __('common.business') }}</label>
                     <select id="filter_business_id" class="form-select">
                         @foreach ($business as $item)
                         <option value="{{ $item->business_id }}">{{ $item->name ?? '' }}</option>
@@ -27,10 +27,10 @@ use App\Enums\RoleNames;
                 <table id="website_page_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Title</th>
-                            <th>Slug</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.title') }}</th>
+                            <th>{{ __('common.slug') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

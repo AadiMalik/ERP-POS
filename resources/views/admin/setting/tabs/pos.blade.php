@@ -3,34 +3,34 @@
 
     <div class="row">
         <div class="col-md-12">
-            <h4>POS Configuration</h4>
+            <h4>{{ __('settings.pos_title') }}</h4>
             <hr>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Register Mode</label>
+            <label>{{ __('settings.pos_register_mode') }}</label>
             <select class="form-select select2" name="register_mode">
-                <option value="manual" {{ $pos_setting->register_mode == 'manual' ? 'selected' : '' }}>Manual</option>
-                <option value="automatic" {{ $pos_setting->register_mode == 'automatic' ? 'selected' : '' }}>Automatic</option>
+                <option value="manual" {{ $pos_setting->register_mode == 'manual' ? 'selected' : '' }}>{{ __('common.manual') }}</option>
+                <option value="automatic" {{ $pos_setting->register_mode == 'automatic' ? 'selected' : '' }}>{{ __('common.automatic') }}</option>
             </select>
         </div>
 
         <div class="col-md-3 mb-3 register-mode-automatic-field">
-            <label>Default Open Time</label>
+            <label>{{ __('settings.pos_default_open_time') }}</label>
             <input type="time" class="form-control" name="open_time" value="{{ $pos_setting->open_time }}">
-            <small class="text-muted">Automatic mode - overridden by each branch's own Open Time if set.</small>
+            <small class="text-muted">{{ __('settings.pos_default_open_time_help') }}</small>
         </div>
 
         <div class="col-md-3 mb-3 register-mode-automatic-field">
-            <label>Default Close Time</label>
+            <label>{{ __('settings.pos_default_close_time') }}</label>
             <input type="time" class="form-control" name="close_time" value="{{ $pos_setting->close_time }}">
-            <small class="text-muted">Automatic mode - overridden by each branch's own Close Time if set.</small>
+            <small class="text-muted">{{ __('settings.pos_default_close_time_help') }}</small>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Default Walk-in Customer</label>
+            <label>{{ __('settings.pos_default_walk_in_customer') }}</label>
             <select class="form-select select2" name="default_customer_user_id">
-                <option value="">--Select Customer--</option>
+                <option value="">{{ __('settings.pos_select_customer') }}</option>
                 @foreach ($pos_customers as $customer)
                     <option value="{{ $customer->user_id }}"
                         {{ $pos_setting->default_customer_user_id == $customer->user_id ? 'selected' : '' }}>
@@ -41,114 +41,114 @@
         </div>
 
         <div class="col-md-4 mb-3">
-            <label>Invoice Prefix</label>
+            <label>{{ __('settings.pos_invoice_prefix') }}</label>
             <input type="text" class="form-control" name="invoice_prefix" value="{{ $pos_setting->invoice_prefix }}">
         </div>
 
         <div class="col-md-4 mb-3">
-            <label>Invoice Start Number</label>
+            <label>{{ __('settings.pos_invoice_start_number') }}</label>
             <input type="number" class="form-control" name="invoice_start" value="{{ $pos_setting->invoice_start }}">
         </div>
 
         <div class="col-md-4 mb-3">
-            <label>Daily Order ID Reset</label>
+            <label>{{ __('settings.pos_daily_order_id_reset') }}</label>
             <select class="form-select select2" name="daily_order_id_reset">
-                <option value="daily" {{ $pos_setting->daily_order_id_reset == 'daily' ? 'selected' : '' }}>Daily</option>
-                <option value="never" {{ $pos_setting->daily_order_id_reset == 'never' ? 'selected' : '' }}>Never</option>
+                <option value="daily" {{ $pos_setting->daily_order_id_reset == 'daily' ? 'selected' : '' }}>{{ __('settings.pos_reset_daily') }}</option>
+                <option value="never" {{ $pos_setting->daily_order_id_reset == 'never' ? 'selected' : '' }}>{{ __('settings.pos_reset_never') }}</option>
             </select>
         </div>
 
         <div class="col-md-12 mb-3">
-            <label>Invoice Footer</label>
+            <label>{{ __('settings.pos_invoice_footer') }}</label>
             <textarea class="form-control" name="invoice_footer" rows="2">{{ $pos_setting->invoice_footer }}</textarea>
         </div>
 
         <div class="col-md-3 mb-3">
-            <label class="d-block">Enable Discount</label>
+            <label class="d-block">{{ __('settings.pos_enable_discount') }}</label>
             <input type="checkbox" class="form-check-input" name="enable_discount" value="1"
                 {{ $pos_setting->enable_discount ? 'checked' : '' }}>
         </div>
 
         <div class="col-md-3 mb-3">
-            <label>Discount Level</label>
+            <label>{{ __('settings.pos_discount_level') }}</label>
             <select class="form-select select2" name="discount_level">
-                <option value="line" {{ $pos_setting->discount_level == 'line' ? 'selected' : '' }}>Line only</option>
-                <option value="order" {{ $pos_setting->discount_level == 'order' ? 'selected' : '' }}>Order only</option>
-                <option value="both" {{ $pos_setting->discount_level == 'both' ? 'selected' : '' }}>Both</option>
+                <option value="line" {{ $pos_setting->discount_level == 'line' ? 'selected' : '' }}>{{ __('settings.pos_discount_line_only') }}</option>
+                <option value="order" {{ $pos_setting->discount_level == 'order' ? 'selected' : '' }}>{{ __('settings.pos_discount_order_only') }}</option>
+                <option value="both" {{ $pos_setting->discount_level == 'both' ? 'selected' : '' }}>{{ __('settings.pos_discount_both') }}</option>
             </select>
         </div>
 
         <div class="col-md-3 mb-3">
-            <label class="d-block">Enable Hold Order</label>
+            <label class="d-block">{{ __('settings.pos_enable_hold_order') }}</label>
             <input type="checkbox" class="form-check-input" name="enable_hold_order" value="1"
                 {{ $pos_setting->enable_hold_order ? 'checked' : '' }}>
         </div>
 
         <div class="col-md-3 mb-3">
-            <label class="d-block">Allow Mixed Sale Types</label>
+            <label class="d-block">{{ __('settings.pos_allow_mixed_sale_types') }}</label>
             <input type="checkbox" class="form-check-input" name="allow_mixed_sale_types" value="1"
                 {{ $pos_setting->allow_mixed_sale_types ? 'checked' : '' }}>
-            <small class="text-muted d-block">Let a cashier set a different Sale Type per cart item instead of the whole order sharing one.</small>
+            <small class="text-muted d-block">{{ __('settings.pos_allow_mixed_sale_types_help') }}</small>
         </div>
 
         <div class="col-md-3 mb-3">
-            <label class="d-block">Allow Price Change in Cart</label>
+            <label class="d-block">{{ __('settings.pos_allow_price_change_in_cart') }}</label>
             <input type="checkbox" class="form-check-input" name="allow_price_change_in_cart" value="1"
                 {{ $pos_setting->allow_price_change_in_cart ? 'checked' : '' }}>
-            <small class="text-muted d-block">When off, no cashier can edit a line's price in the cart. When on, the "Change Price" permission decides who can.</small>
+            <small class="text-muted d-block">{{ __('settings.pos_allow_price_change_in_cart_help') }}</small>
         </div>
 
         <div class="col-md-3 mb-3">
-            <label class="d-block">Allow Price Below Minimum Selling Price</label>
+            <label class="d-block">{{ __('settings.pos_allow_price_below_minimum') }}</label>
             <input type="checkbox" class="form-check-input" name="allow_price_below_minimum" value="1"
                 {{ $pos_setting->allow_price_below_minimum ? 'checked' : '' }}>
-            <small class="text-muted d-block">Only takes effect when Allow Price Change in Cart is also on. When on, cashiers with the "Override Minimum Selling Price" permission can sell below a variation's minimum price; when off, no one can.</small>
+            <small class="text-muted d-block">{{ __('settings.pos_allow_price_below_minimum_help') }}</small>
         </div>
 
         <div class="col-md-3 mb-3">
-            <label class="d-block">Auto Print Invoice</label>
+            <label class="d-block">{{ __('settings.pos_auto_print_invoice') }}</label>
             <input type="checkbox" class="form-check-input" name="auto_print_invoice" value="1"
                 {{ $pos_setting->auto_print_invoice ? 'checked' : '' }}>
-            <small class="text-muted d-block">When on, the receipt is sent straight to the configured printer right after checkout - no print dialog or manual click.</small>
+            <small class="text-muted d-block">{{ __('settings.pos_auto_print_invoice_help') }}</small>
         </div>
 
         <div class="col-md-3 mb-3">
-            <label class="d-block">Show Product Image</label>
+            <label class="d-block">{{ __('settings.pos_show_product_image') }}</label>
             <input type="checkbox" class="form-check-input" name="show_product_image" value="1"
                 {{ $pos_setting->show_product_image ? 'checked' : '' }}>
         </div>
 
         <div class="col-md-3 mb-3">
-            <label class="d-block">Allow Backdated Sale</label>
+            <label class="d-block">{{ __('settings.pos_allow_backdated_sale') }}</label>
             <input type="checkbox" class="form-check-input pos-config-field" name="allow_backdated_sale" value="1"
                 {{ $pos_setting->allow_backdated_sale ? 'checked' : '' }}>
         </div>
 
         <div class="col-md-3 mb-3">
-            <label>Backdated Sale Max Days</label>
+            <label>{{ __('settings.pos_backdated_sale_max_days') }}</label>
             <input type="number" class="form-control" name="backdated_sale_max_days" min="0"
                 value="{{ $pos_setting->backdated_sale_max_days }}">
         </div>
 
         <div class="col-md-12">
             <hr>
-            <h5>Return / Refund</h5>
+            <h5>{{ __('settings.pos_return_refund_heading') }}</h5>
         </div>
 
         <div class="col-md-4 mb-3">
-            <label>Return Window (days)</label>
+            <label>{{ __('settings.pos_return_window_days') }}</label>
             <input type="number" class="form-control" name="return_window_days" min="0"
                 value="{{ $pos_setting->return_window_days }}">
         </div>
 
         <div class="col-md-4 mb-3">
-            <label class="d-block">Require Return Reason</label>
+            <label class="d-block">{{ __('settings.pos_require_return_reason') }}</label>
             <input type="checkbox" class="form-check-input" name="require_return_reason" value="1"
                 {{ $pos_setting->require_return_reason ? 'checked' : '' }}>
         </div>
 
         <div class="col-md-4 mb-3">
-            <label class="d-block">Allow Partial Return</label>
+            <label class="d-block">{{ __('settings.pos_allow_partial_return') }}</label>
             <input type="checkbox" class="form-check-input" name="allow_partial_return" value="1"
                 {{ $pos_setting->allow_partial_return ? 'checked' : '' }}>
         </div>
@@ -159,7 +159,7 @@
                 <button type="button"
                     class="btn btn-primary"
                     onclick="saveSetting('#posSettingForm','{{ url('admin/setting/pos') }}')">
-                    Save Changes
+                    {{ __('common.save_changes') }}
                 </button>
             </div>
         </div>
@@ -171,12 +171,12 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h5 class="mb-0">Sale Types</h5>
-            <small class="text-muted">Only the sale types you keep Active here appear on Product Variations and in POS.</small>
+            <h5 class="mb-0">{{ __('settings.pos_sale_types_heading') }}</h5>
+            <small class="text-muted">{{ __('settings.pos_sale_types_help') }}</small>
         </div>
         @can('sale-type.create')
             <button type="button" id="createNewSaleType" class="btn rounded-pill btn-primary">
-                <i class="icon-base fa fa-plus mr-5"></i>Add Sale Type
+                <i class="icon-base fa fa-plus mr-5"></i>{{ __('settings.pos_add_sale_type') }}
             </button>
         @endcan
     </div>
@@ -185,11 +185,11 @@
         <table class="table" id="saleTypeTable">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Code</th>
-                    <th>Default</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                    <th>{{ __('common.name') }}</th>
+                    <th>{{ __('common.code') }}</th>
+                    <th>{{ __('common.default') }}</th>
+                    <th>{{ __('common.status') }}</th>
+                    <th>{{ __('common.action') }}</th>
                 </tr>
             </thead>
             <tbody id="saleTypeTableBody"></tbody>
@@ -209,31 +209,31 @@
                     <input type="hidden" name="sale_type_id" id="sale_type_id">
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label class="form-label">Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="sale_type_name" name="name" placeholder="e.g. Retail" required>
+                            <label class="form-label">{{ __('common.name') }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="sale_type_name" name="name" placeholder="{{ __('settings.pos_name_placeholder') }}" required>
                         </div>
                         <div class="col-md-12 mb-3">
-                            <label class="form-label">Code <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="sale_type_code" name="code" placeholder="e.g. RETAIL" required>
+                            <label class="form-label">{{ __('common.code') }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="sale_type_code" name="code" placeholder="{{ __('settings.pos_code_placeholder') }}" required>
                         </div>
                         <div class="col-md-6 mb-3 d-flex align-items-end">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="sale_type_is_default" name="is_default" value="1">
-                                <label class="form-check-label" for="sale_type_is_default">Set as Default</label>
+                                <label class="form-check-label" for="sale_type_is_default">{{ __('settings.pos_set_as_default') }}</label>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="sale_type_status" name="status" class="form-select">
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                                <option value="active">{{ __('common.active') }}</option>
+                                <option value="inactive">{{ __('common.inactive') }}</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" id="saveBtn" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.close') }}</button>
+                    <button type="submit" id="saveBtn" class="btn btn-primary">{{ __('common.save') }}</button>
                 </div>
             </form>
         </div>
@@ -242,6 +242,17 @@
 
 @push('js')
 <script>
+    window.i18n_settings = Object.assign(window.i18n_settings || {}, {
+        pos_add_sale_type: @json(__('settings.pos_add_sale_type')),
+        pos_edit_sale_type: @json(__('settings.pos_edit_sale_type')),
+        pos_no_sale_types: @json(__('settings.pos_no_sale_types')),
+        pos_default_badge: @json(__('common.default')),
+        active: @json(__('common.active')),
+        inactive: @json(__('common.inactive')),
+        please_enter_name: @json(__('common.please_enter_name')),
+        please_enter_code: @json(__('common.please_enter_code')),
+    });
+
     // Row-level actions are rendered client-side (see renderSaleTypeRows()
     // below), so - unlike a Blade permission check on a static button - these
     // have to be read into JS explicitly. Server-side middleware on
@@ -254,6 +265,7 @@
 
     function renderSaleTypeRows(sale_types) {
         let rows = '';
+        let i18n = window.i18n_settings || {};
 
         (sale_types || []).forEach(function (item) {
             let checked = item.status === 'active' ? 'checked' : '';
@@ -262,7 +274,7 @@
                 ? `<div class="form-check form-switch mb-0">
                         <input class="form-check-input statusSaleType" type="checkbox" data-id="${item.sale_type_id}" ${checked}>
                     </div>`
-                : `<span class="badge ${item.status === 'active' ? 'bg-label-success' : 'bg-label-secondary'}">${item.status === 'active' ? 'Active' : 'Inactive'}</span>`;
+                : `<span class="badge ${item.status === 'active' ? 'bg-label-success' : 'bg-label-secondary'}">${item.status === 'active' ? (i18n.active || 'Active') : (i18n.inactive || 'Inactive')}</span>`;
 
             let actionCell = '';
             if (canEditSaleType) {
@@ -282,13 +294,13 @@
             rows += `<tr>
                 <td>${item.name}</td>
                 <td>${item.code}</td>
-                <td>${item.is_default == 1 ? '<span class="badge bg-label-primary">Default</span>' : '-'}</td>
+                <td>${item.is_default == 1 ? '<span class="badge bg-label-primary">' + (i18n.pos_default_badge || 'Default') + '</span>' : '-'}</td>
                 <td>${statusCell}</td>
                 <td>${actionCell}</td>
             </tr>`;
         });
 
-        $('#saleTypeTableBody').html(rows || '<tr><td colspan="5" class="text-center">No sale types yet.</td></tr>');
+        $('#saleTypeTableBody').html(rows || '<tr><td colspan="5" class="text-center">' + (i18n.pos_no_sale_types || 'No sale types yet.') + '</td></tr>');
     }
 
     function loadSaleTypes() {
@@ -309,7 +321,7 @@
         $('#sale_type_id').val('');
         $('#sale_type_status').val('active');
         $('#saveBtn').show();
-        $('#saleTypeModalHeading').html('Add Sale Type');
+        $('#saleTypeModalHeading').html((window.i18n_settings && window.i18n_settings.pos_add_sale_type) || 'Add Sale Type');
         $('#saleTypeModal').modal('show');
     });
 
@@ -323,7 +335,7 @@
             $('#sale_type_code').val(data.code);
             $('#sale_type_is_default').prop('checked', data.is_default == 1);
             $('#sale_type_status').val(data.status);
-            $('#saleTypeModalHeading').html('Edit Sale Type');
+            $('#saleTypeModalHeading').html((window.i18n_settings && window.i18n_settings.pos_edit_sale_type) || 'Edit Sale Type');
             $('#saveBtn').show();
             $('#saleTypeModal').modal('show');
         }
@@ -338,11 +350,11 @@
         },
         beforeSubmit: function () {
             if ($('#sale_type_name').val() == '') {
-                errorMessage('Please Enter Name');
+                errorMessage((window.i18n_settings && window.i18n_settings.please_enter_name) || 'Please Enter Name');
                 return false;
             }
             if ($('#sale_type_code').val() == '') {
-                errorMessage('Please Enter Code');
+                errorMessage((window.i18n_settings && window.i18n_settings.please_enter_code) || 'Please Enter Code');
                 return false;
             }
             return true;

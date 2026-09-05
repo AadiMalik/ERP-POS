@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Payroll Payment/Disbursement Report',
+        'title' => __('reports.payroll_disbursement_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,15 +56,15 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Employee Code</th>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Period</th>
+                <th>{{ __('reports.col_employee_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_department') }}</th>
+                <th>{{ __('reports.col_period') }}</th>
                 <th class="text-right">Net Salary</th>
-                <th>Payment Method</th>
-                <th>Bank Account</th>
-                <th>Payment Status</th>
-                <th>Paid On</th>
+                <th>{{ __('reports.col_payment_method') }}</th>
+                <th>{{ __('reports.col_bank_account') }}</th>
+                <th>{{ __('reports.col_payment_status') }}</th>
+                <th>{{ __('reports.col_paid_on') }}</th>
             </tr>
         </thead>
         <tbody>

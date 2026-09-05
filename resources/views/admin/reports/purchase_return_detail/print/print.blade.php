@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Purchase Return Detail Report')
+@section('title', __('reports.purchase_return_detail'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Purchase Return Detail Report',
+        'title' => __('reports.purchase_return_detail'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,19 +25,19 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Return Date</th>
-                <th>Return No.</th>
-                <th>Source Ref.</th>
-                <th>Supplier</th>
-                <th>Warehouse</th>
-                <th>Product</th>
-                <th>Variation</th>
-                <th class="text-right">Qty</th>
+                <th>{{ __('reports.col_return_date') }}</th>
+                <th>{{ __('reports.col_return_no') }}</th>
+                <th>{{ __('reports.col_source_ref') }}</th>
+                <th>{{ __('reports.col_supplier') }}</th>
+                <th>{{ __('reports.col_warehouse') }}</th>
+                <th>{{ __('reports.col_product') }}</th>
+                <th>{{ __('reports.col_variation') }}</th>
+                <th class="text-right">{{ __('reports.col_qty') }}</th>
                 <th class="text-right">Unit Price</th>
-                <th class="text-right">Discount</th>
-                <th class="text-right">Tax</th>
-                <th class="text-right">Total</th>
-                <th>Status</th>
+                <th class="text-right">{{ __('reports.col_discount') }}</th>
+                <th class="text-right">{{ __('reports.col_tax') }}</th>
+                <th class="text-right">{{ __('reports.col_total') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

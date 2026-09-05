@@ -8,7 +8,7 @@ use App\Enums\RoleNames;
 @section('content')
 <!-- ========== table components start ========== -->
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"> Journals</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('journals.title') }}</h4>
 
     <!-- Basic Bootstrap Table -->
     <div class="card">
@@ -21,13 +21,13 @@ use App\Enums\RoleNames;
 
             </div>
             <a href="javascript:void(0)" id="createNewJournal" class="btn rounded-pill btn-primary">
-                <i class="icon-base fa fa-plus mr-5"></i>Add New</a>
+                <i class="icon-base fa fa-plus mr-5"></i>{{ __('common.add_new') }}</a>
         </div>
         <div class="card-body">
             <div id="filterSection" class="card-body border-bottom" style="display:none;">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label class="form-label">Date</label>
+                        <label class="form-label">{{ __('common.date') }}</label>
                         @include('admin.partials.date_filter')
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
@@ -44,9 +44,9 @@ use App\Enums\RoleNames;
                 <table id="journal_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Short</th>
-                            <th>Action</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('journals.short') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                         <!-- end table row-->
                     </thead>
@@ -62,6 +62,15 @@ use App\Enums\RoleNames;
 <!-- ========== table components end ========== -->
 @endsection
 @section('js')
+@php
+    $__i18nJournals = [
+        'create_new' => __('journals.create_new'),
+        'edit_heading' => __('journals.edit_heading'),
+        'please_enter_name' => __('journals.please_enter_name'),
+        'please_enter_short' => __('journals.please_enter_short'),
+    ];
+@endphp
+<script>window.i18n_journals = @json($__i18nJournals);</script>
 <script src="{{ asset('public/assets/js/admin/journal.js') }}"></script>
 @include('admin.partials.datatable', [
 'columns' => "

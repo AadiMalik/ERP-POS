@@ -79,7 +79,7 @@ use App\Enums\BroadcastRecipientStatus;
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Recipients</h5>
+            <h5 class="mb-0">{{ __('Recipients') }}</h5>
             <select id="recipient_status" class="form-select w-auto">
                 <option value="">All</option>
                 @foreach (BroadcastRecipientStatus::labels() as $value => $label)

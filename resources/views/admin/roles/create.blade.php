@@ -7,12 +7,12 @@
 @section('content')
     <!-- ========== table components start ========== -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"> Roles</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('roles.title') }}</h4>
 
         <!-- Basic Bootstrap Table -->
         <div class="card">
             <div class="card-header">
-                <h5>{{ isset($role) ? 'Update' : 'New' }} Role</h5>
+                <h5>{{ isset($role) ? __('roles.update_heading') : __('roles.new_heading') }}</h5>
             </div>
             <div class="card-body">
                 <form action="{{ url('admin/roles') }}" method="POST">
@@ -20,16 +20,16 @@
                     <input type="hidden" name="id" id="id" value="{{ isset($role) ? $role->id : '' }}">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="name" class="form-label">Role Name:<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="name" name="name" placeholder="Role Name"
+                            <label for="name" class="form-label">{{ __('roles.role_name') }}:<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="{{ __('roles.role_name') }}"
                                 value="{{ isset($role) ? $role->name : '' }}"
                                 {{ getRoleName() != RoleNames::SUPERADMIN ? 'readonly' : '' }} required>
                         </div>
                         @if (getRoleName() == RoleNames::SUPERADMIN)
                             <div class="col-md-6 mb-3">
-                                <label for="business" class="form-label">Business:</label>
+                                <label for="business" class="form-label">{{ __('common.business') }}:</label>
                                 <select class="form-select" name="business_id" id="business_id">
-                                    <option value="" selected>--Select Business--</option>
+                                    <option value="" selected>{{ __('common.select_business') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->id }}"
                                             {{ isset($role) && $role->business_id == $item->id ? 'selected' : '' }}>
@@ -39,11 +39,11 @@
                             </div>
                         @endif
                         <div class="col-md-12 mb-3">
-                            <label for="name" class="form-label">Description:<span class="text-danger">*</span></label>
+                            <label for="name" class="form-label">{{ __('common.description') }}:<span class="text-danger">*</span></label>
                             <textarea name="description" id="description" class="form-control" cols="20" rows="5" required>{{ isset($role) ? $role->description : '' }}</textarea>
                         </div>
                         <div class="col-md-12 mb-3">
-                            <label class="form-label">Permissions:<span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('roles.permissions') }}:<span class="text-danger">*</span></label>
                             <div id="permission-modules">
                                 @foreach ($groupedPermissions as $moduleKey => $module)
                                     <div class="card mb-2">
@@ -55,8 +55,7 @@
                                             <div class="form-check form-switch mb-0">
                                                 <input class="form-check-input module-toggle-all" type="checkbox"
                                                     data-module="{{ $moduleKey }}" id="module-all-{{ $moduleKey }}">
-                                                <label class="form-check-label" for="module-all-{{ $moduleKey }}">Enable
-                                                    All</label>
+                                                <label class="form-check-label" for="module-all-{{ $moduleKey }}">{{ __('roles.enable_all') }}</label>
                                             </div>
                                         </div>
                                         <div id="module-{{ $moduleKey }}" class="collapse show">
@@ -81,7 +80,7 @@
                             </div>
                         </div>
                         <div class="col-md-12 mt-4">
-                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="submit" class="btn btn-primary">{{ __('roles.save_role') }}</button>
                         </div>
                     </div>
             </div>

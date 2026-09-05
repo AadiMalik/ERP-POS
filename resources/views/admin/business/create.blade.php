@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Business</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('Business') }}</h4>
 
         <div class="card">
             <div class="card-header bg-white border-bottom">
@@ -259,7 +259,7 @@
                     <!-- Form Actions -->
                     <div class="d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
                         <button type="button" class="btn btn-outline-secondary"
-                            onclick="window.history.back()">Cancel</button>
+                            onclick="window.history.back()">{{ __('common.cancel') }}</button>
                         <button class="btn btn-primary px-4">Save Business</button>
                     </div>
                 </form>

@@ -5,20 +5,20 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">
-            Orders
+            {{ __('orders.title') }}
         </h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @include('admin.partials.import-export-buttons', [
                         'importExportModule' => 'order',
-                        'importExportLabel' => 'Orders',
+                        'importExportLabel' => __('orders.title'),
                         'importExportRefreshFn' => 'initDataTableorder_table',
                         'importExportExportParamsSelector' => '#business_id',
                     ])
@@ -28,18 +28,18 @@
                 <div id="filterSection" class="card-body border-bottom" style="display:none;">
                     <div class="row g-3">
                         <div class="col-md-3">
-                            <label class="form-label">Order ID</label>
-                            <input type="text" id="order_id" class="form-control" placeholder="Order ID">
+                            <label class="form-label">{{ __('orders.order_id') }}</label>
+                            <input type="text" id="order_id" class="form-control" placeholder="{{ __('orders.order_id') }}">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Daily Order ID</label>
-                            <input type="text" id="daily_order_id" class="form-control" placeholder="Daily Order ID">
+                            <label class="form-label">{{ __('orders.daily_order_id') }}</label>
+                            <input type="text" id="daily_order_id" class="form-control" placeholder="{{ __('orders.daily_order_id') }}">
                         </div>
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -49,104 +49,104 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Branch</label>
+                            <label class="form-label">{{ __('common.branch') }}</label>
                             <select id="branch_id" class="form-select">
-                                <option value="">--All Branches--</option>
+                                <option value="">{{ __('common.all_branches') }}</option>
                                 @foreach ($branches as $item)
                                     <option value="{{ $item->branch_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Warehouse</label>
+                            <label class="form-label">{{ __('common.warehouse') }}</label>
                             <select id="warehouse_id" class="form-select">
-                                <option value="">--All Warehouses--</option>
+                                <option value="">{{ __('common.all_warehouses') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Register</label>
+                            <label class="form-label">{{ __('orders.register') }}</label>
                             <select id="register_id" class="form-select">
-                                <option value="">--All Registers--</option>
+                                <option value="">{{ __('orders.all_registers') }}</option>
                                 @foreach ($registers as $item)
                                     <option value="{{ $item->pos_register_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Cashier</label>
+                            <label class="form-label">{{ __('orders.cashier') }}</label>
                             <select id="cashier_id" class="form-select">
-                                <option value="">--All Cashiers--</option>
+                                <option value="">{{ __('orders.all_cashiers') }}</option>
                                 @foreach ($cashiers as $item)
                                     <option value="{{ $item->id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Customer</label>
+                            <label class="form-label">{{ __('common.customer') }}</label>
                             <select id="customer_id" class="form-select">
-                                <option value="">--All Customers--</option>
+                                <option value="">{{ __('common.all_customers') }}</option>
                                 @foreach ($customers as $item)
                                     <option value="{{ $item->user_id }}">{{ $item->user->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Order Type</label>
+                            <label class="form-label">{{ __('orders.order_type') }}</label>
                             <select id="order_type_id" class="form-select">
-                                <option value="">--All Order Types--</option>
+                                <option value="">{{ __('orders.all_order_types') }}</option>
                                 @foreach ($order_types as $item)
                                     <option value="{{ $item->order_type_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Order Source</label>
+                            <label class="form-label">{{ __('orders.order_source') }}</label>
                             <select id="order_source_id" class="form-select">
-                                <option value="">--All Order Sources--</option>
+                                <option value="">{{ __('orders.all_order_sources') }}</option>
                                 @foreach ($order_sources as $item)
                                     <option value="{{ $item->order_source_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Payment Method</label>
+                            <label class="form-label">{{ __('orders.payment_method') }}</label>
                             <select id="payment_method_id" class="form-select">
-                                <option value="">--All Payment Methods--</option>
+                                <option value="">{{ __('orders.all_payment_methods') }}</option>
                                 @foreach ($payment_methods as $item)
                                     <option value="{{ $item->payment_method_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
-                                <option value="">--All Statuses--</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
                                 @foreach ($statuses as $value => $label)
                                     <option value="{{ $value }}">{{ $label ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Order Date</label>
+                            <label class="form-label">{{ __('orders.order_date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Sale Date From</label>
+                            <label class="form-label">{{ __('orders.sale_date_from') }}</label>
                             <input type="date" id="sale_date_start" class="form-control">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Sale Date To</label>
+                            <label class="form-label">{{ __('orders.sale_date_to') }}</label>
                             <input type="date" id="sale_date_end" class="form-control">
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
                             <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
+                                {{ __('common.search') }}
                             </button>
                             <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
+                                {{ __('common.reset') }}
                             </button>
                         </div>
                     </div>
@@ -156,13 +156,13 @@
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Daily Order ID</th>
-                                <th>Order Date</th>
-                                <th>Customer</th>
-                                <th>Total</th>
-                                <th>Due</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>{{ __('orders.daily_order_id') }}</th>
+                                <th>{{ __('orders.order_date') }}</th>
+                                <th>{{ __('common.customer') }}</th>
+                                <th>{{ __('common.total') }}</th>
+                                <th>{{ __('common.due') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>
@@ -176,20 +176,20 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Cancel Order</h5>
+                        <h5 class="modal-title">{{ __('orders.cancel_order') }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" id="cancel_order_id">
-                        <p class="mb-2">This order will be marked as Cancelled. This action is recorded in the order's status history.</p>
+                        <p class="mb-2">{{ __('orders.cancel_order_hint') }}</p>
                         <div class="mb-3">
-                            <label class="form-label">Cancellation Reason <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('orders.cancellation_reason') }} <span class="text-danger">*</span></label>
                             <textarea class="form-control" id="cancel_order_reason" rows="3" required></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-danger" id="confirmCancelOrder">Cancel Order</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.close') }}</button>
+                        <button type="button" class="btn btn-danger" id="confirmCancelOrder">{{ __('orders.cancel_order') }}</button>
                     </div>
                 </div>
             </div>
@@ -197,6 +197,24 @@
     </div>
 @endsection
 @section('js')
+    @php
+        $__i18nOrders = [
+            'all_branches' => __('common.all_branches'),
+            'all_warehouses' => __('common.all_warehouses'),
+            'all_registers' => __('orders.all_registers'),
+            'all_cashiers' => __('orders.all_cashiers'),
+            'all_customers' => __('common.all_customers'),
+            'all_order_types' => __('orders.all_order_types'),
+            'all_order_sources' => __('orders.all_order_sources'),
+            'all_payment_methods' => __('orders.all_payment_methods'),
+            'something_went_wrong' => __('common.something_went_wrong'),
+            'cancellation_reason_required' => __('orders.cancellation_reason_required'),
+            'unable_cancel' => __('orders.unable_cancel'),
+        ];
+    @endphp
+    <script>
+        window.i18n_orders = @json($__i18nOrders);
+    </script>
     <script src="{{ asset('public/assets/js/admin/order.js') }}"></script>
     @include('admin.partials.datatable', [
         'columns' => "

@@ -21,7 +21,7 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold mb-4">
-            Settings
+            {{ __('settings.title') }}
         </h4>
         <div class="card settings-card">
             <div class="card-body">
@@ -30,79 +30,83 @@
                         <div class="nav flex-column nav-pills settings-nav" id="settings-tab" role="tablist">
                             <button class="nav-link active" style="text-align: left; border-radius:0px;"
                                 data-bs-toggle="pill" data-bs-target="#business">
-                                Business
+                                {{ __('settings.tab_business') }}
+                            </button>
+                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
+                                data-bs-target="#localization">
+                                {{ __('settings.tab_localization') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#accounting">
-                                Accounting
+                                {{ __('settings.tab_accounting') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#inventory">
-                                Inventory
+                                {{ __('settings.tab_inventory') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#notification">
-                                Notifications
+                                {{ __('settings.tab_notification') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#customer">
-                                Customer
+                                {{ __('settings.tab_customer') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#supplier">
-                                Supplier
+                                {{ __('settings.tab_supplier') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#email">
-                                Email
+                                {{ __('settings.tab_email') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#sms">
-                                SMS
+                                {{ __('settings.tab_sms') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#whatsapp">
-                                WhatsApp
+                                {{ __('settings.tab_whatsapp') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#firebase">
-                                Firebase
+                                {{ __('settings.tab_firebase') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#fbr">
-                                FBR
+                                {{ __('settings.tab_fbr') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#pra">
-                                PRA
+                                {{ __('settings.tab_pra') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#pos">
-                                POS
+                                {{ __('settings.tab_pos') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#print">
-                                Print
+                                {{ __('settings.tab_print') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#thermal_print">
-                                Thermal Print
+                                {{ __('settings.tab_thermal_print') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#barcode">
-                                Barcode &amp; QR
+                                {{ __('settings.tab_barcode') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#theme">
-                                Theme / Appearance
+                                {{ __('settings.tab_theme') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#website_theme">
-                                Website Theme
+                                {{ __('settings.tab_website_theme') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#website_settings">
-                                Website Settings
+                                {{ __('settings.tab_website_settings') }}
                             </button>
                         </div>
                     </div>
@@ -110,6 +114,9 @@
                         <div class="tab-content">
                             <div class="tab-pane fade show active" id="business">
                                 @include('admin.setting.tabs.business')
+                            </div>
+                            <div class="tab-pane fade" id="localization">
+                                @include('admin.setting.tabs.localization')
                             </div>
                             <div class="tab-pane fade" id="accounting">
                                 @include('admin.setting.tabs.accounting')
@@ -179,6 +186,20 @@
                 width: '100%'
             });
         });
+
+        function saveLocalizationSetting(form) {
+            ajaxRequest({
+                url: '{{ route('localization.update') }}',
+                method: 'POST',
+                data: new FormData($(form)[0]),
+                isFormData: true
+            }).then(res => {
+                successMessage(res.Message);
+                setTimeout(() => location.reload(), 800);
+            }).catch(err => {
+                errorMessage(err.Message);
+            });
+        }
 
         function saveSetting(form, url) {
             ajaxRequest({

@@ -13,7 +13,7 @@ use App\Enums\RoleNames;
                 @if (RoleNames::SUPERADMIN == getRoleName())
                 <div class="col-md-4">
                     <select id="filter_business_id" class="form-select">
-                        <option value="">--All Businesses--</option>
+                        <option value="">{{ __('common.all_businesses') }}</option>
                         @foreach ($business as $item)
                         <option value="{{ $item->business_id }}">{{ $item->name ?? '' }}</option>
                         @endforeach
@@ -30,7 +30,7 @@ use App\Enums\RoleNames;
                 </div>
             </div>
             <a href="javascript:void(0)" id="createNewBenefit" class="btn rounded-pill btn-primary">
-                <i class="icon-base fa fa-plus mr-5"></i>Add New</a>
+                <i class="icon-base fa fa-plus mr-5"></i> {{ __('common.add_new') }}</a>
         </div>
         <div class="card-body">
             <div class="table-responsive text-nowrap p-4">
@@ -39,11 +39,11 @@ use App\Enums\RoleNames;
                         <tr>
                             <th>Icon</th>
                             <th>Group</th>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Sort Order</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.title') }}</th>
+                            <th>{{ __('common.description') }}</th>
+                            <th>{{ __('common.sort_order') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

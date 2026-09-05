@@ -4,36 +4,34 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            Loyalty Report
-        </h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.loyalty_report') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @canAccess('reports.loyalty-report.print')
                     <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary">
-                        <i class="fa fa-print"></i> Print
+                        <i class="fa fa-print"></i> {{ __('common.print') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.loyalty-report.pdf')
                     <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger">
-                        <i class="fa fa-file-pdf"></i> PDF
+                        <i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.loyalty-report.export')
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
-                        <i class="fa fa-file-excel"></i> Excel
+                        <i class="fa fa-file-excel"></i> {{ __('common.excel') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.loyalty-report.export-csv')
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
-                        <i class="fa fa-file-text"></i> CSV
+                        <i class="fa fa-file-text"></i> {{ __('common.csv') }}
                     </a>
                     @endcanAccess
                 </div>
@@ -43,9 +41,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }}
                                             {{ $item->name ?? '' }}
@@ -55,18 +53,18 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Branch</label>
+                            <label class="form-label">{{ __('common.branch') }}</label>
                             <select id="branch_id" class="form-select">
-                                <option value="">--All Branches--</option>
+                                <option value="">{{ __('common.all_branches') }}</option>
                                 @foreach ($branches as $item)
                                     <option value="{{ $item->branch_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Customer</label>
+                            <label class="form-label">{{ __('common.customer') }}</label>
                             <select id="user_id" class="form-select">
-                                <option value="">--All Customers--</option>
+                                <option value="">{{ __('common.all_customers') }}</option>
                                 @foreach ($customers as $item)
                                     <option value="{{ $item->user_id }}">{{ $item->code ?? '' }}
                                         {{ $item->user->name ?? '' }}
@@ -79,9 +77,9 @@
                             <input type="text" id="order_no" class="form-control" placeholder="Order #">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
-                                <option value="">--All Statuses--</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
                                 <option value="draft">Draft</option>
                                 <option value="hold">Hold</option>
                                 <option value="posted">Posted</option>
@@ -91,16 +89,12 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Period</label>
+                            <label class="form-label">{{ __('common.period') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
-                            </button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
-                            </button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -127,15 +121,15 @@
                     <table id="loyalty_report_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Order No</th>
-                                <th>Date</th>
-                                <th>Customer</th>
+                                <th>{{ __('reports.col_order_no') }}</th>
+                                <th>{{ __('common.date') }}</th>
+                                <th>{{ __('common.customer') }}</th>
                                 <th class="text-end">Order Total</th>
                                 <th class="text-end">Points Redeemed</th>
                                 <th class="text-end">Loyalty Discount</th>
                                 <th class="text-end">Points Earned</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>

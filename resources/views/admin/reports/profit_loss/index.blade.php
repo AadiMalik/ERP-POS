@@ -4,9 +4,7 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            Profit & Loss Statement
-        </h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.profit_loss') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="text-muted">
@@ -15,22 +13,22 @@
                 <div class="d-flex gap-2">
                     @canAccess('reports.profit-loss.print')
                     <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary">
-                        <i class="fa fa-print"></i> Print
+                        <i class="fa fa-print"></i> {{ __('common.print') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.profit-loss.pdf')
                     <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger">
-                        <i class="fa fa-file-pdf"></i> PDF
+                        <i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.profit-loss.export')
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
-                        <i class="fa fa-file-excel"></i> Excel
+                        <i class="fa fa-file-excel"></i> {{ __('common.excel') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.profit-loss.export-csv')
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
-                        <i class="fa fa-file-text"></i> CSV
+                        <i class="fa fa-file-text"></i> {{ __('common.csv') }}
                     </a>
                     @endcanAccess
                 </div>
@@ -39,9 +37,9 @@
                 <form method="GET" action="{{ url('/admin/reports/profit-loss') }}" class="row g-3 border-bottom pb-4 mb-4">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                         <div class="col-md-3">
-                            <label class="form-label">Business</label>
+                            <label class="form-label">{{ __('common.business') }}</label>
                             <select name="business_id" class="form-select">
-                                <option value="">--All Businesses--</option>
+                                <option value="">{{ __('common.all_businesses') }}</option>
                                 @foreach ($business as $item)
                                     <option value="{{ $item->business_id }}" {{ request('business_id') == $item->business_id ? 'selected' : '' }}>
                                         {{ $item->code ?? '' }} {{ $item->name ?? '' }}
@@ -51,15 +49,15 @@
                         </div>
                     @endif
                     <div class="col-md-3">
-                        <label class="form-label">Start Date</label>
+                        <label class="form-label">{{ __('common.start_date') }}</label>
                         <input type="date" name="start_date" class="form-control" value="{{ request('start_date', $result['start_date']->format('Y-m-d')) }}">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">End Date</label>
+                        <label class="form-label">{{ __('common.end_date') }}</label>
                         <input type="date" name="end_date" class="form-control" value="{{ request('end_date', $result['end_date']->format('Y-m-d')) }}">
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
-                        <button type="submit" class="btn btn-primary">Search</button>
+                        <button type="submit" class="btn btn-primary">{{ __('common.search') }}</button>
                         <a href="{{ url('/admin/reports/profit-loss') }}" class="btn btn-outline-secondary">Reset</a>
                     </div>
                 </form>

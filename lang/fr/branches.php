@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Succursales',
+    'singular' => 'Succursale',
+    'basic_information' => 'Basic Information',
+    'address_information' => 'Address Information',
+    'branch_name' => 'Succursale Nom',
+    'branch_code' => 'Succursale Code',
+    'branch_email' => 'Succursale Email',
+    'branch_phone' => 'Succursale Phone',
+    'state' => 'State',
+    'pos_register_hours' => 'POS Automatic Register Hours',
+    'open_time' => 'Ouvrir Heure',
+    'close_time' => 'Fermer Heure',
+    'open_time_hint' => 'Overrides the Entreprise Par défaut when Register Mode is Automatic. Congé blank to use the Entreprise Par défaut.',
+    'branch_logo' => 'Succursale Logo',
+    'previous_logo' => 'Previous Logo',
+    'jpg_png_supported' => 'JPG, PNG supported',
+    'please_select_valid_image' => 'Veuillez Sélectionner a valid image file (JPG, PNG)',
+    'new_heading' => 'Nouveau Succursale',
+    'update_heading' => 'Mettre à jour Succursale',
+    'save_branch' => 'Enregistrer Succursale',
+    'select_business' => '-- Sélectionner Entreprise --',
+];

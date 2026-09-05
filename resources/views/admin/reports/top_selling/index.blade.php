@@ -4,36 +4,34 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            Top Selling Report
-        </h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.top_selling') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @canAccess('reports.top-selling.print')
                     <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary">
-                        <i class="fa fa-print"></i> Print
+                        <i class="fa fa-print"></i> {{ __('common.print') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.top-selling.pdf')
                     <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger">
-                        <i class="fa fa-file-pdf"></i> PDF
+                        <i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.top-selling.export')
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
-                        <i class="fa fa-file-excel"></i> Excel
+                        <i class="fa fa-file-excel"></i> {{ __('common.excel') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.top-selling.export-csv')
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
-                        <i class="fa fa-file-text"></i> CSV
+                        <i class="fa fa-file-text"></i> {{ __('common.csv') }}
                     </a>
                     @endcanAccess
                 </div>
@@ -43,9 +41,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }}
                                             {{ $item->name ?? '' }}
@@ -55,16 +53,16 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Branch</label>
+                            <label class="form-label">{{ __('common.branch') }}</label>
                             <select id="branch_id" class="form-select">
-                                <option value="">--All Branches--</option>
+                                <option value="">{{ __('common.all_branches') }}</option>
                                 @foreach ($branches as $item)
                                     <option value="{{ $item->branch_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Order Source</label>
+                            <label class="form-label">{{ __('reports.order_source') }}</label>
                             <select id="order_source_id" class="form-select">
                                 <option value="">--All Sources--</option>
                                 @foreach ($order_sources as $item)
@@ -73,30 +71,30 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Product</label>
+                            <label class="form-label">{{ __('common.product') }}</label>
                             <select id="product_id" class="form-select">
-                                <option value="">--All Products--</option>
+                                <option value="">{{ __('common.all_products') }}</option>
                                 @foreach ($products as $item)
                                     <option value="{{ $item->product_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Group By</label>
+                            <label class="form-label">{{ __('reports.group_by') }}</label>
                             <select id="group_by" class="form-select">
                                 <option value="variation">Variation</option>
                                 <option value="product">Product</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Rank By</label>
+                            <label class="form-label">{{ __('reports.rank_by') }}</label>
                             <select id="rank_by" class="form-select">
                                 <option value="net">Net Sales</option>
                                 <option value="quantity">Quantity</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Limit</label>
+                            <label class="form-label">{{ __('reports.limit') }}</label>
                             <select id="limit" class="form-select">
                                 <option value="25">Top 25</option>
                                 <option value="50" selected>Top 50</option>
@@ -104,16 +102,12 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Period</label>
+                            <label class="form-label">{{ __('common.period') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
-                            </button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
-                            </button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -135,10 +129,10 @@
                     <table id="top_selling_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Rank</th>
-                                <th>Product</th>
-                                <th>Variation</th>
-                                <th>SKU</th>
+                                <th>{{ __('reports.col_rank') }}</th>
+                                <th>{{ __('common.product') }}</th>
+                                <th>{{ __('reports.col_variation') }}</th>
+                                <th>{{ __('reports.col_sku') }}</th>
                                 <th class="text-end">Qty Sold</th>
                                 <th class="text-end">Net Sales</th>
                             </tr>

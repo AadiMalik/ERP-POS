@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Pending Leave Approval Report')
+@section('title', __('reports.pending_leave_approval_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Pending Leave Approval Report',
+        'title' => __('reports.pending_leave_approval_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,14 +25,14 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Employee Code</th>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Leave Type</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th class="text-right">Days</th>
-                <th>Requested On</th>
+                <th>{{ __('reports.col_employee_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_department') }}</th>
+                <th>{{ __('reports.col_leave_type') }}</th>
+                <th>{{ __('reports.col_start_date') }}</th>
+                <th>{{ __('reports.col_end_date') }}</th>
+                <th class="text-right">{{ __('reports.col_days') }}</th>
+                <th>{{ __('reports.col_requested_on') }}</th>
             </tr>
         </thead>
         <tbody>

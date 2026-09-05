@@ -1,14 +1,14 @@
 @extends('layouts.print')
-@section('title', 'Customer-wise Serial Numbers')
+@section('title', __('reports.serial_number_customer'))
 @section('content')
-    <h3>Customer-wise Serial Numbers</h3>
+    <h3>{{ __('reports.serial_number_customer') }}</h3>
     <table class="table table-bordered table-sm">
-        <thead><tr><th>Customer</th><th>Serial No</th><th>Product</th><th>Variation</th><th>Order #</th><th>Warranty Until</th></tr></thead>
+        <thead><tr><th>{{ __('reports.col_customer') }}</th><th>{{ __('reports.col_serial_no') }}</th><th>{{ __('reports.col_product') }}</th><th>{{ __('reports.col_variation') }}</th><th>{{ __('reports.col_order_hash') }}</th><th>{{ __('reports.col_warranty_until') }}</th></tr></thead>
         <tbody>
             @forelse ($rows as $row)
                 <tr><td>{{ $row->customer_name ?? '-' }}</td><td>{{ $row->serial_no ?? '-' }}</td><td>{{ $row->product_name ?? '-' }}</td><td>{{ $row->variation_name ?? '-' }}</td><td>{{ $row->order_daily_id ?? '-' }}</td><td>{{ $row->warranty_expires_at ? localDate($row->warranty_expires_at) : '-' }}</td></tr>
             @empty
-                <tr><td colspan="6">No records found.</td></tr>
+                <tr><td colspan="6">{{ __('common.no_records_found') }}</td></tr>
             @endforelse
         </tbody>
     </table>

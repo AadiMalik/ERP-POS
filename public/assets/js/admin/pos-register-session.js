@@ -3,13 +3,14 @@ $("body").off("click", "#voidPosRegisterSession").on("click", "#voidPosRegisterS
     let id = $(this).data("id");
 
     Swal.fire({
-        title: "Void this register session?",
-        text: "This marks the closed session as voided. This cannot be undone.",
+        title: (window.i18n_pos && window.i18n_pos.void_session_title) || "Void this register session?",
+        text: (window.i18n_pos && window.i18n_pos.void_session_text) || "This marks the closed session as voided. This cannot be undone.",
         icon: "warning",
         input: "text",
-        inputPlaceholder: "Reason (optional)",
+        inputPlaceholder: (window.i18n_pos && window.i18n_pos.void_reason_placeholder) || "Reason (optional)",
         showCancelButton: true,
-        confirmButtonText: "Yes, void it!",
+        cancelButtonText: (window.i18n_pos && window.i18n_pos.cancel) || "Cancel",
+        confirmButtonText: (window.i18n_pos && window.i18n_pos.yes_void_it) || "Yes, void it!",
     }).then((result) => {
 
         if (result.isConfirmed) {
@@ -29,7 +30,7 @@ $("body").off("click", "#voidPosRegisterSession").on("click", "#voidPosRegisterS
                     initDataTablepos_register_session_table();
                 })
                 .catch((err) => {
-                    errorMessage(err.Message || "Void failed");
+                    errorMessage(err.Message || (window.i18n_pos && window.i18n_pos.void_failed) || "Void failed");
                 });
         }
     });

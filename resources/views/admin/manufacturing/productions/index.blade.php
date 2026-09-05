@@ -4,7 +4,7 @@ use App\Enums\RoleNames;
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Productions</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('manufacturing.productions_title') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div>
@@ -15,7 +15,7 @@ use App\Enums\RoleNames;
             <div class="d-flex gap-2">
                 @can('production.create')
                 <a href="{{ url('admin/production/create') }}" class="btn btn-primary rounded-pill">
-                    <i class="fa fa-plus"></i> Add Production
+                    <i class="fa fa-plus"></i> {{ __('manufacturing.add_production') }}
                 </a>
                 @endcan
             </div>
@@ -25,9 +25,9 @@ use App\Enums\RoleNames;
                 <div class="row g-3">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                     <div class="col-md-3">
-                        <label class="form-label">Business</label>
+                        <label class="form-label">{{ __('common.business') }}</label>
                         <select id="business_id" class="form-select">
-                            <option value="">--All Businesses--</option>
+                            <option value="">{{ __('common.all_businesses') }}</option>
                             @foreach ($business as $item)
                             <option value="{{ $item->business_id }}">{{ $item->name ?? '' }}</option>
                             @endforeach
@@ -35,26 +35,26 @@ use App\Enums\RoleNames;
                     </div>
                     @endif
                     <div class="col-md-3">
-                        <label class="form-label">Branch</label>
+                        <label class="form-label">{{ __('common.branch') }}</label>
                         <select id="branch_id" class="form-select">
-                            <option value="">--All Branches--</option>
+                            <option value="">{{ __('common.all_branches') }}</option>
                             @foreach ($branches as $item)
                             <option value="{{ $item->branch_id }}">{{ $item->name ?? '' }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Status</label>
+                        <label class="form-label">{{ __('common.status') }}</label>
                         <select id="status" class="form-select">
-                            <option value="">--All Statuses--</option>
+                            <option value="">{{ __('common.all_statuses') }}</option>
                             @foreach ($statuses as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
-                        <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                        <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                     </div>
                 </div>
             </div>
@@ -62,16 +62,16 @@ use App\Enums\RoleNames;
                 <table id="production_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Business</th>
-                            <th>Branch</th>
-                            <th>Product</th>
-                            <th>Warehouse</th>
-                            <th>Qty</th>
-                            <th>Batch</th>
-                            <th>Expiry</th>
-                            <th>Unit Cost</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.business') }}</th>
+                            <th>{{ __('common.branch') }}</th>
+                            <th>{{ __('common.product') }}</th>
+                            <th>{{ __('common.warehouse') }}</th>
+                            <th>{{ __('common.qty') }}</th>
+                            <th>{{ __('common.batch') }}</th>
+                            <th>{{ __('common.expiry') }}</th>
+                            <th>{{ __('common.unit_cost') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

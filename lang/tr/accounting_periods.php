@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Muhasebe Dönemleri',
+    'singular' => 'Muhasebe Dönem',
+    'intro' => 'Advanced Muhasebe Mod — open/close/reopen periods manually. Reopening and overriding a blocked close both require a reason, which is recorded to the Activity Log.',
+    'closed_automatically' => 'Kapalı Automatically',
+    'close_period' => 'Dönemi Kapat',
+    'reopen_period' => 'Dönemi Yeniden Aç',
+    'pending_close' => 'Pending Kapat',
+    'reason_override' => 'Neden (required if overriding pending items)',
+    'close_anyway' => 'Kapat anyway, even though items are pending',
+    'blocked_message' => 'This period has pending items and was not closed. Resolve them, or tick "Kapat anyway" with a reason to override.',
+    'reason_required_reopen' => 'A reason is required to reopen this period.',
+    'could_not_open' => 'Could not open period',
+    'could_not_close' => 'Could not close period',
+    'could_not_reopen' => 'Could not reopen period',
+    'no_pending_issues' => 'No pending issues for this period.',
+    'pending_items' => 'Pending items:',
+    'no_periods' => 'No accounting periods yet.',
+    'open_btn' => 'Açık',
+    'close_btn' => 'Kapat',
+    'reopen_btn' => 'Reopen',
+    'issues_btn' => 'Issues',
+];

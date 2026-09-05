@@ -3,13 +3,13 @@
 @endsection
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Budgets</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('budgets.title') }}</h4>
 
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>Advanced Accounting Mode</div>
                 @canAccess('budget.create')
-                    <button type="button" class="btn btn-primary" id="addBudget"><i class="fa fa-plus"></i> Add Budget</button>
+                    <button type="button" class="btn btn-primary" id="addBudget"><i class="fa fa-plus"></i> {{ __('budgets.create_new') }}</button>
                 @endcanAccess
             </div>
             <div class="card-body">
@@ -17,13 +17,13 @@
                     <table class="table" id="budget_table">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Fiscal Year</th>
+                                <th>{{ __('common.name') }}</th>
+                                <th>{{ __('budgets.fiscal_year') }}</th>
                                 <th>Granularity</th>
                                 <th>Mode</th>
                                 <th>Growth %</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -37,20 +37,20 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title" id="modelHeading">Add Budget</h4>
+                        <h4 class="modal-title" id="modelHeading">{{ __('budgets.create_new') }}</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <form id="budget_form">
                         <div class="modal-body">
                             <input type="hidden" name="budget_id" id="budget_id">
                             <div class="mb-3">
-                                <label class="form-label">Name <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('common.name') }} <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="name" id="name" required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Fiscal Year <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('budgets.fiscal_year') }} <span class="text-danger">*</span></label>
                                 <select class="form-select" name="fiscal_year_id" id="fiscal_year_id" required>
-                                    <option value="">--Select Fiscal Year--</option>
+                                    <option value="">{{ __('budgets.select_period') }}</option>
                                     @foreach ($fiscal_years as $fy)
                                         <option value="{{ $fy->fiscal_year_id }}">{{ $fy->name }}</option>
                                     @endforeach
@@ -77,8 +77,8 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" id="saveBtn" class="btn btn-primary">Save</button>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.close') }}</button>
+                            <button type="submit" id="saveBtn" class="btn btn-primary">{{ __('common.save') }}</button>
                         </div>
                     </form>
                 </div>
@@ -129,8 +129,8 @@
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th>Account</th>
-                                        <th>Branch</th>
+                                        <th>{{ __('common.account') }}</th>
+                                        <th>{{ __('common.branch') }}</th>
                                         <th>Period</th>
                                         <th>Budgeted Amount</th>
                                     </tr>
@@ -201,7 +201,7 @@
             $("#addBudget").on("click", function() {
                 $("#budget_form")[0].reset();
                 $("#budget_id").val("");
-                $("#modelHeading").text("Add Budget");
+                $("#modelHeading").text("{{ __('budgets.create_new') }}");
                 $("#ajaxModel").modal("show");
             });
 

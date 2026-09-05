@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'సబ్‌స్క్రిప్షన్‌లు మరియు బిల్లింగ్',
+    'renewal_requests' => 'Renewal Requests',
+    'invoices' => 'Invoices',
+    'settings' => 'సెట్టింగ్‌లు',
+    'total_businesses' => 'Total Businesses',
+    'active' => 'Active',
+    'trial' => 'Trial',
+    'expiring_soon' => 'Expiring Soon',
+    'payment_pending' => 'Payment Pending',
+    'expired' => 'Expired',
+    'grace_period' => 'Grace Period',
+    'suspended' => 'Suspended',
+    'cancelled' => 'Cancelled',
+    'pending_approvals' => 'Pending Approvals',
+    'col_business' => 'Business',
+    'col_package' => 'Package',
+    'col_status' => 'Status',
+    'col_starts' => 'Starts',
+    'col_ends' => 'Ends',
+    'col_action' => 'Action',
+    'renew' => 'Renew',
+    'show_title' => 'Subscription Details',
+];

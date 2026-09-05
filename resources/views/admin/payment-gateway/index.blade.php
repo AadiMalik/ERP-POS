@@ -4,13 +4,13 @@ use App\Enums\RoleNames;
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Payment Gateways</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('payment_gateway.title') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div>
                 <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                     <i class="fa fa-filter"></i>
-                    Filters
+                    {{ __('common.filters') }}
                 </button>
             </div>
             <a href="{{ url('admin/payment-gateway/create') }}" class="btn btn-primary rounded-pill">
@@ -23,9 +23,9 @@ use App\Enums\RoleNames;
                 <div class="row g-3">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                     <div class="col-md-3">
-                        <label class="form-label">Business</label>
+                        <label class="form-label">{{ __('common.business') }}</label>
                         <select id="business_id" class="form-select">
-                            <option value="">--All Businesses--</option>
+                            <option value="">{{ __('common.all_businesses') }}</option>
                             @foreach ($business as $item)
                             <option value="{{ $item->business_id }}">{{ $item->code ?? '' }} {{ $item->name ?? '' }}</option>
                             @endforeach
@@ -33,8 +33,8 @@ use App\Enums\RoleNames;
                     </div>
                     @endif
                     <div class="col-md-3 d-flex align-items-end gap-2">
-                        <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                        <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                     </div>
                 </div>
             </div>
@@ -46,8 +46,8 @@ use App\Enums\RoleNames;
                             <th>Display Name</th>
                             <th>Mode</th>
                             <th>Platforms</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Paiements fournisseurs',
+    'singular' => 'Supplier Paiement',
+    'payment_no' => 'Paiement No',
+    'new_heading' => 'Nouveau Supplier Paiement',
+    'update_heading' => 'Mettre à jour Supplier Paiement',
+    'save_payment' => 'Enregistrer Paiement',
+    'select_supplier' => '--Sélectionner Supplier--',
+    'payment_method' => 'Paiement Method',
+    'select_payment_method' => '--Sélectionner Paiement Method--',
+    'paid_amount' => 'Paid Montant',
+    'allocate_to_purchases' => 'Tousocate to Purchases',
+    'outstanding' => 'Outstanding',
+    'create_heading' => 'Create Supplier Payment',
+    'update_payment' => 'Update Payment',
+    'supplier_balance' => 'Supplier Balance',
+    'reference_purchase_optional' => 'Reference Purchase (Optional)',
+    'reference_service_purchase_optional' => 'Reference Service Purchase (Optional)',
+    'advance_on_account' => '--Advance / On Account--',
+    'cheque_date' => 'Cheque Date',
+    'supplier_coa' => 'Supplier COA',
+    'tax_withholding' => 'Tax Amount (Withholding)',
+];

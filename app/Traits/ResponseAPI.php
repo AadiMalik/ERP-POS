@@ -18,6 +18,11 @@ trait ResponseAPI
         // Check the param
         if(!$message) return response()->json(['message' => 'Message is required'], 500);
 
+        // Translate known English phrases (e.g. App\Enums\Message constants)
+        // via lang/{locale}.json - Laravel's own string-key translation, so
+        // any message not in that file just renders unchanged as before.
+        $message = __($message);
+
         // Send the response
         if($isSuccess) 
         {

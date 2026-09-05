@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Períodos contables',
+    'singular' => 'Contabilidad Período',
+    'intro' => 'Advanced Contabilidad Modo — open/close/reopen periods manually. Reopening and overriding a blocked close both require a reason, which is recorded to the Activity Log.',
+    'closed_automatically' => 'Cerrado Automatically',
+    'close_period' => 'Cerrar período',
+    'reopen_period' => 'Reabrir período',
+    'pending_close' => 'Pending Cerrar',
+    'reason_override' => 'Motivo (required if overriding pending items)',
+    'close_anyway' => 'Cerrar anyway, even though items are pending',
+    'blocked_message' => 'This period has pending items and was not closed. Resolve them, or tick "Cerrar anyway" with a reason to override.',
+    'reason_required_reopen' => 'A reason is required to reopen this period.',
+    'could_not_open' => 'Could not open period',
+    'could_not_close' => 'Could not close period',
+    'could_not_reopen' => 'Could not reopen period',
+    'no_pending_issues' => 'No pending issues for this period.',
+    'pending_items' => 'Pending items:',
+    'no_periods' => 'No accounting periods yet.',
+    'open_btn' => 'Abierto',
+    'close_btn' => 'Cerrar',
+    'reopen_btn' => 'Reopen',
+    'issues_btn' => 'Issues',
+];

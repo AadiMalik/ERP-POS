@@ -130,7 +130,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <button class="text-end btn btn-primary" id="submitBtn">
-                                {{ isset($service_sale) ? 'Update Service Sale' : 'Save Service Sale' }}
+                                {{ isset($service_sale) ? '{{ __('service_sales.update_heading') }}' : 'Save Service Sale' }}
                             </button>
                         </div>
                     </div>

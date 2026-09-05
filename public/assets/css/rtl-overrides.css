@@ -1,0 +1,80 @@
+/*
+ * RTL layout overrides. Loaded only when the active business's resolved
+ * text direction is 'rtl' (see resolved_text_direction() / layouts/css.blade.php).
+ * Hand-authored overlay on top of the Sneat theme (which ships no RTL build) -
+ * mirrors layout-level structure, not every pixel of every widget.
+ */
+
+html[dir="rtl"] body {
+    text-align: right;
+}
+
+/* Sidebar moves to the right, content shifts to fill the left */
+html[dir="rtl"] .layout-menu {
+    left: auto;
+    right: 0;
+}
+
+html[dir="rtl"] .layout-page {
+    padding-left: 0;
+}
+
+html[dir="rtl"].layout-menu-fixed .layout-page,
+html[dir="rtl"] .layout-menu-fixed .layout-page {
+    margin-left: 0;
+    margin-right: var(--bs-menu-width, 260px);
+}
+
+html[dir="rtl"] .menu-item .menu-link i,
+html[dir="rtl"] .menu-item .menu-link .menu-icon {
+    margin-right: 0;
+    margin-left: 0.5rem;
+}
+
+html[dir="rtl"] .menu-toggle::after {
+    transform: scaleX(-1);
+}
+
+/* Text alignment */
+html[dir="rtl"] .text-start {
+    text-align: right !important;
+}
+
+html[dir="rtl"] .text-end {
+    text-align: left !important;
+}
+
+html[dir="rtl"] .setting-nav .nav-link,
+html[dir="rtl"] .form-label {
+    text-align: right;
+}
+
+/* Dropdowns, modals, DataTables chrome */
+html[dir="rtl"] .dropdown-menu {
+    text-align: right;
+}
+
+html[dir="rtl"] .modal-header .btn-close {
+    margin: calc(-.5 * var(--bs-modal-header-padding-y)) auto calc(-.5 * var(--bs-modal-header-padding-y)) calc(-.5 * var(--bs-modal-header-padding-x));
+}
+
+html[dir="rtl"] .dataTables_wrapper .dataTables_filter,
+html[dir="rtl"] .dataTables_wrapper .dataTables_length {
+    text-align: left;
+}
+
+html[dir="rtl"] .dataTables_wrapper .dataTables_paginate {
+    direction: rtl;
+}
+
+/* Select2 */
+html[dir="rtl"] .select2-container .select2-selection__rendered {
+    text-align: right;
+}
+
+/* Fields that must always stay LTR regardless of overall direction
+   (SKU/barcode, price, quantity, email, phone, URL) */
+html[dir="rtl"] .ltr-field {
+    direction: ltr;
+    text-align: left;
+}

@@ -42,7 +42,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Employee Clearance Report',
+        'title' => __('reports.employee_clearance_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -52,14 +52,14 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Employee Code</th>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Exit Type</th>
-                <th>Area</th>
-                <th>Status</th>
-                <th>Cleared By</th>
-                <th>Cleared At</th>
+                <th>{{ __('reports.col_employee_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_department') }}</th>
+                <th>{{ __('reports.col_exit_type') }}</th>
+                <th>{{ __('reports.col_area') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
+                <th>{{ __('reports.col_cleared_by') }}</th>
+                <th>{{ __('reports.col_cleared_at') }}</th>
             </tr>
         </thead>
         <tbody>

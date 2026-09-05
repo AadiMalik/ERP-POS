@@ -6,7 +6,7 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Serial Numbers</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('serial_numbers.title') }}</h4>
 
         <div class="card">
             <div class="card-header d-flex justify-content-between">
@@ -17,7 +17,7 @@
                 </div>
                 @canAccess('serial-number.create')
                     <button type="button" id="addFoundUnitBtn" class="btn rounded-pill btn-primary">
-                        <i class="icon-base fa fa-plus mr-5"></i> Add Found Unit
+                        <i class="icon-base fa fa-plus mr-5"></i> {{ __('serial_numbers.add_found_unit') }}
                     </button>
                 @endcanAccess
             </div>
@@ -26,9 +26,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="filter_business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }} {{ $item->name ?? '' }}</option>
                                     @endforeach
@@ -36,41 +36,41 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Product</label>
+                            <label class="form-label">{{ __('common.product') }}</label>
                             <select id="filter_product_id" class="form-select">
-                                <option value="">--All Products--</option>
+                                <option value="">{{ __('common.all_products') }}</option>
                                 @foreach ($products as $item)
                                     <option value="{{ $item->product_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Variation</label>
+                            <label class="form-label">{{ __('common.variation') }}</label>
                             <select id="filter_product_variation_id" class="form-select">
-                                <option value="">--All Variations--</option>
+                                <option value="">{{ __('common.all_variations') }}</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Warehouse</label>
+                            <label class="form-label">{{ __('common.warehouse') }}</label>
                             <select id="filter_warehouse_id" class="form-select">
-                                <option value="">--All Warehouses--</option>
+                                <option value="">{{ __('common.all_warehouses') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="filter_status" class="form-select">
-                                <option value="">--All Statuses--</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
                                 @foreach (SerialStatus::getOptions() as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -78,13 +78,13 @@
                     <table id="serial_number_table" class="table display datatables" style="width:100%">
                         <thead>
                             <tr>
-                                <th>Serial No.</th>
-                                <th>Product</th>
-                                <th>Variation</th>
-                                <th>Warehouse</th>
-                                <th>Status</th>
-                                <th>Customer</th>
-                                <th>Action</th>
+                                <th>{{ __('serial_numbers.serial_no') }}</th>
+                                <th>{{ __('common.product') }}</th>
+                                <th>{{ __('common.variation') }}</th>
+                                <th>{{ __('common.warehouse') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.customer') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -98,49 +98,47 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Found Unit</h5>
+                    <h5 class="modal-title">{{ __('serial_numbers.add_found_unit') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted">Records a physically-found serialized unit that was never entered into the
-                        system (e.g. discovered during a stock count) - this also increases stock for the selected
-                        warehouse.</p>
+                    <p class="text-muted">{{ __('serial_numbers.add_found_unit_hint') }}</p>
                     <div class="mb-3">
-                        <label class="form-label">Product</label>
+                        <label class="form-label">{{ __('common.product') }}</label>
                         <select id="fu_product_id" class="form-select"></select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Variation</label>
+                        <label class="form-label">{{ __('common.variation') }}</label>
                         <select id="fu_product_variation_id" class="form-select"></select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Warehouse</label>
+                        <label class="form-label">{{ __('common.warehouse') }}</label>
                         <select id="fu_warehouse_id" class="form-select">
-                            <option value="">--Select Warehouse--</option>
+                            <option value="">{{ __('common.select_warehouse') }}</option>
                             @foreach ($warehouses as $item)
                                 <option value="{{ $item->warehouse_id }}">{{ $item->name ?? '' }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Serial Number</label>
+                        <label class="form-label">{{ __('common.serial_numbers') }}</label>
                         <div class="input-group">
                             <input type="text" class="form-control" id="fu_serial_no">
                             @include('admin.partials.barcode_scanner', ['targetInputId' => '#fu_serial_no'])
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Unit Cost (optional)</label>
+                        <label class="form-label">{{ __('serial_numbers.unit_cost_optional') }}</label>
                         <input type="number" step="0.01" min="0" class="form-control" id="fu_unit_cost">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Notes</label>
+                        <label class="form-label">{{ __('common.notes') }}</label>
                         <textarea class="form-control" id="fu_notes" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="fuSaveBtn">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="fuSaveBtn">{{ __('common.save') }}</button>
                 </div>
             </div>
         </div>
@@ -148,6 +146,15 @@
 @endsection
 
 @section('js')
+    @php
+        $__i18nSerial = [
+            'no_serial_variations' => __('serial_numbers.no_serial_variations'),
+            'fields_required' => __('serial_numbers.fields_required'),
+            'unable_to_add' => __('serial_numbers.unable_to_add'),
+            'all_variations' => __('common.all_variations'),
+        ];
+    @endphp
+    <script>window.i18n_serial_numbers = @json($__i18nSerial);</script>
     @include('admin.partials.datatable', [
         'columns' => "
         {data:'serial_no',name:'serial_no'},
@@ -186,12 +193,12 @@
 
         $('#filter_product_id').on('change', function() {
             let productId = $(this).val();
-            $('#filter_product_variation_id').html('<option value="">--All Variations--</option>');
+            $('#filter_product_variation_id').html('<option value="">{{ __('common.all_variations') }}</option>');
             if (!productId) return;
             ajaxRequest({
                 url: url_local + '/admin/product/variation-by-product/' + productId,
             }).then(function(response) {
-                let options = '<option value="">--All Variations--</option>';
+                let options = '<option value="">{{ __('common.all_variations') }}</option>';
                 (response.Data || []).forEach(function(v) {
                     options += `<option value="${v.product_variation_id}">${v.name}</option>`;
                 });
@@ -236,7 +243,7 @@
                 });
                 $('#fu_product_variation_id').html(options);
                 if ($('#fu_product_variation_id option').length <= 1) {
-                    errorMessage('This product has no serial-tracked variations.');
+                    errorMessage(window.i18n_serial_numbers.no_serial_variations);
                 }
             });
         });
@@ -252,7 +259,7 @@
             };
 
             if (!payload.product_id || !payload.product_variation_id || !payload.warehouse_id || !payload.serial_no) {
-                errorMessage('Product, variation, warehouse, and serial number are required.');
+                errorMessage(window.i18n_serial_numbers.fields_required);
                 return;
             }
 
@@ -265,7 +272,7 @@
                 addFoundUnitModal.hide();
                 initDataTableserial_number_table();
             }).catch(function(err) {
-                errorMessage(err.Message || 'Unable to add this serial number.');
+                errorMessage(err.Message || window.i18n_serial_numbers.unable_to_add);
             });
         });
         @endcanAccess

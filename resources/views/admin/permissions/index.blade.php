@@ -4,7 +4,7 @@
 @section('content')
     <!-- ========== table components start ========== -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"> Permissions</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('Permissions') }}</h4>
 
         <!-- Basic Bootstrap Table -->
         <div class="card">

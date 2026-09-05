@@ -29,9 +29,9 @@ use App\Enums\RoleNames;
                 <div class="row g-3">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                     <div class="col-md-3">
-                        <label class="form-label">Business</label>
+                        <label class="form-label">{{ __('common.business') }}</label>
                         <select id="business_id" class="form-select">
-                            <option value="">--All Businesses--</option>
+                            <option value="">{{ __('common.all_businesses') }}</option>
                             @foreach ($business as $item)
                             <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                 {{ $item->name ?? '' }}
@@ -41,9 +41,9 @@ use App\Enums\RoleNames;
                     </div>
                     @endif
                     <div class="col-md-3">
-                        <label class="form-label">Branch</label>
+                        <label class="form-label">{{ __('common.branch') }}</label>
                         <select id="branch_id" class="form-select">
-                            <option value="">--All Branches--</option>
+                            <option value="">{{ __('common.all_branches') }}</option>
                             @if (RoleNames::SUPERADMIN != getRoleName())
                             @foreach ($branches as $item)
                             <option value="{{ $item->branch_id }}">{{ isset($item->code) ? $item->code : '' }}
@@ -54,9 +54,9 @@ use App\Enums\RoleNames;
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Category</label>
+                        <label class="form-label">{{ __('common.category') }}</label>
                         <select id="fixed_asset_category_id" class="form-select">
-                            <option value="">--All Categories--</option>
+                            <option value="">{{ __('common.all_categories') }}</option>
                             @foreach ($categories as $item)
                             <option value="{{ $item->fixed_asset_category_id }}">
                                 {{ $item->code ? $item->code . ' ' : '' }}{{ $item->name }}
@@ -65,16 +65,16 @@ use App\Enums\RoleNames;
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Depreciation Status</label>
+                        <label class="form-label">{{ __('fixed_assets.depreciation_status') }}</label>
                         <select id="depreciation_status" class="form-select">
-                            <option value="">--All Statuses--</option>
+                            <option value="">{{ __('common.all_statuses') }}</option>
                             @foreach ($statuses as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Purchase Date</label>
+                        <label class="form-label">{{ __('common.purchase_date') }}</label>
                         @include('admin.partials.date_filter')
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
@@ -91,21 +91,21 @@ use App\Enums\RoleNames;
                 <table id="fixed_asset_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th>Branch</th>
-                            <th>Purchase Date</th>
-                            <th>Purchase Cost</th>
-                            <th>Current Value</th>
-                            <th>Previous Value</th>
-                            <th>Depreciation Amount</th>
-                            <th>Accumulated Dep.</th>
-                            <th>Residual</th>
-                            <th>Frequency</th>
-                            <th>Status</th>
-                            <th>Next Dep. Date</th>
-                            <th>Action</th>
+                            <th>{{ __('common.code') }}</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('common.category') }}</th>
+                            <th>{{ __('common.branch') }}</th>
+                            <th>{{ __('common.purchase_date') }}</th>
+                            <th>{{ __('fixed_assets.purchase_cost') }}</th>
+                            <th>{{ __('fixed_assets.current_value') }}</th>
+                            <th>{{ __('fixed_assets.previous_value') }}</th>
+                            <th>{{ __('fixed_assets.depreciation_amount') }}</th>
+                            <th>{{ __('fixed_assets.accumulated_dep') }}</th>
+                            <th>{{ __('fixed_assets.residual') }}</th>
+                            <th>{{ __('common.frequency') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('fixed_assets.next_dep_date') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>
@@ -164,7 +164,7 @@ use App\Enums\RoleNames;
     $('#business_id').change(function() {
         let business_id = $(this).val();
         if (!business_id) {
-            $('#branch_id').html('<option value="">--All Branches--</option>');
+            $('#branch_id').html('<option value="">{{ __('common.all_branches') }}</option>');
             return;
         }
         ajaxRequest({
@@ -173,7 +173,7 @@ use App\Enums\RoleNames;
             })
             .then((response) => {
                 let data = response.Data;
-                let options = '<option value="">--All Branches--</option>';
+                let options = '<option value="">{{ __('common.all_branches') }}</option>';
                 $.each(data, function(index, item) {
                     options += `<option value="${item.branch_id}">${item.name}</option>`;
                 });

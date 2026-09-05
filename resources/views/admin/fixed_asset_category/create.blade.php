@@ -5,7 +5,7 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Fixed Asset Category</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('fixed_asset_categories.singular') }}</h4>
 
     <div class="card">
         <div class="card-header bg-white border-bottom">

@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'Halaman dan Kebijakan',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'Testimoni',
+    'hero_stats' => 'Statistik Utama',
+    'homepage_sections' => 'Bagian Beranda',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'Pesan Kontak',
+    'newsletter_subscribers' => 'Pelanggan Buletin',
+    'social_media' => 'Media Sosial',
+    'intro_cms' => 'CMS Pengantar',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

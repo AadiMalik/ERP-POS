@@ -1,31 +1,31 @@
-@php
+﻿@php
     use App\Enums\RoleNames;
 @endphp
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">
-            Transfer Notes
+            {{ __('transfer_notes.title') }}
         </h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
 
                 </div>
                 <div class="d-flex gap-2">
                     @include('admin.partials.import-export-buttons', [
                         'importExportModule' => 'transfer-note',
-                        'importExportLabel' => 'Transfer Notes',
+                        'importExportLabel' => __('transfer_notes.title'),
                         'importExportRefreshFn' => 'initDataTabletransfer_note_table',
                         'importExportExportParamsSelector' => '#business_id',
                     ])
                     <a href="{{ url('admin/transfer-note/create') }}" class="btn btn-primary rounded-pill">
                         <i class="fa fa-plus"></i>
-                        Add New
+                        {{ __('common.add_new') }}
                     </a>
                 </div>
             </div>
@@ -34,9 +34,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -46,9 +46,9 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Source Warehouse</label>
+                            <label class="form-label">{{ __('transfer_notes.source_warehouse') }}</label>
                             <select id="source_warehouse_id" class="form-select">
-                                <option value="">--All Warehouses--</option>
+                                <option value="">{{ __('common.all_warehouses') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}">{{ $item->name ?? '' }}
                                     </option>
@@ -56,9 +56,9 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Destination Warehouse</label>
+                            <label class="form-label">{{ __('transfer_notes.destination_warehouse') }}</label>
                             <select id="destination_warehouse_id" class="form-select">
-                                <option value="">--All Warehouses--</option>
+                                <option value="">{{ __('common.all_warehouses') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}">{{ $item->name ?? '' }}
                                     </option>
@@ -66,9 +66,9 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
-                                <option value="">--All Statuses--</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
                                 @foreach ($statuses as $value => $label)
                                     <option value="{{ $value }}">{{ $label ?? '' }}
                                     </option>
@@ -76,15 +76,15 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
                             <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
+                                {{ __('common.search') }}
                             </button>
                             <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
+                                {{ __('common.reset') }}
                             </button>
                         </div>
                     </div>
@@ -93,15 +93,15 @@
                     <table id="transfer_note_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Transfer No.</th>
-                                <th>Date</th>
-                                <th>Source Warehouse</th>
-                                <th>Destination Warehouse</th>
-                                <th>Products</th>
-                                <th>Total Value</th>
-                                <th>Status</th>
-                                <th>Business</th>
-                                <th>Action</th>
+                                <th>{{ __('transfer_notes.transfer_no') }}</th>
+                                <th>{{ __('common.date') }}</th>
+                                <th>{{ __('transfer_notes.source_warehouse') }}</th>
+                                <th>{{ __('transfer_notes.destination_warehouse') }}</th>
+                                <th>{{ __('common.products') }}</th>
+                                <th>{{ __('common.total_value') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>
@@ -114,7 +114,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Receive Transfer</h5>
+                        <h5 class="modal-title">{{ __('transfer_notes.receive_transfer') }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
@@ -124,14 +124,14 @@
                             <table class="table" id="receiveTransferTable">
                                 <thead>
                                     <tr>
-                                        <th>Product</th>
-                                        <th>Variation</th>
-                                        <th>Unit</th>
-                                        <th class="text-end">Sent</th>
-                                        <th class="text-end">Already Received</th>
-                                        <th class="text-end">Remaining</th>
-                                        <th style="width:140px;">Receive Now</th>
-                                        <th style="width:220px;">Serial Numbers</th>
+                                        <th>{{ __('common.product') }}</th>
+                                        <th>{{ __('common.variation') }}</th>
+                                        <th>{{ __('common.unit') }}</th>
+                                        <th class="text-end">{{ __('transfer_notes.sent') }}</th>
+                                        <th class="text-end">{{ __('transfer_notes.already_received') }}</th>
+                                        <th class="text-end">{{ __('transfer_notes.remaining') }}</th>
+                                        <th style="width:140px;">{{ __('transfer_notes.receive_now') }}</th>
+                                        <th style="width:220px;">{{ __('common.serial_numbers') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -139,8 +139,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="submitReceiveTransfer">Receive</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                        <button type="button" class="btn btn-primary" id="submitReceiveTransfer">{{ __('transfer_notes.receive') }}</button>
                     </div>
                 </div>
             </div>
@@ -150,7 +150,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Send Transfer</h5>
+                        <h5 class="modal-title">{{ __('transfer_notes.send_transfer') }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
@@ -160,10 +160,10 @@
                             <table class="table" id="sendTransferTable">
                                 <thead>
                                     <tr>
-                                        <th>Product</th>
-                                        <th>Variation</th>
-                                        <th class="text-end">Qty</th>
-                                        <th style="width:220px;">Serial Numbers</th>
+                                        <th>{{ __('common.product') }}</th>
+                                        <th>{{ __('common.variation') }}</th>
+                                        <th class="text-end">{{ __('common.qty') }}</th>
+                                        <th style="width:220px;">{{ __('common.serial_numbers') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -171,8 +171,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="submitSendTransfer">Send</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                        <button type="button" class="btn btn-primary" id="submitSendTransfer">{{ __('transfer_notes.send') }}</button>
                     </div>
                 </div>
             </div>
@@ -182,7 +182,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Select Serial Numbers</h5>
+                        <h5 class="modal-title">{{ __('transfer_notes.select_serial_numbers') }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
@@ -190,8 +190,8 @@
                         <div id="tnSerialPickerList" style="max-height:300px; overflow-y:auto;"></div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="tnSerialPickerSaveBtn">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                        <button type="button" class="btn btn-primary" id="tnSerialPickerSaveBtn">{{ __('common.save') }}</button>
                     </div>
                 </div>
             </div>
@@ -263,7 +263,7 @@
                             line.transfer_quantity + '" data-detail-id="' + line.transfer_note_detail_id +
                             '"><span class="tn-serial-count-label">Select Serials (0/' + line.transfer_quantity + ')</span></button>' +
                             '<div class="tn-serial-hidden-inputs" style="display:none;"></div>' :
-                            '<span class="text-muted">N/A</span>') +
+                            '<span class="text-muted">{{ __('common.na') }}</span>') +
                         '</td></tr>';
                 });
 
@@ -348,11 +348,11 @@
                             '<button type="button" class="btn btn-sm btn-outline-danger tn-select-receive-serials tn-serial-count-label" data-detail-id="' +
                             line.transfer_note_detail_id + '">Select Serials (0/' + line.remaining_quantity + ')</button>' +
                             '<div class="tn-serial-hidden-inputs" style="display:none;"></div>' :
-                            '<span class="text-muted">N/A</span>') +
+                            '<span class="text-muted">{{ __('common.na') }}</span>') +
                         '</td></tr>';
                 });
 
-                $('#receiveTransferTable tbody').html(rows || '<tr><td colspan="8" class="text-center">Nothing left to receive.</td></tr>');
+                $('#receiveTransferTable tbody').html(rows || '<tr><td colspan="8" class="text-center">{{ __('transfer_notes.nothing_left') }}</td></tr>');
                 new bootstrap.Modal(document.getElementById('receiveTransferModal')).show();
             }).catch(function() {
                 errorMessage('Unable to load transfer note details.');
@@ -448,7 +448,7 @@
             }).get();
 
             $('#tnSerialPickerHint').text(`Select exactly ${expected} serial number(s).`);
-            $('#tnSerialPickerList').html('<div class="text-muted">Loading...</div>');
+            $('#tnSerialPickerList').html('<div class="text-muted">{{ __('common.loading') }}</div>');
             tnSerialPickerModal = tnSerialPickerModal || new bootstrap.Modal(document.getElementById('tnSerialPickerModal'));
             tnSerialPickerModal.show();
 
@@ -459,7 +459,7 @@
                 method: 'GET',
             }).then(function(res) {
                 if (!res.Data || !res.Data.length) {
-                    $('#tnSerialPickerList').html('<div class="text-muted">No serial numbers found.</div>');
+                    $('#tnSerialPickerList').html('<div class="text-muted">{{ __('transfer_notes.no_serials_found') }}</div>');
                     return;
                 }
                 let html = '';
@@ -474,7 +474,7 @@
                 });
                 $('#tnSerialPickerList').html(html);
             }).catch(function() {
-                $('#tnSerialPickerList').html('<div class="text-danger">Unable to load serial numbers.</div>');
+                $('#tnSerialPickerList').html('<div class="text-danger">{{ __('transfer_notes.unable_load_serials') }}</div>');
             });
         });
 

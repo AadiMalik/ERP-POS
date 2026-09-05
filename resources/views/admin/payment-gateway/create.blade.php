@@ -9,7 +9,7 @@
 
     <div class="card">
         <div class="card-header bg-white border-bottom">
-            <h5 class="mb-0">Gateway Configuration</h5>
+            <h5 class="mb-0">{{ __('Gateway Configuration') }}</h5>
         </div>
 
         <div class="card-body border-bottom pb-3" id="webhookUrlBox" style="display:none;">
@@ -139,7 +139,7 @@
             </div>
             <div class="card-footer border-top">
                 <div class="d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">Cancel</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">{{ __('common.cancel') }}</button>
                     <button class="btn btn-primary px-4">Save Gateway</button>
                 </div>
             </div>

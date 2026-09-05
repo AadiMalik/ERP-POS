@@ -5,14 +5,14 @@ use App\Enums\RoleNames;
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Social Media</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('website_cms.social_media') }}</h4>
 
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             @if (RoleNames::SUPERADMIN == getRoleName())
             <div class="col-md-3">
                 <select id="filter_business_id" class="form-select">
-                    <option value="">--All Businesses--</option>
+                    <option value="">{{ __('common.all_businesses') }}</option>
                     @foreach ($business as $item)
                     <option value="{{ $item->business_id }}">{{ $item->name ?? '' }}</option>
                     @endforeach
@@ -22,7 +22,7 @@ use App\Enums\RoleNames;
             <div></div>
             @endif
             <a href="javascript:void(0)" id="createNewSocialMedia" class="btn rounded-pill btn-primary">
-                <i class="icon-base fa fa-plus mr-5"></i>Add New</a>
+                <i class="icon-base fa fa-plus mr-5"></i> {{ __('common.add_new') }}</a>
         </div>
         <div class="card-body">
             <div class="table-responsive text-nowrap p-4">
@@ -32,9 +32,9 @@ use App\Enums\RoleNames;
                             <th>Icon</th>
                             <th>Platform</th>
                             <th>URL</th>
-                            <th>Sort Order</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.sort_order') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

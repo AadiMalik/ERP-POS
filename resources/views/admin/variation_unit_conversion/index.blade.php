@@ -8,7 +8,7 @@
 @section('content')
     <!-- ========== table components start ========== -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Product Variation Unit Conversion</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('variation_unit_conversions.title') }}</h4>
 
         <!-- Basic Bootstrap Table -->
         <div class="card">
@@ -22,16 +22,16 @@
                 </div>
                 <a href="javascript:void(0)" id="createNewProductVariationUnitConversion"
                     class="btn rounded-pill btn-primary">
-                    <i class="icon-base fa fa-plus mr-5"></i>Add New</a>
+                    <i class="icon-base fa fa-plus mr-5"></i>{{ __('common.add_new') }}</a>
             </div>
             <div class="card-body">
                 <div id="filterSection" class="card-body border-bottom" style="display:none;">
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="filter_business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -41,9 +41,9 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Product</label>
+                            <label class="form-label">{{ __('common.product') }}</label>
                             <select id="filter_product_id" class="form-select">
-                                <option value="">--All Products--</option>
+                                <option value="">{{ __('common.all_products') }}</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                     @foreach ($products as $item)
                                         <option value="{{ $item->product_id }}">
@@ -54,16 +54,16 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Product Variation</label>
+                            <label class="form-label">{{ __('common.variation') }}</label>
                             <select id="filter_product_variation_id" class="form-select">
-                                <option value="">--All Product Variations--</option>
+                                <option value="">{{ __('common.all_product_variations') }}</option>
 
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">From Unit</label>
+                            <label class="form-label">{{ __('common.from_unit') }}</label>
                             <select id="filter_from_unit_id" class="form-select">
-                                <option value="">--All From Units--</option>
+                                <option value="">{{ __('common.all_from_units') }}</option>
                                 @foreach ($units as $item)
                                     <option value="{{ $item->unit_id }}">
                                         {{ $item->name ?? '' }}
@@ -72,9 +72,9 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">To Unit</label>
+                            <label class="form-label">{{ __('common.to_unit') }}</label>
                             <select id="filter_to_unit_id" class="form-select">
-                                <option value="">--All To Units--</option>
+                                <option value="">{{ __('common.all_to_units') }}</option>
                                 @foreach ($units as $item)
                                     <option value="{{ $item->unit_id }}">
                                         {{ $item->name ?? '' }}
@@ -83,7 +83,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
@@ -100,14 +100,14 @@
                     <table id="product_variation_unit_conversion_table" class="table display datatables" style="width:100%">
                         <thead>
                             <tr>
-                                <th>Product</th>
-                                <th>Variation</th>
-                                <th>From</th>
-                                <th>To</th>
-                                <th>Conversion</th>
-                                <th>Business</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>{{ __('common.product') }}</th>
+                                <th>{{ __('common.variation') }}</th>
+                                <th>{{ __('common.from') }}</th>
+                                <th>{{ __('common.to') }}</th>
+                                <th>{{ __('common.conversion') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                             <!-- end table row-->
                         </thead>
@@ -123,6 +123,18 @@
     <!-- ========== table components end ========== -->
 @endsection
 @section('js')
+    @php
+        $__i18n = [
+            'create' => __('variation_unit_conversions.create_conversion'),
+            'edit' => __('variation_unit_conversions.edit_conversion'),
+            'please_enter_avg_cost' => __('variation_batches.please_enter_avg_cost'),
+            'please_enter_quantity' => __('variation_batches.please_enter_quantity'),
+            'please_enter_mfg_date' => __('variation_batches.please_enter_mfg_date'),
+            'please_enter_expiry_date' => __('variation_batches.please_enter_expiry_date'),
+            'please_enter_factor' => __('variation_unit_conversions.please_enter_factor'),
+        ];
+    @endphp
+    <script>window.i18n_variation_unit_conversions = @json($__i18n);</script>
     <script src="{{ asset('public/assets/js/admin/product_variation_unit_conversion.js') }}"></script>
     @include('admin.partials.datatable', [
         'columns' => "
@@ -197,7 +209,7 @@
         $('#filter_business_id').change(function() {
             let business_id = $(this).val();
             if (!business_id) {
-                $('#filter_product_id').html('<option value="">--All Products--</option>');
+                $('#filter_product_id').html('<option value="">{{ __('common.all_products') }}</option>');
                 return;
             }
             ajaxRequest({
@@ -206,7 +218,7 @@
                 })
                 .then((response) => {
                     let data = response.Data;
-                    let options = '<option value="">--All Products--</option>';
+                    let options = '<option value="">{{ __('common.all_products') }}</option>';
                     $.each(data, function(index, item) {
                         options += `<option value="${item.product_id}">
                                         ${item.name}
@@ -249,7 +261,7 @@
         $('#filter_product_id').change(function() {
             let product_id = $(this).val();
             if (!product_id) {
-                $('#filter_product_variation_id').html('<option value="">--All Product Variations--</option>');
+                $('#filter_product_variation_id').html('<option value="">{{ __('common.all_product_variations') }}</option>');
                 return;
             }
             ajaxRequest({
@@ -258,7 +270,7 @@
                 })
                 .then((response) => {
                     let data = response.Data;
-                    let options = '<option value="">--All Product Variations--</option>';
+                    let options = '<option value="">{{ __('common.all_product_variations') }}</option>';
                     $.each(data, function(index, item) {
                         options += `<option value="${item.product_variation_id}">
                                         ${item.name}

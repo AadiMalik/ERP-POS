@@ -61,7 +61,7 @@
         <tr><th>Total</th><th class="text-right">{{ number_format($invoice->total, 2) }}</th></tr>
     </table>
 
-    <h4>Payments</h4>
+    <h4>{{ __('Payments') }}</h4>
     <table>
         <thead>
             <tr><th>Date</th><th>Method</th><th>Reference</th><th>Status</th><th class="text-right">Amount</th></tr>

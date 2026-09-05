@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Expense Report')
+@section('title', __('reports.expense_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Expense Report',
+        'title' => __('reports.expense_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,10 +25,10 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Account</th>
-                <th>Sub Type</th>
-                <th class="text-right">Debit</th>
-                <th class="text-right">Credit</th>
+                <th>{{ __('reports.col_account') }}</th>
+                <th>{{ __('reports.col_sub_type') }}</th>
+                <th class="text-right">{{ __('reports.col_debit') }}</th>
+                <th class="text-right">{{ __('reports.col_credit') }}</th>
                 <th class="text-right">Net Expense</th>
             </tr>
         </thead>

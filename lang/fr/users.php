@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Utilisateurs admin',
+    'singular' => 'Utilisateur',
+    'role' => 'Rôle',
+    'all_roles' => '--Tous Rôles--',
+    'all_branches' => '--Tous Succursalees--',
+    'select_role' => '--Sélectionner Rôle--',
+    'select_branch' => '--Sélectionner Succursale--',
+    'last_login' => 'Last Login',
+    'new_heading' => 'Nouveau Utilisateur',
+    'update_heading' => 'Mettre à jour Utilisateur',
+    'save_user' => 'Enregistrer Utilisateur',
+    'password' => 'Mot de passe',
+    'confirm_password' => 'Confirm Mot de passe',
+    'change_password' => 'Change Mot de passe',
+    'current_password' => 'Current Mot de passe',
+    'new_password' => 'Nouveau Mot de passe',
+    'update_password' => 'Mettre à jour Mot de passe',
+    'customer_profile' => 'Customer Profile',
+    'password_optional_hint' => 'Optional for customers - they set their own password via the OTP onboarding flow.',
+    'code_auto_hint' => '(if blank, will be auto generated)',
+    'company_name' => 'Company Name',
+    'contact_person' => 'Contact Person',
+    'credit_limit' => 'Credit Limit',
+    'credit_days' => 'Credit Days',
+];

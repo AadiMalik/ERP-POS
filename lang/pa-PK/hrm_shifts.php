@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'شفٹ',
+    'singular' => 'Shift',
+    'new_heading' => 'نیا Shift',
+    'update_heading' => 'اپ ڈیٹ Shift',
+    'save_shift' => 'محفوظ Shift',
+    'create_new' => 'بنائیں نیا Shift',
+    'edit_heading' => 'ترمیم Shift',
+    'start_time' => 'Start وقت',
+    'end_time' => 'End وقت',
+    'grace_minutes' => 'Grace Minutes',
+    'break_duration_minutes' => 'وقفہ کی مدت (منٹ)',
+    'grace_period_minutes' => 'رعایت مدت (منٹ)',
+    'grace_period_hint' => 'منٹ جن میں ملازم تاخیر سے چیک اِن کر سکتا ہے بغیر "لیٹ" کے۔',
+    'working_days' => 'کام کے دن',
+    'add_new_shift' => 'نیا شفٹ شامل کریں',
+    'day_mon' => 'پیر',
+    'day_tue' => 'منگل',
+    'day_wed' => 'بدھ',
+    'day_thu' => 'جمعرات',
+    'day_fri' => 'جمعہ',
+    'day_sat' => 'ہفتہ',
+    'day_sun' => 'اتوار',
+];

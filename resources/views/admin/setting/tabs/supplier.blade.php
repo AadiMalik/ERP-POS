@@ -3,43 +3,43 @@
 
     <div class="row">
         <div class="col-md-12">
-            <h4>Supplier Setting</h4>
+            <h4>{{ __('settings.supplier_title') }}</h4>
             <hr>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Supplier Code Prefix</label>
+            <label>{{ __('settings.supplier_code_prefix') }}</label>
             <input type="text" class="form-control" name="supplier_code_prefix"
                 value="{{ $supplier_setting->supplier_code_prefix }}">
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Enable Credit Limit</label>
+            <label>{{ __('settings.enable_credit_limit') }}</label>
             <select class="form-select select2" name="supplier_enable_credit_limit">
                 <option value="1" {{ $supplier_setting->enable_credit_limit == 1 ? 'selected' : '' }}>
-                    Yes
+                    {{ __('common.yes') }}
                 </option>
                 <option value="0" {{ $supplier_setting->enable_credit_limit == 0 ? 'selected' : '' }}>
-                    No
+                    {{ __('common.no') }}
                 </option>
             </select>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Default Credit Limit</label>
+            <label>{{ __('settings.default_credit_limit') }}</label>
             <input type="text" class="form-control" name="supplier_credit_limit" onkeypress="return isNumberKey(event)"
                 value="{{ $supplier_setting->credit_limit }}">
             <small class="text-muted">
-                Default credit limit assigned to new suppliers.
+                {{ __('settings.supplier_credit_limit_help') }}
             </small>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Default Payment Days</label>
+            <label>{{ __('settings.default_payment_days') }}</label>
             <input type="text" class="form-control" name="default_payment_days"
                 onkeypress="return isNumberKey(event)" value="{{ $supplier_setting->default_payment_days }}">
             <small class="text-muted">
-                Default payment due days for new suppliers.
+                {{ __('settings.default_payment_days_help') }}
             </small>
         </div>
 
@@ -48,7 +48,7 @@
             <div class="text-end">
                 <button type="button" class="btn btn-primary"
                     onclick="saveSetting('#supplierSettingForm','{{ url('admin/setting/supplier') }}')">
-                    Save Changes
+                    {{ __('common.save_changes') }}
                 </button>
             </div>
         </div>

@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Betaalmethoden',
+    'singular' => 'Zahlung Method',
+    'pos_title' => 'POS-betaalmethoden',
+    'account' => 'Konto',
+    'default' => 'Standard',
+    'set_as_default' => 'Set as Standard',
+    'select_account' => '--Auswählen Konto--',
+    'account_hint' => 'Not required for KrBearbeiten or Store KrBearbeiten - they route to the receivable/store-KrBearbeiten Konto configured in Kontoing Settings at posting Zeit.',
+    'create_new' => 'Erstellen Neu Zahlung Method',
+    'edit_heading' => 'Bearbeiten Zahlung Method',
+    'please_enter_name' => 'Bitte Eingeben Name',
+    'please_enter_code' => 'Bitte Eingeben Code',
+    'please_select_account' => 'Bitte Auswählen Konto',
+    'enter_code' => 'Eingeben Code',
+    'cash' => 'Bar',
+    'card' => 'Karte',
+    'bank' => 'Bank',
+    'credit' => 'Kredit',
+    'store_credit' => 'Store KrBearbeiten',
+    'wallet' => 'WAlleet',
+    'other' => 'Andere',
+];

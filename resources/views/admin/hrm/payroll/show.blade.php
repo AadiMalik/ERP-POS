@@ -1,31 +1,39 @@
 @extends('layouts.app')
 @section('content')
+@php
+    $statusLabels = [
+        'draft' => __('hrm_payroll.status_draft'),
+        'finalized' => __('hrm_payroll.status_finalized'),
+        'paid' => __('hrm_payroll.status_paid'),
+    ];
+    $monthName = \Carbon\Carbon::create($run->year, $run->month, 1)->translatedFormat('F');
+@endphp
 <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold py-3 mb-4">
-        Payroll - {{ date('F', mktime(0, 0, 0, $run->month, 1)) }} {{ $run->year }}
-        <span class="badge bg-label-{{ ['draft' => 'warning', 'finalized' => 'info', 'paid' => 'success'][$run->status] }}">{{ ucfirst($run->status) }}</span>
+        {{ __('hrm_payroll.heading', ['month' => $monthName, 'year' => $run->year]) }}
+        <span class="badge bg-label-{{ ['draft' => 'warning', 'finalized' => 'info', 'paid' => 'success'][$run->status] }}">{{ $statusLabels[$run->status] ?? ucfirst($run->status) }}</span>
     </h4>
 
     <div class="card mb-4">
         <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <strong>Total Payslips:</strong> {{ $run->payslips->count() }} &nbsp; | &nbsp;
-                <strong>Total Amount:</strong> {{ number_format($run->total_amount, 2) }}
+                <strong>{{ __('hrm_payroll.total_payslips') }}:</strong> {{ $run->payslips->count() }} &nbsp; | &nbsp;
+                <strong>{{ __('hrm_payroll.total_amount') }}:</strong> {{ number_format($run->total_amount, 2) }}
             </div>
             <div class="d-flex gap-2">
                 @can('payroll.finalize')
                 @if ($run->status == 'draft')
-                <button type="button" id="finalizeBtn" class="btn btn-info">Finalize</button>
+                <button type="button" id="finalizeBtn" class="btn btn-info">{{ __('hrm_payroll.finalize') }}</button>
                 @endif
                 @endcan
                 @can('payroll.reopen')
                 @if ($run->status == 'finalized')
-                <button type="button" id="reopenBtn" class="btn btn-outline-secondary">Reopen</button>
+                <button type="button" id="reopenBtn" class="btn btn-outline-secondary">{{ __('hrm_payroll.reopen') }}</button>
                 @endif
                 @endcan
                 @can('payroll.pay')
                 @if ($run->status == 'finalized')
-                <button type="button" id="payBtn" class="btn btn-success">Mark Paid</button>
+                <button type="button" id="payBtn" class="btn btn-success">{{ __('hrm_payroll.mark_paid') }}</button>
                 @endif
                 @endcan
             </div>
@@ -38,16 +46,16 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Employee</th>
-                            <th>Basic</th>
-                            <th>Earnings</th>
-                            <th>Deductions</th>
-                            <th>Net Salary</th>
-                            <th>Present</th>
-                            <th>Absent</th>
-                            <th>Leave</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.employee') }}</th>
+                            <th>{{ __('hrm_payroll.basic') }}</th>
+                            <th>{{ __('hrm_payroll.earnings') }}</th>
+                            <th>{{ __('hrm_payroll.deductions') }}</th>
+                            <th>{{ __('hrm_payroll.net_salary') }}</th>
+                            <th>{{ __('hrm_payroll.present') }}</th>
+                            <th>{{ __('hrm_payroll.absent') }}</th>
+                            <th>{{ __('hrm_payroll.leave') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -63,9 +71,9 @@
                             <td>{{ $payslip->leave_days }}</td>
                             <td>
                                 @if ($payslip->status == 'paid')
-                                <span class="badge bg-label-success">Paid</span>
+                                <span class="badge bg-label-success">{{ __('hrm_payroll.status_paid') }}</span>
                                 @else
-                                <span class="badge bg-label-secondary">Generated</span>
+                                <span class="badge bg-label-secondary">{{ __('hrm_payroll.generated') }}</span>
                                 @endif
                             </td>
                             <td>
@@ -82,7 +90,7 @@
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="10" class="text-center text-muted">No payslips generated yet.</td></tr>
+                        <tr><td colspan="10" class="text-center text-muted">{{ __('hrm_payroll.no_payslips') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -94,11 +102,17 @@
 
 @section('js')
 <script>
+    window.i18n_hrm_payroll = {
+        confirm_finalize: @json(__('hrm_payroll.confirm_finalize')),
+        confirm_reopen: @json(__('hrm_payroll.confirm_reopen')),
+        confirm_pay: @json(__('hrm_payroll.confirm_pay')),
+        yes: @json(__('common.yes'))
+    };
     function payrollAction(action, confirmText) {
         Swal.fire({
             title: confirmText,
             showCancelButton: true,
-            confirmButtonText: 'Yes'
+            confirmButtonText: (window.i18n_hrm_payroll && window.i18n_hrm_payroll.yes) || 'Yes'
         }).then((result) => {
             if (result.isConfirmed) {
                 ajaxRequest({
@@ -116,13 +130,13 @@
         });
     }
     $('#finalizeBtn').click(function() {
-        payrollAction('finalize', 'Finalize this payroll run? Payslips will be locked from further recalculation.');
+        payrollAction('finalize', (window.i18n_hrm_payroll && window.i18n_hrm_payroll.confirm_finalize) || 'Finalize this payroll run? Payslips will be locked from further recalculation.');
     });
     $('#reopenBtn').click(function() {
-        payrollAction('reopen', 'Reopen this payroll run for corrections?');
+        payrollAction('reopen', (window.i18n_hrm_payroll && window.i18n_hrm_payroll.confirm_reopen) || 'Reopen this payroll run for corrections?');
     });
     $('#payBtn').click(function() {
-        payrollAction('pay', 'Mark this payroll as paid? This recovers due advance installments and cannot be undone.');
+        payrollAction('pay', (window.i18n_hrm_payroll && window.i18n_hrm_payroll.confirm_pay) || 'Mark this payroll as paid? This recovers due advance installments and cannot be undone.');
     });
 </script>
 @endsection

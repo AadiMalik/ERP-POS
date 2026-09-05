@@ -17,6 +17,9 @@
 <!-- Theme / Appearance engine -->
 @include('layouts.theme-vars')
 <link rel="stylesheet" href="{{ asset('public/assets/css/theme-custom.css') }}" />
+@if(resolved_text_direction() === 'rtl')
+    <link rel="stylesheet" href="{{ asset('public/assets/css/rtl-overrides.css') }}" />
+@endif
 
 <!-- Vendors CSS -->
 <link rel="stylesheet" href="{{ asset('public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />

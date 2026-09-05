@@ -4,36 +4,34 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            Sale Service Report
-        </h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.service_sale_report') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @canAccess('reports.service-sale-report.print')
                     <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary">
-                        <i class="fa fa-print"></i> Print
+                        <i class="fa fa-print"></i> {{ __('common.print') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.service-sale-report.pdf')
                     <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger">
-                        <i class="fa fa-file-pdf"></i> PDF
+                        <i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.service-sale-report.export')
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
-                        <i class="fa fa-file-excel"></i> Excel
+                        <i class="fa fa-file-excel"></i> {{ __('common.excel') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.service-sale-report.export-csv')
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
-                        <i class="fa fa-file-text"></i> CSV
+                        <i class="fa fa-file-text"></i> {{ __('common.csv') }}
                     </a>
                     @endcanAccess
                 </div>
@@ -43,9 +41,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }}
                                             {{ $item->name ?? '' }}
@@ -55,25 +53,25 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Branch</label>
+                            <label class="form-label">{{ __('common.branch') }}</label>
                             <select id="branch_id" class="form-select">
-                                <option value="">--All Branches--</option>
+                                <option value="">{{ __('common.all_branches') }}</option>
                                 @foreach ($branches as $item)
                                     <option value="{{ $item->branch_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Customer</label>
+                            <label class="form-label">{{ __('common.customer') }}</label>
                             <select id="customer_id" class="form-select">
-                                <option value="">--All Customers--</option>
+                                <option value="">{{ __('common.all_customers') }}</option>
                                 @foreach ($customers as $item)
                                     <option value="{{ $item->id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Transaction Type</label>
+                            <label class="form-label">{{ __('reports.transaction_type') }}</label>
                             <select id="transaction_type" class="form-select">
                                 @foreach ($transaction_type_options as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
@@ -81,7 +79,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Group By</label>
+                            <label class="form-label">{{ __('reports.group_by') }}</label>
                             <select id="group_by" class="form-select">
                                 @foreach ($group_by_options as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
@@ -89,25 +87,21 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
-                                <option value="">--All Statuses--</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
                                 <option value="pending">Pending</option>
                                 <option value="approved">Approved</option>
                                 <option value="cancelled">Cancelled</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Period</label>
+                            <label class="form-label">{{ __('common.period') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
-                            </button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
-                            </button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -134,7 +128,7 @@
                     <table id="service_sale_report_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Group</th>
+                                <th>{{ __('reports.col_group') }}</th>
                                 <th class="text-end">Transactions</th>
                                 <th class="text-end">Sale Amount</th>
                                 <th class="text-end">Sale Return Amount</th>

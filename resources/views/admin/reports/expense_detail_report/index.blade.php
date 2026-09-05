@@ -4,15 +4,13 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            Expense Report
-        </h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.expense_report') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
             </div>
@@ -21,9 +19,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }}
                                             {{ $item->name ?? '' }}
@@ -33,9 +31,9 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Branch</label>
+                            <label class="form-label">{{ __('common.branch') }}</label>
                             <select id="branch_id" class="form-select">
-                                <option value="">--All Branches--</option>
+                                <option value="">{{ __('common.all_branches') }}</option>
                                 @foreach ($branches as $item)
                                     <option value="{{ $item->branch_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
@@ -72,9 +70,9 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Category</label>
+                            <label class="form-label">{{ __('common.category') }}</label>
                             <select id="expense_category_id" class="form-select">
-                                <option value="">--All Categories--</option>
+                                <option value="">{{ __('common.all_categories') }}</option>
                                 @foreach ($categories as $item)
                                     <option value="{{ $item->expense_category_id }}">{{ $item->name }}</option>
                                 @endforeach
@@ -89,25 +87,21 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
-                                <option value="">--All Statuses--</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
                                 <option value="pending">Pending</option>
                                 <option value="posted">Posted</option>
                                 <option value="cancelled">Cancelled</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Period</label>
+                            <label class="form-label">{{ __('common.period') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
-                            </button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
-                            </button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -135,17 +129,17 @@
                         <thead>
                             <tr>
                                 <th>Expense No.</th>
-                                <th>Date</th>
-                                <th>Category</th>
-                                <th class="text-end">Amount</th>
-                                <th>Branch</th>
+                                <th>{{ __('common.date') }}</th>
+                                <th>{{ __('reports.col_category') }}</th>
+                                <th class="text-end">{{ __('common.amount') }}</th>
+                                <th>{{ __('common.branch') }}</th>
                                 <th>OT / User</th>
                                 <th>Admin User</th>
                                 <th>Session</th>
-                                <th>Source</th>
-                                <th>Status</th>
+                                <th>{{ __('reports.col_source') }}</th>
+                                <th>{{ __('common.status') }}</th>
                                 <th>Accounting (JV Account)</th>
-                                <th>Business</th>
+                                <th>{{ __('common.business') }}</th>
                             </tr>
                         </thead>
                     </table>

@@ -5,27 +5,27 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">
-            Journal Entries
+            {{ __('journal_entries.title') }}
         </h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
 
                 </div>
                 <div class="d-flex gap-2">
                     @include('admin.partials.import-export-buttons', [
                         'importExportModule' => 'journal-entry',
-                        'importExportLabel' => 'Journal Entries',
+                        'importExportLabel' => __('journal_entries.title'),
                         'importExportRefreshFn' => 'initDataTablejournal_entry_table',
                         'importExportExportParamsSelector' => '#business_id',
                     ])
                     <a href="{{ url('admin/journal-entry/create') }}" class="btn btn-primary rounded-pill">
                         <i class="fa fa-plus"></i>
-                        Add New
+                        {{ __('common.add_new') }}
                     </a>
                 </div>
             </div>

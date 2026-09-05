@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => '班次',
+    'singular' => 'Shift',
+    'new_heading' => '新建 Shift',
+    'update_heading' => '更新 Shift',
+    'save_shift' => '保存 Shift',
+    'create_new' => '创建 新建 Shift',
+    'edit_heading' => '编辑 Shift',
+    'start_time' => 'Start 时间',
+    'end_time' => 'End 时间',
+    'grace_minutes' => 'Grace Minutes',
+    'break_duration_minutes' => '休息时长（分钟）',
+    'grace_period_minutes' => '宽限期（分钟）',
+    'grace_period_hint' => '员工可迟到而不被标记为“迟到”的分钟数。',
+    'working_days' => '工作日',
+    'add_new_shift' => '添加新班次',
+    'day_mon' => '星期一',
+    'day_tue' => '星期二',
+    'day_wed' => '星期三',
+    'day_thu' => '星期四',
+    'day_fri' => '星期五',
+    'day_sat' => '星期六',
+    'day_sun' => '星期日',
+];

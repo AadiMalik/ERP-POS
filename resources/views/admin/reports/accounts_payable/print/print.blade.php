@@ -6,7 +6,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Accounts Payable Report')
+@section('title', __('reports.accounts_payable'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -16,7 +16,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Accounts Payable Report',
+        'title' => __('reports.accounts_payable'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [
@@ -28,15 +28,15 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Supplier</th>
-                <th>Purchase No.</th>
-                <th>Invoice No.</th>
-                <th>Invoice Date</th>
-                <th>Due Date</th>
+                <th>{{ __('reports.col_supplier') }}</th>
+                <th>{{ __('reports.col_purchase_no_dot') }}</th>
+                <th>{{ __('reports.col_invoice_no_dot') }}</th>
+                <th>{{ __('reports.col_invoice_date') }}</th>
+                <th>{{ __('reports.col_due_date') }}</th>
                 <th class="text-right">Invoiced</th>
-                <th class="text-right">Paid</th>
+                <th class="text-right">{{ __('reports.col_paid') }}</th>
                 <th class="text-right">Outstanding</th>
-                <th>Status</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

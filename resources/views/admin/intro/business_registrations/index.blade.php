@@ -19,15 +19,15 @@
                 <table id="intro_registrations_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Business</th>
+                            <th>{{ __('common.business') }}</th>
                             <th>Owner</th>
-                            <th>Email</th>
+                            <th>{{ __('common.email') }}</th>
                             <th>Package</th>
                             <th>Cycle</th>
                             <th>Sub Status</th>
                             <th>Payment</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'පිටු සහ ප්‍රතිපත්ති',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'සහතික',
+    'hero_stats' => 'ප්‍රධාන සංඛ්‍යාලේඛන',
+    'homepage_sections' => 'මුල් පිටුවේ කොටස්',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'සම්බන්ධතා පණිවිඩ',
+    'newsletter_subscribers' => 'පුවත් පත්‍රිකා දායකයින්',
+    'social_media' => 'සමාජ මාධ්‍ය',
+    'intro_cms' => 'හැඳින්වීම් සීඑම්එස්',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

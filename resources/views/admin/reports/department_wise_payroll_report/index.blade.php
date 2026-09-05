@@ -4,36 +4,34 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            Department-wise Payroll Report
-        </h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.department_wise_payroll_report') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @canAccess('reports.department-wise-payroll-report.print')
                     <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary">
-                        <i class="fa fa-print"></i> Print
+                        <i class="fa fa-print"></i> {{ __('common.print') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.department-wise-payroll-report.pdf')
                     <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger">
-                        <i class="fa fa-file-pdf"></i> PDF
+                        <i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.department-wise-payroll-report.export')
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
-                        <i class="fa fa-file-excel"></i> Excel
+                        <i class="fa fa-file-excel"></i> {{ __('common.excel') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.department-wise-payroll-report.export-csv')
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
-                        <i class="fa fa-file-text"></i> CSV
+                        <i class="fa fa-file-text"></i> {{ __('common.csv') }}
                     </a>
                     @endcanAccess
                 </div>
@@ -43,9 +41,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }}
                                             {{ $item->name ?? '' }}
@@ -55,16 +53,16 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Department</label>
+                            <label class="form-label">{{ __('common.department') }}</label>
                             <select id="department_id" class="form-select">
-                                <option value="">--All Departments--</option>
+                                <option value="">{{ __('common.all_departments') }}</option>
                                 @foreach ($departments as $item)
                                     <option value="{{ $item->department_id }}">{{ $item->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Month</label>
+                            <label class="form-label">{{ __('common.month') }}</label>
                             <select id="month" class="form-select">
                                 <option value="">--All--</option>
                                 @foreach (range(1, 12) as $m)
@@ -73,7 +71,7 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Year</label>
+                            <label class="form-label">{{ __('common.year') }}</label>
                             <select id="year" class="form-select">
                                 <option value="">--All--</option>
                                 @foreach (range(now()->year, now()->year - 5) as $y)
@@ -82,9 +80,7 @@
                             </select>
                         </div>
                         <div class="col-md-2 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
-                            </button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
                         </div>
                     </div>
                 </div>
@@ -93,10 +89,10 @@
                     <table id="department_wise_payroll_report_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Department</th>
+                                <th>{{ __('reports.col_department') }}</th>
                                 <th class="text-end">Employees</th>
                                 <th class="text-end">Gross Salary</th>
-                                <th class="text-end">Deductions</th>
+                                <th class="text-end">{{ __('reports.col_deductions') }}</th>
                                 <th class="text-end">Net Salary</th>
                             </tr>
                         </thead>

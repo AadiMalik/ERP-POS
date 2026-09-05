@@ -4,7 +4,7 @@
 @endphp
 <div class="card h-100">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Top Selling Products</h5>
+        <h5 class="mb-0">{{ __('Top Selling Products') }}</h5>
         <a href="{{ route('order.history') }}" class="btn btn-sm btn-outline-primary">View Sales</a>
     </div>
     <div class="card-body">

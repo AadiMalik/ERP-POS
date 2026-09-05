@@ -27,26 +27,25 @@
 
 <form id="printSettingForm">
     @csrf
-    <h4>Print Settings</h4>
-    <p class="text-muted">Controls the header, footer, page and printer behavior of every printed CRUD document and
-        report for this business. Leave everything as-is to keep using the built-in Dukanaz default layout.
+    <h4>{{ __('settings.print_title') }}</h4>
+    <p class="text-muted">{{ __('settings.print_description') }}
     </p>
     <hr>
 
     <ul class="nav nav-pills print-setting-nav mb-3" id="print-setting-tab" role="tablist">
         <li class="nav-item">
             <button class="nav-link active" type="button" data-bs-toggle="pill"
-                data-bs-target="#print-header">Header</button>
+                data-bs-target="#print-header">{{ __('settings.print_tab_header') }}</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link" type="button" data-bs-toggle="pill" data-bs-target="#print-footer">Footer</button>
+            <button class="nav-link" type="button" data-bs-toggle="pill" data-bs-target="#print-footer">{{ __('settings.print_tab_footer') }}</button>
         </li>
         <li class="nav-item">
             <button class="nav-link" type="button" data-bs-toggle="pill"
-                data-bs-target="#print-page">Page &amp; Printer</button>
+                data-bs-target="#print-page">{{ __('settings.print_tab_page') }}</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link" type="button" data-bs-toggle="pill" data-bs-target="#print-body">Body / Table</button>
+            <button class="nav-link" type="button" data-bs-toggle="pill" data-bs-target="#print-body">{{ __('settings.print_tab_body') }}</button>
         </li>
     </ul>
 
@@ -70,7 +69,7 @@
         <div class="text-end">
             <button type="button" class="btn btn-primary"
                 onclick="saveSetting('#printSettingForm','{{ url('admin/setting/print') }}')">
-                Save Changes
+                {{ __('common.save_changes') }}
             </button>
         </div>
     </div>

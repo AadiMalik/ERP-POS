@@ -1910,6 +1910,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     Route::group(['prefix' => 'setting'], function () {
         Route::get('/', [App\Http\Controllers\Admin\SettingController::class, 'index']);
         Route::post('business', [App\Http\Controllers\Admin\SettingController::class, 'updateBusinessSetting'])->name('business.update');
+        Route::post('localization', [App\Http\Controllers\Admin\SettingController::class, 'updateLocalizationSetting'])->name('localization.update');
         Route::post('accounting', [App\Http\Controllers\Admin\SettingController::class, 'updateAccountingSetting'])->name('accounting.update');
         Route::post('inventory', [App\Http\Controllers\Admin\SettingController::class, 'updateInventorySetting'])->name('inventory.update');
         Route::post('customer', [App\Http\Controllers\Admin\SettingController::class, 'updateCustomerSetting'])->name('customer.update');

@@ -6,10 +6,10 @@ use Carbon\Carbon;
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">{{ isset($purchase_request_quotation) ? 'Update' : 'New' }} Purchase Request Quotation</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ isset($purchase_request_quotation) ? __('purchase_request_quotations.update_heading') : __('purchase_request_quotations.new_heading') }}</h4>
     <div class="card">
         <div class="card-header bg-white border-bottom">
-            <h5 class="mb-0">{{ isset($purchase_request_quotation) ? 'Update' : 'Create' }} Purchase Request Quotation</h5>
+            <h5 class="mb-0">{{ isset($purchase_request_quotation) ? __('purchase_request_quotations.update_heading') : __('purchase_request_quotations.create_heading') }}</h5>
         </div>
         <form action="{{ url('admin/purchase-request-quotation') }}" method="POST">
             @csrf
@@ -19,15 +19,15 @@ use Carbon\Carbon;
                 <!-- Header Information -->
                 <div class="row g-4 mb-4">
                     <div class="col-md-3">
-                        <label class="fw-semibold">Quotation No</label>
+                        <label class="fw-semibold">{{ __('purchase_request_quotations.quotation_no') }}</label>
                         <input type="text" class="form-control" name="purchase_request_quotation_no"
-                            value="{{ $purchase_request_quotation->purchase_request_quotation_no ?? ($purchase_request_quotation_no ?? 'Auto Generated') }}"
+                            value="{{ $purchase_request_quotation->purchase_request_quotation_no ?? ($purchase_request_quotation_no ?? __('common.auto_generated')) }}"
                             readonly>
                     </div>
                     <div class="col-md-3">
-                        <label class="fw-semibold">Purchase Request<span class="text-danger">*</span></label>
+                        <label class="fw-semibold">{{ __('purchases.purchase_request') }}<span class="text-danger">*</span></label>
                         <select class="form-select" name="purchase_request_id" id="purchase_request_id">
-                            <option value="">-- Select Purchase Request --</option>
+                            <option value="">{{ __('purchase_request_quotations.select_purchase_request') }}</option>
                             @foreach ($purchase_requests as $item)
                             <option value="{{ $item->purchase_request_id }}"
                                 {{ old('purchase_request_id', $purchase_request_quotation->purchase_request_id ?? '') == $item->purchase_request_id ? 'selected' : '' }}>
@@ -38,11 +38,11 @@ use Carbon\Carbon;
                     </div>
                     <div class="col-md-3">
                         <div class="d-flex align-items-center justify-content-between">
-                            <label class="fw-semibold mb-0">Supplier<span class="text-danger">*</span></label>
+                            <label class="fw-semibold mb-0">{{ __('common.supplier') }}<span class="text-danger">*</span></label>
                             @include('admin.partials.quick-add-btn', ['permission' => 'supplier.create', 'modal' => 'quickAddSupplierModal', 'label' => 'Supplier'])
                         </div>
                         <select class="form-select" name="supplier_id" id="supplier_id" required>
-                            <option value="">-- Select Supplier --</option>
+                            <option value="">{{ __('common.select_supplier') }}</option>
                             @if (RoleNames::SUPERADMIN != getRoleName())
                             @foreach ($suppliers as $item)
                             <option value="{{ $item->supplier_id }}"
@@ -54,30 +54,30 @@ use Carbon\Carbon;
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="fw-semibold">Supplier Reference No</label>
+                        <label class="fw-semibold">{{ __('purchase_request_quotations.supplier_reference_no') }}</label>
                         <input type="text" class="form-control" name="vendor_reference_no"
                             value="{{ $purchase_request_quotation->vendor_reference_no ?? '' }}">
                     </div>
 
                     <div class="col-md-3">
-                        <label class="fw-semibold">Received Date</label>
+                        <label class="fw-semibold">{{ __('purchase_request_quotations.received_date') }}</label>
                         <input type="text" class="form-control datepicker" name="received_date"
                             value="{{ old('received_date', isset($purchase_request_quotation) ? localDate($purchase_request_quotation->received_date) : localDate(date('Y-m-d'))) }}">
                     </div>
                     <div class="col-md-3" style="margin-top: 3.5rem !important;">
                         <input type="checkbox" class="form-check-input" name="send_email" id="send_email" value="">
-                        <label class="form-check-label" for="send_email">Send Email</label>
+                        <label class="form-check-label" for="send_email">{{ __('purchase_request_quotations.send_email') }}</label>
                     </div>
                     <div class="col-md-3" style="margin-top: 3.5rem !important;">
                         <input type="checkbox" class="form-check-input" name="send_whatsapp" id="send_whatsapp" value="">
-                        <label class="form-check-label" for="send_whatsapp">Send Whatsapp</label>
+                        <label class="form-check-label" for="send_whatsapp">{{ __('purchase_request_quotations.send_whatsapp') }}</label>
                     </div>
                     <div class="col-md-3" style="margin-top: 3.5rem !important;">
                         <input type="checkbox" class="form-check-input" name="send_sms" id="send_sms" value="">
-                        <label class="form-check-label" for="send_sms">Send SMS</label>
+                        <label class="form-check-label" for="send_sms">{{ __('purchase_request_quotations.send_sms') }}</label>
                     </div>
                     <div class="col-md-12">
-                        <label class="fw-semibold">Description</label>
+                        <label class="fw-semibold">{{ __('common.description') }}</label>
                         <textarea class="form-control" name="description">{{ old('description', $purchase_request_quotation->description ?? '') }}</textarea>
                     </div>
                 </div>
@@ -300,7 +300,7 @@ use Carbon\Carbon;
             <div class="card-footer border-top">
                 <div class="d-flex justify-content-end gap-2">
                     <button type="button" class="btn btn-outline-secondary"
-                        onclick="window.history.back()">Cancel</button>
+                        onclick="window.history.back()">{{ __('common.cancel') }}</button>
                     <button type="submit" class="btn btn-primary px-4">Save</button>
                 </div>
             </div>

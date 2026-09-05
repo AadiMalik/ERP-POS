@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Leave Type-wise Report',
+        'title' => __('reports.leave_type_wise_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,7 +56,7 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Leave Type</th>
+                <th>{{ __('reports.col_leave_type') }}</th>
                 <th class="text-right">Total Requests</th>
                 <th class="text-right">Approved</th>
                 <th class="text-right">Pending</th>

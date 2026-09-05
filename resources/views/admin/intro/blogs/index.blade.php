@@ -18,18 +18,18 @@
                     @endforeach
                 </select>
             </div>
-            <a href="javascript:void(0)" id="createIntroBlog" class="btn rounded-pill btn-primary"><i class="fa fa-plus me-1"></i>Add New</a>
+            <a href="javascript:void(0)" id="createIntroBlog" class="btn rounded-pill btn-primary"><i class="fa fa-plus me-1"></i> {{ __('common.add_new') }}</a>
         </div>
         <div class="card-body">
             <div class="table-responsive text-nowrap p-2">
                 <table id="intro_blogs_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Title</th>
+                            <th>{{ __('common.title') }}</th>
                             <th>Category</th>
-                            <th>Status</th>
+                            <th>{{ __('common.status') }}</th>
                             <th>Published</th>
-                            <th>Action</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

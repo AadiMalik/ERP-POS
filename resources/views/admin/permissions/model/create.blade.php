@@ -24,7 +24,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Close</button>
+                        <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">{{ __('common.close') }}</button>
                         <button type="submit" id="saveBtn" class="btn btn-primary" value="create">Save
                         </button>
                     </div>

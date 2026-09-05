@@ -5,7 +5,7 @@ use App\Enums\RoleNames;
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="modelHeading">Send Quotation</h4>
+                <h4 class="modal-title" id="modelHeading">{{ __('Send Quotation') }}</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="purchase_request_quotation_form" name="purchase_request_quotation_form" enctype="multipart/form-data">

@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Customer Aging Report',
+        'title' => __('reports.customer_aging'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,7 +56,7 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Customer</th>
+                <th>{{ __('reports.col_customer') }}</th>
                 <th class="text-right">Current</th>
                 <th class="text-right">1-30</th>
                 <th class="text-right">31-60</th>
@@ -64,7 +64,7 @@
                 <th class="text-right">91-120</th>
                 <th class="text-right">120+</th>
                 <th class="text-right">Total Outstanding</th>
-                <th>Last Payment</th>
+                <th>{{ __('reports.col_last_payment') }}</th>
                 <th class="text-right">Total Balance</th>
             </tr>
         </thead>

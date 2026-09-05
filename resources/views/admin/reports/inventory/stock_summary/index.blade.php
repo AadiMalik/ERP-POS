@@ -4,33 +4,33 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">{{ $report_title ?? 'Inventory Report' }}</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ $report_title ?? __('reports.inventory_report') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
-                        <i class="fa fa-filter"></i> Filters
+                        <i class="fa fa-filter"></i> {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @canAccess('reports.stock-summary.print')
                     <a href="javascript:void(0);" id="btn_print" target="_blank" class="btn btn-outline-secondary">
-                        <i class="fa fa-print"></i> Print
+                        <i class="fa fa-print"></i> {{ __('common.print') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.stock-summary.pdf')
                     <a href="javascript:void(0);" id="btn_pdf" target="_blank" class="btn btn-outline-danger">
-                        <i class="fa fa-file-pdf"></i> PDF
+                        <i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.stock-summary.export')
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
-                        <i class="fa fa-file-excel"></i> Excel
+                        <i class="fa fa-file-excel"></i> {{ __('common.excel') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.stock-summary.export-csv')
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
-                        <i class="fa fa-file-text"></i> CSV
+                        <i class="fa fa-file-text"></i> {{ __('common.csv') }}
                     </a>
                     @endcanAccess
                 </div>
@@ -40,9 +40,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->name ?? '' }}</option>
                                     @endforeach
@@ -50,70 +50,70 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Branch</label>
+                            <label class="form-label">{{ __('common.branch') }}</label>
                             <select id="branch_id" class="form-select">
-                                <option value="">--All Branches--</option>
+                                <option value="">{{ __('common.all_branches') }}</option>
                                 @foreach ($branches as $item)
                                     <option value="{{ $item->branch_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Warehouse</label>
+                            <label class="form-label">{{ __('common.warehouse') }}</label>
                             <select id="warehouse_id" class="form-select">
-                                <option value="">--All Warehouses--</option>
+                                <option value="">{{ __('common.all_warehouses') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Product</label>
+                            <label class="form-label">{{ __('common.product') }}</label>
                             <select id="product_id" class="form-select">
-                                <option value="">--All Products--</option>
+                                <option value="">{{ __('common.all_products') }}</option>
                                 @foreach ($products as $item)
                                     <option value="{{ $item->product_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Product Variation</label>
+                            <label class="form-label">{{ __('common.variation') }}</label>
                             <select id="product_variation_id" class="form-select">
-                                <option value="">--All Variations--</option>
+                                <option value="">{{ __('common.all_variations') }}</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Category</label>
+                            <label class="form-label">{{ __('common.category') }}</label>
                             <select id="category_id" class="form-select">
-                                <option value="">--All Categories--</option>
+                                <option value="">{{ __('common.all_categories') }}</option>
                                 @foreach ($categories as $item)
                                     <option value="{{ $item->category_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Brand</label>
+                            <label class="form-label">{{ __('common.brand') }}</label>
                             <select id="brand_id" class="form-select">
-                                <option value="">--All Brands--</option>
+                                <option value="">{{ __('common.all_brands') }}</option>
                                 @foreach ($brands as $item)
                                     <option value="{{ $item->brand_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Report View</label>
+                            <label class="form-label">{{ __('reports.report_view') }}</label>
                             <select id="report_mode" class="form-select">
-                                    <option value="summary">Stock Summary</option>
-                                    <option value="availability">Availability</option>
-                                    <option value="warehouse_branch">Warehouse & Branch</option>
-                                    <option value="low_stock">Low Stock & Reorder</option>
+                                    <option value="summary">{{ __('reports.stock_summary') }}</option>
+                                    <option value="availability">{{ __('reports.availability') }}</option>
+                                    <option value="warehouse_branch">{{ __('reports.warehouse_branch') }}</option>
+                                    <option value="low_stock">{{ __('reports.low_stock') }}</option>
                             </select>
                         </div>
 
 
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -143,18 +143,18 @@
                     <table id="stock_summary_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Product</th>
-                                <th>Variation</th>
-                                <th>Warehouse</th>
-                                <th>Branch</th>
-                                <th>Category</th>
-                                <th>Qty</th>
-                                <th>Reserved</th>
-                                <th>Available</th>
-                                <th>Avg Price</th>
-                                <th>Value</th>
-                                <th>Min Stock</th>
-                                <th>Reorder</th>
+                                <th>{{ __('common.product') }}</th>
+                                <th>{{ __('reports.col_variation') }}</th>
+                                <th>{{ __('reports.col_warehouse') }}</th>
+                                <th>{{ __('common.branch') }}</th>
+                                <th>{{ __('reports.col_category') }}</th>
+                                <th>{{ __('common.qty') }}</th>
+                                <th>{{ __('reports.col_reserved') }}</th>
+                                <th>{{ __('reports.col_available') }}</th>
+                                <th>{{ __('reports.col_avg_price') }}</th>
+                                <th>{{ __('reports.col_value') }}</th>
+                                <th>{{ __('reports.col_min_stock') }}</th>
+                                <th>{{ __('reports.col_reorder') }}</th>
                             </tr>
                         </thead>
                     </table>
@@ -212,12 +212,12 @@
         $('#product_id').change(function() {
             let product_id = $(this).val();
             if (!product_id) {
-                $('#product_variation_id').html('<option value="">--All Variations--</option>').trigger('change');
+                $('#product_variation_id').html('<option value="">{{ __('common.all_variations') }}</option>').trigger('change');
                 return;
             }
             ajaxRequest({ url: url_local + '/admin/product/variation-by-product/' + product_id, data: {} })
                 .then((response) => {
-                    let options = '<option value="">--All Variations--</option>';
+                    let options = '<option value="">{{ __('common.all_variations') }}</option>';
                     $.each(response.Data || [], function(i, item) {
                         options += '<option value="' + item.product_variation_id + '">' + item.name + '</option>';
                     });

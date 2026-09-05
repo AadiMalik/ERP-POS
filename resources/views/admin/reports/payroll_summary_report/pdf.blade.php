@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Payroll Summary Report',
+        'title' => __('reports.payroll_summary_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,14 +56,14 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Period</th>
+                <th>{{ __('reports.col_period') }}</th>
                 <th class="text-right">Employees</th>
                 <th class="text-right">Gross Salary</th>
-                <th class="text-right">Deductions</th>
+                <th class="text-right">{{ __('reports.col_deductions') }}</th>
                 <th class="text-right">Advance Deduction</th>
-                <th class="text-right">Overtime</th>
+                <th class="text-right">{{ __('reports.col_overtime') }}</th>
                 <th class="text-right">Net Salary</th>
-                <th>Status</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

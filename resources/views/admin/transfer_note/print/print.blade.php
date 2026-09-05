@@ -20,8 +20,8 @@
         'doc_no' => $transfer_note->transfer_note_no,
         'doc_date' => localDate($transfer_note->transfer_note_date),
         'reference' => [
-            'Source Warehouse' => $transfer_note->sourceWarehouse->name ?? 'N/A',
-            'Destination Warehouse' => $transfer_note->destinationWarehouse->name ?? 'N/A',
+            '{{ __('transfer_notes.source_warehouse') }}' => $transfer_note->sourceWarehouse->name ?? 'N/A',
+            '{{ __('transfer_notes.destination_warehouse') }}' => $transfer_note->destinationWarehouse->name ?? 'N/A',
             'Reference' => $transfer_note->reference ?? 'N/A',
             'Status' => ucfirst(str_replace('_', ' ', $transfer_note->status)),
             'Sent By' => $transfer_note->sentby->name ?? 'N/A',
@@ -36,12 +36,12 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>Product</th>
-                <th>Variation</th>
+                <th>{{ __('common.product') }}</th>
+                <th>{{ __('common.variation') }}</th>
                 <th class="text-right">Transfer Qty</th>
-                <th class="text-right">Received Qty</th>
-                <th>Unit</th>
-                <th class="text-right">Unit Cost</th>
+                <th class="text-right">{{ __('common.received_qty') }}</th>
+                <th>{{ __('common.unit') }}</th>
+                <th class="text-right">{{ __('common.unit_cost') }}</th>
                 <th class="text-right">Total Value</th>
             </tr>
         </thead>

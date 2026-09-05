@@ -12,7 +12,7 @@
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
             </div>
@@ -22,14 +22,14 @@
                         <div class="col-md-3">
                             <label class="form-label">Type</label>
                             <select id="type" class="form-select">
-                                <option value="">--All Types--</option>
+                                <option value="">{{ __('common.all_types') }}</option>
                                 @foreach ($types as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="is_read" class="form-select">
                                 <option value="">--All--</option>
                                 <option value="0">Unread</option>
@@ -37,16 +37,12 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
-                            </button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
-                            </button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -54,11 +50,11 @@
                     <table id="notification_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Title</th>
+                                <th>{{ __('common.title') }}</th>
                                 <th>Message</th>
                                 <th>Type</th>
-                                <th>Date</th>
-                                <th>Status</th>
+                                <th>{{ __('common.date') }}</th>
+                                <th>{{ __('common.status') }}</th>
                             </tr>
                         </thead>
                     </table>

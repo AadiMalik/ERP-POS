@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => '管理者ユーザー',
+    'singular' => '用户',
+    'role' => '角色',
+    'all_roles' => '--全部 角色s--',
+    'all_branches' => '--全部 分支es--',
+    'select_role' => '--选择 角色--',
+    'select_branch' => '--选择 分支--',
+    'last_login' => 'Last Login',
+    'new_heading' => '新建 用户',
+    'update_heading' => '更新 用户',
+    'save_user' => '保存 用户',
+    'password' => '密码',
+    'confirm_password' => 'Confirm 密码',
+    'change_password' => 'Change 密码',
+    'current_password' => 'Current 密码',
+    'new_password' => '新建 密码',
+    'update_password' => '更新 密码',
+    'customer_profile' => 'Customer Profile',
+    'password_optional_hint' => 'Optional for customers - they set their own password via the OTP onboarding flow.',
+    'code_auto_hint' => '(if blank, will be auto generated)',
+    'company_name' => 'Company Name',
+    'contact_person' => 'Contact Person',
+    'credit_limit' => 'Credit Limit',
+    'credit_days' => 'Credit Days',
+];

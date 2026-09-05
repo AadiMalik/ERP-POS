@@ -1,14 +1,14 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Subscription Settings</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('subscription_settings.title') }}</h4>
         <div class="card">
             <div class="card-body">
                 <form action="{{ route('subscription-settings.update') }}" method="POST">
                     @csrf
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="fw-semibold">Default Grace Period (days)</label>
+                            <label class="fw-semibold">Default {{ __('subscriptions.grace_period') }} (days)</label>
                             <input type="number" min="0" class="form-control" name="default_grace_period_days" value="{{ $setting->default_grace_period_days }}">
                             <small class="text-muted">How many days a business keeps access after expiry before being restricted.</small>
                         </div>

@@ -4,36 +4,34 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            Account Ledger Report
-        </h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.account_ledger') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @canAccess('reports.account-ledger.print')
                     <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary">
-                        <i class="fa fa-print"></i> Print
+                        <i class="fa fa-print"></i> {{ __('common.print') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.account-ledger.pdf')
                     <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger">
-                        <i class="fa fa-file-pdf"></i> PDF
+                        <i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.account-ledger.export')
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
-                        <i class="fa fa-file-excel"></i> Excel
+                        <i class="fa fa-file-excel"></i> {{ __('common.excel') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.account-ledger.export-csv')
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
-                        <i class="fa fa-file-text"></i> CSV
+                        <i class="fa fa-file-text"></i> {{ __('common.csv') }}
                     </a>
                     @endcanAccess
                 </div>
@@ -43,9 +41,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }}
                                             {{ $item->name ?? '' }}
@@ -55,9 +53,9 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Account</label>
+                            <label class="form-label">{{ __('common.account') }}</label>
                             <select id="account_id" class="form-select">
-                                <option value="">--Select Account--</option>
+                                <option value="">{{ __('common.select_account') }}</option>
                                 @foreach ($accounts as $item)
                                     <option value="{{ $item->account_id }}"
                                         {{ request('account_id') == $item->account_id ? 'selected' : '' }}>
@@ -67,16 +65,12 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
-                            </button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
-                            </button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -104,13 +98,13 @@
                     <table id="account_ledger_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Voucher Type</th>
-                                <th>JV Number</th>
+                                <th>{{ __('common.date') }}</th>
+                                <th>{{ __('reports.col_voucher_type') }}</th>
+                                <th>{{ __('reports.col_jv_number') }}</th>
                                 <th>Reference Number</th>
-                                <th>Narration</th>
-                                <th class="text-end">Debit</th>
-                                <th class="text-end">Credit</th>
+                                <th>{{ __('reports.col_narration') }}</th>
+                                <th class="text-end">{{ __('common.debit') }}</th>
+                                <th class="text-end">{{ __('common.credit') }}</th>
                                 <th class="text-end">Running Balance</th>
                             </tr>
                         </thead>

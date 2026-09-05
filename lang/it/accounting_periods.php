@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Periodi contabili',
+    'singular' => 'Contabilità Periodo',
+    'intro' => 'Advanced Contabilità Modalità — open/close/reopen periods manually. Reopening and overriding a blocked close both require a reason, which is recorded to the Activity Log.',
+    'closed_automatically' => 'Chiuso Automatically',
+    'close_period' => 'Chiudi Periodo',
+    'reopen_period' => 'Reopen Periodo',
+    'pending_close' => 'Pending Chiudi',
+    'reason_override' => 'Motivo (required if overriding pending items)',
+    'close_anyway' => 'Chiudi anyway, even though items are pending',
+    'blocked_message' => 'This period has pending items and was not closed. Resolve them, or tick "Chiudi anyway" with a reason to override.',
+    'reason_required_reopen' => 'A reason is required to reopen this period.',
+    'could_not_open' => 'Could not open period',
+    'could_not_close' => 'Could not close period',
+    'could_not_reopen' => 'Could not reopen period',
+    'no_pending_issues' => 'No pending issues for this period.',
+    'pending_items' => 'Pending items:',
+    'no_periods' => 'No accounting periods yet.',
+    'open_btn' => 'Aperto',
+    'close_btn' => 'Chiudi',
+    'reopen_btn' => 'Reopen',
+    'issues_btn' => 'Issues',
+];

@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Пользователи админ',
+    'singular' => 'Benutzer',
+    'role' => 'Rolle',
+    'all_roles' => '--Alle Rolles--',
+    'all_branches' => '--Alle Filialees--',
+    'select_role' => '--Auswählen Rolle--',
+    'select_branch' => '--Auswählen Filiale--',
+    'last_login' => 'Last Login',
+    'new_heading' => 'Neu Benutzer',
+    'update_heading' => 'Aktualisieren Benutzer',
+    'save_user' => 'Speichern Benutzer',
+    'password' => 'Passwort',
+    'confirm_password' => 'Confirm Passwort',
+    'change_password' => 'Change Passwort',
+    'current_password' => 'Current Passwort',
+    'new_password' => 'Neu Passwort',
+    'update_password' => 'Aktualisieren Passwort',
+    'customer_profile' => 'Customer Profile',
+    'password_optional_hint' => 'Optional for customers - they set their own password via the OTP onboarding flow.',
+    'code_auto_hint' => '(if blank, will be auto generated)',
+    'company_name' => 'Company Name',
+    'contact_person' => 'Contact Person',
+    'credit_limit' => 'Credit Limit',
+    'credit_days' => 'Credit Days',
+];

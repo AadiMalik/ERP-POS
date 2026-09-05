@@ -11,7 +11,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Barcode Labels')
+@section('title', __('barcodes.title'))
 
 @section('css')
     <style>
@@ -57,7 +57,7 @@
                     <div class="label-line">{{ $variation->name }}</div>
                 @endif
                 @if ($labelConfig['show_sku'] ?? true)
-                    <div class="label-line">SKU: {{ $variation->sku }}</div>
+                    <div class="label-line">{{ __('barcodes.sku_label') }}: {{ $variation->sku }}</div>
                 @endif
 
                 @if (($labelConfig['show_barcode'] ?? true) && !empty($variation->barcode))

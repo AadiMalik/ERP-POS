@@ -5,20 +5,20 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">
-            Purchase Returns
+            {{ __('purchase_returns.title') }}
         </h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
 
                 </div>
                 <a href="{{ url('admin/purchase-return/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
-                    Add New
+                    {{ __('common.add_new') }}
                 </a>
             </div>
             <div class="card-body">
@@ -26,9 +26,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -38,18 +38,18 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Return Type</label>
+                            <label class="form-label">{{ __('purchase_returns.return_type') }}</label>
                             <select id="return_type" class="form-select">
-                                <option value="">--All Types--</option>
+                                <option value="">{{ __('common.all_types') }}</option>
                                 @foreach ($return_types as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Supplier</label>
+                            <label class="form-label">{{ __('common.supplier') }}</label>
                             <select id="supplier_id" class="form-select">
-                                <option value="">--All Suppliers--</option>
+                                <option value="">{{ __('common.all_suppliers') }}</option>
                                 @foreach ($suppliers as $item)
                                     <option value="{{ $item->supplier_id }}">{{ isset($item->code) ? $item->code : '' }}
                                         {{ $item->name ?? '' }}
@@ -58,9 +58,9 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Warehouse</label>
+                            <label class="form-label">{{ __('common.warehouse') }}</label>
                             <select id="warehouse_id" class="form-select">
-                                <option value="">--All Warehouses--</option>
+                                <option value="">{{ __('common.all_warehouses') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}">{{ $item->name ?? '' }}
                                     </option>
@@ -68,9 +68,9 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
-                                <option value="">--All Statuses--</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
                                 @foreach ($statuses as $value => $label)
                                     <option value="{{ $value }}">{{ $label ?? '' }}
                                     </option>
@@ -78,15 +78,15 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
                             <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
+                                {{ __('common.search') }}
                             </button>
                             <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
+                                {{ __('common.reset') }}
                             </button>
                         </div>
                     </div>
@@ -95,17 +95,17 @@
                     <table id="purchase_return_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Return No.</th>
-                                <th>Return Date</th>
-                                <th>Type</th>
-                                <th>Source No.</th>
-                                <th>Supplier</th>
-                                <th>Warehouse</th>
-                                <th>Products</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Business</th>
-                                <th>Action</th>
+                                <th>{{ __('purchase_returns.return_no') }}</th>
+                                <th>{{ __('purchase_returns.return_date') }}</th>
+                                <th>{{ __('common.type') }}</th>
+                                <th>{{ __('purchase_returns.source_no') }}</th>
+                                <th>{{ __('common.supplier') }}</th>
+                                <th>{{ __('common.warehouse') }}</th>
+                                <th>{{ __('common.products') }}</th>
+                                <th>{{ __('common.total') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>
@@ -115,6 +115,14 @@
     </div>
 @endsection
 @section('js')
+    @php
+        $__i18nPurchaseReturns = [
+            'something_went_wrong' => __('common.something_went_wrong'),
+        ];
+    @endphp
+    <script>
+        window.i18n_purchase_returns = @json($__i18nPurchaseReturns);
+    </script>
     @include('admin.partials.datatable', [
         'columns' => "
                         {data:'purchase_return_no',name:'purchase_return_no'},
@@ -171,7 +179,7 @@
                 },
                 error: function() {
 
-                    errorMessage(error.Message || 'Something went wrong.');
+                    errorMessage(error.Message || window.i18n_purchase_returns?.something_went_wrong || 'Something went wrong.');
                     initDataTablepurchase_return_table();
                     // Previous value restore
                     select.val(select.data('old'));

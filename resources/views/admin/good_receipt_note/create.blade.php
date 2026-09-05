@@ -4,10 +4,10 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">{{ isset($grn) ? 'Update' : 'New' }} Goods Receipt Note</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ isset($grn) ? 'Update' : 'New' }} {{ __('good_receipt_notes.singular') }}</h4>
         <div class="card">
             <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0">{{ isset($grn) ? 'Update' : 'Create' }} Goods Receipt Note</h5>
+                <h5 class="mb-0">{{ isset($grn) ? 'Update' : 'Create' }} {{ __('good_receipt_notes.singular') }}</h5>
             </div>
             <div class="card-body">
                 <form action="{{ url('admin/good-receipt-note') }}" method="POST" id="grnForm">
@@ -17,9 +17,9 @@
                     <div class="row">
                         @if (!empty($business) && RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3 mb-3">
-                                <label>Business <span class="text-danger">*</span></label>
+                                <label>{{ __('common.business') }} <span class="text-danger">*</span></label>
                                 <select class="form-control select2" name="business_id" id="business_id">
-                                    <option value="">--Select Business--</option>
+                                    <option value="">{{ __('common.select_business') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}"
                                             {{ old('business_id', $grn->business_id ?? '') == $item->business_id ? 'selected' : '' }}>
@@ -35,7 +35,7 @@
                             </label>
                             <select class="form-control select2" name="purchase_id" id="purchase_id"
                                 {{ isset($grn) ? 'disabled' : '' }}>
-                                <option value="">--Select Purchase--</option>
+                                <option value="">{{ __('good_receipt_notes.select_purchase') }}</option>
                                 @foreach ($purchases as $item)
                                     <option value="{{ $item->purchase_id }}"
                                         {{ old('purchase_id', $grn->purchase_id ?? '') == $item->purchase_id ? 'selected' : '' }}>
@@ -48,27 +48,27 @@
                             @endif
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Supplier</label>
+                            <label>{{ __('common.supplier') }}</label>
                             <input type="text" class="form-control" id="supplier_name" readonly
                                 value="{{ $grn->supplier->name ?? '' }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Warehouse</label>
+                            <label>{{ __('common.warehouse') }}</label>
                             <input type="text" class="form-control" id="warehouse_name" readonly
                                 value="{{ $grn->warehouse->name ?? '' }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>GRN Number</label>
+                            <label>{{ __('good_receipt_notes.grn_number') }}</label>
                             <input type="text" class="form-control" name="good_receipt_note_no" readonly
-                                value="{{ $grn->good_receipt_note_no ?? ($good_receipt_note_no ?? 'Auto Generated') }}">
+                                value="{{ $grn->good_receipt_note_no ?? ($good_receipt_note_no ?? '{{ __('common.auto_generated') }}') }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>GRN Date</label>
+                            <label>{{ __('good_receipt_notes.grn_date') }}</label>
                             <input type="text" class="form-control datepicker" name="good_receipt_note_date"
                                 value="{{ old('good_receipt_note_date', isset($grn) ? localDate($grn->good_receipt_note_date) : localDate(date('Y-m-d'))) }}">
                         </div>
                         <div class="col-md-12">
-                            <label>Description</label>
+                            <label>{{ __('common.description') }}</label>
                             <textarea class="form-control" rows="3" name="description">{{ old('description', $grn->description ?? '') }}</textarea>
                         </div>
                     </div>
@@ -84,18 +84,18 @@
                             <table class="table table-bordered table-striped" id="productTable">
                                 <thead>
                                     <tr>
-                                        <th style="min-width:220px;">Product</th>
-                                        <th style="min-width:150px;">Variation</th>
-                                        <th style="min-width:90px;">Unit</th>
-                                        <th style="min-width:110px;">Ordered Qty</th>
+                                        <th style="min-width:220px;">{{ __('common.product') }}</th>
+                                        <th style="min-width:150px;">{{ __('common.variation') }}</th>
+                                        <th style="min-width:90px;">{{ __('common.unit') }}</th>
+                                        <th style="min-width:110px;">{{ __('common.ordered_qty') }}</th>
                                         <th style="min-width:120px;">Already Received</th>
                                         <th style="min-width:110px;">Remaining</th>
                                         <th style="min-width:130px;">Receive Qty</th>
-                                        <th style="min-width:130px;">Batch No</th>
-                                        <th style="min-width:150px;">Expiry Date</th>
-                                        <th style="min-width:160px;">Serial #</th>
-                                        <th style="min-width:120px;">Unit Price</th>
-                                        <th style="min-width:130px">Total</th>
+                                        <th style="min-width:130px;">{{ __('common.batch_no') }}</th>
+                                        <th style="min-width:150px;">{{ __('common.expiry_date') }}</th>
+                                        <th style="min-width:160px;">{{ __('common.serial_number') }}</th>
+                                        <th style="min-width:120px;">{{ __('common.unit_price') }}</th>
+                                        <th style="min-width:130px">{{ __('common.total') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody id="productRows">
@@ -114,7 +114,7 @@
                         <div class="offset-md-8 col-md-4">
                             <table class="table table-bordered">
                                 <tr>
-                                    <th>Total</th>
+                                    <th>{{ __('common.total') }}</th>
                                     <td>
                                         <input class="form-control fw-bold" id="total" name="total" readonly>
                                     </td>
@@ -528,21 +528,21 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Enter Serial Numbers</h5>
+                    <h5 class="modal-title">{{ __('common.serial_numbers') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted mb-2" id="grnSerialModalHint">One serial number per line.</p>
+                    <p class="text-muted mb-2" id="grnSerialModalHint">{{ __('purchases.one_serial_per_line') }}</p>
                     <textarea class="form-control" id="grnSerialModalTextarea" rows="8"
-                        placeholder="Scan or type serial numbers, one per line"></textarea>
+                        placeholder="{{ __('purchases.serial_placeholder') }}"></textarea>
                     <div class="mt-2">
                         <input type="text" class="form-control d-none" id="grnSerialScanHelperInput">
                         @include('admin.partials.barcode_scanner', ['targetInputId' => '#grnSerialScanHelperInput'])
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="grnSerialModalSaveBtn">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="grnSerialModalSaveBtn">{{ __('common.save') }}</button>
                 </div>
             </div>
         </div>

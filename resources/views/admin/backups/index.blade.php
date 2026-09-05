@@ -2,10 +2,10 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="d-flex justify-content-between align-items-center py-3 mb-4">
-            <h4 class="fw-bold mb-0">Backup &amp; Restore</h4>
+            <h4 class="fw-bold mb-0">{{ __('backups.title') }}</h4>
             <div>
                 <a href="{{ route('backup-settings.edit') }}" class="btn btn-outline-secondary rounded-pill me-2">
-                    <i class="fa fa-cog"></i> Settings
+                    <i class="fa fa-cog"></i> {{ __('subscriptions.settings') }}
                 </a>
                 @can('backup.manage')
                     <form action="{{ route('backups.cleanup') }}" method="POST" class="d-inline">
@@ -64,14 +64,14 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th>{{ __('common.name') }}</th>
                             <th>Type</th>
                             <th>Date / Time</th>
                             <th>Size</th>
-                            <th>Status</th>
+                            <th>{{ __('common.status') }}</th>
                             <th>Storage Location</th>
                             <th>Retention</th>
-                            <th>Action</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>

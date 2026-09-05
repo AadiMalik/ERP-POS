@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'ಪುಟಗಳು ಮತ್ತು ನೀತಿಗಳು',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'ಸಾಕ್ಷ್ಯಗಳು',
+    'hero_stats' => 'ಮುಖ್ಯ ಅಂಕಿಅಂಶಗಳು',
+    'homepage_sections' => 'ಮುಖಪುಟ ವಿಭಾಗಗಳು',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'ಸಂಪರ್ಕ ಸಂದೇಶಗಳು',
+    'newsletter_subscribers' => 'ಸುದ್ದಿಪತ್ರ ಚಂದಾದಾರರು',
+    'social_media' => 'ಸಾಮಾಜಿಕ ಮಾಧ್ಯಮ',
+    'intro_cms' => 'ಪರಿಚಯ ಸಿಎಂಎಸ್',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

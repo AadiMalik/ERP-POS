@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'اکاؤنٹنگ مدتs',
+    'singular' => 'اکاؤنٹنگ مدت',
+    'intro' => 'Advanced اکاؤنٹنگ موڈ — open/close/reopen periods manually. Reopening and overriding a blocked close both require a reason, which is recorded to the Activity Log.',
+    'closed_automatically' => 'بند Automatically',
+    'close_period' => 'بند مدت',
+    'reopen_period' => 'Reopen مدت',
+    'pending_close' => 'Pending بند',
+    'reason_override' => 'وجہ (required if overriding pending items)',
+    'close_anyway' => 'بند anyway, even though items are pending',
+    'blocked_message' => 'This period has pending items and was not closed. Resolve them, or tick "بند anyway" with a reason to override.',
+    'reason_required_reopen' => 'A reason is required to reopen this period.',
+    'could_not_open' => 'Could not open period',
+    'could_not_close' => 'Could not close period',
+    'could_not_reopen' => 'Could not reopen period',
+    'no_pending_issues' => 'No pending issues for this period.',
+    'pending_items' => 'Pending items:',
+    'no_periods' => 'No accounting periods yet.',
+    'open_btn' => 'کھلا',
+    'close_btn' => 'بند',
+    'reopen_btn' => 'Reopen',
+    'issues_btn' => 'Issues',
+];

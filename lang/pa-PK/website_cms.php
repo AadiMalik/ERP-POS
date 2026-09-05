@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'صفحات تے پالیسیاں',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'تعریفاں',
+    'hero_stats' => 'مکھ اعداد و شمار',
+    'homepage_sections' => 'ہوم پیج حصے',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'رابطہ پیغام',
+    'newsletter_subscribers' => 'نیوز لیٹر ممبر',
+    'social_media' => 'سوشل میڈیا',
+    'intro_cms' => 'انٹرو سی ایم ایس',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

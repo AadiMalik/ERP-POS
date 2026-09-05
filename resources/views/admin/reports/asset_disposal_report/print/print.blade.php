@@ -4,7 +4,7 @@
         ->resolve(Auth::user()->business_id);
 @endphp
 @extends('layouts.print')
-@section('title', 'Asset Disposal Report')
+@section('title', __('reports.asset_disposal_report'))
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
 @endsection
@@ -12,7 +12,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Asset Disposal Report',
+        'title' => __('reports.asset_disposal_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -21,14 +21,14 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Disposal Date</th>
-                <th>Type</th>
+                <th>{{ __('reports.col_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_category') }}</th>
+                <th>{{ __('reports.col_disposal_date') }}</th>
+                <th>{{ __('reports.col_type') }}</th>
                 <th class="text-right">Sale Price</th>
                 <th class="text-right">Book Value</th>
-                <th>Status</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

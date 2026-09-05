@@ -4,26 +4,26 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Asset Valuation Report</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.asset_valuation_report') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
-                        <i class="fa fa-filter"></i> Filters
+                        <i class="fa fa-filter"></i> {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @canAccess('reports.asset-valuation-report.print')
-                    <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary"><i class="fa fa-print"></i> Print</a>
+                    <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary"><i class="fa fa-print"></i> {{ __('common.print') }}</a>
                     @endcanAccess
                     @canAccess('reports.asset-valuation-report.pdf')
-                    <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger"><i class="fa fa-file-pdf"></i> PDF</a>
+                    <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger"><i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}</a>
                     @endcanAccess
                     @canAccess('reports.asset-valuation-report.export')
-                    <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success"><i class="fa fa-file-excel"></i> Excel</a>
+                    <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success"><i class="fa fa-file-excel"></i> {{ __('common.excel') }}</a>
                     @endcanAccess
                     @canAccess('reports.asset-valuation-report.export-csv')
-                    <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success"><i class="fa fa-file-text"></i> CSV</a>
+                    <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success"><i class="fa fa-file-text"></i> {{ __('common.csv') }}</a>
                     @endcanAccess
                 </div>
             </div>
@@ -32,9 +32,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                         <div class="col-md-3">
-                            <label class="form-label">Business</label>
+                            <label class="form-label">{{ __('common.business') }}</label>
                             <select id="business_id" class="form-select">
-                                <option value="">--All Businesses--</option>
+                                <option value="">{{ __('common.all_businesses') }}</option>
                                 @foreach ($business as $item)
                                 <option value="{{ $item->business_id }}">{{ $item->code ?? '' }} {{ $item->name ?? '' }}</option>
                                 @endforeach
@@ -42,9 +42,9 @@
                         </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Branch</label>
+                            <label class="form-label">{{ __('common.branch') }}</label>
                             <select id="branch_id" class="form-select">
-                                <option value="">--All Branches--</option>
+                                <option value="">{{ __('common.all_branches') }}</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                 @foreach ($branches as $item)
                                 <option value="{{ $item->branch_id }}">{{ $item->name ?? '' }}</option>
@@ -53,21 +53,21 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Category</label>
+                            <label class="form-label">{{ __('common.category') }}</label>
                             <select id="fixed_asset_category_id" class="form-select">
-                                <option value="">--All Categories--</option>
+                                <option value="">{{ __('common.all_categories') }}</option>
                                 @foreach ($categories as $item)
                                 <option value="{{ $item->fixed_asset_category_id }}">{{ $item->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Purchase Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -86,16 +86,16 @@
                     <table id="asset_valuation_report_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Code</th>
-                                <th>Name</th>
-                                <th>Category</th>
-                                <th>Branch</th>
+                                <th>{{ __('reports.col_code') }}</th>
+                                <th>{{ __('common.name') }}</th>
+                                <th>{{ __('reports.col_category') }}</th>
+                                <th>{{ __('common.branch') }}</th>
                                 <th class="text-end">Purchase Cost</th>
                                 <th class="text-end">Accum. Dep.</th>
                                 <th class="text-end">Current Value</th>
                                 <th class="text-end">Previous Value</th>
                                 <th class="text-end">Residual</th>
-                                <th>Status</th>
+                                <th>{{ __('common.status') }}</th>
                             </tr>
                         </thead>
                     </table>

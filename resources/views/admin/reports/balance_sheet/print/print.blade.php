@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Balance Sheet')
+@section('title', __('reports.balance_sheet'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Balance Sheet',
+        'title' => __('reports.balance_sheet'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [

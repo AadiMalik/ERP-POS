@@ -3,26 +3,24 @@
 @endsection
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            Packages
-        </h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('packages.title') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <h5></h5>
                 <a href="{{ url('admin/packages/create') }}" class="btn rounded-pill btn-primary"><i
-                        class="icon-base fa fa-plus"></i>Add New</a>
+                        class="icon-base fa fa-plus"></i> {{ __('common.add_new') }}</a>
             </div>
             <div class="table-responsive text-nowrap p-4">
                 <table id="package_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Price</th>
-                            <th>Duration</th>
-                            <th>Users</th>
-                            <th>Branches</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('common.price') }}</th>
+                            <th>{{ __('packages.col_duration') }}</th>
+                            <th>{{ __('packages.col_users') }}</th>
+                            <th>{{ __('packages.col_branches') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -93,7 +91,7 @@
                 setPackageViewData(packageData);
                 $('#viewModal').modal('show');
             } catch (error) {
-                errorMessage(error.Message ?? 'Something went wrong');
+                errorMessage(error.Message ?? __('common.something_went_wrong'));
             }
         });
 
@@ -141,7 +139,7 @@
                     let limitText = '';
                     if (meta.type === 'limited') {
                         limitText = row && row.is_unlimited
-                            ? 'Unlimited'
+                            ? '{{ __('my_subscription.unlimited') }}'
                             : `Limit: ${row ? (row.limit_value ?? 0) : (meta.default_limit ?? 5)}`;
                     }
                     const badge = enabled

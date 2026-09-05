@@ -8,7 +8,7 @@
 @section('content')
     <!-- ========== table components start ========== -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"> Account Types</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('account_types.title') }}</h4>
 
         <!-- Basic Bootstrap Table -->
         <div class="card">
@@ -22,7 +22,7 @@
                 </div>
                 <button type="button" id="resetAccountType" class="btn rounded-pill btn-info">
                     <i class="fa fa-refresh"></i>
-                    {{ RoleNames::SUPERADMIN == getRoleName() ? 'Reset System Template' : 'Reset Account Types' }}
+                    {{ RoleNames::SUPERADMIN == getRoleName() ? __('account_types.reset_system_template') : __('account_types.reset_account_types') }}
                 </button>
             </div>
             <div class="card-body">
@@ -30,9 +30,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="filter_business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -42,7 +42,7 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
@@ -59,11 +59,11 @@
                     <table id="account_type_table" class="table display datatables" style="width:100%">
                         <thead>
                             <tr>
-                                <th>Code</th>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Business</th>
-                                <th>Action</th>
+                                <th>{{ __('common.code') }}</th>
+                                <th>{{ __('common.name') }}</th>
+                                <th>{{ __('common.description') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                             <!-- end table row-->
                         </thead>
@@ -79,6 +79,14 @@
     <!-- ========== table components end ========== -->
 @endsection
 @section('js')
+    @php
+        $__i18nAccountTypes = [
+            'edit_heading' => __('account_types.edit_heading'),
+            'please_enter_code' => __('account_types.please_enter_code'),
+            'reset_success' => __('account_types.reset_success'),
+        ];
+    @endphp
+    <script>window.i18n_account_types = @json($__i18nAccountTypes);</script>
     @include('admin.partials.datatable', [
         'columns' => "
                     {data: 'code' , name: 'code'},
@@ -117,7 +125,7 @@
                 $("#name").val(data.name);
                 $("#description").val(data.description);
 
-                $("#modelHeading").html("Edit Account Type");
+                $("#modelHeading").html(window.i18n_account_types.edit_heading);
                 $("#saveBtn").show();
                 $("#ajaxModel").modal("show");
             }
@@ -132,7 +140,7 @@
             },
             beforeSubmit: function() {
                 if ($("#code").val() == "") {
-                    errorMessage("Please Enter Code");
+                    errorMessage(window.i18n_account_types.please_enter_code);
                     return false;
                 }
                 return true;
@@ -162,7 +170,7 @@
                 },
                 success: function(response) {
                     $("#preloader").hide();
-                    successMessage(response.Message || "Account Type reset successfully!");
+                    successMessage(response.Message || window.i18n_account_types.reset_success);
                     if (typeof account_type_table !== "undefined") {
                         initDataTableaccount_type_table();
                     }
@@ -173,7 +181,7 @@
                     errorMessage(
                         xhr.responseJSON?.Message ||
                         xhr.responseJSON?.message ||
-                        "Something went wrong"
+                        (window.i18n?.something_went_wrong || "Something went wrong")
                     );
                     btn.prop("disabled", false);
                 }

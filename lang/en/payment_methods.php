@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Payment Methods',
+    'singular' => 'Payment Method',
+    'pos_title' => 'POS Payment Methods',
+    'account' => 'Account',
+    'default' => 'Default',
+    'set_as_default' => 'Set as Default',
+    'select_account' => '--Select Account--',
+    'account_hint' => 'Not required for Credit or Store Credit - they route to the receivable/store-credit account configured in Accounting Settings at posting time.',
+    'create_new' => 'Create New Payment Method',
+    'edit_heading' => 'Edit Payment Method',
+    'please_enter_name' => 'Please Enter Name',
+    'please_enter_code' => 'Please Enter Code',
+    'please_select_account' => 'Please Select Account',
+    'enter_code' => 'Enter Code',
+    'cash' => 'Cash',
+    'card' => 'Card',
+    'bank' => 'Bank',
+    'credit' => 'Credit',
+    'store_credit' => 'Store Credit',
+    'wallet' => 'Wallet',
+    'other' => 'Other',
+];

@@ -1,22 +1,22 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Resignation / Termination</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('hrm_exit.title') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div>
                 <select id="status" class="form-select" style="width:200px;">
-                    <option value="">--All Status--</option>
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="finalized">Finalized</option>
+                    <option value="">{{ __('common.all_status') }}</option>
+                    <option value="pending">{{ __('hrm_exit.pending') }}</option>
+                    <option value="approved">{{ __('hrm_exit.approved') }}</option>
+                    <option value="rejected">{{ __('hrm_exit.rejected') }}</option>
+                    <option value="finalized">{{ __('hrm_exit.finalized') }}</option>
                 </select>
             </div>
             @can('employee-exit.create')
             <a href="{{ url('admin/employee-exit/create') }}" class="btn btn-primary rounded-pill">
                 <i class="fa fa-plus"></i>
-                New Request
+                {{ __('hrm_exit.new_request') }}
             </a>
             @endcan
         </div>
@@ -25,12 +25,12 @@
                 <table id="employee_exit_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Employee</th>
-                            <th>Type</th>
-                            <th>Request Date</th>
-                            <th>Last Working Date</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.employee') }}</th>
+                            <th>{{ __('common.type') }}</th>
+                            <th>{{ __('hrm_exit.request_date') }}</th>
+                            <th>{{ __('hrm_exit.last_working_date') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Cancelled Orders Report',
+        'title' => __('reports.cancelled_orders'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,15 +56,15 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Order No</th>
-                <th>Date</th>
-                <th>Customer</th>
-                <th>Branch</th>
-                <th>Order Source</th>
-                <th>Status</th>
-                <th class="text-right">Amount</th>
-                <th>Cancellation Reason</th>
-                <th>Cancelled By</th>
+                <th>{{ __('reports.col_order_no') }}</th>
+                <th>{{ __('reports.col_date') }}</th>
+                <th>{{ __('reports.col_customer') }}</th>
+                <th>{{ __('reports.col_branch') }}</th>
+                <th>{{ __('reports.col_order_source') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
+                <th class="text-right">{{ __('reports.col_amount') }}</th>
+                <th>{{ __('reports.col_cancellation_reason') }}</th>
+                <th>{{ __('reports.col_cancelled_by') }}</th>
             </tr>
         </thead>
         <tbody>

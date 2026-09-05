@@ -11,7 +11,7 @@
 --}}
 @extends('layouts.print')
 
-@section('title', 'Session Summary')
+@section('title', __('pos.session_summary'))
 
 @section('page_class', 'thermal-page')
 
@@ -35,27 +35,27 @@
             @if ($business && $business->name)
                 <p class="tr-name">{{ $business->name }}</p>
             @endif
-            <p class="tr-meta-line">Register Session Summary</p>
+            <p class="tr-meta-line">{{ __('pos.register_session_summary') }}</p>
         </div>
         <hr class="tr-divider">
 
         <div class="tr-meta">
             <div class="tr-row">
-                <span class="tr-label">Session:</span>
+                <span class="tr-label">{{ __('pos.session_label') }}</span>
                 <span class="tr-value">{{ $session->pos_register_session_id }}</span>
             </div>
             <div class="tr-row">
-                <span class="tr-label">Opened:</span>
+                <span class="tr-label">{{ __('pos.opened') }}:</span>
                 <span class="tr-value">{{ $session->opening_datetime ? localDateTime($session->opening_datetime) : '-' }}</span>
             </div>
             @if ($session->closing_datetime)
                 <div class="tr-row">
-                    <span class="tr-label">Closed:</span>
+                    <span class="tr-label">{{ __('pos.closed_at') }}:</span>
                     <span class="tr-value">{{ localDateTime($session->closing_datetime) }}</span>
                 </div>
             @endif
             <div class="tr-row">
-                <span class="tr-label">Printed On:</span>
+                <span class="tr-label">{{ __('pos.printed_on') }}</span>
                 <span class="tr-value">{{ localDateTime($printed_at) }}</span>
             </div>
         </div>
@@ -63,13 +63,13 @@
 
         <div class="tr-totals">
             <div class="tr-row tr-grand-total">
-                <span class="tr-label">Total ({{ $summary['total_orders'] ?? 0 }})</span>
+                <span class="tr-label">{{ __('common.total') }} ({{ $summary['total_orders'] ?? 0 }})</span>
                 <span class="tr-value">{{ currency($summary['total_sales_amount'] ?? 0) }}</span>
             </div>
         </div>
 
         <hr class="tr-divider">
-        <p class="tr-meta-line" style="font-weight:700;">Payments</p>
+        <p class="tr-meta-line" style="font-weight:700;">{{ __('pos.payments') }}</p>
         <div class="tr-totals">
             @foreach ($summary['payment_method_totals'] ?? [] as $row)
                 <div class="tr-row">
@@ -79,7 +79,7 @@
             @endforeach
             @if (!empty($summary['multi_payment_order_count']))
                 <div class="tr-row">
-                    <span class="tr-label">Multi ({{ $summary['multi_payment_order_count'] }})</span>
+                    <span class="tr-label">{{ __('pos.multi_label') }} ({{ $summary['multi_payment_order_count'] }})</span>
                     <span class="tr-value">{{ currency($summary['multi_payment_amount'] ?? 0) }}</span>
                 </div>
             @endif
@@ -87,7 +87,7 @@
 
         @if (!empty($summary['order_source_totals']))
             <hr class="tr-divider">
-            <p class="tr-meta-line" style="font-weight:700;">Order Type</p>
+            <p class="tr-meta-line" style="font-weight:700;">{{ __('pos.order_type_heading') }}</p>
             <div class="tr-totals">
                 @foreach ($summary['order_source_totals'] as $row)
                     <div class="tr-row">
@@ -101,11 +101,11 @@
         <hr class="tr-divider">
         <div class="tr-totals">
             <div class="tr-row">
-                <span class="tr-label">Discount ({{ $summary['discount_order_count'] ?? 0 }})</span>
+                <span class="tr-label">{{ __('common.discount') }} ({{ $summary['discount_order_count'] ?? 0 }})</span>
                 <span class="tr-value">{{ currency($summary['total_discount'] ?? 0) }}</span>
             </div>
             <div class="tr-row">
-                <span class="tr-label">Tax ({{ $summary['tax_order_count'] ?? 0 }})</span>
+                <span class="tr-label">{{ __('common.tax') }} ({{ $summary['tax_order_count'] ?? 0 }})</span>
                 <span class="tr-value">{{ currency($summary['total_tax'] ?? 0) }}</span>
             </div>
         </div>
@@ -113,38 +113,38 @@
         <hr class="tr-divider">
         <div class="tr-totals">
             <div class="tr-row">
-                <span class="tr-label">Opening Amount</span>
+                <span class="tr-label">{{ __('pos.opening_amount') }}</span>
                 <span class="tr-value">{{ currency($summary['opening_cash'] ?? 0) }}</span>
             </div>
             <div class="tr-row">
-                <span class="tr-label">Cash Refunds (-)</span>
+                <span class="tr-label">{{ __('pos.cash_refunds') }}</span>
                 <span class="tr-value">{{ currency($summary['cash_refunds'] ?? 0) }}</span>
             </div>
             <div class="tr-row">
-                <span class="tr-label">Cash In (+)</span>
+                <span class="tr-label">{{ __('pos.cash_in') }}</span>
                 <span class="tr-value">{{ currency($summary['cash_movements_in'] ?? 0) }}</span>
             </div>
             <div class="tr-row">
-                <span class="tr-label">Cash Out (-)</span>
+                <span class="tr-label">{{ __('pos.cash_out') }}</span>
                 <span class="tr-value">{{ currency($summary['cash_movements_out'] ?? 0) }}</span>
             </div>
             <div class="tr-row">
-                <span class="tr-label">Expenses (-)</span>
+                <span class="tr-label">{{ __('pos.expenses_minus') }}</span>
                 <span class="tr-value">{{ currency($summary['total_expenses'] ?? 0) }}</span>
             </div>
             <div class="tr-row tr-grand-total">
-                <span class="tr-label">Cash Amount</span>
+                <span class="tr-label">{{ __('pos.cash_amount') }}</span>
                 <span class="tr-value">{{ currency($summary['expected_cash'] ?? 0) }}</span>
             </div>
             <div class="tr-row">
-                <span class="tr-label">Actual</span>
+                <span class="tr-label">{{ __('pos.actual') }}</span>
                 <span class="tr-value">{{ $summary['actual_cash'] !== null ? currency($summary['actual_cash']) : '-' }}</span>
             </div>
         </div>
 
         <hr class="tr-divider">
         <div class="tr-footer">
-            <p class="tr-powered-by">Powered by Dukanaz</p>
+            <p class="tr-powered-by">{{ __('pos.powered_by_dukanaz') }}</p>
         </div>
     </div>
 @endsection

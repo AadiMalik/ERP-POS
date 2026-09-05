@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Branches',
+    'singular' => 'Branch',
+    'basic_information' => 'Basic Information',
+    'address_information' => 'Address Information',
+    'branch_name' => 'Branch Name',
+    'branch_code' => 'Branch Code',
+    'branch_email' => 'Branch Email',
+    'branch_phone' => 'Branch Phone',
+    'state' => 'State',
+    'pos_register_hours' => 'POS Automatic Register Hours',
+    'open_time' => 'Open Time',
+    'close_time' => 'Close Time',
+    'open_time_hint' => 'Overrides the business default when Register Mode is Automatic. Leave blank to use the business default.',
+    'branch_logo' => 'Branch Logo',
+    'previous_logo' => 'Previous Logo',
+    'jpg_png_supported' => 'JPG, PNG supported',
+    'please_select_valid_image' => 'Please select a valid image file (JPG, PNG)',
+    'new_heading' => 'New Branch',
+    'update_heading' => 'Update Branch',
+    'save_branch' => 'Save Branch',
+    'select_business' => '-- Select Business --',
+];

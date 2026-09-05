@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'Σελίδες και πολιτικές',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'Μαρτυρίες',
+    'hero_stats' => 'Κύρια στατιστικά',
+    'homepage_sections' => 'Ενότητες αρχικής σελίδας',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'Μηνύματα επικοινωνίας',
+    'newsletter_subscribers' => 'Συνδρομητές ενημερωτικού δελτίου',
+    'social_media' => 'Κοινωνικά μέσα',
+    'intro_cms' => 'CMS εισαγωγής',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

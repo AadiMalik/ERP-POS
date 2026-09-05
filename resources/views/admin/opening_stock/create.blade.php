@@ -4,10 +4,10 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">{{ isset($opening_stock) ? 'Update' : 'New' }} Opening Stock</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ isset($opening_stock) ? 'Update' : 'New' }} {{ __('opening_stock.title') }}</h4>
         <div class="card">
             <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0">{{ isset($opening_stock) ? 'Update' : 'Create' }} Opening Stock</h5>
+                <h5 class="mb-0">{{ isset($opening_stock) ? 'Update' : 'Create' }} {{ __('opening_stock.title') }}</h5>
             </div>
             <div class="card-body">
                 <form action="{{ url('admin/opening-stock') }}" method="POST" id="openingStockForm">
@@ -17,9 +17,9 @@
                     <div class="row">
                         @if (!empty($business) && RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3 mb-3">
-                                <label>Business <span class="text-danger">*</span></label>
+                                <label>{{ __('common.business') }} <span class="text-danger">*</span></label>
                                 <select class="form-control select2" name="business_id" id="business_id">
-                                    <option value="">--Select Business--</option>
+                                    <option value="">{{ __('common.select_business') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}"
                                             {{ old('business_id', $opening_stock->business_id ?? '') == $item->business_id ? 'selected' : '' }}>
@@ -31,10 +31,10 @@
                         @endif
                         <div class="col-md-3 mb-3">
                             <label>
-                                Warehouse<span class="text-danger">*</span>
+                                {{ __('common.warehouse') }}<span class="text-danger">*</span>
                             </label>
                             <select class="form-control select2" name="warehouse_id" id="warehouse_id">
-                                <option value="">--Select Warehouse--</option>
+                                <option value="">{{ __('common.select_warehouse') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}"
                                         {{ old('warehouse_id', $opening_stock->warehouse_id ?? '') == $item->warehouse_id ? 'selected' : '' }}>
@@ -44,22 +44,22 @@
                             </select>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Opening Stock No.</label>
+                            <label>{{ __('opening_stock.title') }} No.</label>
                             <input type="text" class="form-control" name="opening_stock_no" readonly
-                                value="{{ $opening_stock->opening_stock_no ?? ($opening_stock_no ?? 'Auto Generated') }}">
+                                value="{{ $opening_stock->opening_stock_no ?? ($opening_stock_no ?? '{{ __('common.auto_generated') }}') }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Date</label>
+                            <label>{{ __('common.date') }}</label>
                             <input type="text" class="form-control datepicker" name="opening_stock_date"
                                 value="{{ old('opening_stock_date', isset($opening_stock) ? localDate($opening_stock->opening_stock_date) : localDate(date('Y-m-d'))) }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Reference</label>
+                            <label>{{ __('common.reference') }}</label>
                             <input type="text" class="form-control" name="reference"
                                 value="{{ old('reference', $opening_stock->reference ?? '') }}">
                         </div>
                         <div class="col-md-9 mb-3">
-                            <label>Notes</label>
+                            <label>{{ __('common.notes') }}</label>
                             <textarea class="form-control" rows="1" name="description">{{ old('description', $opening_stock->description ?? '') }}</textarea>
                         </div>
                     </div>
@@ -78,15 +78,15 @@
                             <table class="table table-bordered table-striped" id="productTable">
                                 <thead>
                                     <tr>
-                                        <th style="min-width:220px;">Product</th>
-                                        <th style="min-width:150px;">Variation</th>
-                                        <th style="min-width:170px;">Conversion</th>
-                                        <th style="min-width:90px;">Unit</th>
-                                        <th style="min-width:110px;">Quantity</th>
-                                        <th style="min-width:120px;">Unit Cost</th>
-                                        <th style="min-width:130px;">Batch No.</th>
-                                        <th style="min-width:150px;">Expiry Date</th>
-                                        <th style="min-width:160px;">Serial #</th>
+                                        <th style="min-width:220px;">{{ __('common.product') }}</th>
+                                        <th style="min-width:150px;">{{ __('common.variation') }}</th>
+                                        <th style="min-width:170px;">{{ __('common.conversion') }}</th>
+                                        <th style="min-width:90px;">{{ __('common.unit') }}</th>
+                                        <th style="min-width:110px;">{{ __('common.quantity') }}</th>
+                                        <th style="min-width:120px;">{{ __('common.unit_cost') }}</th>
+                                        <th style="min-width:130px;">{{ __('common.batch_no') }}</th>
+                                        <th style="min-width:150px;">{{ __('common.expiry_date') }}</th>
+                                        <th style="min-width:160px;">{{ __('common.serial_number') }}</th>
                                         <th style="min-width:130px">Total Value</th>
                                         <th style="width:50px;"></th>
                                     </tr>
@@ -124,7 +124,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <button class="text-end btn btn-primary" id="submitBtn">
-                                {{ isset($opening_stock) ? 'Update Opening Stock' : 'Save Opening Stock' }}
+                                {{ isset($opening_stock) ? 'Update {{ __('opening_stock.title') }}' : 'Save {{ __('opening_stock.title') }}' }}
                             </button>
                         </div>
                     </div>
@@ -174,7 +174,7 @@
         $(document).on('change', '#business_id', function() {
             let businessId = $(this).val();
 
-            $('#warehouse_id').html('<option value="">--Select Warehouse--</option>');
+            $('#warehouse_id').html('<option value="">{{ __('common.select_warehouse') }}</option>');
             productsData = [];
             refreshProductDropdowns();
 
@@ -195,7 +195,7 @@
                     $('#warehouse_id').prop('disabled', true).html('<option>Loading...</option>');
                 },
                 success: function(response) {
-                    let html = '<option value="">--Select Warehouse--</option>';
+                    let html = '<option value="">{{ __('common.select_warehouse') }}</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, warehouse) {
                             html += `<option value="${warehouse.warehouse_id}">${warehouse.name}</option>`;
@@ -204,7 +204,7 @@
                     $('#warehouse_id').html(html).prop('disabled', false);
                 },
                 error: function() {
-                    $('#warehouse_id').html('<option value="">--Select Warehouse--</option>').prop('disabled', false);
+                    $('#warehouse_id').html('<option value="">{{ __('common.select_warehouse') }}</option>').prop('disabled', false);
                     errorMessage('Unable to load warehouses.');
                 }
             });
@@ -228,7 +228,7 @@
         }
 
         function refreshProductDropdowns() {
-            let options = `<option value="">--Select Product--</option>`;
+            let options = `<option value="">{{ __('common.select_product') }}</option>`;
             $.each(productsData, function(_, product) {
                 options += `<option value="${product.product_id}">${product.name}</option>`;
             });
@@ -252,17 +252,17 @@
     <tr class="product-row">
         <td>
             <select name="products[${index}][product_id]" class="form-control product-select">
-                <option value="">--Select Product--</option>
+                <option value="">{{ __('common.select_product') }}</option>
             </select>
         </td>
         <td>
             <select name="products[${index}][product_variation_id]" class="form-control variation-select">
-                <option value="">--Select Variation--</option>
+                <option value="">{{ __('common.select_variation') }}</option>
             </select>
         </td>
         <td>
             <select name="products[${index}][product_variation_unit_conversion_id]" class="form-control conversion-select">
-                <option value="">--Select Conversion--</option>
+                <option value="">{{ __('common.select_conversion') }}</option>
             </select>
             <input type="hidden" class="conversion-factor" name="products[${index}][conversion_factor]" value="1">
         </td>
@@ -333,7 +333,7 @@
         // ======================================================
 
         function loadProductDropdown(row) {
-            let html = `<option value="">--Select Product--</option>`;
+            let html = `<option value="">{{ __('common.select_product') }}</option>`;
             $.each(productsData, function(_, product) {
                 html += `<option value="${product.product_id}">${product.name}</option>`;
             });
@@ -351,8 +351,8 @@
         });
 
         function resetVariationSection(row) {
-            row.find('.variation-select').html(`<option value="">--Select Variation--</option>`);
-            row.find('.conversion-select').html(`<option value="">--Select Conversion--</option>`);
+            row.find('.variation-select').html(`<option value="">{{ __('common.select_variation') }}</option>`);
+            row.find('.conversion-select').html(`<option value="">{{ __('common.select_conversion') }}</option>`);
             row.find('.selected-unit-id').val('');
             row.find('.selected-unit-name').html('-');
             row.find('.conversion-factor').val(1);
@@ -420,7 +420,7 @@
                     row.find('.variation-select').html('<option>Loading...</option>');
                 },
                 success: function(response) {
-                    let html = '<option value="">--Select Variation--</option>';
+                    let html = '<option value="">{{ __('common.select_variation') }}</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, variation) {
                             html += `
@@ -479,7 +479,7 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    let html = `<option value="">--Select Conversion--</option>`;
+                    let html = `<option value="">{{ __('common.select_conversion') }}</option>`;
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, conversion) {
                             html += `
@@ -707,21 +707,21 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Enter Serial Numbers</h5>
+                    <h5 class="modal-title">{{ __('common.serial_numbers') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted mb-2" id="osSerialModalHint">One serial number per line.</p>
+                    <p class="text-muted mb-2" id="osSerialModalHint">{{ __('purchases.one_serial_per_line') }}</p>
                     <textarea class="form-control" id="osSerialModalTextarea" rows="8"
-                        placeholder="Scan or type serial numbers, one per line"></textarea>
+                        placeholder="{{ __('purchases.serial_placeholder') }}"></textarea>
                     <div class="mt-2">
                         <input type="text" class="form-control d-none" id="osSerialScanHelperInput">
                         @include('admin.partials.barcode_scanner', ['targetInputId' => '#osSerialScanHelperInput'])
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="osSerialModalSaveBtn">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="osSerialModalSaveBtn">{{ __('common.save') }}</button>
                 </div>
             </div>
         </div>

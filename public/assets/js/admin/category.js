@@ -19,7 +19,7 @@ $("#createNewCategory").click(function () {
       $("#status").prop("checked", true);
       $("#logo").prop("required", false);
       $("#saveBtn").show();
-      $("#modelHeading").html("Create New Category");
+      $("#modelHeading").html(window.i18n_categories?.create_title || "Create New Category");
       $("#ajaxModel").modal("show");
       enableForm();
 });
@@ -40,7 +40,7 @@ editRecord({
                   $("#logo_preview").hide();
             }
             $("#logo").prop("required", false);
-            $("#modelHeading").html("Edit Category");
+            $("#modelHeading").html(window.i18n_categories?.edit_title || "Edit Category");
             $("#saveBtn").show();
             enableForm();
             $("#ajaxModel").modal("show");
@@ -65,7 +65,7 @@ viewRecord({
             } else {
                   $("#logo_preview").hide();
             }
-            $("#modelHeading").html("View Category");
+            $("#modelHeading").html(window.i18n_categories?.view_title || "View Category");
             disableForm();
             $("#saveBtn").hide();
             $("#ajaxModel").modal("show");
@@ -81,7 +81,7 @@ saveRecord({
       },
       beforeSubmit: function () {
             if ($("#name").val() == "") {
-                  errorMessage("Please Enter Name");
+                  errorMessage(window.i18n_categories?.please_enter_name || window.i18n?.please_enter_name || "Please Enter Name");
                   return false;
             }
             return true;

@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'Turnos',
+    'singular' => 'Shift',
+    'new_heading' => 'Nuevo Shift',
+    'update_heading' => 'Actualizar Shift',
+    'save_shift' => 'Guardar Shift',
+    'create_new' => 'Crear Nuevo Shift',
+    'edit_heading' => 'Editar Shift',
+    'start_time' => 'Start Hora',
+    'end_time' => 'End Hora',
+    'grace_minutes' => 'Grace Minutes',
+    'break_duration_minutes' => 'Duración del descanso (minutos)',
+    'grace_period_minutes' => 'Período de gracia (minutos)',
+    'grace_period_hint' => 'Minutos de retraso permitidos sin marcar «Tarde».',
+    'working_days' => 'Días laborables',
+    'add_new_shift' => 'Agregar nuevo turno',
+    'day_mon' => 'Lunes',
+    'day_tue' => 'Martes',
+    'day_wed' => 'Miércoles',
+    'day_thu' => 'Jueves',
+    'day_fri' => 'Viernes',
+    'day_sat' => 'Sábado',
+    'day_sun' => 'Domingo',
+];

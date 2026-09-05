@@ -18,12 +18,12 @@
                 <table id="intro_comments_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Email</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('common.email') }}</th>
                             <th>Blog</th>
                             <th>Comment</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

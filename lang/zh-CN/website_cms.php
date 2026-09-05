@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => '页面与政策',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => '客户评价',
+    'hero_stats' => '首页统计',
+    'homepage_sections' => '首页板块',
+    'benefits' => 'Benefits',
+    'contact_messages' => '联系信息',
+    'newsletter_subscribers' => '订阅用户',
+    'social_media' => '社交媒体',
+    'intro_cms' => '门户内容管理系统',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

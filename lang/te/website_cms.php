@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'పేజీలు మరియు విధానాలు',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'ప్రశంసలు',
+    'hero_stats' => 'ప్రధాన గణాంకాలు',
+    'homepage_sections' => 'హోమ్‌పేజీ విభాగాలు',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'సంప్రదింపు సందేశాలు',
+    'newsletter_subscribers' => 'వార్తాలేఖ చందాదారులు',
+    'social_media' => 'సోషల్ మీడియా',
+    'intro_cms' => 'ఇంట్రో సిఎంఎస్',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

@@ -7,7 +7,7 @@ use App\Enums\RoleNames;
     <h4 class="fw-bold py-3 mb-4">Post Depreciation</h4>
     <div class="card">
         <div class="card-header bg-white border-bottom">
-            <h5 class="mb-0">Create Depreciation Entry</h5>
+            <h5 class="mb-0">{{ __('fixed_asset_depreciations.create_heading') }} Entry</h5>
         </div>
         <form action="{{ url('admin/fixed-asset-depreciation/store') }}" method="POST">
             @csrf

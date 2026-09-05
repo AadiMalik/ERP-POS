@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $result['customer']->business,
         'branch' => $result['customer']->branch,
-        'title' => 'Customer Ledger Report',
+        'title' => __('reports.customer_ledger'),
         'doc_no' => $result['customer']->code,
         'doc_date' => localDate(now()),
         'reference' => [
@@ -28,13 +28,13 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Document Date</th>
-                <th>Voucher Type</th>
-                <th>Voucher No.</th>
-                <th>Reference No.</th>
-                <th>Description</th>
-                <th class="text-right">Debit</th>
-                <th class="text-right">Credit</th>
+                <th>{{ __('reports.col_document_date') }}</th>
+                <th>{{ __('reports.col_voucher_type') }}</th>
+                <th>{{ __('reports.col_voucher_no') }}</th>
+                <th>{{ __('reports.col_reference_no') }}</th>
+                <th>{{ __('reports.col_description') }}</th>
+                <th class="text-right">{{ __('reports.col_debit') }}</th>
+                <th class="text-right">{{ __('reports.col_credit') }}</th>
                 <th class="text-right">Running Balance</th>
             </tr>
         </thead>

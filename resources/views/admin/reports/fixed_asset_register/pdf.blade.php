@@ -20,7 +20,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Fixed Asset Register',
+        'title' => __('reports.fixed_asset_register'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -29,15 +29,15 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Branch</th>
-                <th>Purchase Date</th>
+                <th>{{ __('reports.col_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_category') }}</th>
+                <th>{{ __('reports.col_branch') }}</th>
+                <th>{{ __('reports.col_purchase_date') }}</th>
                 <th class="text-right">Cost</th>
                 <th class="text-right">Book Value</th>
                 <th class="text-right">Accum. Dep.</th>
-                <th>Status</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'Sidor och policyer',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'Kundomdömen',
+    'hero_stats' => 'Huvudstatistik',
+    'homepage_sections' => 'Hemsideavsnitt',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'Kontaktmeddelanden',
+    'newsletter_subscribers' => 'Nyhetsbrevsprenumeranter',
+    'social_media' => 'Sociala medier',
+    'intro_cms' => 'Intro-CMS',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

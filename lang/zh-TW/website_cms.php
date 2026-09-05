@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => '頁面與政策',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => '客戶評價',
+    'hero_stats' => '首頁統計',
+    'homepage_sections' => '首頁區塊',
+    'benefits' => 'Benefits',
+    'contact_messages' => '聯絡訊息',
+    'newsletter_subscribers' => '訂閱用戶',
+    'social_media' => '社群媒體',
+    'intro_cms' => '入口內容管理系統',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

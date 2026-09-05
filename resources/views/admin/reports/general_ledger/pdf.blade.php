@@ -51,7 +51,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'General Ledger Report',
+        'title' => __('reports.general_ledger'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -61,15 +61,15 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Account</th>
-                <th>Date</th>
-                <th>Voucher Type</th>
-                <th>JV Number</th>
-                <th>Reference</th>
-                <th>Narration</th>
-                <th class="text-right">Debit</th>
-                <th class="text-right">Credit</th>
-                <th class="text-right">Balance</th>
+                <th>{{ __('reports.col_account') }}</th>
+                <th>{{ __('reports.col_date') }}</th>
+                <th>{{ __('reports.col_voucher_type') }}</th>
+                <th>{{ __('reports.col_jv_number') }}</th>
+                <th>{{ __('reports.col_reference') }}</th>
+                <th>{{ __('reports.col_narration') }}</th>
+                <th class="text-right">{{ __('reports.col_debit') }}</th>
+                <th class="text-right">{{ __('reports.col_credit') }}</th>
+                <th class="text-right">{{ __('reports.col_balance') }}</th>
             </tr>
         </thead>
         <tbody>

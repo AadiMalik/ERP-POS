@@ -1,14 +1,14 @@
 @extends('layouts.print')
-@section('title', 'Stock Reconciliation & Adjustment Report')
+@section('title', __('reports.stock_reconciliation'))
 @section('content')
-    <h3>Stock Reconciliation & Adjustment Report</h3>
+    <h3>{{ __('reports.stock_reconciliation') }}</h3>
     <table class="table table-bordered table-sm">
-        <thead><tr><th>Doc No</th><th>Date</th><th>Type</th><th>Warehouse</th><th>Product</th><th>Variation</th><th>System</th><th>Physical</th><th>Diff Qty</th><th>Unit Cost</th><th>Diff Value</th><th>Status</th></tr></thead>
+        <thead><tr><th>{{ __('reports.col_doc_no') }}</th><th>{{ __('reports.col_date') }}</th><th>{{ __('reports.col_type') }}</th><th>{{ __('reports.col_warehouse') }}</th><th>{{ __('reports.col_product') }}</th><th>{{ __('reports.col_variation') }}</th><th>{{ __('reports.col_system') }}</th><th>{{ __('reports.col_physical') }}</th><th>{{ __('reports.col_diff_qty') }}</th><th>{{ __('reports.col_unit_cost') }}</th><th>{{ __('reports.col_diff_value') }}</th><th>{{ __('reports.col_status') }}</th></tr></thead>
         <tbody>
             @forelse ($rows as $row)
                 <tr><td>{{ is_object($row) ? ($row->doc_no ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->doc_date ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->movement_type ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->warehouse_name ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->product_name ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->variation_name ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->system_quantity ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->physical_quantity ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->difference_quantity ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->unit_cost ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->difference_value ?? '-') : '-' }}</td><td>{{ is_object($row) ? ($row->status ?? '-') : '-' }}</td></tr>
             @empty
-                <tr><td colspan="12">No records found.</td></tr>
+                <tr><td colspan="12">{{ __('common.no_records_found') }}</td></tr>
             @endforelse
         </tbody>
     </table>

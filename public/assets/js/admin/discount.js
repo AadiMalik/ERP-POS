@@ -5,7 +5,7 @@ $("#createNewDiscount").click(function () {
       $("#type").val('percent');
       $("#status").val('active');
       $("#saveBtn").show();
-      $("#modelHeading").html("Create New Discount");
+      $("#modelHeading").html(window.i18n_discounts?.create_new || "Create New Discount");
       $("#ajaxModel").modal("show");
 });
 
@@ -21,7 +21,7 @@ editRecord({
             $("#value").val(data.value);
             $("#status").val(data.status);
 
-            $("#modelHeading").html("Edit Discount");
+            $("#modelHeading").html(window.i18n_discounts?.edit_heading || "Edit Discount");
             $("#saveBtn").show();
             $("#ajaxModel").modal("show");
       }
@@ -36,11 +36,11 @@ saveRecord({
       },
       beforeSubmit: function () {
             if ($("#name").val() == "") {
-                  errorMessage("Please Enter Name");
+                  errorMessage(window.i18n_discounts?.please_enter_name || "Please Enter Name");
                   return false;
             }
             if ($("#value").val() == "") {
-                  errorMessage("Please Enter Value");
+                  errorMessage(window.i18n_discounts?.please_enter_value || "Please Enter Value");
                   return false;
             }
             return true;

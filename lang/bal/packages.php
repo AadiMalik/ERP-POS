@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'پیکجانی',
+    'col_name' => 'Name',
+    'col_price' => 'Price',
+    'col_duration' => 'Duration',
+    'col_users' => 'Users',
+    'col_branches' => 'Branches',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'create_title' => 'Create Package',
+    'edit_title' => 'Edit Package',
+    'view_title' => 'View Package',
+    'days' => 'Days',
+    'features' => 'Features',
+    'modules' => 'Modules',
+    'max_users' => 'Max Users',
+    'max_branches' => 'Max Branches',
+    'max_warehouses' => 'Max Warehouses',
+    'max_products' => 'Max Products',
+    'trial_days' => 'Trial Days',
+    'is_featured' => 'Featured',
+    'sort_order' => 'Sort Order',
+    'new_package' => 'New Package',
+    'update_package' => 'Update Package',
+];

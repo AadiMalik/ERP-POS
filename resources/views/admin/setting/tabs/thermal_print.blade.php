@@ -43,21 +43,21 @@
 
 <div class="row g-3 mb-3">
     <div class="col-md-6">
-        <label class="form-label">Configuring</label>
+        <label class="form-label">{{ __('settings.thermal_configuring') }}</label>
         <select class="form-select select2" id="thermalScopeSelect">
-            <option value="">Business Default</option>
+            <option value="">{{ __('settings.thermal_business_default') }}</option>
             @foreach ($thermal_branches as $branch)
                 <option value="{{ $branch->branch_id }}" {{ $thermal_branch_id === $branch->branch_id ? 'selected' : '' }}>
-                    Branch: {{ $branch->name }}
+                    {{ __('settings.thermal_branch_option', ['name' => $branch->name]) }}
                 </option>
             @endforeach
         </select>
         <small class="text-muted">
             @if ($thermal_branch_id)
-                Editing {{ $thermal_current_branch_name }}'s own override.
-                {{ $thermal_print_setting ? '' : 'No override saved yet - this branch currently falls back to the business default; saving below creates one.' }}
+                {{ __('settings.thermal_editing_branch_override', ['name' => $thermal_current_branch_name]) }}
+                {{ $thermal_print_setting ? '' : __('settings.thermal_no_override_yet') }}
             @else
-                Editing the business-wide default, used by any branch without its own override.
+                {{ __('settings.thermal_editing_business_default') }}
             @endif
         </small>
     </div>
@@ -66,9 +66,8 @@
 <form id="thermalPrintSettingForm">
     @csrf
     <input type="hidden" name="branch_id" id="thermal_branch_id_input" value="{{ $thermal_branch_id }}">
-    <h4>Thermal Printer Invoice Settings</h4>
-    <p class="text-muted">Configure a compact, thermal-width receipt layout for POS/order printing, and choose which
-        fields appear on it. The preview on the right always reflects the exact layout that will print.</p>
+    <h4>{{ __('settings.thermal_title') }}</h4>
+    <p class="text-muted">{{ __('settings.thermal_description') }}</p>
     <hr>
 
     <div class="row g-4">
@@ -81,14 +80,13 @@
                             name="is_enabled" value="1"
                             {{ !empty(optional($thermal_print_setting)->is_enabled) ? 'checked' : '' }}>
                         <label class="form-check-label" for="thermal_is_enabled">
-                            Enable Thermal Receipt Printing
+                            {{ __('settings.thermal_enable') }}
                         </label>
                     </div>
-                    <small class="text-muted">When enabled, the Print action (and POS auto-print) uses this thermal
-                        layout instead of the standard A4 invoice.</small>
+                    <small class="text-muted">{{ __('settings.thermal_enable_help') }}</small>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Paper Width</label>
+                    <label class="form-label">{{ __('settings.thermal_paper_width') }}</label>
                     <select class="form-select select2" name="paper_width_mm">
                         <option value="80" {{ (optional($thermal_print_setting)->paper_width_mm ?? 80) == 80 ? 'selected' : '' }}>80mm</option>
                         <option value="58" {{ (optional($thermal_print_setting)->paper_width_mm ?? 80) == 58 ? 'selected' : '' }}>58mm</option>
@@ -99,15 +97,15 @@
             <hr>
 
             <div class="thermal-field-group">
-                <h6>Business / Branch Info</h6>
+                <h6>{{ __('settings.thermal_group_business') }}</h6>
                 <div class="row g-2">
                     @foreach ([
-        'branch_logo' => 'Branch Logo',
-        'branch_name' => 'Branch Name',
-        'email' => 'Email',
-        'phone' => 'Phone',
-        'address' => 'Address',
-        'business_ntn' => 'Business NTN',
+        'branch_logo' => __('settings.thermal_field_branch_logo'),
+        'branch_name' => __('settings.thermal_field_branch_name'),
+        'email' => __('settings.thermal_field_email'),
+        'phone' => __('settings.thermal_field_phone'),
+        'address' => __('settings.thermal_field_address'),
+        'business_ntn' => __('settings.thermal_field_business_ntn'),
     ] as $key => $label)
                         <div class="col-md-6">
                             <div class="form-check">
@@ -122,16 +120,16 @@
             </div>
 
             <div class="thermal-field-group">
-                <h6>Order Info</h6>
+                <h6>{{ __('settings.thermal_group_order') }}</h6>
                 <div class="row g-2">
                     @foreach ([
-        'customer_name' => 'Customer Name',
-        'order_type' => 'Order Type',
-        'order_no' => 'Order No',
-        'date_time' => 'Local Date & Time',
-        'order_source' => 'Order Source',
-        'order_taker_name' => 'Order Taker Name',
-        'sale_type' => 'Sale Type',
+        'customer_name' => __('settings.thermal_field_customer_name'),
+        'order_type' => __('settings.thermal_field_order_type'),
+        'order_no' => __('settings.thermal_field_order_no'),
+        'date_time' => __('settings.thermal_field_date_time'),
+        'order_source' => __('settings.thermal_field_order_source'),
+        'order_taker_name' => __('settings.thermal_field_order_taker_name'),
+        'sale_type' => __('settings.thermal_field_sale_type'),
     ] as $key => $label)
                         <div class="col-md-6">
                             <div class="form-check">
@@ -146,16 +144,15 @@
             </div>
 
             <div class="thermal-field-group">
-                <h6>Item Table Columns</h6>
-                <p class="text-muted mb-2" style="font-size: 12px;">Product name and Variation name are always shown;
-                    these columns are optional.</p>
+                <h6>{{ __('settings.thermal_group_item_columns') }}</h6>
+                <p class="text-muted mb-2" style="font-size: 12px;">{{ __('settings.thermal_item_columns_help') }}</p>
                 <div class="row g-2">
                     @foreach ([
-        'quantity' => 'Quantity',
-        'unit' => 'Unit',
-        'unit_price' => 'Unit Price',
-        'line_total' => 'Line Total',
-        'item_sale_type' => 'Sale Type',
+        'quantity' => __('settings.thermal_field_quantity'),
+        'unit' => __('settings.thermal_field_unit'),
+        'unit_price' => __('settings.thermal_field_unit_price'),
+        'line_total' => __('settings.thermal_field_line_total'),
+        'item_sale_type' => __('settings.thermal_field_item_sale_type'),
     ] as $key => $label)
                         <div class="col-md-6">
                             <div class="form-check">
@@ -170,14 +167,14 @@
             </div>
 
             <div class="thermal-field-group">
-                <h6>Totals</h6>
+                <h6>{{ __('settings.thermal_group_totals') }}</h6>
                 <div class="row g-2">
                     @foreach ([
-        'subtotal' => 'Subtotal',
-        'discount' => 'Discount (% and Amount)',
-        'tax' => 'Tax (% and Amount)',
-        'voucher' => 'Voucher Details',
-        'total' => 'Total',
+        'subtotal' => __('settings.thermal_field_subtotal'),
+        'discount' => __('settings.thermal_field_discount'),
+        'tax' => __('settings.thermal_field_tax'),
+        'voucher' => __('settings.thermal_field_voucher'),
+        'total' => __('settings.thermal_field_total'),
     ] as $key => $label)
                         <div class="col-md-6">
                             <div class="form-check">
@@ -192,12 +189,12 @@
             </div>
 
             <div class="thermal-field-group">
-                <h6>Payment</h6>
+                <h6>{{ __('settings.thermal_group_payment') }}</h6>
                 <div class="row g-2">
                     @foreach ([
-        'paid_amount' => 'Paid Amount',
-        'due_amount' => 'Remaining / Due Amount',
-        'payment_status' => 'Payment / Paid Status',
+        'paid_amount' => __('settings.thermal_field_paid_amount'),
+        'due_amount' => __('settings.thermal_field_due_amount'),
+        'payment_status' => __('settings.thermal_field_payment_status'),
     ] as $key => $label)
                         <div class="col-md-6">
                             <div class="form-check">
@@ -212,14 +209,14 @@
             </div>
 
             <div class="thermal-field-group">
-                <h6>Footer</h6>
+                <h6>{{ __('settings.thermal_group_footer') }}</h6>
                 <div class="row g-2">
                     <div class="col-md-6">
                         <div class="form-check">
                             <input type="hidden" name="field_config[thank_you_note]" value="0">
                             <input class="form-check-input" type="checkbox" name="field_config[thank_you_note]"
                                 value="1" {{ $field_check('thank_you_note') }}>
-                            <label class="form-check-label">Thank You Note</label>
+                            <label class="form-check-label">{{ __('settings.thermal_field_thank_you_note') }}</label>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -227,7 +224,7 @@
                             <input type="hidden" name="field_config[qr_code]" value="0">
                             <input class="form-check-input" type="checkbox" name="field_config[qr_code]" value="1"
                                 {{ $field_check('qr_code') }}>
-                            <label class="form-check-label">QR Code</label>
+                            <label class="form-check-label">{{ __('settings.thermal_field_qr_code') }}</label>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -236,26 +233,26 @@
                             <input class="form-check-input" type="checkbox"
                                 name="field_config[powered_by_smart_mart]" value="1"
                                 {{ $field_check('powered_by_smart_mart') }}>
-                            <label class="form-check-label">"Powered by Dukanaz" Credit</label>
+                            <label class="form-check-label">{{ __('settings.thermal_field_powered_by') }}</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="row g-2 mt-2">
                     <div class="col-md-12">
-                        <label class="form-label">Thank You Note Text</label>
+                        <label class="form-label">{{ __('settings.thermal_thank_you_note_text') }}</label>
                         <textarea class="form-control" name="footer_config[thank_you_note]" rows="2">{{ $footer_config['thank_you_note'] ?? '' }}</textarea>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">QR Code Content</label>
+                        <label class="form-label">{{ __('settings.thermal_qr_code_content') }}</label>
                         <select class="form-select select2" name="footer_config[qr_data_source]">
-                            <option value="order_no" {{ ($footer_config['qr_data_source'] ?? 'order_no') === 'order_no' ? 'selected' : '' }}>Order No</option>
-                            <option value="order_url" {{ ($footer_config['qr_data_source'] ?? '') === 'order_url' ? 'selected' : '' }}>Order Print URL</option>
-                            <option value="custom" {{ ($footer_config['qr_data_source'] ?? '') === 'custom' ? 'selected' : '' }}>Custom Text</option>
+                            <option value="order_no" {{ ($footer_config['qr_data_source'] ?? 'order_no') === 'order_no' ? 'selected' : '' }}>{{ __('settings.thermal_qr_order_no') }}</option>
+                            <option value="order_url" {{ ($footer_config['qr_data_source'] ?? '') === 'order_url' ? 'selected' : '' }}>{{ __('settings.thermal_qr_order_url') }}</option>
+                            <option value="custom" {{ ($footer_config['qr_data_source'] ?? '') === 'custom' ? 'selected' : '' }}>{{ __('settings.thermal_qr_custom') }}</option>
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Custom QR Text</label>
+                        <label class="form-label">{{ __('settings.thermal_custom_qr_text') }}</label>
                         <input type="text" class="form-control" name="footer_config[qr_custom_text]"
                             value="{{ $footer_config['qr_custom_text'] ?? '' }}">
                     </div>
@@ -266,14 +263,14 @@
             <div class="text-end">
                 <button type="button" class="btn btn-primary"
                     onclick="saveSetting('#thermalPrintSettingForm','{{ route('thermal_print.update') }}')">
-                    Save Changes
+                    {{ __('common.save_changes') }}
                 </button>
             </div>
         </div>
 
         <div class="col-md-5">
             <div class="thermal-preview-wrap">
-                <h6>Live Preview</h6>
+                <h6>{{ __('settings.thermal_live_preview') }}</h6>
                 <iframe id="thermalPreviewFrame" class="thermal-preview-frame"></iframe>
             </div>
         </div>

@@ -4,7 +4,7 @@
 @section('content')
 <!-- ========== table components start ========== -->
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"> POS Register Sessions</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('pos.register_sessions_title') }}</h4>
 
     <!-- Basic Bootstrap Table -->
     <div class="card">
@@ -12,7 +12,7 @@
             <div>
                 <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                     <i class="fa fa-filter"></i>
-                    Filters
+                    {{ __('common.filters') }}
                 </button>
             </div>
         </div>
@@ -20,15 +20,15 @@
             <div id="filterSection" class="card-body border-bottom" style="display:none;">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label class="form-label">Date</label>
+                        <label class="form-label">{{ __('common.date') }}</label>
                         @include('admin.partials.date_filter')
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
                         <button type="button" id="search_btn" class="btn btn-primary">
-                            Search
+                            {{ __('common.search') }}
                         </button>
                         <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                            Reset
+                            {{ __('common.reset') }}
                         </button>
                     </div>
                 </div>
@@ -37,14 +37,14 @@
                 <table id="pos_register_session_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Register</th>
-                            <th>Branch</th>
-                            <th>Cashier</th>
-                            <th>Opened</th>
-                            <th>Closed</th>
-                            <th>Opening Cash</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.register') }}</th>
+                            <th>{{ __('common.branch') }}</th>
+                            <th>{{ __('common.cashier') }}</th>
+                            <th>{{ __('pos.opened') }}</th>
+                            <th>{{ __('pos.closed_at') }}</th>
+                            <th>{{ __('pos.opening_cash') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                         <!-- end table row-->
                     </thead>
@@ -59,6 +59,11 @@
 <!-- ========== table components end ========== -->
 @endsection
 @section('js')
+<script>
+    window.i18n_pos = @json(array_merge(trans('pos'), [
+        'cancel' => __('common.cancel'),
+    ]));
+</script>
 @include('admin.partials.datatable', [
 'columns' => "
 {data: 'register' , name: 'register', 'sortable': false , searchable: false},

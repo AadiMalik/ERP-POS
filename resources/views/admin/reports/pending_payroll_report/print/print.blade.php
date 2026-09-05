@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Pending Payroll Report')
+@section('title', __('reports.pending_payroll_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Pending Payroll Report',
+        'title' => __('reports.pending_payroll_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,9 +25,9 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Period</th>
-                <th>Status</th>
-                <th>Generated On</th>
+                <th>{{ __('reports.col_period') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
+                <th>{{ __('reports.col_generated_on') }}</th>
                 <th class="text-right">Employees</th>
             </tr>
         </thead>

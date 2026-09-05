@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'Schimburi',
+    'singular' => 'Shift',
+    'new_heading' => 'Nuevo Shift',
+    'update_heading' => 'Actualizar Shift',
+    'save_shift' => 'Guardar Shift',
+    'create_new' => 'Crear Nuevo Shift',
+    'edit_heading' => 'Editar Shift',
+    'start_time' => 'Start Hora',
+    'end_time' => 'End Hora',
+    'grace_minutes' => 'Grace Minutes',
+    'break_duration_minutes' => 'Break Duration (minutes)',
+    'grace_period_minutes' => 'Grace Period (minutes)',
+    'grace_period_hint' => 'Minutes an employee may check in late without being marked "Late".',
+    'working_days' => 'Working Days',
+    'add_new_shift' => 'Add New Shift',
+    'day_mon' => 'Monday',
+    'day_tue' => 'Tuesday',
+    'day_wed' => 'Wednesday',
+    'day_thu' => 'Thursday',
+    'day_fri' => 'Friday',
+    'day_sat' => 'Saturday',
+    'day_sun' => 'Sunday',
+];

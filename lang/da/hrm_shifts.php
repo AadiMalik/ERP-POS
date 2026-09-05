@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'Vagter',
+    'singular' => 'Shift',
+    'new_heading' => 'Neu Shift',
+    'update_heading' => 'Aktualisieren Shift',
+    'save_shift' => 'Speichern Shift',
+    'create_new' => 'Erstellen Neu Shift',
+    'edit_heading' => 'Bearbeiten Shift',
+    'start_time' => 'Start Zeit',
+    'end_time' => 'End Zeit',
+    'grace_minutes' => 'Grace Minutes',
+    'break_duration_minutes' => 'Break Duration (minutes)',
+    'grace_period_minutes' => 'Grace Period (minutes)',
+    'grace_period_hint' => 'Minutes an employee may check in late without being marked "Late".',
+    'working_days' => 'Working Days',
+    'add_new_shift' => 'Add New Shift',
+    'day_mon' => 'Monday',
+    'day_tue' => 'Tuesday',
+    'day_wed' => 'Wednesday',
+    'day_thu' => 'Thursday',
+    'day_fri' => 'Friday',
+    'day_sat' => 'Saturday',
+    'day_sun' => 'Sunday',
+];

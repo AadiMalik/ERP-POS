@@ -1,24 +1,24 @@
-@php
+﻿@php
     use App\Enums\RoleNames;
 @endphp
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">
-            Waste / Damage / Expiry
+            {{ __('waste_damage_expiry.title') }}
         </h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 @canAccess('waste-damage-expiry.create')
                     <a href="{{ url('admin/waste-damage-expiry/create') }}" class="btn btn-primary rounded-pill">
                         <i class="fa fa-plus"></i>
-                        Add New
+                        {{ __('common.add_new') }}
                     </a>
                 @endcanAccess
             </div>
@@ -27,9 +27,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -39,33 +39,33 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Warehouse</label>
+                            <label class="form-label">{{ __('common.warehouse') }}</label>
                             <select id="warehouse_id" class="form-select">
-                                <option value="">--All Warehouses--</option>
+                                <option value="">{{ __('common.all_warehouses') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
-                                <option value="">--All Statuses--</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
                                 @foreach ($statuses as $value => $label)
                                     <option value="{{ $value }}">{{ $label ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
                             <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
+                                {{ __('common.search') }}
                             </button>
                             <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
+                                {{ __('common.reset') }}
                             </button>
                         </div>
                     </div>
@@ -74,14 +74,14 @@
                     <table id="waste_damage_expiry_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Reference No.</th>
-                                <th>Date</th>
-                                <th>Warehouse</th>
-                                <th>Products</th>
-                                <th>Total Value</th>
-                                <th>Status</th>
-                                <th>Business</th>
-                                <th>Action</th>
+                                <th>{{ __('waste_damage_expiry.reference_no') }}</th>
+                                <th>{{ __('common.date') }}</th>
+                                <th>{{ __('common.warehouse') }}</th>
+                                <th>{{ __('common.products') }}</th>
+                                <th>{{ __('common.total_value') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>
@@ -91,6 +91,17 @@
     </div>
 @endsection
 @section('js')
+    @php
+        $__i18nWde = [
+            'something_went_wrong' => __('common.something_went_wrong'),
+            'approve_title' => __('waste_damage_expiry.approve_title'),
+            'approve_text' => __('waste_damage_expiry.approve_text'),
+            'yes_approve' => __('waste_damage_expiry.yes_approve'),
+        ];
+    @endphp
+    <script>
+        window.i18n_waste_damage_expiry = @json($__i18nWde);
+    </script>
     @include('admin.partials.datatable', [
         'columns' => "
                         {data:'reference_no',name:'reference_no'},
@@ -135,7 +146,7 @@
                     initDataTablewaste_damage_expiry_table();
                 },
                 error: function(xhr) {
-                    errorMessage(xhr.responseJSON?.Message || 'Something went wrong.');
+                    errorMessage(xhr.responseJSON?.Message || window.i18n_waste_damage_expiry?.something_went_wrong || 'Something went wrong.');
                     initDataTablewaste_damage_expiry_table();
                     select.val(select.data('old'));
                 }
@@ -149,11 +160,11 @@
 
             if (status === 'approved') {
                 Swal.fire({
-                    title: 'Approve this write-off?',
-                    text: 'Stock will be permanently reduced from the selected warehouse once approved.',
+                    title: window.i18n_waste_damage_expiry?.approve_title || 'Approve this write-off?',
+                    text: window.i18n_waste_damage_expiry?.approve_text || 'Stock will be permanently reduced from the selected warehouse once approved.',
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, approve'
+                    confirmButtonText: window.i18n_waste_damage_expiry?.yes_approve || 'Yes, approve'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         submitWdeStatus(waste_damage_expiry_id, status, select);

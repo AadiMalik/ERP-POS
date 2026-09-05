@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Branch-wise Employee Report',
+        'title' => __('reports.branch_wise_employee_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,7 +56,7 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Branch</th>
+                <th>{{ __('reports.col_branch') }}</th>
                 <th class="text-right">Total Employees</th>
                 <th class="text-right">Active</th>
                 <th class="text-right">On Leave</th>

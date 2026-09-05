@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Customer Payment History Report')
+@section('title', __('reports.customer_payment_history'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Customer Payment History Report',
+        'title' => __('reports.customer_payment_history'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,16 +25,16 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Payment Date</th>
-                <th>Payment No.</th>
-                <th>Customer</th>
-                <th>Method</th>
-                <th>Ref. Order</th>
-                <th>Bank/Cash Account</th>
-                <th class="text-right">Tax</th>
-                <th class="text-right">Discount</th>
+                <th>{{ __('reports.col_payment_date') }}</th>
+                <th>{{ __('reports.col_payment_no') }}</th>
+                <th>{{ __('reports.col_customer') }}</th>
+                <th>{{ __('reports.col_method') }}</th>
+                <th>{{ __('reports.col_ref_order') }}</th>
+                <th>{{ __('reports.col_bank_cash_account') }}</th>
+                <th class="text-right">{{ __('reports.col_tax') }}</th>
+                <th class="text-right">{{ __('reports.col_discount') }}</th>
                 <th class="text-right">Net Payment</th>
-                <th>Status</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

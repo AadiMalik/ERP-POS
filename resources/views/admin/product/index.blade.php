@@ -16,18 +16,18 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">
-            Products
+            {{ __('products.title') }}
         </h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                     <button type="button" id="btnBackfillBarcodes" class="btn btn-outline-secondary">
                         <i class="fa fa-barcode"></i>
-                        Backfill Barcodes/QR
+                        {{ __('products.backfill_barcodes') }}
                     </button>
 
                 </div>
@@ -40,7 +40,7 @@
                     ])
                     <a href="{{ url('admin/product/create') }}" class="btn btn-primary rounded-pill">
                         <i class="fa fa-plus"></i>
-                        Add New
+                        {{ __('common.add_new') }}
                     </a>
                 </div>
             </div>
@@ -49,9 +49,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('products.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('products.all_businesses') }}</option>
                                     @foreach ($businesses as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -62,9 +62,9 @@
                         @endif
 
                         <div class="col-md-3">
-                            <label class="form-label">Brand</label>
+                            <label class="form-label">{{ __('products.brand') }}</label>
                             <select id="brand_id" class="form-select">
-                                <option value="">--All Brands--</option>
+                                <option value="">{{ __('products.all_brands') }}</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                     @foreach ($brands as $item)
                                         <option value="{{ $item->brand_id }}">
@@ -76,9 +76,9 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label">Category</label>
+                            <label class="form-label">{{ __('products.category') }}</label>
                             <select id="category_id" class="form-select">
-                                <option value="">--All Categories--</option>
+                                <option value="">{{ __('products.all_categories') }}</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                     @foreach ($categories as $item)
                                         <option value="{{ $item->category_id }}">
@@ -90,22 +90,22 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label">Sub Category</label>
+                            <label class="form-label">{{ __('products.sub_category') }}</label>
                             <select id="sub_category_id" class="form-select">
-                                <option value="">--All Sub Categories--</option>
+                                <option value="">{{ __('products.all_sub_categories') }}</option>
                             </select>
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('products.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
                             <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
+                                {{ __('common.search') }}
                             </button>
                             <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
+                                {{ __('common.reset') }}
                             </button>
                         </div>
                     </div>
@@ -114,16 +114,16 @@
                     <table id="product_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Category</th>
-                                <th>Brand</th>
-                                <th>Type</th>
-                                <th>Variations</th>
-                                <th>Images</th>
-                                <th>Features</th>
-                                <th>Business</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>{{ __('products.col_name') }}</th>
+                                <th>{{ __('products.col_category') }}</th>
+                                <th>{{ __('products.col_brand') }}</th>
+                                <th>{{ __('products.col_type') }}</th>
+                                <th>{{ __('products.col_variations') }}</th>
+                                <th>{{ __('products.col_images') }}</th>
+                                <th>{{ __('products.col_features') }}</th>
+                                <th>{{ __('products.col_business') }}</th>
+                                <th>{{ __('products.col_status') }}</th>
+                                <th>{{ __('products.col_action') }}</th>
                             </tr>
                         </thead>
                     </table>
@@ -136,7 +136,7 @@
                 <div class="modal-content">
 
                     <div class="modal-header">
-                        <h5>Product Variations</h5>
+                        <h5>{{ __('products.variations_modal_title') }}</h5>
                         <button class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
@@ -153,7 +153,7 @@
                 <div class="modal-content">
 
                     <div class="modal-header">
-                        <h5>Price History</h5>
+                        <h5>{{ __('products.price_history_modal_title') }}</h5>
                         <button class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
@@ -162,11 +162,11 @@
                             <table class="table table-bordered table-sm mb-0">
                                 <thead>
                                     <tr>
-                                        <th>Date</th>
-                                        <th>Sale Type</th>
-                                        <th>Old Price</th>
-                                        <th>New Price</th>
-                                        <th>Changed By</th>
+                                        <th>{{ __('products.date') }}</th>
+                                        <th>{{ __('products.col_sale_type') }}</th>
+                                        <th>{{ __('products.col_old_price') }}</th>
+                                        <th>{{ __('products.col_new_price') }}</th>
+                                        <th>{{ __('products.col_changed_by') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody id="priceHistoryTableBody"></tbody>
@@ -184,7 +184,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
-                            <i class="fa fa-images me-2"></i> Product Images
+                            <i class="fa fa-images me-2"></i> {{ __('products.images_modal_title') }}
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
@@ -192,20 +192,20 @@
 
                         {{-- Upload Section --}}
                         <div class="border rounded p-3 mb-4 bg-light">
-                            <h6 class="mb-3">Upload New Images</h6>
+                            <h6 class="mb-3">{{ __('products.upload_new_images') }}</h6>
                             <input type="file" id="product_images_input" class="form-control mb-2" multiple
                                 accept="image/*">
-                            <div class="form-text mb-2">JPG, PNG, WEBP — max 2MB each.</div>
+                            <div class="form-text mb-2">{{ __('products.image_upload_hint') }}</div>
                             <div id="upload_preview" class="d-flex flex-wrap gap-2 mb-3"></div>
                         </div>
 
                     </div>
                     <div class="modal-footer">
                         <button type="button" id="upload_images_btn" class="btn btn-primary ms-auto">
-                            <i class="fa fa-upload me-1"></i> Upload
+                            <i class="fa fa-upload me-1"></i> {{ __('products.upload') }}
                         </button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Close
+                            {{ __('common.close') }}
                         </button>
                     </div>
                 </div>
@@ -215,6 +215,19 @@
     </div>
 @endsection
 @section('js')
+    @php
+        $__i18nProducts = [
+            'backfill_confirm_title' => __('products.backfill_confirm_title'),
+            'backfill_confirm_text' => __('products.backfill_confirm_text'),
+            'backfill_confirm_button' => __('products.backfill_confirm_button'),
+            'backfill_failed' => __('products.backfill_failed'),
+            'all_categories' => __('products.all_categories'),
+            'all_brands' => __('products.all_brands'),
+        ];
+    @endphp
+    <script>
+        window.i18n_products = @json($__i18nProducts);
+    </script>
     @if (session('error'))
         <script>
             errorMessage("{{ session('error') }}");
@@ -248,10 +261,10 @@
     ])
     <script>
         $(document).ready(function() {
-            $('#business_id').select2();
-            $('#brand_id').select2();
-            $('#category_id').select2();
-            $('#sub_category_id').select2();
+            $('#business_id').select2({ language: CURRENT_LOCALE !== 'en' ? CURRENT_LOCALE : undefined });
+            $('#brand_id').select2({ language: CURRENT_LOCALE !== 'en' ? CURRENT_LOCALE : undefined });
+            $('#category_id').select2({ language: CURRENT_LOCALE !== 'en' ? CURRENT_LOCALE : undefined });
+            $('#sub_category_id').select2({ language: CURRENT_LOCALE !== 'en' ? CURRENT_LOCALE : undefined });
         });
         $('#search_btn').click(function() {
             initDataTableproduct_table();
@@ -260,11 +273,11 @@
         // backfill barcodes/qr codes for existing variations that don't have one yet
         $('#btnBackfillBarcodes').click(function() {
             Swal.fire({
-                title: "Backfill missing barcodes/QR codes?",
-                text: "This only fills in variations that don't have a barcode yet. Existing barcodes are never changed.",
+                title: window.i18n_products?.backfill_confirm_title || "Backfill missing barcodes/QR codes?",
+                text: window.i18n_products?.backfill_confirm_text || "This only fills in variations that don't have a barcode yet. Existing barcodes are never changed.",
                 icon: "info",
                 showCancelButton: true,
-                confirmButtonText: "Yes, backfill",
+                confirmButtonText: window.i18n_products?.backfill_confirm_button || "Yes, backfill",
             }).then((result) => {
                 if (result.isConfirmed) {
                     ajaxRequest({
@@ -273,7 +286,7 @@
                     }).then((response) => {
                         successMessage(response.Message);
                     }).catch((err) => {
-                        errorMessage(err.Message || "Backfill failed");
+                        errorMessage(err.Message || window.i18n_products?.backfill_failed || "Backfill failed");
                     });
                 }
             });
@@ -299,8 +312,8 @@
         $('#business_id').change(function() {
             let business_id = $(this).val();
             if (!business_id) {
-                $('#category_id').html('<option value="">--All Categories--</option>');
-                $('#brand_id').html('<option value="">--All Brands--</option>');
+                $('#category_id').html('<option value="">' + window.i18n_products.all_categories + '</option>');
+                $('#brand_id').html('<option value="">' + window.i18n_products.all_brands + '</option>');
                 return;
             }
 
@@ -309,7 +322,7 @@
                 data: {}
             }).then((response) => {
                 let data = response.Data;
-                let options = '<option value="">--All Categories--</option>';
+                let options = '<option value="">' + window.i18n_products.all_categories + '</option>';
                 $.each(data, function(index, item) {
                     options += `<option value="${item.category_id}">${item.name}</option>`;
                 });
@@ -323,7 +336,7 @@
                 data: {}
             }).then((response) => {
                 let data = response.Data;
-                let options = '<option value="">--All Brands--</option>';
+                let options = '<option value="">' + window.i18n_products.all_brands + '</option>';
                 $.each(data, function(index, item) {
                     options += `<option value="${item.brand_id}">${item.name}</option>`;
                 });

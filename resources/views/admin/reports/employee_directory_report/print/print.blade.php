@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Employee Directory Report')
+@section('title', __('reports.employee_directory_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Employee Directory Report',
+        'title' => __('reports.employee_directory_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,15 +25,15 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Employee Code</th>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Designation</th>
-                <th>Branch</th>
-                <th>Joining Date</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Status</th>
+                <th>{{ __('reports.col_employee_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_department') }}</th>
+                <th>{{ __('reports.col_designation') }}</th>
+                <th>{{ __('reports.col_branch') }}</th>
+                <th>{{ __('reports.col_joining_date') }}</th>
+                <th>{{ __('reports.col_email') }}</th>
+                <th>{{ __('reports.col_phone') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

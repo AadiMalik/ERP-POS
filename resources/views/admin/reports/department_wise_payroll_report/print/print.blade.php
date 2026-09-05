@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Department-wise Payroll Report')
+@section('title', __('reports.department_wise_payroll_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Department-wise Payroll Report',
+        'title' => __('reports.department_wise_payroll_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,10 +25,10 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Department</th>
+                <th>{{ __('reports.col_department') }}</th>
                 <th class="text-right">Employees</th>
                 <th class="text-right">Gross Salary</th>
-                <th class="text-right">Deductions</th>
+                <th class="text-right">{{ __('reports.col_deductions') }}</th>
                 <th class="text-right">Net Salary</th>
             </tr>
         </thead>

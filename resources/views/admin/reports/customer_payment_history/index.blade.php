@@ -4,36 +4,34 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            Customer Payment History Report
-        </h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.customer_payment_history') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @canAccess('reports.customer-payment-history.print')
                     <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary">
-                        <i class="fa fa-print"></i> Print
+                        <i class="fa fa-print"></i> {{ __('common.print') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.customer-payment-history.pdf')
                     <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger">
-                        <i class="fa fa-file-pdf"></i> PDF
+                        <i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.customer-payment-history.export')
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
-                        <i class="fa fa-file-excel"></i> Excel
+                        <i class="fa fa-file-excel"></i> {{ __('common.excel') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.customer-payment-history.export-csv')
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
-                        <i class="fa fa-file-text"></i> CSV
+                        <i class="fa fa-file-text"></i> {{ __('common.csv') }}
                     </a>
                     @endcanAccess
                 </div>
@@ -43,9 +41,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }}
                                             {{ $item->name ?? '' }}
@@ -55,9 +53,9 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Customer</label>
+                            <label class="form-label">{{ __('common.customer') }}</label>
                             <select id="user_id" class="form-select">
-                                <option value="">--All Customers--</option>
+                                <option value="">{{ __('common.all_customers') }}</option>
                                 @foreach ($customers as $item)
                                     <option value="{{ $item->user_id }}">{{ $item->code ?? '' }}
                                         {{ $item->user->name ?? '' }}
@@ -66,7 +64,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Payment Method</label>
+                            <label class="form-label">{{ __('common.payment') }}</label>
                             <select id="payment_method" class="form-select">
                                 <option value="">--All Methods--</option>
                                 <option value="cash">Cash</option>
@@ -77,16 +75,12 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
-                            </button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
-                            </button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -113,20 +107,20 @@
                     <table id="customer_payment_history_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Payment Date</th>
-                                <th>Payment No.</th>
-                                <th>Customer</th>
-                                <th>Payment Method</th>
+                                <th>{{ __('reports.col_payment_date') }}</th>
+                                <th>{{ __('reports.col_payment_no') }}</th>
+                                <th>{{ __('common.customer') }}</th>
+                                <th>{{ __('reports.col_payment_method') }}</th>
                                 <th>Reference Order</th>
                                 <th>Payment Reference No.</th>
-                                <th>Bank/Cash Account</th>
-                                <th class="text-end">Tax</th>
-                                <th class="text-end">Discount</th>
+                                <th>{{ __('reports.col_bank_cash_account') }}</th>
+                                <th class="text-end">{{ __('reports.col_tax') }}</th>
+                                <th class="text-end">{{ __('reports.col_discount') }}</th>
                                 <th class="text-end">Net Payment</th>
                                 <th>Posted By</th>
-                                <th>Status</th>
-                                <th>Remarks</th>
-                                <th>Action</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('reports.col_remarks') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>

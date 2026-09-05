@@ -8,7 +8,7 @@
 @section('content')
     <!-- ========== table components start ========== -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Product Variation Stocks</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('variation_stocks.title') }}</h4>
 
         <!-- Basic Bootstrap Table -->
         <div class="card">
@@ -26,9 +26,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="filter_business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -38,9 +38,9 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Product</label>
+                            <label class="form-label">{{ __('common.product') }}</label>
                             <select id="filter_product_id" class="form-select">
-                                <option value="">--All Products--</option>
+                                <option value="">{{ __('common.all_products') }}</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                     @foreach ($products as $item)
                                         <option value="{{ $item->product_id }}">
@@ -51,16 +51,16 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Product Variation</label>
+                            <label class="form-label">{{ __('common.variation') }}</label>
                             <select id="filter_product_variation_id" class="form-select">
-                                <option value="">--All Product Variations--</option>
+                                <option value="">{{ __('common.all_product_variations') }}</option>
 
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Warehouse</label>
+                            <label class="form-label">{{ __('common.warehouse') }}</label>
                             <select id="filter_warehouse_id" class="form-select">
-                                <option value="">--All Warehouses--</option>
+                                <option value="">{{ __('common.all_warehouses') }}</option>
                                 @foreach ($warehouse as $item)
                                     <option value="{{ $item->warehouse_id }}">
                                         {{ $item->name ?? '' }}
@@ -69,7 +69,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
@@ -86,17 +86,17 @@
                     <table id="product_variation_stock_table" class="table display datatables" style="width:100%">
                         <thead>
                             <tr>
-                                <th>Product</th>
-                                <th>Variation</th>
-                                <th>Unit</th>
-                                <th>Warehouse</th>
-                                <th>Avg Cost</th>
-                                <th>Quantity</th>
-                                <th>Reserved</th>
-                                <th>Available</th>
-                                <th>Business</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>{{ __('common.product') }}</th>
+                                <th>{{ __('common.variation') }}</th>
+                                <th>{{ __('common.unit') }}</th>
+                                <th>{{ __('common.warehouse') }}</th>
+                                <th>{{ __('common.avg_cost') }}</th>
+                                <th>{{ __('common.quantity') }}</th>
+                                <th>{{ __('common.reserved') }}</th>
+                                <th>{{ __('common.available') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                             <!-- end table row-->
                         </thead>
@@ -109,13 +109,13 @@
         </div>
     </div>
 
-    <!-- Stock History Modal -->
+    <!-- {{ __('variation_stocks.stock_history') }} Modal -->
     <div class="modal fade" id="stockHistoryModal" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        Stock History
+                        {{ __('variation_stocks.stock_history') }}
                         <small class="d-block text-muted fw-normal" id="stockHistorySubtitle"></small>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -132,9 +132,9 @@
                                     <th>Date / Time</th>
                                     <th>Source Module</th>
                                     <th>Reference No</th>
-                                    <th>Type</th>
+                                    <th>{{ __('common.type') }}</th>
                                     <th>In / Out</th>
-                                    <th class="text-end">Quantity</th>
+                                    <th class="text-end">{{ __('common.quantity') }}</th>
                                     <th class="text-end">Running Balance</th>
                                 </tr>
                             </thead>
@@ -227,7 +227,7 @@
         $('#filter_business_id').change(function() {
             let business_id = $(this).val();
             if (!business_id) {
-                $('#filter_product_id').html('<option value="">--All Products--</option>');
+                $('#filter_product_id').html('<option value="">{{ __('common.all_products') }}</option>');
                 return;
             }
             ajaxRequest({
@@ -236,7 +236,7 @@
                 })
                 .then((response) => {
                     let data = response.Data;
-                    let options = '<option value="">--All Products--</option>';
+                    let options = '<option value="">{{ __('common.all_products') }}</option>';
                     $.each(data, function(index, item) {
                         options += `<option value="${item.product_id}">
                                         ${item.name}
@@ -279,7 +279,7 @@
         $('#filter_product_id').change(function() {
             let product_id = $(this).val();
             if (!product_id) {
-                $('#filter_product_variation_id').html('<option value="">--All Product Variations--</option>');
+                $('#filter_product_variation_id').html('<option value="">{{ __('common.all_product_variations') }}</option>');
                 return;
             }
             ajaxRequest({
@@ -288,7 +288,7 @@
                 })
                 .then((response) => {
                     let data = response.Data;
-                    let options = '<option value="">--All Product Variations--</option>';
+                    let options = '<option value="">{{ __('common.all_product_variations') }}</option>';
                     $.each(data, function(index, item) {
                         options += `<option value="${item.product_variation_id}">
                                         ${item.name}
@@ -320,7 +320,7 @@
             }
         });
 
-        // Stock History
+        // {{ __('variation_stocks.stock_history') }}
         $(document).off('click', '#viewStockHistory').on('click', '#viewStockHistory', function() {
             let product_variation_stock_id = $(this).data('id');
 

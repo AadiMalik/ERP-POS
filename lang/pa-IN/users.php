@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'ਐਡਮਿਨ ਉਪਭੋਗਤਾ',
+    'singular' => 'صارف',
+    'role' => 'کردار',
+    'all_roles' => '--تمام کردارs--',
+    'all_branches' => '--تمام برانچes--',
+    'select_role' => '--منتخب کریں کردار--',
+    'select_branch' => '--منتخب کریں برانچ--',
+    'last_login' => 'Last Login',
+    'new_heading' => 'نیا صارف',
+    'update_heading' => 'اپ ڈیٹ صارف',
+    'save_user' => 'محفوظ صارف',
+    'password' => 'پاس ورڈ',
+    'confirm_password' => 'Confirm پاس ورڈ',
+    'change_password' => 'Change پاس ورڈ',
+    'current_password' => 'Current پاس ورڈ',
+    'new_password' => 'نیا پاس ورڈ',
+    'update_password' => 'اپ ڈیٹ پاس ورڈ',
+    'customer_profile' => 'Customer Profile',
+    'password_optional_hint' => 'Optional for customers - they set their own password via the OTP onboarding flow.',
+    'code_auto_hint' => '(if blank, will be auto generated)',
+    'company_name' => 'Company Name',
+    'contact_person' => 'Contact Person',
+    'credit_limit' => 'Credit Limit',
+    'credit_days' => 'Credit Days',
+];

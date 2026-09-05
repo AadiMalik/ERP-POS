@@ -4,36 +4,34 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            Order Correction Report
-        </h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.order_correction') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @canAccess('reports.order-correction-report.print')
                     <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary">
-                        <i class="fa fa-print"></i> Print
+                        <i class="fa fa-print"></i> {{ __('common.print') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.order-correction-report.pdf')
                     <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger">
-                        <i class="fa fa-file-pdf"></i> PDF
+                        <i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.order-correction-report.export')
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
-                        <i class="fa fa-file-excel"></i> Excel
+                        <i class="fa fa-file-excel"></i> {{ __('common.excel') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.order-correction-report.export-csv')
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
-                        <i class="fa fa-file-text"></i> CSV
+                        <i class="fa fa-file-text"></i> {{ __('common.csv') }}
                     </a>
                     @endcanAccess
                 </div>
@@ -43,9 +41,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }}
                                             {{ $item->name ?? '' }}
@@ -55,16 +53,16 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Branch</label>
+                            <label class="form-label">{{ __('common.branch') }}</label>
                             <select id="branch_id" class="form-select">
-                                <option value="">--All Branches--</option>
+                                <option value="">{{ __('common.all_branches') }}</option>
                                 @foreach ($branches as $item)
                                     <option value="{{ $item->branch_id }}">{{ $item->name ?? '' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Corrected By</label>
+                            <label class="form-label">{{ __('reports.corrected_by') }}</label>
                             <select id="causer_id" class="form-select">
                                 <option value="">--All Managers--</option>
                                 @foreach ($managers as $item)
@@ -73,16 +71,12 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Period</label>
+                            <label class="form-label">{{ __('common.period') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
-                            </button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
-                            </button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -109,15 +103,15 @@
                     <table id="order_correction_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Order No</th>
-                                <th>Branch</th>
+                                <th>{{ __('common.date') }}</th>
+                                <th>{{ __('reports.col_order_no') }}</th>
+                                <th>{{ __('common.branch') }}</th>
                                 <th>Corrected By</th>
-                                <th>Reason</th>
+                                <th>{{ __('reports.col_reason') }}</th>
                                 <th class="text-end">Previous Total</th>
                                 <th class="text-end">New Total</th>
                                 <th class="text-end">Difference</th>
-                                <th>Action</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>
@@ -147,10 +141,10 @@
                             <table class="table table-sm table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>Product</th>
-                                        <th class="text-end">Qty</th>
-                                        <th class="text-end">Price</th>
-                                        <th class="text-end">Total</th>
+                                        <th>{{ __('common.product') }}</th>
+                                        <th class="text-end">{{ __('common.qty') }}</th>
+                                        <th class="text-end">{{ __('common.price') }}</th>
+                                        <th class="text-end">{{ __('common.total') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody id="cdBeforeItems"></tbody>
@@ -158,8 +152,8 @@
                             <table class="table table-sm table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>Payment Method</th>
-                                        <th class="text-end">Amount</th>
+                                        <th>{{ __('reports.col_payment_method') }}</th>
+                                        <th class="text-end">{{ __('common.amount') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody id="cdBeforePayments"></tbody>
@@ -173,10 +167,10 @@
                             <table class="table table-sm table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>Product</th>
-                                        <th class="text-end">Qty</th>
-                                        <th class="text-end">Price</th>
-                                        <th class="text-end">Total</th>
+                                        <th>{{ __('common.product') }}</th>
+                                        <th class="text-end">{{ __('common.qty') }}</th>
+                                        <th class="text-end">{{ __('common.price') }}</th>
+                                        <th class="text-end">{{ __('common.total') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody id="cdAfterItems"></tbody>
@@ -184,8 +178,8 @@
                             <table class="table table-sm table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>Payment Method</th>
-                                        <th class="text-end">Amount</th>
+                                        <th>{{ __('reports.col_payment_method') }}</th>
+                                        <th class="text-end">{{ __('common.amount') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody id="cdAfterPayments"></tbody>

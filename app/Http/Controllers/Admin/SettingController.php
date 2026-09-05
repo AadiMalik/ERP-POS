@@ -79,6 +79,8 @@ $this->middleware('permission:setting.manage');
             : $this->setting_service->getThermalPrintSetting(Auth::user()->business_id);
         $accounts =  $this->account_service->getAllChild();
         $business_setting = $this->setting_service->getBusinessSetting(Auth::user()->business_id);
+        $localization_setting = $this->setting_service->getLocalizationSetting(Auth::user()->business_id);
+        $languages = config('languages');
         $accounting_setting = $this->setting_service->getAccountingSetting(Auth::user()->business_id);
         $customer_setting = $this->setting_service->getCustomerSetting(Auth::user()->business_id);
         $supplier_setting = $this->setting_service->getSupplierSetting(Auth::user()->business_id);
@@ -112,6 +114,8 @@ $this->middleware('permission:setting.manage');
             'business',
             'accounts',
             'business_setting',
+            'localization_setting',
+            'languages',
             'accounting_setting',
             'customer_setting',
             'supplier_setting',
@@ -145,6 +149,32 @@ $this->middleware('permission:setting.manage');
             'barcode_types',
             'qr_data_sources'
         ));
+    }
+
+    public function updateLocalizationSetting(Request $request)
+    {
+        $rules = [
+            'display_language'    => 'required|in:' . implode(',', array_keys(config('languages'))),
+            'input_language'      => 'required|in:' . implode(',', array_keys(config('languages'))),
+            'direction_override'  => 'required|in:auto,ltr,rtl',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->all();
+        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $setting = $this->setting_service->updateLocalizationSetting($obj);
+        if ($setting) {
+            return $this->success(
+                Message::UPDATE,
+                $setting
+            );
+        } else {
+            return $this->error(Message::NOTUPDATE);
+        }
     }
 
     public function updateBusinessSetting(Request $request)

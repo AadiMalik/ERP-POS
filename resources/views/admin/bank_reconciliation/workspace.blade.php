@@ -292,7 +292,7 @@
             <div class="modal-dialog">
                 <form class="modal-content" id="addLineForm">
                     <div class="modal-header">
-                        <h5 class="modal-title">Add Statement Line</h5>
+                        <h5 class="modal-title">{{ __('Add Statement Line') }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
@@ -315,7 +315,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.close') }}</button>
                         <button type="submit" class="btn btn-primary">Add</button>
                     </div>
                 </form>

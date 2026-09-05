@@ -6,7 +6,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Employee Lifecycle Report')
+@section('title', __('reports.employee_lifecycle_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -16,7 +16,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Employee Lifecycle Report',
+        'title' => __('reports.employee_lifecycle_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -29,23 +29,23 @@
         @php $employee = $lifecycle->employee; @endphp
         <h4>{{ $employee->user?->name }} ({{ $employee->employee_code }})</h4>
         <table class="print-table">
-            <tr><th>Department</th><td>{{ $employee->department?->name ?? '-' }}</td>
-                <th>Designation</th><td>{{ $employee->designation?->name ?? '-' }}</td></tr>
-            <tr><th>Joining Date</th><td>{{ localDate($employee->joining_date) }}</td>
-                <th>Status</th><td>{{ ucfirst(str_replace('_', ' ', $employee->status)) }}</td></tr>
+            <tr><th>{{ __('reports.col_department') }}</th><td>{{ $employee->department?->name ?? '-' }}</td>
+                <th>{{ __('reports.col_designation') }}</th><td>{{ $employee->designation?->name ?? '-' }}</td></tr>
+            <tr><th>{{ __('reports.col_joining_date') }}</th><td>{{ localDate($employee->joining_date) }}</td>
+                <th>{{ __('reports.col_status') }}</th><td>{{ ucfirst(str_replace('_', ' ', $employee->status)) }}</td></tr>
         </table>
 
         <h5 style="margin-top:12px;">Attendance Summary</h5>
         <table class="print-table">
-            <tr><th>Present</th><td>{{ $lifecycle->attendance_present }}</td>
-                <th>Absent</th><td>{{ $lifecycle->attendance_absent }}</td>
-                <th>Late</th><td>{{ $lifecycle->attendance_late }}</td>
-                <th>Leave</th><td>{{ $lifecycle->attendance_leave }}</td></tr>
+            <tr><th>{{ __('reports.col_present') }}</th><td>{{ $lifecycle->attendance_present }}</td>
+                <th>{{ __('reports.col_absent') }}</th><td>{{ $lifecycle->attendance_absent }}</td>
+                <th>{{ __('reports.col_late') }}</th><td>{{ $lifecycle->attendance_late }}</td>
+                <th>{{ __('reports.col_leave') }}</th><td>{{ $lifecycle->attendance_leave }}</td></tr>
         </table>
 
         <h5 style="margin-top:12px;">Salary History</h5>
         <table class="print-table">
-            <thead><tr><th>Effective From</th><th>Basic Salary</th><th>Status</th></tr></thead>
+            <thead><tr><th>{{ __('reports.col_effective_from') }}</th><th>{{ __('reports.col_basic_salary') }}</th><th>{{ __('reports.col_status') }}</th></tr></thead>
             <tbody>
                 @forelse ($lifecycle->salary_history as $structure)
                     <tr>
@@ -61,7 +61,7 @@
 
         <h5 style="margin-top:12px;">Leave History</h5>
         <table class="print-table">
-            <thead><tr><th>Leave Type</th><th>Start Date</th><th>End Date</th><th>Days</th><th>Status</th></tr></thead>
+            <thead><tr><th>{{ __('reports.col_leave_type') }}</th><th>{{ __('reports.col_start_date') }}</th><th>{{ __('reports.col_end_date') }}</th><th>{{ __('reports.col_days') }}</th><th>{{ __('reports.col_status') }}</th></tr></thead>
             <tbody>
                 @forelse ($lifecycle->leave_requests as $leave)
                     <tr>
@@ -79,7 +79,7 @@
 
         <h5 style="margin-top:12px;">Advances</h5>
         <table class="print-table">
-            <thead><tr><th>Request Date</th><th>Amount</th><th>Remaining Balance</th><th>Status</th></tr></thead>
+            <thead><tr><th>{{ __('reports.col_request_date') }}</th><th>{{ __('reports.col_amount') }}</th><th>{{ __('reports.col_remaining_balance') }}</th><th>{{ __('reports.col_status') }}</th></tr></thead>
             <tbody>
                 @forelse ($lifecycle->advances as $advance)
                     <tr>
@@ -97,9 +97,9 @@
         <h5 style="margin-top:12px;">Exit / Resignation / Termination</h5>
         @if ($lifecycle->exit)
             <table class="print-table">
-                <tr><th>Type</th><td>{{ ucfirst($lifecycle->exit->type) }}</td>
-                    <th>Last Working Date</th><td>{{ localDate($lifecycle->exit->last_working_date) }}</td>
-                    <th>Status</th><td>{{ ucfirst($lifecycle->exit->status) }}</td></tr>
+                <tr><th>{{ __('reports.col_type') }}</th><td>{{ ucfirst($lifecycle->exit->type) }}</td>
+                    <th>{{ __('reports.col_last_working_date') }}</th><td>{{ localDate($lifecycle->exit->last_working_date) }}</td>
+                    <th>{{ __('reports.col_status') }}</th><td>{{ ucfirst($lifecycle->exit->status) }}</td></tr>
             </table>
         @else
             <p>No exit record - employee is currently active.</p>

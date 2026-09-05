@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Leave Type-wise Report')
+@section('title', __('reports.leave_type_wise_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Leave Type-wise Report',
+        'title' => __('reports.leave_type_wise_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,7 +25,7 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Leave Type</th>
+                <th>{{ __('reports.col_leave_type') }}</th>
                 <th class="text-right">Total Requests</th>
                 <th class="text-right">Approved</th>
                 <th class="text-right">Pending</th>

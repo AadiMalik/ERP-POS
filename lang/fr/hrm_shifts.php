@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'Équipes',
+    'singular' => 'Shift',
+    'new_heading' => 'Nouveau Shift',
+    'update_heading' => 'Mettre à jour Shift',
+    'save_shift' => 'Enregistrer Shift',
+    'create_new' => 'Créer Nouveau Shift',
+    'edit_heading' => 'Modifier Shift',
+    'start_time' => 'Start Heure',
+    'end_time' => 'End Heure',
+    'grace_minutes' => 'Grace Minutes',
+    'break_duration_minutes' => 'Durée de pause (minutes)',
+    'grace_period_minutes' => 'Période de grâce (minutes)',
+    'grace_period_hint' => 'Minutes de retard autorisées sans être marqué « En retard ».',
+    'working_days' => 'Jours travaillés',
+    'add_new_shift' => 'Ajouter un nouveau quart',
+    'day_mon' => 'Lundi',
+    'day_tue' => 'Mardi',
+    'day_wed' => 'Mercredi',
+    'day_thu' => 'Jeudi',
+    'day_fri' => 'Vendredi',
+    'day_sat' => 'Samedi',
+    'day_sun' => 'Dimanche',
+];

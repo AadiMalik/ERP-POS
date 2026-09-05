@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Payment Method Sales Report')
+@section('title', __('reports.payment_method_sales'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Payment Method Sales Report',
+        'title' => __('reports.payment_method_sales'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,7 +25,7 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Payment Method</th>
+                <th>{{ __('reports.col_payment_method') }}</th>
                 <th class="text-right">Orders</th>
                 <th class="text-right">Total Amount</th>
             </tr>

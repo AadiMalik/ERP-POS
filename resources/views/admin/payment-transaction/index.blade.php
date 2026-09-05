@@ -4,12 +4,12 @@ use App\Enums\RoleNames;
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Payment Gateway Transactions</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('payment_transaction.title') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                 <i class="fa fa-filter"></i>
-                Filters
+                {{ __('common.filters') }}
             </button>
         </div>
         <div class="card-body">
@@ -17,7 +17,7 @@ use App\Enums\RoleNames;
                 <div class="row g-3">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                     <div class="col-md-2">
-                        <label class="form-label">Business</label>
+                        <label class="form-label">{{ __('common.business') }}</label>
                         <select id="business_id" class="form-select">
                             <option value="">--All--</option>
                             @foreach ($business as $item)
@@ -44,7 +44,7 @@ use App\Enums\RoleNames;
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">Status</label>
+                        <label class="form-label">{{ __('common.status') }}</label>
                         <select id="status" class="form-select">
                             <option value="">--All--</option>
                             @foreach (['initiated','pending','processing','authorized','paid','failed','cancelled','expired','refunded','partially_refunded','disputed','unknown'] as $s)
@@ -53,12 +53,12 @@ use App\Enums\RoleNames;
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">Date</label>
+                        <label class="form-label">{{ __('common.date') }}</label>
                         @include('admin.partials.date_filter')
                     </div>
                     <div class="col-md-2 d-flex align-items-end gap-2">
-                        <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                        <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                     </div>
                 </div>
             </div>
@@ -69,10 +69,10 @@ use App\Enums\RoleNames;
                             <th>Order #</th>
                             <th>Gateway</th>
                             <th>Environment</th>
-                            <th>Amount</th>
+                            <th>{{ __('common.amount') }}</th>
                             <th>Currency</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

@@ -5,20 +5,20 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">
-            Supplier Payments
+            {{ __('supplier_payments.title') }}
         </h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @include('admin.partials.import-export-buttons', [
                         'importExportModule' => 'supplier-payment',
-                        'importExportLabel' => 'Supplier Payments',
+                        'importExportLabel' => __('supplier_payments.title'),
                         'importExportRefreshFn' => 'initDataTablesupplier_payment_table',
                         'importExportExportParamsSelector' => '#business_id',
                     ])
@@ -33,9 +33,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -45,7 +45,7 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Supplier</label>
+                            <label class="form-label">{{ __('common.supplier') }}</label>
                             <select id="supplier_id" class="form-select">
                                 <option value="">--All Suppliers--</option>
                                 @foreach ($suppliers as $item)
@@ -66,7 +66,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
                                 <option value="">--All Statuses--</option>
                                 @foreach ($statuses as $value => $label)
@@ -76,7 +76,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
@@ -98,11 +98,11 @@
                                 <th>Supplier</th>
                                 <th>Reference Purchase</th>
                                 <th>Method</th>
-                                <th>Amount</th>
+                                <th>{{ __('common.amount') }}</th>
                                 <th>Net Payment</th>
-                                <th>Status</th>
-                                <th>Business</th>
-                                <th>Action</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>

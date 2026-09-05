@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'Oldalak és irányelvek',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'Vélemények',
+    'hero_stats' => 'Fő statisztikák',
+    'homepage_sections' => 'Kezdőlap szakaszok',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'Kapcsolati üzenetek',
+    'newsletter_subscribers' => 'Hírlevél feliratkozók',
+    'social_media' => 'Közösségi média',
+    'intro_cms' => 'Bevezető CMS',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

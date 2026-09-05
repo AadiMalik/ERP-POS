@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'பக்கங்கள் மற்றும் கொள்கைகள்',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'சான்றுகள்',
+    'hero_stats' => 'முதன்மை புள்ளிவிவரங்கள்',
+    'homepage_sections' => 'முகப்புப் பக்க பிரிவுகள்',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'தொடர்பு செய்திகள்',
+    'newsletter_subscribers' => 'செய்திமடல் சந்தாதாரர்கள்',
+    'social_media' => 'சமூக ஊடகம்',
+    'intro_cms' => 'அறிமுக சிஎம்எஸ்',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

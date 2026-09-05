@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => '盤點',
+    'singular' => '盤點',
+    'stock_taking_no' => '盘点单号',
+    'system_qty' => 'System Qty',
+    'physical_qty' => 'Physical Qty',
+    'difference' => 'Difference',
+    'difference_value' => 'Difference Value',
+    'diff_value' => 'Diff. Value',
+    'total_difference_qty' => 'Total Difference Qty',
+    'total_difference_quantity' => 'Total Difference Quantity',
+    'total_difference_value' => 'Total Difference Value',
+    'available_qty' => 'Available Qty',
+    'serial_tracked_hint' => 'Serial-tracked - reconcile via Serial Number screens',
+    'update_heading' => 'Update Stock Taking',
+    'new_heading' => 'New Stock Taking',
+    'create_heading' => 'Create Stock Taking',
+    'save_stock_taking' => 'Save Stock Taking',
+    'update_stock_taking' => 'Update Stock Taking',
+    'stock_changed_title' => 'Stock has changed since this count was taken',
+    'stock_changed_text' => 'The final adjustment will use the CURRENT stock quantity, not what was originally counted:',
+    'approve_anyway' => '仍然批准',
+];

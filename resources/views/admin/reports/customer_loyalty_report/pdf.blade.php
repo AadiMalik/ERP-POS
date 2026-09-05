@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Customer Loyalty History Report',
+        'title' => __('reports.customer_loyalty_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,12 +56,12 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Customer</th>
-                <th>Reference</th>
-                <th>Transaction Type</th>
+                <th>{{ __('reports.col_customer') }}</th>
+                <th>{{ __('reports.col_reference') }}</th>
+                <th>{{ __('reports.col_transaction_type') }}</th>
                 <th class="text-right">Points</th>
                 <th class="text-right">Monetary Value</th>
-                <th>Date</th>
+                <th>{{ __('reports.col_date') }}</th>
                 <th class="text-right">Balance After</th>
             </tr>
         </thead>

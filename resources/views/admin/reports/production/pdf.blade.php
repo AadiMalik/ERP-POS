@@ -18,17 +18,17 @@
 </head>
 <body>
     @include('admin.partials.print.pdf_header', [
-        'business' => $business, 'branch' => null, 'title' => 'Production Report',
+        'business' => $business, 'branch' => null, 'title' => __('reports.production'),
         'doc_no' => '', 'doc_date' => localDate(now()), 'reference' => [], 'print_config' => $print_config,
     ])
     <table class="data-table">
         <thead>
             <tr>
-                <th>Production No.</th><th>Plan No.</th><th>Product</th><th>Warehouse</th><th>Batch</th>
-                <th>Mfg. Date</th><th>Expiry</th><th class="text-right">Qty</th>
+                <th>{{ __('reports.col_production_no') }}</th><th>{{ __('reports.col_plan_no') }}</th><th>{{ __('reports.col_product') }}</th><th>{{ __('reports.col_warehouse') }}</th><th>{{ __('reports.col_batch') }}</th>
+                <th>{{ __('reports.col_mfg_date_dot') }}</th><th>{{ __('reports.col_expiry') }}</th><th class="text-right">{{ __('reports.col_qty') }}</th>
                 <th class="text-right">Material Cost</th><th class="text-right">Labor</th>
                 <th class="text-right">Overhead</th><th class="text-right">Total Cost</th>
-                <th class="text-right">Unit Cost</th><th>Status</th>
+                <th class="text-right">{{ __('reports.col_unit_cost') }}</th><th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

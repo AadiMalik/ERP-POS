@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Asset Allocation Report')
+@section('title', __('reports.asset_allocation_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Asset Allocation Report',
+        'title' => __('reports.asset_allocation_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,14 +25,14 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Asset Tag</th>
-                <th>Asset Name</th>
-                <th>Employee</th>
-                <th>Department</th>
-                <th>Issue Date</th>
-                <th>Expected Return</th>
-                <th>Return Date</th>
-                <th>Status</th>
+                <th>{{ __('reports.col_asset_tag') }}</th>
+                <th>{{ __('reports.col_asset_name') }}</th>
+                <th>{{ __('reports.col_employee') }}</th>
+                <th>{{ __('reports.col_department') }}</th>
+                <th>{{ __('reports.col_issue_date') }}</th>
+                <th>{{ __('reports.col_expected_return') }}</th>
+                <th>{{ __('reports.col_return_date') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
             </tr>
         </thead>
         <tbody>

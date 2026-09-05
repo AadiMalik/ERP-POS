@@ -8,7 +8,7 @@ use App\Enums\RoleNames;
 @section('content')
 <!-- ========== table components start ========== -->
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Sub Categories</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('sub_categories.title') }}</h4>
 
     <!-- Basic Bootstrap Table -->
     <div class="card">
@@ -16,19 +16,19 @@ use App\Enums\RoleNames;
             <div>
                 <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                     <i class="fa fa-filter"></i>
-                    Filters
+                    {{ __('common.filters') }}
                 </button>
 
             </div>
             <div class="d-flex gap-2">
                 @include('admin.partials.import-export-buttons', [
                     'importExportModule' => 'sub-category',
-                    'importExportLabel' => 'Sub Categories',
+                    'importExportLabel' => __('sub_categories.title'),
                     'importExportRefreshFn' => 'initDataTablesub_category_table',
                     'importExportExportParamsSelector' => '#filter_business_id',
                 ])
                 <a href="javascript:void(0)" id="createNewSubCategory" class="btn rounded-pill btn-primary">
-                    <i class="icon-base fa fa-plus mr-5"></i>Add New</a>
+                    <i class="icon-base fa fa-plus mr-5"></i>{{ __('common.add_new') }}</a>
             </div>
         </div>
         <div class="card-body">
@@ -36,9 +36,9 @@ use App\Enums\RoleNames;
                 <div class="row g-3">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                     <div class="col-md-3">
-                        <label class="form-label">Business</label>
+                        <label class="form-label">{{ __('common.business') }}</label>
                         <select id="filter_business_id" class="form-select">
-                            <option value="">--All Businesses--</option>
+                            <option value="">{{ __('common.all_businesses') }}</option>
                             @foreach ($business as $item)
                             <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                 {{ $item->name ?? '' }}
@@ -48,9 +48,9 @@ use App\Enums\RoleNames;
                     </div>
                     @endif
                     <div class="col-md-3">
-                        <label class="form-label">Category</label>
+                        <label class="form-label">{{ __('common.category') }}</label>
                         <select id="filter_category_id" class="form-select">
-                            <option value="">--All Categories--</option>
+                            <option value="">{{ __('common.all_categories') }}</option>
                             @foreach ($categories as $item)
                             <option value="{{ $item->category_id }}">
                                 {{ $item->name ?? '' }}
@@ -59,15 +59,15 @@ use App\Enums\RoleNames;
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Date</label>
+                        <label class="form-label">{{ __('common.date') }}</label>
                         @include('admin.partials.date_filter')
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
                         <button type="button" id="search_btn" class="btn btn-primary">
-                            Search
+                            {{ __('common.search') }}
                         </button>
                         <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                            Reset
+                            {{ __('common.reset') }}
                         </button>
                     </div>
                 </div>
@@ -76,12 +76,12 @@ use App\Enums\RoleNames;
                 <table id="sub_category_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Logo</th>
-                            <th>Category</th>
-                            <th>Business</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('common.logo') }}</th>
+                            <th>{{ __('common.category') }}</th>
+                            <th>{{ __('common.business') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                         <!-- end table row-->
                     </thead>
@@ -99,6 +99,19 @@ use App\Enums\RoleNames;
 <!-- ========== table components end ========== -->
 @endsection
 @section('js')
+@php
+    $__i18nSubCategories = [
+        'create_title' => __('sub_categories.create_title'),
+        'edit_title' => __('sub_categories.edit_title'),
+        'view_title' => __('sub_categories.view_title'),
+        'select_category' => __('common.select_category'),
+        'all_categories' => __('common.all_categories'),
+        'please_enter_name' => __('common.please_enter_name'),
+    ];
+@endphp
+<script>
+    window.i18n_sub_categories = @json($__i18nSubCategories);
+</script>
 <script src="{{ asset('public/assets/js/admin/sub_category.js') }}"></script>
 @include('admin.partials.datatable', [
 'columns' => "
@@ -145,7 +158,7 @@ use App\Enums\RoleNames;
     $('#business_id').change(function() {
         let business_id = $(this).val();
         if (!business_id) {
-            $('#category_id').html('<option value="">--Select Category--</option>');
+            $('#category_id').html('<option value="">' + (window.i18n_sub_categories?.select_category || '--Select Category--') + '</option>');
             return;
         }
         ajaxRequest({
@@ -154,7 +167,7 @@ use App\Enums\RoleNames;
             })
             .then((response) => {
                 let data = response.Data;
-                let options = '<option value="">--Select Category--</option>';
+                let options = '<option value="">' + (window.i18n_sub_categories?.select_category || '--Select Category--') + '</option>';
                 $.each(data, function(index, item) {
                     options += `<option value="${item.category_id}">
                                         ${item.name}
@@ -170,7 +183,7 @@ use App\Enums\RoleNames;
     $('#filter_business_id').change(function() {
         let business_id = $(this).val();
         if (!business_id) {
-            $('#filter_category_id').html('<option value="">--All Categories--</option>');
+            $('#filter_category_id').html('<option value="">' + (window.i18n_sub_categories?.all_categories || '--All Categories--') + '</option>');
             return;
         }
         ajaxRequest({
@@ -179,7 +192,7 @@ use App\Enums\RoleNames;
             })
             .then((response) => {
                 let data = response.Data;
-                let options = '<option value="">--All Categories--</option>';
+                let options = '<option value="">' + (window.i18n_sub_categories?.all_categories || '--All Categories--') + '</option>';
                 $.each(data, function(index, item) {
                     options += `<option value="${item.category_id}">
                                         ${item.name}

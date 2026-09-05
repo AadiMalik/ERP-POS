@@ -20,7 +20,7 @@ $("#createNewSubCategory").click(function () {
       $("#status").prop("checked", true);
       $("#logo").prop("required", false);
       $("#saveBtn").show();
-      $("#modelHeading").html("Create New Sub Category");
+      $("#modelHeading").html(window.i18n_sub_categories?.create_title || "Create New Sub Category");
       $("#ajaxModel").modal("show");
       enableForm();
 });
@@ -47,7 +47,7 @@ editRecord({
                   $("#logo_preview").hide();
             }
             $("#logo").prop("required", false);
-            $("#modelHeading").html("Edit Sub Category");
+            $("#modelHeading").html(window.i18n_sub_categories?.edit_title || "Edit Sub Category");
             $("#saveBtn").show();
             enableForm();
             $("#ajaxModel").modal("show");
@@ -73,7 +73,7 @@ viewRecord({
             } else {
                   $("#logo_preview").hide();
             }
-            $("#modelHeading").html("View Sub Category");
+            $("#modelHeading").html(window.i18n_sub_categories?.view_title || "View Sub Category");
             disableForm();
             $("#saveBtn").hide();
             $("#ajaxModel").modal("show");
@@ -89,7 +89,7 @@ saveRecord({
       },
       beforeSubmit: function () {
             if ($("#name").val() == "") {
-                  errorMessage("Please Enter Name");
+                  errorMessage(window.i18n_sub_categories?.please_enter_name || "Please Enter Name");
                   return false;
             }
             return true;
@@ -122,7 +122,7 @@ function loadCategories(business_id, callback) {
       })
             .then((response) => {
                   let data = response.Data;
-                  let options = '<option value="">--Select Category--</option>';
+                  let options = '<option value="">' + (window.i18n_sub_categories?.select_category || '--Select Category--') + '</option>';
                   $.each(data, function (index, item) {
                         options += `<option value="${item.category_id}">
                                     ${item.name}

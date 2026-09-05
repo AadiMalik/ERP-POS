@@ -36,7 +36,7 @@ function loadVoucherPickers(business_id) {
             populateVoucherPicker('get_product_ids', data.products, i => i.product_id, i => i.name);
             populateVoucherPicker('get_category_ids', data.categories, i => i.category_id, i => i.name);
       }).catch(function (err) {
-            errorMessage(err.Message || 'Unable to load options for the selected business.');
+            errorMessage(err.Message || (window.i18n_vouchers?.unable_load_options || 'Unable to load options for the selected business.'));
       });
 }
 
@@ -81,7 +81,7 @@ $("#createNewVoucher").click(function () {
       $("#get_category_ids").val(null).trigger('change.select2');
       toggleVoucherPromoFields();
       $("#saveBtn").show();
-      $("#modelHeading").html("Create New Voucher");
+      $("#modelHeading").html(window.i18n_vouchers?.create_new || "Create New Voucher");
       $("#ajaxModel").modal("show");
 });
 
@@ -144,7 +144,7 @@ editRecord({
 
             toggleVoucherPromoFields();
 
-            $("#modelHeading").html("Edit Voucher");
+            $("#modelHeading").html(window.i18n_vouchers?.edit_heading || "Edit Voucher");
             $("#saveBtn").show();
             $("#ajaxModel").modal("show");
       }
@@ -159,21 +159,21 @@ saveRecord({
       },
       beforeSubmit: function () {
             if ($("#name").val() == "") {
-                  errorMessage("Please Enter Name");
+                  errorMessage(window.i18n_vouchers?.please_enter_name || "Please Enter Name");
                   return false;
             }
             if ($("#code").val() == "") {
-                  errorMessage("Please Enter Code");
+                  errorMessage(window.i18n_vouchers?.please_enter_code || "Please Enter Code");
                   return false;
             }
             let promo_type = $("#promo_type").val();
             if (promo_type === 'bogo' || promo_type === 'buy_x_get_y') {
                   if ($("#buy_quantity").val() == "" || $("#get_quantity").val() == "") {
-                        errorMessage("Please enter Buy Quantity and Get Quantity");
+                        errorMessage(window.i18n_vouchers?.please_enter_buy_get_qty || "Please enter Buy Quantity and Get Quantity");
                         return false;
                   }
             } else if ($("#value").val() == "") {
-                  errorMessage("Please Enter Value");
+                  errorMessage(window.i18n_vouchers?.please_enter_value || "Please Enter Value");
                   return false;
             }
             return true;
@@ -228,7 +228,7 @@ $(document).on('click', '#viewVoucherHistory', function () {
                         $('#voucherHistoryBody').append(
                               '<tr>' +
                               '<td>' + escapeHtml(row.used_at || '-') + '</td>' +
-                              '<td>' + escapeHtml(row.customer || 'Walk-in') + '</td>' +
+                              '<td>' + escapeHtml(row.customer || (window.i18n_vouchers?.walk_in || 'Walk-in')) + '</td>' +
                               '<td>' + escapeHtml(row.customer_email || '-') + '</td>' +
                               '<td>' + escapeHtml(row.order_no || '-') + '</td>' +
                               '<td>' + escapeHtml(row.order_status || '-') + '</td>' +
@@ -242,7 +242,7 @@ $(document).on('click', '#viewVoucherHistory', function () {
             $('#voucherHistoryContent').show();
       }).catch(function (err) {
             $('#voucherHistoryLoading').hide();
-            errorMessage(err.Message || 'Unable to load voucher history.');
+            errorMessage(err.Message || (window.i18n_vouchers?.unable_load_history || 'Unable to load voucher history.'));
             $('#voucherHistoryModal').modal('hide');
       });
 });

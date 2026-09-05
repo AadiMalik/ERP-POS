@@ -20,7 +20,7 @@
 <div class="row">
     <div class="col-lg-4 mb-4">
         <div class="card h-100">
-            <div class="card-header"><h5 class="mb-0">Sales Trend</h5></div>
+            <div class="card-header"><h5 class="mb-0">{{ __('Sales Trend') }}</h5></div>
             <div class="card-body">
                 @if ($hasTrend)
                     <div id="salesTrendChart"></div>

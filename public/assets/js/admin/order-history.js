@@ -1,3 +1,8 @@
+
+function tPos(key, fallback) {
+    return (window.i18n_pos && window.i18n_pos[key]) || fallback;
+}
+
 function money(v) {
     v = parseFloat(v || 0);
     if (isNaN(v)) v = 0;
@@ -114,7 +119,7 @@ function openOrderDetailModal(rowData) {
             renderOrderDetail(response.Data || {});
         })
         .catch(function (err) {
-            $('#odItemsBody').html('<tr><td colspan="6" class="text-center text-danger">' + escapeHtml(err.Message || 'Unable to load order details.') + '</td></tr>');
+            $('#odItemsBody').html('<tr><td colspan="6" class="text-center text-danger">' + escapeHtml(err.Message || tPos('unable_load_order_details', 'Unable to load order details.')) + '</td></tr>');
             $('#odPaymentsBody').html('');
         });
 }
@@ -232,11 +237,11 @@ $('#rpSubmitBtn').click(function () {
         return;
     }
     if (amount <= 0) {
-        errorMessage('Payment amount must be greater than zero.');
+        errorMessage(tPos('payment_amount_gt_zero', 'Payment amount must be greater than zero.'));
         return;
     }
     if (amount > due) {
-        errorMessage('Payment amount exceeds the order\'s remaining due.');
+        errorMessage(tPos('payment_exceeds_due', 'Payment amount exceeds the order\'s remaining due.'));
         return;
     }
 
@@ -252,14 +257,14 @@ $('#rpSubmitBtn').click(function () {
             reference_no: $('#rpReferenceNo').val()
         }
     }).then(function (response) {
-        successMessage(response.Message || 'Payment received.');
+        successMessage(response.Message || tPos('payment_received', 'Payment received.'));
         bootstrap.Modal.getInstance(document.getElementById('receivePaymentModal')).hide();
         renderOrderDetail(response.Data || {});
         if (window.order_history_table) {
             order_history_table.ajax.reload(null, false);
         }
     }).catch(function (err) {
-        errorMessage(err.Message || 'Unable to receive payment.');
+        errorMessage(err.Message || tPos('unable_receive_payment', 'Unable to receive payment.'));
     }).then(function () {
         $btn.prop('disabled', false);
     });
@@ -318,7 +323,7 @@ function loadHistorySummary() {
             }
         })
         .catch(function (err) {
-            errorMessage(err.Message || 'Unable to load sales summary.');
+            errorMessage(err.Message || tPos('unable_load_sales_summary', 'Unable to load sales summary.'));
         })
         .then(function () {
             $('#summarySection').css('opacity', 1);

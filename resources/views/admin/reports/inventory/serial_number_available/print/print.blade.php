@@ -1,14 +1,14 @@
 @extends('layouts.print')
-@section('title', 'Available Serial Numbers')
+@section('title', __('reports.serial_number_available'))
 @section('content')
-    <h3>Available Serial Numbers</h3>
+    <h3>{{ __('reports.serial_number_available') }}</h3>
     <table class="table table-bordered table-sm">
-        <thead><tr><th>Serial No</th><th>Product</th><th>Variation</th><th>Warehouse</th><th>Unit Cost</th><th>Received On</th></tr></thead>
+        <thead><tr><th>{{ __('reports.col_serial_no') }}</th><th>{{ __('reports.col_product') }}</th><th>{{ __('reports.col_variation') }}</th><th>{{ __('reports.col_warehouse') }}</th><th>{{ __('reports.col_unit_cost') }}</th><th>{{ __('reports.col_received_on') }}</th></tr></thead>
         <tbody>
             @forelse ($rows as $row)
                 <tr><td>{{ $row->serial_no ?? '-' }}</td><td>{{ $row->product_name ?? '-' }}</td><td>{{ $row->variation_name ?? '-' }}</td><td>{{ $row->warehouse_name ?? '-' }}</td><td>{{ $row->avg_price ?? '-' }}</td><td>{{ $row->date_created ? localDate($row->date_created) : '-' }}</td></tr>
             @empty
-                <tr><td colspan="6">No records found.</td></tr>
+                <tr><td colspan="6">{{ __('common.no_records_found') }}</td></tr>
             @endforelse
         </tbody>
     </table>

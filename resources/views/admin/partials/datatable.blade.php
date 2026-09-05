@@ -43,6 +43,11 @@
             order: {!! $order !!},
             @endisset
             destroy : true,
+            @if (app()->getLocale() !== 'en')
+            language: {
+                url: "//cdn.datatables.net/plug-ins/2.3.8/i18n/{{ app()->getLocale() }}.json"
+            },
+            @endif
             ajax: {
                 url: "{{$route}}",
                 method: "POST",
@@ -76,7 +81,7 @@
             {
                 extend: 'selectAll',
                 className: 'btn-primary',
-                text: '{{ trans('global.select_all') }}',
+                text: '{{ __('common.select_all') }}',
                 exportOptions: {
                     columns: ':visible'
                 }
@@ -84,14 +89,14 @@
             {
                 extend: 'selectNone',
                 className: 'btn-primary',
-                text: '{{ trans('global.deselect_all') }}',
+                text: '{{ __('common.deselect_all') }}',
                 exportOptions: {
                     columns: ':visible'
                 }
             },
             {
                 extend: 'excel',
-                text: "Download",
+                text: "{{ __('common.download') }}",
                 className: 'btn-info',
             },
           
@@ -152,7 +157,7 @@
                 row.child.hide();
                 tr.removeClass('shown');
             } else {
-                row.child(row.data().row_detail || '<div class="dt-detail-empty text-muted">No additional details.</div>', 'dt-detail-row').show();
+                row.child(row.data().row_detail || '<div class="dt-detail-empty text-muted">{{ __('common.no_additional_details') }}</div>', 'dt-detail-row').show();
                 tr.addClass('shown');
             }
         });

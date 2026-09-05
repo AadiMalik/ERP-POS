@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'পৃষ্ঠা ও নীতি',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'প্রশংসাপত্র',
+    'hero_stats' => 'প্রধান পরিসংখ্যান',
+    'homepage_sections' => 'হোমপেজ অংশ',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'যোগাযোগ বার্তা',
+    'newsletter_subscribers' => 'নিউজলেটার সাবস্ক্রাইবার',
+    'social_media' => 'সামাজিক মাধ্যম',
+    'intro_cms' => 'ইন্ট্রো সিএমএস',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

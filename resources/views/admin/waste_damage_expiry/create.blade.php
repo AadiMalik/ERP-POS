@@ -4,10 +4,10 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">{{ isset($waste_damage_expiry) ? 'Update' : 'New' }} Waste / Damage / Expiry</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ isset($waste_damage_expiry) ? 'Update' : 'New' }} {{ __('waste_damage_expiry.title') }}</h4>
         <div class="card">
             <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0">{{ isset($waste_damage_expiry) ? 'Update' : 'Create' }} Waste / Damage / Expiry</h5>
+                <h5 class="mb-0">{{ isset($waste_damage_expiry) ? 'Update' : 'Create' }} {{ __('waste_damage_expiry.title') }}</h5>
             </div>
             <div class="card-body">
                 <form action="{{ url('admin/waste-damage-expiry') }}" method="POST" id="wdeForm">
@@ -17,9 +17,9 @@
                     <div class="row">
                         @if (!empty($business) && RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3 mb-3">
-                                <label>Business <span class="text-danger">*</span></label>
+                                <label>{{ __('common.business') }} <span class="text-danger">*</span></label>
                                 <select class="form-control select2" name="business_id" id="business_id">
-                                    <option value="">--Select Business--</option>
+                                    <option value="">{{ __('common.select_business') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}"
                                             {{ old('business_id', $waste_damage_expiry->business_id ?? '') == $item->business_id ? 'selected' : '' }}>
@@ -33,7 +33,7 @@
                             <label>Warehouse/Branch<span class="text-danger">*</span></label>
                             <select class="form-control select2" name="warehouse_id" id="warehouse_id"
                                 {{ isset($waste_damage_expiry) ? 'disabled' : '' }}>
-                                <option value="">--Select Warehouse--</option>
+                                <option value="">{{ __('common.select_warehouse') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}"
                                         {{ old('warehouse_id', $waste_damage_expiry->warehouse_id ?? '') == $item->warehouse_id ? 'selected' : '' }}>
@@ -46,22 +46,22 @@
                             @endif
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Reference No.</label>
+                            <label>{{ __('waste_damage_expiry.reference_no') }}</label>
                             <input type="text" class="form-control" name="reference_no" readonly
-                                value="{{ $waste_damage_expiry->reference_no ?? ($reference_no ?? 'Auto Generated') }}">
+                                value="{{ $waste_damage_expiry->reference_no ?? ($reference_no ?? '{{ __('common.auto_generated') }}') }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Date</label>
+                            <label>{{ __('common.date') }}</label>
                             <input type="text" class="form-control datepicker" name="transaction_date"
                                 value="{{ old('transaction_date', isset($waste_damage_expiry) ? localDate($waste_damage_expiry->transaction_date) : localDate(date('Y-m-d'))) }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Reference (optional)</label>
-                            <input type="text" class="form-control" name="reference" placeholder="Related source transaction, if known"
+                            <label>{{ __('waste_damage_expiry.reference_optional') }}</label>
+                            <input type="text" class="form-control" name="reference" placeholder="{{ __('waste_damage_expiry.reference_placeholder') }}"
                                 value="{{ old('reference', $waste_damage_expiry->reference ?? '') }}">
                         </div>
                         <div class="col-md-9 mb-3">
-                            <label>Notes</label>
+                            <label>{{ __('common.notes') }}</label>
                             <textarea class="form-control" rows="1" name="notes">{{ old('notes', $waste_damage_expiry->notes ?? '') }}</textarea>
                         </div>
                     </div>
@@ -69,7 +69,7 @@
                     {{-- ================= LINE ITEMS ================= --}}
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Products</h5>
+                            <h5 class="mb-0">{{ __('common.products') }}</h5>
                             <button type="button" class="btn btn-sm btn-primary" id="addProductBtn">
                                 <i class="fa fa-plus"></i> Add Product
                             </button>
@@ -78,25 +78,25 @@
                             <table class="table table-bordered table-striped" id="productTable">
                                 <thead>
                                     <tr>
-                                        <th style="min-width:200px;">Product</th>
-                                        <th style="min-width:150px;">Variation</th>
-                                        <th style="min-width:80px;">Unit</th>
+                                        <th style="min-width:200px;">{{ __('common.product') }}</th>
+                                        <th style="min-width:150px;">{{ __('common.variation') }}</th>
+                                        <th style="min-width:80px;">{{ __('common.unit') }}</th>
                                         <th style="min-width:100px;">Available Qty</th>
-                                        <th style="min-width:170px;">Batch/Lot</th>
-                                        <th style="min-width:130px;">Expiry Date</th>
-                                        <th style="min-width:110px;">Quantity</th>
-                                        <th style="min-width:160px;">Serial #</th>
+                                        <th style="min-width:170px;">{{ __('waste_damage_expiry.batch_lot') }}</th>
+                                        <th style="min-width:130px;">{{ __('common.expiry_date') }}</th>
+                                        <th style="min-width:110px;">{{ __('common.quantity') }}</th>
+                                        <th style="min-width:160px;">{{ __('common.serial_number') }}</th>
                                         <th style="min-width:120px;">Value</th>
-                                        <th style="min-width:130px;">Loss Type</th>
-                                        <th style="min-width:170px;">Reason</th>
-                                        <th style="min-width:150px;">Notes</th>
+                                        <th style="min-width:130px;">{{ __('waste_damage_expiry.loss_type') }}</th>
+                                        <th style="min-width:170px;">{{ __('common.reason') }}</th>
+                                        <th style="min-width:150px;">{{ __('common.notes') }}</th>
                                         <th style="width:50px;"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="productRows">
                                     <tr id="emptyRow">
                                         <td colspan="13" class="text-center text-muted">
-                                            Select a warehouse, then "Add Product"
+                                            {{ __('waste_damage_expiry.select_warehouse_then') }} "Add Product"
                                         </td>
                                     </tr>
                                 </tbody>
@@ -167,7 +167,7 @@
         function resetProductRows() {
             $('#productRows').html(`
                 <tr id="emptyRow">
-                    <td colspan="13" class="text-center text-muted">Select a warehouse, then "Add Product"</td>
+                    <td colspan="13" class="text-center text-muted">{{ __('waste_damage_expiry.select_warehouse_then') }} "Add Product"</td>
                 </tr>
             `);
             calculateGrandTotal();
@@ -282,7 +282,7 @@
         }
 
         function loadManualProductDropdown(row, prefill) {
-            let html = `<option value="">--Select Product--</option>`;
+            let html = `<option value="">{{ __('common.select_product') }}</option>`;
             $.each(productsData, function(_, product) {
                 html += `<option value="${product.product_id}" ${prefill && prefill.product_id == product.product_id ? 'selected' : ''}>${product.name}</option>`;
             });
@@ -303,7 +303,7 @@
         });
 
         function resetRowVariationDependents(row) {
-            row.find('.manual-variation-select').html('<option value="">--Select Variation--</option>');
+            row.find('.manual-variation-select').html('<option value="">{{ __('common.select_variation') }}</option>');
             row.find('.selected-unit-id').val('');
             row.find('.selected-unit-name').html('-');
             row.find('.available-qty').html('-');
@@ -324,7 +324,7 @@
                     row.find('.manual-variation-select').html('<option>Loading...</option>');
                 },
                 success: function(response) {
-                    let html = '<option value="">--Select Variation--</option>';
+                    let html = '<option value="">{{ __('common.select_variation') }}</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, variation) {
                             let selected = prefill && prefill.product_variation_id == variation.product_variation_id ? 'selected' : '';
@@ -626,8 +626,8 @@
                     <div id="wdeSerialModalList" style="max-height:300px; overflow-y:auto;"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="wdeSerialModalSaveBtn">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="wdeSerialModalSaveBtn">{{ __('common.save') }}</button>
                 </div>
             </div>
         </div>

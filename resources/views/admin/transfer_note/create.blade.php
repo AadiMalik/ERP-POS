@@ -4,10 +4,10 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">{{ isset($transfer_note) ? 'Update' : 'New' }} Transfer Note</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ isset($transfer_note) ? 'Update' : 'New' }} {{ __('transfer_notes.singular') }}</h4>
         <div class="card">
             <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0">{{ isset($transfer_note) ? 'Update' : 'Create' }} Transfer Note</h5>
+                <h5 class="mb-0">{{ isset($transfer_note) ? 'Update' : 'Create' }} {{ __('transfer_notes.singular') }}</h5>
             </div>
             <div class="card-body">
                 <form action="{{ url('admin/transfer-note') }}" method="POST" id="transferNoteForm">
@@ -17,9 +17,9 @@
                     <div class="row">
                         @if (!empty($business) && RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3 mb-3">
-                                <label>Business <span class="text-danger">*</span></label>
+                                <label>{{ __('common.business') }} <span class="text-danger">*</span></label>
                                 <select class="form-control select2" name="business_id" id="business_id">
-                                    <option value="">--Select Business--</option>
+                                    <option value="">{{ __('common.select_business') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}"
                                             {{ old('business_id', $transfer_note->business_id ?? '') == $item->business_id ? 'selected' : '' }}>
@@ -31,11 +31,11 @@
                         @endif
                         <div class="col-md-3 mb-3">
                             <label>
-                                Source Warehouse<span class="text-danger">*</span>
+                                Source {{ __('common.warehouse') }}<span class="text-danger">*</span>
                             </label>
                             <select class="form-control select2" name="source_warehouse_id" id="source_warehouse_id"
                                 {{ isset($transfer_note) ? 'disabled' : '' }}>
-                                <option value="">--Select Warehouse--</option>
+                                <option value="">{{ __('common.select_warehouse') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}"
                                         {{ old('source_warehouse_id', $transfer_note->source_warehouse_id ?? '') == $item->warehouse_id ? 'selected' : '' }}>
@@ -49,11 +49,11 @@
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>
-                                Destination Warehouse<span class="text-danger">*</span>
+                                Destination {{ __('common.warehouse') }}<span class="text-danger">*</span>
                             </label>
                             <select class="form-control select2" name="destination_warehouse_id" id="destination_warehouse_id"
                                 {{ isset($transfer_note) ? 'disabled' : '' }}>
-                                <option value="">--Select Warehouse--</option>
+                                <option value="">{{ __('common.select_warehouse') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}"
                                         data-business="{{ $item->business_id }}"
@@ -67,22 +67,22 @@
                             @endif
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Transfer Note No.</label>
+                            <label>{{ __('transfer_notes.singular') }} No.</label>
                             <input type="text" class="form-control" name="transfer_note_no" readonly
-                                value="{{ $transfer_note->transfer_note_no ?? ($transfer_note_no ?? 'Auto Generated') }}">
+                                value="{{ $transfer_note->transfer_note_no ?? ($transfer_note_no ?? '{{ __('common.auto_generated') }}') }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Date</label>
+                            <label>{{ __('common.date') }}</label>
                             <input type="text" class="form-control datepicker" name="transfer_note_date"
                                 value="{{ old('transfer_note_date', isset($transfer_note) ? localDate($transfer_note->transfer_note_date) : localDate(date('Y-m-d'))) }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Reference</label>
+                            <label>{{ __('common.reference') }}</label>
                             <input type="text" class="form-control" name="reference"
                                 value="{{ old('reference', $transfer_note->reference ?? '') }}">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label>Notes</label>
+                            <label>{{ __('common.notes') }}</label>
                             <textarea class="form-control" rows="1" name="description">{{ old('description', $transfer_note->description ?? '') }}</textarea>
                         </div>
                     </div>
@@ -101,12 +101,12 @@
                             <table class="table table-bordered table-striped" id="productTable">
                                 <thead>
                                     <tr>
-                                        <th style="min-width:220px;">Product</th>
-                                        <th style="min-width:150px;">Variation</th>
-                                        <th style="min-width:170px;">Conversion</th>
-                                        <th style="min-width:90px;">Unit</th>
+                                        <th style="min-width:220px;">{{ __('common.product') }}</th>
+                                        <th style="min-width:150px;">{{ __('common.variation') }}</th>
+                                        <th style="min-width:170px;">{{ __('common.conversion') }}</th>
+                                        <th style="min-width:90px;">{{ __('common.unit') }}</th>
                                         <th style="min-width:120px;">Available Qty</th>
-                                        <th style="min-width:130px;">Transfer Qty</th>
+                                        <th style="min-width:130px;">{{ __('transfer_notes.transfer_qty') }}</th>
                                         <th style="min-width:130px">Est. Value</th>
                                         <th style="width:50px;"></th>
                                     </tr>
@@ -144,7 +144,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <button class="text-end btn btn-primary" id="submitBtn">
-                                {{ isset($transfer_note) ? 'Update Transfer Note' : 'Save Transfer Note' }}
+                                {{ isset($transfer_note) ? 'Update {{ __('transfer_notes.singular') }}' : 'Save {{ __('transfer_notes.singular') }}' }}
                             </button>
                         </div>
                     </div>
@@ -192,8 +192,8 @@
         $(document).on('change', '#business_id', function() {
             let businessId = $(this).val();
 
-            $('#source_warehouse_id').html('<option value="">--Select Warehouse--</option>');
-            $('#destination_warehouse_id').html('<option value="">--Select Warehouse--</option>');
+            $('#source_warehouse_id').html('<option value="">{{ __('common.select_warehouse') }}</option>');
+            $('#destination_warehouse_id').html('<option value="">{{ __('common.select_warehouse') }}</option>');
             productsData = [];
             refreshProductDropdowns();
             resetProductRows();
@@ -215,7 +215,7 @@
                     $('#source_warehouse_id,#destination_warehouse_id').prop('disabled', true).html('<option>Loading...</option>');
                 },
                 success: function(response) {
-                    let html = '<option value="">--Select Warehouse--</option>';
+                    let html = '<option value="">{{ __('common.select_warehouse') }}</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, warehouse) {
                             html += `<option value="${warehouse.warehouse_id}" data-business="${warehouse.business_id}">${warehouse.name}</option>`;
@@ -224,7 +224,7 @@
                     $('#source_warehouse_id,#destination_warehouse_id').html(html).prop('disabled', false);
                 },
                 error: function() {
-                    $('#source_warehouse_id,#destination_warehouse_id').html('<option value="">--Select Warehouse--</option>').prop('disabled', false);
+                    $('#source_warehouse_id,#destination_warehouse_id').html('<option value="">{{ __('common.select_warehouse') }}</option>').prop('disabled', false);
                     errorMessage('Unable to load warehouses.');
                 }
             });
@@ -248,7 +248,7 @@
         }
 
         function refreshProductDropdowns() {
-            let options = `<option value="">--Select Product--</option>`;
+            let options = `<option value="">{{ __('common.select_product') }}</option>`;
             $.each(productsData, function(_, product) {
                 options += `<option value="${product.product_id}">${product.name}</option>`;
             });
@@ -306,17 +306,17 @@
     <tr class="product-row">
         <td>
             <select name="products[${index}][product_id]" class="form-control product-select">
-                <option value="">--Select Product--</option>
+                <option value="">{{ __('common.select_product') }}</option>
             </select>
         </td>
         <td>
             <select name="products[${index}][product_variation_id]" class="form-control variation-select">
-                <option value="">--Select Variation--</option>
+                <option value="">{{ __('common.select_variation') }}</option>
             </select>
         </td>
         <td>
             <select name="products[${index}][product_variation_unit_conversion_id]" class="form-control conversion-select">
-                <option value="">--Select Conversion--</option>
+                <option value="">{{ __('common.select_conversion') }}</option>
             </select>
             <input type="hidden" class="conversion-factor" name="products[${index}][conversion_factor]" value="1">
         </td>
@@ -360,7 +360,7 @@
         // ======================================================
 
         function loadProductDropdown(row) {
-            let html = `<option value="">--Select Product--</option>`;
+            let html = `<option value="">{{ __('common.select_product') }}</option>`;
             $.each(productsData, function(_, product) {
                 html += `<option value="${product.product_id}">${product.name}</option>`;
             });
@@ -378,8 +378,8 @@
         });
 
         function resetVariationSection(row) {
-            row.find('.variation-select').html(`<option value="">--Select Variation--</option>`);
-            row.find('.conversion-select').html(`<option value="">--Select Conversion--</option>`);
+            row.find('.variation-select').html(`<option value="">{{ __('common.select_variation') }}</option>`);
+            row.find('.conversion-select').html(`<option value="">{{ __('common.select_conversion') }}</option>`);
             row.find('.selected-unit-id').val('');
             row.find('.selected-unit-name').html('-');
             row.find('.conversion-factor').val(1);
@@ -397,7 +397,7 @@
                     row.find('.variation-select').html('<option>Loading...</option>');
                 },
                 success: function(response) {
-                    let html = '<option value="">--Select Variation--</option>';
+                    let html = '<option value="">{{ __('common.select_variation') }}</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, variation) {
                             html += `
@@ -448,7 +448,7 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    let html = `<option value="">--Select Conversion--</option>`;
+                    let html = `<option value="">{{ __('common.select_conversion') }}</option>`;
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, conversion) {
                             html += `

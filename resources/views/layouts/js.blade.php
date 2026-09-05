@@ -31,12 +31,24 @@
 <script src="{{ asset('public/assets/js/admin/global-search.js') }}"></script>
 <script src="https://cdn.datatables.net/2.3.8/js/dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+@if (app()->getLocale() !== 'en')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/{{ app()->getLocale() }}.js"></script>
+@endif
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+@if (app()->getLocale() !== 'en')
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/{{ app()->getLocale() }}.js"></script>
+@endif
 
 <script>
+    const CURRENT_LOCALE = "{{ app()->getLocale() }}";
+
     $(document).ready(function() {
         $('.datatables').DataTable();
         initGlobalDateFilter();
+
+        if ($('body').data('input-dir') === 'rtl') {
+            $('textarea, input[type=text], input[type=search]').not('.ltr-field').attr('dir', 'rtl');
+        }
     });
 
     var url_local = "{{ url('/') }}";
@@ -52,6 +64,7 @@
 
     flatpickr(".datepicker", {
         dateFormat: "{{ session('business_setting.date_format', 'd-m-Y') }}",
-        allowInput: true
+        allowInput: true,
+        locale: CURRENT_LOCALE !== 'en' ? CURRENT_LOCALE : undefined
     });
 </script>

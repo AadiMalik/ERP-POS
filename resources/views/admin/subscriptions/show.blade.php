@@ -55,7 +55,7 @@
                                 @else
                                     <button type="button" class="btn btn-sm btn-outline-success" id="reactivateBtn">Reactivate</button>
                                 @endif
-                                <button type="button" class="btn btn-sm btn-outline-danger" id="cancelBtn">Cancel</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" id="cancelBtn">{{ __('common.cancel') }}</button>
                             </div>
                         @else
                             <p class="text-muted mb-0">No subscription found for this business.</p>

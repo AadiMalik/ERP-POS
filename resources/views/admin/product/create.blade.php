@@ -127,11 +127,11 @@ use App\Enums\RoleNames;
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">{{ isset($product) ? 'Update' : 'Create' }} Product</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ isset($product) ? __('products.update_product_title') : __('products.create_product_title') }}</h4>
 
     <div class="card">
         <div class="card-header bg-white border-bottom">
-            <h5 class="mb-0">{{ isset($product) ? 'Update' : 'New' }} Product</h5>
+            <h5 class="mb-0">{{ isset($product) ? __('products.update_product_heading') : __('products.new_product_heading') }}</h5>
         </div>
 
         <form id="productForm"
@@ -146,27 +146,27 @@ use App\Enums\RoleNames;
                         <!-- BASIC INFO -->
                         <div class="card mb-4">
                             <div class="card-header bg-light">
-                                <h6 class="mb-0"><i class="fa fa-info-circle me-1"></i>Basic Information</h6>
+                                <h6 class="mb-0"><i class="fa fa-info-circle me-1"></i>{{ __('products.basic_information') }}</h6>
                             </div>
                             <div class="card-body">
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="name" id="productName"
+                                        <label class="fw-semibold">{{ __('products.name') }} <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control ltr-field" name="name" id="productName"
                                             value="{{ $product->name ?? '' }}" placeholder="e.g. Classic Hoodie"
                                             required>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Slug</label>
-                                        <input type="text" class="form-control" name="slug" id="productSlug"
+                                        <label class="fw-semibold">{{ __('products.slug') }}</label>
+                                        <input type="text" class="form-control ltr-field" name="slug" id="productSlug"
                                             value="{{ $product->slug ?? '' }}" placeholder="auto-generated" readonly>
                                     </div>
                                     @if (getRoleName() == RoleNames::SUPERADMIN)
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Business <span
+                                        <label class="fw-semibold">{{ __('products.business') }} <span
                                                 class="text-danger">*</span></label>
                                         <select class="form-select" name="business_id" id="business_id" required>
-                                            <option value="">--Select Business--</option>
+                                            <option value="">{{ __('products.select_business') }}</option>
                                             @foreach ($businesses as $item)
                                             <option value="{{ $item->business_id }}"
                                                 {{ isset($product) && $product->business_id == $item->business_id ? 'selected' : '' }}>
@@ -178,11 +178,11 @@ use App\Enums\RoleNames;
                                     @endif
                                     <div class="col-md-6">
                                         <div class="d-flex align-items-center justify-content-between">
-                                            <label class="fw-semibold mb-0">Category <span class="text-danger">*</span></label>
+                                            <label class="fw-semibold mb-0">{{ __('products.category') }} <span class="text-danger">*</span></label>
                                             @include('admin.partials.quick-add-btn', ['permission' => 'category.create', 'modal' => 'quickAddCategoryModal', 'label' => 'Category'])
                                         </div>
                                         <select class="form-select" name="category_id" id="category_id" required>
-                                            <option value="">--Select Category--</option>
+                                            <option value="">{{ __('products.select_category') }}</option>
                                             @if (getRoleName() != RoleNames::SUPERADMIN)
                                             @foreach ($categories as $item)
                                             <option value="{{ $item->category_id }}"
@@ -195,21 +195,21 @@ use App\Enums\RoleNames;
                                     </div>
                                     <div class="col-md-6">
                                         <div class="d-flex align-items-center justify-content-between">
-                                            <label class="fw-semibold mb-0">Sub Category</label>
+                                            <label class="fw-semibold mb-0">{{ __('products.sub_category') }}</label>
                                             @include('admin.partials.quick-add-btn', ['permission' => 'sub-category.create', 'modal' => 'quickAddSubCategoryModal', 'label' => 'Sub Category'])
                                         </div>
                                         <select class="form-select" name="sub_category_id" id="sub_category_id">
-                                            <option value="">--Select Sub Category--</option>
+                                            <option value="">{{ __('products.select_sub_category') }}</option>
 
                                         </select>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="d-flex align-items-center justify-content-between">
-                                            <label class="fw-semibold mb-0">Brand <span class="text-danger">*</span></label>
+                                            <label class="fw-semibold mb-0">{{ __('products.brand') }} <span class="text-danger">*</span></label>
                                             @include('admin.partials.quick-add-btn', ['permission' => 'brand.create', 'modal' => 'quickAddBrandModal', 'label' => 'Brand'])
                                         </div>
                                         <select class="form-select" name="brand_id" id="brand_id" required>
-                                            <option value="">--Select Brand--</option>
+                                            <option value="">{{ __('products.select_brand') }}</option>
                                             @if (getRoleName() != RoleNames::SUPERADMIN)
                                             @foreach ($brands as $item)
                                             <option value="{{ $item->brand_id }}"
@@ -221,34 +221,34 @@ use App\Enums\RoleNames;
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Type</label>
+                                        <label class="fw-semibold">{{ __('products.type') }}</label>
                                         <select class="form-select" name="type" id="productType">
                                             <option value="single"
                                                 {{ isset($product) && $product->type == 'single' ? 'selected' : '' }}>
-                                                Single</option>
+                                                {{ __('products.type_single') }}</option>
                                             <option value="variable"
                                                 {{ isset($product) && $product->type == 'variable' ? 'selected' : '' }}>
-                                                Variable</option>
+                                                {{ __('products.type_variable') }}</option>
                                             <option value="service"
                                                 {{ isset($product) && $product->type == 'service' ? 'selected' : '' }}>
-                                                Service</option>
+                                                {{ __('products.type_service') }}</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Usage type</label>
+                                        <label class="fw-semibold">{{ __('products.usage_type') }}</label>
                                         <select class="form-select" name="usage_type">
                                             <option value="saleable"
                                                 {{ isset($product) && $product->usage_type == 'saleable' ? 'selected' : '' }}>
-                                                Saleable</option>
+                                                {{ __('products.usage_saleable') }}</option>
                                             <option value="consumable"
                                                 {{ isset($product) && $product->usage_type == 'consumable' ? 'selected' : '' }}>
-                                                Consumable</option>
+                                                {{ __('products.usage_consumable') }}</option>
                                             <option value="asset"
                                                 {{ isset($product) && $product->usage_type == 'asset' ? 'selected' : '' }}>
-                                                Asset</option>
+                                                {{ __('products.usage_asset') }}</option>
                                             <option value="service"
                                                 {{ isset($product) && $product->usage_type == 'service' ? 'selected' : '' }}>
-                                                Service</option>
+                                                {{ __('products.usage_service') }}</option>
                                         </select>
                                     </div>
                                     <div class="col-12">
@@ -257,50 +257,50 @@ use App\Enums\RoleNames;
                                                 <input class="form-check-input" type="checkbox" name="is_track_stock"
                                                     id="trackStock"
                                                     {{ isset($product) && $product->is_track_stock ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="trackStock">Track stock</label>
+                                                <label class="form-check-label" for="trackStock">{{ __('products.track_stock') }}</label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="is_pos_visible"
                                                     id="posVisible"
                                                     {{ isset($product) && $product->is_pos_visible ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="posVisible">POS visible</label>
+                                                <label class="form-check-label" for="posVisible">{{ __('products.pos_visible') }}</label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox"
                                                     name="is_website_visible" id="webVisible"
                                                     {{ isset($product) && $product->is_website_visible ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="webVisible">Website</label>
+                                                <label class="form-check-label" for="webVisible">{{ __('products.website') }}</label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="is_app_visible"
                                                     id="appVisible"
                                                     {{ isset($product) && $product->is_app_visible ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="appVisible">App</label>
+                                                <label class="form-check-label" for="appVisible">{{ __('products.app') }}</label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="is_featured"
                                                     id="featured" value="1"
                                                     {{ isset($product) && $product->is_featured ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="featured">Featured</label>
+                                                <label class="form-check-label" for="featured">{{ __('products.featured') }}</label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="is_trending"
                                                     id="trending" value="1"
                                                     {{ isset($product) && $product->is_trending ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="trending">Trending</label>
+                                                <label class="form-check-label" for="trending">{{ __('products.trending') }}</label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="is_best_seller"
                                                     id="bestSeller" value="1"
                                                     {{ isset($product) && $product->is_best_seller ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="bestSeller">Best Seller</label>
+                                                <label class="form-check-label" for="bestSeller">{{ __('products.best_seller') }}</label>
                                             </div>
                                             @if (($customer_setting->loyalty_program ?? false) && ($customer_setting->loyalty_earning_mode ?? null) == 'product')
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="is_loyalty_enabled"
                                                     id="loyaltyEnabled" value="1"
                                                     {{ old('is_loyalty_enabled', $product->is_loyalty_enabled ?? false) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="loyaltyEnabled">Loyalty Enabled</label>
+                                                <label class="form-check-label" for="loyaltyEnabled">{{ __('products.loyalty_enabled') }}</label>
                                             </div>
                                             @endif
                                         </div>
@@ -312,11 +312,11 @@ use App\Enums\RoleNames;
                         <!-- VARIATIONS -->
                         <div class="card mb-4">
                             <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                                <span><i class="fa fa-tags me-1"></i>Variations</span>
+                                <span><i class="fa fa-tags me-1"></i>{{ __('products.variations') }}</span>
                                 <div>
                                     <span class="badge bg-secondary me-2" id="variationCount">0</span>
                                     <button type="button" class="btn btn-sm btn-primary" id="openVariationModalBtn">
-                                        <i class="fa fa-plus"></i> Add Variation
+                                        <i class="fa fa-plus"></i> {{ __('products.add_variation') }}
                                     </button>
                                 </div>
                             </div>
@@ -325,9 +325,9 @@ use App\Enums\RoleNames;
                                     <table class="table table-bordered table-hover" id="variationTable">
                                         <thead class="table-light">
                                             <tr>
-                                                <th>Name</th>
-                                                <th>SKU</th>
-                                                <th>Sale Price</th>
+                                                <th>{{ __('products.name') }}</th>
+                                                <th>{{ __('products.sku') }}</th>
+                                                <th>{{ __('products.sale_price') }}</th>
                                                 <th>Attributes</th>
                                                 <th style="width: 100px;">Actions</th>
                                             </tr>
@@ -349,17 +349,17 @@ use App\Enums\RoleNames;
 
                         <!-- DESCRIPTIONS -->
                         <div class="card mb-4">
-                            <div class="card-header bg-light"><i class="fa fa-align-left me-1"></i>Descriptions</div>
+                            <div class="card-header bg-light"><i class="fa fa-align-left me-1"></i>{{ __('products.descriptions') }}</div>
                             <div class="card-body">
                                 <div class="row g-3">
                                     <div class="col-12">
-                                        <label class="fw-semibold">Short description</label>
+                                        <label class="fw-semibold">{{ __('products.short_description') }}</label>
                                         <input type="text" class="form-control" name="short_description"
                                             value="{{ $product->short_description ?? '' }}"
                                             placeholder="Brief summary">
                                     </div>
                                     <div class="col-12">
-                                        <label class="fw-semibold">Full description</label>
+                                        <label class="fw-semibold">{{ __('products.full_description') }}</label>
                                         <textarea class="form-control" name="description" rows="3" placeholder="Detailed description">{{ $product->description ?? '' }}</textarea>
                                     </div>
                                 </div>
@@ -369,7 +369,7 @@ use App\Enums\RoleNames;
                         <!-- FEATURES -->
                         <div class="card mb-4" id="featuresCard">
                             <div class="card-header bg-light">
-                                <i class="fa fa-list me-1"></i>Features
+                                <i class="fa fa-list me-1"></i>{{ __('products.features') }}
                                 <span class="badge bg-secondary ms-2" id="featureCount">0</span>
                             </div>
                             <div class="card-body">
@@ -384,7 +384,7 @@ use App\Enums\RoleNames;
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-primary w-100" id="addFeatureBtn">
-                                            <i class="fa fa-plus"></i> Add
+                                            <i class="fa fa-plus"></i> {{ __('products.add') }}
                                         </button>
                                     </div>
                                     <div class="col-12 mt-2">
@@ -401,9 +401,9 @@ use App\Enums\RoleNames;
             <div class="card-footer border-top sticky-footer">
                 <div class="d-flex justify-content-end gap-2">
                     <button type="button" class="btn btn-outline-secondary"
-                        onclick="history.back()">Cancel</button>
+                        onclick="history.back()">{{ __('products.cancel') }}</button>
                     <button type="submit" class="btn btn-primary px-4" id="saveProductBtn">
-                        <i class="fa fa-save me-1"></i> {{ isset($product) ? 'Update' : 'Save' }} Product
+                        <i class="fa fa-save me-1"></i> {{ isset($product) ? __('products.update_product_button') : __('products.save_product') }}
                     </button>
                 </div>
             </div>

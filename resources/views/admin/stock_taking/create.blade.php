@@ -4,10 +4,10 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">{{ isset($stock_taking) ? 'Update' : 'New' }} Stock Taking</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ isset($stock_taking) ? 'Update' : 'New' }} {{ __('stock_taking.title') }}</h4>
         <div class="card">
             <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0">{{ isset($stock_taking) ? 'Update' : 'Create' }} Stock Taking</h5>
+                <h5 class="mb-0">{{ isset($stock_taking) ? 'Update' : 'Create' }} {{ __('stock_taking.title') }}</h5>
             </div>
             <div class="card-body">
                 <form action="{{ url('admin/stock-taking') }}" method="POST" id="stockTakingForm">
@@ -17,9 +17,9 @@
                     <div class="row">
                         @if (!empty($business) && RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3 mb-3">
-                                <label>Business <span class="text-danger">*</span></label>
+                                <label>{{ __('common.business') }} <span class="text-danger">*</span></label>
                                 <select class="form-control select2" name="business_id" id="business_id">
-                                    <option value="">--Select Business--</option>
+                                    <option value="">{{ __('common.select_business') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}"
                                             {{ old('business_id', $stock_taking->business_id ?? '') == $item->business_id ? 'selected' : '' }}>
@@ -31,11 +31,11 @@
                         @endif
                         <div class="col-md-3 mb-3">
                             <label>
-                                Warehouse<span class="text-danger">*</span>
+                                {{ __('common.warehouse') }}<span class="text-danger">*</span>
                             </label>
                             <select class="form-control select2" name="warehouse_id" id="warehouse_id"
                                 {{ isset($stock_taking) ? 'disabled' : '' }}>
-                                <option value="">--Select Warehouse--</option>
+                                <option value="">{{ __('common.select_warehouse') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}"
                                         {{ old('warehouse_id', $stock_taking->warehouse_id ?? '') == $item->warehouse_id ? 'selected' : '' }}>
@@ -48,22 +48,22 @@
                             @endif
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Stock Taking No.</label>
+                            <label>{{ __('stock_taking.title') }} No.</label>
                             <input type="text" class="form-control" name="stock_taking_no" readonly
-                                value="{{ $stock_taking->stock_taking_no ?? ($stock_taking_no ?? 'Auto Generated') }}">
+                                value="{{ $stock_taking->stock_taking_no ?? ($stock_taking_no ?? '{{ __('common.auto_generated') }}') }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Date</label>
+                            <label>{{ __('common.date') }}</label>
                             <input type="text" class="form-control datepicker" name="stock_taking_date"
                                 value="{{ old('stock_taking_date', isset($stock_taking) ? localDate($stock_taking->stock_taking_date) : localDate(date('Y-m-d'))) }}">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label>Reference</label>
+                            <label>{{ __('common.reference') }}</label>
                             <input type="text" class="form-control" name="reference"
                                 value="{{ old('reference', $stock_taking->reference ?? '') }}">
                         </div>
                         <div class="col-md-9 mb-3">
-                            <label>Notes</label>
+                            <label>{{ __('common.notes') }}</label>
                             <textarea class="form-control" rows="1" name="description">{{ old('description', $stock_taking->description ?? '') }}</textarea>
                         </div>
                     </div>
@@ -88,14 +88,14 @@
                             <table class="table table-bordered table-striped" id="productTable">
                                 <thead>
                                     <tr>
-                                        <th style="min-width:220px;">Product</th>
-                                        <th style="min-width:150px;">Variation</th>
-                                        <th style="min-width:90px;">Unit</th>
-                                        <th style="min-width:120px;">System Qty</th>
-                                        <th style="min-width:130px;">Physical Qty</th>
-                                        <th style="min-width:110px;">Difference</th>
-                                        <th style="min-width:130px;">Diff. Value</th>
-                                        <th style="min-width:180px;">Reason</th>
+                                        <th style="min-width:220px;">{{ __('common.product') }}</th>
+                                        <th style="min-width:150px;">{{ __('common.variation') }}</th>
+                                        <th style="min-width:90px;">{{ __('common.unit') }}</th>
+                                        <th style="min-width:120px;">{{ __('stock_taking.system_qty') }}</th>
+                                        <th style="min-width:130px;">{{ __('stock_taking.physical_qty') }}</th>
+                                        <th style="min-width:110px;">{{ __('stock_taking.difference') }}</th>
+                                        <th style="min-width:130px;">{{ __('stock_taking.diff_value') }}</th>
+                                        <th style="min-width:180px;">{{ __('common.reason') }}</th>
                                         <th style="width:50px;"></th>
                                     </tr>
                                 </thead>
@@ -115,13 +115,13 @@
                         <div class="offset-md-8 col-md-4">
                             <table class="table table-bordered">
                                 <tr>
-                                    <th>Total Difference Qty</th>
+                                    <th>Total {{ __('stock_taking.difference') }} Qty</th>
                                     <td>
                                         <input class="form-control" id="total_difference_quantity" readonly>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>Total Difference Value</th>
+                                    <th>Total {{ __('stock_taking.difference') }} Value</th>
                                     <td>
                                         <input class="form-control fw-bold" id="total_difference_value" readonly>
                                     </td>
@@ -132,7 +132,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <button class="text-end btn btn-primary" id="submitBtn">
-                                {{ isset($stock_taking) ? 'Update Stock Taking' : 'Save Stock Taking' }}
+                                {{ isset($stock_taking) ? 'Update {{ __('stock_taking.title') }}' : 'Save {{ __('stock_taking.title') }}' }}
                             </button>
                         </div>
                     </div>
@@ -180,7 +180,7 @@
         $(document).on('change', '#business_id', function() {
             let businessId = $(this).val();
 
-            $('#warehouse_id').html('<option value="">--Select Warehouse--</option>');
+            $('#warehouse_id').html('<option value="">{{ __('common.select_warehouse') }}</option>');
             productsData = [];
             resetProductRows();
 
@@ -201,7 +201,7 @@
                     $('#warehouse_id').prop('disabled', true).html('<option>Loading...</option>');
                 },
                 success: function(response) {
-                    let html = '<option value="">--Select Warehouse--</option>';
+                    let html = '<option value="">{{ __('common.select_warehouse') }}</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, warehouse) {
                             html += `<option value="${warehouse.warehouse_id}">${warehouse.name}</option>`;
@@ -210,7 +210,7 @@
                     $('#warehouse_id').html(html).prop('disabled', false);
                 },
                 error: function() {
-                    $('#warehouse_id').html('<option value="">--Select Warehouse--</option>').prop('disabled', false);
+                    $('#warehouse_id').html('<option value="">{{ __('common.select_warehouse') }}</option>').prop('disabled', false);
                     errorMessage('Unable to load warehouses.');
                 }
             });
@@ -321,12 +321,12 @@
         <tr class="product-row">
             <td>
                 <select name="products[${index}][product_id]" class="form-control manual-product-select">
-                    <option value="">--Select Product--</option>
+                    <option value="">{{ __('common.select_product') }}</option>
                 </select>
             </td>
             <td>
                 <select name="products[${index}][product_variation_id]" class="form-control manual-variation-select">
-                    <option value="">--Select Variation--</option>
+                    <option value="">{{ __('common.select_variation') }}</option>
                 </select>
             </td>
             <td>
@@ -357,7 +357,7 @@
         }
 
         function loadManualProductDropdown(row) {
-            let html = `<option value="">--Select Product--</option>`;
+            let html = `<option value="">{{ __('common.select_product') }}</option>`;
             $.each(productsData, function(_, product) {
                 html += `<option value="${product.product_id}">${product.name}</option>`;
             });
@@ -368,7 +368,7 @@
             let row = $(this).closest('tr');
             let productId = $(this).val();
 
-            row.find('.manual-variation-select').html('<option value="">--Select Variation--</option>');
+            row.find('.manual-variation-select').html('<option value="">{{ __('common.select_variation') }}</option>');
             row.find('.selected-unit-id').val('');
             row.find('.selected-unit-name').html('-');
             row.data('system_quantity', 0);
@@ -386,7 +386,7 @@
                     row.find('.manual-variation-select').html('<option>Loading...</option>');
                 },
                 success: function(response) {
-                    let html = '<option value="">--Select Variation--</option>';
+                    let html = '<option value="">{{ __('common.select_variation') }}</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, variation) {
                             html += `
@@ -451,7 +451,7 @@
             <td>
                 <input type="text" class="form-control physical-qty" name="products[${index}][physical_quantity]"
                     value="${decimal(physical_quantity)}" ${isSerialTracked ? 'readonly' : ''}>
-                ${isSerialTracked ? '<small class="text-muted d-block">Serial-tracked - reconcile via Serial Number screens</small>' : ''}
+                ${isSerialTracked ? '<small class="text-muted d-block">{{ __('stock_taking.serial_tracked_hint') }}</small>' : ''}
             </td>
             <td class="difference-qty">${decimal(0)}</td>
             <td class="difference-value">${decimal(0)}</td>

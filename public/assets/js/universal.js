@@ -93,8 +93,8 @@ function ajaxRequest({
                     xhr.responseJSON?.Message ||
                     xhr.responseJSON?.ErrorMessage ||
                     xhr.responseJSON?.message ||
-                    (xhr.status === 404 ? "Record or route not found" : null) ||
-                    "Something went wrong";
+                    (xhr.status === 404 ? (window.i18n?.record_not_found || "Record or route not found") : null) ||
+                    (window.i18n?.something_went_wrong || "Something went wrong");
 
                 reject({
                     Message: message,
@@ -235,18 +235,18 @@ function deleteRecord({
     buttonClass,
     url,
     tableCallback = null,
-    text = "You won't be able to revert this!",
+    text = window.i18n?.confirm_delete_text || "You won't be able to revert this!",
 }) {
     $("body").off("click", buttonClass).on("click", buttonClass, function () {
 
         let id = $(this).data("id");
 
         Swal.fire({
-            title: "Are you sure?",
+            title: window.i18n?.confirm_delete_title || "Are you sure?",
             text: text,
             icon: "warning",
             showCancelButton: true,
-            confirmButtonText: "Yes, delete it!",
+            confirmButtonText: window.i18n?.confirm_delete_button || "Yes, delete it!",
         }).then((result) => {
 
             if (result.isConfirmed) {
@@ -264,7 +264,7 @@ function deleteRecord({
                         }
                     })
                     .catch((err) => {
-                        errorMessage(err.Message || "Delete failed");
+                        errorMessage(err.Message || window.i18n?.delete_failed || "Delete failed");
                     });
             }
         });

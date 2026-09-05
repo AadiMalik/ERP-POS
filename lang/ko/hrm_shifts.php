@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => '교대',
+    'singular' => 'Shift',
+    'new_heading' => '新建 Shift',
+    'update_heading' => '更新 Shift',
+    'save_shift' => '保存 Shift',
+    'create_new' => '创建 新建 Shift',
+    'edit_heading' => '编辑 Shift',
+    'start_time' => 'Start 时间',
+    'end_time' => 'End 时间',
+    'grace_minutes' => 'Grace Minutes',
+    'break_duration_minutes' => 'Break Duration (minutes)',
+    'grace_period_minutes' => 'Grace Period (minutes)',
+    'grace_period_hint' => 'Minutes an employee may check in late without being marked "Late".',
+    'working_days' => 'Working Days',
+    'add_new_shift' => 'Add New Shift',
+    'day_mon' => 'Monday',
+    'day_tue' => 'Tuesday',
+    'day_wed' => 'Wednesday',
+    'day_thu' => 'Thursday',
+    'day_fri' => 'Friday',
+    'day_sat' => 'Saturday',
+    'day_sun' => 'Sunday',
+];

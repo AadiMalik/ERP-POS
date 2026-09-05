@@ -18,7 +18,7 @@
                 <div class="d-flex gap-2">
                     @include('admin.partials.import-export-buttons', [
                         'importExportModule' => 'recurring-transaction',
-                        'importExportLabel' => 'Recurring Transactions',
+                        'importExportLabel' => __('recurring_transactions.title'),
                         'importExportRefreshFn' => 'initDataTablerecurring_transaction_table',
                         'importExportExportParamsSelector' => '#business_id',
                     ])
@@ -35,9 +35,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }}
                                             {{ $item->name ?? '' }}
@@ -47,35 +47,35 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Transaction Type</label>
+                            <label class="form-label">{{ __('recurring_transactions.transaction_type') }}</label>
                             <select id="transaction_type" class="form-select">
-                                <option value="">--All Types--</option>
+                                <option value="">{{ __('common.all_types') }}</option>
                                 @foreach ($types as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
-                                <option value="">--All Statuses--</option>
-                                <option value="active">Active</option>
-                                <option value="paused">Paused</option>
-                                <option value="completed">Completed</option>
-                                <option value="cancelled">Cancelled</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
+                                <option value="active">{{ __('common.active') }}</option>
+                                <option value="paused">{{ __('common.paused') }}</option>
+                                <option value="completed">{{ __('common.completed') }}</option>
+                                <option value="cancelled">{{ __('common.cancelled') }}</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Frequency</label>
+                            <label class="form-label">{{ __('common.frequency') }}</label>
                             <select id="frequency" class="form-select">
-                                <option value="">--All Frequencies--</option>
+                                <option value="">{{ __('recurring_transactions.all_frequencies') }}</option>
                                 @foreach ($frequencies as $item)
                                     <option value="{{ $item }}">{{ ucfirst($item) }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Next Run From</label>
+                            <label class="form-label">{{ __('recurring_transactions.next_run_from') }}</label>
                             <input type="text" id="next_run_from" class="form-control datepicker">
                         </div>
                         <div class="col-md-3">
@@ -96,15 +96,15 @@
                     <table id="recurring_transaction_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Frequency</th>
-                                <th>Next Run</th>
-                                <th>Last Run</th>
-                                <th>Branch</th>
-                                <th>Business</th>
-                                <th>Status</th>
-                                <th>Action</th>
+                                <th>{{ __('common.name') }}</th>
+                                <th>{{ __('common.type') }}</th>
+                                <th>{{ __('common.frequency') }}</th>
+                                <th>{{ __('common.next_run') }}</th>
+                                <th>{{ __('common.last_run') }}</th>
+                                <th>{{ __('common.branch') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>

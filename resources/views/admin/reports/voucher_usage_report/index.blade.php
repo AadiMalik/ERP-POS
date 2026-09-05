@@ -4,12 +4,12 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Voucher Usage Report</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.voucher_usage_report') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
-                        <i class="fa fa-filter"></i> Filters
+                        <i class="fa fa-filter"></i> {{ __('common.filters') }}
                     </button>
                 </div>
             </div>
@@ -18,9 +18,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }} {{ $item->name ?? '' }}</option>
                                     @endforeach
@@ -28,7 +28,7 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Voucher</label>
+                            <label class="form-label">{{ __('common.reference') }}</label>
                             <select id="voucher_id" class="form-select">
                                 <option value="">--All Vouchers--</option>
                                 @foreach ($vouchers as $item)
@@ -37,12 +37,12 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Period</label>
+                            <label class="form-label">{{ __('common.period') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
-                            <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -69,11 +69,11 @@
                                 <th>Used At</th>
                                 <th>Voucher Code</th>
                                 <th>Voucher Name</th>
-                                <th>Customer</th>
-                                <th>Email</th>
-                                <th>Order #</th>
+                                <th>{{ __('common.customer') }}</th>
+                                <th>{{ __('common.email') }}</th>
+                                <th>{{ __('reports.col_order_hash') }}</th>
                                 <th>Order Status</th>
-                                <th>Discount</th>
+                                <th>{{ __('reports.col_discount') }}</th>
                             </tr>
                         </thead>
                         <tbody></tbody>

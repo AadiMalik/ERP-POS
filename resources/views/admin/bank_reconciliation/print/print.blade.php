@@ -57,7 +57,7 @@
         </p>
     @endif
 
-    <h4 style="margin-top:16px;">Matched Items</h4>
+    <h4 style="margin-top:16px;">{{ __('Matched Items') }}</h4>
     <table class="print-table">
         <thead>
             <tr>

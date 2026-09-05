@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'د عرضه کوونکو تادیات',
+    'singular' => 'Supplier ادائیگی',
+    'payment_no' => 'ادائیگی No',
+    'new_heading' => 'نیا Supplier ادائیگی',
+    'update_heading' => 'اپ ڈیٹ Supplier ادائیگی',
+    'save_payment' => 'محفوظ ادائیگی',
+    'select_supplier' => '--منتخب کریں Supplier--',
+    'payment_method' => 'ادائیگی Method',
+    'select_payment_method' => '--منتخب کریں ادائیگی Method--',
+    'paid_amount' => 'Paid رقم',
+    'allocate_to_purchases' => 'تمامocate to Purchases',
+    'outstanding' => 'Outstanding',
+    'create_heading' => 'Create Supplier Payment',
+    'update_payment' => 'Update Payment',
+    'supplier_balance' => 'Supplier Balance',
+    'reference_purchase_optional' => 'Reference Purchase (Optional)',
+    'reference_service_purchase_optional' => 'Reference Service Purchase (Optional)',
+    'advance_on_account' => '--Advance / On Account--',
+    'cheque_date' => 'Cheque Date',
+    'supplier_coa' => 'Supplier COA',
+    'tax_withholding' => 'Tax Amount (Withholding)',
+];

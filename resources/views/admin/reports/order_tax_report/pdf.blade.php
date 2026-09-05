@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Order Tax Report',
+        'title' => __('reports.order_tax_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,15 +56,15 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Order No</th>
-                <th>Date</th>
-                <th>Product</th>
-                <th>Variation</th>
-                <th>SKU</th>
+                <th>{{ __('reports.col_order_no') }}</th>
+                <th>{{ __('reports.col_date') }}</th>
+                <th>{{ __('reports.col_product') }}</th>
+                <th>{{ __('reports.col_variation') }}</th>
+                <th>{{ __('reports.col_sku') }}</th>
                 <th class="text-right">Tax Rate (%)</th>
                 <th class="text-right">Taxable Amount</th>
                 <th class="text-right">Tax Amount</th>
-                <th class="text-right">Total</th>
+                <th class="text-right">{{ __('reports.col_total') }}</th>
             </tr>
         </thead>
         <tbody>

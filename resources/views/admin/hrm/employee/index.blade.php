@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Employees</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('hrm_employees.title') }}</h4>
 
     @if (session('generated_password'))
     <div class="alert alert-success">
@@ -17,19 +17,19 @@
             <div>
                 <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                     <i class="fa fa-filter"></i>
-                    Filters
+                    {{ __('common.filters') }}
                 </button>
             </div>
             <div class="d-flex gap-2">
                 @include('admin.partials.import-export-buttons', [
                     'importExportModule' => 'employee',
-                    'importExportLabel' => 'Employees',
+                    'importExportLabel' => __('hrm_employees.title'),
                     'importExportRefreshFn' => 'initDataTableemployee_table',
                 ])
                 @can('employee.create')
                 <a href="{{ url('admin/employee/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
-                    Add New
+                    {{ __('common.add_new') }}
                 </a>
                 @endcan
             </div>
@@ -38,19 +38,19 @@
             <div id="filterSection" class="card-body border-bottom" style="display:none;">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label class="form-label">Department</label>
+                        <label class="form-label">{{ __('hrm_employees.department') }}</label>
                         <select id="department_id" class="form-select">
-                            <option value="">--All Departments--</option>
+                            <option value="">{{ __('hrm_employees.all_departments') }}</option>
                             @foreach ($departments as $item)
                             <option value="{{ $item->department_id }}">{{ $item->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Status</label>
+                        <label class="form-label">{{ __('common.status') }}</label>
                         <select id="status" class="form-select">
-                            <option value="">--All Status--</option>
-                            <option value="active">Active</option>
+                            <option value="">{{ __('common.all_statuses') }}</option>
+                            <option value="active">{{ __('common.active') }}</option>
                             <option value="on_leave">On Leave</option>
                             <option value="suspended">Suspended</option>
                             <option value="resigned">Resigned</option>
@@ -58,8 +58,8 @@
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
-                        <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                        <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                     </div>
                 </div>
             </div>
@@ -67,13 +67,13 @@
                 <table id="employee_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Department</th>
-                            <th>Designation</th>
-                            <th>Branch</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('common.email') }}</th>
+                            <th>{{ __('hrm_employees.department') }}</th>
+                            <th>{{ __('hrm_employees.designation') }}</th>
+                            <th>{{ __('common.branch') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

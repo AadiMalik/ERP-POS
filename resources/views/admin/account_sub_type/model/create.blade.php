@@ -14,9 +14,9 @@
                     <div class="row">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-12">
-                                <label class="form-label">Business <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('common.business') }} <span class="text-danger">*</span></label>
                                 <select id="business_id" name="business_id" class="form-select" required>
-                                    <option value="">--Select Business--</option>
+                                    <option value="">{{ __('common.select_business') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">
                                             {{ isset($item->code) ? $item->code : '' }}
@@ -27,9 +27,9 @@
                             </div>
                         @endif
                         <div class="col-md-12">
-                            <label class="form-label">Account Type <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('account_sub_types.account_type') }} <span class="text-danger">*</span></label>
                             <select id="account_type_id" name="account_type_id" class="form-select" required disabled>
-                                <option value="">--Select Account Type--</option>
+                                <option value="">{{ __('account_sub_types.select_account_type') }}</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                 @foreach ($account_types as $item)
                                     <option value="{{ $item->account_type_id }}">
@@ -45,20 +45,20 @@
                                 Code <span class="text-danger">*</span>
                             </label>
                             <input type="text" class="form-control" id="code" name="code"
-                                placeholder="Enter Code" Required>
+                                placeholder="{{ __('common.enter_code') }}" Required>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label class="form-label">
                                 Name <span class="text-danger">*</span>
                             </label>
                             <input type="text" class="form-control" id="name" name="name"
-                                placeholder="Enter Name" disabled>
+                                placeholder="{{ __('common.enter_name') }}" disabled>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label class="form-label">
                                 Description <span class="text-danger">*</span>
                             </label>
-                            <textarea class="form-control" id="description" name="description" placeholder="Enter Description" disabled></textarea>
+                            <textarea class="form-control" id="description" name="description" placeholder="{{ __('common.enter_description') }}" disabled></textarea>
                         </div>
                     </div>
                 </div>

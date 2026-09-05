@@ -34,14 +34,14 @@
                     <thead>
                         <tr>
                             <th>Invoice #</th>
-                            <th>Business</th>
+                            <th>{{ __('common.business') }}</th>
                             <th>Package</th>
                             <th>Type</th>
                             <th>Total</th>
                             <th>Invoice</th>
                             <th>Payment</th>
-                            <th>Date</th>
-                            <th>Action</th>
+                            <th>{{ __('common.date') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>
@@ -112,7 +112,7 @@
                         successMessage('Invoice deleted');
                         initDataTableinvoices_table();
                         refreshPendingBadge();
-                    }).catch((e) => errorMessage(e.Message ?? 'Something went wrong'));
+                    }).catch((e) => errorMessage(e.Message ?? __('common.something_went_wrong')));
                 });
             });
 
@@ -132,7 +132,7 @@
                         successMessage('Payment confirmed');
                         initDataTableinvoices_table();
                         refreshPendingBadge();
-                    }).catch((e) => errorMessage(e.Message ?? 'Something went wrong'));
+                    }).catch((e) => errorMessage(e.Message ?? __('common.something_went_wrong')));
                 });
             });
 
@@ -154,7 +154,7 @@
                         successMessage('Payment rejected');
                         initDataTableinvoices_table();
                         refreshPendingBadge();
-                    }).catch((e) => errorMessage(e.Message ?? 'Something went wrong'));
+                    }).catch((e) => errorMessage(e.Message ?? __('common.something_went_wrong')));
                 });
             });
         });

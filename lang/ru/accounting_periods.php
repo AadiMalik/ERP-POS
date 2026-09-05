@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Учетные периоды',
+    'singular' => 'Учет Период',
+    'intro' => 'Advanced Учет Режим — open/close/reopen periods manually. Reopening and overriding a blocked close both require a reason, which is recorded to the Activity Log.',
+    'closed_automatically' => 'Закрыт Automatically',
+    'close_period' => 'Закрыть период',
+    'reopen_period' => 'Открыть период снова',
+    'pending_close' => 'Pending Закрыть',
+    'reason_override' => 'Причина (required if overriding pending items)',
+    'close_anyway' => 'Закрыть anyway, even though items are pending',
+    'blocked_message' => 'This period has pending items and was not closed. Resolve them, or tick "Закрыть anyway" with a reason to override.',
+    'reason_required_reopen' => 'A reason is required to reopen this period.',
+    'could_not_open' => 'Could not open period',
+    'could_not_close' => 'Could not close period',
+    'could_not_reopen' => 'Could not reopen period',
+    'no_pending_issues' => 'No pending issues for this period.',
+    'pending_items' => 'Pending items:',
+    'no_periods' => 'No accounting periods yet.',
+    'open_btn' => 'Открыт',
+    'close_btn' => 'Закрыть',
+    'reopen_btn' => 'Reopen',
+    'issues_btn' => 'Issues',
+];

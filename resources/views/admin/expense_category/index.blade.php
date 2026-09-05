@@ -8,7 +8,7 @@
 @section('content')
     <!-- ========== table components start ========== -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"> Expense Categories</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('expense_categories.title') }}</h4>
 
         <!-- Basic Bootstrap Table -->
         <div class="card">
@@ -16,23 +16,23 @@
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @include('admin.partials.import-export-buttons', [
                         'importExportModule' => 'expense-category',
-                        'importExportLabel' => 'Expense Categories',
+                        'importExportLabel' => __('expense_categories.title'),
                         'importExportRefreshFn' => 'initDataTableexpense_category_table',
                         'importExportExportParamsSelector' => '#filter_business_id',
                     ])
                     <button type="button" id="resetExpenseCategory" class="btn rounded-pill btn-info">
                         <i class="fa fa-refresh"></i>
-                        Reset to Defaults
+                        {{ __('expense_categories.reset_to_defaults') }}
                     </button>
                     <button type="button" class="btn btn-primary rounded-pill" id="addExpenseCategoryBtn">
                         <i class="fa fa-plus"></i>
-                        Add New
+                        {{ __('common.add_new') }}
                     </button>
                 </div>
             </div>
@@ -41,9 +41,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="filter_business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -53,15 +53,15 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
                             <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
+                                {{ __('common.search') }}
                             </button>
                             <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
+                                {{ __('common.reset') }}
                             </button>
                         </div>
                     </div>
@@ -70,13 +70,13 @@
                     <table id="expense_category_table" class="table display datatables" style="width:100%">
                         <thead>
                             <tr>
-                                <th>Code</th>
-                                <th>Name</th>
-                                <th>Expense Account</th>
-                                <th>Description</th>
-                                <th>Status</th>
-                                <th>Business</th>
-                                <th>Action</th>
+                                <th>{{ __('common.code') }}</th>
+                                <th>{{ __('common.name') }}</th>
+                                <th>{{ __('expense_categories.expense_account') }}</th>
+                                <th>{{ __('common.description') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                         <tbody>

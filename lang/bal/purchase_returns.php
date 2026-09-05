@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'خریداری واپسی',
+    'singular' => 'مرتجع شراء',
+    'return_type' => 'نوع المرتجع',
+    'source_no' => 'رقم المصدر',
+    'return_no' => 'رقم المرتجع',
+    'return_date' => 'تاريخ المرتجع',
+    'return_qty' => 'كمية المرتجع',
+    'returnable' => 'قابل للإرجاع',
+    'already_returned' => 'تم إرجاعه مسبقاً',
+    'select_serials_to_return' => 'اختر الأرقام التسلسلية للإرجاع',
+    'select_serials_hint' => 'اختر الأرقام التسلسلية للإرجاع.',
+    'no_available_serials' => 'لا توجد أرقام تسلسلية متاحة لهذا السطر.',
+    'no_available_serials_short' => 'لا توجد أرقام تسلسلية متاحة.',
+    'unable_load_returnable' => 'تعذر تحميل الأسطر القابلة للإرجاع.',
+    'update_heading' => 'تحديث مرتجع الشراء',
+    'new_heading' => 'مرتجع شراء جديد',
+    'create_heading' => 'إنشاء مرتجع شراء',
+    'save_return' => 'حفظ مرتجع الشراء',
+    'update_return' => 'تحديث مرتجع الشراء',
+    'select_purchase' => '--اختر الشراء--',
+    'select_grn' => '--اختر إذن استلام البضاعة--',
+];

@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Offline Orders Report')
+@section('title', __('reports.offline_orders_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Offline Orders Report',
+        'title' => __('reports.offline_orders_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,15 +25,15 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Order No</th>
-                <th>Date</th>
-                <th>Branch</th>
-                <th>Device</th>
-                <th>Customer</th>
-                <th>Status</th>
-                <th class="text-right">Total</th>
-                <th>Offline Local ID</th>
-                <th>Last Sync</th>
+                <th>{{ __('reports.col_order_no') }}</th>
+                <th>{{ __('reports.col_date') }}</th>
+                <th>{{ __('reports.col_branch') }}</th>
+                <th>{{ __('reports.col_device') }}</th>
+                <th>{{ __('reports.col_customer') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
+                <th class="text-right">{{ __('reports.col_total') }}</th>
+                <th>{{ __('reports.col_offline_local_id') }}</th>
+                <th>{{ __('reports.col_last_sync') }}</th>
             </tr>
         </thead>
         <tbody>

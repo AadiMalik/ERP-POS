@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'مدفوعات الموردين',
+    'singular' => 'مورد دفع',
+    'payment_no' => 'رقم الدفع',
+    'new_heading' => 'دفعة مورد جديدة',
+    'update_heading' => 'تحديث دفعة المورد',
+    'save_payment' => 'حفظ الدفع',
+    'select_supplier' => '--اختر المورد--',
+    'payment_method' => 'دفع طريقة',
+    'select_payment_method' => '--اختر طريقة الدفع--',
+    'paid_amount' => 'المبلغ المدفوع',
+    'allocate_to_purchases' => 'تخصيص للمشتريات',
+    'outstanding' => 'مستحق',
+    'create_heading' => 'Create Supplier Payment',
+    'update_payment' => 'Update Payment',
+    'supplier_balance' => 'Supplier Balance',
+    'reference_purchase_optional' => 'Reference Purchase (Optional)',
+    'reference_service_purchase_optional' => 'Reference Service Purchase (Optional)',
+    'advance_on_account' => '--Advance / On Account--',
+    'cheque_date' => 'Cheque Date',
+    'supplier_coa' => 'Supplier COA',
+    'tax_withholding' => 'Tax Amount (Withholding)',
+];

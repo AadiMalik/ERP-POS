@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'דפים ומדיניות',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'המלצות',
+    'hero_stats' => 'סטטיסטיקות ראשיות',
+    'homepage_sections' => 'קטעי דף הבית',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'הודעות יצירת קשר',
+    'newsletter_subscribers' => 'מנויי ניוזלטר',
+    'social_media' => 'רשתות חברתיות',
+    'intro_cms' => 'מערכת ניהול תוכן פתיחה',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

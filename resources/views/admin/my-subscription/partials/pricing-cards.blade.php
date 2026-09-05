@@ -12,7 +12,7 @@
 
 <section class="erp-pricing">
     <div class="erp-pricing-intro">
-        <h5>Plans &amp; Pricing</h5>
+        <h5>{{ __('Plans &amp; Pricing') }}</h5>
         <p class="text-muted">Compare packages and request an upgrade, downgrade, or renewal. Changes are reviewed by the platform operator before they take effect.</p>
     </div>
 
@@ -177,7 +177,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
                     <button type="submit" class="btn btn-primary" id="planChangeSubmit">Submit Request</button>
                 </div>
             </div>

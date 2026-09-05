@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Order Correction Report',
+        'title' => __('reports.order_correction'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,11 +56,11 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Order No</th>
-                <th>Branch</th>
-                <th>Corrected By</th>
-                <th>Reason</th>
+                <th>{{ __('reports.col_date') }}</th>
+                <th>{{ __('reports.col_order_no') }}</th>
+                <th>{{ __('reports.col_branch') }}</th>
+                <th>{{ __('reports.col_corrected_by') }}</th>
+                <th>{{ __('reports.col_reason') }}</th>
                 <th class="text-right">Previous Total</th>
                 <th class="text-right">New Total</th>
                 <th class="text-right">Difference</th>

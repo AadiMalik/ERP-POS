@@ -4,7 +4,7 @@
         ->resolve(Auth::user()->business_id);
 @endphp
 @extends('layouts.print')
-@section('title', 'Depreciation Report')
+@section('title', __('reports.depreciation_report'))
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
 @endsection
@@ -12,7 +12,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Depreciation Report',
+        'title' => __('reports.depreciation_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -21,12 +21,12 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Period</th>
-                <th>Asset</th>
-                <th>Branch</th>
+                <th>{{ __('reports.col_date') }}</th>
+                <th>{{ __('reports.col_period') }}</th>
+                <th>{{ __('reports.col_asset') }}</th>
+                <th>{{ __('reports.col_branch') }}</th>
                 <th class="text-right">Previous</th>
-                <th class="text-right">Amount</th>
+                <th class="text-right">{{ __('reports.col_amount') }}</th>
                 <th class="text-right">New Value</th>
                 <th class="text-right">Accumulated</th>
             </tr>

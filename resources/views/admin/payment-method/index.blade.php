@@ -4,7 +4,7 @@
 @section('content')
 <!-- ========== table components start ========== -->
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"> POS Payment Methods</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('payment_methods.pos_title') }}</h4>
 
     <!-- Basic Bootstrap Table -->
     <div class="card">
@@ -12,26 +12,26 @@
             <div>
                 <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                     <i class="fa fa-filter"></i>
-                    Filters
+                    {{ __('common.filters') }}
                 </button>
 
             </div>
             <a href="javascript:void(0)" id="createNewPaymentMethod" class="btn rounded-pill btn-primary">
-                <i class="icon-base fa fa-plus mr-5"></i>Add New</a>
+                <i class="icon-base fa fa-plus mr-5"></i>{{ __('common.add_new') }}</a>
         </div>
         <div class="card-body">
             <div id="filterSection" class="card-body border-bottom" style="display:none;">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label class="form-label">Date</label>
+                        <label class="form-label">{{ __('common.date') }}</label>
                         @include('admin.partials.date_filter')
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
                         <button type="button" id="search_btn" class="btn btn-primary">
-                            Search
+                            {{ __('common.search') }}
                         </button>
                         <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                            Reset
+                            {{ __('common.reset') }}
                         </button>
                     </div>
                 </div>
@@ -40,12 +40,12 @@
                 <table id="pos_payment_method_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Code</th>
-                            <th>Account</th>
-                            <th>Default</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('common.code') }}</th>
+                            <th>{{ __('common.account') }}</th>
+                            <th>{{ __('payment_methods.default') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                         <!-- end table row-->
                     </thead>
@@ -61,6 +61,16 @@
 <!-- ========== table components end ========== -->
 @endsection
 @section('js')
+@php
+    $__i18nPaymentMethods = [
+        'create_new' => __('payment_methods.create_new'),
+        'edit_heading' => __('payment_methods.edit_heading'),
+        'please_enter_name' => __('payment_methods.please_enter_name'),
+        'please_enter_code' => __('payment_methods.please_enter_code'),
+        'please_select_account' => __('payment_methods.please_select_account'),
+    ];
+@endphp
+<script>window.i18n_payment_methods = @json($__i18nPaymentMethods);</script>
 <script src="{{ asset('public/assets/js/admin/payment-method.js') }}"></script>
 @include('admin.partials.datatable', [
 'columns' => "

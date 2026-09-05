@@ -14,9 +14,9 @@
                     <div class="row">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-12 mb-3">
-                                <label class="form-label">Business <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('common.business') }} <span class="text-danger">*</span></label>
                                 <select id="business_id" name="business_id" class="form-select" required>
-                                    <option value="">--Select Business--</option>
+                                    <option value="">{{ __('common.select_business') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">
                                             {{ isset($item->code) ? $item->code : '' }}
@@ -28,18 +28,18 @@
                         @endif
                         <div class="col-md-12 mb-3">
                             <label class="form-label">
-                                Name <span class="text-danger">*</span>
+                                {{ __('common.name') }} <span class="text-danger">*</span>
                             </label>
                             <input type="text" class="form-control" id="name" name="name"
-                                placeholder="e.g. Damaged in Transit, Broken Packaging, Fridge Failure" required>
+                                placeholder="{{ __('loss_reasons.name_placeholder') }}" required>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label class="form-label">
                                 Status
                             </label>
                             <select class="form-select" id="status" name="status">
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                                <option value="active">{{ __('common.active') }}</option>
+                                <option value="inactive">{{ __('common.inactive') }}</option>
                             </select>
                         </div>
                     </div>

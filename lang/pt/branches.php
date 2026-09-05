@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Filiais',
+    'singular' => 'Sucursal',
+    'basic_information' => 'Basic Information',
+    'address_information' => 'Address Information',
+    'branch_name' => 'Sucursal Nombre',
+    'branch_code' => 'Sucursal Código',
+    'branch_email' => 'Sucursal Email',
+    'branch_phone' => 'Sucursal Phone',
+    'state' => 'State',
+    'pos_register_hours' => 'POS Automatic Register Hours',
+    'open_time' => 'Abrir Hora',
+    'close_time' => 'Cerrar Hora',
+    'open_time_hint' => 'Overrides the Negocio Predeterminado when Register Mode is Automatic. Permiso blank to use the Negocio Predeterminado.',
+    'branch_logo' => 'Sucursal Logo',
+    'previous_logo' => 'Previous Logo',
+    'jpg_png_supported' => 'JPG, PNG supported',
+    'please_select_valid_image' => 'Por favor Seleccionar a valid image file (JPG, PNG)',
+    'new_heading' => 'Nuevo Sucursal',
+    'update_heading' => 'Actualizar Sucursal',
+    'save_branch' => 'Guardar Sucursal',
+    'select_business' => '-- Seleccionar Negocio --',
+];

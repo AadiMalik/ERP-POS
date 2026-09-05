@@ -4,7 +4,7 @@ use App\Enums\RoleNames;
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Fixed Asset Depreciation</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('fixed_asset_depreciations.title') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div>
@@ -25,9 +25,9 @@ use App\Enums\RoleNames;
                 <div class="row g-3">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                     <div class="col-md-3">
-                        <label class="form-label">Business</label>
+                        <label class="form-label">{{ __('common.business') }}</label>
                         <select id="business_id" class="form-select">
-                            <option value="">--All Businesses--</option>
+                            <option value="">{{ __('common.all_businesses') }}</option>
                             @foreach ($business as $item)
                             <option value="{{ $item->business_id }}">{{ $item->code ?? '' }} {{ $item->name ?? '' }}</option>
                             @endforeach
@@ -35,9 +35,9 @@ use App\Enums\RoleNames;
                     </div>
                     @endif
                     <div class="col-md-3">
-                        <label class="form-label">Branch</label>
+                        <label class="form-label">{{ __('common.branch') }}</label>
                         <select id="branch_id" class="form-select">
-                            <option value="">--All Branches--</option>
+                            <option value="">{{ __('common.all_branches') }}</option>
                             @if (RoleNames::SUPERADMIN != getRoleName())
                             @foreach ($branches as $item)
                             <option value="{{ $item->branch_id }}">{{ $item->code ?? '' }} {{ $item->name ?? '' }}</option>
@@ -46,7 +46,7 @@ use App\Enums\RoleNames;
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Fixed Asset</label>
+                        <label class="form-label">{{ __('fixed_assets.singular') }}</label>
                         <select id="fixed_asset_id" class="form-select">
                             <option value="">--All Assets--</option>
                             @foreach ($assets as $item)
@@ -57,12 +57,12 @@ use App\Enums\RoleNames;
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Date</label>
+                        <label class="form-label">{{ __('common.date') }}</label>
                         @include('admin.partials.date_filter')
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
-                        <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                        <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                     </div>
                 </div>
             </div>
@@ -70,18 +70,18 @@ use App\Enums\RoleNames;
                 <table id="fixed_asset_depreciation_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Period</th>
-                            <th>Asset Code</th>
-                            <th>Asset Name</th>
-                            <th>Branch</th>
-                            <th>Previous Value</th>
-                            <th>Depreciation</th>
-                            <th>New Value</th>
-                            <th>Accumulated</th>
+                            <th>{{ __('common.date') }}</th>
+                            <th>{{ __('common.period') }}</th>
+                            <th>{{ __('fixed_asset_depreciations.asset_code') }}</th>
+                            <th>{{ __('fixed_asset_depreciations.asset_name') }}</th>
+                            <th>{{ __('common.branch') }}</th>
+                            <th>{{ __('fixed_asset_depreciations.previous_value') }}</th>
+                            <th>{{ __('fixed_asset_depreciations.depreciation') }}</th>
+                            <th>{{ __('fixed_asset_depreciations.new_value') }}</th>
+                            <th>{{ __('fixed_asset_depreciations.accumulated') }}</th>
                             <th>JV</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

@@ -27,8 +27,8 @@
                     <div class="mb-3"><label class="form-label">Image</label><input type="file" class="form-control" id="image" name="image" accept="image/*"><img id="image_preview" src="" style="max-height:80px;display:none;" class="img-thumbnail mt-2"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" id="saveBtn" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.close') }}</button>
+                    <button type="submit" id="saveBtn" class="btn btn-primary">{{ __('common.save') }}</button>
                 </div>
             </form>
         </div>

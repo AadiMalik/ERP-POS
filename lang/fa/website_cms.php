@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'صفحات و سیاست‌ها',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'نظرات مشتریان',
+    'hero_stats' => 'آمار برجسته صفحه اصلی',
+    'homepage_sections' => 'بخش‌های صفحه اصلی',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'پیام‌های تماس',
+    'newsletter_subscribers' => 'مشترکین خبرنامه',
+    'social_media' => 'شبکه‌های اجتماعی',
+    'intro_cms' => 'سیستم مدیریت محتوای مقدماتی',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

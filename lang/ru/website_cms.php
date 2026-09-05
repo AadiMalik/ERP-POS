@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'Страницы и политики',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'Отзывы клиентов',
+    'hero_stats' => 'Основная статистика',
+    'homepage_sections' => 'Разделы главной страницы',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'Контактные сообщения',
+    'newsletter_subscribers' => 'Подписчики рассылки',
+    'social_media' => 'Социальные сети',
+    'intro_cms' => 'CMS вводной страницы',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

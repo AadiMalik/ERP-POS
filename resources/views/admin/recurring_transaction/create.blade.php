@@ -7,7 +7,7 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">{{ isset($rt) ? 'Update' : 'New' }} Recurring Transaction</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ isset($rt) ? __('recurring_transactions.update_heading') : __('recurring_transactions.new_heading') }}</h4>
         <div class="card">
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0">{{ isset($rt) ? 'Update' : 'Create' }} Recurring Transaction</h5>

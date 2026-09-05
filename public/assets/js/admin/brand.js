@@ -19,7 +19,7 @@ $("#createNewBrand").click(function () {
       $("#status").prop("checked", true);
       $("#logo").prop("required", true);
       $("#saveBtn").show();
-      $("#modelHeading").html("Create New Brand");
+      $("#modelHeading").html(window.i18n_brands?.create_title || "Create New Brand");
       $("#ajaxModel").modal("show");
       enableForm();
 });
@@ -40,7 +40,7 @@ editRecord({
                   $("#logo_preview").hide();
             }
             $("#logo").prop("required", false);
-            $("#modelHeading").html("Edit Brand");
+            $("#modelHeading").html(window.i18n_brands?.edit_title || "Edit Brand");
             $("#saveBtn").show();
             enableForm();
             $("#ajaxModel").modal("show");
@@ -65,7 +65,7 @@ viewRecord({
             } else {
                   $("#logo_preview").hide();
             }
-            $("#modelHeading").html("View Brand");
+            $("#modelHeading").html(window.i18n_brands?.view_title || "View Brand");
             disableForm();
             $("#saveBtn").hide();
             $("#ajaxModel").modal("show");
@@ -81,7 +81,7 @@ saveRecord({
       },
       beforeSubmit: function () {
             if ($("#name").val() == "") {
-                  errorMessage("Please Enter Brand Name");
+                  errorMessage(window.i18n_brands?.please_enter_name || "Please Enter Brand Name");
                   return false;
             }
             return true;

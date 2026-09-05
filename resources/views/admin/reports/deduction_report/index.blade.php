@@ -4,36 +4,34 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            Deduction Report
-        </h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.deduction_report') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 <div class="d-flex gap-2">
                     @canAccess('reports.deduction-report.print')
                     <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary">
-                        <i class="fa fa-print"></i> Print
+                        <i class="fa fa-print"></i> {{ __('common.print') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.deduction-report.pdf')
                     <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger">
-                        <i class="fa fa-file-pdf"></i> PDF
+                        <i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.deduction-report.export')
                     <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
-                        <i class="fa fa-file-excel"></i> Excel
+                        <i class="fa fa-file-excel"></i> {{ __('common.excel') }}
                     </a>
                     @endcanAccess
                     @canAccess('reports.deduction-report.export-csv')
                     <a href="javascript:void(0);" id="btn_csv" class="btn btn-outline-success">
-                        <i class="fa fa-file-text"></i> CSV
+                        <i class="fa fa-file-text"></i> {{ __('common.csv') }}
                     </a>
                     @endcanAccess
                 </div>
@@ -43,9 +41,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }}
                                             {{ $item->name ?? '' }}
@@ -55,38 +53,34 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Department</label>
+                            <label class="form-label">{{ __('common.department') }}</label>
                             <select id="department_id" class="form-select">
-                                <option value="">--All Departments--</option>
+                                <option value="">{{ __('common.all_departments') }}</option>
                                 @foreach ($departments as $item)
                                     <option value="{{ $item->department_id }}">{{ $item->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Employee</label>
+                            <label class="form-label">{{ __('common.employee') }}</label>
                             <select id="employee_id" class="form-select">
-                                <option value="">--All Employees--</option>
+                                <option value="">{{ __('common.all_employees') }}</option>
                                 @foreach ($employees as $item)
                                     <option value="{{ $item->employee_id }}">{{ $item->user?->name }} ({{ $item->employee_code }})</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
-                                <option value="">--All Statuses--</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
                             </select>
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2 mt-3">
-                            <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
-                            </button>
-                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
-                            </button>
+                            <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                            <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                         </div>
                     </div>
                 </div>
@@ -101,15 +95,15 @@
                     <table id="deduction_report_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Employee Code</th>
-                                <th>Name</th>
-                                <th>Department</th>
-                                <th>Title</th>
-                                <th class="text-end">Amount</th>
-                                <th>Recurring</th>
-                                <th>Effective From</th>
-                                <th>Effective To</th>
-                                <th>Status</th>
+                                <th>{{ __('reports.col_employee_code') }}</th>
+                                <th>{{ __('common.name') }}</th>
+                                <th>{{ __('reports.col_department') }}</th>
+                                <th>{{ __('common.title') }}</th>
+                                <th class="text-end">{{ __('common.amount') }}</th>
+                                <th>{{ __('reports.col_recurring') }}</th>
+                                <th>{{ __('reports.col_effective_from') }}</th>
+                                <th>{{ __('reports.col_effective_to') }}</th>
+                                <th>{{ __('common.status') }}</th>
                             </tr>
                         </thead>
                     </table>

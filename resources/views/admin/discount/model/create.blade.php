@@ -14,9 +14,9 @@ use App\Enums\RoleNames;
                     <div class="row">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                         <div class="col-md-12 mb-3">
-                            <label class="form-label">Business <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('common.business') }} <span class="text-danger">*</span></label>
                             <select id="business_id" name="business_id" class="form-select" required>
-                                <option value="">--Select Business--</option>
+                                <option value="">{{ __('common.select_business') }}</option>
                                 @foreach ($business as $item)
                                 <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                     {{ $item->name ?? '' }}
@@ -29,38 +29,38 @@ use App\Enums\RoleNames;
                             <label class="form-label">
                                 Name <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" id="name" name="name" placeholder="Enter Name" required>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="{{ __('common.enter_name') }}" required>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">
                                 Type <span class="text-danger">*</span>
                             </label>
                             <select id="type" name="type" class="form-select" required>
-                                <option value="percent">Percent</option>
-                                <option value="fixed">Fixed</option>
+                                <option value="percent">{{ __('common.percent') }}</option>
+                                <option value="fixed">{{ __('common.fixed') }}</option>
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">
                                 Value <span class="text-danger">*</span>
                             </label>
-                            <input type="number" step="0.001" min="0" class="form-control" id="value" name="value" placeholder="Enter Value" required>
+                            <input type="number" step="0.001" min="0" class="form-control" id="value" name="value" placeholder="{{ __('discounts.enter_value') }}" required>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" name="status" class="form-select">
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                                <option value="active">{{ __('common.active') }}</option>
+                                <option value="inactive">{{ __('common.inactive') }}</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Close
+                        {{ __('common.close') }}
                     </button>
                     <button type="submit" id="saveBtn" class="btn btn-primary">
-                        Save
+                        {{ __('common.save') }}
                     </button>
                 </div>
 

@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'پاڼې او پالیسۍ',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'ستاینې',
+    'hero_stats' => 'د مخکنۍ پاڼې احصایې',
+    'homepage_sections' => 'د کور پاڼې برخې',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'د تماس پیغامونه',
+    'newsletter_subscribers' => 'د خبرپاڼې غړي',
+    'social_media' => 'ټولنیز رسنۍ',
+    'intro_cms' => 'د پیلیز مینځپانګې مدیریت',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

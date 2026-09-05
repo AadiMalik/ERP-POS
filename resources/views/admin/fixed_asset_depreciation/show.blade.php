@@ -2,7 +2,7 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-        <h4 class="fw-bold py-3 mb-0">Depreciation Detail</h4>
+        <h4 class="fw-bold py-3 mb-0">{{ __('fixed_asset_depreciations.run_details') }}</h4>
         <a href="{{ url('admin/fixed-asset-depreciation') }}" class="btn btn-outline-secondary">
             <i class="fa fa-arrow-left"></i> Back
         </a>

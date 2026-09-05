@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Package Details</h4>
+                <h4 class="modal-title">{{ __('Package Details') }}</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -41,7 +41,7 @@
                     </div>
 
                     <div class="col-md-12">
-                        <h5 class="mb-3">Modules &amp; Limits</h5>
+                        <h5 class="mb-3">{{ __('Modules &amp; Limits') }}</h5>
                         <div id="v_modules" class="small"></div>
                     </div>
                 </div>

@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Filialer',
+    'singular' => 'Filiale',
+    'basic_information' => 'Basic Information',
+    'address_information' => 'Address Information',
+    'branch_name' => 'Filiale Name',
+    'branch_code' => 'Filiale Code',
+    'branch_email' => 'Filiale Email',
+    'branch_phone' => 'Filiale Phone',
+    'state' => 'State',
+    'pos_register_hours' => 'POS Automatic Register Hours',
+    'open_time' => 'Öffnen Zeit',
+    'close_time' => 'Schließen Zeit',
+    'open_time_hint' => 'Overrides the Unternehmen Standard when Register Mode is Automatic. Urlaub blank to use the Unternehmen Standard.',
+    'branch_logo' => 'Filiale Logo',
+    'previous_logo' => 'Previous Logo',
+    'jpg_png_supported' => 'JPG, PNG supported',
+    'please_select_valid_image' => 'Bitte Auswählen a valid image file (JPG, PNG)',
+    'new_heading' => 'Neu Filiale',
+    'update_heading' => 'Aktualisieren Filiale',
+    'save_branch' => 'Speichern Filiale',
+    'select_business' => '-- Auswählen Unternehmen --',
+];

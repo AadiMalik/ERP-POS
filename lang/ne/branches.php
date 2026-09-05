@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'शाखाहरू',
+    'singular' => 'برانچ',
+    'basic_information' => 'Basic Information',
+    'address_information' => 'Address Information',
+    'branch_name' => 'برانچ نام',
+    'branch_code' => 'برانچ کوڈ',
+    'branch_email' => 'برانچ Email',
+    'branch_phone' => 'برانچ Phone',
+    'state' => 'State',
+    'pos_register_hours' => 'POS Automatic Register Hours',
+    'open_time' => 'کھولیں وقت',
+    'close_time' => 'بند وقت',
+    'open_time_hint' => 'Overrides the کاروبار ڈیفالٹ when Register Mode is Automatic. چھٹی blank to use the کاروبار ڈیفالٹ.',
+    'branch_logo' => 'برانچ لوگو',
+    'previous_logo' => 'Previous لوگو',
+    'jpg_png_supported' => 'JPG, PNG supported',
+    'please_select_valid_image' => 'براہ کرم منتخب کریں a valid image file (JPG, PNG)',
+    'new_heading' => 'نیا برانچ',
+    'update_heading' => 'اپ ڈیٹ برانچ',
+    'save_branch' => 'محفوظ برانچ',
+    'select_business' => '-- منتخب کریں کاروبار --',
+];

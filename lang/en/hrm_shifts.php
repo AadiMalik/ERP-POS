@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'Shifts',
+    'singular' => 'Shift',
+    'new_heading' => 'New Shift',
+    'update_heading' => 'Update Shift',
+    'save_shift' => 'Save Shift',
+    'create_new' => 'Create New Shift',
+    'edit_heading' => 'Edit Shift',
+    'start_time' => 'Start Time',
+    'end_time' => 'End Time',
+    'grace_minutes' => 'Grace Minutes',
+    'break_duration_minutes' => 'Break Duration (minutes)',
+    'grace_period_minutes' => 'Grace Period (minutes)',
+    'grace_period_hint' => 'Minutes an employee may check in late without being marked "Late".',
+    'working_days' => 'Working Days',
+    'add_new_shift' => 'Add New Shift',
+    'day_mon' => 'Monday',
+    'day_tue' => 'Tuesday',
+    'day_wed' => 'Wednesday',
+    'day_thu' => 'Thursday',
+    'day_fri' => 'Friday',
+    'day_sat' => 'Saturday',
+    'day_sun' => 'Sunday',
+];

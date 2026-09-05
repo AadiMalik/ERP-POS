@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'പേജുകൾ, നയങ്ങൾ',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'സാക്ഷ്യപത്രങ്ങൾ',
+    'hero_stats' => 'പ്രധാന സ്ഥിതിവിവരക്കണക്കുകൾ',
+    'homepage_sections' => 'ഹോംപേജ് വിഭാഗങ്ങൾ',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'ബന്ധപ്പെടൽ സന്ദേശങ്ങൾ',
+    'newsletter_subscribers' => 'വാർത്താക്കുറിപ്പ് വരിക്കാർ',
+    'social_media' => 'സോഷ്യൽ മീഡിയ',
+    'intro_cms' => 'ഇൻട്രോ സിഎംഎസ്',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

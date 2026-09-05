@@ -1,31 +1,31 @@
-@php
+﻿@php
     use App\Enums\RoleNames;
 @endphp
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">
-            Opening Stock
+            {{ __('opening_stock.title') }}
         </h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
 
                 </div>
                 <div class="d-flex gap-2">
                     @include('admin.partials.import-export-buttons', [
                         'importExportModule' => 'opening-stock',
-                        'importExportLabel' => 'Opening Stock',
+                        'importExportLabel' => __('opening_stock.title'),
                         'importExportRefreshFn' => 'initDataTableopening_stock_table',
                         'importExportExportParamsSelector' => '#business_id',
                     ])
                     <a href="{{ url('admin/opening-stock/create') }}" class="btn btn-primary rounded-pill">
                         <i class="fa fa-plus"></i>
-                        Add New
+                        {{ __('common.add_new') }}
                     </a>
                 </div>
             </div>
@@ -34,9 +34,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -46,9 +46,9 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Warehouse</label>
+                            <label class="form-label">{{ __('common.warehouse') }}</label>
                             <select id="warehouse_id" class="form-select">
-                                <option value="">--All Warehouses--</option>
+                                <option value="">{{ __('common.all_warehouses') }}</option>
                                 @foreach ($warehouses as $item)
                                     <option value="{{ $item->warehouse_id }}">{{ $item->name ?? '' }}
                                     </option>
@@ -56,9 +56,9 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
-                                <option value="">--All Statuses--</option>
+                                <option value="">{{ __('common.all_statuses') }}</option>
                                 @foreach ($statuses as $value => $label)
                                     <option value="{{ $value }}">{{ $label ?? '' }}
                                     </option>
@@ -66,15 +66,15 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
                             <button type="button" id="search_btn" class="btn btn-primary">
-                                Search
+                                {{ __('common.search') }}
                             </button>
                             <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                                Reset
+                                {{ __('common.reset') }}
                             </button>
                         </div>
                     </div>
@@ -83,14 +83,14 @@
                     <table id="opening_stock_table" class="table datatables">
                         <thead>
                             <tr>
-                                <th>Opening Stock No.</th>
-                                <th>Date</th>
-                                <th>Warehouse</th>
-                                <th>Products</th>
-                                <th>Total Value</th>
-                                <th>Status</th>
-                                <th>Business</th>
-                                <th>Action</th>
+                                <th>{{ __('opening_stock.opening_stock_no') }}</th>
+                                <th>{{ __('common.date') }}</th>
+                                <th>{{ __('common.warehouse') }}</th>
+                                <th>{{ __('common.products') }}</th>
+                                <th>{{ __('common.total_value') }}</th>
+                                <th>{{ __('common.status') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                         </thead>
                     </table>
@@ -101,6 +101,14 @@
     </div>
 @endsection
 @section('js')
+    @php
+        $__i18nOpeningStock = [
+            'something_went_wrong' => __('common.something_went_wrong'),
+        ];
+    @endphp
+    <script>
+        window.i18n_opening_stock = @json($__i18nOpeningStock);
+    </script>
     @include('admin.partials.datatable', [
         'columns' => "
                         {data:'opening_stock_no',name:'opening_stock_no'},
@@ -152,7 +160,7 @@
                 },
                 error: function() {
 
-                    errorMessage(error.Message || 'Something went wrong.');
+                    errorMessage(error.Message || window.i18n_opening_stock?.something_went_wrong || 'Something went wrong.');
                     initDataTableopening_stock_table();
                     // Previous value restore
                     select.val(select.data('old'));

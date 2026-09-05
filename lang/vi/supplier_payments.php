@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Thanh toán nhà cung cấp',
+    'singular' => 'Supplier 付款',
+    'payment_no' => '付款 No',
+    'new_heading' => '新建 Supplier 付款',
+    'update_heading' => '更新 Supplier 付款',
+    'save_payment' => '保存 付款',
+    'select_supplier' => '--选择 Supplier--',
+    'payment_method' => '付款 Method',
+    'select_payment_method' => '--选择 付款 Method--',
+    'paid_amount' => 'Paid 金额',
+    'allocate_to_purchases' => '全部ocate to Purchases',
+    'outstanding' => 'Outstanding',
+    'create_heading' => 'Create Supplier Payment',
+    'update_payment' => 'Update Payment',
+    'supplier_balance' => 'Supplier Balance',
+    'reference_purchase_optional' => 'Reference Purchase (Optional)',
+    'reference_service_purchase_optional' => 'Reference Service Purchase (Optional)',
+    'advance_on_account' => '--Advance / On Account--',
+    'cheque_date' => 'Cheque Date',
+    'supplier_coa' => 'Supplier COA',
+    'tax_withholding' => 'Tax Amount (Withholding)',
+];

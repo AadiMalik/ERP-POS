@@ -7,7 +7,7 @@ $("#createNewProductVariationUnitConversion").click(function () {
     $("#from_unit_id").val('').trigger('change.select2');
     $("#to_unit_id").val('').trigger('change.select2');
     $("#saveBtn").show();
-    $("#modelHeading").html("Create New Unit Conversion");
+    $("#modelHeading").html((window.i18n_variation_unit_conversions && window.i18n_variation_unit_conversions.create) || "Create New Unit Conversion");
     $("#ajaxModel").modal("show");
     enableForm();
 });
@@ -37,7 +37,7 @@ editRecord({
         $("#from_unit_id").val(data.from_unit_id).trigger('change');
         $("#to_unit_id").val(data.to_unit_id).trigger('change');
         $("#conversion_factor").val(data.conversion_factor);
-        $("#modelHeading").html("Edit Unit Conversion");
+        $("#modelHeading").html((window.i18n_variation_unit_conversions && window.i18n_variation_unit_conversions.edit) || "Edit Unit Conversion");
         $("#saveBtn").show();
         enableForm();
         $("#ajaxModel").modal("show");
@@ -53,7 +53,7 @@ saveRecord({
     },
     beforeSubmit: function () {
         if ($("#conversion_factor").val() == "") {
-            errorMessage("Please enter conversion factor");
+            errorMessage((window.i18n_variation_unit_conversions && window.i18n_variation_unit_conversions.please_enter_factor) || "Please enter conversion factor");
             return false;
         }
         return true;

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">{{ isset($production) ? 'Edit' : 'New' }} Production</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ isset($production) ? __('common.edit') : __('common.new') }} {{ __('manufacturing.productions_title') }}</h4>
     <form id="productionForm" method="POST" action="{{ url('admin/production/store') }}">
         @csrf
         <input type="hidden" name="production_id" value="{{ $production->production_id ?? '' }}">

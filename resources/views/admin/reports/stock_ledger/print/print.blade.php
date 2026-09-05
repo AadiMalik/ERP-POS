@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Stock Ledger & Movement Report')
+@section('title', __('reports.stock_ledger'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Stock Ledger & Movement Report',
+        'title' => __('reports.stock_ledger'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,18 +25,18 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Source Module</th>
-                <th>Reference No.</th>
-                <th>Warehouse</th>
-                <th>Product</th>
-                <th>Variation</th>
-                <th>Movement Type</th>
+                <th>{{ __('reports.col_date') }}</th>
+                <th>{{ __('reports.col_source_module') }}</th>
+                <th>{{ __('reports.col_reference_no') }}</th>
+                <th>{{ __('reports.col_warehouse') }}</th>
+                <th>{{ __('reports.col_product') }}</th>
+                <th>{{ __('reports.col_variation') }}</th>
+                <th>{{ __('reports.col_movement_type') }}</th>
                 <th class="text-right">Qty In</th>
                 <th class="text-right">Qty Out</th>
-                <th class="text-right">Unit Cost</th>
-                <th class="text-right">Value</th>
-                <th class="text-right">Balance</th>
+                <th class="text-right">{{ __('reports.col_unit_cost') }}</th>
+                <th class="text-right">{{ __('reports.col_value') }}</th>
+                <th class="text-right">{{ __('reports.col_balance') }}</th>
             </tr>
         </thead>
         <tbody>

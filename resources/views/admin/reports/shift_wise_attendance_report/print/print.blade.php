@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Shift-wise Attendance Report')
+@section('title', __('reports.shift_wise_attendance_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Shift-wise Attendance Report',
+        'title' => __('reports.shift_wise_attendance_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,13 +25,13 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Shift</th>
-                <th>Timing</th>
+                <th>{{ __('reports.col_shift') }}</th>
+                <th>{{ __('reports.col_timing') }}</th>
                 <th class="text-right">Employees</th>
-                <th class="text-right">Present</th>
-                <th class="text-right">Absent</th>
-                <th class="text-right">Late</th>
-                <th class="text-right">Leave</th>
+                <th class="text-right">{{ __('reports.col_present') }}</th>
+                <th class="text-right">{{ __('reports.col_absent') }}</th>
+                <th class="text-right">{{ __('reports.col_late') }}</th>
+                <th class="text-right">{{ __('reports.col_leave') }}</th>
                 <th class="text-right">Working Hours</th>
             </tr>
         </thead>

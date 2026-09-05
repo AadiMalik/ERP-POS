@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'Schichten',
+    'singular' => 'Shift',
+    'new_heading' => 'Neu Shift',
+    'update_heading' => 'Aktualisieren Shift',
+    'save_shift' => 'Speichern Shift',
+    'create_new' => 'Erstellen Neu Shift',
+    'edit_heading' => 'Bearbeiten Shift',
+    'start_time' => 'Start Zeit',
+    'end_time' => 'End Zeit',
+    'grace_minutes' => 'Grace Minutes',
+    'break_duration_minutes' => 'Pausendauer (Minuten)',
+    'grace_period_minutes' => 'Kulanzzeit (Minuten)',
+    'grace_period_hint' => 'Minuten Verspätung ohne Markierung als „Verspätet“.',
+    'working_days' => 'Arbeitstage',
+    'add_new_shift' => 'Neue Schicht hinzufügen',
+    'day_mon' => 'Montag',
+    'day_tue' => 'Dienstag',
+    'day_wed' => 'Mittwoch',
+    'day_thu' => 'Donnerstag',
+    'day_fri' => 'Freitag',
+    'day_sat' => 'Samstag',
+    'day_sun' => 'Sonntag',
+];

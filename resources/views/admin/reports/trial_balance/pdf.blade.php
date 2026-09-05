@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Trial Balance',
+        'title' => __('reports.trial_balance'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,8 +56,8 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Account</th>
-                <th>Account Type</th>
+                <th>{{ __('reports.col_account') }}</th>
+                <th>{{ __('reports.col_account_type') }}</th>
                 <th class="text-right">Opening Debit</th>
                 <th class="text-right">Opening Credit</th>
                 <th class="text-right">Period Debit</th>

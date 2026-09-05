@@ -14,9 +14,9 @@
                     <div class="row">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-6">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="parent_business_id" name="parent_business_id" class="form-select">
-                                    <option value="">System Template (Global)</option>
+                                    <option value="">{{ __('accounts.system_template_global') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">
                                             {{ isset($item->code) ? $item->code : '' }}
@@ -27,9 +27,9 @@
                             </div>
                         @endif
                         <div class="col-md-6">
-                            <label class="form-label">Account Type <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('accounts.account_type') }} <span class="text-danger">*</span></label>
                             <select id="parent_account_type_id" name="parent_account_type_id" class="form-select" required>
-                                <option value="">--Select Account Type--</option>
+                                <option value="">{{ __('accounts.select_account_type') }}</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                     @foreach ($account_types as $item)
                                         <option value="{{ $item->account_type_id }}">
@@ -41,9 +41,9 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Account Sub Type <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('accounts.account_sub_type') }} <span class="text-danger">*</span></label>
                             <select id="parent_account_sub_type_id" name="parent_account_sub_type_id" class="form-select" required>
-                                <option value="">--Select Account Sub Type--</option>
+                                <option value="">{{ __('accounts.select_account_sub_type') }}</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -51,17 +51,17 @@
                                 Code <span class="text-danger">**</span>
                             </label>
                             <input type="text" class="form-control" id="parent_code" name="parent_code"
-                                placeholder="e.g. 1130" pattern="[0-9]+" title="Numbers only" required>
+                                placeholder="{{ __('accounts.code_placeholder') }}" pattern="[0-9]+" title="{{ __('accounts.code_numbers_only') }}" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">
                                 Name <span class="text-danger">*</span>
                             </label>
                             <input type="text" class="form-control" id="parent_name" name="parent_name"
-                                placeholder="Enter Name" required>
+                                placeholder="{{ __('common.enter_name') }}" required>
                         </div>
                         <div class="col-md-12 mb-3">
-                            <label class="form-label">Description</label>
+                            <label class="form-label">{{ __('common.description') }}</label>
                             <textarea class="form-control"  name="parent_description"  id="parent_description"></textarea>
                         </div>
                     </div>

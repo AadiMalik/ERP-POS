@@ -11,6 +11,24 @@ All configuration lives under one **Settings** screen, organized into sections
   supplier is created (including website/API customer signup). Saving a change
   to either default also updates existing customers/suppliers for that business
   so credit sales and payments can post.
+- **Language / Localization** — choose the **ERP Display Language** (the language the
+  whole system — sidebar, menus, screens, buttons, messages — is shown in for everyone
+  at your business), the **Default Input Language** (the default text direction for
+  notes/description fields — codes, prices, emails and web addresses always stay
+  left-to-right regardless), and the **Interface Direction** (leave on Auto to follow
+  the Display Language automatically, or force Left-to-Right/Right-to-Left). Right-to-left
+  languages such as Urdu, Arabic, Persian, Pashto, Sindhi, Balochi, Punjabi (Pakistan),
+  and Hebrew automatically flip the whole layout — sidebar moves to the right, text
+  aligns to the right, tables and menus mirror accordingly. **40+ languages** are
+  available (including English, Urdu, Hindi, Arabic, Persian, French, Spanish,
+  Punjabi India/Pakistan, Pashto, Sindhi, Balochi, and major world languages). **Settings
+  screen labels** (every tab — Business, Accounting, Inventory, POS, Print, Theme,
+  Website, Email/SMS/WhatsApp, and the rest) follow the Display Language along with the
+  sidebar, shared buttons/toasts, Products and most business modules (purchases, sales,
+  inventory, accounting lists, HRM including payroll/ESS/advances/assets, reports indexes
+  and print/PDF column headers, POS cart/payment messages, and more). A few deep create
+  forms and product/category names stored in the database may still show English — missing
+  phrases fall back to English rather than showing a broken label.
 - **Inventory** — stock-related preferences.
 - **Customer** / **Supplier** — defaults for new customer/supplier records.
 - **Email**, **SMS**, **WhatsApp** — the channels used to send documents (e.g.

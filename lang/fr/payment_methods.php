@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Moyens de paiement',
+    'singular' => 'Paiement Method',
+    'pos_title' => 'Moyens de paiement PDV',
+    'account' => 'Compte',
+    'default' => 'Par défaut',
+    'set_as_default' => 'Set as Par défaut',
+    'select_account' => '--Sélectionner Compte--',
+    'account_hint' => 'Not required for Crédit or Store Crédit - they route to the receivable/store-Crédit Compte configured in Compteing Settings at posting Heure.',
+    'create_new' => 'Créer Nouveau Paiement Method',
+    'edit_heading' => 'Modifier Paiement Method',
+    'please_enter_name' => 'Veuillez Saisir Nom',
+    'please_enter_code' => 'Veuillez Saisir Code',
+    'please_select_account' => 'Veuillez Sélectionner Compte',
+    'enter_code' => 'Saisir Code',
+    'cash' => 'Espèces',
+    'card' => 'Carte',
+    'bank' => 'Banque',
+    'credit' => 'Crédit',
+    'store_credit' => 'Store Crédit',
+    'wallet' => 'WTouset',
+    'other' => 'Autre',
+];

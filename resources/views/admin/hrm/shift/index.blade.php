@@ -1,20 +1,20 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Shifts</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('hrm_shifts.title') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div></div>
             <div class="d-flex gap-2">
                 @include('admin.partials.import-export-buttons', [
                     'importExportModule' => 'shift',
-                    'importExportLabel' => 'Shifts',
+                    'importExportLabel' => __('hrm_shifts.title'),
                     'importExportRefreshFn' => 'initDataTableshift_table',
                 ])
                 @can('shift.create')
                 <a href="{{ url('admin/shift/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
-                    Add New
+                    {{ __('common.add_new') }}
                 </a>
                 @endcan
             </div>
@@ -24,11 +24,11 @@
                 <table id="shift_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th>{{ __('common.name') }}</th>
                             <th>Timing</th>
                             <th>Working Days</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

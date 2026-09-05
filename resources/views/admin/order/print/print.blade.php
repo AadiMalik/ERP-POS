@@ -32,14 +32,14 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>Product</th>
-                <th>Variation</th>
-                <th class="text-right">Qty</th>
-                <th>Unit</th>
-                <th class="text-right">Unit Price</th>
+                <th>{{ __('common.product') }}</th>
+                <th>{{ __('common.variation') }}</th>
+                <th class="text-right">{{ __('common.qty') }}</th>
+                <th>{{ __('common.unit') }}</th>
+                <th class="text-right">{{ __('common.unit_price') }}</th>
                 <th class="text-right">Discount</th>
                 <th class="text-right">Tax</th>
-                <th class="text-right">Total</th>
+                <th class="text-right">{{ __('common.total') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -65,7 +65,7 @@
 
     <table class="print-totals">
         <tr>
-            <td>Subtotal</td>
+            <td>{{ __('common.subtotal') }}</td>
             <td class="text-right">{{ currency($order->subtotal) }}</td>
         </tr>
         <tr>
@@ -77,7 +77,7 @@
             <td class="text-right">{{ currency($order->tax_amount) }}</td>
         </tr>
         <tr class="grand-total">
-            <td>Total</td>
+            <td>{{ __('common.total') }}</td>
             <td class="text-right">{{ currency($order->total) }}</td>
         </tr>
     </table>
@@ -89,8 +89,8 @@
         <thead>
             <tr>
                 <th>Payment Method</th>
-                <th>Reference No.</th>
-                <th class="text-right">Amount</th>
+                <th>{{ __('waste_damage_expiry.reference_no') }}</th>
+                <th class="text-right">{{ __('common.amount') }}</th>
             </tr>
         </thead>
         <tbody>

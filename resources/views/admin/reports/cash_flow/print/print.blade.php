@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Cash Flow Statement')
+@section('title', __('reports.cash_flow'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Cash Flow Statement',
+        'title' => __('reports.cash_flow'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [
@@ -27,10 +27,10 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Particulars</th>
+                <th>{{ __('reports.col_particulars') }}</th>
                 <th class="text-right">Inflow</th>
                 <th class="text-right">Outflow</th>
-                <th class="text-right">Net</th>
+                <th class="text-right">{{ __('reports.col_net') }}</th>
             </tr>
         </thead>
         <tbody>

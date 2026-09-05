@@ -3,7 +3,7 @@
 @section('title', 'Reset Password')
 
 @section('content')
-    <h4 class="mb-2">Reset Password</h4>
+    <h4 class="mb-2">{{ __('Reset Password') }}</h4>
     <p class="mb-4">Enter the 6-digit code sent to <strong>{{ $email }}</strong>, then choose a new password.</p>
     @if (session('status'))
         <div class="alert alert-success" role="alert">

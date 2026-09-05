@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Product-wise Sales Report',
+        'title' => __('reports.product_sales'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,11 +56,11 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Product</th>
+                <th>{{ __('reports.col_product') }}</th>
                 <th class="text-right">Total Qty Sold</th>
                 <th class="text-right">Gross Sales</th>
-                <th class="text-right">Discount</th>
-                <th class="text-right">Tax</th>
+                <th class="text-right">{{ __('reports.col_discount') }}</th>
+                <th class="text-right">{{ __('reports.col_tax') }}</th>
                 <th class="text-right">Net Sales</th>
             </tr>
         </thead>

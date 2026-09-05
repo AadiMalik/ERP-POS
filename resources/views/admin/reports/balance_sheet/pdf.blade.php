@@ -47,7 +47,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Balance Sheet',
+        'title' => __('reports.balance_sheet'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [

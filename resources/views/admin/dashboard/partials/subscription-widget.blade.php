@@ -33,7 +33,7 @@
 <div class="col-sm-6 col-lg-3 mb-4">
     <div class="card h-100 border-{{ $color }}">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Subscription</h5>
+            <h5 class="mb-0">{{ __('Subscription') }}</h5>
             <span class="badge bg-label-{{ $color }}">{{ $label }}</span>
         </div>
         <div class="card-body">

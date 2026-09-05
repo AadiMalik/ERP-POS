@@ -4,7 +4,7 @@
 @endsection
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">My Subscription</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('my_subscription.title') }}</h4>
 
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
@@ -18,7 +18,7 @@
         @include('admin.my-subscription.partials.pricing-cards')
 
         <div class="card mt-4">
-            <div class="card-header bg-light"><h6 class="mb-0">Modules &amp; Usage</h6></div>
+            <div class="card-header bg-light"><h6 class="mb-0">{{ __('my_subscription.modules_usage') }}</h6></div>
             <div class="card-body">
                 @foreach ($moduleUsage as $category => $modules)
                     <h6 class="mt-2">{{ $category }}</h6>
@@ -26,15 +26,15 @@
                         @foreach ($modules as $key => $row)
                             <div class="col-md-4 mb-2">
                                 <span class="badge {{ $row['enabled'] ? 'bg-label-success' : 'bg-label-secondary' }}">
-                                    {{ $row['enabled'] ? 'Included' : 'Not Included' }}
+                                    {{ $row['enabled'] ? __('my_subscription.included') : __('my_subscription.not_included') }}
                                 </span>
                                 {{ $row['label'] }}
                                 @if ($row['type'] === 'limited' && $row['enabled'])
                                     <div class="small text-muted">
                                         @if ($row['unlimited'])
-                                            Unlimited
+                                            {{ __('my_subscription.unlimited') }}
                                         @else
-                                            {{ $row['used'] }}/{{ $row['limit'] }} used
+                                            {{ $row['used'] }}/{{ $row['limit'] }} {{ __('common.used') }}
                                             <div class="progress" style="height:4px;">
                                                 <div class="progress-bar {{ $row['percent'] >= 80 ? 'bg-danger' : 'bg-primary' }}"
                                                     style="width: {{ $row['percent'] }}%"></div>
@@ -55,7 +55,7 @@
                     <div class="card-header bg-light"><h6 class="mb-0">Renewal Request History</h6></div>
                     <div class="card-body p-0">
                         <table class="table mb-0">
-                            <thead><tr><th>Package</th><th>Status</th><th>Date</th></tr></thead>
+                            <thead><tr><th>Package</th><th>{{ __('common.status') }}</th><th>{{ __('common.date') }}</th></tr></thead>
                             <tbody>
                                 @forelse ($renewal_requests as $req)
                                     <tr>
@@ -77,7 +77,7 @@
                     <div class="card-header bg-light"><h6 class="mb-0">Invoices &amp; Payments</h6></div>
                     <div class="card-body p-0">
                         <table class="table mb-0">
-                            <thead><tr><th>Invoice #</th><th>Total</th><th>Status</th><th></th></tr></thead>
+                            <thead><tr><th>Invoice #</th><th>Total</th><th>{{ __('common.status') }}</th><th></th></tr></thead>
                             <tbody>
                                 @forelse ($invoices as $invoice)
                                     <tr>

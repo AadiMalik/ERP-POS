@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'الصفحات والسياسات',
+    'faq' => 'الأسئلة الشائعة / المساعدة',
+    'testimonials' => 'الشهادات',
+    'hero_stats' => 'إحصائيات البطل',
+    'homepage_sections' => 'أقسام الصفحة الرئيسية',
+    'benefits' => 'المزايا',
+    'contact_messages' => 'رسائل الاتصال',
+    'newsletter_subscribers' => 'مشتركو النشرة',
+    'social_media' => 'وسائل التواصل',
+    'intro_cms' => 'مقدمة الموقع',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

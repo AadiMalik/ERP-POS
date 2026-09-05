@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => '페이지 및 정책',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => '고객 후기',
+    'hero_stats' => '주요 통계',
+    'homepage_sections' => '홈페이지 섹션',
+    'benefits' => 'Benefits',
+    'contact_messages' => '문의 메시지',
+    'newsletter_subscribers' => '뉴스레터 구독자',
+    'social_media' => '소셜 미디어',
+    'intro_cms' => '소개 CMS',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

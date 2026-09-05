@@ -2,13 +2,13 @@
     @csrf
     <div class="row">
         <div class="col-md-12">
-            <h4>Business Setting</h4>
+            <h4>{{ __('settings.business_title') }}</h4>
             <hr>
         </div>
         <div class="col-md-6 mb-3">
-            <label>Timezone<span class="text-danger">*</span></label>
+            <label>{{ __('settings.timezone') }}<span class="text-danger">*</span></label>
             <select class="form-select select2" name="timezone">
-                <option value="">--Select Timezone--</option>
+                <option value="">{{ __('settings.select_timezone') }}</option>
                 @foreach ($timezones as $timezone)
                     <option value="{{ $timezone->name }}"
                         {{ $business_setting->timezone == $timezone->name ? 'selected' : '' }}>
@@ -19,16 +19,16 @@
             </select>
         </div>
         <div class="col-md-6 mb-3">
-            <label>Overall Tax Rate (%)<span class="text-danger">*</span></label>
+            <label>{{ __('settings.overall_tax_rate') }}<span class="text-danger">*</span></label>
             <input type="text" onkeypress="return isNumberKey(event)" class="form-control" name="overall_tax_rate"
                 value="{{ $business_setting->overall_tax_rate }}">
-            <small class="text-muted">Applied to orders paid by cash or any other non-card method.</small>
+            <small class="text-muted">{{ __('settings.overall_tax_rate_help') }}</small>
         </div>
         <div class="col-md-6 mb-3">
-            <label>Card Tax Rate (%)<span class="text-danger">*</span></label>
+            <label>{{ __('settings.card_tax_rate') }}<span class="text-danger">*</span></label>
             <input type="text" onkeypress="return isNumberKey(event)" class="form-control" name="card_tax_rate"
                 value="{{ $business_setting->card_tax_rate }}">
-            <small class="text-muted">Applied automatically when an order is paid fully by card.</small>
+            <small class="text-muted">{{ __('settings.card_tax_rate_help') }}</small>
         </div>
 
         @php
@@ -56,9 +56,9 @@
             ];
         @endphp
         <div class="col-md-6 mb-3">
-            <label>Date Format<span class="text-danger">*</span></label>
+            <label>{{ __('settings.date_format') }}<span class="text-danger">*</span></label>
             <select class="form-select select2" name="date_format">
-                <option value="">--Select Date Format--</option>
+                <option value="">{{ __('settings.select_date_format') }}</option>
                 @foreach ($date_formats as $key => $value)
                     <option value="{{ $key }}" {{ $business_setting->date_format == $key ? 'selected' : '' }}>
                         {{ $key }} ({{ $value }})</option>
@@ -76,9 +76,9 @@
             ];
         @endphp
         <div class="col-md-6 mb-3">
-            <label>Time Format<span class="text-danger">*</span></label>
+            <label>{{ __('settings.time_format') }}<span class="text-danger">*</span></label>
             <select class="form-select select2" name="time_format">
-                <option value="">--Select Time Format--</option>
+                <option value="">{{ __('settings.select_time_format') }}</option>
                 @foreach ($time_formats as $key => $value)
                     <option value="{{ $key }}"
                         {{ $business_setting->time_format == $key ? 'selected' : '' }}>
@@ -91,7 +91,7 @@
             <div class="text-end">
                 <button type="button" class="btn btn-primary"
                     onclick="saveSetting('#businessSettingForm','{{ url('admin/setting/business') }}')">
-                    Save Changes
+                    {{ __('common.save_changes') }}
                 </button>
             </div>
         </div>

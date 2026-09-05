@@ -1,14 +1,14 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Leave Types</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('hrm_leaves.leave_types') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div></div>
             @can('leave-type.create')
             <a href="{{ url('admin/leave-type/create') }}" class="btn btn-primary rounded-pill">
                 <i class="fa fa-plus"></i>
-                Add New
+                {{ __('common.add_new') }}
             </a>
             @endcan
         </div>
@@ -17,12 +17,12 @@
                 <table id="leave_type_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th>Max Days/Year</th>
-                            <th>Paid</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.code') }}</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('hrm_leaves.max_days_year') }}</th>
+                            <th>{{ __('hrm_leaves.paid') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

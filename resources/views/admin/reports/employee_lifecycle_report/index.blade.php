@@ -4,32 +4,30 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            Employee Lifecycle Report
-        </h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.employee_lifecycle_report') }}</h4>
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                         <i class="fa fa-filter"></i>
-                        Filters
+                        {{ __('common.filters') }}
                     </button>
                 </div>
                 @if ($lifecycle)
                     <div class="d-flex gap-2">
                         @canAccess('reports.employee-lifecycle-report.print')
                         <a href="javascript:void(0);" id="btn_print" class="btn btn-outline-secondary">
-                            <i class="fa fa-print"></i> Print
+                            <i class="fa fa-print"></i> {{ __('common.print') }}
                         </a>
                         @endcanAccess
                         @canAccess('reports.employee-lifecycle-report.pdf')
                         <a href="javascript:void(0);" id="btn_pdf" class="btn btn-outline-danger">
-                            <i class="fa fa-file-pdf"></i> PDF
+                            <i class="fa fa-file-pdf"></i> {{ __('common.pdf') }}
                         </a>
                         @endcanAccess
                         @canAccess('reports.employee-lifecycle-report.export')
                         <a href="javascript:void(0);" id="btn_excel" class="btn btn-outline-success">
-                            <i class="fa fa-file-excel"></i> Excel
+                            <i class="fa fa-file-excel"></i> {{ __('common.excel') }}
                         </a>
                         @endcanAccess
                     </div>
@@ -40,9 +38,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ $item->code ?? '' }}
                                             {{ $item->name ?? '' }}
@@ -52,7 +50,7 @@
                             </div>
                         @endif
                         <div class="col-md-4">
-                            <label class="form-label">Employee</label>
+                            <label class="form-label">{{ __('common.employee') }}</label>
                             <select id="employee_id" class="form-select">
                                 <option value="">--Select Employee--</option>
                                 @foreach ($employees as $item)
@@ -94,7 +92,7 @@
 
                         <h6 class="mt-4">Salary History</h6>
                         <table class="table table-bordered table-sm">
-                            <thead><tr><th>Effective From</th><th>Basic Salary</th><th>Status</th></tr></thead>
+                            <thead><tr><th>{{ __('reports.col_effective_from') }}</th><th>Basic Salary</th><th>{{ __('common.status') }}</th></tr></thead>
                             <tbody>
                                 @forelse ($lifecycle->salary_history as $structure)
                                     <tr>
@@ -110,7 +108,7 @@
 
                         <h6 class="mt-4">Leave History</h6>
                         <table class="table table-bordered table-sm">
-                            <thead><tr><th>Leave Type</th><th>Start Date</th><th>End Date</th><th>Days</th><th>Status</th></tr></thead>
+                            <thead><tr><th>{{ __('reports.col_leave_type') }}</th><th>{{ __('reports.col_start_date') }}</th><th>{{ __('reports.col_end_date') }}</th><th>{{ __('reports.col_days') }}</th><th>{{ __('common.status') }}</th></tr></thead>
                             <tbody>
                                 @forelse ($lifecycle->leave_requests as $leave)
                                     <tr>
@@ -128,7 +126,7 @@
 
                         <h6 class="mt-4">Advances</h6>
                         <table class="table table-bordered table-sm">
-                            <thead><tr><th>Request Date</th><th>Amount</th><th>Remaining Balance</th><th>Status</th></tr></thead>
+                            <thead><tr><th>{{ __('reports.col_request_date') }}</th><th>{{ __('common.amount') }}</th><th>Remaining Balance</th><th>{{ __('common.status') }}</th></tr></thead>
                             <tbody>
                                 @forelse ($lifecycle->advances as $advance)
                                     <tr>
@@ -148,7 +146,7 @@
                             <table class="table table-bordered table-sm w-auto">
                                 <tr><th>Type</th><td>{{ ucfirst($lifecycle->exit->type) }}</td>
                                     <th>Last Working Date</th><td>{{ localDate($lifecycle->exit->last_working_date) }}</td>
-                                    <th>Status</th><td>{{ ucfirst($lifecycle->exit->status) }}</td></tr>
+                                    <th>{{ __('common.status') }}</th><td>{{ ucfirst($lifecycle->exit->status) }}</td></tr>
                             </table>
                         @else
                             <p class="text-muted">No exit record - employee is currently active.</p>

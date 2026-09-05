@@ -1,25 +1,25 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Employee Advances</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('hrm_advances.title') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div>
                 <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                     <i class="fa fa-filter"></i>
-                    Filters
+                    {{ __('common.filters') }}
                 </button>
             </div>
             <div class="d-flex gap-2">
                 @include('admin.partials.import-export-buttons', [
                     'importExportModule' => 'employee-advance',
-                    'importExportLabel' => 'Employee Advances',
+                    'importExportLabel' => __('hrm_advances.import_export_label'),
                     'importExportRefreshFn' => 'initDataTableemployee_advance_table',
                 ])
                 @can('employee-advance.create')
                 <a href="{{ url('admin/employee-advance/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
-                    Add New
+                    {{ __('common.add_new') }}
                 </a>
                 @endcan
             </div>
@@ -28,27 +28,27 @@
             <div id="filterSection" class="card-body border-bottom" style="display:none;">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label class="form-label">Employee</label>
+                        <label class="form-label">{{ __('common.employee') }}</label>
                         <select id="employee_id" class="form-select">
-                            <option value="">--All Employees--</option>
+                            <option value="">{{ __('common.all_employees') }}</option>
                             @foreach ($employees as $item)
                             <option value="{{ $item->employee_id }}">{{ $item->user->name ?? '-' }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Status</label>
+                        <label class="form-label">{{ __('common.status') }}</label>
                         <select id="status" class="form-select">
-                            <option value="">--All Status--</option>
-                            <option value="pending">Pending</option>
-                            <option value="repaying">Repaying</option>
-                            <option value="completed">Completed</option>
-                            <option value="rejected">Rejected</option>
+                            <option value="">{{ __('common.all_status') }}</option>
+                            <option value="pending">{{ __('hrm_advances.pending') }}</option>
+                            <option value="repaying">{{ __('hrm_advances.repaying') }}</option>
+                            <option value="completed">{{ __('hrm_advances.completed') }}</option>
+                            <option value="rejected">{{ __('hrm_advances.rejected') }}</option>
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
-                        <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                        <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                     </div>
                 </div>
             </div>
@@ -56,12 +56,12 @@
                 <table id="employee_advance_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Employee</th>
-                            <th>Amount</th>
-                            <th>Installments</th>
-                            <th>Remaining</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.employee') }}</th>
+                            <th>{{ __('common.amount') }}</th>
+                            <th>{{ __('hrm_advances.installments') }}</th>
+                            <th>{{ __('hrm_advances.remaining') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>
@@ -72,6 +72,15 @@
 </div>
 @endsection
 @section('js')
+<script>
+    window.i18n_hrm_advances = {
+        installments_prompt: @json(__('hrm_advances.installments_prompt')),
+        approve_confirm: @json(__('hrm_advances.approve_confirm')),
+        reject_confirm: @json(__('hrm_advances.reject_confirm')),
+        approve: @json(__('hrm_advances.approve')),
+        reject: @json(__('hrm_advances.reject')),
+    };
+</script>
 @include('admin.partials.datatable', [
 'columns' => "
 {data:'employee',name:'employee',sortable:false},
@@ -100,13 +109,14 @@
     function decideAdvance(id, status) {
         let installments = 1;
         if (status === 'approved') {
-            installments = prompt('Number of installments to recover this advance over:', '1');
+            installments = prompt(window.i18n_hrm_advances.installments_prompt, '1');
             if (installments === null) return;
         }
         Swal.fire({
-            title: status === 'approved' ? 'Approve this advance?' : 'Reject this advance?',
+            title: status === 'approved' ? window.i18n_hrm_advances.approve_confirm : window.i18n_hrm_advances.reject_confirm,
             showCancelButton: true,
-            confirmButtonText: status === 'approved' ? 'Approve' : 'Reject',
+            confirmButtonText: status === 'approved' ? window.i18n_hrm_advances.approve : window.i18n_hrm_advances.reject,
+            cancelButtonText: window.i18n?.cancel || 'Cancel',
         }).then((result) => {
             if (result.isConfirmed) {
                 ajaxRequest({

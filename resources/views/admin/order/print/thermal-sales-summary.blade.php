@@ -1,5 +1,5 @@
 {{--
-    Thermal-formatted Sales Summary for the POS Order History "Sales Summary"
+    Thermal-formatted {{ __('orders.sales_summary') }} for the POS Order History "{{ __('orders.sales_summary') }}"
     panel - printed from inside the POS interface, never the Admin Panel.
     Expects: $summary (array from OrderService::getHistorySummary()),
              $thermal_config (App\Support\Print\ThermalPrintConfig),
@@ -9,7 +9,7 @@
 --}}
 @extends('layouts.print')
 
-@section('title', 'Sales Summary')
+@section('title', '{{ __('orders.sales_summary') }}')
 
 @section('page_class', 'thermal-page')
 
@@ -33,21 +33,21 @@
             @if ($business && $business->name)
                 <p class="tr-name">{{ $business->name }}</p>
             @endif
-            <p class="tr-meta-line">Sales Summary</p>
+            <p class="tr-meta-line">{{ __('orders.sales_summary') }}</p>
         </div>
         <hr class="tr-divider">
 
         <div class="tr-meta">
             <div class="tr-row">
-                <span class="tr-label">From:</span>
+                <span class="tr-label">{{ __('common.from') }}:</span>
                 <span class="tr-value">{{ !empty($filters['sale_date_start']) ? localDate($filters['sale_date_start']) : 'All time' }}</span>
             </div>
             <div class="tr-row">
-                <span class="tr-label">To:</span>
+                <span class="tr-label">{{ __('common.to') }}:</span>
                 <span class="tr-value">{{ !empty($filters['sale_date_end']) ? localDate($filters['sale_date_end']) : 'Today' }}</span>
             </div>
             <div class="tr-row">
-                <span class="tr-label">Printed On:</span>
+                <span class="tr-label">{{ __('orders.printed_on') }}:</span>
                 <span class="tr-value">{{ localDateTime($printed_at) }}</span>
             </div>
         </div>
@@ -55,11 +55,11 @@
 
         <div class="tr-totals">
             <div class="tr-row">
-                <span class="tr-label">Total Orders</span>
+                <span class="tr-label">{{ __('orders.total_orders') }}</span>
                 <span class="tr-value">{{ $summary['total_orders'] ?? 0 }}</span>
             </div>
             <div class="tr-row">
-                <span class="tr-label">Total Sales</span>
+                <span class="tr-label">{{ __('orders.total_sales') }}</span>
                 <span class="tr-value">{{ currency($summary['total_sales'] ?? 0) }}</span>
             </div>
             <div class="tr-row">
@@ -74,7 +74,7 @@
 
         @if (!empty($summary['by_status']))
             <hr class="tr-divider">
-            <p class="tr-meta-line" style="font-weight:700;">By Order Status</p>
+            <p class="tr-meta-line" style="font-weight:700;">{{ __('orders.by_order_status') }}</p>
             <div class="tr-totals">
                 @foreach ($summary['by_status'] as $status => $count)
                     <div class="tr-row">
@@ -87,7 +87,7 @@
 
         @if (!empty($summary['by_payment_method']))
             <hr class="tr-divider">
-            <p class="tr-meta-line" style="font-weight:700;">By Payment Method</p>
+            <p class="tr-meta-line" style="font-weight:700;">{{ __('orders.by_payment_method') }}</p>
             <div class="tr-totals">
                 @foreach ($summary['by_payment_method'] as $method => $amount)
                     <div class="tr-row">
@@ -100,7 +100,7 @@
 
         <hr class="tr-divider">
         <div class="tr-footer">
-            <p class="tr-powered-by">Powered by Dukanaz</p>
+            <p class="tr-powered-by">{{ __('orders.powered_by') }}</p>
         </div>
     </div>
 @endsection

@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'ಶಿಫ್ಟ್‌ಗಳು',
+    'singular' => 'Shift',
+    'new_heading' => 'نیا Shift',
+    'update_heading' => 'اپ ڈیٹ Shift',
+    'save_shift' => 'محفوظ Shift',
+    'create_new' => 'بنائیں نیا Shift',
+    'edit_heading' => 'ترمیم Shift',
+    'start_time' => 'Start وقت',
+    'end_time' => 'End وقت',
+    'grace_minutes' => 'Grace Minutes',
+    'break_duration_minutes' => 'Break Duration (minutes)',
+    'grace_period_minutes' => 'Grace Period (minutes)',
+    'grace_period_hint' => 'Minutes an employee may check in late without being marked "Late".',
+    'working_days' => 'Working Days',
+    'add_new_shift' => 'Add New Shift',
+    'day_mon' => 'Monday',
+    'day_tue' => 'Tuesday',
+    'day_wed' => 'Wednesday',
+    'day_thu' => 'Thursday',
+    'day_fri' => 'Friday',
+    'day_sat' => 'Saturday',
+    'day_sun' => 'Sunday',
+];

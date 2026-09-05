@@ -873,6 +873,25 @@ function resolved_theme_setting(): array
     );
 }
 
+/**
+ * Resolves the current request's text direction ('ltr'/'rtl'): the
+ * LocalizationSetting's direction_override wins if set to 'ltr'/'rtl',
+ * otherwise it's derived from the active display_language's registry entry.
+ */
+function resolved_text_direction(): string
+{
+    $localization = session('localization_setting') ?: [];
+    $override = $localization['direction_override'] ?? 'auto';
+
+    if (in_array($override, ['ltr', 'rtl'], true)) {
+        return $override;
+    }
+
+    $language = config('languages.' . ($localization['display_language'] ?? 'en'));
+
+    return $language['direction'] ?? 'ltr';
+}
+
 function numberToWord($num = '')
 {
     $num    = (string) ((int) $num);

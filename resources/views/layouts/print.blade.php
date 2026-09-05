@@ -16,8 +16,8 @@
          is pointless here and is skipped entirely. --}}
     @unless(request()->boolean('auto'))
     <div class="print-toolbar no-print">
-        <button type="button" onclick="window.print()">Print</button>
-        <button type="button" onclick="window.close()">Close</button>
+        <button type="button" onclick="window.print()">{{ __('common.print') }}</button>
+        <button type="button" onclick="window.close()">{{ __('common.close') }}</button>
     </div>
     @endunless
 

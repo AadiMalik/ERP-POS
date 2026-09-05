@@ -47,7 +47,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Monthly Attendance Report',
+        'title' => __('reports.monthly_attendance_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -57,15 +57,15 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Code</th>
-                <th>Name</th>
+                <th>{{ __('reports.col_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
                 @foreach (array_keys($days) as $day)
                     <th class="text-center">{{ $day }}</th>
                 @endforeach
-                <th class="text-right">Present</th>
-                <th class="text-right">Absent</th>
-                <th class="text-right">Leave</th>
-                <th class="text-right">Hours</th>
+                <th class="text-right">{{ __('reports.col_present') }}</th>
+                <th class="text-right">{{ __('reports.col_absent') }}</th>
+                <th class="text-right">{{ __('reports.col_leave') }}</th>
+                <th class="text-right">{{ __('reports.col_hours') }}</th>
             </tr>
         </thead>
         <tbody>

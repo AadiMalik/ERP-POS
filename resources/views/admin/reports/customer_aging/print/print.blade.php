@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Customer Aging Report')
+@section('title', __('reports.customer_aging'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Customer Aging Report',
+        'title' => __('reports.customer_aging'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,7 +25,7 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Customer</th>
+                <th>{{ __('reports.col_customer') }}</th>
                 <th class="text-right">Current</th>
                 <th class="text-right">1-30 Days</th>
                 <th class="text-right">31-60 Days</th>
@@ -33,7 +33,7 @@
                 <th class="text-right">91-120 Days</th>
                 <th class="text-right">120+ Days</th>
                 <th class="text-right">Total Outstanding</th>
-                <th>Last Payment</th>
+                <th>{{ __('reports.col_last_payment') }}</th>
                 <th class="text-right">Total Balance</th>
             </tr>
         </thead>

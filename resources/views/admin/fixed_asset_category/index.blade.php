@@ -5,21 +5,21 @@ use App\Enums\RoleNames;
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold py-3 mb-4">
-        Fixed Asset Categories
+        {{ __('fixed_asset_categories.title') }}
     </h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div>
                 <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                     <i class="fa fa-filter"></i>
-                    Filters
+                    {{ __('common.filters') }}
                 </button>
             </div>
             <div class="d-flex gap-2">
                 @can('fixed-asset-category.create')
                 <a href="{{ url('admin/fixed-asset-category/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
-                    Add New
+                    {{ __('common.add_new') }}
                 </a>
                 @endcan
             </div>
@@ -29,9 +29,9 @@ use App\Enums\RoleNames;
                 <div class="row g-3">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                     <div class="col-md-3">
-                        <label class="form-label">Business</label>
+                        <label class="form-label">{{ __('common.business') }}</label>
                         <select id="business_id" class="form-select">
-                            <option value="">--All Businesses--</option>
+                            <option value="">{{ __('common.all_businesses') }}</option>
                             @foreach ($business as $item)
                             <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                 {{ $item->name ?? '' }}
@@ -54,12 +54,12 @@ use App\Enums\RoleNames;
                 <table id="fixed_asset_category_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th>Useful Life (Years)</th>
-                            <th>Residual %</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.code') }}</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('fixed_asset_categories.useful_life_years') }}</th>
+                            <th>{{ __('fixed_asset_categories.residual_percent') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

@@ -23,7 +23,7 @@
                 Correcting order <strong id="posCorrectionOrderLabel"></strong> — same-day manager correction.
                 Stock, payments, and accounting will be reversed and reposted.
             </div>
-            <button type="button" class="btn btn-sm btn-outline-secondary" id="cancelCorrectionBtn">Cancel Correction</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="cancelCorrectionBtn">{{ __('pos.cancel_correction') }}</button>
         </div>
 
         {{-- Shown until a register session is confirmed open --}}
@@ -31,20 +31,19 @@
             <div class="card-body pos-disabled-overlay">
                 <div class="text-center text-muted" id="posNoSessionChecking">
                     <div class="spinner-border mb-2" role="status"></div>
-                    <p class="mb-0">Checking register session...</p>
+                    <p class="mb-0">{{ __('pos.checking_session') }}</p>
                 </div>
                 <div class="text-center d-none" id="posNoSessionBrowseOnly">
                     <i class="fa fa-cash-register fs-1 text-muted mb-2"></i>
-                    <p class="mb-1 fw-semibold">No register session is open</p>
-                    <p class="text-muted mb-3">You can still view Order History and Reports from the header above,
-                        but you must open a register before placing orders.</p>
+                    <p class="mb-1 fw-semibold">{{ __('pos.no_session_open') }}</p>
+                    <p class="text-muted mb-3">{{ __('pos.browse_only_hint') }}</p>
                     <div class="d-flex justify-content-center gap-2 flex-wrap">
                         <button type="button" class="btn btn-primary" id="openRegisterFromBrowseBtn">
-                            <i class="fa fa-lock-open"></i> Open Register
+                            <i class="fa fa-lock-open"></i> {{ __('pos.open_register_btn') }}
                         </button>
                         @if (!$is_fixed_context)
                             <button type="button" class="btn btn-outline-secondary js-change-branch-btn">
-                                <i class="fa fa-code-branch"></i> Change Branch
+                                <i class="fa fa-code-branch"></i> {{ __('pos.change_branch') }}
                             </button>
                         @endif
                     </div>
@@ -59,12 +58,12 @@
                     {{-- ---- Row 1: Search Product / Order Type / Branch ---- --}}
                     <div class="pos-row pos-row-top">
                         <div class="pos-field pos-field-search">
-                            <span class="pos-field-label">Search Product</span>
+                            <span class="pos-field-label">{{ __('common.search_product') }}</span>
                             <div class="pos-search-input-wrap">
                                 <i class="fa fa-magnifying-glass pos-search-icon"></i>
                                 <input type="text" class="form-control" id="productSearchInput"
-                                    placeholder="Search by name, SKU or scan barcode..." autocomplete="off">
-                                <button type="button" class="btn pos-scan-btn" id="scanFocusBtn" title="Scan barcode">
+                                    placeholder="{{ __('pos.search_product_placeholder') }}" autocomplete="off">
+                                <button type="button" class="btn pos-scan-btn" id="scanFocusBtn" title="{{ __('pos.scan_barcode') }}">
                                     <i class="fa fa-barcode"></i>
                                 </button>
                             </div>
@@ -73,7 +72,7 @@
 
                         <div class="pos-field pos-field-ordertype pos-pill-group" data-select-target="order_type_id">
                             <div class="d-flex align-items-center justify-content-between">
-                                <span class="pos-field-label">Order Type</span>
+                                <span class="pos-field-label">{{ __('common.order_type') }}</span>
                                 @include('admin.partials.quick-add-btn', ['permission' => 'order-type.create', 'modal' => 'quickAddOrderTypeModal', 'label' => 'Order Type'])
                             </div>
                             <div class="pos-pill-buttons">
@@ -85,11 +84,11 @@
                         </div>
 
                         <div class="pos-field pos-field-branch">
-                            <span class="pos-field-label">Branch</span>
+                            <span class="pos-field-label">{{ __('common.branch') }}</span>
                             @if (!$is_fixed_context)
                                 <div class="pos-branch-switch">
                                     <span class="pos-branch-current"><i class="fa fa-code-branch"></i> {{ $branch_name ?? 'Branch' }}</span>
-                                    <button type="button" class="btn pos-header-btn js-change-branch-btn" id="changeBranchBtn" title="Change Branch">
+                                    <button type="button" class="btn pos-header-btn js-change-branch-btn" id="changeBranchBtn" title="{{ __('pos.change_branch') }}">
                                         <i class="fa fa-exchange-alt"></i>
                                     </button>
                                 </div>
@@ -104,7 +103,7 @@
                         <div class="pos-category-rail" id="posCategoryRail">
                             <button type="button" class="category-rail-item active" data-category-id="">
                                 <span class="category-rail-icon"><i class="fa fa-th-large"></i></span>
-                                <span class="category-rail-label">All Products</span>
+                                <span class="category-rail-label">{{ __('common.all_products_label') }}</span>
                             </button>
                             @foreach ($categories as $item)
                                 <button type="button" class="category-rail-item" data-category-id="{{ $item->category_id }}">
@@ -120,13 +119,13 @@
                                     <div id="posProductGrid" class="product-grid"></div>
                                     <div id="posProductGridEmpty" class="pos-empty-state d-none">
                                         <i class="fa fa-box-open fs-1 text-muted mb-2"></i>
-                                        <p class="text-muted mb-0">No products found</p>
+                                        <p class="text-muted mb-0">{{ __('common.no_products_found') }}</p>
                                     </div>
                                 </div>
                                 <button type="button" class="pos-checkout-clip" id="posCheckoutToggle"
-                                    aria-expanded="false" title="Payment &amp; Options">
+                                    aria-expanded="false" title="{{ __('pos.payment_options') }}">
                                     <i class="fa fa-bookmark"></i>
-                                    <span id="posCheckoutSummary">Cash</span>
+                                    <span id="posCheckoutSummary">{{ __('common.cash') }}</span>
                                 </button>
                             </div>
 
@@ -147,14 +146,14 @@
                                     <div class="pos-checkout-body" id="posCheckoutBody">
                                         <div class="pos-meta-row pos-delivery-payment-row">
                                             <div class="pos-field pos-field-delivery d-none" id="deliveryAddressWrap">
-                                                <label class="pos-field-label" for="delivery_address">Delivery Address <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control form-control-sm" id="delivery_address" placeholder="Enter address">
+                                                <label class="pos-field-label" for="delivery_address">{{ __('common.delivery_address') }} <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" id="delivery_address" placeholder="{{ __('common.enter_address') }}">
                                             </div>
 
                                             <div class="pos-field pos-field-payment" id="paymentMethodField">
-                                                <span class="pos-field-label">Payment Method</span>
+                                                <span class="pos-field-label">{{ __('common.payment_method') }}</span>
                                                 <select class="d-none" id="paymentMethodSelect">
-                                                    <option value="">Payment Method</option>
+                                                    <option value="">{{ __('common.payment_method') }}</option>
                                                 </select>
                                                 <div class="pos-pill-group" data-select-target="paymentMethodSelect">
                                                     <div class="pos-pill-buttons pos-payment-pills" id="paymentMethodPills"></div>
@@ -162,14 +161,14 @@
 
                                                 <div class="pos-payment-extra">
                                                     <div class="pos-payment-extra-summary">
-                                                        <span>Entered</span><span id="paymentEntered">0.00</span>
+                                                        <span>{{ __('common.entered') }}</span><span id="paymentEntered">0.00</span>
                                                     </div>
 
                                                     <div id="singlePaymentBlock">
                                                         <div class="d-none" id="creditCustomerSummary">
                                                             <div class="d-flex justify-content-between align-items-center pos-credit-summary">
                                                                 <span id="creditCustomerText"></span>
-                                                                <a href="javascript:void(0);" id="creditCustomerChangeLink">Change</a>
+                                                                <a href="javascript:void(0);" id="creditCustomerChangeLink">{{ __('common.change') }}</a>
                                                             </div>
                                                         </div>
                                                         <div class="d-none" id="storeCreditSummary">
@@ -181,7 +180,7 @@
 
                                                     <div class="d-none" id="multiPaymentBlock">
                                                         <div class="d-flex justify-content-between align-items-center mb-2">
-                                                            <span class="fw-semibold">Split Payment</span>
+                                                            <span class="fw-semibold">{{ __('common.split_payment') }}</span>
                                                             <button type="button" class="btn btn-sm btn-outline-primary" id="addPaymentRowBtn">
                                                                 <i class="fa fa-plus"></i> Add
                                                             </button>
@@ -195,7 +194,7 @@
                                         <div class="pos-meta-row">
                                             @if ($pos_setting->enable_discount && in_array($pos_setting->discount_level, ['order', 'both']))
                                                 <div class="pos-field pos-field-discount" id="orderDiscountWrap">
-                                                    <span class="pos-field-label">Discount</span>
+                                                    <span class="pos-field-label">{{ __('common.discount') }}</span>
                                                     <select class="form-select form-select-sm select2" id="discount_id">
                                                         <option value="">--No Discount--</option>
                                                         @foreach ($discounts as $item)
@@ -208,10 +207,10 @@
                                                 </div>
                                             @endif
                                             <div class="pos-field pos-field-voucher" id="voucherWrap" style="position:relative;">
-                                                <span class="pos-field-label">Voucher / Coupon</span>
+                                                <span class="pos-field-label">{{ __('common.voucher_coupon') }}</span>
                                                 <div class="input-group input-group-sm">
-                                                    <input type="text" class="form-control" id="voucher_code" placeholder="Search or enter code" autocomplete="off">
-                                                    <button class="btn btn-outline-secondary" type="button" id="browseVouchersBtn" title="Show vouchers available for this cart">
+                                                    <input type="text" class="form-control" id="voucher_code" placeholder="{{ __('pos.search_or_enter_code') }}" autocomplete="off">
+                                                    <button class="btn btn-outline-secondary" type="button" id="browseVouchersBtn" title="{{ __('pos.show_vouchers_title') }}">
                                                         <i class="fa fa-list"></i>
                                                     </button>
                                                     <button class="btn btn-outline-primary" type="button" id="applyVoucherBtn">
@@ -224,10 +223,10 @@
                                             </div>
                                             @if ($customer_setting->loyalty_program ?? false)
                                                 <div class="pos-field pos-field-loyalty" id="loyaltyWrap">
-                                                    <span class="pos-field-label">Loyalty Points</span>
+                                                    <span class="pos-field-label">{{ __('common.loyalty_points') }}</span>
                                                     <div class="form-check">
                                                         <input type="checkbox" class="form-check-input" id="use_loyalty_points">
-                                                        <label class="form-check-label" for="use_loyalty_points">Redeem available points</label>
+                                                        <label class="form-check-label" for="use_loyalty_points">{{ __('pos.redeem_points') }}</label>
                                                     </div>
                                                     <div id="loyaltyPointsHint" class="small text-muted mt-1" style="display:none;"></div>
                                                 </div>
@@ -245,9 +244,9 @@
                     {{-- ---- Row 1: Cart ---- --}}
                     <div class="pos-cart-card" id="posCartPanel">
                         <div class="pos-cart-header">
-                            <h6 class="mb-0">Cart <span class="pos-cart-count" id="cartItemCount">(0 Items)</span></h6>
+                            <h6 class="mb-0">{{ __('common.cart') }} <span class="pos-cart-count" id="cartItemCount">{{ __('pos.cart_items_count', ['count' => 0]) }}</span></h6>
                             <div class="pos-cart-header-select pos-cart-header-select-customer">
-                                <select id="customer_id" class="form-select form-select-sm" title="Customer">
+                                <select id="customer_id" class="form-select form-select-sm" title="{{ __('common.customer') }}">
                                     @foreach ($customers as $item)
                                         @php
                                             $customer_label = ($item->code ? $item->code . ' - ' : '') . ($item->user->name ?? '');
@@ -268,11 +267,11 @@
                                 </select>
                                 <div id="creditLimitHint" class="pos-cart-credit-hint d-none"></div>
                             </div>
-                            <button type="button" class="btn btn-sm pos-cart-icon-btn" id="addCustomerBtn" title="Add Customer">
+                            <button type="button" class="btn btn-sm pos-cart-icon-btn" id="addCustomerBtn" title="{{ __('common.add_customer') }}">
                                 <i class="fa fa-user-plus"></i>
                             </button>
                             <div class="pos-cart-header-select">
-                                <select id="saleTypeSelect" class="form-select form-select-sm" title="Sale Type">
+                                <select id="saleTypeSelect" class="form-select form-select-sm" title="{{ __('pos.sale_type') }}">
                                     @foreach ($sale_types as $item)
                                         <option value="{{ $item->sale_type_id }}" {{ $item->is_default ? 'selected' : '' }}>{{ $item->name }}</option>
                                     @endforeach
@@ -284,19 +283,19 @@
                             </button>
                         </div>
                         <div class="pos-cart-columns">
-                            <span class="pos-cart-col-items">Items</span>
-                            <span class="pos-cart-col-price">Price ({{ session('accounting_setting.currency_symbol', 'Rs') }})</span>
+                            <span class="pos-cart-col-items">{{ __('common.items') }}</span>
+                            <span class="pos-cart-col-price">{{ __('pos.price_with_currency', ['symbol' => session('accounting_setting.currency_symbol', 'Rs')]) }}</span>
                             @if ($pos_setting->enable_discount && in_array($pos_setting->discount_level, ['line', 'both']))
-                                <span class="pos-cart-col-discount">Discount</span>
+                                <span class="pos-cart-col-discount">{{ __('common.discount') }}</span>
                             @endif
-                            <span class="pos-cart-col-qty">Qty</span>
-                            <span class="pos-cart-col-total">Total ({{ session('accounting_setting.currency_symbol', 'Rs') }})</span>
+                            <span class="pos-cart-col-qty">{{ __('common.qty') }}</span>
+                            <span class="pos-cart-col-total">{{ __('pos.total_with_currency', ['symbol' => session('accounting_setting.currency_symbol', 'Rs')]) }}</span>
                         </div>
                         <div class="pos-cart-scroll">
                             <div id="cartRows" class="pos-cart-lines">
                                 <div class="pos-cart-empty" id="cartEmptyRow">
                                     <i class="fa fa-cart-shopping fs-1 text-muted mb-2"></i>
-                                    <p class="text-muted mb-0">Cart is empty</p>
+                                    <p class="text-muted mb-0">{{ __('common.cart_empty') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -304,12 +303,12 @@
 
                     {{-- ---- Rows 2-5: Subtotal / Discount / Tax / Total ---- --}}
                     <div class="pos-totals-card">
-                        <div class="pos-totals-row"><span>Subtotal</span><span id="sumSubtotal">0.00</span></div>
-                        <div class="pos-totals-row"><span>Item Discounts</span><span id="sumItemDiscount">0.00</span></div>
-                        <div class="pos-totals-row"><span>Order Discount</span><span id="sumOrderDiscount">0.00</span></div>
-                        <div class="pos-totals-row d-none" id="sumLoyaltyDiscountRow"><span>Loyalty Discount</span><span id="sumLoyaltyDiscount">0.00</span></div>
-                        <div class="pos-totals-row"><span>Tax</span><span id="sumTax">0.00</span></div>
-                        <div class="pos-totals-row pos-grand-total"><span>Total ({{ session('accounting_setting.currency_symbol', 'Rs') }})</span><span id="sumTotal">0.00</span></div>
+                        <div class="pos-totals-row"><span>{{ __('common.subtotal') }}</span><span id="sumSubtotal">0.00</span></div>
+                        <div class="pos-totals-row"><span>{{ __('pos.item_discounts') }}</span><span id="sumItemDiscount">0.00</span></div>
+                        <div class="pos-totals-row"><span>{{ __('pos.order_discount') }}</span><span id="sumOrderDiscount">0.00</span></div>
+                        <div class="pos-totals-row d-none" id="sumLoyaltyDiscountRow"><span>{{ __('pos.loyalty_discount') }}</span><span id="sumLoyaltyDiscount">0.00</span></div>
+                        <div class="pos-totals-row"><span>{{ __('common.tax') }}</span><span id="sumTax">0.00</span></div>
+                        <div class="pos-totals-row pos-grand-total"><span>{{ __('pos.total_with_currency', ['symbol' => session('accounting_setting.currency_symbol', 'Rs')]) }}</span><span id="sumTotal">0.00</span></div>
                     </div>
                 </div>
             </div>
@@ -317,23 +316,23 @@
             {{-- ================= Sticky footer: Paid Amount / Due-Change / Hold & Pay ================= --}}
             <div class="pos-sticky-footer">
                 <div class="pos-footer-field pos-footer-paid">
-                    <label for="paidAmountInput">Paid Amount</label>
+                    <label for="paidAmountInput">{{ __('common.paid_amount') }}</label>
                     <input type="number" step="0.01" min="0" class="form-control" id="paidAmountInput" placeholder="0.00">
                 </div>
 
                 <div class="pos-footer-field pos-footer-due">
-                    <label id="paymentRemainingLabel">Due / Change</label>
+                    <label id="paymentRemainingLabel">{{ __('common.due_change') }}</label>
                     <span class="pos-footer-due-value" id="paymentRemaining">0.00</span>
                 </div>
 
                 <div class="pos-footer-actions">
                     @if ($pos_setting->enable_hold_order)
                         <button type="button" class="btn pos-hold-btn" id="holdOrderBtn">
-                            <i class="fa fa-pause"></i> Hold <span class="pos-key-hint">(F6)</span>
+                            <i class="fa fa-pause"></i> {{ __('common.hold') }} <span class="pos-key-hint">(F6)</span>
                         </button>
                     @endif
                     <button type="button" class="btn pos-pay-btn" id="completeSaleBtn">
-                        <i class="fa fa-check"></i> Pay <span class="pos-key-hint">(F9)</span>
+                        <i class="fa fa-check"></i> {{ __('common.pay') }} <span class="pos-key-hint">(F9)</span>
                     </button>
                 </div>
             </div>
@@ -347,7 +346,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="productPickerTitle">Select a variation</h5>
+                    <h5 class="modal-title" id="productPickerTitle">{{ __('pos.select_variation') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -361,7 +360,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Select Serial Numbers</h5>
+                    <h5 class="modal-title">{{ __('pos.select_serials') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -373,14 +372,14 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="serialPickerSaveBtn">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="serialPickerSaveBtn">{{ __('common.save') }}</button>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- ================= Change Branch Modal (switches business/branch/warehouse
+    {{-- ================= {{ __('pos.change_branch') }} Modal (switches business/branch/warehouse
          context without leaving the POS screen - submits to the same
          pos-screen.context route the original full-page picker used) ================= --}}
     @if (!$is_fixed_context)
@@ -388,7 +387,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Change Branch</h5>
+                        <h5 class="modal-title">{{ __('pos.change_branch') }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <form action="{{ route('pos-screen.context') }}" method="POST">
@@ -396,7 +395,7 @@
                         <div class="modal-body">
                             @if ($is_superadmin)
                                 <div class="mb-3">
-                                    <label class="form-label">Business <span class="text-danger">*</span></label>
+                                    <label class="form-label">{{ __('common.business') }} <span class="text-danger">*</span></label>
                                     <select class="form-select select2" name="business_id" id="changeBranchBusinessId" required>
                                         <option value="">--Select Business--</option>
                                         @foreach ($context_businesses as $item)
@@ -406,7 +405,7 @@
                                 </div>
                             @endif
                             <div class="mb-3">
-                                <label class="form-label">Branch <span class="text-danger">*</span></label>
+                                <label class="form-label">{{ __('common.branch') }} <span class="text-danger">*</span></label>
                                 <select class="form-select select2" name="branch_id" id="changeBranchBranchId" required>
                                     <option value="">--Select Branch--</option>
                                     @foreach ($context_branches as $item)
@@ -415,18 +414,18 @@
                                 </select>
                             </div>
                             <div class="mb-1">
-                                <label class="form-label">Warehouse</label>
+                                <label class="form-label">{{ __('common.warehouse') }}</label>
                                 <select class="form-select select2" name="warehouse_id" id="changeBranchWarehouseId">
                                     <option value="">--Select Warehouse--</option>
                                     @foreach ($context_warehouses as $item)
                                         <option value="{{ $item->warehouse_id }}" {{ $item->warehouse_id == $warehouse_id ? 'selected' : '' }}>{{ $item->name }}</option>
                                     @endforeach
                                 </select>
-                                <small class="text-muted">Manual mode registers already fix a warehouse - this is only used where the register/session doesn't determine one.</small>
+                                <small class="text-muted">{{ __('pos.warehouse_context_hint') }}</small>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">Switch Branch</button>
+                            <button type="submit" class="btn btn-primary">{{ __('pos.switch_branch') }}</button>
                         </div>
                     </form>
                 </div>
@@ -434,30 +433,30 @@
         </div>
     @endif
 
-    {{-- ================= Add Customer Modal (quick create, stays on POS screen) ================= --}}
+    {{-- ================= {{ __('common.add_customer') }} Modal (quick create, stays on POS screen) ================= --}}
     <div class="modal fade" id="addCustomerModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Customer</h5>
+                    <h5 class="modal-title">{{ __('common.add_customer') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Name <span class="text-danger">*</span></label>
+                        <label class="form-label">{{ __('common.name') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="new_customer_name">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Email <span class="text-danger">*</span></label>
+                        <label class="form-label">{{ __('common.email') }} <span class="text-danger">*</span></label>
                         <input type="email" class="form-control" id="new_customer_email">
                     </div>
                     <div class="mb-1">
-                        <label class="form-label">Phone</label>
+                        <label class="form-label">{{ __('common.phone') }}</label>
                         <input type="text" class="form-control" id="new_customer_phone">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="addCustomerSubmitBtn">Save Customer</button>
+                    <button type="button" class="btn btn-primary" id="addCustomerSubmitBtn">{{ __('common.save_customer') }}</button>
                 </div>
             </div>
         </div>
@@ -480,25 +479,25 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Credit Sale - Customer Payment Details</h5>
+                    <h5 class="modal-title">{{ __('pos.credit_sale_title') }}</h5>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Customer</label>
+                        <label class="form-label">{{ __('common.customer') }}</label>
                         <div class="form-control-plaintext fw-bold" id="creditCustomerName"></div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Due Date</label>
+                        <label class="form-label">{{ __('common.due_date') }}</label>
                         <input type="date" class="form-control" id="creditDueDate">
                     </div>
                     <div class="mb-1">
-                        <label class="form-label">Note</label>
-                        <textarea class="form-control" id="creditNote" rows="2" placeholder="Optional reference note"></textarea>
+                        <label class="form-label">{{ __('common.note') }}</label>
+                        <textarea class="form-control" id="creditNote" rows="2" placeholder="{{ __('pos.optional_reference_note') }}"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" id="creditPaymentSkipBtn">Skip</button>
-                    <button type="button" class="btn btn-primary" id="creditPaymentSaveBtn">Save</button>
+                    <button type="button" class="btn btn-outline-secondary" id="creditPaymentSkipBtn">{{ __('pos.skip') }}</button>
+                    <button type="button" class="btn btn-primary" id="creditPaymentSaveBtn">{{ __('common.save') }}</button>
                 </div>
             </div>
         </div>
@@ -509,19 +508,19 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Correction Reason</h5>
+                    <h5 class="modal-title">{{ __('pos.correction_reason_title') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p class="text-muted small mb-2">
                         This will reverse stock and accounting for the posted sale, apply your cart changes, and repost on the same order number.
                     </p>
-                    <label class="form-label">Reason <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="correction_reason" rows="3" maxlength="1000" placeholder="Why is this order being corrected?"></textarea>
+                    <label class="form-label">{{ __('common.reason') }} <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="correction_reason" rows="3" maxlength="1000" placeholder="{{ __('pos.correction_reason_placeholder') }}"></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="correctionReasonSubmitBtn">Apply Correction</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="correctionReasonSubmitBtn">{{ __('pos.apply_correction') }}</button>
                 </div>
             </div>
         </div>
@@ -532,15 +531,15 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Open Register Session</h5>
+                    <h5 class="modal-title">{{ __('pos.open_session_title') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     @if ($pos_setting->register_mode == 'manual')
                         <div class="mb-3">
-                            <label class="form-label">Register <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('common.register') }} <span class="text-danger">*</span></label>
                             <select class="form-select select2" id="open_pos_register_id">
-                                <option value="">--Select Register--</option>
+                                <option value="">{{ __('pos.select_register') }}</option>
                                 @foreach ($registers as $item)
                                     <option value="{{ $item->pos_register_id }}">{{ $item->name }}</option>
                                 @endforeach
@@ -548,16 +547,16 @@
                         </div>
                     @endif
                     <div class="mb-3">
-                        <label class="form-label">Opening Cash <span class="text-danger">*</span></label>
+                        <label class="form-label">{{ __('pos.opening_cash') }} <span class="text-danger">*</span></label>
                         <input type="number" step="0.01" min="0" class="form-control" id="opening_cash" value="0">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Opening Notes</label>
+                        <label class="form-label">{{ __('pos.opening_notes') }}</label>
                         <textarea class="form-control" id="opening_notes" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="openSessionSubmitBtn">Open Session</button>
+                    <button type="button" class="btn btn-primary" id="openSessionSubmitBtn">{{ __('pos.open_session') }}</button>
                 </div>
             </div>
         </div>
@@ -568,32 +567,32 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Close Register Session</h5>
+                    <h5 class="modal-title">{{ __('pos.close_session_title') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <table class="table table-sm" id="closeSummaryTable">
                         <tbody>
-                            <tr><th>Opening Cash</th><td class="text-end" id="sumOpeningCash">0.00</td></tr>
-                            <tr><th>Cash Sales (+)</th><td class="text-end" id="sumCashSales">0.00</td></tr>
-                            <tr><th>Cash Refunds (&minus;)</th><td class="text-end" id="sumCashRefunds">0.00</td></tr>
-                            <tr><th>Cash In (+)</th><td class="text-end" id="sumCashIn">0.00</td></tr>
-                            <tr><th>Cash Out (&minus;)</th><td class="text-end" id="sumCashOut">0.00</td></tr>
-                            <tr><th>Expenses (&minus;)</th><td class="text-end" id="sumExpenses">0.00</td></tr>
-                            <tr class="fw-bold"><th>Expected Cash</th><td class="text-end" id="sumExpectedCash">0.00</td></tr>
+                            <tr><th>{{ __('pos.opening_cash') }}</th><td class="text-end" id="sumOpeningCash">0.00</td></tr>
+                            <tr><th>{{ __('pos.cash_sales') }}</th><td class="text-end" id="sumCashSales">0.00</td></tr>
+                            <tr><th>{{ __('pos.cash_refunds') }}</th><td class="text-end" id="sumCashRefunds">0.00</td></tr>
+                            <tr><th>{{ __('pos.cash_in') }}</th><td class="text-end" id="sumCashIn">0.00</td></tr>
+                            <tr><th>{{ __('pos.cash_out') }}</th><td class="text-end" id="sumCashOut">0.00</td></tr>
+                            <tr><th>{{ __('pos.expenses_minus') }}</th><td class="text-end" id="sumExpenses">0.00</td></tr>
+                            <tr class="fw-bold"><th>{{ __('pos.expected_cash') }}</th><td class="text-end" id="sumExpectedCash">0.00</td></tr>
                         </tbody>
                     </table>
                     <div class="mb-3">
-                        <label class="form-label">Actual Cash <span class="text-danger">*</span></label>
+                        <label class="form-label">{{ __('pos.actual_cash') }} <span class="text-danger">*</span></label>
                         <input type="number" step="0.01" min="0" class="form-control" id="actual_cash">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Closing Notes</label>
+                        <label class="form-label">{{ __('pos.closing_notes') }}</label>
                         <textarea class="form-control" id="closing_notes" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" id="closeSessionSubmitBtn">Close Session</button>
+                    <button type="button" class="btn btn-danger" id="closeSessionSubmitBtn">{{ __('pos.close_session') }}</button>
                 </div>
             </div>
         </div>
@@ -604,22 +603,22 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="cashMovementModalTitle">Cash Movement</h5>
+                    <h5 class="modal-title" id="cashMovementModalTitle">{{ __('pos.cash_movement') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="cash_movement_type" value="in">
                     <div class="mb-3">
-                        <label class="form-label">Amount <span class="text-danger">*</span></label>
+                        <label class="form-label">{{ __('common.amount') }} <span class="text-danger">*</span></label>
                         <input type="number" step="0.01" min="0.01" class="form-control" id="cash_movement_amount">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Reason <span class="text-danger">*</span></label>
+                        <label class="form-label">{{ __('common.reason') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="cash_movement_reason" maxlength="255">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="cashMovementSubmitBtn">Save</button>
+                    <button type="button" class="btn btn-primary" id="cashMovementSubmitBtn">{{ __('common.save') }}</button>
                 </div>
             </div>
         </div>
@@ -630,30 +629,30 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Expense</h5>
+                    <h5 class="modal-title">{{ __('pos.add_expense') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Category <span class="text-danger">*</span></label>
+                        <label class="form-label">{{ __('common.category') }} <span class="text-danger">*</span></label>
                         <select class="form-select select2" id="expense_category_id">
-                            <option value="">--Select Category--</option>
+                            <option value="">{{ __('common.select_category') }}</option>
                             @foreach ($expense_categories as $item)
                                 <option value="{{ $item->expense_category_id }}">{{ $item->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Amount <span class="text-danger">*</span></label>
+                        <label class="form-label">{{ __('common.amount') }} <span class="text-danger">*</span></label>
                         <input type="number" step="0.01" min="0.01" class="form-control" id="expense_amount">
                     </div>
                     <div class="mb-1">
-                        <label class="form-label">Description</label>
+                        <label class="form-label">{{ __('common.description') }}</label>
                         <input type="text" class="form-control" id="expense_description">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="addExpenseSubmitBtn">Save Expense</button>
+                    <button type="button" class="btn btn-primary" id="addExpenseSubmitBtn">{{ __('pos.save_expense') }}</button>
                 </div>
             </div>
         </div>
@@ -662,12 +661,12 @@
     {{-- ================= Held Orders Offcanvas ================= --}}
     <div class="offcanvas offcanvas-end" tabindex="-1" id="heldOrdersOffcanvas">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title">Hold Orders</h5>
+            <h5 class="offcanvas-title">{{ __('pos.hold_orders') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body">
             <div id="heldOrdersList" class="list-group">
-                <div class="text-muted text-center py-3">No hold orders</div>
+                <div class="text-muted text-center py-3">{{ __('pos.no_hold_orders') }}</div>
             </div>
         </div>
     </div>
@@ -675,41 +674,41 @@
     {{-- ================= Reports Offcanvas (my register sessions - non-transactional) ================= --}}
     <div class="offcanvas offcanvas-end" tabindex="-1" id="posReportsOffcanvas">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title">My Register Sessions</h5>
+            <h5 class="offcanvas-title">{{ __('pos.my_register_sessions') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body">
             <div id="posReportsList" class="list-group mb-3">
-                <div class="text-muted text-center py-3">No sessions found</div>
+                <div class="text-muted text-center py-3">{{ __('pos.no_sessions_found') }}</div>
             </div>
             <div id="posReportsSummary" class="d-none">
                 <hr>
-                <h6>Session Summary</h6>
+                <h6>{{ __('pos.session_summary') }}</h6>
                 <div class="table-responsive">
                     <table class="table table-sm" id="posReportsSummaryTable">
                         <thead>
-                            <tr><th>Detail</th><th class="text-end">Orders</th><th class="text-end">Amount</th></tr>
+                            <tr><th>{{ __('pos.detail') }}</th><th class="text-end">{{ __('pos.orders_col') }}</th><th class="text-end">{{ __('common.amount') }}</th></tr>
                         </thead>
                         <tbody>
-                            <tr class="fw-bold"><td>Total</td><td class="text-end" id="repTotalOrders">0</td><td class="text-end" id="repTotalSales">0.00</td></tr>
+                            <tr class="fw-bold"><td>{{ __('common.total') }}</td><td class="text-end" id="repTotalOrders">0</td><td class="text-end" id="repTotalSales">0.00</td></tr>
                         </tbody>
                         <tbody id="repPaymentRows"></tbody>
                         <tbody id="repSourceRows"></tbody>
                         <tbody>
-                            <tr><td>Discount</td><td class="text-end" id="repDiscountOrderCount">0</td><td class="text-end" id="repTotalDiscount">0.00</td></tr>
-                            <tr><td>Tax</td><td class="text-end" id="repTaxOrderCount">0</td><td class="text-end" id="repTotalTax">0.00</td></tr>
-                            <tr><td>Opening Amount</td><td class="text-end">-</td><td class="text-end" id="repOpeningCash">0.00</td></tr>
-                            <tr><td>Cash Refunds (&minus;)</td><td class="text-end">-</td><td class="text-end" id="repCashRefunds">0.00</td></tr>
-                            <tr><td>Cash In (+)</td><td class="text-end">-</td><td class="text-end" id="repCashIn">0.00</td></tr>
-                            <tr><td>Cash Out (&minus;)</td><td class="text-end">-</td><td class="text-end" id="repCashOut">0.00</td></tr>
-                            <tr><td>Expenses (&minus;)</td><td class="text-end">-</td><td class="text-end" id="repExpenses">0.00</td></tr>
-                            <tr class="fw-bold"><td>Cash Amount</td><td class="text-end">-</td><td class="text-end" id="repExpectedCash">0.00</td></tr>
-                            <tr><td>Actual</td><td class="text-end">-</td><td class="text-end" id="repActualCash">0.00</td></tr>
+                            <tr><td>{{ __('common.discount') }}</td><td class="text-end" id="repDiscountOrderCount">0</td><td class="text-end" id="repTotalDiscount">0.00</td></tr>
+                            <tr><td>{{ __('common.tax') }}</td><td class="text-end" id="repTaxOrderCount">0</td><td class="text-end" id="repTotalTax">0.00</td></tr>
+                            <tr><td>{{ __('pos.opening_amount') }}</td><td class="text-end">-</td><td class="text-end" id="repOpeningCash">0.00</td></tr>
+                            <tr><td>{{ __('pos.cash_refunds') }}</td><td class="text-end">-</td><td class="text-end" id="repCashRefunds">0.00</td></tr>
+                            <tr><td>{{ __('pos.cash_in') }}</td><td class="text-end">-</td><td class="text-end" id="repCashIn">0.00</td></tr>
+                            <tr><td>{{ __('pos.cash_out') }}</td><td class="text-end">-</td><td class="text-end" id="repCashOut">0.00</td></tr>
+                            <tr><td>{{ __('pos.expenses_minus') }}</td><td class="text-end">-</td><td class="text-end" id="repExpenses">0.00</td></tr>
+                            <tr class="fw-bold"><td>{{ __('pos.cash_amount') }}</td><td class="text-end">-</td><td class="text-end" id="repExpectedCash">0.00</td></tr>
+                            <tr><td>{{ __('pos.actual') }}</td><td class="text-end">-</td><td class="text-end" id="repActualCash">0.00</td></tr>
                         </tbody>
                     </table>
                 </div>
                 <button type="button" class="btn btn-sm btn-outline-secondary" id="printSessionSummaryBtn">
-                    <i class="fa fa-print"></i> Thermal Print
+                    <i class="fa fa-print"></i> {{ __('pos.thermal_print') }}
                 </button>
             </div>
         </div>
@@ -770,6 +769,21 @@
     @endphp
     <script>
         window.POS_CONFIG = @json($posConfig);
+        window.i18n_pos = @json(array_merge(trans('pos'), [
+            'cash' => __('common.cash'),
+            'hold' => __('common.hold'),
+            'pay' => __('common.pay'),
+            'save' => __('common.save'),
+            'cancel' => __('common.cancel'),
+            'amount' => __('common.amount'),
+            'unit' => __('common.unit'),
+            'loading' => __('common.loading'),
+            'cart_empty' => __('common.cart_empty'),
+            'select_branch' => __('common.select_branch'),
+            'select_warehouse' => __('common.select_warehouse'),
+            'register' => __('common.register'),
+            'manual' => __('common.manual'),
+        ]));
     </script>
     <script src="{{ asset('public/assets/js/admin/pos-screen.js') }}"></script>
 @endsection

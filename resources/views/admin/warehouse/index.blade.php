@@ -5,27 +5,27 @@ use App\Enums\RoleNames;
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold py-3 mb-4">
-        Warehouses
+        {{ __('warehouses.title') }}
     </h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div>
                 <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                     <i class="fa fa-filter"></i>
-                    Filters
+                    {{ __('common.filters') }}
                 </button>
 
             </div>
             <div class="d-flex gap-2">
                 @include('admin.partials.import-export-buttons', [
                     'importExportModule' => 'warehouse',
-                    'importExportLabel' => 'Warehouses',
+                    'importExportLabel' => __('warehouses.title'),
                     'importExportRefreshFn' => 'initDataTablewarehouse_table',
                     'importExportExportParamsSelector' => '#business_id',
                 ])
                 <a href="{{ url('admin/warehouse/create') }}" class="btn btn-primary rounded-pill">
                     <i class="fa fa-plus"></i>
-                    Add New
+                    {{ __('common.add_new') }}
                 </a>
             </div>
         </div>
@@ -34,9 +34,9 @@ use App\Enums\RoleNames;
                 <div class="row g-3">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                     <div class="col-md-3">
-                        <label class="form-label">Business</label>
+                        <label class="form-label">{{ __('common.business') }}</label>
                         <select id="business_id" class="form-select">
-                            <option value="">--All Businesses--</option>
+                            <option value="">{{ __('common.all_businesses') }}</option>
                             @foreach ($business as $item)
                             <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                 {{ $item->name ?? '' }}
@@ -46,9 +46,9 @@ use App\Enums\RoleNames;
                     </div>
                     @endif
                     <div class="col-md-3">
-                        <label class="form-label">Branch</label>
+                        <label class="form-label">{{ __('common.branch') }}</label>
                         <select id="branch_id" class="form-select">
-                            <option value="">--All Branches--</option>
+                            <option value="">{{ __('warehouses.all_branches') }}</option>
                             @if (RoleNames::SUPERADMIN != getRoleName())
                             @foreach ($branches as $item)
                             <option value="{{ $item->branch_id }}">{{ isset($item->code) ? $item->code : '' }}
@@ -59,15 +59,15 @@ use App\Enums\RoleNames;
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Date</label>
+                        <label class="form-label">{{ __('common.date') }}</label>
                         @include('admin.partials.date_filter')
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
                         <button type="button" id="search_btn" class="btn btn-primary">
-                            Search
+                            {{ __('common.search') }}
                         </button>
                         <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                            Reset
+                            {{ __('common.reset') }}
                         </button>
                     </div>
                 </div>
@@ -76,14 +76,14 @@ use App\Enums\RoleNames;
                 <table id="warehouse_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th>Phone</th>
-                            <th>Address</th>
-                            <th>Branch</th>
-                            <th>Business</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.code') }}</th>
+                            <th>{{ __('common.name') }}</th>
+                            <th>{{ __('common.phone') }}</th>
+                            <th>{{ __('common.address') }}</th>
+                            <th>{{ __('common.branch') }}</th>
+                            <th>{{ __('common.business') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>
@@ -94,6 +94,15 @@ use App\Enums\RoleNames;
 </div>
 @endsection
 @section('js')
+@php
+    $__i18nWarehouses = [
+        'all_branches' => __('warehouses.all_branches'),
+        'select_branch' => __('warehouses.select_branch'),
+    ];
+@endphp
+<script>
+    window.i18n_warehouses = @json($__i18nWarehouses);
+</script>
 @include('admin.partials.datatable', [
 'columns' => "
 {data:'code',name:'code'},
@@ -124,7 +133,7 @@ use App\Enums\RoleNames;
     $('#business_id').change(function() {
         let business_id = $(this).val();
         if (!business_id) {
-            $('#branch_id').html('<option value="">--All Branches--</option>');
+            $('#branch_id').html('<option value="">' + (window.i18n_warehouses?.all_branches || '--All Branches--') + '</option>');
             return;
         }
         ajaxRequest({
@@ -133,7 +142,7 @@ use App\Enums\RoleNames;
             })
             .then((response) => {
                 let data = response.Data;
-                let options = '<option value="">--Select Branch--</option>';
+                let options = '<option value="">' + (window.i18n_warehouses?.select_branch || '--Select Branch--') + '</option>';
                 $.each(data, function(index, item) {
                     options += `<option value="${item.branch_id}">
                                         ${item.name}

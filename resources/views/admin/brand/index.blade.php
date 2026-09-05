@@ -8,7 +8,7 @@ use App\Enums\RoleNames;
 @section('content')
 <!-- ========== table components start ========== -->
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"> Brands</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('brands.title') }}</h4>
 
     <!-- Basic Bootstrap Table -->
     <div class="card">
@@ -16,7 +16,7 @@ use App\Enums\RoleNames;
             <div>
                 <button type="button" id="toggleFilter" class="btn btn-outline-primary">
                     <i class="fa fa-filter"></i>
-                    Filters
+                    {{ __('common.filters') }}
                 </button>
 
             </div>
@@ -24,12 +24,12 @@ use App\Enums\RoleNames;
                 @include('admin.partials.import-export-buttons', [
                     'importExportModule' => 'brand',
                     'importExportRouteSegment' => 'brands',
-                    'importExportLabel' => 'Brands',
+                    'importExportLabel' => __('brands.title'),
                     'importExportRefreshFn' => 'initDataTablebrand_table',
                     'importExportExportParamsSelector' => '#filter_business_id',
                 ])
                 <a href="javascript:void(0)" id="createNewBrand" class="btn rounded-pill btn-primary">
-                    <i class="icon-base fa fa-plus mr-5"></i>Add New</a>
+                    <i class="icon-base fa fa-plus mr-5"></i>{{ __('common.add_new') }}</a>
             </div>
         </div>
         <div class="card-body">
@@ -37,9 +37,9 @@ use App\Enums\RoleNames;
                 <div class="row g-3">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                     <div class="col-md-3">
-                        <label class="form-label">Business</label>
+                        <label class="form-label">{{ __('common.business') }}</label>
                         <select id="filter_business_id" class="form-select">
-                            <option value="">--All Businesses--</option>
+                            <option value="">{{ __('common.all_businesses') }}</option>
                             @foreach ($business as $item)
                             <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                 {{ $item->name ?? '' }}
@@ -49,15 +49,15 @@ use App\Enums\RoleNames;
                     </div>
                     @endif
                     <div class="col-md-3">
-                        <label class="form-label">Date</label>
+                        <label class="form-label">{{ __('common.date') }}</label>
                         @include('admin.partials.date_filter')
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
                         <button type="button" id="search_btn" class="btn btn-primary">
-                            Search
+                            {{ __('common.search') }}
                         </button>
                         <button type="button" id="reset_filter" class="btn btn-outline-secondary">
-                            Reset
+                            {{ __('common.reset') }}
                         </button>
                     </div>
                 </div>
@@ -66,11 +66,11 @@ use App\Enums\RoleNames;
                 <table id="brand_table" class="table display datatables" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Logo</th>
-                            <th>Business</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('brands.col_name') }}</th>
+                            <th>{{ __('brands.col_logo') }}</th>
+                            <th>{{ __('brands.col_business') }}</th>
+                            <th>{{ __('brands.col_status') }}</th>
+                            <th>{{ __('brands.col_action') }}</th>
                         </tr>
                         <!-- end table row-->
                     </thead>
@@ -87,6 +87,17 @@ use App\Enums\RoleNames;
 <!-- ========== table components end ========== -->
 @endsection
 @section('js')
+@php
+    $__i18nBrands = [
+        'create_title' => __('brands.create_title'),
+        'edit_title' => __('brands.edit_title'),
+        'view_title' => __('brands.view_title'),
+        'please_enter_name' => __('brands.please_enter_name'),
+    ];
+@endphp
+<script>
+    window.i18n_brands = @json($__i18nBrands);
+</script>
 <script src="{{ asset('public/assets/js/admin/brand.js') }}"></script>
 @include('admin.partials.datatable', [
 'columns' => "

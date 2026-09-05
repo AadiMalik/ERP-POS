@@ -1,27 +1,27 @@
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Recipe / BOM</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('manufacturing.recipes_title') }}</h4>
     <div class="card mb-4">
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">Product <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('common.product') }} <span class="text-danger">*</span></label>
                     <select id="product_id" class="form-select">
-                        <option value="">--Select--</option>
+                        <option value="">{{ __('common.select_option') }}</option>
                         @foreach ($products as $item)
                         <option value="{{ $item->product_id }}">{{ $item->name }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Variation <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('common.variation') }} <span class="text-danger">*</span></label>
                     <select id="product_variation_id" class="form-select"></select>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Base Unit</label>
+                    <label class="form-label">{{ __('manufacturing.base_unit') }}</label>
                     <input type="text" id="finishedBaseUnitDisplay" class="form-control" readonly>
-                    <small class="text-muted">Stock for this product is always kept in this unit.</small>
+                    <small class="text-muted">{{ __('manufacturing.base_unit_hint') }}</small>
                 </div>
             </div>
             <div id="recipeStatusMessage" class="alert alert-info mt-3" style="display:none;"></div>
@@ -30,15 +30,15 @@
 
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h6 class="mb-0">Raw Material Components</h6>
-            <button type="button" class="btn btn-sm btn-primary" id="addComponentBtn" onclick="openLineModal()" disabled><i class="fa fa-plus"></i> Add Raw Material</button>
+            <h6 class="mb-0">{{ __('manufacturing.raw_material_components') }}</h6>
+            <button type="button" class="btn btn-sm btn-primary" id="addComponentBtn" onclick="openLineModal()" disabled><i class="fa fa-plus"></i> {{ __('manufacturing.add_raw_material') }}</button>
         </div>
         <div class="card-body">
             <table class="table table-bordered" id="componentsTable">
-                <thead><tr><th>Raw Material</th><th>Qty</th><th>Unit</th><th>Consume From (Warehouse)</th><th></th></tr></thead>
+                <thead><tr><th>{{ __('manufacturing.raw_material') }}</th><th>{{ __('common.qty') }}</th><th>{{ __('common.unit') }}</th><th>{{ __('manufacturing.consume_from_warehouse') }}</th><th></th></tr></thead>
                 <tbody></tbody>
             </table>
-            <small class="text-muted" id="selectFinishedFirstHint">Select the product/variation above first.</small>
+            <small class="text-muted" id="selectFinishedFirstHint">{{ __('manufacturing.select_finished_first') }}</small>
         </div>
     </div>
 </div>
@@ -48,38 +48,38 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add Raw Material</h5>
+                <h5 class="modal-title">{{ __('manufacturing.add_raw_material') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">Product <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('common.product') }} <span class="text-danger">*</span></label>
                     <select id="lineProduct" class="form-select">
-                        <option value="">--Select--</option>
+                        <option value="">{{ __('common.select_option') }}</option>
                         @foreach ($products as $item)
                         <option value="{{ $item->product_id }}">{{ $item->name }}</option>
                         @endforeach
                     </select>
-                    <small class="text-muted">The product being manufactured is not shown here - a recipe cannot consume itself.</small>
+                    <small class="text-muted">{{ __('manufacturing.cannot_consume_self') }}</small>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Variation <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('common.variation') }} <span class="text-danger">*</span></label>
                     <select id="lineVariation" class="form-select"></select>
                 </div>
                 <div class="row">
                     <div class="col-6 mb-3">
-                        <label class="form-label">Quantity <span class="text-danger">*</span></label>
+                        <label class="form-label">{{ __('common.quantity') }} <span class="text-danger">*</span></label>
                         <input type="number" step="0.0001" id="lineQuantity" class="form-control">
                     </div>
                     <div class="col-6 mb-3">
-                        <label class="form-label">Base Unit</label>
+                        <label class="form-label">{{ __('manufacturing.base_unit') }}</label>
                         <input type="text" id="lineUnitDisplay" class="form-control" readonly>
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Consume From (Warehouse) <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('manufacturing.consume_from_warehouse') }} <span class="text-danger">*</span></label>
                     <select id="lineWarehouse" class="form-select">
-                        <option value="">--Select--</option>
+                        <option value="">{{ __('common.select_option') }}</option>
                         @foreach ($warehouses as $item)
                         <option value="{{ $item->warehouse_id }}">{{ $item->name }}{{ $item->branch ? ' (' . $item->branch->name . ')' : ' (Shared)' }}</option>
                         @endforeach
@@ -87,8 +87,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="saveLineBtn" onclick="saveLineRow()">Save</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.close') }}</button>
+                <button type="button" class="btn btn-primary" id="saveLineBtn" onclick="saveLineRow()">{{ __('common.save') }}</button>
             </div>
         </div>
     </div>

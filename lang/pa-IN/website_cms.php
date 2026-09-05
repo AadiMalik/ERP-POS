@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'ਪੰਨੇ ਅਤੇ ਨੀਤੀਆਂ',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'ਪ੍ਰਸ਼ੰਸਾ ਪੱਤਰ',
+    'hero_stats' => 'ਮੁੱਖ ਅੰਕੜੇ',
+    'homepage_sections' => 'ਹੋਮਪੇਜ ਭਾਗ',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'ਸੰਪਰਕ ਸੁਨੇਹੇ',
+    'newsletter_subscribers' => 'ਨਿਊਜ਼ਲੈਟਰ ਮੈਂਬਰ',
+    'social_media' => 'ਸੋਸ਼ਲ ਮੀਡੀਆ',
+    'intro_cms' => 'ਇੰਟਰੋ ਸੀਐਮਐਸ',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

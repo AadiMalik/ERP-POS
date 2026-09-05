@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Plăți furnizori',
+    'singular' => 'Supplier Pago',
+    'payment_no' => 'Pago No',
+    'new_heading' => 'Nuevo Supplier Pago',
+    'update_heading' => 'Actualizar Supplier Pago',
+    'save_payment' => 'Guardar Pago',
+    'select_supplier' => '--Seleccionar Supplier--',
+    'payment_method' => 'Pago Method',
+    'select_payment_method' => '--Seleccionar Pago Method--',
+    'paid_amount' => 'Paid Importe',
+    'allocate_to_purchases' => 'Todosocate to Purchases',
+    'outstanding' => 'Outstanding',
+    'create_heading' => 'Create Supplier Payment',
+    'update_payment' => 'Update Payment',
+    'supplier_balance' => 'Supplier Balance',
+    'reference_purchase_optional' => 'Reference Purchase (Optional)',
+    'reference_service_purchase_optional' => 'Reference Service Purchase (Optional)',
+    'advance_on_account' => '--Advance / On Account--',
+    'cheque_date' => 'Cheque Date',
+    'supplier_coa' => 'Supplier COA',
+    'tax_withholding' => 'Tax Amount (Withholding)',
+];

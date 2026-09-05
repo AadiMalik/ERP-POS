@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'תקופות חשבונאיות',
+    'singular' => 'المحاسبة الفترة',
+    'intro' => 'Advanced المحاسبة الوضع — open/close/reopen periods manually. Reopening and overriding a blocked close both require a reason, which is recorded to the Activity Log.',
+    'closed_automatically' => 'مغلق Automatically',
+    'close_period' => 'إغلاق الفترة',
+    'reopen_period' => 'Reopen الفترة',
+    'pending_close' => 'Pending إغلاق',
+    'reason_override' => 'السبب (required if overriding pending items)',
+    'close_anyway' => 'إغلاق anyway, even though items are pending',
+    'blocked_message' => 'This period has pending items and was not closed. Resolve them, or tick "إغلاق anyway" with a reason to override.',
+    'reason_required_reopen' => 'A reason is required to reopen this period.',
+    'could_not_open' => 'Could not open period',
+    'could_not_close' => 'Could not close period',
+    'could_not_reopen' => 'Could not reopen period',
+    'no_pending_issues' => 'لا pending issues for this period.',
+    'pending_items' => 'Pending items:',
+    'no_periods' => 'لا accounting periods yet.',
+    'open_btn' => 'פתוח',
+    'close_btn' => 'إغلاق',
+    'reopen_btn' => 'Reopen',
+    'issues_btn' => 'المشكلات',
+];

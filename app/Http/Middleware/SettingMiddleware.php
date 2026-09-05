@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Enums\RoleNames;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 
 class SettingMiddleware
@@ -22,7 +23,11 @@ class SettingMiddleware
 
             $business = Auth::user()->business;
 
+            $localization_setting = $business->localizationSetting?->toArray() ?? [];
+            App::setLocale($localization_setting['display_language'] ?? 'en');
+
             session([
+                'localization_setting' => $localization_setting,
                 'business_setting'   => $business->businessSetting?->toArray() ?? [],
                 'accounting_setting' => $business->accountingSetting?->toArray() ?? [],
                 'customer_setting'   => $business->customerSetting?->toArray() ?? [],

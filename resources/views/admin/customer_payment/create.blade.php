@@ -5,15 +5,15 @@
 @extends('layouts.app')
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">{{ isset($customer_payment) ? 'Update' : 'New' }} Customer Payment</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ isset($customer_payment) ? __('customer_payments.update_heading') : __('customer_payments.new_heading') }}</h4>
         <div class="card">
             <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">{{ isset($customer_payment) ? 'Update' : 'Create' }} Customer Payment</h5>
+                <h5 class="mb-0">{{ isset($customer_payment) ? __('customer_payments.update_heading') : __('customer_payments.create_heading') }}</h5>
                 @if (isset($customer_payment) && $customer_payment->status === Status::POSTED)
                     <button type="button" class="btn btn-warning" id="unpostBtn"
                         data-id="{{ $customer_payment->customer_payment_id }}">
                         <i class="fa fa-unlock"></i>
-                        Unpost to Edit
+                        {{ __('common.unpost_to_edit') }}
                     </button>
                 @endif
             </div>
@@ -28,9 +28,9 @@
                         <div class="row">
                             @if (!empty($business) && RoleNames::SUPERADMIN == getRoleName())
                                 <div class="col-md-3 mb-3">
-                                    <label>Business <span class="text-danger">*</span></label>
+                                    <label>{{ __('common.business') }} <span class="text-danger">*</span></label>
                                     <select class="form-control select2" name="business_id" id="business_id">
-                                        <option value="">--Select Business--</option>
+                                        <option value="">{{ __('common.select_business') }}</option>
                                         @foreach ($business as $item)
                                             <option value="{{ $item->business_id }}"
                                                 {{ old('business_id', $customer_payment->business_id ?? ($prefill_order->business_id ?? '')) == $item->business_id ? 'selected' : '' }}>
@@ -41,19 +41,19 @@
                                 </div>
                             @endif
                             <div class="col-md-3 mb-3">
-                                <label>Payment No.</label>
+                                <label>{{ __('customer_payments.payment_no') }}</label>
                                 <input type="text" class="form-control" readonly
-                                    value="{{ $customer_payment->payment_no ?? ($payment_no ?? 'Auto Generated') }}">
+                                    value="{{ $customer_payment->payment_no ?? ($payment_no ?? __('common.auto_generated')) }}">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label>Payment Date <span class="text-danger">*</span></label>
+                                <label>{{ __('common.payment_date') }} <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control datepicker" name="payment_date"
                                     value="{{ old('payment_date', isset($customer_payment) ? localDate($customer_payment->payment_date) : localDate(date('Y-m-d'))) }}">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label>Customer <span class="text-danger">*</span></label>
+                                <label>{{ __('common.customer') }} <span class="text-danger">*</span></label>
                                 <select class="form-control select2" name="user_id" id="user_id">
-                                    <option value="">--Select Customer--</option>
+                                    <option value="">{{ __('customer_payments.select_customer') }}</option>
                                     @foreach ($customers as $item)
                                         <option value="{{ $item->user_id }}"
                                             {{ old('user_id', $customer_payment->user_id ?? '') == $item->user_id ? 'selected' : '' }}>
@@ -63,41 +63,41 @@
                                 </select>
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label>Customer Balance</label>
+                                <label>{{ __('customer_payments.customer_balance') }}</label>
                                 <input type="text" class="form-control fw-bold" id="customer_balance_display" readonly
                                     value="--">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label>Reference Order (Optional)</label>
+                                <label>{{ __('customer_payments.reference_order_optional') }}</label>
                                 <select class="form-control select2" name="order_id" id="order_id">
-                                    <option value="">--Advance / On Account--</option>
+                                    <option value="">{{ __('customer_payments.advance_on_account') }}</option>
                                 </select>
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label>Reference Service Sale (Optional)</label>
+                                <label>{{ __('customer_payments.reference_service_sale_optional') }}</label>
                                 <select class="form-control select2" name="service_sale_id" id="service_sale_id">
-                                    <option value="">--Advance / On Account--</option>
+                                    <option value="">{{ __('customer_payments.advance_on_account') }}</option>
                                 </select>
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label>Payment Method <span class="text-danger">*</span></label>
+                                <label>{{ __('common.payment_method') }} <span class="text-danger">*</span></label>
                                 <select class="form-control" name="payment_method" id="payment_method">
-                                    <option value="cash" {{ old('payment_method', $customer_payment->payment_method ?? 'cash') == 'cash' ? 'selected' : '' }}>Cash</option>
-                                    <option value="card" {{ old('payment_method', $customer_payment->payment_method ?? '') == 'card' ? 'selected' : '' }}>Card</option>
-                                    <option value="bank_transfer" {{ old('payment_method', $customer_payment->payment_method ?? '') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
-                                    <option value="cheque" {{ old('payment_method', $customer_payment->payment_method ?? '') == 'cheque' ? 'selected' : '' }}>Cheque</option>
-                                    <option value="online" {{ old('payment_method', $customer_payment->payment_method ?? '') == 'online' ? 'selected' : '' }}>Online Payment</option>
+                                    <option value="cash" {{ old('payment_method', $customer_payment->payment_method ?? 'cash') == 'cash' ? 'selected' : '' }}>{{ __('common.cash') }}</option>
+                                    <option value="card" {{ old('payment_method', $customer_payment->payment_method ?? '') == 'card' ? 'selected' : '' }}>{{ __('common.card') }}</option>
+                                    <option value="bank_transfer" {{ old('payment_method', $customer_payment->payment_method ?? '') == 'bank_transfer' ? 'selected' : '' }}>{{ __('common.bank_transfer') }}</option>
+                                    <option value="cheque" {{ old('payment_method', $customer_payment->payment_method ?? '') == 'cheque' ? 'selected' : '' }}>{{ __('common.cheque') }}</option>
+                                    <option value="online" {{ old('payment_method', $customer_payment->payment_method ?? '') == 'online' ? 'selected' : '' }}>{{ __('common.online_payment') }}</option>
                                 </select>
                             </div>
                             <div class="col-md-3 mb-3" id="payment_account_display_area">
-                                <label>Payment Account COA</label>
+                                <label>{{ __('common.payment_account_coa') }}</label>
                                 <input type="text" class="form-control" id="payment_account_display" readonly
                                     value="--">
                             </div>
                             <div class="col-md-3 mb-3 d-none" id="payment_account_select_area">
-                                <label>Payment Account COA <span class="text-danger">*</span></label>
+                                <label>{{ __('common.payment_account_coa') }} <span class="text-danger">*</span></label>
                                 <select class="form-control select2" name="payment_account_id" id="payment_account_id">
-                                    <option value="">--Select Account--</option>
+                                    <option value="">{{ __('common.select_account') }}</option>
                                     @foreach ($accounts as $item)
                                         <option value="{{ $item->account_id }}"
                                             {{ old('payment_account_id', $customer_payment->payment_account_id ?? '') == $item->account_id ? 'selected' : '' }}>
@@ -107,54 +107,54 @@
                                 </select>
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label>Reference No.</label>
+                                <label>{{ __('common.reference_no') }}</label>
                                 <input type="text" class="form-control" name="reference_no"
                                     value="{{ old('reference_no', $customer_payment->reference_no ?? '') }}">
                             </div>
                             <div class="col-md-3 mb-3 d-none" id="cheque_date_area">
-                                <label>Cheque Date</label>
+                                <label>{{ __('customer_payments.cheque_date') }}</label>
                                 <input type="text" class="form-control datepicker" name="cheque_date"
                                     value="{{ old('cheque_date', isset($customer_payment) && $customer_payment->cheque_date ? localDate($customer_payment->cheque_date) : '') }}">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label>Payment Amount <span class="text-danger">*</span></label>
+                                <label>{{ __('common.payment_amount') }} <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="amount" name="amount"
                                     value="{{ old('amount', $customer_payment->amount ?? 0) }}">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label>Tax Amount</label>
+                                <label>{{ __('common.tax_amount') }}</label>
                                 <input type="text" class="form-control" id="tax_amount" name="tax_amount"
                                     value="{{ old('tax_amount', $customer_payment->tax_amount ?? 0) }}">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label>Discount Amount</label>
+                                <label>{{ __('common.discount_amount') }}</label>
                                 <input type="text" class="form-control" id="discount_amount" name="discount_amount"
                                     value="{{ old('discount_amount', $customer_payment->discount_amount ?? 0) }}">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label>Net Payment</label>
+                                <label>{{ __('common.net_payment') }}</label>
                                 <input type="text" class="form-control fw-bold" id="net_amount" readonly
                                     value="{{ $customer_payment->net_amount ?? 0 }}">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label>Attachment</label>
+                                <label>{{ __('common.attachment') }}</label>
                                 <input type="file" class="form-control" name="attachment">
                                 @if (isset($customer_payment) && $customer_payment->attachment)
                                     <small>
                                         <a href="{{ asset('public/uploads/customer_payment/' . $customer_payment->attachment) }}"
-                                            target="_blank">View current attachment</a>
+                                            target="_blank">{{ __('common.view_current_attachment') }}</a>
                                     </small>
                                 @endif
                             </div>
                             <div class="col-md-12 mb-3">
-                                <label>Remarks</label>
+                                <label>{{ __('common.remarks') }}</label>
                                 <textarea class="form-control" rows="3" name="remarks">{{ old('remarks', $customer_payment->remarks ?? '') }}</textarea>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12">
                                 <button class="text-end btn btn-primary" id="saveBtn">
-                                    {{ isset($customer_payment) ? 'Update Payment' : 'Save Payment' }}
+                                    {{ isset($customer_payment) ? __('customer_payments.update_payment') : __('customer_payments.save_payment') }}
                                 </button>
                             </div>
                         </div>
@@ -250,8 +250,8 @@
 
         $(document).on('change', '#user_id', function() {
             let userId = $(this).val();
-            $('#order_id').html('<option value="">--Advance / On Account--</option>');
-            $('#service_sale_id').html('<option value="">--Advance / On Account--</option>');
+            $('#order_id').html('<option value="">{{ __('customer_payments.advance_on_account') }}</option>');
+            $('#service_sale_id').html('<option value="">{{ __('customer_payments.advance_on_account') }}</option>');
             if (!userId) {
                 $('#customer_balance_display').val('--');
                 return;
@@ -302,7 +302,7 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    let html = '<option value="">--Advance / On Account--</option>';
+                    let html = '<option value="">{{ __('customer_payments.advance_on_account') }}</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, order) {
                             let label = (order.daily_order_id || order.order_id) +
@@ -332,7 +332,7 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    let html = '<option value="">--Advance / On Account--</option>';
+                    let html = '<option value="">{{ __('customer_payments.advance_on_account') }}</option>';
                     if (response.Success && response.Data.length) {
                         $.each(response.Data, function(_, serviceSale) {
                             html += `

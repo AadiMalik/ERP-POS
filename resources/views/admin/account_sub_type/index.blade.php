@@ -8,7 +8,7 @@
 @section('content')
     <!-- ========== table components start ========== -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"> Account Sub Types</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('account_sub_types.title') }}</h4>
 
         <!-- Basic Bootstrap Table -->
         <div class="card">
@@ -22,7 +22,7 @@
                 </div>
                 <button type="button" id="resetAccountSubType" class="btn rounded-pill btn-info">
                     <i class="fa fa-refresh"></i>
-                    {{ RoleNames::SUPERADMIN == getRoleName() ? 'Reset System Template' : 'Reset Account Sub Types' }}
+                    {{ RoleNames::SUPERADMIN == getRoleName() ? __('account_sub_types.reset_system_template') : __('account_sub_types.reset_account_sub_types') }}
                 </button>
             </div>
             <div class="card-body">
@@ -30,9 +30,9 @@
                     <div class="row g-3">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                             <div class="col-md-3">
-                                <label class="form-label">Business</label>
+                                <label class="form-label">{{ __('common.business') }}</label>
                                 <select id="filter_business_id" class="form-select">
-                                    <option value="">--All Businesses--</option>
+                                    <option value="">{{ __('common.all_businesses') }}</option>
                                     @foreach ($business as $item)
                                         <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                             {{ $item->name ?? '' }}
@@ -42,9 +42,9 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label class="form-label">Account Type</label>
+                            <label class="form-label">{{ __('account_sub_types.account_type') }}</label>
                             <select id="filter_account_type_id" class="form-select">
-                                <option value="">--All Account Types--</option>
+                                <option value="">{{ __('account_sub_types.all_account_types') }}</option>
                                 @if (RoleNames::SUPERADMIN != getRoleName())
                                     @foreach ($account_types as $item)
                                         <option value="{{ $item->account_type_id }}">
@@ -56,7 +56,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Date</label>
+                            <label class="form-label">{{ __('common.date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
                         <div class="col-md-3 d-flex align-items-end gap-2">
@@ -73,12 +73,12 @@
                     <table id="account_sub_type_table" class="table display datatables" style="width:100%">
                         <thead>
                             <tr>
-                                <th>Code</th>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Account Type</th>
-                                <th>Business</th>
-                                <th>Action</th>
+                                <th>{{ __('common.code') }}</th>
+                                <th>{{ __('common.name') }}</th>
+                                <th>{{ __('common.description') }}</th>
+                                <th>{{ __('account_sub_types.account_type') }}</th>
+                                <th>{{ __('common.business') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                             <!-- end table row-->
                         </thead>
@@ -94,6 +94,18 @@
     <!-- ========== table components end ========== -->
 @endsection
 @section('js')
+    @php
+        $__i18nAccountSubTypes = [
+            'edit_heading' => __('account_sub_types.edit_heading'),
+            'please_enter_code' => __('account_sub_types.please_enter_code'),
+            'reset_success' => __('account_sub_types.reset_success'),
+            'select_sub_type' => __('account_sub_types.select_sub_type'),
+            'all_sub_types' => __('account_sub_types.all_sub_types'),
+            'select_account_type' => __('account_sub_types.select_account_type'),
+            'all_account_types' => __('account_sub_types.all_account_types'),
+        ];
+    @endphp
+    <script>window.i18n_account_sub_types = @json($__i18nAccountSubTypes);</script>
     @include('admin.partials.datatable', [
         'columns' => "
                                         {data: 'code' , name: 'code'},
@@ -139,7 +151,7 @@
                 $("#name").val(data.name);
                 $("#description").val(data.description);
 
-                $("#modelHeading").html("Edit Account Sub Type");
+                $("#modelHeading").html(window.i18n_account_sub_types.edit_heading);
                 $("#saveBtn").show();
                 $("#ajaxModel").modal("show");
             }
@@ -154,7 +166,7 @@
             },
             beforeSubmit: function() {
                 if ($("#code").val() == "") {
-                    errorMessage("Please Enter Code");
+                    errorMessage(window.i18n_account_sub_types.please_enter_code);
                     return false;
                 }
                 return true;
@@ -173,7 +185,7 @@
         $('#business_id').change(function() {
             let business_id = $(this).val();
             if (!business_id) {
-                $('#account_type_id').html('<option value="">--Select Sub Type--</option>');
+                $('#account_type_id').html('<option value="">' + (window.i18n_account_sub_types.select_sub_type || '') + '</option>');
                 return;
             }
             ajaxRequest({
@@ -182,7 +194,7 @@
                 })
                 .then((response) => {
                     let data = response.Data;
-                    let options = '<option value="">--Select Sub Type--</option>';
+                    let options = '<option value="">' + (window.i18n_account_sub_types.select_sub_type || '') + '</option>';
                     $.each(data, function(index, item) {
                         options += `<option value="${item.account_type_id}">
                                        ${item.code} ${item.name}
@@ -199,7 +211,7 @@
         $('#filter_business_id').change(function() {
             let business_id = $(this).val();
             if (!business_id) {
-                $('#filter_account_type_id').html('<option value="">--All Sub Types--</option>');
+                $('#filter_account_type_id').html('<option value="">' + (window.i18n_account_sub_types.all_sub_types || '') + '</option>');
                 return;
             }
             ajaxRequest({
@@ -208,7 +220,7 @@
                 })
                 .then((response) => {
                     let data = response.Data;
-                    let options = '<option value="">--All Sub Types--</option>';
+                    let options = '<option value="">' + (window.i18n_account_sub_types.all_sub_types || '') + '</option>';
                     $.each(data, function(index, item) {
                         options += `<option value="${item.account_type_id}">
                                        ${item.code} ${item.name}
@@ -236,7 +248,7 @@
                 },
                 success: function(response) {
                     $("#preloader").hide();
-                    successMessage(response.Message || "Account Sub Type reset successfully!");
+                    successMessage(response.Message || window.i18n_account_sub_types.reset_success);
                     if (typeof account_sub_type_table !== "undefined") {
                         initDataTableaccount_sub_type_table();
                     }

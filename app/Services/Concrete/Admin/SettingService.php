@@ -15,6 +15,7 @@ use App\Models\CustomerSetting;
 use App\Models\EmailSetting;
 use App\Models\FbrSetting;
 use App\Models\InventorySetting;
+use App\Models\LocalizationSetting;
 use App\Models\NotificationSetting;
 use App\Models\SmsSetting;
 use App\Models\PosSetting;
@@ -38,6 +39,7 @@ class SettingService
 
     protected $model_business;
     protected $model_business_setting;
+    protected $model_localization_setting;
     protected $model_accounting_setting;
     protected $model_customer_setting;
     protected $model_supplier_setting;
@@ -69,6 +71,7 @@ class SettingService
         $this->model_business = new Repository(new Business());
         $this->model_notification_setting = new Repository(new NotificationSetting());
         $this->model_business_setting = new Repository(new BusinessSetting());
+        $this->model_localization_setting = new Repository(new LocalizationSetting());
         $this->model_accounting_setting = new Repository(new AccountingSetting());
         $this->model_customer_setting = new Repository(new CustomerSetting());
         $this->model_supplier_setting = new Repository(new SupplierSetting());
@@ -89,6 +92,11 @@ class SettingService
     public function getBusinessSetting($business_id)
     {
         return $this->model_business_setting->getModel()::firstOrCreate(['business_id' => $business_id]);
+    }
+
+    public function getLocalizationSetting($business_id)
+    {
+        return $this->model_localization_setting->getModel()::firstOrCreate(['business_id' => $business_id]);
     }
 
     public function getAccountingSetting($business_id)
@@ -280,6 +288,33 @@ class SettingService
             ucfirst(str_replace('_', ' ', $type)) . ' setting ' . ($old_values === null ? 'created' : 'updated'),
             $setting->business_id ?? null
         );
+    }
+
+    public function updateLocalizationSetting(array $obj)
+    {
+        $model = $this->model_localization_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id'],
+        ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::user()->id;
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::user()->id;
+        $setting->date_updated = now();
+        $setting->save();
+        $this->auditSetting('localization', $setting, $old_values);
+
+        session([
+            'localization_setting' => $setting->fresh()->toArray(),
+        ]);
+
+        return $setting;
     }
 
     public function updateBusinessSetting(array $obj)

@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'pages_policies' => 'Trang và chính sách',
+    'faq' => 'FAQ / Help Center',
+    'testimonials' => 'Lời chứng thực',
+    'hero_stats' => 'Thống kê chính',
+    'homepage_sections' => 'Các phần trang chủ',
+    'benefits' => 'Benefits',
+    'contact_messages' => 'Tin nhắn liên hệ',
+    'newsletter_subscribers' => 'Người đăng ký bản tin',
+    'social_media' => 'Mạng xã hội',
+    'intro_cms' => 'CMS giới thiệu',
+    'col_title' => 'Title',
+    'col_slug' => 'Slug',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_question' => 'Question',
+    'col_sort_order' => 'Sort Order',
+    'col_name' => 'Name',
+    'col_email' => 'Email',
+    'col_message' => 'Message',
+    'col_date' => 'Date',
+    'col_platform' => 'Platform',
+    'col_url' => 'URL',
+];

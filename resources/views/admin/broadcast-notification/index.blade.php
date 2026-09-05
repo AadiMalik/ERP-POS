@@ -5,12 +5,12 @@ use App\Enums\BroadcastNotificationStatus;
 @extends('layouts.app')
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Broadcast Notifications</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('broadcast_notifications.title') }}</h4>
     <div class="card">
         <div class="card-header d-flex justify-content-between">
             <div>
                 <button type="button" id="toggleFilter" class="btn btn-outline-primary">
-                    <i class="fa fa-filter"></i> Filters
+                    <i class="fa fa-filter"></i> {{ __('common.filters') }}
                 </button>
             </div>
             @canAccess('broadcast-notification.create')
@@ -24,9 +24,9 @@ use App\Enums\BroadcastNotificationStatus;
                 <div class="row g-3">
                     @if (RoleNames::SUPERADMIN == getRoleName())
                     <div class="col-md-3">
-                        <label class="form-label">Business</label>
+                        <label class="form-label">{{ __('common.business') }}</label>
                         <select id="business_id" class="form-select">
-                            <option value="">--All Businesses--</option>
+                            <option value="">{{ __('common.all_businesses') }}</option>
                             @foreach ($business as $item)
                             <option value="{{ $item->business_id }}">{{ $item->code }} {{ $item->name }}</option>
                             @endforeach
@@ -34,7 +34,7 @@ use App\Enums\BroadcastNotificationStatus;
                     </div>
                     @endif
                     <div class="col-md-3">
-                        <label class="form-label">Status</label>
+                        <label class="form-label">{{ __('common.status') }}</label>
                         <select id="status" class="form-select">
                             <option value="">--All--</option>
                             @foreach (BroadcastNotificationStatus::labels() as $value => $label)
@@ -43,12 +43,12 @@ use App\Enums\BroadcastNotificationStatus;
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Date</label>
+                        <label class="form-label">{{ __('common.date') }}</label>
                         @include('admin.partials.date_filter')
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
-                        <button type="button" id="search_btn" class="btn btn-primary">Search</button>
-                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">Reset</button>
+                        <button type="button" id="search_btn" class="btn btn-primary">{{ __('common.search') }}</button>
+                        <button type="button" id="reset_filter" class="btn btn-outline-secondary">{{ __('common.reset') }}</button>
                     </div>
                 </div>
             </div>
@@ -56,20 +56,20 @@ use App\Enums\BroadcastNotificationStatus;
                 <table id="broadcast_notification_table" class="table datatables">
                     <thead>
                         <tr>
-                            <th>Title</th>
+                            <th>{{ __('common.title') }}</th>
                             <th>Template</th>
-                            <th>Business</th>
+                            <th>{{ __('common.business') }}</th>
                             <th>Total</th>
                             <th>Success</th>
                             <th>Failed</th>
                             <th>Pending</th>
                             <th>Cancelled</th>
-                            <th>Status</th>
+                            <th>{{ __('common.status') }}</th>
                             <th>Created By</th>
                             <th>Created</th>
                             <th>Started</th>
                             <th>Completed</th>
-                            <th>Action</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

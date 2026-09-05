@@ -8,7 +8,7 @@ $("#createParentAccount").click(function () {
       $("#parent_name").val('');
       $("#parent_description").val('');
       $("#parentSaveBtn").show();
-      $("#modelHeading").html("Create New Parent Account");
+      $("#modelHeading").html(window.i18n_accounts?.create_parent || "Create New Parent Account");
       $("#parentAccountModal").modal("show");
 });
 
@@ -23,7 +23,7 @@ $("#createChildAccount").click(function () {
       $("#child_name").val('');
       $("#child_description").val('');
       $("#childSaveBtn").show();
-      $("#modelHeading").html("Create New Child Account");
+      $("#modelHeading").html(window.i18n_accounts?.create_child || "Create New Child Account");
       $("#childAccountModal").modal("show");
 });
 
@@ -65,7 +65,7 @@ $("body").on("click", "#editParentAccount", function (event) {
                   $("#parent_name").val(data.name);
                   $("#parent_description").val(data.description);
 
-                  $("#modelHeading").html("Edit Parent Account");
+                  $("#modelHeading").html(window.i18n_accounts?.edit_parent || "Edit Parent Account");
                   $("#parentAccountModal").modal("show");
 
             },
@@ -119,7 +119,7 @@ $("body").on("click", "#editChildAccount", function (event) {
                   $("#child_name").val(data.name);
                   $("#child_description").val(data.description);
 
-                  $("#modelHeading").html("Edit Child Account");
+                  $("#modelHeading").html(window.i18n_accounts?.edit_child || "Edit Child Account");
                   $("#childAccountModal").modal("show");
 
             },
@@ -138,19 +138,19 @@ saveRecord({
       },
       beforeSubmit: function () {
             if ($("#parent_account_type_id").val() == "") {
-                  errorMessage("Please select account type");
+                  errorMessage(window.i18n_accounts?.please_select_account_type || "Please select account type");
                   return false;
             }
             if ($("#parent_account_sub_type_id").val() == "") {
-                  errorMessage("Please select account sub type");
+                  errorMessage(window.i18n_accounts?.please_select_account_sub_type || "Please select account sub type");
                   return false;
             }
             if ($("#parent_code").val() == "") {
-                  errorMessage("Please enter code");
+                  errorMessage(window.i18n_accounts?.please_enter_code || "Please enter code");
                   return false;
             }
             if ($("#parent_name").val() == "") {
-                  errorMessage("Please enter name");
+                  errorMessage(window.i18n_accounts?.please_enter_name || "Please enter name");
                   return false;
             }
             return true;
@@ -166,23 +166,23 @@ saveRecord({
       },
       beforeSubmit: function () {
             if ($("#child_account_type_id").val() == "") {
-                  errorMessage("Please select account type");
+                  errorMessage(window.i18n_accounts?.please_select_account_type || "Please select account type");
                   return false;
             }
             if ($("#child_account_sub_type_id").val() == "") {
-                  errorMessage("Please select account sub type");
+                  errorMessage(window.i18n_accounts?.please_select_account_sub_type || "Please select account sub type");
                   return false;
             }
             if ($("#child_parent_account_id").val() == "") {
-                  errorMessage("Please select parent account");
+                  errorMessage(window.i18n_accounts?.please_select_parent_account || "Please select parent account");
                   return false;
             }
             if ($("#child_code").val() == "") {
-                  errorMessage("Please enter code");
+                  errorMessage(window.i18n_accounts?.please_enter_code || "Please enter code");
                   return false;
             }
             if ($("#child_name").val() == "") {
-                  errorMessage("Please enter name");
+                  errorMessage(window.i18n_accounts?.please_enter_name || "Please enter name");
                   return false;
             }
             return true;

@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Variation-wise Sales Report',
+        'title' => __('reports.variation_sales'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,14 +56,14 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Product</th>
-                <th>Variation</th>
-                <th>SKU</th>
-                <th class="text-right">Qty</th>
-                <th class="text-right">Gross</th>
-                <th class="text-right">Discount</th>
-                <th class="text-right">Tax</th>
-                <th class="text-right">Net</th>
+                <th>{{ __('reports.col_product') }}</th>
+                <th>{{ __('reports.col_variation') }}</th>
+                <th>{{ __('reports.col_sku') }}</th>
+                <th class="text-right">{{ __('reports.col_qty') }}</th>
+                <th class="text-right">{{ __('reports.col_gross') }}</th>
+                <th class="text-right">{{ __('reports.col_discount') }}</th>
+                <th class="text-right">{{ __('reports.col_tax') }}</th>
+                <th class="text-right">{{ __('reports.col_net') }}</th>
             </tr>
         </thead>
         <tbody>

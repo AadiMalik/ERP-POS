@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'משתמשי מנהל',
+    'singular' => 'مستخدم',
+    'role' => 'دور',
+    'all_roles' => '--كل الأدوار--',
+    'all_branches' => '--كل الفروع--',
+    'select_role' => '--اختر الدور--',
+    'select_branch' => '--اختر الفرع--',
+    'last_login' => 'آخر تسجيل دخول',
+    'new_heading' => 'مستخدم جديد',
+    'update_heading' => 'تحديث المستخدم',
+    'save_user' => 'حفظ المستخدم',
+    'password' => 'كلمة المرور',
+    'confirm_password' => 'تأكيد كلمة المرور',
+    'change_password' => 'تغيير كلمة المرور',
+    'current_password' => 'كلمة المرور الحالية',
+    'new_password' => 'كلمة المرور الجديدة',
+    'update_password' => 'تحديث كلمة المرور',
+    'customer_profile' => 'Customer Profile',
+    'password_optional_hint' => 'Optional for customers - they set their own password via the OTP onboarding flow.',
+    'code_auto_hint' => '(if blank, will be auto generated)',
+    'company_name' => 'Company Name',
+    'contact_person' => 'Contact Person',
+    'credit_limit' => 'Credit Limit',
+    'credit_days' => 'Credit Days',
+];

@@ -2,16 +2,16 @@
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="d-flex justify-content-between align-items-center py-3 mb-4">
-            <h4 class="fw-bold mb-0">Subscriptions &amp; Billing</h4>
+            <h4 class="fw-bold mb-0">{{ __('subscriptions.title') }}</h4>
             <div>
                 <a href="{{ route('subscription-renewal-requests.index') }}" class="btn btn-outline-primary">
-                    <i class="fa fa-clock"></i> Renewal Requests
+                    <i class="fa fa-clock"></i> {{ __('subscriptions.renewal_requests') }}
                 </a>
                 <a href="{{ route('subscription-invoices.index') }}" class="btn btn-outline-primary">
-                    <i class="fa fa-file-text"></i> Invoices
+                    <i class="fa fa-file-text"></i> {{ __('subscriptions.invoices') }}
                 </a>
                 <a href="{{ route('subscription-settings.edit') }}" class="btn btn-outline-secondary">
-                    <i class="fa fa-cog"></i> Settings
+                    <i class="fa fa-cog"></i> {{ __('subscriptions.settings') }}
                 </a>
             </div>
         </div>
@@ -19,61 +19,61 @@
         <div class="row g-3 mb-4">
             <div class="col-6 col-md-3 col-xl-2">
                 <div class="card h-100"><div class="card-body">
-                    <span class="text-muted d-block">Total Businesses</span>
+                    <span class="text-muted d-block">{{ __('subscriptions.total_businesses') }}</span>
                     <h4 class="mb-0">{{ $metrics['total_businesses'] }}</h4>
                 </div></div>
             </div>
             <div class="col-6 col-md-3 col-xl-2">
                 <div class="card h-100 border-success"><div class="card-body">
-                    <span class="text-muted d-block">Active</span>
+                    <span class="text-muted d-block">{{ __('subscriptions.active') }}</span>
                     <h4 class="mb-0 text-success">{{ $metrics['active'] }}</h4>
                 </div></div>
             </div>
             <div class="col-6 col-md-3 col-xl-2">
                 <div class="card h-100 border-info"><div class="card-body">
-                    <span class="text-muted d-block">Trial</span>
+                    <span class="text-muted d-block">{{ __('subscriptions.trial') }}</span>
                     <h4 class="mb-0 text-info">{{ $metrics['trial'] }}</h4>
                 </div></div>
             </div>
             <div class="col-6 col-md-3 col-xl-2">
                 <div class="card h-100 border-warning"><div class="card-body">
-                    <span class="text-muted d-block">Expiring Soon</span>
+                    <span class="text-muted d-block">{{ __('subscriptions.expiring_soon') }}</span>
                     <h4 class="mb-0 text-warning">{{ $metrics['expiring_soon'] }}</h4>
                 </div></div>
             </div>
             <div class="col-6 col-md-3 col-xl-2">
                 <div class="card h-100 border-warning"><div class="card-body">
-                    <span class="text-muted d-block">Payment Pending</span>
+                    <span class="text-muted d-block">{{ __('subscriptions.payment_pending') }}</span>
                     <h4 class="mb-0 text-warning">{{ $metrics['payment_pending'] }}</h4>
                 </div></div>
             </div>
             <div class="col-6 col-md-3 col-xl-2">
                 <div class="card h-100 border-danger"><div class="card-body">
-                    <span class="text-muted d-block">Expired</span>
+                    <span class="text-muted d-block">{{ __('subscriptions.expired') }}</span>
                     <h4 class="mb-0 text-danger">{{ $metrics['expired'] }}</h4>
                 </div></div>
             </div>
             <div class="col-6 col-md-3 col-xl-2">
                 <div class="card h-100"><div class="card-body">
-                    <span class="text-muted d-block">Grace Period</span>
+                    <span class="text-muted d-block">{{ __('subscriptions.grace_period') }}</span>
                     <h4 class="mb-0">{{ $metrics['grace_period'] }}</h4>
                 </div></div>
             </div>
             <div class="col-6 col-md-3 col-xl-2">
                 <div class="card h-100"><div class="card-body">
-                    <span class="text-muted d-block">Suspended</span>
+                    <span class="text-muted d-block">{{ __('subscriptions.suspended') }}</span>
                     <h4 class="mb-0">{{ $metrics['suspended'] }}</h4>
                 </div></div>
             </div>
             <div class="col-6 col-md-3 col-xl-2">
                 <div class="card h-100"><div class="card-body">
-                    <span class="text-muted d-block">Cancelled</span>
+                    <span class="text-muted d-block">{{ __('subscriptions.cancelled') }}</span>
                     <h4 class="mb-0">{{ $metrics['cancelled'] }}</h4>
                 </div></div>
             </div>
             <div class="col-6 col-md-3 col-xl-2">
                 <div class="card h-100 border-primary"><div class="card-body">
-                    <span class="text-muted d-block">Pending Approvals</span>
+                    <span class="text-muted d-block">{{ __('subscriptions.pending_approvals') }}</span>
                     <h4 class="mb-0 text-primary">{{ $metrics['pending_approvals'] }}</h4>
                 </div></div>
             </div>
@@ -124,9 +124,9 @@
                         <option value="">All Statuses</option>
                         <option value="trial">Trial</option>
                         <option value="active">Active</option>
-                        <option value="expiring_soon">Expiring Soon</option>
-                        <option value="payment_pending">Payment Pending</option>
-                        <option value="grace_period">Grace Period</option>
+                        <option value="expiring_soon">{{ __('subscriptions.expiring_soon') }}</option>
+                        <option value="payment_pending">{{ __('subscriptions.payment_pending') }}</option>
+                        <option value="grace_period">{{ __('subscriptions.grace_period') }}</option>
                         <option value="suspended">Suspended</option>
                         <option value="cancelled">Cancelled</option>
                         <option value="expired">Expired</option>
@@ -138,13 +138,13 @@
                     <thead>
                         <tr>
                             <th>Code</th>
-                            <th>Business</th>
+                            <th>{{ __('common.business') }}</th>
                             <th>Package</th>
                             <th>Sub. Start</th>
                             <th>Sub. End</th>
                             <th>Rem. Days</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>

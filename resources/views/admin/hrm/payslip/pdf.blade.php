@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Salary Slip</title>
+    <title>{{ __('hrm_payslips.title') }}</title>
     <style>
         body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #333; }
         h2 { margin-bottom: 0; }
@@ -16,21 +16,21 @@
     </style>
 </head>
 <body>
-    <h2>Salary Slip</h2>
-    <p>{{ date('F', mktime(0, 0, 0, $payslip->payrollRun->month, 1)) }} {{ $payslip->payrollRun->year }}</p>
+    <h2>{{ __('hrm_payslips.title') }}</h2>
+    <p>{{ \Carbon\Carbon::create($payslip->payrollRun->year, $payslip->payrollRun->month, 1)->translatedFormat('F') }} {{ $payslip->payrollRun->year }}</p>
 
     <table class="header-table">
         <tr>
-            <td><strong>Employee:</strong> {{ $payslip->employee->user->name ?? '-' }}</td>
-            <td><strong>Code:</strong> {{ $payslip->employee->employee_code }}</td>
+            <td><strong>{{ __('common.employee') }}:</strong> {{ $payslip->employee->user->name ?? '-' }}</td>
+            <td><strong>{{ __('common.code') }}:</strong> {{ $payslip->employee->employee_code }}</td>
         </tr>
         <tr>
-            <td><strong>Department:</strong> {{ $payslip->employee->department->name ?? '-' }}</td>
-            <td><strong>Designation:</strong> {{ $payslip->employee->designation->name ?? '-' }}</td>
+            <td><strong>{{ __('common.department') }}:</strong> {{ $payslip->employee->department->name ?? '-' }}</td>
+            <td><strong>{{ __('common.designation') }}:</strong> {{ $payslip->employee->designation->name ?? '-' }}</td>
         </tr>
         <tr>
-            <td><strong>Present Days:</strong> {{ $payslip->present_days }}</td>
-            <td><strong>Absent Days:</strong> {{ $payslip->absent_days }} &nbsp; <strong>Leave Days:</strong> {{ $payslip->leave_days }}</td>
+            <td><strong>{{ __('hrm_payslips.present_days') }}:</strong> {{ $payslip->present_days }}</td>
+            <td><strong>{{ __('hrm_payslips.absent_days') }}:</strong> {{ $payslip->absent_days }} &nbsp; <strong>{{ __('hrm_payslips.leave_days') }}:</strong> {{ $payslip->leave_days }}</td>
         </tr>
     </table>
 
@@ -38,10 +38,10 @@
 
     <table class="items-table">
         <tr>
-            <th width="25%">Earnings</th>
-            <th width="25%" class="text-end">Amount</th>
-            <th width="25%">Deductions</th>
-            <th width="25%" class="text-end">Amount</th>
+            <th width="25%">{{ __('hrm_payslips.earnings') }}</th>
+            <th width="25%" class="text-end">{{ __('common.amount') }}</th>
+            <th width="25%">{{ __('hrm_payslips.deductions') }}</th>
+            <th width="25%" class="text-end">{{ __('common.amount') }}</th>
         </tr>
         @php
             $earnings = $payslip->items->where('type', 'earning')->values();
@@ -57,13 +57,13 @@
         </tr>
         @endfor
         <tr class="total-row">
-            <td>Total Earnings</td>
+            <td>{{ __('hrm_payslips.total_earnings') }}</td>
             <td class="text-end">{{ number_format($payslip->total_earnings, 2) }}</td>
-            <td>Total Deductions</td>
+            <td>{{ __('hrm_payslips.total_deductions') }}</td>
             <td class="text-end">{{ number_format($payslip->total_deductions, 2) }}</td>
         </tr>
     </table>
 
-    <div class="net-salary">Net Salary: {{ number_format($payslip->net_salary, 2) }}</div>
+    <div class="net-salary">{{ __('hrm_payslips.net_salary') }}: {{ number_format($payslip->net_salary, 2) }}</div>
 </body>
 </html>

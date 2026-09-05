@@ -153,7 +153,7 @@
 
     <div class="card mb-4">
         <div class="card-header bg-white border-bottom">
-            <h5 class="mb-0">Asset Details</h5>
+            <h5 class="mb-0">{{ __('fixed_assets.asset_details') }}</h5>
         </div>
         <div class="card-body">
             <div class="row g-3">

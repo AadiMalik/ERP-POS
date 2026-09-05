@@ -22,11 +22,11 @@
 
     $due = max(($order->total ?? 0) - ($order->paid_amount ?? 0), 0);
     if ($due <= 0) {
-        $payment_status = \App\Enums\Status::PAID;
+        $payment_status = \App\Enums\{{ __('common.status') }}::PAID;
     } elseif (($order->paid_amount ?? 0) > 0) {
-        $payment_status = \App\Enums\Status::PARTIALLY_PAID;
+        $payment_status = \App\Enums\{{ __('common.status') }}::PARTIALLY_PAID;
     } else {
-        $payment_status = \App\Enums\Status::UNPAID;
+        $payment_status = \App\Enums\{{ __('common.status') }}::UNPAID;
     }
     $payment_status_label = ucwords(str_replace('_', ' ', $payment_status));
 
@@ -105,21 +105,21 @@
             <div class="tr-meta">
                 @if ($thermal_config->isVisible('order_no'))
                     <div class="tr-row">
-                        <span class="tr-label">Order No:</span>
+                        <span class="tr-label">{{ __('order_returns.order_no') }}:</span>
                         <span class="tr-value">{{ $order->daily_order_id ?? 'N/A' }}</span>
                     </div>
                 @endif
 
                 @if ($thermal_config->isVisible('date_time'))
                     <div class="tr-row">
-                        <span class="tr-label">Date:</span>
+                        <span class="tr-label">{{ __('common.date') }}:</span>
                         <span class="tr-value">{{ localDateTime($order->sale_date ?? $order->order_date) }}</span>
                     </div>
                 @endif
 
                 @if ($thermal_config->isVisible('customer_name') && !empty($order->user->name))
                     <div class="tr-row">
-                        <span class="tr-label">Customer:</span>
+                        <span class="tr-label">{{ __('common.customer') }}:</span>
                         <span class="tr-value">{{ $order->user->name }}</span>
                     </div>
                 @endif
@@ -147,7 +147,7 @@
 
                 @if ($thermal_config->isVisible('order_taker_name') && !empty($order->cashier->name))
                     <div class="tr-row">
-                        <span class="tr-label">Served by:</span>
+                        <span class="tr-label">{{ __('orders.served_by') }}:</span>
                         <span class="tr-value">{{ $order->cashier->name }}</span>
                     </div>
                 @endif
@@ -159,7 +159,7 @@
              distinguishable from the original print by its own timestamp. --}}
         <div class="tr-meta">
             <div class="tr-row">
-                <span class="tr-label">Printed On:</span>
+                <span class="tr-label">{{ __('orders.printed_on') }}:</span>
                 <span class="tr-value">{{ localDateTime($printed_at) }}</span>
             </div>
         </div>
@@ -170,7 +170,7 @@
                 <tr>
                     <th>Item</th>
                     @if (in_array('quantity', $item_columns))
-                        <th class="text-right">Qty</th>
+                        <th class="text-right">{{ __('common.qty') }}</th>
                     @endif
                     @if (in_array('unit_price', $item_columns))
                         <th class="text-right">Price ({{ session('accounting_setting.currency_symbol', 'Rs') }})</th>
@@ -226,7 +226,7 @@
             <div class="tr-totals">
                 @if ($thermal_config->isVisible('subtotal'))
                     <div class="tr-row">
-                        <span class="tr-label">Subtotal</span>
+                        <span class="tr-label">{{ __('common.subtotal') }}</span>
                         <span class="tr-value">{{ currency($order->subtotal) }}</span>
                     </div>
                 @endif
@@ -261,7 +261,7 @@
 
                 @if ($thermal_config->isVisible('total'))
                     <div class="tr-row tr-grand-total">
-                        <span class="tr-label">TOTAL</span>
+                        <span class="tr-label">{{ __('common.total') }}</span>
                         <span class="tr-value">{{ currency($order->total) }}</span>
                     </div>
                 @endif
@@ -287,7 +287,7 @@
 
                 @if ($thermal_config->isVisible('payment_status'))
                     <div class="tr-row">
-                        <span class="tr-label">Status</span>
+                        <span class="tr-label">{{ __('common.status') }}</span>
                         <span class="tr-value">{{ $payment_status_label }}</span>
                     </div>
                 @endif
@@ -325,7 +325,7 @@
                 @endif
 
                 @if ($thermal_config->isVisible('powered_by_smart_mart'))
-                    <p class="tr-powered-by">Powered by Dukanaz</p>
+                    <p class="tr-powered-by">{{ __('orders.powered_by') }}</p>
                 @endif
             </div>
         @endif

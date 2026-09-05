@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Employee Ledger Report')
+@section('title', __('reports.employee_ledger_report'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Employee Ledger Report',
+        'title' => __('reports.employee_ledger_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,13 +25,13 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Employee Code</th>
-                <th>Name</th>
-                <th>Entry Date</th>
-                <th>Type</th>
-                <th>Description</th>
-                <th class="text-right">Debit</th>
-                <th class="text-right">Credit</th>
+                <th>{{ __('reports.col_employee_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_entry_date') }}</th>
+                <th>{{ __('reports.col_type') }}</th>
+                <th>{{ __('reports.col_description') }}</th>
+                <th class="text-right">{{ __('reports.col_debit') }}</th>
+                <th class="text-right">{{ __('reports.col_credit') }}</th>
                 <th class="text-right">Balance After</th>
             </tr>
         </thead>

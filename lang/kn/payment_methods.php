@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'ಪಾವತಿ ವಿಧಾನಗಳು',
+    'singular' => 'ادائیگی Method',
+    'pos_title' => 'POS ಪಾವತಿ ವಿಧಾನಗಳು',
+    'account' => 'اکاؤنٹ',
+    'default' => 'ڈیفالٹ',
+    'set_as_default' => 'Set as ڈیفالٹ',
+    'select_account' => '--منتخب کریں اکاؤنٹ--',
+    'account_hint' => 'Not required for کریڈٹ or Store کریڈٹ - they route to the receivable/store-کریڈٹ اکاؤنٹ configured in اکاؤنٹing Settings at posting وقت.',
+    'create_new' => 'بنائیں نیا ادائیگی Method',
+    'edit_heading' => 'ترمیم ادائیگی Method',
+    'please_enter_name' => 'براہ کرم درج کریں نام',
+    'please_enter_code' => 'براہ کرم درج کریں کوڈ',
+    'please_select_account' => 'براہ کرم منتخب کریں اکاؤنٹ',
+    'enter_code' => 'درج کریں کوڈ',
+    'cash' => 'نقد',
+    'card' => 'کارڈ',
+    'bank' => 'بینک',
+    'credit' => 'کریڈٹ',
+    'store_credit' => 'Store کریڈٹ',
+    'wallet' => 'Wتمامet',
+    'other' => 'دیگر',
+];

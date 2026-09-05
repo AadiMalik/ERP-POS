@@ -3,7 +3,7 @@
 @endsection
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">Budget vs Actual</h4>
+        <h4 class="fw-bold py-3 mb-4">{{ __('reports.budget_vs_actual') }}</h4>
 
         <div class="card">
             <div class="card-body">
@@ -25,9 +25,9 @@
                     <table class="table" id="variance_table">
                         <thead>
                             <tr>
-                                <th>Account</th>
-                                <th>Branch</th>
-                                <th>Period</th>
+                                <th>{{ __('reports.col_account') }}</th>
+                                <th>{{ __('common.branch') }}</th>
+                                <th>{{ __('reports.col_period') }}</th>
                                 <th class="text-end">Budgeted</th>
                                 <th class="text-end">Actual</th>
                                 <th class="text-end">Variance</th>

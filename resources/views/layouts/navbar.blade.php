@@ -18,7 +18,7 @@
                     type="text"
                     id="globalSearchInput"
                     class="form-control border-0 shadow-none"
-                    placeholder="Search suppliers, products, orders, purchases..."
+                    placeholder="{{ __('common.global_search_placeholder') }}"
                     aria-label="Global search"
                     autocomplete="off"
                     data-search-url="{{ route('search.global') }}" />
@@ -46,8 +46,8 @@
                     <ul class="dropdown-menu dropdown-menu-end" style="width: 380px; max-height: 420px; overflow-y: auto;">
                         <li>
                             <div class="dropdown-header d-flex align-items-center justify-content-between py-2 px-3">
-                                <h6 class="mb-0">Notifications</h6>
-                                <a href="javascript:void(0);" class="text-body" id="markAllReadDropdownBtn" title="Mark all as read">
+                                <h6 class="mb-0">{{ __('common.notifications') }}</h6>
+                                <a href="javascript:void(0);" class="text-body" id="markAllReadDropdownBtn" title="{{ __('common.mark_all_as_read') }}">
                                     <i class="fa fa-check-double"></i>
                                 </a>
                             </div>
@@ -56,14 +56,14 @@
                             <div class="dropdown-divider"></div>
                         </li>
                         <li id="notificationListContainer">
-                            <div class="text-center text-muted py-4">No notifications</div>
+                            <div class="text-center text-muted py-4">{{ __('common.no_notifications') }}</div>
                         </li>
                         <li>
                             <div class="dropdown-divider"></div>
                         </li>
                         <li>
                             <a href="{{ url('admin/notifications') }}" class="dropdown-item d-flex justify-content-center p-2 text-primary">
-                                View all notifications
+                                {{ __('common.view_all_notifications') }}
                             </a>
                         </li>
                     </ul>
@@ -100,20 +100,20 @@
                     <li>
                         <a class="dropdown-item" href="{{ url('admin/profile') }}">
                             <i class="fa fa-user me-2"></i>
-                            <span class="align-middle">My Profile</span>
+                            <span class="align-middle">{{ __('common.my_profile') }}</span>
                         </a>
                     </li>
                     <li>
                         <a class="dropdown-item" href="{{ url('admin/setting') }}">
                             <i class="fa fa-cog me-2"></i>
-                            <span class="align-middle">Settings</span>
+                            <span class="align-middle">{{ __('settings.title') }}</span>
                         </a>
                     </li>
                     <li>
                         <a class="dropdown-item" href="#">
                             <span class="d-flex align-items-center align-middle">
                                 <i class="flex-shrink-0 fa fa-credit-card me-2"></i>
-                                <span class="flex-grow-1 align-middle">Billing</span>
+                                <span class="flex-grow-1 align-middle">{{ __('common.billing') }}</span>
                                 <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
                             </span>
                         </a>
@@ -252,7 +252,7 @@
                 function renderNotificationDropdown(items) {
                     const $container = $('#notificationListContainer');
                     if (!items || items.length === 0) {
-                        $container.html('<div class="text-center text-muted py-4">No notifications</div>');
+                        $container.html('<div class="text-center text-muted py-4">' + (window.i18n?.no_notifications || 'No notifications') + '</div>');
                         return;
                     }
                     let html = '';

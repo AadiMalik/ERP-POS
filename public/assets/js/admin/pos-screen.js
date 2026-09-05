@@ -44,6 +44,21 @@
         correction_reason_modal: null,
     };
 
+
+    function t(key, fallback) {
+        return (window.i18n_pos && window.i18n_pos[key]) || fallback;
+    }
+
+    function tr(key, fallback, replacements) {
+        var s = t(key, fallback);
+        if (replacements) {
+            Object.keys(replacements).forEach(function (k) {
+                s = s.split(':' + k).join(String(replacements[k]));
+            });
+        }
+        return s;
+    }
+
     function can(perm) {
         return !!PERM[perm];
     }
@@ -84,8 +99,8 @@
             return '';
         }
         return available_stock > 0
-            ? '<span class="pos-stock-hint">' + available_stock + ' in stock</span>'
-            : '<span class="pos-stock-hint pos-stock-hint-out">Out of stock</span>';
+            ? '<span class="pos-stock-hint">' + tr('in_stock', ':qty in stock', {qty: available_stock}) + '</span>'
+            : '<span class="pos-stock-hint pos-stock-hint-out">' + t('out_of_stock', 'Out of stock') + '</span>';
     }
 
     // Registers the qty (existing cart quantity + any quantity about to be
@@ -103,11 +118,11 @@
         available_stock = parseFloat(available_stock) || 0;
 
         if (available_stock <= 0) {
-            return '"' + name + '" is out of stock.';
+            return tr('product_out_of_stock', '":name" is out of stock.', {name: name});
         }
 
         if (requestedQty > available_stock) {
-            return 'Only ' + available_stock + ' of "' + name + '" available in stock.';
+            return tr('only_n_available', 'Only :qty of ":name" available in stock.', {qty: available_stock, name: name});
         }
 
         return null;
@@ -208,7 +223,7 @@
             })
             .catch(function (err) {
                 state.session = null;
-                errorMessage(err.Message || 'Unable to check register session.');
+                errorMessage(err.Message || t('unable_check_session', 'Unable to check register session.'));
                 showBrowseOnly();
             });
     }
@@ -231,10 +246,10 @@
         $('#posNoSessionArea').hide();
         $('#posScreenBody').show();
 
-        var registerName = (state.session.register && state.session.register.name) || 'Register';
+        var registerName = (state.session.register && state.session.register.name) || t('register', 'Register');
         $('#registerBadge')
             .removeClass('d-none')
-            .html(escapeHtml(registerName) + ' <span class="pos-register-status-pill">OPEN</span>');
+            .html(escapeHtml(registerName) + ' <span class="pos-register-status-pill">' + t('session_open_status', 'OPEN') + '</span>');
 
         $('#cashInBtn, #cashOutBtn, #closeRegisterBtn').removeClass('d-none');
         if (can('expense.access')) {
@@ -246,7 +261,7 @@
 
         if (CFG.correct_order_id) {
             if (!can('order.correct')) {
-                errorMessage('You do not have permission to correct orders.');
+                errorMessage(t('no_correct_permission', 'You do not have permission to correct orders.'));
             } else {
                 loadCorrectionOrder(CFG.correct_order_id);
             }
@@ -264,7 +279,7 @@
         });
         $('#printSessionSummaryBtn').on('click', function () {
             if (!state.reports_viewed_session_id) {
-                errorMessage('Select a session first.');
+                errorMessage(t('select_session_first', 'Select a session first.'));
                 return;
             }
             window.open(URLS.session_summary_print + '/' + state.reports_viewed_session_id + '/print', '_blank');
@@ -340,7 +355,7 @@
             if (!product) return;
 
             if ($(this).hasClass('product-card-out-of-stock')) {
-                errorMessage('"' + (product.name || 'This product') + '" is out of stock.');
+                errorMessage(tr('product_out_of_stock', '":name" is out of stock.', {name: product.name || t('this_product', 'This product')}));
                 return;
             }
 
@@ -502,8 +517,8 @@
 
             $('#changeBranchBusinessId').on('change', function () {
                 var business_id = $(this).val();
-                $('#changeBranchBranchId').html('<option value="">--Select Branch--</option>');
-                $('#changeBranchWarehouseId').html('<option value="">--Select Warehouse--</option>');
+                $('#changeBranchBranchId').html('<option value="">' + t('select_branch', '--Select Branch--') + '</option>');
+                $('#changeBranchWarehouseId').html('<option value="">' + t('select_warehouse', '--Select Warehouse--') + '</option>');
                 if (!business_id) return;
 
                 ajaxRequest({ url: url_local + '/admin/pos-screen/context-options/' + business_id })
@@ -522,7 +537,7 @@
                         $('#changeBranchWarehouseId').html(warehouseOptions);
                     })
                     .catch(function (err) {
-                        errorMessage(err.Message || 'Unable to load branches.');
+                        errorMessage(err.Message || t('unable_load_branches', 'Unable to load branches.'));
                     });
             });
         }
@@ -643,7 +658,7 @@
 
     function initCustomerSelect() {
         $('#customer_id').select2({
-            placeholder: 'Walk-in Customer',
+            placeholder: t('walk_in_customer', 'Walk-in Customer'),
             dropdownParent: $('body'),
             width: '100%',
             minimumResultsForSearch: 0,
@@ -696,11 +711,11 @@
     }
 
     function updateCheckoutSummary() {
-        var label = 'Cash';
+        var label = t('cash', 'Cash');
         var methods = CFG.payment_methods || [];
 
         if (state.payment_mode === 'multi') {
-            label = 'Multi Pay';
+            label = t('multi_pay', 'Multi Pay');
         } else if (state.selected_payment_method_id) {
             var selected = methods.find(function (m) {
                 return m.payment_method_id === state.selected_payment_method_id;
@@ -722,7 +737,7 @@
         var phone = $('#new_customer_phone').val().trim();
 
         if (!name || !email) {
-            errorMessage('Name and Email are required.');
+            errorMessage(t('name_email_required', 'Name and Email are required.'));
             return;
         }
 
@@ -749,10 +764,10 @@
                 $('#customer_id').append($option).val(customer.user_id).trigger('change');
 
                 state.add_customer_modal.hide();
-                successMessage('Customer added.');
+                successMessage(t('customer_added', 'Customer added.'));
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to add customer.');
+                errorMessage(err.Message || t('unable_add_customer', 'Unable to add customer.'));
             });
     }
 
@@ -763,7 +778,7 @@
         var opening_cash = $('#opening_cash').val();
 
         if (opening_cash === '' || isNaN(opening_cash)) {
-            errorMessage('Please enter a valid opening cash amount.');
+            errorMessage(t('valid_opening_cash', 'Please enter a valid opening cash amount.'));
             return;
         }
 
@@ -777,7 +792,7 @@
         if (SETTING.register_mode === 'manual') {
             var register_id = $('#open_pos_register_id').val();
             if (!register_id) {
-                errorMessage('Please select a register.');
+                errorMessage(t('please_select_register', 'Please select a register.'));
                 return;
             }
             data.pos_register_id = register_id;
@@ -787,17 +802,17 @@
             .then(function (response) {
                 state.session = response.Data;
                 state.open_session_modal.hide();
-                successMessage('Register session opened.');
+                successMessage(t('session_opened', 'Register session opened.'));
                 onSessionReady();
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to open register session.');
+                errorMessage(err.Message || t('unable_open_session', 'Unable to open register session.'));
             });
     }
 
     function openCashMovementModal(type) {
         $('#cash_movement_type').val(type);
-        $('#cashMovementModalTitle').text(type === 'in' ? 'Add Cash (In)' : 'Remove Cash (Out)');
+        $('#cashMovementModalTitle').text(type === 'in' ? t('add_cash_in', 'Add Cash (In)') : t('remove_cash_out', 'Remove Cash (Out)'));
         $('#cash_movement_amount').val('');
         $('#cash_movement_reason').val('');
         // Fresh key per modal open - reused across retries of this one
@@ -812,11 +827,11 @@
         var reason = $.trim($('#cash_movement_reason').val() || '');
 
         if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-            errorMessage('Please enter a valid amount.');
+            errorMessage(t('valid_amount', 'Please enter a valid amount.'));
             return;
         }
         if (!reason) {
-            errorMessage('Please enter a reason for this cash movement.');
+            errorMessage(t('cash_movement_reason_required', 'Please enter a reason for this cash movement.'));
             return;
         }
         if (state.cash_movement_submitting) {
@@ -838,11 +853,11 @@
             },
         })
             .then(function () {
-                successMessage('Cash movement recorded.');
+                successMessage(t('cash_movement_recorded', 'Cash movement recorded.'));
                 state.cash_movement_modal.hide();
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to record cash movement.');
+                errorMessage(err.Message || t('unable_record_cash_movement', 'Unable to record cash movement.'));
             })
             .finally(function () {
                 state.cash_movement_submitting = false;
@@ -868,11 +883,11 @@
         var amount = $('#expense_amount').val();
 
         if (!category_id) {
-            errorMessage('Please select an expense category.');
+            errorMessage(t('please_select_expense_category', 'Please select an expense category.'));
             return;
         }
         if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-            errorMessage('Please enter a valid amount.');
+            errorMessage(t('valid_amount', 'Please enter a valid amount.'));
             return;
         }
 
@@ -887,11 +902,11 @@
             },
         })
             .then(function () {
-                successMessage('Expense recorded.');
+                successMessage(t('expense_recorded', 'Expense recorded.'));
                 state.add_expense_modal.hide();
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to record expense.');
+                errorMessage(err.Message || t('unable_record_expense', 'Unable to record expense.'));
             });
     }
 
@@ -911,7 +926,7 @@
                 state.close_session_modal.show();
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to load session summary.');
+                errorMessage(err.Message || t('unable_load_session_summary', 'Unable to load session summary.'));
             });
     }
 
@@ -919,7 +934,7 @@
         var actual_cash = $('#actual_cash').val();
 
         if (actual_cash === '' || isNaN(actual_cash)) {
-            errorMessage('Please enter the actual cash amount.');
+            errorMessage(t('enter_actual_cash', 'Please enter the actual cash amount.'));
             return;
         }
 
@@ -933,14 +948,14 @@
             },
         })
             .then(function () {
-                successMessage('Register session closed.');
+                successMessage(t('session_closed', 'Register session closed.'));
                 state.close_session_modal.hide();
                 state.session = null;
                 resetScreenState();
                 bootstrapSession();
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to close register session.');
+                errorMessage(err.Message || t('unable_close_session', 'Unable to close register session.'));
             });
     }
 
@@ -977,7 +992,7 @@
                 renderSearchResults(results);
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Product search failed.');
+                errorMessage(err.Message || t('product_search_failed', 'Product search failed.'));
             });
     }
 
@@ -1039,7 +1054,7 @@
                 renderVoucherSearchResults(response.Data || []);
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Voucher search failed.');
+                errorMessage(err.Message || t('voucher_search_failed', 'Voucher search failed.'));
             });
     }
 
@@ -1063,7 +1078,7 @@
                 renderVoucherSearchResults(response.Data || []);
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to load available vouchers.');
+                errorMessage(err.Message || t('unable_load_vouchers', 'Unable to load available vouchers.'));
             });
     }
 
@@ -1141,7 +1156,7 @@
                     recalcPayments(parseFloat(data.total) || 0);
 
                     if (parseFloat(data.voucher_discount_amount) > 0) {
-                        var msg = 'Voucher applied: -' + money(data.voucher_discount_amount);
+                        var msg = tr('voucher_applied', 'Voucher applied: -:amount', {amount: money(data.voucher_discount_amount)});
                         if (data.voucher_rule) msg += ' (' + escapeHtml(data.voucher_rule) + ')';
                         $('#voucherApplyFeedback').removeClass('text-danger').addClass('text-success').text(msg).show();
                     }
@@ -1161,7 +1176,7 @@
                 .catch(function (err) {
                     clearVoucherFeedback();
                     $('#voucherApplyFeedback').removeClass('text-success').addClass('text-danger')
-                        .text(err.Message || 'This voucher cannot be applied.').show();
+                        .text(err.Message || t('voucher_cannot_apply', 'This voucher cannot be applied.')).show();
                     // Don't silently carry an invalid voucher into checkout -
                     // the cashier must pick another one or clear the field.
                     $('#voucher_id').val('');
@@ -1176,14 +1191,14 @@
     // base_unit_id, see OrderService::searchProducts()/getProductsByCategory()).
     function primaryUnitOf(pv) {
         if (pv.sale_unit_id) {
-            return { unit_id: pv.sale_unit_id, name: (pv.sale_unit && pv.sale_unit.name) || 'Sale Unit' };
+            return { unit_id: pv.sale_unit_id, name: (pv.sale_unit && pv.sale_unit.name) || t('sale_unit', 'Sale Unit') };
         }
 
         if (pv.base_unit_id) {
-            return { unit_id: pv.base_unit_id, name: (pv.unit && pv.unit.name) || 'Base Unit' };
+            return { unit_id: pv.base_unit_id, name: (pv.unit && pv.unit.name) || t('base_unit', 'Base Unit') };
         }
 
-        return { unit_id: null, name: 'Unit' };
+        return { unit_id: null, name: t('unit', 'Unit') };
     }
 
     // ==============================
@@ -1213,7 +1228,7 @@
             return l.product_variation_id === pv.product_variation_id && l.unit_id === unit_id;
         });
 
-        var name = (pv.product && pv.product.name) || pv.name || 'This product';
+        var name = (pv.product && pv.product.name) || pv.name || t('this_product', 'This product');
         var newQty = quantity + (existing ? (parseFloat(existing.quantity) || 0) : 0);
 
         var blockMessage = stockBlockMessage(name, pv.is_track_stock, pv.available_stock, newQty);
@@ -1293,8 +1308,8 @@
         var alreadyChosen = existing ? (existing.serial_numbers || []) : [];
         var totalNeeded = requestedQty + alreadyChosen.length;
 
-        $('#serialPickerHint').text('Select exactly ' + totalNeeded + ' serial number(s) for ' + ((pv.product && pv.product.name) || pv.name || 'this product') + '.');
-        $('#serialPickerList').html('<div class="text-muted p-2">Loading...</div>');
+        $('#serialPickerHint').text(tr('select_exactly_serials', 'Select exactly :count serial number(s) for :name.', {count: totalNeeded, name: ((pv.product && pv.product.name) || pv.name || t('this_product', 'This product'))}));
+        $('#serialPickerList').html('<div class="text-muted p-2">' + t('loading', 'Loading...') + '</div>');
         $('#serialPickerModal').data('total-needed', totalNeeded);
         state.serial_picker_modal = state.serial_picker_modal || new bootstrap.Modal(document.getElementById('serialPickerModal'));
         state.serial_picker_modal.show();
@@ -1308,7 +1323,7 @@
         }).then(function (response) {
             renderSerialPickerList(response.Data || [], alreadyChosen);
         }).catch(function () {
-            $('#serialPickerList').html('<div class="text-danger p-2">Unable to load serial numbers.</div>');
+            $('#serialPickerList').html('<div class="text-danger p-2">' + t('unable_load_serials', 'Unable to load serial numbers.') + '</div>');
         });
     }
 
@@ -1321,8 +1336,8 @@
 
         state_serial_picker = { pv: null, unit_id: line.unit_id, primary: null, requestedQty: null, existing: null, overrides: {}, lineKey: lineKey };
 
-        $('#serialPickerHint').text('Check/uncheck serial numbers for ' + line.product_name + '. At least one must remain selected.');
-        $('#serialPickerList').html('<div class="text-muted p-2">Loading...</div>');
+        $('#serialPickerHint').text(tr('check_uncheck_serials', 'Check/uncheck serial numbers for :name. At least one must remain selected.', {name: line.product_name}));
+        $('#serialPickerList').html('<div class="text-muted p-2">' + t('loading', 'Loading...') + '</div>');
         $('#serialPickerModal').data('total-needed', null);
         state.serial_picker_modal = state.serial_picker_modal || new bootstrap.Modal(document.getElementById('serialPickerModal'));
         state.serial_picker_modal.show();
@@ -1336,13 +1351,13 @@
         }).then(function (response) {
             renderSerialPickerList(response.Data || [], line.serial_numbers || []);
         }).catch(function () {
-            $('#serialPickerList').html('<div class="text-danger p-2">Unable to load serial numbers.</div>');
+            $('#serialPickerList').html('<div class="text-danger p-2">' + t('unable_load_serials', 'Unable to load serial numbers.') + '</div>');
         });
     }
 
     function renderSerialPickerList(serials, alreadyChosen) {
         if (!serials.length && !alreadyChosen.length) {
-            $('#serialPickerList').html('<div class="text-muted p-2">No available serial numbers found for this product.</div>');
+            $('#serialPickerList').html('<div class="text-muted p-2">' + t('no_serials_found', 'No available serial numbers found for this product.') + '</div>');
             return;
         }
         // Already-chosen serials (from an existing cart line) may not come
@@ -1376,7 +1391,7 @@
 
         var $checkbox = $('.serial-picker-checkbox[value="' + code.replace(/"/g, '\\"') + '"]');
         if (!$checkbox.length) {
-            errorMessage('Serial number "' + code + '" is not in the available list for this product.');
+            errorMessage(tr('serial_not_available', 'Serial number ":code" is not in the available list for this product.', {code: code}));
             return;
         }
         $checkbox.prop('checked', true);
@@ -1387,11 +1402,11 @@
         var totalNeeded = $('#serialPickerModal').data('total-needed');
 
         if (totalNeeded !== null && totalNeeded !== undefined && selected.length !== totalNeeded) {
-            errorMessage('Select exactly ' + totalNeeded + ' serial number(s) (currently ' + selected.length + ').');
+            errorMessage(tr('select_exactly_serials_count', 'Select exactly :needed serial number(s) (currently :current).', {needed: totalNeeded, current: selected.length}));
             return;
         }
         if (!selected.length) {
-            errorMessage('Select at least one serial number.');
+            errorMessage(t('select_at_least_one_serial', 'Select at least one serial number.'));
             return;
         }
 
@@ -1541,7 +1556,7 @@
                 renderProductGrid(response.Data || []);
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to load products.');
+                errorMessage(err.Message || t('unable_load_products', 'Unable to load products.'));
                 renderProductGrid([]);
             });
     }
@@ -1665,7 +1680,7 @@
         }
 
         if (!variations.length) {
-            errorMessage('This product has no sellable variation.');
+            errorMessage(t('no_sellable_variation', 'This product has no sellable variation.'));
             return;
         }
 
@@ -1681,7 +1696,7 @@
         state.picker.product = product;
         state.picker.variations = variations;
 
-        $('#productPickerTitle').text('Select a variation for ' + (product.name || ''));
+        $('#productPickerTitle').text(tr('select_variation_for', 'Select a variation for :name', {name: product.name || ''}));
         renderVariationPickerGrid(product, variations);
 
         state.product_picker_modal.show();
@@ -1724,7 +1739,7 @@
     // Small inline "Manual" badge when the cashier has hand-edited a line's
     // price, so it's clear that line no longer follows Sale Type pricing.
     function manualOverrideBadge(line) {
-        return line.manual_override ? ' <span class="badge bg-label-warning">Manual</span>' : '';
+        return line.manual_override ? ' <span class="badge bg-label-warning">' + t('manual', 'Manual') + '</span>' : '';
     }
 
     function saleTypeOptionsHtml(selectedId) {
@@ -1739,7 +1754,9 @@
         var $rows = $('#cartRows');
         $rows.empty();
 
-        $('#cartItemCount').text('(' + state.cart.length + ' Item' + (state.cart.length === 1 ? '' : 's') + ')');
+        $('#cartItemCount').text(state.cart.length === 1
+            ? tr('cart_item_one', '(:count Item)', {count: state.cart.length})
+            : tr('cart_items_count', '(:count Items)', {count: state.cart.length}));
         $('#clearCartBtn').toggleClass('d-none', !state.cart.length);
         updateCartOrderBadge();
 
@@ -1788,7 +1805,7 @@
 
             var saleTypeCell = showLineSaleType
                 ? '<select class="line-sale-type' + (isOverride ? ' line-sale-type-override' : '') + '"' +
-                    (isOverride ? ' title="Priced under a different Sale Type than the order"' : '') + '>' +
+                    (isOverride ? ' title="' + t('priced_different_sale_type', 'Priced under a different Sale Type than the order') + '"' : '') + '>' +
                     saleTypeOptionsHtml(line.sale_type_id) + '</select>'
                 : '';
 
@@ -1798,7 +1815,7 @@
 
             var qtyCell = line.track_serial_number
                 ? '<div class="cart-line-qty-stepper">' +
-                    '<button type="button" class="btn btn-sm btn-outline-secondary manage-serials" title="Manage serial numbers">' +
+                    '<button type="button" class="btn btn-sm btn-outline-secondary manage-serials" title="' + t('manage_serials', 'Manage serial numbers') + '">' +
                         '<i class="fa fa-barcode"></i> ' + line.quantity +
                     '</button>' +
                   '</div>'
@@ -1832,7 +1849,7 @@
     function updateCartOrderBadge() {
         var $badge = $('#cartOrderNoBadge');
         if (state.order_daily_id) {
-            $badge.removeClass('d-none').text('Order #' + state.order_daily_id);
+            $badge.removeClass('d-none').text(tr('order_number', 'Order #:id', {id: state.order_daily_id}));
         } else {
             $badge.addClass('d-none').text('');
         }
@@ -1842,7 +1859,7 @@
         // just saves the current cart to the same order_id (see holdOrder()).
         var $holdBtn = $('#holdOrderBtn');
         if ($holdBtn.length) {
-            var label = state.order_id ? 'Update Hold' : 'Hold';
+            var label = state.order_id ? t('update_hold', 'Update Hold') : t('hold', 'Hold');
             $holdBtn.html('<i class="fa fa-pause"></i> ' + label + ' <span class="pos-key-hint">(F6)</span>');
         }
     }
@@ -1882,7 +1899,7 @@
             if (!canOverrideMinPrice() && line.minimum_selling_price !== null && line.minimum_selling_price !== undefined) {
                 var netPrice = newPrice * (1 - discountPercent / 100);
                 if (netPrice < line.minimum_selling_price - 0.0005) {
-                    errorMessage('Price for "' + line.product_name + '" cannot be below its minimum selling price of ' + money(line.minimum_selling_price) + '.');
+                    errorMessage(tr('below_min_price', 'Price for ":name" cannot be below its minimum selling price of :price.', {name: line.product_name, price: money(line.minimum_selling_price)}));
                     $row.find('.line-price').val(line.unit_price);
                     recalcLocal();
                     return;
@@ -1989,7 +2006,7 @@
         var limit = parseFloat($opt.data('credit-limit') || 0);
 
         if (limit > 0) {
-            $('#creditLimitHint').removeClass('d-none').text('Credit limit: ' + money(limit));
+            $('#creditLimitHint').removeClass('d-none').text(tr('credit_limit_label', 'Credit limit: :amount', {amount: money(limit)}));
         } else {
             $('#creditLimitHint').addClass('d-none');
         }
@@ -2021,9 +2038,11 @@
         }
 
         var rate = parseFloat(CUSTOMER_SETTING.loyalty_redemption_value || 0);
-        var valueText = rate > 0 ? ' (~' + money(available * rate) + ')' : '';
-
-        $hint.show().text(available + ' pts available' + valueText);
+        if (rate > 0) {
+            $hint.show().text(tr('pts_available_value', ':pts pts available (~:value)', {pts: available, value: money(available * rate)}));
+        } else {
+            $hint.show().text(tr('pts_available', ':pts pts available', {pts: available}));
+        }
     }
 
     // ==============================
@@ -2070,8 +2089,8 @@
             $pills.append('<button type="button" class="pos-pill" data-value="' + m.payment_method_id + '">' + escapeHtml(m.name) + '</button>');
         });
 
-        $select.append('<option value="' + MULTI_PAY_VALUE + '">Multi Pay (Split)</option>');
-        $pills.append('<button type="button" class="pos-pill" data-value="' + MULTI_PAY_VALUE + '">Multi Pay</button>');
+        $select.append('<option value="' + MULTI_PAY_VALUE + '">' + t('multi_pay', 'Multi Pay') + '</option>');
+        $pills.append('<button type="button" class="pos-pill" data-value="' + MULTI_PAY_VALUE + '">' + t('multi_pay', 'Multi Pay') + '</button>');
     }
 
     // Cash is the default tender for a fresh sale (opening the POS or
@@ -2151,7 +2170,9 @@
             var name = $.trim($opt.text());
             var limit = parseFloat($opt.data('credit-limit') || 0);
 
-            $('#creditCustomerText').text('Customer: ' + name + (limit > 0 ? ' · Credit limit: ' + money(limit) : ''));
+            $('#creditCustomerText').text(limit > 0
+                ? tr('customer_with_credit', 'Customer: :name · Credit limit: :amount', {name: name, amount: money(limit)})
+                : tr('customer_label', 'Customer: :name', {name: name}));
         }
 
         updateStoreCreditSummary(selected);
@@ -2166,7 +2187,7 @@
         var $opt = $('#customer_id').find(':selected');
         var balance = parseFloat($opt.data('store-credit-balance') || 0);
 
-        $('#storeCreditText').text('Available store credit: ' + money(balance));
+        $('#storeCreditText').text(tr('available_store_credit', 'Available store credit: :amount', {amount: money(balance)}));
     }
 
     // True when any tendered payment (single or multi-pay) uses a
@@ -2251,7 +2272,7 @@
         })
             .then(finish)
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to save credit payment details.');
+                errorMessage(err.Message || t('unable_save_credit_details', 'Unable to save credit payment details.'));
                 finish();
             });
     }
@@ -2276,9 +2297,9 @@
                 '<div class="row g-2 mb-2 payment-row" data-idx="' + idx + '">' +
                     '<div class="col-5"><select class="form-select form-select-sm payment-method">' +
                         '<option value="">--Method--</option>' + optionsHtml + '</select></div>' +
-                    '<div class="col-4"><input type="number" step="0.01" min="0" class="form-control form-control-sm payment-amount" value="' + payment.amount + '" placeholder="Amount"></div>' +
+                    '<div class="col-4"><input type="number" step="0.01" min="0" class="form-control form-control-sm payment-amount" value="' + payment.amount + '" placeholder="' + t('amount', 'Amount') + '"></div>' +
                     '<div class="col-2 payment-ref-wrap" style="display:' + (showRef ? 'block' : 'none') + '">' +
-                        '<input type="text" class="form-control form-control-sm payment-ref" value="' + (payment.reference_no || '') + '" placeholder="Ref #"></div>' +
+                        '<input type="text" class="form-control form-control-sm payment-ref" value="' + (payment.reference_no || '') + '" placeholder="' + t('ref_placeholder', 'Ref #') + '"></div>' +
                     '<div class="col-1"><button type="button" class="btn btn-sm btn-outline-danger payment-remove"><i class="fa fa-times"></i></button></div>' +
                 '</div>'
             );
@@ -2330,10 +2351,10 @@
         $('#paymentEntered').text(money(entered));
 
         if (diff > 0.004) {
-            $('#paymentRemainingLabel').text('Remaining');
+            $('#paymentRemainingLabel').text(t('remaining', 'Remaining'));
             $('#paymentRemaining').text(money(diff));
         } else {
-            $('#paymentRemainingLabel').text('Change Due');
+            $('#paymentRemainingLabel').text(t('change_due', 'Change Due'));
             $('#paymentRemaining').text(money(Math.abs(diff)));
         }
     }
@@ -2453,21 +2474,21 @@
     // ==============================
     function holdOrder() {
         if (state.correction_mode) {
-            errorMessage('Hold is not available while correcting a posted order.');
+            errorMessage(t('hold_not_while_correcting', 'Hold is not available while correcting a posted order.'));
             return;
         }
         if (!state.session) {
-            errorMessage('Open a register session before placing an order.');
+            errorMessage(t('open_session_before_order', 'Open a register session before placing an order.'));
             return;
         }
 
         if (!state.cart.length) {
-            errorMessage('Cart is empty.');
+            errorMessage(t('cart_is_empty', 'Cart is empty.') || t('cart_empty', 'Cart is empty.'));
             return;
         }
 
         if (isDeliveryOrderType() && !$('#delivery_address').val().trim()) {
-            errorMessage('Delivery address is required for delivery orders.');
+            errorMessage(t('delivery_address_required', 'Delivery address is required for delivery orders.'));
             return;
         }
 
@@ -2487,12 +2508,12 @@
                 state.order_id = order.order_id || state.order_id;
                 state.order_daily_id = order.daily_order_id || state.order_daily_id;
 
-                successMessage('Order held' + (state.order_daily_id ? ' (#' + state.order_daily_id + ')' : '') + '. Keep editing to update it, or use Clear Cart to start a new sale.');
+                successMessage(tr('order_held_message', 'Order held:suffix. Keep editing to update it, or use Clear Cart to start a new sale.', {suffix: state.order_daily_id ? (' (#' + state.order_daily_id + ')') : ''}));
                 renderCart();
                 loadHeldOrdersCount();
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to hold order.');
+                errorMessage(err.Message || t('unable_hold_order', 'Unable to hold order.'));
             });
     }
 
@@ -2517,7 +2538,7 @@
                 var details = data.details || [];
 
                 if (header.business_id && CFG.business_id && header.business_id !== CFG.business_id) {
-                    errorMessage('This order belongs to a different business and cannot be reordered here.');
+                    errorMessage(t('order_different_business', 'This order belongs to a different business and cannot be reordered here.'));
                     return;
                 }
 
@@ -2538,7 +2559,7 @@
                         product_name: d.product_name || '',
                         variation_name: d.product_variation_name || '',
                         unit_id: d.unit_id,
-                        unit_name: d.unit_name || 'Unit',
+                        unit_name: d.unit_name || t('unit', 'Unit'),
                         quantity: d.quantity,
                         unit_price: d.unit_price,
                         discount: d.discount,
@@ -2572,7 +2593,7 @@
                 resetPaymentSelection();
                 selectDefaultPaymentMethod();
 
-                successMessage('Cart loaded from order #' + (header.daily_order_id || '') + ' for reorder.');
+                successMessage(tr('cart_loaded_reorder', 'Cart loaded from order #:id for reorder.', {id: header.daily_order_id || ''}));
 
                 if (window.history && window.history.replaceState) {
                     var url = new URL(window.location.href);
@@ -2581,7 +2602,7 @@
                 }
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to load order for reorder.');
+                errorMessage(err.Message || t('unable_load_reorder', 'Unable to load order for reorder.'));
             });
     }
 
@@ -2591,7 +2612,7 @@
     function loadPosReports() {
         var $list = $('#posReportsList');
         $('#posReportsSummary').addClass('d-none');
-        $list.html('<div class="text-muted text-center py-3">Loading...</div>');
+        $list.html('<div class="text-muted text-center py-3">' + t('loading', 'Loading...') + '</div>');
 
         ajaxRequest({ url: URLS.session_my_history })
             .then(function (response) {
@@ -2607,7 +2628,7 @@
                     var $item = $(
                         '<a href="javascript:void(0);" class="list-group-item list-group-item-action">' +
                             '<div class="d-flex justify-content-between">' +
-                                '<span>' + escapeHtml(row.register && row.register.name || 'Register') + '</span>' +
+                                '<span>' + escapeHtml(row.register && row.register.name || t('register', 'Register')) + '</span>' +
                                 '<span class="badge ' + (row.status === 'open' ? 'bg-label-success' : 'bg-label-secondary') + '">' + escapeHtml(row.status) + '</span>' +
                             '</div>' +
                             '<small class="text-muted">' + escapeHtml(row.opening_datetime || '') + '</small>' +
@@ -2622,7 +2643,7 @@
                 });
             })
             .catch(function (err) {
-                $list.html('<div class="text-danger text-center py-3">' + escapeHtml(err.Message || 'Unable to load sessions.') + '</div>');
+                $list.html('<div class="text-danger text-center py-3">' + escapeHtml(err.Message || t('unable_load_sessions', 'Unable to load sessions.')) + '</div>');
             });
     }
 
@@ -2675,7 +2696,7 @@
                 $('#posReportsSummary').removeClass('d-none');
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to load session summary.');
+                errorMessage(err.Message || t('unable_load_session_summary', 'Unable to load session summary.'));
             });
     }
 
@@ -2757,7 +2778,7 @@
                     loadHeldOrdersCount();
                 })
                 .catch(function (err) {
-                    errorMessage(err.Message || 'Unable to load order details.');
+                    errorMessage(err.Message || t('unable_load_order_details', 'Unable to load order details.'));
                 });
         }
 
@@ -2766,7 +2787,7 @@
         // stuck mid-checkout) just needs loading into the cart for editing,
         // no status transition/stock revalidation.
         if (status !== 'hold') {
-            successMessage('Order loaded for editing.');
+            successMessage(t('order_loaded_editing', 'Order loaded for editing.'));
             loadDetailsIntoCart();
             return;
         }
@@ -2776,15 +2797,15 @@
                 var warnings = (response.Data && response.Data.stock_warnings) || [];
 
                 if (warnings.length) {
-                    warningMessage('Order resumed - stock changed while it was on hold: ' + warnings.join(' '));
+                    warningMessage(tr('order_resumed_stock_changed', 'Order resumed - stock changed while it was on hold: :warnings', {warnings: warnings.join(' ')}));
                 } else {
-                    successMessage('Order resumed.');
+                    successMessage(t('order_resumed', 'Order resumed.'));
                 }
 
                 loadDetailsIntoCart();
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to resume order.');
+                errorMessage(err.Message || t('unable_resume_order', 'Unable to resume order.'));
             });
     }
 
@@ -2806,7 +2827,7 @@
                 product_name: d.product_name || '',
                 variation_name: d.product_variation_name || '',
                 unit_id: d.unit_id,
-                unit_name: d.unit_name || 'Unit',
+                unit_name: d.unit_name || t('unit', 'Unit'),
                 quantity: d.quantity,
                 unit_price: d.unit_price,
                 discount: d.discount,
@@ -2881,17 +2902,17 @@
     // ==============================
     function completeSale() {
         if (!state.session) {
-            errorMessage('Open a register session before placing an order.');
+            errorMessage(t('open_session_before_order', 'Open a register session before placing an order.'));
             return;
         }
 
         if (!state.cart.length) {
-            errorMessage('Cart is empty.');
+            errorMessage(t('cart_is_empty', 'Cart is empty.') || t('cart_empty', 'Cart is empty.'));
             return;
         }
 
         if (isDeliveryOrderType() && !$('#delivery_address').val().trim()) {
-            errorMessage('Delivery address is required for delivery orders.');
+            errorMessage(t('delivery_address_required', 'Delivery address is required for delivery orders.'));
             return;
         }
 
@@ -2899,7 +2920,7 @@
         // walk-in one, so it can actually be tracked/recovered on their
         // ledger. Checked before any request is sent.
         if (hasCreditPayment() && $('#customer_id').find(':selected').data('walkin') == 1) {
-            errorMessage('Select a real customer before completing a credit sale.');
+            errorMessage(t('select_real_customer_credit', 'Select a real customer before completing a credit sale.'));
             return;
         }
 
@@ -2908,14 +2929,14 @@
         // still server-side (CustomerStoreCreditService::redeem()).
         if (hasStoreCreditPayment()) {
             if ($('#customer_id').find(':selected').data('walkin') == 1) {
-                errorMessage('Select a real customer before applying store credit.');
+                errorMessage(t('select_real_customer_store_credit', 'Select a real customer before applying store credit.'));
                 return;
             }
 
             var storeCreditBalance = parseFloat($('#customer_id').find(':selected').data('store-credit-balance') || 0);
 
             if (storeCreditAmountTendered() > storeCreditBalance + 0.0001) {
-                errorMessage('This customer only has ' + money(storeCreditBalance) + ' in store credit available.');
+                errorMessage(tr('insufficient_store_credit', 'This customer only has :amount in store credit available.', {amount: money(storeCreditBalance)}));
                 return;
             }
         }
@@ -2943,7 +2964,7 @@
                 var entered = Math.round(state.payments.reduce(function (sum, p) { return sum + (parseFloat(p.amount) || 0); }, 0) * 100) / 100;
 
                 if (entered + 0.01 < total) {
-                    errorMessage('Payment amount does not cover the total. Please adjust payments.');
+                    errorMessage(t('payment_does_not_cover', 'Payment amount does not cover the total. Please adjust payments.'));
                     return;
                 }
 
@@ -2957,7 +2978,7 @@
                 })
                     .then(function (completeResponse) {
                         var posted = completeResponse.Data;
-                        successMessage('Sale completed.');
+                        successMessage(t('sale_completed', 'Sale completed.'));
 
                         if (SETTING.auto_print_invoice) {
                             silentPrintReceipt(posted.order_id);
@@ -2970,23 +2991,23 @@
                         }
                     })
                     .catch(function (err) {
-                        errorMessage(err.Message || 'Unable to complete sale.');
+                        errorMessage(err.Message || t('unable_complete_sale', 'Unable to complete sale.'));
                         // Keep the cart intact so the cashier can correct and retry.
                     });
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to save order.');
+                errorMessage(err.Message || t('unable_save_order', 'Unable to save order.'));
             });
     }
 
     function openCorrectionReasonModal() {
         if (!can('order.correct')) {
-            errorMessage('You do not have permission to correct orders.');
+            errorMessage(t('no_correct_permission', 'You do not have permission to correct orders.'));
             return;
         }
 
         if (!state.order_id) {
-            errorMessage('No order loaded for correction.');
+            errorMessage(t('no_order_for_correction', 'No order loaded for correction.'));
             return;
         }
 
@@ -3000,7 +3021,7 @@
         var reason = ($('#correction_reason').val() || '').trim();
 
         if (!reason) {
-            errorMessage('A correction reason is required.');
+            errorMessage(t('correction_reason_required', 'A correction reason is required.'));
             return;
         }
 
@@ -3010,7 +3031,7 @@
         payload.payments = state.payments;
 
         if (!payload.payments || !payload.payments.length) {
-            errorMessage('At least one payment is required.');
+            errorMessage(t('at_least_one_payment', 'At least one payment is required.'));
             return;
         }
 
@@ -3022,7 +3043,7 @@
                     state.correction_reason_modal.hide();
                 }
 
-                successMessage('Order corrected.');
+                successMessage(t('order_corrected', 'Order corrected.'));
 
                 if (SETTING.auto_print_invoice) {
                     silentPrintReceipt(order.order_id);
@@ -3031,7 +3052,7 @@
                 resetForNewSale();
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to correct order.');
+                errorMessage(err.Message || t('unable_correct_order', 'Unable to correct order.'));
             });
     }
 
@@ -3042,7 +3063,7 @@
                 var header = data.header || {};
 
                 if (!header.can_correct) {
-                    errorMessage('This order cannot be corrected (same-day POS posted orders only, with no returns or settlements).');
+                    errorMessage(t('order_cannot_be_corrected', 'This order cannot be corrected (same-day POS posted orders only, with no returns or settlements).'));
                     clearCorrectQueryParam();
                     return;
                 }
@@ -3050,10 +3071,10 @@
                 loadCartFromDetails(data);
                 enterCorrectionMode(header.daily_order_id || '');
                 clearCorrectQueryParam();
-                successMessage('Order #' + (header.daily_order_id || '') + ' loaded for same-day correction.');
+                successMessage(tr('order_loaded_correction', 'Order #:id loaded for same-day correction.', {id: header.daily_order_id || ''}));
             })
             .catch(function (err) {
-                errorMessage(err.Message || 'Unable to load order for correction.');
+                errorMessage(err.Message || t('unable_load_correction', 'Unable to load order for correction.'));
                 clearCorrectQueryParam();
             });
     }
@@ -3063,7 +3084,7 @@
         $('#posCorrectionBanner').removeClass('d-none').addClass('d-flex');
         $('#posCorrectionOrderLabel').text(dailyOrderId ? ('#' + dailyOrderId) : '');
         $('#holdOrderBtn').addClass('d-none');
-        $('#completeSaleBtn').html('<i class="fa fa-pencil"></i> Apply Correction');
+        $('#completeSaleBtn').html('<i class="fa fa-pencil"></i> ' + t('apply_correction', 'Apply Correction'));
         $('#cancelCorrectionBtn').removeClass('d-none');
     }
 
@@ -3073,7 +3094,7 @@
         }
 
         resetForNewSale();
-        successMessage('Correction cancelled.');
+        successMessage(t('correction_cancelled', 'Correction cancelled.'));
     }
 
     function clearCorrectQueryParam() {
@@ -3148,7 +3169,7 @@
             }
 
             if (!win || !doc) {
-                errorMessage('Receipt could not be prepared for printing.');
+                errorMessage(t('receipt_prepare_failed', 'Receipt could not be prepared for printing.'));
                 cleanup();
                 return;
             }
@@ -3158,7 +3179,7 @@
             // (order not found, server error, etc.) instead of a receipt -
             // notify instead of printing a broken page.
             if (!doc.querySelector('.print-page')) {
-                errorMessage('Receipt could not be generated for the printer. The sale was still completed - reprint from Order History if needed.');
+                errorMessage(t('receipt_generate_failed_sale_ok', 'Receipt could not be generated for the printer. The sale was still completed - reprint from Order History if needed.'));
                 cleanup();
                 return;
             }
@@ -3174,7 +3195,7 @@
                 win.focus();
                 win.print();
             } catch (e) {
-                errorMessage('Unable to send the receipt to the thermal printer. Please check the printer connection.');
+                errorMessage(t('thermal_print_failed', 'Unable to send the receipt to the thermal printer. Please check the printer connection.'));
                 cleanup();
                 return;
             }
@@ -3188,7 +3209,7 @@
         };
 
         iframe.onerror = function () {
-            errorMessage('Receipt could not be generated. The order was placed, but printing failed.');
+            errorMessage(t('receipt_generate_failed', 'Receipt could not be generated. The order was placed, but printing failed.'));
             cleanup();
         };
 
@@ -3211,7 +3232,7 @@
         $('#posCorrectionOrderLabel').text('');
         $('#holdOrderBtn').removeClass('d-none');
         $('#cancelCorrectionBtn').addClass('d-none');
-        $('#completeSaleBtn').html('<i class="fa fa-check"></i> Pay <span class="pos-key-hint">(F9)</span>');
+        $('#completeSaleBtn').html('<i class="fa fa-check"></i> ' + t('pay', 'Pay') + ' <span class="pos-key-hint">(F9)</span>');
         $('#voucher_code').val('');
         $('#voucher_id').val('');
         $('#voucherSearchResults').hide().empty();

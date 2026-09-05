@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Purchase Service Report',
+        'title' => __('reports.service_purchase_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,7 +56,7 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Group</th>
+                <th>{{ __('reports.col_group') }}</th>
                 <th class="text-right">Transactions</th>
                 <th class="text-right">Purchase Amount</th>
                 <th class="text-right">Purchase Return Amount</th>

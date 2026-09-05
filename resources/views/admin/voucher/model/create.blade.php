@@ -14,9 +14,9 @@ use App\Enums\RoleNames;
                     <div class="row">
                         @if (RoleNames::SUPERADMIN == getRoleName())
                         <div class="col-md-12 mb-3">
-                            <label class="form-label">Business <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('common.business') }} <span class="text-danger">*</span></label>
                             <select id="business_id" name="business_id" class="form-select" required>
-                                <option value="">--Select Business--</option>
+                                <option value="">{{ __('common.select_business') }}</option>
                                 @foreach ($business as $item)
                                 <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
                                     {{ $item->name ?? '' }}
@@ -27,118 +27,118 @@ use App\Enums\RoleNames;
                         @endif
                         <div class="col-md-6 mb-3">
                             <label class="form-label">
-                                Name <span class="text-danger">*</span>
+                                {{ __('common.name') }} <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" id="name" name="name" placeholder="Enter Name" required>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="{{ __('common.enter_name') }}" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">
-                                Code <span class="text-danger">*</span>
+                                {{ __('common.code') }} <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" id="code" name="code" placeholder="Enter Code" required>
+                            <input type="text" class="form-control" id="code" name="code" placeholder="{{ __('common.enter_code') }}" required>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">
-                                Promo Type <span class="text-danger">*</span>
+                                {{ __('vouchers.promo_type') }} <span class="text-danger">*</span>
                             </label>
                             <select id="promo_type" name="promo_type" class="form-select">
-                                <option value="discount">Discount (%/Fixed)</option>
-                                <option value="bogo">Buy One Get One (BOGO)</option>
-                                <option value="buy_x_get_y">Buy X Get Y</option>
+                                <option value="discount">{{ __('vouchers.promo_discount') }}</option>
+                                <option value="bogo">{{ __('vouchers.promo_bogo') }}</option>
+                                <option value="buy_x_get_y">{{ __('vouchers.promo_buy_x_get_y') }}</option>
                             </select>
                         </div>
                         <div class="col-md-4 mb-3 discount-only-field">
                             <label class="form-label">
-                                Type <span class="text-danger">*</span>
+                                {{ __('common.type') }} <span class="text-danger">*</span>
                             </label>
                             <select id="type" name="type" class="form-select" required>
-                                <option value="percent">Percent</option>
-                                <option value="fixed">Fixed</option>
+                                <option value="percent">{{ __('common.percent') }}</option>
+                                <option value="fixed">{{ __('common.fixed') }}</option>
                             </select>
                         </div>
                         <div class="col-md-4 mb-3 discount-only-field">
                             <label class="form-label">
-                                Value <span class="text-danger">*</span>
+                                {{ __('common.value') }} <span class="text-danger">*</span>
                             </label>
-                            <input type="number" step="0.001" min="0" class="form-control" id="value" name="value" placeholder="Enter Value">
+                            <input type="number" step="0.001" min="0" class="form-control" id="value" name="value" placeholder="{{ __('common.please_enter_value') }}">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" name="status" class="form-select">
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                                <option value="active">{{ __('common.active') }}</option>
+                                <option value="inactive">{{ __('common.inactive') }}</option>
                             </select>
                         </div>
 
                         <div class="col-md-4 mb-3 bogo-only-field" style="display:none;">
-                            <label class="form-label">Buy Quantity <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('vouchers.buy_quantity') }} <span class="text-danger">*</span></label>
                             <input type="number" min="1" class="form-control" id="buy_quantity" name="buy_quantity" placeholder="e.g. 2">
                         </div>
                         <div class="col-md-4 mb-3 bogo-only-field" style="display:none;">
-                            <label class="form-label">Get Quantity <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('vouchers.get_quantity') }} <span class="text-danger">*</span></label>
                             <input type="number" min="1" class="form-control" id="get_quantity" name="get_quantity" placeholder="e.g. 1">
                         </div>
                         <div class="col-md-4 mb-3 bogo-only-field" style="display:none;">
-                            <label class="form-label">Get Discount %</label>
-                            <input type="number" step="0.01" min="0" max="100" class="form-control" id="get_discount_percent" name="get_discount_percent" value="100" placeholder="100 = fully free">
+                            <label class="form-label">{{ __('vouchers.get_discount_percent') }}</label>
+                            <input type="number" step="0.01" min="0" max="100" class="form-control" id="get_discount_percent" name="get_discount_percent" value="100" placeholder="{{ __('vouchers.fully_free_hint') }}">
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Max Discount Amount</label>
-                            <input type="number" step="0.001" min="0" class="form-control" id="max_discount_amount" name="max_discount_amount" placeholder="No cap">
+                            <label class="form-label">{{ __('vouchers.max_discount_amount') }}</label>
+                            <input type="number" step="0.001" min="0" class="form-control" id="max_discount_amount" name="max_discount_amount" placeholder="{{ __('vouchers.no_cap') }}">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label d-block">Exclusive Voucher</label>
+                            <label class="form-label d-block">{{ __('vouchers.exclusive_voucher') }}</label>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="is_exclusive" name="is_exclusive" value="1">
-                                <label class="form-check-label" for="is_exclusive">Cannot combine with a Discount</label>
+                                <label class="form-check-label" for="is_exclusive">{{ __('vouchers.cannot_combine_discount') }}</label>
                             </div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Valid From</label>
+                            <label class="form-label">{{ __('vouchers.valid_from') }}</label>
                             <input type="date" class="form-control" id="valid_from" name="valid_from">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Valid To</label>
+                            <label class="form-label">{{ __('vouchers.valid_to') }}</label>
                             <input type="date" class="form-control" id="valid_to" name="valid_to">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Time Start</label>
+                            <label class="form-label">{{ __('vouchers.time_start') }}</label>
                             <input type="time" class="form-control" id="time_start" name="time_start">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Time End</label>
+                            <label class="form-label">{{ __('vouchers.time_end') }}</label>
                             <input type="time" class="form-control" id="time_end" name="time_end">
                         </div>
                         <div class="col-md-12 mb-3">
-                            <label class="form-label d-block">Days of Week</label>
-                            @foreach (['0' => 'Sun', '1' => 'Mon', '2' => 'Tue', '3' => 'Wed', '4' => 'Thu', '5' => 'Fri', '6' => 'Sat'] as $value => $label)
+                            <label class="form-label d-block">{{ __('vouchers.days_of_week') }}</label>
+                            @foreach (['0' => __('common.days_sun'), '1' => __('common.days_mon'), '2' => __('common.days_tue'), '3' => __('common.days_wed'), '4' => __('common.days_thu'), '5' => __('common.days_fri'), '6' => __('common.days_sat')] as $value => $label)
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input days-of-week" type="checkbox" name="days_of_week[]" id="dow_{{ $value }}" value="{{ $value }}">
                                     <label class="form-check-label" for="dow_{{ $value }}">{{ $label }}</label>
                                 </div>
                             @endforeach
-                            <small class="text-muted d-block">Leave all unchecked to apply every day.</small>
+                            <small class="text-muted d-block">{{ __('vouchers.days_unchecked_hint') }}</small>
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Total Usage Limit</label>
-                            <input type="number" min="0" class="form-control" id="usage_limit_total" name="usage_limit_total" placeholder="Unlimited">
+                            <label class="form-label">{{ __('vouchers.total_usage_limit') }}</label>
+                            <input type="number" min="0" class="form-control" id="usage_limit_total" name="usage_limit_total" placeholder="{{ __('common.unlimited') }}">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Per Customer Usage Limit</label>
-                            <input type="number" min="0" class="form-control" id="usage_limit_per_customer" name="usage_limit_per_customer" placeholder="Unlimited">
+                            <label class="form-label">{{ __('vouchers.per_customer_usage_limit') }}</label>
+                            <input type="number" min="0" class="form-control" id="usage_limit_per_customer" name="usage_limit_per_customer" placeholder="{{ __('common.unlimited') }}">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Min Order Amount</label>
-                            <input type="number" step="0.001" min="0" class="form-control" id="min_order_amount" name="min_order_amount" placeholder="No minimum">
+                            <label class="form-label">{{ __('vouchers.min_order_amount') }}</label>
+                            <input type="number" step="0.001" min="0" class="form-control" id="min_order_amount" name="min_order_amount" placeholder="{{ __('vouchers.no_minimum') }}">
                         </div>
 
-                        <div class="col-md-12"><hr><small class="text-muted">Leave a scope below empty to apply this voucher to all of that dimension. For BOGO/Buy X Get Y, these dimensions define what must be bought.</small></div>
+                        <div class="col-md-12"><hr><small class="text-muted">{{ __('vouchers.scope_hint') }}</small></div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Products</label>
+                            <label class="form-label">{{ __('vouchers.products') }}</label>
                             <input type="hidden" name="product_ids[]" value="">
                             <select id="product_ids" name="product_ids[]" class="form-select select2-multiple" multiple>
                                 @foreach ($products as $item)
@@ -147,7 +147,7 @@ use App\Enums\RoleNames;
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Categories</label>
+                            <label class="form-label">{{ __('vouchers.categories') }}</label>
                             <input type="hidden" name="category_ids[]" value="">
                             <select id="category_ids" name="category_ids[]" class="form-select select2-multiple" multiple>
                                 @foreach ($categories as $item)
@@ -156,7 +156,7 @@ use App\Enums\RoleNames;
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Brands</label>
+                            <label class="form-label">{{ __('vouchers.brands') }}</label>
                             <input type="hidden" name="brand_ids[]" value="">
                             <select id="brand_ids" name="brand_ids[]" class="form-select select2-multiple" multiple>
                                 @foreach ($brands as $item)
@@ -165,7 +165,7 @@ use App\Enums\RoleNames;
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Variations</label>
+                            <label class="form-label">{{ __('vouchers.variations') }}</label>
                             <input type="hidden" name="variation_ids[]" value="">
                             <select id="variation_ids" name="variation_ids[]" class="form-select select2-multiple" multiple>
                                 @foreach ($variations as $item)
@@ -174,7 +174,7 @@ use App\Enums\RoleNames;
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Customers</label>
+                            <label class="form-label">{{ __('vouchers.customers') }}</label>
                             <input type="hidden" name="customer_ids[]" value="">
                             <select id="customer_ids" name="customer_ids[]" class="form-select select2-multiple" multiple>
                                 @foreach ($customers as $item)
@@ -183,7 +183,7 @@ use App\Enums\RoleNames;
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Order Types</label>
+                            <label class="form-label">{{ __('vouchers.order_types') }}</label>
                             <input type="hidden" name="order_type_ids[]" value="">
                             <select id="order_type_ids" name="order_type_ids[]" class="form-select select2-multiple" multiple>
                                 @foreach ($order_types as $item)
@@ -192,7 +192,7 @@ use App\Enums\RoleNames;
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Branches</label>
+                            <label class="form-label">{{ __('vouchers.branches') }}</label>
                             <input type="hidden" name="branch_ids[]" value="">
                             <select id="branch_ids" name="branch_ids[]" class="form-select select2-multiple" multiple>
                                 @foreach ($branches as $item)
@@ -201,7 +201,7 @@ use App\Enums\RoleNames;
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Sale Types</label>
+                            <label class="form-label">{{ __('vouchers.sale_types') }}</label>
                             <input type="hidden" name="sale_type_ids[]" value="">
                             <select id="sale_type_ids" name="sale_type_ids[]" class="form-select select2-multiple" multiple>
                                 @foreach ($sale_types as $item)
@@ -210,7 +210,7 @@ use App\Enums\RoleNames;
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Order Sources</label>
+                            <label class="form-label">{{ __('vouchers.order_sources') }}</label>
                             <input type="hidden" name="order_source_ids[]" value="">
                             <select id="order_source_ids" name="order_source_ids[]" class="form-select select2-multiple" multiple>
                                 @foreach ($order_sources as $item)
@@ -219,7 +219,7 @@ use App\Enums\RoleNames;
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Payment Methods</label>
+                            <label class="form-label">{{ __('vouchers.payment_methods') }}</label>
                             <input type="hidden" name="payment_method_ids[]" value="">
                             <select id="payment_method_ids" name="payment_method_ids[]" class="form-select select2-multiple" multiple>
                                 @foreach ($payment_methods as $item)
@@ -232,7 +232,7 @@ use App\Enums\RoleNames;
                             <hr><small class="text-muted">"Get" scope for Buy X Get Y - leave empty to give the free/discounted item from the same Products/Categories selected above.</small>
                         </div>
                         <div class="col-md-6 mb-3 bogo-only-field" style="display:none;">
-                            <label class="form-label">Get Products</label>
+                            <label class="form-label">{{ __('vouchers.get_products') }}</label>
                             <input type="hidden" name="get_product_ids[]" value="">
                             <select id="get_product_ids" name="get_product_ids[]" class="form-select select2-multiple" multiple>
                                 @foreach ($products as $item)
@@ -241,7 +241,7 @@ use App\Enums\RoleNames;
                             </select>
                         </div>
                         <div class="col-md-6 mb-3 bogo-only-field" style="display:none;">
-                            <label class="form-label">Get Categories</label>
+                            <label class="form-label">{{ __('vouchers.get_categories') }}</label>
                             <input type="hidden" name="get_category_ids[]" value="">
                             <select id="get_category_ids" name="get_category_ids[]" class="form-select select2-multiple" multiple>
                                 @foreach ($categories as $item)

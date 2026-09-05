@@ -5,11 +5,11 @@ use App\Enums\RoleNames;
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4">Supplier</h4>
+    <h4 class="fw-bold py-3 mb-4">{{ __('suppliers.singular') }}</h4>
 
     <div class="card">
         <div class="card-header bg-white border-bottom">
-            <h5 class="mb-0">{{ isset($supplier) ? 'Update' : 'New' }} Supplier</h5>
+            <h5 class="mb-0">{{ isset($supplier) ? __('suppliers.update_heading') : __('suppliers.new_heading') }}</h5>
         </div>
 
         <form action="{{ url('admin/supplier') }}" method="POST" enctype="multipart/form-data">
@@ -25,18 +25,18 @@ use App\Enums\RoleNames;
                         <!-- Basic Information Section -->
                         <div class="card mb-4">
                             <div class="card-header bg-light">
-                                <h6 class="mb-0">Basic Information</h6>
+                                <h6 class="mb-0">{{ __('suppliers.basic_information') }}</h6>
                             </div>
                             <div class="card-body">
                                 <div class="row g-4">
                                     @if (!empty($business))
                                     @if (RoleNames::SUPERADMIN == getRoleName())
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Business <span class="text-danger">*</span>
+                                        <label class="fw-semibold">{{ __('common.business') }} <span class="text-danger">*</span>
                                         </label>
                                         <select class="form-select" name="business_id" id="business_id"
                                             required>
-                                            <option value="">-- Select Business --</option>
+                                            <option value="">{{ __('common.select_business') }}</option>
                                             @foreach ($business as $item)
                                             <option value="{{ $item->business_id }}"
                                                 {{ old('business_id', $supplier->business_id ?? '') == $item->business_id ? 'selected' : '' }}>
@@ -50,7 +50,7 @@ use App\Enums\RoleNames;
 
                                     <div class="col-md-6">
                                         <label class="fw-semibold">
-                                            Code <small>(if blank, will be auto generated)</small>
+                                            {{ __('common.code') }} <small>{{ __('suppliers.code_auto_hint') }}</small>
                                         </label>
 
                                         <div class="input-group">
@@ -64,51 +64,51 @@ use App\Enums\RoleNames;
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Name <span class="text-danger">**</span>
+                                        <label class="fw-semibold">{{ __('common.name') }} <span class="text-danger">**</span>
                                         </label>
                                         <input type="text" class="form-control" name="name"
                                             value="{{ old('name', $supplier->name ?? '') }}" required>
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Company Name <span
+                                        <label class="fw-semibold">{{ __('suppliers.company_name') }} <span
                                                 class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="company_name"
                                             value="{{ old('company_name', $supplier->company_name ?? '') }}" required>
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Contact Person</label>
+                                        <label class="fw-semibold">{{ __('suppliers.contact_person') }}</label>
                                         <input type="text" class="form-control" name="contact_person"
                                             value="{{ old('contact_person', $supplier->contact_person ?? '') }}">
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Email</label>
+                                        <label class="fw-semibold">{{ __('common.email') }}</label>
                                         <input type="email" class="form-control" name="email"
                                             value="{{ old('email', $supplier->email ?? '') }}">
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Phone</label>
+                                        <label class="fw-semibold">{{ __('common.phone') }}</label>
                                         <input type="text" class="form-control" name="phone"
                                             value="{{ old('phone', $supplier->phone ?? '') }}">
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Website</label>
+                                        <label class="fw-semibold">{{ __('suppliers.website') }}</label>
                                         <input type="text" class="form-control" name="website"
                                             value="{{ old('website', $supplier->website ?? '') }}">
                                     </div>
 
                                     <div class="col-md-3">
-                                        <label class="fw-semibold">NTN</label>
+                                        <label class="fw-semibold">{{ __('suppliers.ntn') }}</label>
                                         <input type="text" class="form-control" name="ntn"
                                             value="{{ old('ntn', $supplier->ntn ?? '') }}">
                                     </div>
 
                                     <div class="col-md-3">
-                                        <label class="fw-semibold">STRN</label>
+                                        <label class="fw-semibold">{{ __('suppliers.strn') }}</label>
                                         <input type="text" class="form-control" name="strn"
                                             value="{{ old('strn', $supplier->strn ?? '') }}">
                                     </div>
@@ -119,35 +119,35 @@ use App\Enums\RoleNames;
                         <!-- Address Information Section -->
                         <div class="card mb-4">
                             <div class="card-header bg-light">
-                                <h6 class="mb-0">Address Information</h6>
+                                <h6 class="mb-0">{{ __('suppliers.address_information') }}</h6>
                             </div>
                             <div class="card-body">
                                 <div class="row g-3">
                                     <div class="col-md-12">
-                                        <label class="fw-semibold">Address</label>
+                                        <label class="fw-semibold">{{ __('common.address') }}</label>
                                         <textarea class="form-control" rows="2" name="address">{{ old('address', $supplier->address ?? '') }}</textarea>
                                     </div>
 
                                     <div class="col-md-3">
-                                        <label class="fw-semibold">City</label>
+                                        <label class="fw-semibold">{{ __('common.city') }}</label>
                                         <input type="text" class="form-control" name="city"
                                             value="{{ old('city', $supplier->city ?? '') }}">
                                     </div>
 
                                     <div class="col-md-3">
-                                        <label class="fw-semibold">State</label>
+                                        <label class="fw-semibold">{{ __('suppliers.state') }}</label>
                                         <input type="text" class="form-control" name="state"
                                             value="{{ old('state', $supplier->state ?? '') }}">
                                     </div>
 
                                     <div class="col-md-3">
-                                        <label class="fw-semibold">Country</label>
+                                        <label class="fw-semibold">{{ __('common.country') }}</label>
                                         <input type="text" class="form-control" name="country"
                                             value="{{ old('country', $supplier->country ?? '') }}">
                                     </div>
 
                                     <div class="col-md-3">
-                                        <label class="fw-semibold">Zip Code</label>
+                                        <label class="fw-semibold">{{ __('suppliers.zip_code') }}</label>
                                         <input type="text" class="form-control" name="zip_code"
                                             value="{{ old('zip_code', $supplier->zip_code ?? '') }}">
                                     </div>
@@ -156,51 +156,51 @@ use App\Enums\RoleNames;
                         </div>
                         <div class="card mb-4">
                             <div class="card-header bg-light">
-                                <h6 class="mb-0">Credit Information</h6>
+                                <h6 class="mb-0">{{ __('suppliers.credit_information') }}</h6>
                             </div>
 
                             <div class="card-body">
                                 <div class="row g-3">
 
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Credit Limit</label>
+                                        <label class="fw-semibold">{{ __('suppliers.credit_limit') }}</label>
                                         <input type="number" step="0.01" class="form-control"
                                             name="credit_limit"
                                             value="{{ old('credit_limit', $supplier->credit_limit ?? 0) }}">
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Credit Days</label>
+                                        <label class="fw-semibold">{{ __('suppliers.credit_days') }}</label>
                                         <input type="number" class="form-control" name="credit_days"
                                             value="{{ old('credit_days', $supplier->credit_days ?? 0) }}">
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="fw-semibold">Payment Terms</label>
+                                        <label class="fw-semibold">{{ __('suppliers.payment_terms') }}</label>
                                         <input type="text" class="form-control" name="payment_terms"
-                                            placeholder="e.g. Net 30, Due on Receipt"
+                                            placeholder="{{ __('suppliers.payment_terms_placeholder') }}"
                                             value="{{ old('payment_terms', $supplier->payment_terms ?? '') }}">
                                     </div>
 
                                     @if (!isset($supplier))
                                         <div class="col-md-3">
-                                            <label class="fw-semibold">Opening Balance</label>
+                                            <label class="fw-semibold">{{ __('suppliers.opening_balance') }}</label>
                                             <input type="number" step="0.01" class="form-control" name="opening_balance"
                                                 value="{{ old('opening_balance', 0) }}">
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="fw-semibold">Balance Type</label>
+                                            <label class="fw-semibold">{{ __('suppliers.balance_type') }}</label>
                                             <select class="form-select" name="opening_balance_type">
-                                                <option value="Cr">Credit (We Owe Supplier)</option>
-                                                <option value="Dr">Debit (Advance to Supplier)</option>
+                                                <option value="Cr">{{ __('suppliers.credit_we_owe') }}</option>
+                                                <option value="Dr">{{ __('suppliers.debit_advance') }}</option>
                                             </select>
                                         </div>
                                     @else
                                         <div class="col-md-6">
-                                            <label class="fw-semibold">Opening Balance</label>
+                                            <label class="fw-semibold">{{ __('suppliers.opening_balance') }}</label>
                                             <input type="text" class="form-control" disabled
                                                 value="{{ currency($supplier->opening_balance ?? 0) }} {{ $supplier->opening_balance_type ?? '' }}">
-                                            <small class="text-muted">Opening balance can only be set at creation.</small>
+                                            <small class="text-muted">{{ __('suppliers.opening_balance_locked') }}</small>
                                         </div>
                                     @endif
 
@@ -211,13 +211,13 @@ use App\Enums\RoleNames;
                         <!-- Logo & Description Section -->
                         <div class="card mb-4">
                             <div class="card-header bg-light">
-                                <h6 class="mb-0">Image</h6>
+                                <h6 class="mb-0">{{ __('common.image') }}</h6>
                             </div>
                             <div class="card-body">
                                 <div class="row g-3">
                                     <div class="col-md-12">
                                         <label class="fw-semibold">
-                                            Image
+                                            {{ __('common.image') }}
                                             @if (!isset($supplier))
                                             <span class="text-danger">*</span>
                                             @endif
@@ -229,13 +229,13 @@ use App\Enums\RoleNames;
                                                 style="max-height: 120px; object-fit: contain;">
                                             @if (isset($supplier) && $supplier->image)
                                             <div class="mb-2">
-                                                <small class="text-muted">Previous Image</small>
+                                                <small class="text-muted">{{ __('suppliers.previous_image') }}</small>
                                             </div>
                                             @endif
                                             <input type="file" id="logoInput" class="form-control" name="image"
                                                 accept="image/*">
                                             <small class="text-muted d-block mt-2">
-                                                <i class="fa fa-info-circle"></i> JPG, PNG supported
+                                                <i class="fa fa-info-circle"></i> {{ __('suppliers.jpg_png_supported') }}
                                             </small>
                                         </div>
                                     </div>
@@ -244,7 +244,7 @@ use App\Enums\RoleNames;
                         </div>
                         <div class="card mb-4">
                             <div class="card-header bg-light">
-                                <h6 class="mb-0">Description</h6>
+                                <h6 class="mb-0">{{ __('common.description') }}</h6>
                             </div>
                             <div class="card-body">
                                 <textarea class="form-control" rows="4" name="description">{{ old('description', $supplier->description ?? '') }}</textarea>
@@ -257,8 +257,8 @@ use App\Enums\RoleNames;
                 <!-- Form Actions -->
                 <div class="d-flex justify-content-end gap-2">
                     <button type="button" class="btn btn-outline-secondary"
-                        onclick="window.history.back()">Cancel</button>
-                    <button class="btn btn-primary px-4">Save Supplier</button>
+                        onclick="window.history.back()">{{ __('common.cancel') }}</button>
+                    <button class="btn btn-primary px-4">{{ __('suppliers.save_supplier') }}</button>
                 </div>
             </div>
         </form>
@@ -268,6 +268,14 @@ use App\Enums\RoleNames;
 @endsection
 
 @section('js')
+@php
+    $__i18nSuppliers = [
+        'invalid_image' => __('suppliers.invalid_image'),
+    ];
+@endphp
+<script>
+    window.i18n_suppliers = @json($__i18nSuppliers);
+</script>
 @if ($errors->any())
 <script>
     errorMessage("{{ $errors->first() }}");
@@ -285,6 +293,8 @@ use App\Enums\RoleNames;
         $('#business_id').select2();
     });
     (function() {
+        var logoInput = document.getElementById('logoInput');
+        var logoPreview = document.getElementById('logoPreview');
 
         // Logo preview handler
         if (logoInput && logoPreview) {
@@ -297,7 +307,7 @@ use App\Enums\RoleNames;
                     };
                     reader.readAsDataURL(file);
                 } else if (file) {
-                    alert('Please select a valid image file (JPG, PNG)');
+                    alert(window.i18n_suppliers?.invalid_image || 'Please select a valid image file (JPG, PNG)');
                     logoInput.value = '';
                 }
             });

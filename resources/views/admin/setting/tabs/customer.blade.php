@@ -3,117 +3,115 @@
 
     <div class="row">
         <div class="col-md-12">
-            <h4>Customer Setting</h4>
+            <h4>{{ __('settings.customer_title') }}</h4>
             <hr>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Customer Code Prefix</label>
+            <label>{{ __('settings.customer_code_prefix') }}</label>
             <input type="text" class="form-control" name="customer_code_prefix"
                 value="{{ $customer_setting->customer_code_prefix }}">
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Enable Credit Limit</label>
+            <label>{{ __('settings.enable_credit_limit') }}</label>
             <select class="form-select select2" name="customer_enable_credit_limit">
                 <option value="1" {{ $customer_setting->enable_credit_limit == 1 ? 'selected' : '' }}>
-                    Yes
+                    {{ __('common.yes') }}
                 </option>
                 <option value="0" {{ $customer_setting->enable_credit_limit == 0 ? 'selected' : '' }}>
-                    No
+                    {{ __('common.no') }}
                 </option>
             </select>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Default Credit Limit</label>
+            <label>{{ __('settings.default_credit_limit') }}</label>
             <input type="text" onkeypress="return isNumberKey(event)" class="form-control" name="customer_credit_limit"
                 value="{{ $customer_setting->credit_limit }}">
             <small class="text-muted">
-                Default credit limit assigned to new customers.
+                {{ __('settings.customer_credit_limit_help') }}
             </small>
         </div>
 
         <div class="col-md-12">
-            <h4>Loyalty Program</h4>
+            <h4>{{ __('settings.loyalty_program_heading') }}</h4>
             <hr>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Enable Loyalty Program</label>
+            <label>{{ __('settings.enable_loyalty_program') }}</label>
             <select class="form-select select2" name="loyalty_program">
                 <option value="1" {{ $customer_setting->loyalty_program == 1 ? 'selected' : '' }}>
-                    Yes
+                    {{ __('common.yes') }}
                 </option>
                 <option value="0" {{ $customer_setting->loyalty_program == 0 ? 'selected' : '' }}>
-                    No
+                    {{ __('common.no') }}
                 </option>
             </select>
             <small class="text-muted">
-                When disabled, loyalty functionality is hidden everywhere - POS, website, mobile app, customer profile, product listing, checkout and reports.
+                {{ __('settings.loyalty_program_help') }}
             </small>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Earn Points Based On</label>
+            <label>{{ __('settings.loyalty_earning_mode') }}</label>
             <select class="form-select select2" name="loyalty_earning_mode">
                 <option value="order" {{ $customer_setting->loyalty_earning_mode == 'order' ? 'selected' : '' }}>
-                    Overall Order
+                    {{ __('settings.loyalty_earning_order') }}
                 </option>
                 <option value="product" {{ $customer_setting->loyalty_earning_mode == 'product' ? 'selected' : '' }}>
-                    Individual Product / Variation
+                    {{ __('settings.loyalty_earning_product') }}
                 </option>
             </select>
             <small class="text-muted">
-                "Overall Order" earns on the whole order total. "Individual Product / Variation" only counts
-                products/variations you've marked as loyalty-enabled on their Create/Edit screen.
+                {{ __('settings.loyalty_earning_mode_help') }}
             </small>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Every Purchase Amount</label>
+            <label>{{ __('settings.loyalty_every_amount') }}</label>
             <div class="input-group">
                 <span class="input-group-text">Rs</span>
                 <input type="text" onkeypress="return isNumberKey(event)" class="form-control"
                     name="loyalty_every_amount" value="{{ $customer_setting->loyalty_every_amount }}">
             </div>
             <small class="text-muted">
-                Customer earns points for every entered purchase amount (of the whole order, or of the
-                loyalty-eligible products/variations only, depending on the mode above).
+                {{ __('settings.loyalty_every_amount_help') }}
             </small>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Loyalty Points</label>
+            <label>{{ __('settings.loyalty_points') }}</label>
             <input type="text" onkeypress="return isNumberKey(event)" class="form-control" name="loyalty_point_rate"
                 value="{{ $customer_setting->loyalty_point_rate }}">
             <small class="text-muted">
-                Points awarded for each purchase amount above.
+                {{ __('settings.loyalty_points_help') }}
             </small>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Minimum Order Amount</label>
+            <label>{{ __('settings.loyalty_min_order_amount') }}</label>
             <div class="input-group">
                 <span class="input-group-text">Rs</span>
                 <input type="text" onkeypress="return isNumberKey(event)" class="form-control"
                     name="loyalty_min_order_amount" value="{{ $customer_setting->loyalty_min_order_amount }}">
             </div>
             <small class="text-muted">
-                Minimum order amount required to earn loyalty points.
+                {{ __('settings.loyalty_min_order_amount_help') }}
             </small>
         </div>
 
         <div class="col-md-6 mb-3">
-            <label>Point Redemption Value</label>
+            <label>{{ __('settings.loyalty_redemption_value') }}</label>
             <div class="input-group">
                 <span class="input-group-text">Rs</span>
                 <input type="text" onkeypress="return isNumberKey(event)" class="form-control"
                     name="loyalty_redemption_value" value="{{ $customer_setting->loyalty_redemption_value }}">
-                <span class="input-group-text">per point</span>
+                <span class="input-group-text">{{ __('settings.loyalty_per_point') }}</span>
             </div>
             <small class="text-muted">
-                Monetary value of 1 loyalty point when redeemed as a discount at checkout.
+                {{ __('settings.loyalty_redemption_value_help') }}
             </small>
         </div>
 
@@ -122,7 +120,7 @@
             <div class="text-end">
                 <button type="button" class="btn btn-primary"
                     onclick="saveSetting('#customerSettingForm','{{ url('admin/setting/customer') }}')">
-                    Save Changes
+                    {{ __('common.save_changes') }}
                 </button>
             </div>
         </div>

@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Attendance Summary Report',
+        'title' => __('reports.attendance_summary_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,15 +56,15 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Employee Code</th>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Designation</th>
-                <th class="text-right">Present</th>
-                <th class="text-right">Absent</th>
-                <th class="text-right">Late</th>
+                <th>{{ __('reports.col_employee_code') }}</th>
+                <th>{{ __('reports.col_name') }}</th>
+                <th>{{ __('reports.col_department') }}</th>
+                <th>{{ __('reports.col_designation') }}</th>
+                <th class="text-right">{{ __('reports.col_present') }}</th>
+                <th class="text-right">{{ __('reports.col_absent') }}</th>
+                <th class="text-right">{{ __('reports.col_late') }}</th>
                 <th class="text-right">Half Day</th>
-                <th class="text-right">Leave</th>
+                <th class="text-right">{{ __('reports.col_leave') }}</th>
                 <th class="text-right">Holiday</th>
                 <th class="text-right">Early Checkout</th>
                 <th class="text-right">Working Hours</th>

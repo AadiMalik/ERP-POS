@@ -46,7 +46,7 @@
     @include('admin.partials.print.pdf_header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Pending Payroll Report',
+        'title' => __('reports.pending_payroll_report'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -56,9 +56,9 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Period</th>
-                <th>Status</th>
-                <th>Generated On</th>
+                <th>{{ __('reports.col_period') }}</th>
+                <th>{{ __('reports.col_status') }}</th>
+                <th>{{ __('reports.col_generated_on') }}</th>
                 <th class="text-right">Employees</th>
             </tr>
         </thead>

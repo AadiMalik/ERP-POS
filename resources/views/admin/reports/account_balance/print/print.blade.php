@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.print')
 
-@section('title', 'Account Balance Report')
+@section('title', __('reports.account_balance'))
 
 @section('css')
     @include('admin.partials.print.page_css', ['print_config' => $print_config])
@@ -15,7 +15,7 @@
     @include('admin.partials.print.header', [
         'business' => $business,
         'branch' => null,
-        'title' => 'Account Balance Report',
+        'title' => __('reports.account_balance'),
         'doc_no' => '',
         'doc_date' => localDate(now()),
         'reference' => [],
@@ -25,7 +25,7 @@
     <table class="print-table">
         <thead>
             <tr>
-                <th>Account</th>
+                <th>{{ __('reports.col_account') }}</th>
                 <th class="text-right">Opening Balance</th>
                 <th class="text-right">Period Debit</th>
                 <th class="text-right">Period Credit</th>
