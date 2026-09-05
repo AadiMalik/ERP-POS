@@ -56,6 +56,38 @@ The auth layout does **not** load `theme-custom.css` (that file depends on
 inlined on the auth layout as well as mirrored under `.dukanaz-brand-img--login`
 in `public/assets/css/theme-custom.css`.
 
+## Frontend action locking
+
+Admin/POS/auth pages load a global **page action lock** (`public/assets/js/admin/page-action-lock.js`
++ `public/assets/css/page-action-lock.css`) from `layouts/js.blade.php` /
+`layouts/css.blade.php` (and the auth layout for login submit).
+
+- **Scope:** current page content (`.content-wrapper` / `.pos-content-wrapper` /
+  modals) — not other browser tabs.
+- **Visual feedback:** inline feedback on the **clicked** control only — no page
+  overlay / content loader is introduced; `showLoader()` in `universal.js` is
+  suppressed while `PageActionLock.suppressPageLoader` is true. A button with
+  visible text (Save, Search, Delete…) gets its label swapped for
+  `window.i18n.loading` ("Processing..."); an icon-only control (`.btn-icon`
+  row actions, or any control whose whole content is an icon with no text —
+  the norm for Edit/Delete/View buttons in DataTables action columns) gets a
+  small `.pal-spinner` instead, since "Processing..." text does not fit and
+  would overflow a 30px icon button.
+- **Behavior:** first actionable click soft-gates (or hard-locks for submit /
+  search / export); other actionable buttons on the page are disabled until the
+  request finishes or fails. Confirm dialogs (SweetAlert / delete) soft-gate
+  only — spinner + full lock start **after** the user confirms.
+- **Escape hatches:** `data-action-lock="off"` / `data-no-action-lock` on a
+  control or form; `data-confirm` / `data-action-confirm` to force confirm-gate;
+  `$.ajax({ skipActionLock: true })` or `fetch(url, { skipActionLock: true })`
+  for background XHR; `PageActionLock.forceUnlock()` after client-side
+  validation failures.
+- Shared CRUD helpers in `universal.js` (`editRecord`, `viewRecord`,
+  `saveRecord`, `deleteRecord`, `updateStatus`) and `quick-add.js` integrate
+  with the lock.
+
+See [Coding Conventions](11-coding-conventions.md) for when to opt out.
+
 ## Request Flow / Layering
 
 `Route → Controller → Service → Model`. Controllers

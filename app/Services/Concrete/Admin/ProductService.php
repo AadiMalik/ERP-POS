@@ -156,7 +156,7 @@ class ProductService
                     </a>
 
                     <a class='btn btn-icon btn-outline-danger'
-                    id='deleteProdct'
+                    id='deleteProduct'
                     data-id='{$item->product_id}'>
 
                     <i class='fa fa-trash'></i>

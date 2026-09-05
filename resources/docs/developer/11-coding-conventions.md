@@ -45,3 +45,27 @@ Repository layer.
 - Preserve existing formatting/coding style; don't reformat unrelated code.
 - Use database transactions for multi-step writes; validate all input.
 - Never rename or repurpose a shipped permission name.
+
+## Page action lock (frontend)
+
+Do **not** add per-CRUD page overlays or custom double-submit loaders. The global
+`PageActionLock` covers listing/create/edit actions automatically.
+
+When a control must stay clickable during another request (rare), mark it:
+
+```html
+<button type="button" data-action-lock="off">...</button>
+```
+
+When a custom confirm dialog is used before a mutating request, either:
+- include `delete` / `approve` / `reject` in the control `id`/`class`, or
+- set `data-confirm` / `data-action-confirm`, or
+- call `PageActionLock.softGate(btn)` on open and
+  `PageActionLock.confirmAccepted(btn)` after confirm.
+
+Background polls / Select2 remote searches are ignored by URL pattern; for other
+noise use `skipActionLock: true` on the jQuery/`fetch` options.
+
+Frontend locking does **not** replace server-side guards — keep
+`DB::transaction`, status checks (“already paid/posted”), and validation on
+duplicate-sensitive writes (payments, postings, approvals).

@@ -37,10 +37,18 @@ function warningMessage(message) {
 }
 
 function showLoader() {
+    // Page/content overlays are suppressed when PageActionLock is active —
+    // visual feedback is button-only (spinner on the clicked control).
+    if (window.PageActionLock && window.PageActionLock.suppressPageLoader) {
+        return;
+    }
     $("#preloader").fadeIn(100);
 }
 
 function hideLoader() {
+    if (window.PageActionLock && window.PageActionLock.suppressPageLoader) {
+        return;
+    }
     $("#preloader").fadeOut(100);
 }
 
@@ -118,6 +126,10 @@ function editRecord({
     $("body").off("click", buttonClass).on("click", buttonClass, function (e) {
         e.preventDefault();
 
+        if (window.PageActionLock) {
+            window.PageActionLock.noteGesture(this);
+        }
+
         let id = $(this).data("id");
 
         ajaxRequest({
@@ -145,6 +157,10 @@ function viewRecord({
 }) {
     $("body").off("click", buttonClass).on("click", buttonClass, function (e) {
         e.preventDefault();
+
+        if (window.PageActionLock) {
+            window.PageActionLock.noteGesture(this);
+        }
 
         let id = $(this).data("id");
 
@@ -184,11 +200,19 @@ function saveRecord({
             let valid = beforeSubmit();
 
             if (!valid) {
+                if (window.PageActionLock) {
+                    window.PageActionLock.forceUnlock();
+                }
                 return false;
             }
         }
 
         let formData = new FormData(this);
+        let saveBtn = document.getElementById("saveBtn") || this.querySelector('[type="submit"]');
+
+        if (window.PageActionLock) {
+            window.PageActionLock.lock(saveBtn);
+        }
 
         $("#saveBtn").prop("disabled", true);
 
@@ -240,6 +264,11 @@ function deleteRecord({
     $("body").off("click", buttonClass).on("click", buttonClass, function () {
 
         let id = $(this).data("id");
+        let triggerBtn = this;
+
+        if (window.PageActionLock) {
+            window.PageActionLock.softGate(triggerBtn);
+        }
 
         Swal.fire({
             title: window.i18n?.confirm_delete_title || "Are you sure?",
@@ -250,6 +279,10 @@ function deleteRecord({
         }).then((result) => {
 
             if (result.isConfirmed) {
+
+                if (window.PageActionLock) {
+                    window.PageActionLock.confirmAccepted(triggerBtn);
+                }
 
                 ajaxRequest({
                     url: `${url}/${id}`,
@@ -266,6 +299,8 @@ function deleteRecord({
                     .catch((err) => {
                         errorMessage(err.Message || window.i18n?.delete_failed || "Delete failed");
                     });
+            } else if (window.PageActionLock) {
+                window.PageActionLock.forceUnlock();
             }
         });
     });
@@ -282,6 +317,10 @@ function updateStatus({
 }) {
 
     $("body").off("click", buttonClass).on("click", buttonClass, function () {
+
+        if (window.PageActionLock) {
+            window.PageActionLock.noteGesture(this);
+        }
 
         let id = $(this).data("id");
         ajaxRequest({

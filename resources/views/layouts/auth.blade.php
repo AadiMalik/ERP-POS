@@ -58,6 +58,7 @@
         </div>
     </div>
 
+    <link rel="stylesheet" href="{{ asset('public/assets/css/page-action-lock.css') }}" />
     <script src="{{ asset('public/assets/vendor/libs/jquery/jquery.js') }}"></script>
     <script src="{{ asset('public/assets/vendor/libs/popper/popper.js') }}"></script>
     <script src="{{ asset('public/assets/vendor/js/bootstrap.js') }}"></script>
@@ -65,6 +66,7 @@
     <script src="{{ asset('public/assets/vendor/js/menu.js') }}"></script>
     <script src="{{ asset('public/assets/js/main.js') }}"></script>
     <script src="{{ asset('public/assets/js/password-toggle.js') }}"></script>
+    <script src="{{ asset('public/assets/js/admin/page-action-lock.js') }}"></script>
 </body>
 
 </html>

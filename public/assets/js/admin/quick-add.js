@@ -47,12 +47,19 @@ function initQuickAdd({
             let valid = beforeSubmit();
 
             if (!valid) {
+                if (window.PageActionLock) {
+                    window.PageActionLock.forceUnlock();
+                }
                 return false;
             }
         }
 
         let formData = new FormData(this);
         let $btn = $(this).find('[type="submit"]');
+
+        if (window.PageActionLock) {
+            window.PageActionLock.lock($btn.get(0));
+        }
 
         $btn.prop("disabled", true);
 
