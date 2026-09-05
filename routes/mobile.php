@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Mobile\ContactMessageController;
 use App\Http\Controllers\Api\Mobile\CustomerOrderController;
 use App\Http\Controllers\Api\Mobile\LoyaltyController;
 use App\Http\Controllers\Api\Mobile\NewsletterSubscriberController;
+use App\Http\Controllers\Api\Mobile\PaymentController;
 use App\Http\Controllers\Api\Mobile\ProductController;
 use App\Http\Controllers\Api\Mobile\ProductReviewController;
 use App\Http\Controllers\Api\Mobile\ProfileController;
@@ -76,6 +77,10 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::post('newsletter/subscribe/{business_id}', [NewsletterSubscriberController::class, 'store']);
 
     Route::get('payment-methods/{business_id}', [CheckoutController::class, 'paymentMethods']);
+
+    // Public active Payment Gateways for this business (Mobile App platform).
+    Route::get('payment-gateways/{business_id}', [PaymentController::class, 'gateways']);
+
     Route::post('orders/{business_id}/track', [CustomerOrderController::class, 'track']);
 });
 
@@ -107,6 +112,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::delete('vouchers/{business_id}', [VoucherController::class, 'remove']);
 
     Route::post('checkout/{business_id}', [CheckoutController::class, 'placeOrder']);
+
+    // Payment Gateway payment lifecycle for an already-created hold order.
+    Route::post('orders/{business_id}/{order_id}/pay', [PaymentController::class, 'initiate']);
+    Route::get('payments/{business_id}/{payment_transaction_id}', [PaymentController::class, 'status']);
+    Route::post('payments/{business_id}/{payment_transaction_id}/verify', [PaymentController::class, 'verify']);
 
     Route::get('wishlist/{business_id}', [WishlistController::class, 'index']);
     Route::post('wishlist/{business_id}', [WishlistController::class, 'store']);

@@ -1827,7 +1827,7 @@
         @endcanAccessAny
 
         {{-- Orders (centralized - shared by POS, Website, Mobile App, API) --}}
-        @canAccessAny(['pos.access', 'order-return.view', 'order-type.view', 'order-source.view', 'payment-method.view', 'discount.view', 'voucher.view',
+        @canAccessAny(['pos.access', 'order-return.view', 'order-type.view', 'order-source.view', 'payment-method.view', 'payment-gateway.view', 'payment-transaction.view', 'discount.view', 'voucher.view',
             'reports.order-detail.view', 'reports.product-sales.view', 'reports.variation-sales.view', 'reports.customer-sales.view',
             'reports.branch-sales.view', 'reports.order-source-sales.view', 'reports.payment-method-sales.view',
             'reports.order-status-report.view', 'reports.cancelled-orders.view', 'reports.due-credit-sales.view',
@@ -1872,6 +1872,20 @@
                         <li class="menu-item">
                             <a href="{{ url('/admin/payment-method') }}" class="menu-link">
                                 <div data-i18n="Payment Methods">Payment Methods</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('payment-gateway.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/payment-gateway') }}" class="menu-link">
+                                <div data-i18n="Payment Gateways">Payment Gateways</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('payment-transaction.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/payment-transaction') }}" class="menu-link">
+                                <div data-i18n="Payment Gateway Transactions">Payment Gateway Transactions</div>
                             </a>
                         </li>
                     @endcanAccess

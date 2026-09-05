@@ -16,11 +16,14 @@ use App\Models\Order;
 use App\Models\OrderReturn;
 use App\Models\OrderReturnDetail;
 use App\Models\OrderStatusHistory;
+use App\Models\PaymentGateway;
 use App\Models\PaymentMethod;
+use App\Models\PaymentTransaction;
 use App\Models\PosRegisterSession;
 use App\Models\ProductVariationStock;
 use App\Models\ProductVariationStockTransaction;
 use App\Repository\Repository;
+use App\Services\PaymentGateways\PaymentGatewayProviderRegistry;
 use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
@@ -799,6 +802,41 @@ class OrderReturnService
      * and reverses the exact legs OrderService::post() originally posted
      * for the lines being returned.
      */
+    /**
+     * Calls the real Payment Gateway refund API through the same provider
+     * abstraction the CMS Payment Transactions screen uses (see
+     * PaymentTransactionService::refundTransaction()) - only for gateways
+     * that officially declare refund support. Website/Mobile only, exactly
+     * like the rest of the Payment Gateway framework; this never runs for
+     * POS's own cash/card/bank/credit refund paths above.
+     */
+    protected function processGatewayRefund(OrderReturn $order_return, PaymentMethod $refund_method): void
+    {
+        $gateway = PaymentGateway::find($refund_method->payment_gateway_id);
+
+        if (!$gateway) {
+            throw new Exception('The payment gateway linked to "' . $refund_method->name . '" no longer exists.');
+        }
+
+        $provider = PaymentGatewayProviderRegistry::find($gateway->provider_code);
+
+        if (!$provider || empty($provider['supports_refund'])) {
+            throw new Exception(($provider['label'] ?? $gateway->provider_code) . ' does not support refunds. Choose a different refund method.');
+        }
+
+        $transaction = PaymentTransaction::where('order_id', $order_return->order_id)
+            ->where('payment_gateway_id', $gateway->payment_gateway_id)
+            ->whereIn('status', ['paid', 'partially_refunded'])
+            ->orderByDesc('date_created')
+            ->first();
+
+        if (!$transaction) {
+            throw new Exception('No successful gateway payment was found for this order to refund.');
+        }
+
+        app(PaymentTransactionService::class)->refundTransaction($transaction->payment_transaction_id, (float) $order_return->total);
+    }
+
     protected function applyOrderReturnPosting(OrderReturn $order_return)
     {
         $existing = JournalEntry::where('source_type', JournalSourceTypes::SALE_RETURN)
@@ -872,6 +910,19 @@ class OrderReturnService
                 if ($open_session) {
                     $order_return->update(['pos_register_session_id' => $open_session->pos_register_session_id]);
                 }
+            } elseif ($refund_method->type === 'gateway') {
+                // Payment Gateway refund - actually call the provider (only
+                // for gateways that officially support refunds) inside this
+                // same DB transaction, so a failed gateway refund rolls back
+                // the whole approval rather than leaving accounting and the
+                // real gateway state out of sync. See processGatewayRefund().
+                $refund_account_id = $refund_method->account_id ?: $accounting_setting->default_store_credit_account_id;
+
+                if (empty($refund_account_id)) {
+                    throw new Exception('Payment method "' . $refund_method->name . '" is not mapped to an account, and no Store Credit Account is configured as a fallback.');
+                }
+
+                $this->processGatewayRefund($order_return, $refund_method);
             } else {
                 $refund_account_id = $refund_method->account_id;
 

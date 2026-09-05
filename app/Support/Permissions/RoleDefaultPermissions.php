@@ -50,7 +50,7 @@ class RoleDefaultPermissions
                      'stock-taking', 'transfer-note', 'supplier', 'customer', 'purchase-request',
                      'purchase-request-quotation', 'purchase', 'good-receipt-note', 'purchase-return',
                      'supplier-payment', 'customer-payment', 'service-purchase', 'service-purchase-return',
-                     'service-sale', 'service-sale-return', 'order-type', 'payment-method', 'order-source', 'discount',
+                     'service-sale', 'service-sale-return', 'order-type', 'payment-method', 'payment-gateway', 'order-source', 'discount',
                      'voucher', 'order', 'order-return', 'pos', 'pos-register', 'expense', 'expense-category', 'admin-expense'],
                     ['delete']
                 );
@@ -104,7 +104,7 @@ class RoleDefaultPermissions
                         'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'bank-reconciliation', 'recurring-transaction',
                         'fixed-asset-category', 'fixed-asset', 'fixed-asset-depreciation',
                         'expense', 'expense-category', 'admin-expense', 'supplier-payment', 'customer-payment',
-                        'fiscal-year', 'accounting-period', 'period-closing-rule', 'budget',
+                        'fiscal-year', 'accounting-period', 'period-closing-rule', 'budget', 'payment-transaction',
                     ]),
                     array_merge(
                         ['dashboard.view'],
@@ -122,7 +122,7 @@ class RoleDefaultPermissions
 
             case RoleNames::SALEMANAGER:
                 return array_merge(
-                    PermissionRegistry::namesForModules(['order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment', 'service-sale', 'service-sale-return', 'loyalty']),
+                    PermissionRegistry::namesForModules(['order-type', 'payment-method', 'payment-gateway', 'payment-transaction', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment', 'service-sale', 'service-sale-return', 'loyalty']),
                     array_merge(
                         ['dashboard.view'],
                         self::formatVariants([

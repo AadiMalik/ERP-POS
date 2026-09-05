@@ -18,6 +18,7 @@ class PaymentMethod extends Model
         'name',
         'code',
         'account_id',
+        'payment_gateway_id',
         'type',
         'is_default',
         'is_website_only',
@@ -40,6 +41,11 @@ class PaymentMethod extends Model
     public function account()
     {
         return $this->belongsTo(Account::class, 'account_id');
+    }
+
+    public function paymentGateway()
+    {
+        return $this->belongsTo(PaymentGateway::class, 'payment_gateway_id');
     }
 
     public function createdby()

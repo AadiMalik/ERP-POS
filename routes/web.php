@@ -943,6 +943,22 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
 
     }); // end module:pos (order-type/payment-method/order-source/sale-type/discount)
 
+    ////////////////////// Payment Gateways (Website & Mobile App only - never POS) ///////////////////////////
+    Route::group(['middleware' => ['module:payment-gateway']], function () {
+    Route::resource('payment-gateway', App\Http\Controllers\Admin\PaymentGatewayController::class)->except(['show']);
+    Route::group(['prefix' => 'payment-gateway'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\PaymentGatewayController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\PaymentGatewayController::class, 'status']);
+        Route::post('test-connection/{id}', [App\Http\Controllers\Admin\PaymentGatewayController::class, 'testConnection']);
+    });
+
+    Route::resource('payment-transaction', App\Http\Controllers\Admin\PaymentTransactionController::class)->only(['index', 'show']);
+    Route::group(['prefix' => 'payment-transaction'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\PaymentTransactionController::class, 'getData']);
+        Route::post('refund/{id}', [App\Http\Controllers\Admin\PaymentTransactionController::class, 'refund']);
+    });
+    }); // end module:payment-gateway
+
     Route::group(['middleware' => ['module:accounting']], function () {
     //voucher
     Route::resource('voucher', App\Http\Controllers\Admin\VoucherController::class)->except(['show']);

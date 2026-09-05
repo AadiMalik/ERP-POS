@@ -42,6 +42,7 @@ class DocumentationService
             ['slug' => 'manufacturing', 'title' => 'Manufacturing & Production', 'file' => '16-manufacturing.md'],
             ['slug' => 'serial-number-tracking', 'title' => 'Serial Number Tracking', 'file' => '17-serial-number-tracking.md'],
             ['slug' => 'backup-restore', 'title' => 'Backup & Restore', 'file' => '18-backup-restore.md'],
+            ['slug' => 'payment-gateways', 'title' => 'Payment Gateways (Website & Mobile App)', 'file' => '19-payment-gateways.md'],
         ];
     }
 
@@ -68,6 +69,7 @@ class DocumentationService
             ['slug' => 'waste-damage-expiry', 'title' => 'Waste / Damage / Expiry', 'file' => '17-waste-damage-expiry.md'],
             ['slug' => 'serial-number-tracking', 'title' => 'Serial Number Tracking', 'file' => '18-serial-number-tracking.md'],
             ['slug' => 'backup-restore', 'title' => 'Backup, Restore & Disaster Recovery', 'file' => '19-backup-restore.md'],
+            ['slug' => 'payment-gateway-framework', 'title' => 'Payment Gateway Framework', 'file' => '20-payment-gateway-framework.md'],
         ];
     }
 

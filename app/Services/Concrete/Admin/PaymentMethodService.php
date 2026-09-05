@@ -197,7 +197,7 @@ class PaymentMethodService
         // Credit / store_credit / COD route to receivable (or no mapped tender
         // account) at posting time - none need their own mapped account here.
         // Every other type must have a valid account_id.
-        if (!in_array($obj['type'] ?? null, ['credit', 'store_credit', 'cod'], true)) {
+        if (!in_array($obj['type'] ?? null, ['credit', 'store_credit', 'cod', 'gateway'], true)) {
             if (empty($obj['account_id'])) {
                 throw new Exception('Account is required for this payment method type.');
             }

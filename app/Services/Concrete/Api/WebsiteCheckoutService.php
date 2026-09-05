@@ -8,6 +8,7 @@ use App\Models\OrderPayment;
 use App\Models\OrderSource;
 use App\Models\OrderType;
 use App\Models\PaymentMethod;
+use App\Models\PaymentTransaction;
 use App\Models\WebsiteCartItem;
 use App\Services\Concrete\Admin\OrderService;
 use App\Services\Concrete\Admin\OrderSourceService;
@@ -271,11 +272,6 @@ class WebsiteCheckoutService
             throw new Exception('Only website orders can use this payment confirmation action.');
         }
 
-        $due = max((float) $order->total - (float) $order->paid_amount, 0);
-        if ($due <= 0.001) {
-            throw new Exception('This order is already marked as paid.');
-        }
-
         $has_bank = $order->payments->contains(function ($p) {
             return optional($p->paymentMethod)->type === 'bank';
         });
@@ -288,15 +284,54 @@ class WebsiteCheckoutService
             throw new Exception('No payment receipt is attached to this order.');
         }
 
+        $this->markOrderPaid($order, $admin_user_id, null);
+
+        return $order->fresh(['payments.paymentMethod', 'user', 'orderSource']);
+    }
+
+    /**
+     * Called only after a Payment Gateway transaction has been independently
+     * verified (webhook or server-to-server API poll - see
+     * App\Services\Concrete\Api\PaymentService::applyResult()). Never call
+     * this from anything driven solely by a frontend redirect.
+     */
+    public function applyGatewayPaymentSuccess(PaymentTransaction $transaction): void
+    {
+        $order = Order::find($transaction->order_id);
+
+        if (!$order) {
+            return;
+        }
+
+        $this->markOrderPaid($order, null, $transaction->gateway_transaction_id);
+    }
+
+    /**
+     * Single place an order actually becomes "paid" - shared by the existing
+     * manual bank-transfer admin confirm flow and gateway verify/webhook
+     * results, so accounting/order-sync logic is written once. Idempotent:
+     * a second call against an already-paid order is a safe no-op (a
+     * customer/gateway can never pay - or be credited for paying - the same
+     * order twice this way).
+     */
+    protected function markOrderPaid(Order $order, ?int $admin_user_id, ?string $gateway_transaction_id): void
+    {
+        $due = max((float) $order->total - (float) $order->paid_amount, 0);
+        if ($due <= 0.001) {
+            return;
+        }
+
         $order->update([
             'paid_amount' => $order->total,
             'payment_confirmed_at' => now(),
             'payment_confirmed_by_id' => $admin_user_id,
-            'updatedby_id' => $admin_user_id,
+            'updatedby_id' => $admin_user_id ?? $order->updatedby_id,
             'date_updated' => now(),
         ]);
 
-        return $order->fresh(['payments.paymentMethod', 'user', 'orderSource']);
+        if ($gateway_transaction_id) {
+            OrderPayment::where('order_id', $order->order_id)->update(['reference_no' => $gateway_transaction_id]);
+        }
     }
 
     protected function resolveWebsitePaymentMethod(string $business_id, ?string $payment_method_id, string $payment_code): ?PaymentMethod
@@ -322,12 +357,19 @@ class WebsiteCheckoutService
             return null;
         }
 
-        // Only COD (website-only) and Bank are allowed for website checkout.
+        // COD, Bank, and an active Payment Gateway's linked method are allowed
+        // for website/mobile checkout. Gateway methods are only ever resolved
+        // by their specific payment_method_id (from the payment-gateways
+        // listing endpoint), never by a guessable payment_code.
         if ($method->type === 'cod') {
             return $method;
         }
 
         if ($method->type === 'bank' && strtoupper($method->code) === 'BANK') {
+            return $method;
+        }
+
+        if ($method->type === 'gateway' && $payment_method_id) {
             return $method;
         }
 

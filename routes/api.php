@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\CustomerOrderController;
 use App\Http\Controllers\Api\LoyaltyController;
 use App\Http\Controllers\Api\NewsletterSubscriberController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\Webhooks\PaymentGatewayWebhookController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProductReviewController;
 use App\Http\Controllers\Api\ProfileController;
@@ -91,9 +93,18 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     // Public website payment methods + bank details (COD is website-only).
     Route::get('payment-methods/{business_id}', [CheckoutController::class, 'paymentMethods']);
 
+    // Public active Payment Gateways for this business (Website platform).
+    Route::get('payment-gateways/{business_id}', [PaymentController::class, 'gateways']);
+
     // Public track order (order number + email/phone verification).
     Route::post('orders/{business_id}/track', [CustomerOrderController::class, 'track']);
 });
+
+// Payment gateway webhooks/callbacks - no Sanctum (the caller is the
+// provider, not one of our users) and no CSRF (this whole file is loaded
+// under the 'api' middleware group, which never applies VerifyCsrfToken).
+// Security comes entirely from each provider adapter's own signature check.
+Route::post('webhooks/payment-gateways/{business_id}/{provider_code}', [PaymentGatewayWebhookController::class, 'handle']);
 
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->prefix('v1')->group(function () {
     Route::post('reviews/{business_id}', [ProductReviewController::class, 'store']);
@@ -128,6 +139,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->prefix('v1')->group(functi
 
     // Website checkout / place order.
     Route::post('checkout/{business_id}', [CheckoutController::class, 'placeOrder']);
+
+    // Payment Gateway payment lifecycle for an already-created hold order.
+    Route::post('orders/{business_id}/{order_id}/pay', [PaymentController::class, 'initiate']);
+    Route::get('payments/{business_id}/{payment_transaction_id}', [PaymentController::class, 'status']);
+    Route::post('payments/{business_id}/{payment_transaction_id}/verify', [PaymentController::class, 'verify']);
 
     // Wishlist (product-level and variation-level).
     Route::get('wishlist/{business_id}', [WishlistController::class, 'index']);

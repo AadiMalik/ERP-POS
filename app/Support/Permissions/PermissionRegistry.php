@@ -449,6 +449,23 @@ class PermissionRegistry
                 'status' => ['name' => 'payment-method.status', 'label' => 'Change Status', 'is_system' => false],
             ]],
 
+            // Payment Gateway Integration Framework - Website & Mobile App
+            // only, never POS. See resources/docs/developer's payment
+            // gateway framework doc.
+            'payment-gateway' => ['label' => 'Payment Gateways', 'actions' => [
+                'view'   => ['name' => 'payment-gateway.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'payment-gateway.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'payment-gateway.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'payment-gateway.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'payment-gateway.status', 'label' => 'Change Status', 'is_system' => false],
+                'test'   => ['name' => 'payment-gateway.test', 'label' => 'Test Connection', 'is_system' => false],
+            ]],
+
+            'payment-transaction' => ['label' => 'Payment Transactions', 'actions' => [
+                'view'   => ['name' => 'payment-transaction.view', 'label' => 'View', 'is_system' => false],
+                'refund' => ['name' => 'payment-transaction.refund', 'label' => 'Refund', 'is_system' => false],
+            ]],
+
             'order-source' => ['label' => 'Order Sources', 'actions' => [
                 'view'   => ['name' => 'order-source.view', 'label' => 'View', 'is_system' => false],
                 'create' => ['name' => 'order-source.create', 'label' => 'Create', 'is_system' => false],
@@ -1778,7 +1795,7 @@ class PermissionRegistry
             'barcode', 'unit-conversion', 'batch', 'serial-number', 'stock', 'stock-transaction',
             'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'bank-reconciliation', 'recurring-transaction',
             'fixed-asset-category', 'fixed-asset', 'fixed-asset-depreciation',
-            'supplier', 'customer', 'loyalty', 'order-type', 'payment-method', 'order-source', 'sale-type', 'discount', 'voucher',
+            'supplier', 'customer', 'loyalty', 'order-type', 'payment-method', 'payment-gateway', 'payment-transaction', 'order-source', 'sale-type', 'discount', 'voucher',
             'purchase-request', 'purchase-request-quotation', 'purchase', 'good-receipt-note',
             'purchase-return', 'opening-stock', 'stock-taking', 'loss-reason', 'waste-damage-expiry', 'transfer-note', 'supplier-payment', 'customer-payment',
             'service-purchase', 'service-purchase-return', 'service-sale', 'service-sale-return',

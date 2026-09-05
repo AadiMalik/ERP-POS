@@ -131,6 +131,12 @@ class SubscriptionModuleRegistry
             'order' => ['label' => 'Orders', 'category' => 'Orders', 'type' => 'limited', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'order-reports' => ['label' => 'Order Reports', 'category' => 'Orders', 'type' => 'feature', 'parent' => 'pos', 'default_enabled' => true],
 
+            // ---- Payment Gateways (Website & Mobile App only, never POS -
+            // its own umbrella since it must work even for businesses that
+            // never enable the POS module) ----
+            'payment-gateway' => ['label' => 'Payment Gateways', 'category' => 'Orders', 'type' => 'feature', 'parent' => null, 'default_enabled' => true],
+            'payment-transaction' => ['label' => 'Payment Gateway Transactions', 'category' => 'Orders', 'type' => 'feature', 'parent' => 'payment-gateway', 'default_enabled' => true],
+
             // ---- HRM & Payroll (umbrellas: is_hrm_enabled / is_payroll_enabled) ----
             'hrm'                 => ['label' => 'HRM Module', 'category' => 'HRM & Payroll', 'type' => 'feature', 'parent' => null, 'default_enabled' => false],
             'department'          => ['label' => 'Departments', 'category' => 'HRM & Payroll', 'type' => 'limited', 'parent' => 'hrm', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
