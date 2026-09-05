@@ -169,6 +169,12 @@ class SubscriptionModuleRegistry
             'manufacturing-plan'  => ['label' => 'Manufacturing Plans', 'category' => 'Manufacturing', 'type' => 'limited', 'parent' => 'manufacturing', 'default_enabled' => true, 'default_limit' => 20, 'unlimited_allowed' => true],
             'production'          => ['label' => 'Productions', 'category' => 'Manufacturing', 'type' => 'limited', 'parent' => 'manufacturing', 'default_enabled' => true, 'default_limit' => 50, 'unlimited_allowed' => true],
             'manufacturing-reports' => ['label' => 'Manufacturing Reports', 'category' => 'Manufacturing', 'type' => 'feature', 'parent' => 'manufacturing', 'default_enabled' => true],
+
+            // ---- Advanced Analytics & BI (package-tier gate only, same as
+            // hrm/payroll/manufacturing; composes existing sales/purchase/
+            // inventory/finance report data, no separate business-level
+            // on/off toggle) ----
+            'analytics' => ['label' => 'Advanced Analytics & BI', 'category' => 'Analytics', 'type' => 'feature', 'parent' => null, 'default_enabled' => false],
         ];
     }
 

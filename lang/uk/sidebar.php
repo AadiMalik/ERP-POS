@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'Звіт про відсутніх працівників',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'Адміністративні витрати',
     'admin_users' => 'Адміністратори',
     'advance_recovery_report' => 'Звіт про стягнення авансів',
+    'analytics' => 'Розширена аналітика та BI',
     'asset_allocation' => 'Розподіл активів',
     'asset_allocation_report' => 'Звіт про розподіл активів',
     'asset_disposal_report' => 'Звіт про вибуття активів',

@@ -766,10 +766,9 @@
                 'quick_expense' => route('pos-screen.quick-expense'),
             ],
         ];
-    @endphp
-    <script>
-        window.POS_CONFIG = @json($posConfig);
-        window.i18n_pos = @json(array_merge(trans('pos'), [
+        // Build i18n in PHP first — Blade's @json() splits on commas, so
+        // @json(array_merge(...)) produces broken PHP ("Unclosed '['").
+        $__i18nPos = array_merge(trans('pos'), [
             'cash' => __('common.cash'),
             'hold' => __('common.hold'),
             'pay' => __('common.pay'),
@@ -783,7 +782,11 @@
             'select_warehouse' => __('common.select_warehouse'),
             'register' => __('common.register'),
             'manual' => __('common.manual'),
-        ]));
+        ]);
+    @endphp
+    <script>
+        window.POS_CONFIG = @json($posConfig);
+        window.i18n_pos = @json($__i18nPos);
     </script>
     <script src="{{ asset('public/assets/js/admin/pos-screen.js') }}"></script>
 @endsection

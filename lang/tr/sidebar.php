@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'Devamsız Çalışan Raporu',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'Yönetim Giderleri',
     'admin_users' => 'Yönetici Kullanıcılar',
     'advance_recovery_report' => 'Avans Tahsilat Raporu',
+    'analytics' => 'Gelişmiş Analitik ve BI',
     'asset_allocation' => 'Varlık Tahsisi',
     'asset_allocation_report' => 'Varlık Tahsis Raporu',
     'asset_disposal_report' => 'Varlık Elden Çıkarma Raporu',

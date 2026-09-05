@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'Laporan Karyawan Tidak Hadir',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'Biaya Administrasi',
     'admin_users' => 'Pengguna Admin',
     'advance_recovery_report' => 'Laporan Pemulihan Uang Muka',
+    'analytics' => 'Analitik Lanjutan & BI',
     'asset_allocation' => 'Alokasi Aset',
     'asset_allocation_report' => 'Laporan Alokasi Aset',
     'asset_disposal_report' => 'Laporan Pelepasan Aset',

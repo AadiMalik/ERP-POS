@@ -224,10 +224,15 @@ inputs for the pattern to follow on other forms.
 
 All three are CDN-loaded (`layouts/js.blade.php`/`css.blade.php`), and each ships official
 per-locale language files on the same CDNs already in use — no new dependency:
-- DataTables: `resources/views/admin/partials/datatable.blade.php` sets
-  `language.url` to `//cdn.datatables.net/plug-ins/2.3.8/i18n/{locale}.json` whenever the
-  active locale isn't `en` (DataTables itself falls back to English if a given locale file
-  404s).
+- DataTables: `resources/views/admin/partials/datatable.blade.php` uses
+  `datatablesLocaleCode()` (`app/Helpers/CommonFunctions.php`) to map our
+  `config/languages.php` codes onto DataTables CDN filenames (e.g. `zh-CN` → `zh`,
+  `zh-TW` → `zh-HANT`). When the helper returns `null` (English, or a locale with no
+  CDN pack such as `bal`/`sd`), `language.url` is omitted entirely — otherwise
+  DataTables shows warning tn/21 ("i18n file loading error"). Do **not** pass
+  `@json(array_merge(...))` inline in Blade: `@json` splits on commas and breaks
+  nested arrays; build the PHP array in `@php` first, then `@json($var)` (see
+  `admin/pos/screen/index.blade.php`).
 - Select2: `dist/js/i18n/{locale}.js` loaded conditionally in `js.blade.php`; pass
   `language: CURRENT_LOCALE` (a JS constant set in `js.blade.php`) to each `.select2({...})`
   call — see `admin/product/index.blade.php` for the pattern.

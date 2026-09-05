@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'Bericht über abwesende Mitarbeiter',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'Verwaltungskosten',
     'admin_users' => 'Administratorbenutzer',
     'advance_recovery_report' => 'Vorschuss-Rückforderungsbericht',
+    'analytics' => 'Erweiterte Analytik & BI',
     'asset_allocation' => 'Vermögenszuweisung',
     'asset_allocation_report' => 'Vermögenszuweisungsbericht',
     'asset_disposal_report' => 'Anlagenabgangsbericht',

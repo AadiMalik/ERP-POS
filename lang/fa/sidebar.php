@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'گزارش کارمندان غایب',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'هزینه‌های اداری',
     'admin_users' => 'کاربران مدیریت',
     'advance_recovery_report' => 'گزارش بازیافت پیش‌پرداخت',
+    'analytics' => 'تحلیل‌های پیشرفته و هوش تجاری',
     'asset_allocation' => 'تخصیص دارایی',
     'asset_allocation_report' => 'گزارش تخصیص دارایی',
     'asset_disposal_report' => 'گزارش واگذاری دارایی',

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'تقرير الموظفين الغائبين',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'المصاريف الإدارية',
     'admin_users' => 'مستخدمو الإدارة',
     'advance_recovery_report' => 'تقرير استرداد السلف',
+    'analytics' => 'التحليلات المتقدمة وذكاء الأعمال',
     'asset_allocation' => 'تخصيص الأصول',
     'asset_allocation_report' => 'تقرير تخصيص الأصول',
     'asset_disposal_report' => 'تقرير التصرف في الأصول',

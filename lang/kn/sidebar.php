@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'ಗೈರುಹಾಜರಾದ ಉದ್ಯೋಗಿಗಳ ವರದಿ',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'ಆಡಳಿತಾತ್ಮಕ ವೆಚ್ಚಗಳು',
     'admin_users' => 'ನಿರ್ವಾಹಕ ಬಳಕೆದಾರರು',
     'advance_recovery_report' => 'ಮುಂಗಡ ವಸೂಲಿ ವರದಿ',
+    'analytics' => 'ಸುಧಾರಿತ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು BI',
     'asset_allocation' => 'ಆಸ್ತಿ ಹಂಚಿಕೆ',
     'asset_allocation_report' => 'ಆಸ್ತಿ ಹಂಚಿಕೆ ವರದಿ',
     'asset_disposal_report' => 'ಆಸ್ತಿ ವಿಲೇವಾರಿ ವರದಿ',

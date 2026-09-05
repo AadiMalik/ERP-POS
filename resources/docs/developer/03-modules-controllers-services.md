@@ -626,6 +626,16 @@ Reusable sender: `App\Services\Concrete\Firebase\FirebaseNotificationService`.
 Queued worker: `ProcessBroadcastNotificationJob`. See
 [FCM Broadcast Notifications](13-fcm-broadcast-notifications.md).
 
+## Advanced Analytics & BI (package: `analytics`)
+`AnalyticsController` — `admin/analytics` (index, `data/{widget}`, `table/{widget}`,
+`export/{widget}`). Orchestrator: `AnalyticsService` (composes Dashboard + Report
+services; caches widget JSON for 300s). Access/filters:
+`AnalyticsAccessService`, `AnalyticsFilterOptionsService`. New metrics:
+`ProductMarginReportService`, `CustomerSegmentService`. Slow-moving:
+`SlowMovingProductService` wrapping `StockAgingReportService` velocity mode.
+Permissions: `analytics.view`, `analytics.export`. Full write-up:
+[Advanced Analytics & Business Intelligence](22-analytics-bi.md).
+
 ## Shared Concerns
 `App\Http\Controllers\Admin\Concerns\HasLookupTypeCrudActions` — shared trait for
 simple lookup-type CRUD controllers (e.g. Order Type/Source, Payment Method) to

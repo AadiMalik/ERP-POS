@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'Raport angajați absenți',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'Cheltuieli administrative',
     'admin_users' => 'Utilizatori administratori',
     'advance_recovery_report' => 'Raport recuperare avansuri',
+    'analytics' => 'Analiză avansată și BI',
     'asset_allocation' => 'Alocare active',
     'asset_allocation_report' => 'Raport alocare active',
     'asset_disposal_report' => 'Raport casare active',

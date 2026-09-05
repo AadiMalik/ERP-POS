@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'Αναφορά απόντων υπαλλήλων',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'Διοικητικά έξοδα',
     'admin_users' => 'Χρήστες διαχειριστές',
     'advance_recovery_report' => 'Αναφορά ανάκτησης προκαταβολών',
+    'analytics' => 'Προηγμένα αναλυτικά & BI',
     'asset_allocation' => 'Κατανομή περιουσιακών στοιχείων',
     'asset_allocation_report' => 'Αναφορά κατανομής περιουσιακών στοιχείων',
     'asset_disposal_report' => 'Αναφορά διάθεσης περιουσιακών στοιχείων',

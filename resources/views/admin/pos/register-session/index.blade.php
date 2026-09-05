@@ -59,10 +59,13 @@
 <!-- ========== table components end ========== -->
 @endsection
 @section('js')
-<script>
-    window.i18n_pos = @json(array_merge(trans('pos'), [
+@php
+    $__i18nPos = array_merge(trans('pos'), [
         'cancel' => __('common.cancel'),
-    ]));
+    ]);
+@endphp
+<script>
+    window.i18n_pos = @json($__i18nPos);
 </script>
 @include('admin.partials.datatable', [
 'columns' => "

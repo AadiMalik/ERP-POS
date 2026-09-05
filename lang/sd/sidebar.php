@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'غير حاضر ملازمن جي رپورٽ',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'انتظامي خرچ',
     'admin_users' => 'ايڊمن يوزر',
     'advance_recovery_report' => 'ايڊوانس وصولي رپورٽ',
+    'analytics' => 'ايڊوانسڊ اينالائيٽڪس ۽ BI',
     'asset_allocation' => 'اثاثو مختص ڪرڻ',
     'asset_allocation_report' => 'اثاثو مختص رپورٽ',
     'asset_disposal_report' => 'اثاثو ضايع ڪرڻ جي رپورٽ',

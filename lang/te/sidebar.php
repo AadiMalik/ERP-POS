@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'గైర్హాజరు ఉద్యోగుల నివేదిక',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'పరిపాలనా ఖర్చులు',
     'admin_users' => 'అడ్మిన్ వినియోగదారులు',
     'advance_recovery_report' => 'అడ్వాన్స్ రికవరీ నివేదిక',
+    'analytics' => 'అధునాతన విశ్లేషణలు & BI',
     'asset_allocation' => 'ఆస్తి కేటాయింపు',
     'asset_allocation_report' => 'ఆస్తి కేటాయింపు నివేదిక',
     'asset_disposal_report' => 'ఆస్తి పారవేత నివేదిక',

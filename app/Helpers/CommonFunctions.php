@@ -839,6 +839,48 @@ function businessModuleEnabled($moduleKey)
 }
 
 /**
+ * Map the app locale to a DataTables CDN i18n filename (plug-ins/{ver}/i18n/{code}.json).
+ * Returns null for English (DataTables default) or when no CDN file exists for
+ * the locale — callers must skip language.url in that case (tn/21 otherwise).
+ */
+function datatablesLocaleCode(?string $locale = null): ?string
+{
+    $locale = $locale ?? app()->getLocale();
+
+    if ($locale === 'en' || $locale === '' || $locale === null) {
+        return null;
+    }
+
+    // DataTables CDN codes that differ from our config/languages.php keys.
+    $map = [
+        'zh-CN' => 'zh',
+        'zh-TW' => 'zh-HANT',
+        'pa-IN' => 'pa',
+        'pa-PK' => 'pa',
+        // No official DataTables pack for these — fall back to English UI strings.
+        'bal' => null,
+        'sd' => null,
+        'ps' => null,
+        'ne' => null,
+        'si' => null,
+        'ml' => null,
+        'kn' => null,
+        'te' => null,
+        'mr' => null,
+        'gu' => null,
+        'ta' => null,
+        'bn' => null,
+    ];
+
+    if (array_key_exists($locale, $map)) {
+        return $map[$locale];
+    }
+
+    // Most ISO codes (ur, ar, fa, hi, de, fr, ...) match the CDN filename.
+    return $locale;
+}
+
+/**
  * Whether the current user's business has Advanced Accounting Mode turned
  * on (accounting_settings.advanced_accounting_mode) - gates the Fiscal
  * Years / Accounting Periods / Closing Rules / Budgets sidebar entries and

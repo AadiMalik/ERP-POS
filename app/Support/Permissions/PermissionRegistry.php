@@ -1671,6 +1671,16 @@ class PermissionRegistry
                 'recipe_bom_report_export' => ['name' => 'reports.recipe-bom-report.export', 'label' => 'Recipe/BOM Report - Export (Excel)', 'is_system' => false],
                 'recipe_bom_report_export_csv' => ['name' => 'reports.recipe-bom-report.export-csv', 'label' => 'Recipe/BOM Report - Export (CSV)', 'is_system' => false],
             ]],
+
+            // ---- Advanced Analytics & BI (package-gated, see
+            // SubscriptionModuleRegistry's 'analytics' key / module:analytics
+            // route group). One dashboard with many widgets, not many report
+            // pages, so kept to a lean view/export pair rather than a
+            // per-widget permission bundle. ----
+            'analytics' => ['label' => 'Advanced Analytics & BI', 'actions' => [
+                'view'   => ['name' => 'analytics.view', 'label' => 'View', 'is_system' => false],
+                'export' => ['name' => 'analytics.export', 'label' => 'Export', 'is_system' => false],
+            ]],
         ];
     }
 
@@ -1811,6 +1821,7 @@ class PermissionRegistry
             'website-section', 'website-page', 'website-faq', 'social-media',
             'website-hero-stat', 'website-benefit', 'website-testimonial',
             'contact-message', 'product-review', 'newsletter-subscriber',
+            'analytics',
         ];
     }
 }

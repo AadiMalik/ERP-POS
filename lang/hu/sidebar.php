@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'Hiányzó alkalmazottak jelentése',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'Adminisztratív költségek',
     'admin_users' => 'Rendszergazda felhasználók',
     'advance_recovery_report' => 'Előleg behajtási jelentés',
+    'analytics' => 'Haladó analitika és BI',
     'asset_allocation' => 'Eszközallokáció',
     'asset_allocation_report' => 'Eszközallokációs jelentés',
     'asset_disposal_report' => 'Eszközértékesítési jelentés',

@@ -217,9 +217,12 @@ class DashboardAccessService
     /**
      * Whitelists a submitted lookup-table id (order type / order source /
      * payment method) against the user's own business - invalid or foreign
-     * ids are dropped, falling back to "all" rather than erroring.
+     * ids are dropped, falling back to "all" rather than erroring. Public so
+     * AnalyticsAccessService can reuse this exact anti-tampering check for
+     * its own extra filter dimensions (product/category/brand/customer)
+     * instead of reimplementing it.
      */
-    protected function resolveLookupId(string $model, string $key, $business_id, $requested_id): ?string
+    public function resolveLookupId(string $model, string $key, $business_id, $requested_id): ?string
     {
         if (empty($requested_id)) {
             return null;

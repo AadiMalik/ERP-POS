@@ -43,6 +43,7 @@ class DocumentationService
             ['slug' => 'serial-number-tracking', 'title' => 'Serial Number Tracking', 'file' => '17-serial-number-tracking.md'],
             ['slug' => 'backup-restore', 'title' => 'Backup & Restore', 'file' => '18-backup-restore.md'],
             ['slug' => 'payment-gateways', 'title' => 'Payment Gateways (Website & Mobile App)', 'file' => '19-payment-gateways.md'],
+            ['slug' => 'analytics-bi', 'title' => 'Advanced Analytics & Business Intelligence', 'file' => '20-analytics-bi.md'],
         ];
     }
 
@@ -71,6 +72,7 @@ class DocumentationService
             ['slug' => 'backup-restore', 'title' => 'Backup, Restore & Disaster Recovery', 'file' => '19-backup-restore.md'],
             ['slug' => 'payment-gateway-framework', 'title' => 'Payment Gateway Framework', 'file' => '20-payment-gateway-framework.md'],
             ['slug' => 'localization', 'title' => 'Localization / Multilingual System', 'file' => '21-localization.md'],
+            ['slug' => 'analytics-bi', 'title' => 'Advanced Analytics & Business Intelligence', 'file' => '22-analytics-bi.md'],
         ];
     }
 

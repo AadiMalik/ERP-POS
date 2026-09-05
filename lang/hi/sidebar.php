@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'अनुपस्थित कर्मचारी रिपोर्ट',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'प्रशासनिक व्यय',
     'admin_users' => 'एडमिन उपयोगकर्ता',
     'advance_recovery_report' => 'अग्रिम वसूली रिपोर्ट',
+    'analytics' => 'उन्नत एनालिटिक्स और BI',
     'asset_allocation' => 'संपत्ति आवंटन',
     'asset_allocation_report' => 'संपत्ति आवंटन रिपोर्ट',
     'asset_disposal_report' => 'संपत्ति निपटान रिपोर्ट',

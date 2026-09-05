@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'Admin Expenses',
     'admin_users' => 'Admin Users',
     'advance_recovery_report' => 'Advance Recovery Report',
+    'analytics' => 'Advanced Analytics & BI',
     'asset_allocation' => 'Asset Allocation',
     'asset_allocation_report' => 'Asset Allocation Report',
     'asset_disposal_report' => 'Asset Disposal Report',

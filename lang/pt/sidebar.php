@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'Relatório de funcionários ausentes',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'Despesas administrativas',
     'admin_users' => 'Usuários administradores',
     'advance_recovery_report' => 'Relatório de recuperação de adiantamentos',
+    'analytics' => 'Análise avançada e BI',
     'asset_allocation' => 'Alocação de ativos',
     'asset_allocation_report' => 'Relatório de alocação de ativos',
     'asset_disposal_report' => 'Relatório de baixa de ativos',

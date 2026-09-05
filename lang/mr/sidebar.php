@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'गैरहजर कर्मचारी अहवाल',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'प्रशासकीय खर्च',
     'admin_users' => 'प्रशासक वापरकर्ते',
     'advance_recovery_report' => 'आगाऊ वसुली अहवाल',
+    'analytics' => 'प्रगत अॅनालिटिक्स आणि BI',
     'asset_allocation' => 'मालमत्ता वाटप',
     'asset_allocation_report' => 'मालमत्ता वाटप अहवाल',
     'asset_disposal_report' => 'मालमत्ता विल्हेवाट अहवाल',

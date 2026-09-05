@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'Rapport om fraværende ansatte',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'Administrative utgifter',
     'admin_users' => 'Administratorbrukere',
     'advance_recovery_report' => 'Rapport om tilbakebetaling av forskudd',
+    'analytics' => 'Avansert analyse & BI',
     'asset_allocation' => 'Eiendeltildeling',
     'asset_allocation_report' => 'Rapport om eiendeltildeling',
     'asset_disposal_report' => 'Rapport om avhending av eiendeler',

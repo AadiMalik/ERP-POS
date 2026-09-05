@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'د غیر حاضر کارکوونکو راپور',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'اداري لګښتونه',
     'admin_users' => 'اډمین کاروونکي',
     'advance_recovery_report' => 'د پیشکي بیرته اخیستنې راپور',
+    'analytics' => 'پرمختللي تحلیلونه او BI',
     'asset_allocation' => 'د شتمنیو تخصیص',
     'asset_allocation_report' => 'د شتمنیو تخصیص راپور',
     'asset_disposal_report' => 'د شتمنیو له منځه وړلو راپور',

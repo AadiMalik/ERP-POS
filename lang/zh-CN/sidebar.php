@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => '缺勤员工报告',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => '行政费用',
     'admin_users' => '管理员用户',
     'advance_recovery_report' => '预支回收报告',
+    'analytics' => '高级分析与商业智能',
     'asset_allocation' => '资产分配',
     'asset_allocation_report' => '资产分配报告',
     'asset_disposal_report' => '资产处置报告',

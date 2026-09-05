@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'ഹാജരാകാത്ത ജീവനക്കാരുടെ റിപ്പോർട്ട്',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'ഭരണപരമായ ചെലവുകൾ',
     'admin_users' => 'അഡ്മിൻ ഉപയോക്താക്കൾ',
     'advance_recovery_report' => 'അഡ്വാൻസ് വീണ്ടെടുക്കൽ റിപ്പോർട്ട്',
+    'analytics' => 'അഡ്വാൻസ്ഡ് അനലിറ്റിക്സ് & BI',
     'asset_allocation' => 'ആസ്തി വിഹിതം',
     'asset_allocation_report' => 'ആസ്തി വിഹിത റിപ്പോർട്ട്',
     'asset_disposal_report' => 'ആസ്തി വിനിയോഗ റിപ്പോർട്ട്',

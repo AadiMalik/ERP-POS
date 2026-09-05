@@ -60,6 +60,17 @@
                 <div data-i18n="Analytics">{{ __('sidebar.dashboard') }}</div>
             </a>
         </li>
+        <!-- Advanced Analytics & BI -->
+        @if (businessModuleEnabled('analytics'))
+        @canAccess('analytics.view')
+            <li class="menu-item">
+                <a href="{{ route('analytics.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons fa fa-chart-pie"></i>
+                    <div data-i18n="Advanced Analytics">{{ __('sidebar.analytics') }}</div>
+                </a>
+            </li>
+        @endcanAccess
+        @endif
         <!-- Self Service (Employee) -->
         @canAccessAny(['ess.dashboard.view', 'ess.attendance.manage', 'ess.leave.view', 'ess.payslip.view', 'ess.profile.view', 'ess.advance.apply', 'ess.resignation.apply'])
             <li class="menu-item">

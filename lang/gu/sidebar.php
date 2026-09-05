@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'ગેરહાજર કર્મચારીઓનો અહેવાલ',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'વહીવટી ખર્ચ',
     'admin_users' => 'એડમિન વપરાશકર્તાઓ',
     'advance_recovery_report' => 'એડવાન્સ વસૂલાત અહેવાલ',
+    'analytics' => 'એડવાન્સ્ડ એનાલિટિક્સ અને BI',
     'asset_allocation' => 'સંપત્તિ ફાળવણી',
     'asset_allocation_report' => 'સંપત્તિ ફાળવણી અહેવાલ',
     'asset_disposal_report' => 'સંપત્તિ નિકાલ અહેવાલ',

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => '欠勤従業員レポート',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => '管理費',
     'admin_users' => '管理者ユーザー',
     'advance_recovery_report' => '前払金回収レポート',
+    'analytics' => '高度な分析とBI',
     'asset_allocation' => '資産配分',
     'asset_allocation_report' => '資産配分レポート',
     'asset_disposal_report' => '資産処分レポート',

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'Zpráva o nepřítomných zaměstnancích',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'Administrativní náklady',
     'admin_users' => 'Administrátoři',
     'advance_recovery_report' => 'Zpráva o vymáhání záloh',
+    'analytics' => 'Pokročilá analytika a BI',
     'asset_allocation' => 'Alokace majetku',
     'asset_allocation_report' => 'Zpráva o alokaci majetku',
     'asset_disposal_report' => 'Zpráva o vyřazení majetku',

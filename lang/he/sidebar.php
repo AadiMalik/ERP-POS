@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'דוח עובדים נעדרים',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'הוצאות מנהלה',
     'admin_users' => 'משתמשי ניהול',
     'advance_recovery_report' => 'דוח החזר מקדמות',
+    'analytics' => 'אנליטיקה מתקדמת ובינה עסקית',
     'asset_allocation' => 'הקצאת נכסים',
     'asset_allocation_report' => 'דוח הקצאת נכסים',
     'asset_disposal_report' => 'דוח מימוש נכסים',

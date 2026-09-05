@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => '결근 직원 보고서',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => '관리 비용',
     'admin_users' => '관리자 사용자',
     'advance_recovery_report' => '선급금 회수 보고서',
+    'analytics' => '고급 분석 및 BI',
     'asset_allocation' => '자산 배분',
     'asset_allocation_report' => '자산 배분 보고서',
     'asset_disposal_report' => '자산 처분 보고서',

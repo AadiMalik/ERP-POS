@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'অনুপস্থিত কর্মচারী প্রতিবেদন',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'প্রশাসনিক ব্যয়',
     'admin_users' => 'অ্যাডমিন ব্যবহারকারী',
     'advance_recovery_report' => 'অগ্রিম আদায় প্রতিবেদন',
+    'analytics' => 'অ্যাডভান্সড অ্যানালিটিক্স ও BI',
     'asset_allocation' => 'সম্পদ বরাদ্দ',
     'asset_allocation_report' => 'সম্পদ বরাদ্দ প্রতিবেদন',
     'asset_disposal_report' => 'সম্পদ নিষ্পত্তি প্রতিবেদন',

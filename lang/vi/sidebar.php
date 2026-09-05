@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'Báo cáo nhân viên vắng mặt',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'Chi phí quản lý',
     'admin_users' => 'Người dùng quản trị',
     'advance_recovery_report' => 'Báo cáo thu hồi tạm ứng',
+    'analytics' => 'Phân tích nâng cao & BI',
     'asset_allocation' => 'Phân bổ tài sản',
     'asset_allocation_report' => 'Báo cáo phân bổ tài sản',
     'asset_disposal_report' => 'Báo cáo thanh lý tài sản',

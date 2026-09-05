@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'غیر حاضر ملازمانی رپورٹ',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'انتظامی خرچی',
     'admin_users' => 'ایڈمن کاربرانی',
     'advance_recovery_report' => 'پیشگی وصولی رپورٹ',
+    'analytics' => 'پیشرفته تحلیل و BI',
     'asset_allocation' => 'اثاثہ تخصیص',
     'asset_allocation_report' => 'اثاثہ تخصیص رپورٹ',
     'asset_disposal_report' => 'اثاثہ ضائع کنگ ءِ رپورٹ',

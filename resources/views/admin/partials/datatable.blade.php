@@ -43,9 +43,10 @@
             order: {!! $order !!},
             @endisset
             destroy : true,
-            @if (app()->getLocale() !== 'en')
+            @php $__dtLocale = datatablesLocaleCode(); @endphp
+            @if ($__dtLocale)
             language: {
-                url: "//cdn.datatables.net/plug-ins/2.3.8/i18n/{{ app()->getLocale() }}.json"
+                url: "//cdn.datatables.net/plug-ins/2.3.8/i18n/{{ $__dtLocale }}.json"
             },
             @endif
             ajax: {

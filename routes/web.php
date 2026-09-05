@@ -1906,6 +1906,20 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         }); // end module:manufacturing (manufacturing reports)
     });
 
+    // Advanced Analytics & BI - package-gated (see SubscriptionModuleRegistry's
+    // 'analytics' key), permission-gated via the controller's own constructor
+    // middleware (analytics.view / analytics.export). {widget} is validated
+    // against a whitelist inside AnalyticsService, never used to dynamically
+    // dispatch a method from raw user input.
+    Route::group(['middleware' => ['module:analytics']], function () {
+        Route::group(['prefix' => 'analytics', 'as' => 'analytics.'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('index');
+            Route::get('data/{widget}', [App\Http\Controllers\Admin\AnalyticsController::class, 'data'])->name('data');
+            Route::post('table/{widget}', [App\Http\Controllers\Admin\AnalyticsController::class, 'table'])->name('table');
+            Route::get('export/{widget}', [App\Http\Controllers\Admin\AnalyticsController::class, 'export'])->name('export');
+        });
+    }); // end module:analytics
+
     //Setting
     Route::group(['prefix' => 'setting'], function () {
         Route::get('/', [App\Http\Controllers\Admin\SettingController::class, 'index']);

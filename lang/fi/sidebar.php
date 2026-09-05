@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'absent_employees_report' => 'Poissaolevien työntekijöiden raportti',
@@ -14,6 +14,7 @@ return [
     'admin_expenses' => 'Hallinnolliset kulut',
     'admin_users' => 'Pääkäyttäjät',
     'advance_recovery_report' => 'Ennakon takaisinperintäraportti',
+    'analytics' => 'Edistynyt analytiikka & BI',
     'asset_allocation' => 'Omaisuuden allokointi',
     'asset_allocation_report' => 'Omaisuuden allokointiraportti',
     'asset_disposal_report' => 'Omaisuuden luovutusraportti',
