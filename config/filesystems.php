@@ -56,6 +56,16 @@ return [
             'throw' => false,
         ],
 
+        // Private disk used exclusively by the Super Admin Backup & Restore
+        // module (see BackupService) - never exposed via the "public" disk
+        // or a public URL, so backup archives are only reachable through the
+        // permission-gated download route.
+        'backups' => [
+            'driver' => 'local',
+            'root' => storage_path('app/backups'),
+            'throw' => false,
+        ],
+
     ],
 
     /*

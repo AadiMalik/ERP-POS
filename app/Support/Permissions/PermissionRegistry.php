@@ -60,6 +60,18 @@ class PermissionRegistry
                 'manage' => ['name' => 'subscription.manage', 'label' => 'Manage', 'is_system' => true],
             ]],
 
+            // Platform-level Backup & Restore / Disaster Recovery module.
+            // Enforced via constructor middleware on BackupController, in
+            // addition to the `superadmin` route-group middleware.
+            'backup' => ['label' => 'Backup & Restore', 'actions' => [
+                'view'     => ['name' => 'backup.view', 'label' => 'View', 'is_system' => true],
+                'create'   => ['name' => 'backup.create', 'label' => 'Create Backup', 'is_system' => true],
+                'download' => ['name' => 'backup.download', 'label' => 'Download', 'is_system' => true],
+                'delete'   => ['name' => 'backup.delete', 'label' => 'Delete', 'is_system' => true],
+                'restore'  => ['name' => 'backup.restore', 'label' => 'Restore', 'is_system' => true],
+                'manage'   => ['name' => 'backup.manage', 'label' => 'Manage Settings', 'is_system' => true],
+            ]],
+
             // Dukanaz Intro marketing CMS (platform / Super Admin only)
             'intro-module' => ['label' => 'Intro Modules', 'actions' => [
                 'view'   => ['name' => 'intro-module.view', 'label' => 'View', 'is_system' => true],

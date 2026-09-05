@@ -250,6 +250,15 @@ already be registered as a customer of your business; otherwise they see that
 the email is not registered. Customer payments and any store credit balance are
 tracked per customer, feeding the Customer Ledger and Aging reports.
 
+Both the Customers and Customer Payments screens have **Import** and
+**Export** buttons (permission-gated) for bulk work: download a sample
+Excel template, fill it in, and upload it for a row-by-row preview — with
+create/update/error counts and the exact reason for any row that can't be
+imported — before anything is saved. Imported customer payments are always
+created as unallocated/on-account and Pending, exactly like a payment
+entered by hand; posting it still requires the separate Change Status →
+Posted action.
+
 ## Multiple Registers & Branches
 
 Each branch can run its own POS Register(s). Reporting can be broken down by branch,

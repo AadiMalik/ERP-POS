@@ -33,10 +33,31 @@ Growth / Business / Enterprise × monthly + yearly, with `discount` % on the
 package). Super Admin creates and edits packages via `PackageController`
 (price + discount + duration_type + module matrix).
 
+## Backup, Restore & Disaster Recovery (Super Admin only)
+`BackupController` (`superadmin` route-group middleware + `permission:backup.*`
+constructor middleware) — prefix `admin/backups`. Full details, including the
+restore procedure and disaster-recovery scenarios, are in
+[Backup, Restore & Disaster Recovery](19-backup-restore.md). Summary: wraps
+`spatie/laravel-backup` for zip creation (database dump + application/storage
+files) with a custom `BackupService`/`BackupRestoreService` layer that adds a
+`backup_logs` audit trail, post-run zip/checksum verification, admin-configurable
+schedule/retention (`backup_settings`, read by the hourly `backups:auto-run`
+command), and a restore flow that always takes an automatic safety backup of
+the current state first.
+
 ## Users, Customers & Profile (Core CRM/Identity)
 `UserController`, `CustomerController`, `ProfileController`, `SearchController`
 (global header search — each result group gated by its own module's view
 permission) — `admin/users`, `admin/customer`, `admin/profile`, `admin/search`.
+
+`CustomerController` uses the generic Import/Export system (see
+`ImportExportModuleRegistry`, module key `customer`) via
+`CustomerImportExportDefinition`, which delegates every create/update to
+`UserService::save()` (the same path `CustomerController::store()` uses) so
+role assignment, global-account reuse by email, and
+`CustomerService::upsertProfile()`'s side effects (default receivable COA,
+opening-balance posting on a brand-new profile) stay identical to a manual
+Add New. The match key is the globally-unique `users.email`.
 
 Web login / forgot-password lives outside the admin group:
 `App\Http\Controllers\Auth\LoginController`,
@@ -262,6 +283,19 @@ Setup: `OrderTypeController`, `PaymentMethodController`, `OrderSourceController`
 payments may not exceed remaining due; due/amount are compared at the
 business `decimal_points` scale so amounts that display as equal, e.g.
 Rs 10.61 vs Rs 10.61, are accepted).
+
+`CustomerPaymentController` also uses the generic Import/Export system
+(module key `customer-payment`) via `CustomerPaymentImportExportDefinition`,
+which delegates to `CustomerPaymentService::save()` exactly like
+`SupplierPaymentImportExportDefinition` does for suppliers. Imported rows are
+always created/updated at status `Pending` and never linked to a specific
+Order or Service Sale (always on-account) — posting the CRV/BRV Journal
+Entry still only happens via the separate "Change Status → Posted" action,
+so an import never posts a Journal Entry as a side effect. The "Customer"
+column matches by `users.email` unscoped by business (a customer's
+`business_id` is only the first business that created them), relying on
+`CustomerPaymentService::save()`'s own "no profile for this business" guard
+to reject an email that has no `CustomerProfile` here.
 
 **Register session open — tenant/cashier binding:**
 `PosRegisterSessionService::open()` forces `business_id`, branch-scoped

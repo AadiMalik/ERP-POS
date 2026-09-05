@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Message;
 use App\Enums\RoleNames;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Models\CustomerLoyaltyTransaction;
 use App\Models\CustomerSetting;
@@ -29,6 +30,7 @@ use Illuminate\Validation\Rule;
 class CustomerController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $customer_service;
     protected $user_service;
@@ -45,6 +47,8 @@ class CustomerController extends Controller
         $this->middleware('permission:customer.edit')->only(['edit']);
         $this->middleware('permission:customer.delete')->only(['destroy']);
         $this->middleware('permission:customer.status')->only(['status']);
+        $this->middleware('permission:customer.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:customer.export')->only(['export']);
 
         $this->customer_service = $customer_service;
         $this->user_service = $user_service;
@@ -243,6 +247,11 @@ class CustomerController extends Controller
         $profile = $this->customer_service->getProfile($request->id, $request->business_id);
 
         return $profile->customer_profile_id ?? null;
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'customer';
     }
 
     protected function friendlyCustomerSaveError(Exception $e): string

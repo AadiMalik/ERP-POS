@@ -187,6 +187,25 @@
                     </li>
                 </ul>
             </li>
+            <!-- Backup & Restore -->
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons fa fa-database"></i>
+                    <div data-i18n="Backup & Restore">Backup &amp; Restore</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                        <a href="{{ route('backups.index') }}" class="menu-link">
+                            <div data-i18n="Backups">Dashboard</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{{ route('backup-settings.edit') }}" class="menu-link">
+                            <div data-i18n="Backup Settings">Settings</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
             <!-- Dukanaz Intro CMS -->
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\Message;
 use App\Enums\PaymentMethod;
 use App\Enums\Status;
+use App\Http\Controllers\Concerns\HandlesImportExport;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Concrete\Admin\AccountService;
@@ -24,6 +25,7 @@ use Illuminate\Validation\Rule;
 class CustomerPaymentController extends Controller
 {
     use ResponseAPI;
+    use HandlesImportExport;
 
     protected $customer_payment_service;
     protected $business_service;
@@ -48,6 +50,8 @@ class CustomerPaymentController extends Controller
         $this->middleware('permission:customer-payment.delete')->only(['destroy']);
         $this->middleware('permission:customer-payment.status')->only(['status']);
         $this->middleware('permission:customer-payment.print')->only(['print']);
+        $this->middleware('permission:customer-payment.import')->only(['importSample', 'importPreview', 'importConfirm']);
+        $this->middleware('permission:customer-payment.export')->only(['export']);
 
         $this->customer_payment_service = $customer_payment_service;
         $this->business_service = $business_service;
@@ -326,5 +330,10 @@ class CustomerPaymentController extends Controller
         }
 
         return view('admin.customer_payment.print.print', compact('payment'));
+    }
+
+    protected function importExportModuleKey(): string
+    {
+        return 'customer-payment';
     }
 }

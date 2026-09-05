@@ -61,6 +61,24 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+
+            // Consumed by spatie/laravel-backup (Backup & Restore module) to
+            // shell out to mysqldump for backups. dumpBinaryPath is the
+            // directory containing mysqldump/mysql - required on Windows/XAMPP
+            // where those binaries aren't normally on PATH; leave
+            // MYSQLDUMP_PATH empty on servers where mysqldump is on PATH.
+            'dump' => [
+                'dumpBinaryPath' => env('MYSQLDUMP_PATH', ''),
+                'useSingleTransaction' => true,
+                // The Backup & Restore module's own bookkeeping tables are
+                // excluded from the dump: otherwise every backup's own
+                // "running" -> "success" status transition (committed after
+                // the dump is taken) gets overwritten back to "running" the
+                // next time that backup is restored, permanently confusing
+                // the dashboard even though the actual archive files are
+                // untouched on disk.
+                'excludeTables' => ['backup_logs', 'backup_settings'],
+            ],
         ],
 
         'pgsql' => [

@@ -10,6 +10,7 @@
 | `CheckNotificationAlertsCommand` | `notifications:check-alerts {--dry-run}` | hourly | Scans for conditions that should raise in-app notifications |
 | `ProcessRecurringTransactionsCommand` | `recurring-transactions:process {--dry-run} {--id=}` | hourly | Generates due journal entries from Recurring Transaction templates |
 | `BackfillBarcodesCommand` | `barcode:backfill {--business=} {--dry-run} {--force}` | manual/ops only | One-off backfill of missing product-variation barcodes (also exposed via `POST admin/product/barcode/backfill`) |
+| `BackupAutoRunCommand` | `backups:auto-run` | hourly, `withoutOverlapping()` | Checks `BackupSetting` and runs a scheduled backup + retention cleanup if one is due - see [Backup, Restore & Disaster Recovery](19-backup-restore.md) |
 
 All scheduled commands are registered in `app/Console/Kernel.php`. Run
 `php artisan schedule:run` (typically via cron/Task Scheduler) to fire due

@@ -22,6 +22,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('accounting-periods:process')->dailyAt('02:00')->withoutOverlapping();
         $schedule->command('notifications:check-alerts')->hourly();
         $schedule->command('recurring-transactions:process')->hourly();
+        $schedule->command('backups:auto-run')->hourly()->withoutOverlapping();
     }
 
     /**

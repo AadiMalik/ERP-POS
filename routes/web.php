@@ -196,6 +196,18 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('/', [App\Http\Controllers\Admin\SubscriptionSettingController::class, 'update'])->name('subscription-settings.update');
     });
 
+    //////////////////// Backup, Restore & Disaster Recovery (Super Admin) ////////////////////
+    Route::group(['prefix' => 'backups', 'middleware' => ['superadmin']], function () {
+        Route::get('/', [App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backups.index');
+        Route::post('/', [App\Http\Controllers\Admin\BackupController::class, 'store'])->name('backups.store');
+        Route::get('settings', [App\Http\Controllers\Admin\BackupController::class, 'settingsEdit'])->name('backup-settings.edit');
+        Route::post('settings', [App\Http\Controllers\Admin\BackupController::class, 'settingsUpdate'])->name('backup-settings.update');
+        Route::post('cleanup', [App\Http\Controllers\Admin\BackupController::class, 'cleanup'])->name('backups.cleanup');
+        Route::get('{id}/download', [App\Http\Controllers\Admin\BackupController::class, 'download'])->name('backups.download');
+        Route::delete('{id}', [App\Http\Controllers\Admin\BackupController::class, 'destroy'])->name('backups.destroy');
+        Route::post('{id}/restore', [App\Http\Controllers\Admin\BackupController::class, 'restore'])->name('backups.restore');
+    });
+
     //////////////////// Subscription (Business Admin self-service) ////////////////////
     Route::group(['prefix' => 'my-subscription'], function () {
         Route::get('/', [App\Http\Controllers\Admin\MySubscriptionController::class, 'index'])->name('my-subscription.index');
@@ -234,6 +246,10 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('data', [App\Http\Controllers\Admin\CustomerController::class, 'getData']);
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\CustomerController::class, 'status']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\CustomerController::class, 'byBusiness']);
+        Route::get('import/sample', [App\Http\Controllers\Admin\CustomerController::class, 'importSample'])->name('customer-import-sample');
+        Route::post('import/preview', [App\Http\Controllers\Admin\CustomerController::class, 'importPreview'])->name('customer-import-preview');
+        Route::post('import/confirm', [App\Http\Controllers\Admin\CustomerController::class, 'importConfirm'])->name('customer-import-confirm');
+        Route::get('export', [App\Http\Controllers\Admin\CustomerController::class, 'export'])->name('customer-export');
     });
 
     //generic "View JV" / "Stock Consumption Details" popups - reused from Orders,
@@ -1030,6 +1046,10 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('orders-by-customer/{user_id}', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'ordersByCustomer']);
             Route::get('service-sales-by-customer/{user_id}', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'serviceSalesByCustomer']);
             Route::get('{customer_payment_id}/print', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'print'])->name('customer-payment.print');
+            Route::get('import/sample', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'importSample'])->name('customer-payment-import-sample');
+            Route::post('import/preview', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'importPreview'])->name('customer-payment-import-preview');
+            Route::post('import/confirm', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'importConfirm'])->name('customer-payment-import-confirm');
+            Route::get('export', [App\Http\Controllers\Admin\CustomerPaymentController::class, 'export'])->name('customer-payment-export');
         });
     }); // end module:pos (customer payment)
 

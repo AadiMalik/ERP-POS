@@ -8,6 +8,8 @@ use App\Services\ImportExport\Modules\AssetAllocation\AssetAllocationImportExpor
 use App\Services\ImportExport\Modules\Attendance\AttendanceImportExportDefinition;
 use App\Services\ImportExport\Modules\Brand\BrandImportExportDefinition;
 use App\Services\ImportExport\Modules\Category\CategoryImportExportDefinition;
+use App\Services\ImportExport\Modules\Customer\CustomerImportExportDefinition;
+use App\Services\ImportExport\Modules\CustomerPayment\CustomerPaymentImportExportDefinition;
 use App\Services\ImportExport\Modules\Department\DepartmentImportExportDefinition;
 use App\Services\ImportExport\Modules\Designation\DesignationImportExportDefinition;
 use App\Services\ImportExport\Modules\Discount\DiscountImportExportDefinition;
@@ -66,6 +68,8 @@ class ImportExportModuleRegistry
             'asset-allocation' => AssetAllocationImportExportDefinition::class,
             'supplier' => SupplierImportExportDefinition::class,
             'supplier-payment' => SupplierPaymentImportExportDefinition::class,
+            'customer' => CustomerImportExportDefinition::class,
+            'customer-payment' => CustomerPaymentImportExportDefinition::class,
             'purchase-request' => PurchaseRequestImportExportDefinition::class,
             'order' => OrderImportExportDefinition::class,
             'discount' => DiscountImportExportDefinition::class,

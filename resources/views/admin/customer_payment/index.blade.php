@@ -16,6 +16,12 @@
                     </button>
                 </div>
                 <div class="d-flex gap-2">
+                    @include('admin.partials.import-export-buttons', [
+                        'importExportModule' => 'customer-payment',
+                        'importExportLabel' => 'Customer Payments',
+                        'importExportRefreshFn' => 'initDataTablecustomer_payment_table',
+                        'importExportExportParamsSelector' => '#business_id',
+                    ])
                     <a href="{{ url('admin/customer-payment/create') }}" class="btn btn-primary rounded-pill">
                         <i class="fa fa-plus"></i>
                         Add New
@@ -104,6 +110,7 @@
             </div>
         </div>
     </div>
+    @include('admin.partials.import-export-modal')
 @endsection
 @section('js')
     @include('admin.partials.datatable', [
