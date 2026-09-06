@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             PackageSeeder::class,
             IntroPackageCatalogSeeder::class,
             IntroCmsSeeder::class,
+            SystemFeatureFlagSeeder::class,
         ]);
     }
 }

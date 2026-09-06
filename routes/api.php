@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\CustomerOrderController;
 use App\Http\Controllers\Api\LoyaltyController;
 use App\Http\Controllers\Api\NewsletterSubscriberController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\Webhooks\PaymentGatewayWebhookController;
 use App\Http\Controllers\Api\ProductController;
@@ -66,7 +67,7 @@ Route::prefix('v1/auth')->middleware('throttle:20,1')->group(function () {
 // Public storefront config - business-wise website theme settings, global
 // website settings, and branches, consumed by the Vue frontend before
 // render / on demand using its .env-configured business_id.
-Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
+Route::prefix('v1')->middleware(['throttle:60,1', 'platform:storefront'])->group(function () {
     Route::get('website-theme/{business_id}', [WebsiteThemeController::class, 'show']);
     Route::get('website-settings/{business_id}', [WebsiteSettingController::class, 'show']);
     Route::get('branches/{business_id}', [BranchController::class, 'index']);
@@ -106,7 +107,7 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
 // Security comes entirely from each provider adapter's own signature check.
 Route::post('webhooks/payment-gateways/{business_id}/{provider_code}', [PaymentGatewayWebhookController::class, 'handle']);
 
-Route::middleware(['auth:sanctum', 'throttle:60,1'])->prefix('v1')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:60,1', 'platform:storefront'])->prefix('v1')->group(function () {
     Route::post('reviews/{business_id}', [ProductReviewController::class, 'store']);
 
     // Customer account profile + addresses (scoped to business_id).
@@ -151,4 +152,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->prefix('v1')->group(functi
     Route::delete('wishlist/{business_id}', [WishlistController::class, 'destroy']);
     Route::post('wishlist/{business_id}/toggle', [WishlistController::class, 'toggle']);
     Route::get('wishlist/{business_id}/status', [WishlistController::class, 'status']);
+
+    // Customer-facing notification inbox (order placed/status-changed,
+    // customer credit due) - see App\Services\Concrete\Admin\NotificationDispatchService.
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::post('notifications/{id}/read', [NotificationController::class, 'markRead']);
+    Route::post('notifications/mark-all-read', [NotificationController::class, 'markAllRead']);
 });

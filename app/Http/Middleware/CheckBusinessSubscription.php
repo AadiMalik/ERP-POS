@@ -57,6 +57,16 @@ class CheckBusinessSubscription
                 ->with('error', 'Business not found.');
         }
 
+        // Business Access Control: covers a session that was already open
+        // when Super Admin disabled ERP access mid-session (login itself is
+        // blocked separately, in LoginController::attemptLogin()).
+        if (!$business->erp_access_enabled) {
+            Auth::logout();
+
+            return redirect()->route('login')
+                ->with('error', 'Your business access has been disabled. Please contact the administrator.');
+        }
+
         $subscription = $this->subscription_service->getCurrentSubscription($business);
         $route_name = $request->route()?->getName();
 

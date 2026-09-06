@@ -2,6 +2,7 @@
 
 return [
     'title' => 'Settings',
+    'superadmin_business_selector_help' => 'As Super Admin, choose a business above to view and update its settings.',
 
     // Tab nav (left sidebar)
     'tab_business' => 'Business',

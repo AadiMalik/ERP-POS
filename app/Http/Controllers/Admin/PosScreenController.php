@@ -23,6 +23,7 @@ use App\Services\Concrete\Admin\ExpenseService;
 use App\Services\Concrete\Admin\OrderSourceService;
 use App\Services\Concrete\Admin\OrderTypeService;
 use App\Services\Concrete\Admin\PaymentMethodService;
+use App\Services\Concrete\Admin\NotificationService;
 use App\Services\Concrete\Admin\PosRegisterSessionService;
 use App\Services\Concrete\Admin\SaleTypeService;
 use App\Services\Concrete\Admin\UserService;
@@ -89,6 +90,7 @@ class PosScreenController extends Controller
     protected $expense_service;
     protected $pos_register_session_service;
     protected $sale_type_service;
+    protected $notification_service;
 
     public function __construct(
         CustomerService $customer_service,
@@ -104,7 +106,8 @@ class PosScreenController extends Controller
         ExpenseCategoryService $expense_category_service,
         ExpenseService $expense_service,
         PosRegisterSessionService $pos_register_session_service,
-        SaleTypeService $sale_type_service
+        SaleTypeService $sale_type_service,
+        NotificationService $notification_service
     ) {
         $this->middleware('permission:pos.access');
 
@@ -122,6 +125,7 @@ class PosScreenController extends Controller
         $this->expense_service = $expense_service;
         $this->pos_register_session_service = $pos_register_session_service;
         $this->sale_type_service = $sale_type_service;
+        $this->notification_service = $notification_service;
     }
 
     /**
@@ -489,5 +493,23 @@ class PosScreenController extends Controller
         } catch (Exception $e) {
             return $this->error($e->getMessage());
         }
+    }
+
+    /**
+     * Website/Mobile order-to-POS notifications only ('order_placed_pos') -
+     * never the ERP's general notification set. This is structural, not a
+     * filter to remember: that type is only ever dispatched to POS
+     * recipients (see NotificationDispatchService::resolvePosRecipients()
+     * and OrderService::recordStatusHistory()), and only when the business's
+     * "Website/Mobile App Order Notification to POS" setting is on.
+     */
+    public function posNotificationsUnreadCount()
+    {
+        return response()->json(['count' => $this->notification_service->unreadCount(Auth::id(), 'order_placed_pos')]);
+    }
+
+    public function posNotificationsLatest()
+    {
+        return response()->json(['data' => $this->notification_service->latest(Auth::id(), 5, 'order_placed_pos')]);
     }
 }

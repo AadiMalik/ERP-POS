@@ -61,6 +61,25 @@
                 <i class="fa fa-receipt"></i>
             </button>
 
+            @can('pos.access')
+                <div class="nav-item navbar-dropdown dropdown-notifications dropdown">
+                    <a class="btn btn-icon btn-sm pos-header-btn dropdown-toggle hide-arrow position-relative" href="javascript:void(0);" data-bs-toggle="dropdown" title="Online Orders">
+                        <i class="fa fa-bell"></i>
+                        <span class="badge bg-danger rounded-pill d-none" id="posNotificationBadge"
+                            style="position:absolute; top:-2px; right:-2px; font-size:.6rem;">0</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" style="width: 340px; max-height: 400px; overflow-y: auto;">
+                        <li>
+                            <div class="dropdown-header py-2 px-3"><h6 class="mb-0">Online Orders</h6></div>
+                        </li>
+                        <li><div class="dropdown-divider"></div></li>
+                        <li id="posNotificationListContainer">
+                            <div class="text-center text-muted py-4">No new orders</div>
+                        </li>
+                    </ul>
+                </div>
+            @endcan
+
             <a href="{{ route('order.history') }}" target="_blank" class="btn btn-sm pos-header-btn" title="History">
                 <i class="fa fa-clock-rotate-left"></i> <span class="pos-header-btn-label">History</span>
             </a>
@@ -120,3 +139,89 @@
         </div>
     </div>
 </nav>
+
+@can('pos.access')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let soundEnabled = {{ session('notification_setting.sound_enabled', true) ? 'true' : 'false' }};
+            let lastUnreadCount = null;
+            const unreadCountUrl = "{{ route('pos-screen.notifications.unread-count') }}";
+            const latestUrl = "{{ route('pos-screen.notifications.latest') }}";
+            const markReadUrlBase = "{{ url('admin/notifications') }}";
+
+            function playPosNotificationBeep() {
+                if (!soundEnabled) return;
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    oscillator.connect(gain);
+                    gain.connect(ctx.destination);
+                    oscillator.start();
+                    oscillator.stop(ctx.currentTime + 0.3);
+                } catch (e) {}
+            }
+
+            function renderPosNotifications(items) {
+                const $container = $('#posNotificationListContainer');
+                if (!items || items.length === 0) {
+                    $container.html('<div class="text-center text-muted py-4">No new orders</div>');
+                    return;
+                }
+                let html = '';
+                items.forEach(function(item) {
+                    const unreadClass = item.is_read ? '' : 'bg-label-primary';
+                    html += '<a href="javascript:void(0);" class="dropdown-item d-flex flex-column py-2 px-3 border-bottom pos-notification-item ' + unreadClass + '" data-id="' + item.id + '" data-url="' + (item.url || '') + '">' +
+                        '<span class="fw-semibold small">' + item.title + '</span>' +
+                        '<span class="small text-muted text-truncate d-block" style="max-width:300px;">' + item.message + '</span>' +
+                        '<span class="small text-muted">' + item.date + '</span>' +
+                        '</a>';
+                });
+                $container.html(html);
+
+                $('.pos-notification-item').off('click').on('click', function() {
+                    const id = $(this).data('id');
+                    const url = $(this).data('url');
+                    $.post(markReadUrlBase + '/' + id + '/read', {
+                        _token: "{{ csrf_token() }}"
+                    }).always(function() {
+                        if (url) {
+                            window.location.href = url;
+                        } else {
+                            refreshPosNotifications();
+                        }
+                    });
+                });
+            }
+
+            function refreshPosNotifications() {
+                $.getJSON(unreadCountUrl, function(res) {
+                    const count = res.count || 0;
+                    const $badge = $('#posNotificationBadge');
+
+                    if (count > 0) {
+                        $badge.text(count > 99 ? '99+' : count).removeClass('d-none');
+                    } else {
+                        $badge.addClass('d-none');
+                    }
+
+                    if (lastUnreadCount !== null && count > lastUnreadCount) {
+                        playPosNotificationBeep();
+                    }
+                    lastUnreadCount = count;
+                });
+
+                $.getJSON(latestUrl, function(res) {
+                    renderPosNotifications(res.data || []);
+                });
+            }
+
+            refreshPosNotifications();
+            setInterval(refreshPosNotifications, 30000);
+        });
+    </script>
+@endcan

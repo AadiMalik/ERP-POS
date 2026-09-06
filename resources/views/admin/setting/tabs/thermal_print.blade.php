@@ -288,7 +288,7 @@
             ajaxRequest({
                 url: '{{ route('thermal_print.preview') }}',
                 method: 'POST',
-                data: new FormData(form),
+                data: buildSettingFormData(form),
                 isFormData: true
             }).then(res => {
                 let frame = document.getElementById('thermalPreviewFrame');

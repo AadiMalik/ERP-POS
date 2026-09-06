@@ -25,10 +25,13 @@ class NotificationController extends Controller
     {
         $types = [
             'low_stock'                 => 'Low Stock',
+            'out_of_stock'               => 'Out of Stock',
+            'new_order'                  => 'New Order',
             'payment_due'                => 'Payment Due',
             'credit_limit'               => 'Credit Limit',
             'supplier_payment_reminder'  => 'Supplier Payment Reminder',
             'order_status'               => 'Order Status',
+            'order_placed_pos'           => 'Online Order (POS)',
             'subscription_expiry'        => 'Subscription Expiry',
         ];
 

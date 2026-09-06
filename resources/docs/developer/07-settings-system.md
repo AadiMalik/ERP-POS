@@ -18,6 +18,19 @@ permission) delegates to `App\Services\Concrete\Admin\SettingService`, which has
 one `updateXxxSetting()` method per domain — `routes/web.php`'s `setting` group
 maps one `POST` route per section to its update method.
 
+Every method (index and every `updateXxxSetting()`) resolves its target
+business via `SettingController::resolveTargetBusinessId(Request $request)`
+rather than reading `Auth::user()->business_id`/`$request->business_id`
+directly: a Super Admin passing `business_id` (query param on `index`, form
+field on every save) targets that business; everyone else is always pinned to
+their own `business_id` regardless of what they send. This is both the
+mechanism behind the Super Admin business-selector dropdown on the Settings
+screen (`resources/views/admin/setting/index.blade.php` - `#settingsBusinessSelect`,
+reloads with `?business_id=`, and every AJAX save picks the same value back up
+via `currentSettingsBusinessId()`/`buildSettingFormData()`) and the fix for a
+pre-existing IDOR where any authenticated user holding `setting.manage` could
+overwrite another tenant's settings by forging `business_id` in the POST body.
+
 ## Settings Consumed Outside the Settings Screen
 
 Most of these rows are read only by `SettingController`/`SettingService`

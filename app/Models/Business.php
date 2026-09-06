@@ -33,6 +33,10 @@ class Business extends Model
         'subscription_end',
         'current_business_subscription_id',
         'grace_period_ends_at',
+        'erp_access_enabled',
+        'storefront_access_enabled',
+        'pos_access_enabled',
+        'offline_pos_access_enabled',
 
         'is_deleted',
         'createdby_id',

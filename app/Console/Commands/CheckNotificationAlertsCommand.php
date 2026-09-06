@@ -69,6 +69,8 @@ class CheckNotificationAlertsCommand extends Command
             'supplier_payment_reminder_enabled' => true,
             'supplier_payment_reminder_days_before' => 3,
             'order_status_alert_enabled' => true,
+            'new_order_alert_enabled' => true,
+            'website_order_notify_pos_enabled' => true,
             'sound_enabled' => true,
         ]);
     }
@@ -98,17 +100,19 @@ class CheckNotificationAlertsCommand extends Command
                     continue;
                 }
 
+                $is_out_of_stock = (float) $stock->quantity <= 0;
+
                 if ($dry_run) {
-                    $this->line("Would alert low stock: {$variation->sku} ({$stock->quantity} <= {$threshold})");
+                    $this->line(($is_out_of_stock ? 'Would alert out of stock: ' : 'Would alert low stock: ') . "{$variation->sku} ({$stock->quantity} <= {$threshold})");
                     continue;
                 }
 
                 $this->dispatcher->dispatch(
-                    'low_stock',
+                    $is_out_of_stock ? 'out_of_stock' : 'low_stock',
                     $business_id,
                     $stock->warehouse->branch_id ?? null,
-                    'Low Stock Alert',
-                    'Stock for "' . ($variation->product->name ?? $variation->sku) . '" (' . $variation->sku . ') is low: ' . $stock->quantity . ' remaining at ' . ($stock->warehouse->name ?? 'warehouse') . '.',
+                    $is_out_of_stock ? 'Out of Stock Alert' : 'Low Stock Alert',
+                    'Stock for "' . ($variation->product->name ?? $variation->sku) . '" (' . $variation->sku . ') is ' . ($is_out_of_stock ? 'out of stock' : 'low') . ': ' . $stock->quantity . ' remaining at ' . ($stock->warehouse->name ?? 'warehouse') . '.',
                     'product_variation_stock',
                     $stock->product_variation_stock_id,
                     route('product.show', $variation->product_id),
@@ -167,6 +171,23 @@ class CheckNotificationAlertsCommand extends Command
                 route('order.show', $order->order_id),
                 ['due_amount' => $due_amount, 'due_date' => $due_date->toDateString()],
                 $today->toDateString()
+            );
+
+            // Customer Credit Due also reaches the customer directly
+            // (Website/Mobile), separate from the business alert above.
+            $this->dispatcher->dispatch(
+                'customer_credit_due',
+                $order->business_id,
+                $order->branch_id,
+                'Payment Due',
+                'Your order #' . $order->daily_order_id . ' has an outstanding balance of ' . number_format($due_amount, 2) . ' due on ' . $due_date->toDateString() . '.',
+                'order',
+                $order->order_id,
+                null,
+                ['due_amount' => $due_amount, 'due_date' => $due_date->toDateString()],
+                $today->toDateString() . '_customer',
+                [],
+                [$order->user_id]
             );
         }
     }
@@ -296,23 +317,9 @@ class CheckNotificationAlertsCommand extends Command
 
             $message = 'Subscription for business expires in ' . $remaining_days . ' day(s) (on ' . Carbon::parse($subscription->end_at)->toDateString() . ').';
 
-            // Two separate dispatches - one per audience - so each gets its
-            // own recipient-appropriate url and neither read state affects
-            // the other (see NotificationDispatchService::defaultRoles()).
-            $this->dispatcher->dispatch(
-                'subscription_expiry',
-                $subscription->business_id,
-                null,
-                'Subscription Expiry Alert',
-                $message,
-                'business_subscription',
-                $subscription->business_subscription_id,
-                route('my-subscription.index'),
-                ['remaining_days' => $remaining_days, 'end_at' => $subscription->end_at],
-                'expiry_alert_business',
-                [RoleNames::BUSINESSADMIN]
-            );
-
+            // Subscription Expiry is Super-Admin-only - the business's own
+            // users are never notified in-app about their own expiry here
+            // (they have My Subscription / CheckBusinessSubscription for that).
             $this->dispatcher->dispatch(
                 'subscription_expiry',
                 $subscription->business_id,

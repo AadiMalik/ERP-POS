@@ -6,6 +6,7 @@ use App\Enums\BarcodeType;
 use App\Enums\EmailProvider;
 use App\Enums\Message;
 use App\Enums\QrDataSource;
+use App\Enums\RoleNames;
 use App\Enums\SMSProvider;
 use App\Enums\WhatsappProvider;
 use App\Http\Controllers\Controller;
@@ -66,8 +67,36 @@ $this->middleware('permission:setting.manage');
         $this->branch_service = $branch_service;
     }
 
+    /**
+     * Which business's settings this request should read/write. Only a
+     * Super Admin may target another business (via the business-selector
+     * dropdown on this screen, or its `business_id` query/POST param) -
+     * every other user is always pinned to their own business_id, closing
+     * an IDOR where any authenticated user with setting.manage could
+     * previously overwrite another tenant's settings by forging
+     * `business_id` in the POST body.
+     *
+     * Super Admin's own `business_id` is null (they belong to no tenant), so
+     * before they've picked anything from the dropdown (first page load, or
+     * any call that doesn't carry `business_id` yet) this falls back to the
+     * first available business rather than crashing/erroring on a null id.
+     */
+    private function resolveTargetBusinessId(Request $request): string
+    {
+        if (getRoleName() === RoleNames::SUPERADMIN) {
+            if ($request->filled('business_id')) {
+                return $request->business_id;
+            }
+
+            return optional($this->business_service->getAll()->first())->business_id ?? '';
+        }
+
+        return Auth::user()->business_id;
+    }
+
     public function index(Request $request)
     {
+        $target_business_id = $this->resolveTargetBusinessId($request);
         $business =  $this->business_service->getAll();
         $thermal_branches = $this->branch_service->getAllActive();
         $thermal_branch_id = $request->query('thermal_branch_id') ?: null;
@@ -75,30 +104,30 @@ $this->middleware('permission:setting.manage');
         // this branch yet" (null) is distinguishable in the view from "this
         // is the business default" (business default is always resolvable).
         $thermal_print_setting = $thermal_branch_id
-            ? $this->setting_service->getBranchThermalPrintSetting(Auth::user()->business_id, $thermal_branch_id)
-            : $this->setting_service->getThermalPrintSetting(Auth::user()->business_id);
+            ? $this->setting_service->getBranchThermalPrintSetting($target_business_id, $thermal_branch_id)
+            : $this->setting_service->getThermalPrintSetting($target_business_id);
         $accounts =  $this->account_service->getAllChild();
-        $business_setting = $this->setting_service->getBusinessSetting(Auth::user()->business_id);
-        $localization_setting = $this->setting_service->getLocalizationSetting(Auth::user()->business_id);
+        $business_setting = $this->setting_service->getBusinessSetting($target_business_id);
+        $localization_setting = $this->setting_service->getLocalizationSetting($target_business_id);
         $languages = config('languages');
-        $accounting_setting = $this->setting_service->getAccountingSetting(Auth::user()->business_id);
-        $customer_setting = $this->setting_service->getCustomerSetting(Auth::user()->business_id);
-        $supplier_setting = $this->setting_service->getSupplierSetting(Auth::user()->business_id);
-        $inventory_setting = $this->setting_service->getInventorySetting(Auth::user()->business_id);
-        $notification_setting = $this->setting_service->getNotificationSetting(Auth::user()->business_id);
-        $email_setting = $this->setting_service->getEmailSetting(Auth::user()->business_id);
-        $sms_setting = $this->setting_service->getSmsSetting(Auth::user()->business_id);
-        $fbr_setting = $this->setting_service->getFbrSetting(Auth::user()->business_id);
-        $whatsapp_setting = $this->setting_service->getWhatsappSetting(Auth::user()->business_id);
-        $firebase_setting = $this->setting_service->getFirebaseSetting(Auth::user()->business_id);
-        $print_setting = $this->setting_service->getPrintSetting(Auth::user()->business_id);
-        $barcode_setting = $this->setting_service->getBarcodeSetting(Auth::user()->business_id);
-        $theme_setting = $this->setting_service->getThemeSetting(Auth::user()->business_id);
-        $website_theme_setting = $this->setting_service->getWebsiteThemeSetting(Auth::user()->business_id);
-        $pos_setting = $this->setting_service->getPosSetting(Auth::user()->business_id);
-        $pra_setting = $this->setting_service->getPraSetting(Auth::user()->business_id);
-        $pos_customers = $this->customer_service->getAllActive(Auth::user()->business_id);
-        $sale_types = $this->sale_type_service->getAll(Auth::user()->business_id);
+        $accounting_setting = $this->setting_service->getAccountingSetting($target_business_id);
+        $customer_setting = $this->setting_service->getCustomerSetting($target_business_id);
+        $supplier_setting = $this->setting_service->getSupplierSetting($target_business_id);
+        $inventory_setting = $this->setting_service->getInventorySetting($target_business_id);
+        $notification_setting = $this->setting_service->getNotificationSetting($target_business_id);
+        $email_setting = $this->setting_service->getEmailSetting($target_business_id);
+        $sms_setting = $this->setting_service->getSmsSetting($target_business_id);
+        $fbr_setting = $this->setting_service->getFbrSetting($target_business_id);
+        $whatsapp_setting = $this->setting_service->getWhatsappSetting($target_business_id);
+        $firebase_setting = $this->setting_service->getFirebaseSetting($target_business_id);
+        $print_setting = $this->setting_service->getPrintSetting($target_business_id);
+        $barcode_setting = $this->setting_service->getBarcodeSetting($target_business_id);
+        $theme_setting = $this->setting_service->getThemeSetting($target_business_id);
+        $website_theme_setting = $this->setting_service->getWebsiteThemeSetting($target_business_id);
+        $pos_setting = $this->setting_service->getPosSetting($target_business_id);
+        $pra_setting = $this->setting_service->getPraSetting($target_business_id);
+        $pos_customers = $this->customer_service->getAllActive($target_business_id);
+        $sale_types = $this->sale_type_service->getAll($target_business_id);
         $theme_presets = config('theme_presets');
         $website_theme_presets = config('website_theme_presets.themes');
         $website_theme_font_pairings = config('website_theme_presets.font_pairings');
@@ -112,6 +141,7 @@ $this->middleware('permission:setting.manage');
         $qr_data_sources = QrDataSource::getOptions();
         return view('admin.setting.index', compact(
             'business',
+            'target_business_id',
             'accounts',
             'business_setting',
             'localization_setting',
@@ -165,7 +195,7 @@ $this->middleware('permission:setting.manage');
         }
 
         $obj = $request->all();
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
         $setting = $this->setting_service->updateLocalizationSetting($obj);
         if ($setting) {
             return $this->success(
@@ -193,7 +223,7 @@ $this->middleware('permission:setting.manage');
         }
 
         $obj = $request->all();
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
         $setting = $this->setting_service->updateBusinessSetting($obj);
         if ($setting) {
             return $this->success(
@@ -260,7 +290,7 @@ $this->middleware('permission:setting.manage');
         }
 
         $obj = $request->all();
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updateAccountingSetting($obj);
 
@@ -298,7 +328,7 @@ $this->middleware('permission:setting.manage');
         $obj = $request->all();
         $obj['enable_credit_limit'] = $request->customer_enable_credit_limit ? 1 : 0;
         $obj['credit_limit'] = $request->customer_credit_limit ?? 0;
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updateCustomerSetting($obj);
 
@@ -325,7 +355,7 @@ $this->middleware('permission:setting.manage');
         $obj = $request->all();
         $obj['enable_credit_limit'] = $request->supplier_enable_credit_limit ? 1 : 0;
         $obj['credit_limit'] = $request->supplier_credit_limit ?? 0;
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updateSupplierSetting($obj);
 
@@ -356,7 +386,7 @@ $this->middleware('permission:setting.manage');
         }
 
         $obj = $request->all();
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updateEmailSetting($obj);
 
@@ -440,7 +470,7 @@ $this->middleware('permission:setting.manage');
         }
 
         $obj = $request->all();
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updateSmsSetting($obj);
 
@@ -471,7 +501,7 @@ $this->middleware('permission:setting.manage');
         }
 
         $obj = $request->all();
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updateWhatsappSetting($obj);
 
@@ -494,7 +524,7 @@ $this->middleware('permission:setting.manage');
             return $this->validationResponse($validate->errors()->first());
         }
 
-        $businessId = $request->business_id ?? Auth::user()->business_id;
+        $businessId = $this->resolveTargetBusinessId($request);
         $existing = $this->setting_service->getFirebaseSetting($businessId);
 
         if (empty($request->private_key) && !$existing->hasPrivateKey()) {
@@ -532,7 +562,7 @@ $this->middleware('permission:setting.manage');
         }
 
         $obj = $request->all();
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updateFbrSetting($obj);
 
@@ -577,7 +607,7 @@ $this->middleware('permission:setting.manage');
         }
 
         $obj = $request->all();
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updatePosSetting($obj);
 
@@ -602,7 +632,7 @@ $this->middleware('permission:setting.manage');
         }
 
         $obj = $request->all();
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updatePraSetting($obj);
 
@@ -638,7 +668,7 @@ $this->middleware('permission:setting.manage');
             'batch_selection_strategy' => $request->batch_selection_strategy ?? 'fefo',
             'near_expiry_days'   => $request->near_expiry_days ?? 30,
         ];
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updateInventorySetting($obj);
 
@@ -672,7 +702,7 @@ $this->middleware('permission:setting.manage');
             'order_status_alert_enabled'             => $request->has('order_status_alert_enabled') ? 1 : 0,
             'sound_enabled'                           => $request->has('sound_enabled') ? 1 : 0,
         ];
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updateNotificationSetting($obj);
 
@@ -709,7 +739,7 @@ $this->middleware('permission:setting.manage');
         ]);
         $obj['enable_barcode'] = $request->has('enable_barcode') ? 1 : 0;
         $obj['enable_qr_code'] = $request->has('enable_qr_code') ? 1 : 0;
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updateBarcodeSetting($obj);
 
@@ -734,7 +764,7 @@ $this->middleware('permission:setting.manage');
         }
 
         $obj = $request->only(['header_config', 'footer_config', 'page_config', 'body_config']);
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updatePrintSetting($obj);
 
@@ -763,7 +793,7 @@ $this->middleware('permission:setting.manage');
 
         $obj = $request->only(['paper_width_mm', 'field_config', 'footer_config']);
         $obj['is_enabled'] = $request->has('is_enabled') ? 1 : 0;
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
         $obj['branch_id'] = $request->branch_id ?: null;
 
         $setting = $this->setting_service->updateThermalPrintSetting($obj);
@@ -791,7 +821,7 @@ $this->middleware('permission:setting.manage');
             return $this->validationResponse($validate->errors()->first());
         }
 
-        $business_id = $request->business_id ?? Auth::user()->business_id;
+        $business_id = $this->resolveTargetBusinessId($request);
 
         // Unsaved config built directly from the posted (not yet saved) form
         // values, so the preview always reflects the current form state -
@@ -930,7 +960,7 @@ $this->middleware('permission:setting.manage');
             'footer_config',
             'content_config',
         ]);
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updateThemeSetting($obj);
 
@@ -950,7 +980,7 @@ $this->middleware('permission:setting.manage');
             return $this->validationResponse($validate->errors()->first());
         }
 
-        $business_id = $request->business_id ?? Auth::user()->business_id;
+        $business_id = $this->resolveTargetBusinessId($request);
         $setting = $this->setting_service->applyThemePreset($business_id, $request->preset);
 
         return $setting
@@ -1002,7 +1032,7 @@ $this->middleware('permission:setting.manage');
             'button_style',
             'typography_style',
         ]);
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updateWebsiteThemeSetting($obj);
 
@@ -1022,7 +1052,7 @@ $this->middleware('permission:setting.manage');
             return $this->validationResponse($validate->errors()->first());
         }
 
-        $business_id = $request->business_id ?? Auth::user()->business_id;
+        $business_id = $this->resolveTargetBusinessId($request);
         $setting = $this->setting_service->applyWebsiteThemePreset($business_id, $request->preset);
 
         return $setting
@@ -1076,7 +1106,7 @@ $this->middleware('permission:setting.manage');
             'bank_swift_code',
             'bank_instructions',
         ]);
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
         $obj['free_delivery_enabled'] = $request->boolean('free_delivery_enabled');
         $obj['free_delivery_min_amount'] = $request->input('free_delivery_min_amount');
 

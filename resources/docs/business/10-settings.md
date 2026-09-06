@@ -55,7 +55,16 @@ All configuration lives under one **Settings** screen, organized into sections
   browser tab on your website; if you leave it empty, the Dukanaz default
   icon is shown instead. Business name, logo, email, phone, and address still
   come from the Business profile screen.
-- **Notification** — which in-app/email alerts you receive.
+- **Notification** — which in-app alerts you receive (Low Stock, New Order,
+  Customer Credit Due, Supplier Payment Due, Order Status Updated), lead times
+  for the due-date alerts, the notification sound on/off, and
+  **"Website/Mobile App Order Notification to POS"** (on by default) — see
+  [Notifications, Activity Log & Security](12-audit-security.md).
 
 Only users with the `Manage Settings` permission can change these — everyone else
 can browse the app but not alter business-wide configuration.
+
+**For the Super Admin only:** a business selector appears above these tabs.
+Pick any business from it to view and update *that* business's settings —
+useful for helping a business configure something without needing their
+login. Every other user only ever sees and edits their own business's settings.

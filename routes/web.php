@@ -196,6 +196,22 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('/', [App\Http\Controllers\Admin\SubscriptionSettingController::class, 'update'])->name('subscription-settings.update');
     });
 
+    //////////////////// Business Access Control (Super Admin) ////////////////////
+    Route::group(['prefix' => 'business-access-control', 'middleware' => ['superadmin']], function () {
+        Route::get('/', [App\Http\Controllers\Admin\BusinessAccessControlController::class, 'index'])->name('business-access-control.index');
+        Route::post('data', [App\Http\Controllers\Admin\BusinessAccessControlController::class, 'getData'])->name('business-access-control-data');
+        Route::post('{business_id}/{platform}', [App\Http\Controllers\Admin\BusinessAccessControlController::class, 'toggle'])
+            ->where('platform', 'erp|storefront|pos|offline-pos')
+            ->name('business-access-control.toggle');
+    });
+
+    //////////////////// System Feature Controls (Super Admin) ////////////////////
+    Route::group(['prefix' => 'system-feature-flags', 'middleware' => ['superadmin']], function () {
+        Route::get('/', [App\Http\Controllers\Admin\SystemFeatureFlagController::class, 'index'])->name('system-feature-flags.index');
+        Route::post('data', [App\Http\Controllers\Admin\SystemFeatureFlagController::class, 'getData'])->name('system-feature-flags-data');
+        Route::post('toggle/{id}', [App\Http\Controllers\Admin\SystemFeatureFlagController::class, 'toggle'])->name('system-feature-flags.toggle');
+    });
+
     //////////////////// Backup, Restore & Disaster Recovery (Super Admin) ////////////////////
     Route::group(['prefix' => 'backups', 'middleware' => ['superadmin']], function () {
         Route::get('/', [App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backups.index');
@@ -1143,7 +1159,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         });
     }); // end module:pos (customer + order reports)
 
-    Route::group(['middleware' => ['module:pos']], function () {
+    Route::group(['middleware' => ['module:pos', 'platform:pos']], function () {
     //pos screen
     Route::group(['middleware' => ['permission:pos.access']], function () {
         Route::get('order-history', [App\Http\Controllers\Admin\OrderController::class, 'history'])->name('order.history');
@@ -1153,6 +1169,8 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('pos-screen/change-context', [App\Http\Controllers\Admin\PosScreenController::class, 'changeContext'])->name('pos-screen.change-context');
         Route::post('pos-screen/quick-customer', [App\Http\Controllers\Admin\PosScreenController::class, 'quickCreateCustomer'])->name('pos-screen.quick-customer');
         Route::post('pos-screen/quick-expense', [App\Http\Controllers\Admin\PosScreenController::class, 'quickCreateExpense'])->name('pos-screen.quick-expense');
+        Route::get('pos-screen/notifications/unread-count', [App\Http\Controllers\Admin\PosScreenController::class, 'posNotificationsUnreadCount'])->name('pos-screen.notifications.unread-count');
+        Route::get('pos-screen/notifications/latest', [App\Http\Controllers\Admin\PosScreenController::class, 'posNotificationsLatest'])->name('pos-screen.notifications.latest');
     });
     }); // end module:pos (pos screen)
 

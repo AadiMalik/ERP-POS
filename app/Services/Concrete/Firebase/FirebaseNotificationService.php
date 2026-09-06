@@ -4,6 +4,7 @@ namespace App\Services\Concrete\Firebase;
 
 use App\Models\FirebaseSetting;
 use App\Models\UserFcmToken;
+use App\Services\Concrete\Admin\SystemFeatureFlagService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -37,6 +38,15 @@ class FirebaseNotificationService
         ?string $image = null,
         array $data = []
     ): array {
+        if (!app(SystemFeatureFlagService::class)->isEnabled('push_notifications')) {
+            return [
+                'success' => false,
+                'response' => null,
+                'error' => 'Push notifications are disabled platform-wide.',
+                'permanent_token_error' => false,
+            ];
+        }
+
         $setting = $this->getActiveSetting($businessId);
 
         if (!$setting) {

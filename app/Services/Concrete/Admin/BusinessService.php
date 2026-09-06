@@ -96,6 +96,67 @@ class BusinessService
             ->make(true);
     }
 
+    // Column name for each Business Access Control platform key.
+    protected const PLATFORM_COLUMN = [
+        'erp' => 'erp_access_enabled',
+        'storefront' => 'storefront_access_enabled',
+        'pos' => 'pos_access_enabled',
+        'offline-pos' => 'offline_pos_access_enabled',
+    ];
+
+    public function getAccessControlData($data)
+    {
+        $datatable = $this->model_business->getModel()::where('is_deleted', 0);
+
+        return DataTables::of($datatable)
+            ->addColumn('erp_access_enabled', function ($item) {
+                return $this->renderAccessToggle($item, 'erp');
+            })
+            ->addColumn('storefront_access_enabled', function ($item) {
+                return $this->renderAccessToggle($item, 'storefront');
+            })
+            ->addColumn('pos_access_enabled', function ($item) {
+                return $this->renderAccessToggle($item, 'pos');
+            })
+            ->addColumn('offline_pos_access_enabled', function ($item) {
+                return $this->renderAccessToggle($item, 'offline-pos');
+            })
+            ->rawColumns(['erp_access_enabled', 'storefront_access_enabled', 'pos_access_enabled', 'offline_pos_access_enabled'])
+            ->make(true);
+    }
+
+    protected function renderAccessToggle($item, string $platform): string
+    {
+        $checked = $item->{self::PLATFORM_COLUMN[$platform]} ? 'checked' : '';
+
+        return '
+            <div class="form-check form-switch mb-0">
+                <input
+                    class="form-check-input togglePlatformAccess"
+                    type="checkbox"
+                    data-id="' . $item->business_id . '/' . $platform . '"
+                    ' . $checked . '>
+            </div>
+        ';
+    }
+
+    public function togglePlatformAccess(string $business_id, string $platform): void
+    {
+        $column = self::PLATFORM_COLUMN[$platform] ?? null;
+
+        if (!$column) {
+            throw new \InvalidArgumentException('Unknown platform: ' . $platform);
+        }
+
+        $business = $this->model_business->find($business_id);
+
+        $this->model_business->update([
+            $column => !$business->{$column},
+            'updatedby_id' => Auth::id(),
+            'date_updated' => now(),
+        ], $business_id);
+    }
+
     public function save($obj)
     {
         return DB::transaction(function () use ($obj) {

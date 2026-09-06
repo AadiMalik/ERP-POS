@@ -33,13 +33,13 @@ Route::prefix('setup')->middleware('throttle:30,1')->group(function () {
     Route::post('register-device', [SetupController::class, 'registerDeviceSetup']);
 });
 
-Route::middleware(['auth:sanctum', 'module:pos', 'module:offline-pos', 'throttle:60,1'])->group(function () {
+Route::middleware(['auth:sanctum', 'module:pos', 'module:offline-pos', 'platform:offline-pos', 'throttle:60,1'])->group(function () {
     Route::get('setup/location-options', [SetupController::class, 'locationOptions']);
     Route::post('device/register', [DeviceController::class, 'register']);
     Route::get('device/info', [DeviceController::class, 'info']);
 });
 
-Route::middleware(['auth:sanctum', 'offline.pos.device', 'module:pos', 'module:offline-pos', 'throttle:120,1'])->group(function () {
+Route::middleware(['auth:sanctum', 'offline.pos.device', 'module:pos', 'module:offline-pos', 'platform:offline-pos', 'throttle:120,1'])->group(function () {
     Route::get('settings/context', [SettingsController::class, 'context']);
 
     Route::get('sync/bootstrap', [SyncController::class, 'bootstrap']);

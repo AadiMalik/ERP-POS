@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Mobile\ContactMessageController;
 use App\Http\Controllers\Api\Mobile\CustomerOrderController;
 use App\Http\Controllers\Api\Mobile\LoyaltyController;
 use App\Http\Controllers\Api\Mobile\NewsletterSubscriberController;
+use App\Http\Controllers\Api\Mobile\NotificationController;
 use App\Http\Controllers\Api\Mobile\PaymentController;
 use App\Http\Controllers\Api\Mobile\ProductController;
 use App\Http\Controllers\Api\Mobile\ProductReviewController;
@@ -54,7 +55,7 @@ Route::prefix('auth')->middleware('throttle:20,1')->group(function () {
     });
 });
 
-Route::middleware('throttle:60,1')->group(function () {
+Route::middleware(['throttle:60,1', 'platform:storefront'])->group(function () {
     Route::get('website-theme/{business_id}', [WebsiteThemeController::class, 'show']);
     Route::get('website-settings/{business_id}', [WebsiteSettingController::class, 'show']);
     Route::get('branches/{business_id}', [BranchController::class, 'index']);
@@ -84,7 +85,7 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::post('orders/{business_id}/track', [CustomerOrderController::class, 'track']);
 });
 
-Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:60,1', 'platform:storefront'])->group(function () {
     Route::post('reviews/{business_id}', [ProductReviewController::class, 'store']);
 
     Route::get('profile/{business_id}', [ProfileController::class, 'show']);
@@ -123,4 +124,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::delete('wishlist/{business_id}', [WishlistController::class, 'destroy']);
     Route::post('wishlist/{business_id}/toggle', [WishlistController::class, 'toggle']);
     Route::get('wishlist/{business_id}/status', [WishlistController::class, 'status']);
+
+    // Customer-facing notification inbox (order placed/status-changed,
+    // customer credit due) - see App\Services\Concrete\Admin\NotificationDispatchService.
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::post('notifications/{id}/read', [NotificationController::class, 'markRead']);
+    Route::post('notifications/mark-all-read', [NotificationController::class, 'markAllRead']);
 });

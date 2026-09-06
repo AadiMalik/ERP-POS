@@ -217,6 +217,20 @@
                     </li>
                 </ul>
             </li>
+            <!-- Business Access Control -->
+            <li class="menu-item">
+                <a href="{{ route('business-access-control.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons fa fa-toggle-on"></i>
+                    <div data-i18n="Business Access Control">{{ __('sidebar.business_access_control') }}</div>
+                </a>
+            </li>
+            <!-- System Feature Controls -->
+            <li class="menu-item">
+                <a href="{{ route('system-feature-flags.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons fa fa-sliders-h"></i>
+                    <div data-i18n="System Feature Controls">{{ __('sidebar.system_feature_flags') }}</div>
+                </a>
+            </li>
             <!-- Dukanaz Intro CMS -->
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">

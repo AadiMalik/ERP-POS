@@ -25,7 +25,9 @@ trait Notifiable
         ?string $referenceId = null,
         ?string $url = null,
         ?array $data = null,
-        ?string $dedupeKey = null
+        ?string $dedupeKey = null,
+        ?array $roles = null,
+        ?array $explicitUserIds = null
     ) {
         try {
             app(NotificationDispatchService::class)->dispatch(
@@ -41,7 +43,9 @@ trait Notifiable
                 // Default dedupe key makes each call unique (order status
                 // changes are event-driven, not periodic) - callers that
                 // need periodic/threshold dedupe pass an explicit key.
-                $dedupeKey ?? generateUuid()
+                $dedupeKey ?? generateUuid(),
+                $roles,
+                $explicitUserIds
             );
         } catch (Throwable $e) {
             // Notification dispatch must never break the primary transaction

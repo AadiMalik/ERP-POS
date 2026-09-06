@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\PaymentGateway;
 use App\Models\PaymentGatewayWebhookLog;
 use App\Models\PaymentTransaction;
+use App\Services\Concrete\Admin\SystemFeatureFlagService;
 use App\Services\PaymentGateways\PaymentGatewayManager;
 use App\Services\PaymentGateways\PaymentGatewayProviderRegistry;
 use App\Services\PaymentGateways\Support\PaymentGatewayResult;
@@ -39,6 +40,10 @@ class PaymentService
 
     public function listAvailableGateways(string $business_id, string $platform, ?string $currency = null): array
     {
+        if (!app(SystemFeatureFlagService::class)->isEnabled('online_payment_gateways')) {
+            return [];
+        }
+
         $column = $platform === 'mobile' ? 'mobile_enabled' : 'website_enabled';
 
         $gateways = PaymentGateway::where('business_id', $business_id)

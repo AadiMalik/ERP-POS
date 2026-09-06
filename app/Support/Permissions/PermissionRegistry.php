@@ -72,6 +72,25 @@ class PermissionRegistry
                 'manage'   => ['name' => 'backup.manage', 'label' => 'Manage Settings', 'is_system' => true],
             ]],
 
+            // Business Access Control: per-business whole-platform on/off
+            // switches (ERP/Storefront/POS/Offline POS). Enforced via
+            // constructor middleware on BusinessAccessControlController, in
+            // addition to the `superadmin` route-group middleware, and via
+            // App\Http\Middleware\EnsurePlatformAccess on the gated routes.
+            'business-access-control' => ['label' => 'Business Access Control', 'actions' => [
+                'view'   => ['name' => 'business-access-control.view', 'label' => 'View', 'is_system' => true],
+                'manage' => ['name' => 'business-access-control.manage', 'label' => 'Manage', 'is_system' => true],
+            ]],
+
+            // System Feature Controls: platform-wide feature/service/
+            // integration flags, independent of per-business Package
+            // module-tier gating. Enforced via constructor middleware on
+            // SystemFeatureFlagController, in addition to `superadmin`.
+            'system-feature-flag' => ['label' => 'System Feature Controls', 'actions' => [
+                'view'   => ['name' => 'system-feature-flag.view', 'label' => 'View', 'is_system' => true],
+                'manage' => ['name' => 'system-feature-flag.manage', 'label' => 'Manage', 'is_system' => true],
+            ]],
+
             // Dukanaz Intro marketing CMS (platform / Super Admin only)
             'intro-module' => ['label' => 'Intro Modules', 'actions' => [
                 'view'   => ['name' => 'intro-module.view', 'label' => 'View', 'is_system' => true],

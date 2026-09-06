@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Enums\RoleNames;
 use App\Http\Controllers\Controller;
+use App\Models\Business;
 use App\Models\LoginHistory;
 use App\Models\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -81,6 +82,36 @@ class LoginController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * AuthenticatesUsers is a trait, not a parent class - `parent::` cannot
+     * reach the trait's own attemptLogin() once it's overridden here, so its
+     * behavior is replicated directly instead (matches
+     * vendor/laravel/ui/auth-backend/AuthenticatesUsers.php). Rejects before
+     * any session is touched when the user's business has ERP access
+     * disabled (Business Access Control) - checked ahead of the actual
+     * credentials attempt so a blocked business never gets a session
+     * regardless of whether the password is correct.
+     */
+    protected function attemptLogin(Request $request)
+    {
+        $user = User::where($this->username(), $request->input($this->username()))->first();
+
+        if ($user && $user->business_id) {
+            // A raw value() read returns the driver's native type (e.g. int
+            // 0/1), not a PHP bool, so this must be a loose falsy check -
+            // `=== false` never matches int(0).
+            $blocked = !Business::where('business_id', $user->business_id)->value('erp_access_enabled');
+
+            if ($blocked) {
+                throw ValidationException::withMessages([
+                    $this->username() => ['Your business access has been disabled. Please contact the administrator.'],
+                ]);
+            }
+        }
+
+        return $this->guard()->attempt($this->credentials($request), $request->boolean('remember'));
     }
 
     /**

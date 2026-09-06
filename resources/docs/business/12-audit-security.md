@@ -2,10 +2,46 @@
 
 ## Notifications
 
-The bell icon shows in-app alerts relevant to you — e.g. low-stock warnings,
-items awaiting your approval, or subscription reminders. Mark individual alerts or
-all of them as read, and control which alerts you receive under
-[Settings](10-settings.md).
+The bell icon shows in-app alerts relevant to you, each with a timestamp, a
+type, and (where relevant) a link straight to the record it's about. Mark
+individual alerts or all of them as read from the bell dropdown, or browse
+your full alert history on the Notifications page. Alerts are always scoped
+to your own business and branch — you never see another business's alerts.
+
+Business-level alerts shown here:
+
+- **Low Stock** / **Out of Stock** — a product's stock has fallen to or below
+  its configured threshold, or reached zero.
+- **New Order** — a new order was placed, from any channel (POS, Website, or
+  Mobile App).
+- **Customer Credit Due** — a customer's credit-based order is approaching or
+  past its due date. The customer sees this too, on the Website/Mobile App
+  (see below) — it isn't only visible to your staff.
+- **Supplier Payment Due** — a supplier invoice is approaching or past its due
+  date.
+- **Order Status Updated** — an order's status changed.
+
+Turn any of these on/off, set alert thresholds/lead times, and enable or
+disable the notification sound under
+[Settings → Notification Settings](10-settings.md). Two additional alerts —
+**Backup Failed** and **Subscription Expiry** — are Super-Admin-only and never
+appear in a business's own notification bell.
+
+### Order Notifications on Website, Mobile App & POS
+
+When a customer places an order through your Website or Mobile App, they get
+an **Order Placed** notification, and again an **Order Status Updated**
+notification whenever you change that order's status — both delivered
+in-app on the Website/Mobile App itself, not here in the ERP.
+
+A setting called **"Website/Mobile App Order Notification to POS"** (in
+Notification Settings, **on by default**) controls whether that same online
+order also raises an alert for the relevant POS register's cashier, so staff
+manning the till notice a new online order immediately. Turn it off if you'd
+rather online orders only surface in the regular Orders list. No other
+general ERP alert (Low Stock, New Order for a walk-in sale, Payment Due,
+etc.) is ever sent to POS or Offline POS — only this one, and only for
+online orders.
 
 Admins can send marketing push notifications to mobile customers under
 **Push Notifications** (Firebase Settings, Templates, Broadcasts). See

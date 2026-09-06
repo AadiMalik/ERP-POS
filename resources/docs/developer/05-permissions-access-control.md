@@ -21,7 +21,8 @@ public static function modules(): array
 }
 ```
 - `is_system = true` is reserved for platform-level, Super-Admin-only actions
-  (raw Permission CRUD, Package, Business, Subscription/Billing). Everything a
+  (raw Permission CRUD, Package, Business, Subscription/Billing,
+  `business-access-control`, `system-feature-flag`). Everything a
   Business Admin should be able to manage defaults to `false`.
 - Permission **names, once shipped, are permanent** — never rename or repurpose one;
   add a new one instead.

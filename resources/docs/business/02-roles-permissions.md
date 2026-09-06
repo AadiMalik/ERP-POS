@@ -18,7 +18,12 @@ Two roles are **global templates** managed by the platform and reset automatical
 whenever the system's permission set changes:
 
 - **Super Admin** — the platform operator. Manages all businesses, packages, and
-  subscriptions. Automatically has every permission in the system.
+  subscriptions. Automatically has every permission in the system, including two
+  platform-only controls no business can see: **Business Access Control**
+  (enabling/disabling a business's access to ERP, Website & Mobile App, POS, or
+  Offline POS — see [The Wider Platform](14-platform-ecosystem.md)) and
+  **System Feature Controls** (platform-wide on/off switches for integrations
+  like push notifications or online payment gateways).
 - **Business Admin** — the owner/top administrator of a single business. Has every
   permission available to a business (everything except platform-level actions like
   managing other businesses or raw permission definitions).

@@ -23,6 +23,21 @@
         <h4 class="fw-bold mb-4">
             {{ __('settings.title') }}
         </h4>
+        @if (getRoleName() === \App\Enums\RoleNames::SUPERADMIN)
+            <div class="card mb-4">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <label class="form-label mb-0" for="settingsBusinessSelect">{{ __('common.business') }}</label>
+                    <select id="settingsBusinessSelect" class="form-select select2" style="max-width:350px;">
+                        @foreach ($business as $item)
+                            <option value="{{ $item->business_id }}" {{ $target_business_id == $item->business_id ? 'selected' : '' }}>
+                                {{ $item->code ?? '' }} {{ $item->name ?? '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted">{{ __('settings.superadmin_business_selector_help') }}</small>
+                </div>
+            </div>
+        @endif
         <div class="card settings-card">
             <div class="card-body">
                 <div class="row">
@@ -187,11 +202,32 @@
             });
         });
 
+        $('#settingsBusinessSelect').on('change', function() {
+            window.location.href = '{{ url('admin/setting') }}?business_id=' + encodeURIComponent($(this).val());
+        });
+
+        // Super Admin only: the business the selector dropdown targets, read
+        // from the query string set on reload (see #settingsBusinessSelect
+        // below) - every save call attaches it so it writes the selected
+        // business, not the Super Admin's own (null) business_id.
+        function currentSettingsBusinessId() {
+            return new URLSearchParams(window.location.search).get('business_id') || '';
+        }
+
+        function buildSettingFormData(formEl) {
+            const fd = new FormData(formEl);
+            const businessId = currentSettingsBusinessId();
+            if (businessId) {
+                fd.set('business_id', businessId);
+            }
+            return fd;
+        }
+
         function saveLocalizationSetting(form) {
             ajaxRequest({
                 url: '{{ route('localization.update') }}',
                 method: 'POST',
-                data: new FormData($(form)[0]),
+                data: buildSettingFormData($(form)[0]),
                 isFormData: true
             }).then(res => {
                 successMessage(res.Message);
@@ -205,7 +241,7 @@
             ajaxRequest({
                 url: url,
                 method: 'POST',
-                data: new FormData($(form)[0]),
+                data: buildSettingFormData($(form)[0]),
                 isFormData: true
             }).then(res => {
                 successMessage(res.Message);
@@ -393,7 +429,7 @@
             ajaxRequest({
                 url: '{{ route('theme.update') }}',
                 method: 'POST',
-                data: new FormData($(form)[0]),
+                data: buildSettingFormData($(form)[0]),
                 isFormData: true
             }).then(res => {
                 successMessage(res.Message);
@@ -414,6 +450,7 @@
                 method: 'POST',
                 data: {
                     preset: presetKey,
+                    business_id: currentSettingsBusinessId(),
                     _token: '{{ csrf_token() }}'
                 }
             }).then(res => {
@@ -474,7 +511,7 @@
             ajaxRequest({
                 url: '{{ route('website_theme.update') }}',
                 method: 'POST',
-                data: new FormData($(form)[0]),
+                data: buildSettingFormData($(form)[0]),
                 isFormData: true
             }).then(res => {
                 successMessage(res.Message);
@@ -490,6 +527,7 @@
                 method: 'POST',
                 data: {
                     preset: presetKey,
+                    business_id: currentSettingsBusinessId(),
                     _token: '{{ csrf_token() }}'
                 }
             }).then(res => {
@@ -512,7 +550,7 @@
             ajaxRequest({
                 url: '{{ route('website_settings.update') }}',
                 method: 'POST',
-                data: new FormData($(form)[0]),
+                data: buildSettingFormData($(form)[0]),
                 isFormData: true
             }).then(res => {
                 successMessage(res.Message);

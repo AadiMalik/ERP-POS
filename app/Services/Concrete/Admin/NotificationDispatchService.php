@@ -5,6 +5,7 @@ namespace App\Services\Concrete\Admin;
 use App\Enums\RoleNames;
 use App\Models\Notification;
 use App\Models\NotificationRecipient;
+use App\Models\PosRegister;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 
@@ -29,7 +30,8 @@ class NotificationDispatchService
         ?string $url,
         ?array $data,
         string $dedupeKey,
-        ?array $roles = null
+        ?array $roles = null,
+        ?array $explicitUserIds = null
     ): ?Notification {
         try {
             $notification = Notification::create([
@@ -54,7 +56,13 @@ class NotificationDispatchService
             return null;
         }
 
-        foreach ($this->resolveRecipients($businessId, $branchId, $roles ?? $this->defaultRoles($type)) as $userId) {
+        // $roles === [] means "no role-based recipients" (explicit-only, e.g.
+        // a customer or POS notification) - only $roles === null falls back
+        // to the type's default business-role audience.
+        $roleRecipients = $roles === [] ? [] : $this->resolveRecipients($businessId, $branchId, $roles ?? $this->defaultRoles($type));
+        $recipients = array_values(array_unique(array_merge($roleRecipients, $explicitUserIds ?? [])));
+
+        foreach ($recipients as $userId) {
             NotificationRecipient::create([
                 'notification_recipient_id' => generateUuid(),
                 'notification_id'           => $notification->notification_id,
@@ -69,11 +77,41 @@ class NotificationDispatchService
 
     protected function defaultRoles(string $type): array
     {
-        // Subscription expiry is dispatched twice by the caller (once per
-        // audience, each with its own url/dedupe_key) - see
-        // CheckNotificationAlertsCommand::checkSubscriptionExpiry(). Every
-        // other alert type reaches Business Admin + Branch Admin.
+        // Every alert type reaches Business Admin + Branch Admin by default.
+        // Super-Admin-only alerts (backup_failed, subscription_expiry) and
+        // customer/POS-only alerts (order_placed, customer_credit_due, ...)
+        // pass an explicit $roles (possibly []) at the call site instead of
+        // relying on this default - see NotificationDispatchService::dispatch().
         return [RoleNames::BUSINESSADMIN, RoleNames::BRANCHADMIN];
+    }
+
+    /**
+     * "The relevant POS" for a Website/Mobile order in a given branch: the
+     * assigned cashier of every active register there, falling back to
+     * branch-scoped users holding pos.access when no register has one
+     * assigned (no "default register per branch" concept exists).
+     */
+    public function resolvePosRecipients(string $businessId, string $branchId): array
+    {
+        $assigned = PosRegister::where('business_id', $businessId)
+            ->where('branch_id', $branchId)
+            ->where('status', 'active')
+            ->where('is_deleted', 0)
+            ->pluck('assigned_user_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (!empty($assigned)) {
+            return $assigned;
+        }
+
+        return User::permission('pos.access')
+            ->where('business_id', $businessId)
+            ->where('branch_id', $branchId)
+            ->pluck('id')
+            ->all();
     }
 
     protected function resolveRecipients(?string $businessId, ?string $branchId, array $roles): array

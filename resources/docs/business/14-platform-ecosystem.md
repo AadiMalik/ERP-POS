@@ -66,3 +66,36 @@ this site represents the platform as a whole, not any one business.
 If something looks wrong on your website or app — a wrong price, an outdated
 banner, a missing product — the fix is almost always made here in the ERP,
 not in the website or app itself.
+
+## Business Access Control (Super Admin only)
+
+The Super Admin can enable or disable your business's access to each
+platform — **ERP**, **Website & Mobile App**, **POS**, and **Offline POS** —
+independently. Every platform is **on by default**; blocking is
+whole-business, applying automatically to every branch and every user, with
+no per-branch or per-user configuration needed or possible.
+
+If a platform is blocked for your business:
+
+- **ERP** — no user from your business can log in; they see "Your business
+  access has been disabled. Please contact the administrator."
+- **Website & Mobile App** — your storefront and app stop working for
+  customers entirely (both together, since they share the same backend).
+- **POS** — the POS screen and all POS operations stop working.
+- **Offline POS** — the offline desktop POS client stops working.
+
+This is separate from your subscription status (suspended/expired) and from
+your subscription package's included modules — it's a direct, platform-level
+switch the Super Admin uses when there's a reason to fully suspend one
+specific channel. If you believe a platform has been blocked in error,
+contact the administrator.
+
+## System Feature Controls (Super Admin only)
+
+Separately, the Super Admin can turn specific platform-wide features,
+services, or third-party integrations on or off across *every* business at
+once — for example, push notifications or online payment gateways, if a
+service needs to be paused platform-wide (e.g. while credentials are
+renewed). This is different from Business Access Control above: it affects
+one integration everywhere, rather than one business's access to a whole
+platform.

@@ -19,6 +19,7 @@ All admin routes sit inside one group requiring `auth`, `check.subscription`,
 | `module:<key>` | `EnsureModuleEnabled` → `FeatureLimitService::hasModule()` → `SubscriptionModuleRegistry` + the tenant's `Business->package->modules` | Whole module umbrellas: `hrm`, `payroll`, `inventory`, `accounting`, `pos`, `service-management` (each independently toggleable per subscription package) |
 | `permission:<name>` | Spatie's permission middleware, backed by `PermissionRegistry` | Individual actions — see [Permissions & Access Control](05-permissions-access-control.md) |
 | `superadmin` | `EnsureSuperAdmin` | Platform-level SaaS billing/subscription admin screens only |
+| `platform:<storefront\|pos\|offline-pos>` | `EnsurePlatformAccess` → the 4 boolean columns on `businesses` | Business Access Control — Super Admin blocking one platform for an entire business, independent of subscription/package. ERP itself is gated separately, at login (`LoginController::attemptLogin()`) and mid-session (`CheckBusinessSubscription`), not via a route middleware. See [Notifications, Alerts & Access Control](23-notifications-alerts.md). |
 
 Core keys (`dashboard`, `permission`, `role`, `package`, `business`, `subscription`,
 `my-subscription`, `setting`, `activity-log`, `login-history`, `notification`,
@@ -133,6 +134,13 @@ Auth OTPs still use the `storefront` email channel (tenant branding). Sanctum
 tokens are named `mobile-auth`. Mobile cart/checkout/wishlist/order/account
 services currently extend the website Api services so behaviour stays identical;
 override only the Mobile subclasses when the app needs different rules.
+
+Because Website and Mobile App share this exact endpoint surface with no
+client-identifying signal, Business Access Control's `platform:storefront`
+middleware necessarily gates them **together** as one switch — there is
+currently no way to block one without the other. Splitting them would require
+both frontends to start sending a client-platform header the backend can key
+off of.
 
 ## Public Intro/Marketing API (`routes/intro.php`)
 

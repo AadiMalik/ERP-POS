@@ -45,6 +45,24 @@ schedule/retention (`backup_settings`, read by the hourly `backups:auto-run`
 command), and a restore flow that always takes an automatic safety backup of
 the current state first.
 
+## Business Access Control & System Feature Controls (Super Admin only)
+`BusinessAccessControlController` (`superadmin` route-group middleware +
+`permission:business-access-control.*` constructor middleware) — prefix
+`admin/business-access-control`. Toggles the 4 boolean columns on `businesses`
+via `BusinessService::togglePlatformAccess()`; enforcement is
+`App\Http\Middleware\EnsurePlatformAccess` (`platform:<key>` route middleware)
+plus the ERP-specific checks in `LoginController::attemptLogin()` and
+`CheckBusinessSubscription`.
+
+`SystemFeatureFlagController` (same `superadmin` + `permission:system-feature-flag.*`
+pattern) — prefix `admin/system-feature-flags`. A standalone, platform-wide
+`system_feature_flags` registry (`SystemFeatureFlagService::isEnabled($key)`,
+fails open for an unregistered key) seeded by `SystemFeatureFlagSeeder`; not
+tied to any business or the Package/module-tier system. See
+[Notifications, Alerts & Access Control](23-notifications-alerts.md) for the
+full design and [Subscription & Module Gating](08-subscription-module-gating.md)
+for how this differs from package gating.
+
 ## Users, Customers & Profile (Core CRM/Identity)
 `UserController`, `CustomerController`, `ProfileController`, `SearchController`
 (global header search — each result group gated by its own module's view
@@ -593,6 +611,13 @@ See [The Documentation System Itself](12-documentation-system.md).
 ## Audit, Security & Notifications (Core)
 `ActivityLogController`, `LoginHistoryController`, `NotificationController` —
 `admin/activity-log`, `admin/login-history`, `admin/notifications`.
+
+`NotificationController` is the ERP bell/history read-side only. Dispatch,
+recipient resolution (including customer and POS recipients), every alert
+type, and the Website/Mobile/POS-facing surfaces
+(`Api\Mobile\NotificationController`, `Api\NotificationController`,
+`PosScreenController::posNotifications*`) are covered in full in
+[Notifications, Alerts & Access Control](23-notifications-alerts.md).
 
 `ActivityLogController@index` sources its Module and Action filter option lists
 by running `ActivityLog::distinct()` on the `module`/`action` columns (cached

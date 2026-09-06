@@ -24,6 +24,7 @@ use App\Models\OrderDetail;
 use App\Models\OrderDetailBatch;
 use App\Models\OrderPayment;
 use App\Models\OrderReturn;
+use App\Models\OrderSource;
 use App\Models\OrderStatusHistory;
 use App\Models\OrderType;
 use App\Models\PaymentMethod;
@@ -2048,22 +2049,108 @@ class OrderService
             $reason ?? ('Order status changed to ' . $to_status)
         );
 
-        $business_id = Auth::user()?->business_id;
+        $order = Order::find($order_id);
+        $business_id = $order->business_id ?? Auth::user()?->business_id;
+        $branch_id = $order->branch_id ?? null;
         $notification_setting = $business_id ? NotificationSetting::where('business_id', $business_id)->first() : null;
 
-        if (!$notification_setting || $notification_setting->order_status_alert_enabled) {
-            $this->notify(
-                'order_status',
-                null,
-                null,
-                'Order Status Updated',
-                $reason ?? ('Order status changed to ' . $to_status),
-                'order',
-                $order_id,
-                route('order.show', $order_id),
-                ['from_status' => $from_status, 'to_status' => $to_status],
-                $to_status
-            );
+        // Website/Mobile orders are the only ones that ever notify a
+        // customer - identified by their order_source code, not the
+        // register/session used (an admin can still place a WEBSITE-sourced
+        // order manually, in which case it's still "a customer order").
+        $source_code = $order ? OrderSource::where('order_source_id', $order->order_source_id)->value('code') : null;
+        $is_customer_order = $order
+            && in_array($source_code, ['WEBSITE', 'MOBILE_APP'], true)
+            && CustomerProfile::where('user_id', $order->user_id)->where('business_id', $business_id)->exists();
+
+        if ($from_status === null) {
+            // Order created.
+            if (!$notification_setting || $notification_setting->new_order_alert_enabled) {
+                $this->notify(
+                    'new_order',
+                    $business_id,
+                    $branch_id,
+                    'New Order',
+                    'New order #' . ($order->daily_order_id ?? $order_id) . ' received.',
+                    'order',
+                    $order_id,
+                    route('order.show', $order_id),
+                    null,
+                    $order_id
+                );
+            }
+
+            if ($is_customer_order) {
+                $this->notify(
+                    'order_placed',
+                    $business_id,
+                    $branch_id,
+                    'Order Placed',
+                    'Your order #' . ($order->daily_order_id ?? $order_id) . ' has been placed.',
+                    'order',
+                    $order_id,
+                    null,
+                    null,
+                    $order_id,
+                    [],
+                    [$order->user_id]
+                );
+
+                if (!$notification_setting || $notification_setting->website_order_notify_pos_enabled) {
+                    $pos_user_ids = $branch_id
+                        ? app(NotificationDispatchService::class)->resolvePosRecipients($business_id, $branch_id)
+                        : [];
+
+                    if (!empty($pos_user_ids)) {
+                        $this->notify(
+                            'order_placed_pos',
+                            $business_id,
+                            $branch_id,
+                            'New Online Order',
+                            'Order #' . ($order->daily_order_id ?? $order_id) . ' received.',
+                            'order',
+                            $order_id,
+                            route('order.show', $order_id),
+                            null,
+                            $order_id . '_pos',
+                            [],
+                            $pos_user_ids
+                        );
+                    }
+                }
+            }
+        } else {
+            if (!$notification_setting || $notification_setting->order_status_alert_enabled) {
+                $this->notify(
+                    'order_status',
+                    $business_id,
+                    $branch_id,
+                    'Order Status Updated',
+                    $reason ?? ('Order status changed to ' . $to_status),
+                    'order',
+                    $order_id,
+                    route('order.show', $order_id),
+                    ['from_status' => $from_status, 'to_status' => $to_status],
+                    $to_status
+                );
+            }
+
+            if ($is_customer_order) {
+                $this->notify(
+                    'order_status_changed',
+                    $business_id,
+                    $branch_id,
+                    'Order Status Updated',
+                    'Your order #' . ($order->daily_order_id ?? $order_id) . ' status changed to ' . $to_status . '.',
+                    'order',
+                    $order_id,
+                    null,
+                    ['from_status' => $from_status, 'to_status' => $to_status],
+                    $to_status . '_customer',
+                    [],
+                    [$order->user_id]
+                );
+            }
         }
     }
 

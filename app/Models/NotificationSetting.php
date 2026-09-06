@@ -18,6 +18,8 @@ class NotificationSetting extends Model
         'supplier_payment_reminder_enabled',
         'supplier_payment_reminder_days_before',
         'order_status_alert_enabled',
+        'new_order_alert_enabled',
+        'website_order_notify_pos_enabled',
         'sound_enabled',
         'createdby_id',
         'updatedby_id',

@@ -63,15 +63,27 @@ class NotificationService
             ->make(true);
     }
 
-    public function unreadCount($user_id)
+    public function unreadCount($user_id, ?string $type = null)
     {
-        return NotificationRecipient::where('user_id', $user_id)->where('is_read', 0)->count();
+        $query = NotificationRecipient::where('user_id', $user_id)->where('is_read', 0);
+
+        if ($type) {
+            $query->whereHas('notification', fn ($q) => $q->where('type', $type));
+        }
+
+        return $query->count();
     }
 
-    public function latest($user_id, $limit = 10)
+    public function latest($user_id, $limit = 10, ?string $type = null)
     {
-        return NotificationRecipient::with('notification')
-            ->where('user_id', $user_id)
+        $query = NotificationRecipient::with('notification')
+            ->where('user_id', $user_id);
+
+        if ($type) {
+            $query->whereHas('notification', fn ($q) => $q->where('type', $type));
+        }
+
+        return $query
             ->orderBy('date_created', 'desc')
             ->limit($limit)
             ->get()

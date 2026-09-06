@@ -73,6 +73,7 @@ class DocumentationService
             ['slug' => 'payment-gateway-framework', 'title' => 'Payment Gateway Framework', 'file' => '20-payment-gateway-framework.md'],
             ['slug' => 'localization', 'title' => 'Localization / Multilingual System', 'file' => '21-localization.md'],
             ['slug' => 'analytics-bi', 'title' => 'Advanced Analytics & Business Intelligence', 'file' => '22-analytics-bi.md'],
+            ['slug' => 'notifications-alerts', 'title' => 'Notifications, Alerts & Access Control', 'file' => '23-notifications-alerts.md'],
         ];
     }
 

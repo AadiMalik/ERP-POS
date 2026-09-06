@@ -24,6 +24,15 @@ belong to a business.
 `BusinessSubscription` (`belongsTo Business, Package`; `hasMany SubscriptionInvoice,
 SubscriptionHistory`).
 
+`businesses` also carries 4 Business Access Control columns —
+`erp_access_enabled`, `storefront_access_enabled`, `pos_access_enabled`,
+`offline_pos_access_enabled` (all boolean, default `true`) — a Super-Admin,
+whole-business platform on/off switch distinct from both the package/module
+tier above and from `system_feature_flags` (a standalone, platform-wide
+key→`is_enabled` registry, not scoped to any business, for toggling system
+features/integrations everywhere at once). See
+[Notifications, Alerts & Access Control](23-notifications-alerts.md).
+
 ## Auth / Roles / Permissions
 
 `users` (Laravel default + `business_id`, `branch_id`, nullable password for

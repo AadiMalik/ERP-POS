@@ -180,3 +180,29 @@ PDFs asynchronously. See [Jobs, Commands & Scheduling](09-jobs-commands.md).
    (see `2026_09_03_070000_backfill_order_reports_offline_pos_bank_reconciliation_modules.php`
    for the pattern) that upserts a row per existing package, inheriting the
    parent's already-synced `is_enabled` state.
+
+## Three Separate Gating Systems — Don't Conflate Them
+
+This file covers only the package/module-tier system above. Two other, unrelated
+gating layers exist and are easy to confuse with it:
+
+1. **Package/module gating** (this file) — per-business, tied to the
+   business's subscribed `Package`/`package_modules`. Answers "does this
+   business's *plan* include this feature?" Middleware: `module:<key>` →
+   `EnsureModuleEnabled` → `FeatureLimitService::hasModule()`.
+2. **Business Access Control** — per-business, tied directly to 4 boolean
+   columns on `businesses` (`erp_access_enabled`, `storefront_access_enabled`,
+   `pos_access_enabled`, `offline_pos_access_enabled`), set only by Super
+   Admin, independent of package/plan. Answers "has Super Admin blocked this
+   business from an entire platform?" Middleware: `platform:<key>` →
+   `EnsurePlatformAccess`. See
+   [Notifications, Alerts & Access Control](23-notifications-alerts.md).
+3. **System Feature Flags** — platform-wide, not scoped to any business at
+   all (`system_feature_flags` table, keyed by `key`). Answers "has Super
+   Admin turned this integration off everywhere?" No middleware — checked
+   inline via `SystemFeatureFlagService::isEnabled($key)` at the specific
+   call sites that opted in (e.g. `FirebaseNotificationService::sendToToken()`).
+
+A route can legitimately carry both `module:` and `platform:` middleware at
+once (see `routes/offline.php`) — they answer different questions and neither
+implies the other.
