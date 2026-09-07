@@ -22,11 +22,11 @@
 
     $due = max(($order->total ?? 0) - ($order->paid_amount ?? 0), 0);
     if ($due <= 0) {
-        $payment_status = \App\Enums\{{ __('common.status') }}::PAID;
+        $payment_status = \App\Enums\Status::PAID;
     } elseif (($order->paid_amount ?? 0) > 0) {
-        $payment_status = \App\Enums\{{ __('common.status') }}::PARTIALLY_PAID;
+        $payment_status = \App\Enums\Status::PARTIALLY_PAID;
     } else {
-        $payment_status = \App\Enums\{{ __('common.status') }}::UNPAID;
+        $payment_status = \App\Enums\Status::UNPAID;
     }
     $payment_status_label = ucwords(str_replace('_', ' ', $payment_status));
 

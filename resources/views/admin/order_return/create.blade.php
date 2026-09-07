@@ -60,7 +60,7 @@
                         <div class="col-md-3 mb-3">
                             <label>Return Number</label>
                             <input type="text" class="form-control" name="order_return_no" readonly
-                                value="{{ $order_return->order_return_no ?? ($order_return_no ?? '{{ __('common.auto_generated') }}') }}">
+                                value="{{ $order_return->order_return_no ?? ($order_return_no ?? __('common.auto_generated')) }}">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>{{ __('order_returns.return_date') }}</label>
@@ -162,7 +162,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <button class="text-end btn btn-primary" id="submitBtn">
-                                {{ isset($order_return) ? 'Update {{ __('order_returns.singular') }}' : 'Save {{ __('order_returns.singular') }}' }}
+                                {{ (isset($order_return) ? 'Update ' : 'Save ') . __('order_returns.singular') }}
                             </button>
                         </div>
                     </div>

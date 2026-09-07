@@ -9,7 +9,7 @@
 --}}
 @extends('layouts.print')
 
-@section('title', '{{ __('orders.sales_summary') }}')
+@section('title', __('orders.sales_summary'))
 
 @section('page_class', 'thermal-page')
 

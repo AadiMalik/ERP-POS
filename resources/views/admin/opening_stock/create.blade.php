@@ -46,7 +46,7 @@
                         <div class="col-md-3 mb-3">
                             <label>{{ __('opening_stock.title') }} No.</label>
                             <input type="text" class="form-control" name="opening_stock_no" readonly
-                                value="{{ $opening_stock->opening_stock_no ?? ($opening_stock_no ?? '{{ __('common.auto_generated') }}') }}">
+                                value="{{ $opening_stock->opening_stock_no ?? ($opening_stock_no ?? __('common.auto_generated')) }}">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>{{ __('common.date') }}</label>
@@ -124,7 +124,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <button class="text-end btn btn-primary" id="submitBtn">
-                                {{ isset($opening_stock) ? 'Update {{ __('opening_stock.title') }}' : 'Save {{ __('opening_stock.title') }}' }}
+                                {{ (isset($opening_stock) ? 'Update ' : 'Save ') . __('opening_stock.title') }}
                             </button>
                         </div>
                     </div>

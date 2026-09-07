@@ -69,7 +69,7 @@
                         <div class="col-md-3 mb-3">
                             <label>{{ __('transfer_notes.singular') }} No.</label>
                             <input type="text" class="form-control" name="transfer_note_no" readonly
-                                value="{{ $transfer_note->transfer_note_no ?? ($transfer_note_no ?? '{{ __('common.auto_generated') }}') }}">
+                                value="{{ $transfer_note->transfer_note_no ?? ($transfer_note_no ?? __('common.auto_generated')) }}">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>{{ __('common.date') }}</label>
@@ -144,7 +144,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <button class="text-end btn btn-primary" id="submitBtn">
-                                {{ isset($transfer_note) ? 'Update {{ __('transfer_notes.singular') }}' : 'Save {{ __('transfer_notes.singular') }}' }}
+                                {{ (isset($transfer_note) ? 'Update ' : 'Save ') . __('transfer_notes.singular') }}
                             </button>
                         </div>
                     </div>

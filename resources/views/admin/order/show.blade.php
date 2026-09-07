@@ -401,7 +401,7 @@
                         @forelse ($order->payments as $index => $payment)
                             <tr>
                                 <td>{{ $index + 1 }}</td>
-                                <td>{{ $payment->payment{{ __('orders.method') }}->name ?? '-' }}</td>
+                                <td>{{ $payment->paymentMethod->name ?? '-' }}</td>
                                 <td>{{ $payment->reference_no ?? '-' }}</td>
                                 <td class="text-end">{{ currency($payment->amount) }}</td>
                             </tr>
@@ -421,7 +421,7 @@
                     <h6 class="mb-0">{{ __('orders.website_payment_receipt') }}</h6>
                     @php
                         $due_for_confirm = max(($order->total ?? 0) - ($order->paid_amount ?? 0), 0);
-                        $is_bank_website = $order->payments->contains(fn ($p) => optional($p->payment{{ __('orders.method') }})->type === 'bank');
+                        $is_bank_website = $order->payments->contains(fn ($p) => optional($p->paymentMethod)->type === 'bank');
                     @endphp
                     @if ($due_for_confirm > 0 && $is_bank_website && !empty($order->payment_proof))
                         <button type="button" class="btn btn-sm btn-success" id="confirmWebsitePaymentBtn"
@@ -461,7 +461,7 @@
         @endif
 
         @php
-            $customer_payments = $order->customer{{ __('orders.payments') }}->sortBy('payment_date')->values();
+            $customer_payments = $order->customerPayments->sortBy('payment_date')->values();
             $running_paid = 0;
         @endphp
         <div class="card mb-4">
@@ -529,7 +529,7 @@
             </div>
         </div>
 
-        @if ($order->order{{ __('orders.returns') }}->isNotEmpty())
+        @if ($order->orderReturns->isNotEmpty())
             <div class="card mb-4">
                 <div class="card-header">
                     <h6 class="mb-0">{{ __('orders.returns') }}</h6>
@@ -546,7 +546,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($order->order{{ __('orders.returns') }} as $order_return)
+                            @foreach ($order->orderReturns as $order_return)
                                 <tr>
                                     <td>{{ $order_return->order_return_no }}</td>
                                     <td>{{ $order_return->order_return_date ? localDate($order_return->order_return_date) : 'N/A' }}</td>

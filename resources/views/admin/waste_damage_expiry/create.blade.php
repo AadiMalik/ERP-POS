@@ -48,7 +48,7 @@
                         <div class="col-md-3 mb-3">
                             <label>{{ __('waste_damage_expiry.reference_no') }}</label>
                             <input type="text" class="form-control" name="reference_no" readonly
-                                value="{{ $waste_damage_expiry->reference_no ?? ($reference_no ?? '{{ __('common.auto_generated') }}') }}">
+                                value="{{ $waste_damage_expiry->reference_no ?? ($reference_no ?? __('common.auto_generated')) }}">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>{{ __('common.date') }}</label>

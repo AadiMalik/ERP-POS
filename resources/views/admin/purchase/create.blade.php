@@ -111,7 +111,7 @@
                         <div class="col-md-3 mb-3">
                             <label>{{ __('purchases.po_number') }}</label>
                             <input type="text" class="form-control" name="purchase_no" readonly
-                                value="{{ $purchase->purchase_no ?? ($purchase_no ?? '{{ __('common.auto_generated') }}') }}">
+                                value="{{ $purchase->purchase_no ?? ($purchase_no ?? __('common.auto_generated')) }}">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>{{ __('purchases.purchase_date') }}</label>
@@ -1201,14 +1201,14 @@
 
         $(document).on('change', '#purchase_request_id', function() {
             let purchase_request_id = $(this).val();
-            reset{{ __('purchases.quotation') }}Select();
+            resetQuotationSelect();
             showSelectPurchaseRequestRow();
             $('#shipping_charge').val(decimal(0));
             calculateGrandTotal();
             if (!purchase_request_id) {
                 return;
             }
-            load{{ __('purchases.quotation') }}sByPurchaseRequest(purchase_request_id);
+            loadQuotationsByPurchaseRequest(purchase_request_id);
 
         });
 
@@ -1216,7 +1216,7 @@
         // RESET QUOTATION SELECT
         // ======================================================
 
-        function reset{{ __('purchases.quotation') }}Select() {
+        function resetQuotationSelect() {
             $('#purchase_request_quotation_id')
                 .html('<option value="">--Select {{ __('purchases.quotation') }}--</option>');
         }
@@ -1235,7 +1235,7 @@
     `);
         }
 
-        function showSelect{{ __('purchases.quotation') }}Row() {
+        function showSelectQuotationRow() {
             $('#productRows').html(`
         <tr id="emptyRow">
             <td colspan="17" class="text-center text-muted">
@@ -1249,7 +1249,7 @@
         // LOAD QUOTATIONS FOR PURCHASE REQUEST
         // ======================================================
 
-        function load{{ __('purchases.quotation') }}sByPurchaseRequest(purchase_request_id) {
+        function loadQuotationsByPurchaseRequest(purchase_request_id) {
             $.ajax({
                 url: url_local +
                     '/admin/purchase-request-quotation/selected-by-purchase-request/' +
@@ -1284,7 +1284,7 @@
                         .html(html)
                         .prop('disabled', false);
                     if (response.Success && response.Data.length) {
-                        showSelect{{ __('purchases.quotation') }}Row();
+                        showSelectQuotationRow();
                     }
                 },
                 error: function() {
@@ -1303,18 +1303,18 @@
         $(document).on('change', '#purchase_request_quotation_id', function() {
             let purchase_request_quotation_id = $(this).val();
             if (!purchase_request_quotation_id) {
-                showSelect{{ __('purchases.quotation') }}Row();
+                showSelectQuotationRow();
                 calculateGrandTotal();
                 return;
             }
-            loadPurchaseRequest{{ __('purchases.quotation') }}Details(purchase_request_quotation_id);
+            loadPurchaseRequestQuotationDetails(purchase_request_quotation_id);
         });
 
         // ======================================================
         // LOAD SELECTED QUOTATION DETAILS
         // ======================================================
 
-        function loadPurchaseRequest{{ __('purchases.quotation') }}Details(purchase_request_quotation_id) {
+        function loadPurchaseRequestQuotationDetails(purchase_request_quotation_id) {
             $.ajax({
                 url: url_local +
                     '/admin/purchase-request-quotation/details/' +

@@ -60,7 +60,7 @@
                         <div class="col-md-3 mb-3">
                             <label>{{ __('good_receipt_notes.grn_number') }}</label>
                             <input type="text" class="form-control" name="good_receipt_note_no" readonly
-                                value="{{ $grn->good_receipt_note_no ?? ($good_receipt_note_no ?? '{{ __('common.auto_generated') }}') }}">
+                                value="{{ $grn->good_receipt_note_no ?? ($good_receipt_note_no ?? __('common.auto_generated')) }}">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>{{ __('good_receipt_notes.grn_date') }}</label>

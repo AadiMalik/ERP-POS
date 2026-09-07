@@ -22,7 +22,7 @@
         'reference' => [
             'Supplier' => $grn->supplier->name ?? 'N/A',
             'Warehouse' => $grn->warehouse->name ?? 'N/A',
-            '{{ __('purchases.purchase_no') }}' => $grn->purchase->purchase_no ?? 'N/A',
+            __('purchases.purchase_no') => $grn->purchase->purchase_no ?? 'N/A',
         ],
         'print_config' => $print_config,
     ])
