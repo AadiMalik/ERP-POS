@@ -57,9 +57,21 @@
     $('body').on('click', '.import-export-export-btn', function () {
         var module = $(this).data('module');
         var params = readContextParams($(this).data('export-params-selector'));
+        var tableKey = $(this).data('datatable-key') || $(this).attr('data-datatable-key');
+        if (!tableKey) {
+            var $table = $(this).closest('.card').find('table.dataTable, table.datatables, table.erp-datatable').first();
+            tableKey = $table.attr('id') || '';
+        }
+        if (tableKey && window.ErpDataTable && window.ErpDataTable.instance(tableKey)) {
+            $.extend(params, window.ErpDataTable.instance(tableKey).exportQuery());
+        }
         var query = Object.keys(params).map(function (name) {
-            return name + '=' + encodeURIComponent(params[name]);
-        });
+            var value = params[name];
+            if (value === undefined || value === null) {
+                return null;
+            }
+            return name + '=' + encodeURIComponent(value);
+        }).filter(Boolean);
 
         var url = url_local + '/admin/' + module + '/export';
         if (query.length) {

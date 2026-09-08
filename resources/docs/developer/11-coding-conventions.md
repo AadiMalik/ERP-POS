@@ -21,8 +21,13 @@ Repository layer.
 
 1. Migration(s) + Model, following the data conventions above.
 2. Service class in `app/Services/Concrete/Admin/**` (or the matching
-   sub-namespace, e.g. `Hrm\`, `Reports\`) with the business logic and a
-   `getData()` method if it needs a DataTable.
+   sub-namespace, e.g. `Hrm\`, `Reports\`) with the business logic. For a new
+   list screen, add an `app/DataTables/FooDataTable.php` definition, register
+  it in `DataTableRegistry`, and render `<x-erp-data-table key="foo" />` on
+  the index view — see
+  [Centralized DataTable System](24-datatable-system.md). Existing unmigrated
+  modules still use a Service `getData()` method; **Customize Table** still
+  attaches automatically as long as the HTML table has an `id`.
 3. Controller in `app/Http/Controllers/Admin/**`, thin, with constructor
    `permission:` middleware on every action (see
    [Permissions & Access Control](05-permissions-access-control.md)).

@@ -48,8 +48,7 @@ class SupplierController extends Controller
 
     public function index()
     {
-        $business = $this->business_service->getAllActive();
-        return view('admin.supplier.index', compact('business'));
+        return view('admin.supplier.index');
     }
     public function getData(Request $request)
     {

@@ -35,6 +35,13 @@ linked to their own ledger account so every purchase, GRN, and payment they're
 involved in rolls up into a single running balance (see the Supplier Ledger and
 Supplier Aging reports under [Reports](09-reports.md)).
 
+The list has **Customize Table** (icon at the top-right of the table): each
+user can show or hide columns and reorder them. Tick which columns to include
+in **Export** (this screen has an Export button). Extra financial columns
+(credit limit, opening balance) require **View Financial Fields**. **Export**
+downloads the ticked columns; it never includes columns your role cannot see.
+Bulk **Import** templates are unchanged.
+
 ## Other Stock Movements
 
 Outside of purchasing, stock can also change through:

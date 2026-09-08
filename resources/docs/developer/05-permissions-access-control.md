@@ -31,6 +31,9 @@ public static function modules(): array
   `namesForModulesExcludingActions($keys, $exclude)`, and `operationalModuleKeys()`
   (the list of business/branch-scoped module keys used to build broad "manager"
   role defaults without hand-listing every permission).
+- Column-level DataTable gates (extra financial fields) use
+  `customer.view-financial` and `supplier.view-financial`. See
+  [Centralized DataTable System](24-datatable-system.md).
 
 ## Role Defaults
 

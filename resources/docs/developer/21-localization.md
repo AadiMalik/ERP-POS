@@ -224,7 +224,9 @@ inputs for the pattern to follow on other forms.
 
 All three are CDN-loaded (`layouts/js.blade.php`/`css.blade.php`), and each ships official
 per-locale language files on the same CDNs already in use — no new dependency:
-- DataTables: `resources/views/admin/partials/datatable.blade.php` uses
+- DataTables: the shared ERP table (`public/assets/js/admin/erp-datatable.js`,
+  chrome strings in `lang/{locale}/datatable.php`)
+  and the legacy `resources/views/admin/partials/datatable.blade.php` both use
   `datatablesLocaleCode()` (`app/Helpers/CommonFunctions.php`) to map our
   `config/languages.php` codes onto DataTables CDN filenames (e.g. `zh-CN` → `zh`,
   `zh-TW` → `zh-HANT`). When the helper returns `null` (English, or a locale with no

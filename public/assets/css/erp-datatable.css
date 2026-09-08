@@ -1,0 +1,41 @@
+.erp-dt-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.erp-dt-customize-btn {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+}
+
+.erp-dt-col-list {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.erp-dt-col-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--bs-border-color, #d9dee3);
+    border-radius: 0.375rem;
+    margin-bottom: 0.4rem;
+    background: var(--bs-body-bg, #fff);
+}
+
+.erp-dt-col-item .erp-dt-col-label {
+    flex: 1;
+}
+
+.erp-dt-col-item .btn {
+    padding: 0.15rem 0.45rem;
+}
+
+.erp-dt-filter-range {
+    display: flex;
+    gap: 0.5rem;
+}

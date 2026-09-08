@@ -31,7 +31,7 @@
         return (el.textContent || '').replace(/\s+/g, '') === '';
     }
 
-    var IGNORE_URL_RE = /select2|global-search|notifications?\/|barcode|heartbeat|sanctum\/csrf|telescope|horizon|_debugbar|livewire\/update/i;
+    var IGNORE_URL_RE = /select2|global-search|notifications?\/|barcode|heartbeat|sanctum\/csrf|telescope|horizon|_debugbar|livewire\/update|datatable\//i;
 
     var ACTIONABLE_SELECTOR = [
         'button.btn',

@@ -5,8 +5,13 @@
 Almost every list screen follows the same shape: `Route::resource(...)` for
 CRUD, plus a sibling `POST .../data` route (feeding a server-side DataTable via the
 Service's `getData()`), and where relevant `status`/`import`/`export` actions.
-Report controllers additionally follow a uniform `index / data / print / pdf /
-export / export-csv` action set (see
+Customers and Suppliers lists use the centralized DataTable engine
+(`POST admin/datatable/{key}/data`). Every listing DataTable (including
+POS Order History) uses `GET`/`POST admin/datatable/{key}/preferences` for
+Customize Table — see
+[Centralized DataTable System](24-datatable-system.md). Other modules still
+use the per-service `getData()` pattern for row data. Report controllers additionally follow
+a uniform `index / data / print / pdf / export / export-csv` action set (see
 [Reports Infrastructure](06-reports-infrastructure.md)).
 
 ## Middleware Gating

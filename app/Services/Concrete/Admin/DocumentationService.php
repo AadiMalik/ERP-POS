@@ -74,6 +74,7 @@ class DocumentationService
             ['slug' => 'localization', 'title' => 'Localization / Multilingual System', 'file' => '21-localization.md'],
             ['slug' => 'analytics-bi', 'title' => 'Advanced Analytics & Business Intelligence', 'file' => '22-analytics-bi.md'],
             ['slug' => 'notifications-alerts', 'title' => 'Notifications, Alerts & Access Control', 'file' => '23-notifications-alerts.md'],
+            ['slug' => 'datatable-system', 'title' => 'Centralized DataTable System', 'file' => '24-datatable-system.md'],
         ];
     }
 

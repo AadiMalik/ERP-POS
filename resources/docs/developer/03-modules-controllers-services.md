@@ -77,6 +77,16 @@ role assignment, global-account reuse by email, and
 opening-balance posting on a brand-new profile) stay identical to a manual
 Add New. The match key is the globally-unique `users.email`.
 
+The Customers **list** uses the centralized DataTable engine
+(`app/DataTables/CustomerDataTable.php`, table key `customers`) via
+`<x-erp-data-table key="customers" />` — see
+[Centralized DataTable System](24-datatable-system.md). Other list screens
+keep `admin.partials.datatable`; **Customize Table** still attaches
+automatically (preferences keyed by the HTML table id). Export ticks in
+Customize appear only when that card has an **Export** button. Legacy
+`CustomerService::getData()` remains for the old `POST admin/customer/data`
+route until nothing else calls it.
+
 Web login / forgot-password lives outside the admin group:
 `App\Http\Controllers\Auth\LoginController`,
 `ForgotPasswordController` (OTP via `OtpService`, not Laravel's password-reset
@@ -348,6 +358,12 @@ lookup). Full architecture, schema, and posting/reversal flow:
 `OpeningStockController`, `StockTakingController`, `TransferNoteController`,
 `SupplierPaymentController`.
 
+The Suppliers **list** uses the centralized DataTable engine
+(`app/DataTables/SupplierDataTable.php`, table key `suppliers`, `moduleKey`
+`inventory`) via `<x-erp-data-table key="suppliers" />` — see
+[Centralized DataTable System](24-datatable-system.md).
+Legacy `SupplierService::getData()` remains for `POST admin/supplier/data`.
+
 ### Transfer Notes (`TransferNoteController` / `TransferNoteService`)
 Inter-branch/inter-warehouse stock transfers follow a controlled 4-state workflow,
 mirroring the Purchase → GRN partial-receiving pattern rather than a one-shot move:
@@ -405,7 +421,11 @@ Setup: `OrderTypeController`, `PaymentMethodController`, `OrderSourceController`
 `CustomerPaymentController` (service: `CustomerPaymentService` — order-targeted
 payments may not exceed remaining due; due/amount are compared at the
 business `decimal_points` scale so amounts that display as equal, e.g.
-Rs 10.61 vs Rs 10.61, are accepted).
+Rs 10.61 vs Rs 10.61, are accepted). POS **Order History**
+(`resources/views/admin/pos/order-history/index.blade.php`, table id
+`order_history_table`) still uses the Yajra `admin.partials.datatable`
+partial; Customize Table attaches in JS. There is no CRUD Export button, so
+Customize has no Export checkboxes.
 
 `CustomerPaymentController` also uses the generic Import/Export system
 (module key `customer-payment`) via `CustomerPaymentImportExportDefinition`,

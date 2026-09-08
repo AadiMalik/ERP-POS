@@ -32,6 +32,7 @@
 <script src="{{ asset('public/assets/js/admin/barcode-scanner.js') }}"></script>
 <script src="{{ asset('public/assets/js/admin/global-search.js') }}"></script>
 <script src="https://cdn.datatables.net/2.3.8/js/dataTables.min.js"></script>
+<script src="{{ asset('public/assets/js/admin/erp-datatable.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 @if (app()->getLocale() !== 'en')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/{{ app()->getLocale() }}.js"></script>
@@ -55,6 +56,8 @@
 
     var url_local = "{{ url('/') }}";
     const CURRENT_YEAR = {{ date('Y') }};
+    window.erpDtI18n = @json(__('datatable'));
+    window.erpDtPageLengths = @json(config('erp_datatables.page_lengths'));
     $('#toggleFilter').on('click', function() {
 
         $('#filterSection').slideToggle(300);

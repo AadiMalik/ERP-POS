@@ -441,6 +441,7 @@ class PermissionRegistry
                 'status' => ['name' => 'supplier.status', 'label' => 'Change Status', 'is_system' => false],
                 'import' => ['name' => 'supplier.import', 'label' => 'Import', 'is_system' => false],
                 'export' => ['name' => 'supplier.export', 'label' => 'Export', 'is_system' => false],
+                'view-financial' => ['name' => 'supplier.view-financial', 'label' => 'View Financial Fields', 'is_system' => false],
             ]],
 
             'customer' => ['label' => 'Customers', 'actions' => [
@@ -451,6 +452,7 @@ class PermissionRegistry
                 'status' => ['name' => 'customer.status', 'label' => 'Change Status', 'is_system' => false],
                 'import' => ['name' => 'customer.import', 'label' => 'Import', 'is_system' => false],
                 'export' => ['name' => 'customer.export', 'label' => 'Export', 'is_system' => false],
+                'view-financial' => ['name' => 'customer.view-financial', 'label' => 'View Financial Fields', 'is_system' => false],
             ]],
 
             'loyalty' => ['label' => 'Loyalty Program', 'actions' => [

@@ -16,12 +16,16 @@
         call after a successful import confirm to refresh this page's
         DataTable, e.g. 'initDataTablecategory_table'. Falls back to a full
         page reload if omitted.
-    Optional: $importExportExportParamsSelector - comma-separated CSS
-        selector list of filter inputs (e.g. '#filter_business_id') read at
-        click-time and appended to the export download link.
+    Optional: $importExportShowExport - when false, the Export button is omitted
+        even if the user has the export permission (e.g. import-only listing).
+        Defaults to true.
+    Optional: $importExportDatatableKey - centralized DataTable registry key
+        (e.g. 'customers'). When set, Export downloads the columns currently
+        showing on that table plus the current filters/search.
 --}}
 @php
     $importExportRouteSegment = $importExportRouteSegment ?? $importExportModule;
+    $importExportShowExport = $importExportShowExport ?? true;
 @endphp
 @can($importExportModule . '.import')
     <button type="button" class="btn btn-outline-primary import-export-import-btn"
@@ -32,10 +36,13 @@
         <i class="fa fa-upload mr-5"></i>{{ __('common.import') }}
     </button>
 @endcan
+@if ($importExportShowExport)
 @can($importExportModule . '.export')
     <a href="javascript:void(0)" class="btn btn-outline-success import-export-export-btn"
         data-module="{{ $importExportRouteSegment }}"
-        data-export-params-selector="{{ $importExportExportParamsSelector ?? '' }}">
+        data-export-params-selector="{{ $importExportExportParamsSelector ?? '' }}"
+        @if (!empty($importExportDatatableKey)) data-datatable-key="{{ $importExportDatatableKey }}" @endif>
         <i class="fa fa-download mr-5"></i>{{ __('common.export') }}
     </a>
 @endcan
+@endif

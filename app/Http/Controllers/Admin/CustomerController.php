@@ -57,8 +57,7 @@ class CustomerController extends Controller
 
     public function index()
     {
-        $business = $this->business_service->getAllActive();
-        return view('admin.customer.index', compact('business'));
+        return view('admin.customer.index');
     }
 
     public function getData(Request $request)

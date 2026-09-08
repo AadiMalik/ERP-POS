@@ -8,6 +8,8 @@ use App\Services\ImportExport\Engine\PreviewBuilderService;
 use App\Services\ImportExport\Engine\SampleFileGeneratorService;
 use App\Services\ImportExport\Support\ImportContext;
 use App\Services\ImportExport\Support\ImportExportAuditService;
+use App\Support\DataTables\DataTableManager;
+use App\Support\DataTables\DataTableRegistry;
 use App\Support\ImportExport\ImportExportModuleRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -80,6 +82,15 @@ trait HandlesImportExport
 
     public function export(Request $request)
     {
+        $tableKey = DataTableRegistry::keyForImportExportModule($this->importExportModuleKey());
+        if ($tableKey) {
+            $request->merge([
+                'export_format' => $request->input('export_format', 'xlsx'),
+            ]);
+
+            return app(DataTableManager::class)->export($tableKey, $request);
+        }
+
         $def = ImportExportModuleRegistry::resolve($this->importExportModuleKey());
         $ctx = ImportContext::fromRequest($request, $this->importExportModuleKey());
 

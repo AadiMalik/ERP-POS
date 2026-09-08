@@ -286,6 +286,14 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     //global header search (each result group is gated by that module's own .view permission, not a separate one)
     Route::get('search/global', [App\Http\Controllers\Admin\SearchController::class, 'globalSearch'])->name('search.global');
 
+    // Centralized ERP DataTable engine (per-table permission is enforced inside
+    // DataTableManager from each definition's permission()/exportPermission()).
+    Route::group(['prefix' => 'datatable'], function () {
+        Route::post('{key}/data', [App\Http\Controllers\Admin\DataTableController::class, 'data'])->name('datatable.data');
+        Route::get('{key}/preferences', [App\Http\Controllers\Admin\DataTableController::class, 'loadPreferences'])->name('datatable.preferences.show');
+        Route::post('{key}/preferences', [App\Http\Controllers\Admin\DataTableController::class, 'savePreferences'])->name('datatable.preferences');
+    });
+
     ////////////////////// HRM & Payroll ///////////////////////////
     Route::group(['middleware' => ['module:hrm']], function () {
     //departments

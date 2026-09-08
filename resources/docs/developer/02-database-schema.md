@@ -1,6 +1,6 @@
 # Database Schema & Relationships
 
-242 migrations, 137 models. See [Architecture & Overview](00-architecture.md) for
+243 migrations, 139 models. See [Architecture & Overview](00-architecture.md) for
 the multi-tenancy convention (`business_id`/`branch_id`, manually filtered, no
 global scope) and the UUID-PK/custom-audit-column convention that applies to every
 table below.
@@ -45,6 +45,13 @@ permissions are global), `model_has_permissions`, `model_has_roles`,
 HasRoles`; `belongsTo Business, Branch`; `hasMany CustomerProfile`; `hasOne
 Employee`); `Role` (extends `Spatie\Permission\Models\Role`, adds `belongsTo
 Business`).
+
+Per-user DataTable layout lives in `datatable_preferences` (one row per
+`user_id` + `table_key`: visible columns, order, sort, page length, export
+columns, last filters). Engine tables use registry keys (`customers`);
+every other listing uses the HTML table id (`warehouse_table`,
+`order_history_table`). See
+[Centralized DataTable System](24-datatable-system.md).
 
 ## Settings (one row per business — a table per domain)
 

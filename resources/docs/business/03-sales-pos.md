@@ -76,7 +76,11 @@ the **Activity Log** with who did it and when.
 
 The **POS Screen** is the main selling interface: search or scan products, add a
 customer (or sell as a walk-in), apply discounts/vouchers, choose a payment method,
-and complete the sale.
+and complete the sale. **Order History** (from the POS header) lists past
+sales in a table: use **Customize Table** (icon at the top-right of that
+list) to show or hide columns, pick a default sort, and choose rows per
+page — your layout is remembered. That screen has no Export button, so
+Customize does not show Export ticks.
 
 **Cart header:** the customer dropdown (with a quick **+** button to add a new
 customer) sits on the same line as the cart title, styled like the Sale Type
@@ -274,6 +278,14 @@ your website are emailed with your business name, logo, and website colors, with
 already be registered as a customer of your business; otherwise they see that
 the email is not registered. Customer payments and any store credit balance are
 tracked per customer, feeding the Customer Ledger and Aging reports.
+
+The Customers list has **Customize Table** (icon at the top-right of the
+table): show or hide columns, change their order, default sort, and rows per
+page. Tick which columns to include in **Export** (that screen has an Export
+button). Your layout is remembered per user. Extra financial columns (opening
+balance, credit days) only appear if your role includes **View Financial
+Fields**. Bulk **Import** is unchanged. **Export** downloads the ticked
+export columns, with the same filters you have applied.
 
 Both the Customers and Customer Payments screens have **Import** and
 **Export** buttons (permission-gated) for bulk work: download a sample
