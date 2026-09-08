@@ -511,7 +511,7 @@ body[data-content-bg="dark"] .erp-page-header {
  * white-card look untouched. */
 .erp-kpi-card--gradient {
     color: #fff;
-    background: linear-gradient(135deg, rgba(var(--erp-kpi-color-rgb, var(--erp-primary-rgb)), 1) 0%, rgba(var(--erp-kpi-color-rgb, var(--erp-primary-rgb)), .78) 100%);
+    background: linear-gradient(135deg, rgba(var(--erp-kpi-color-rgb, var(--erp-primary-rgb)), 1) 0%, rgba(var(--erp-kpi-color-rgb, var(--erp-primary-rgb)), .78) 100%) !important;
     border: none;
 }
 
