@@ -4,6 +4,7 @@ namespace App\Services\Concrete\Api\Offline;
 
 use App\Models\PosDevice;
 use App\Models\User;
+use App\Services\Concrete\Admin\ProductVariationStockService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -36,8 +37,17 @@ class OfflineDeviceService
       $payload['pos_register_id'] ?? null
     );
 
-    if (empty($branch_id) || empty($warehouse_id)) {
-      throw new \Exception('Branch and warehouse are required to register a desktop POS device.');
+    if (empty($branch_id)) {
+      throw new \Exception('Branch is required to register a desktop POS device.');
+    }
+
+    // Stock is combined across every warehouse linked to the branch - the
+    // device no longer picks one. This column stays only as the legacy
+    // "primary warehouse" used for display/reporting, same convention as
+    // Order::warehouse_id (see ProductVariationStockService::getLinkedWarehouseIds()).
+    if (empty($warehouse_id)) {
+      $warehouse_id = app(ProductVariationStockService::class)
+        ->getLinkedWarehouseIds($business_id, $branch_id)[0] ?? null;
     }
 
     $plain_token = Str::random(64);

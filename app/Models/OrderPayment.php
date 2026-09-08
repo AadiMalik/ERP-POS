@@ -16,6 +16,7 @@ class OrderPayment extends Model
         'order_payment_id',
         'order_id',
         'payment_method_id',
+        'bank_id',
         'amount',
         'reference_no',
         'is_deleted',
@@ -31,5 +32,10 @@ class OrderPayment extends Model
     public function paymentMethod()
     {
         return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
+    }
+
+    public function bank()
+    {
+        return $this->belongsTo(Bank::class, 'bank_id');
     }
 }

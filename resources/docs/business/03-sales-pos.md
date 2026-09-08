@@ -130,16 +130,38 @@ consumed which stock. Orders can also be placed on credit — an unpaid or parti
 paid order is tracked against the customer, and later settled via
 **Customer Payments**.
 
+## Bank Accounts & Card/Bank Payments
+
+Set up your business's bank accounts once under **Banks** — each one links to a
+specific account in your Chart of Accounts (so money collected there posts to
+the right ledger account automatically) and can either be linked to one branch
+or left unlinked so every branch can use it.
+
+When a cashier selects **Card** or **Bank** as the payment method in POS, a
+**Bank** dropdown appears (showing only the banks available to the current
+branch) and a bank must be chosen — **the sale cannot be completed without
+it**. This also applies to Split/Multi Pay: any Card or Bank line in a split
+payment needs its own bank selected. The order's payment history and its
+Journal Voucher both record exactly which bank was used, and the **Orders**
+list has a **Bank** filter so you can see every sale that went into a
+particular account.
+
 ## Stock Availability in POS
 
-For every stock-tracked product, the POS screen shows how much is currently
-available at the register's own warehouse — right on the product card for a
-single-variation product, and per variation in the picker when a product has
-more than one. A product that isn't stock-tracked shows no stock figure at
-all (it's treated as unlimited). This figure is always the live warehouse
-quantity, not a cached snapshot — it's refreshed every time products are
-searched/browsed, whenever the Sale Type changes (which re-prices the cart),
-and whenever a held order is resumed.
+There is no warehouse to pick in POS any more. For every stock-tracked
+product, the POS screen shows the **combined stock of every warehouse linked
+to the current branch** (see [Inventory & Warehouses](05-inventory.md#branch-stock-one-branch-multiple-warehouses))
+— right on the product card for a single-variation product, and per variation
+in the picker when a product has more than one. A product that isn't
+stock-tracked shows no stock figure at all (it's treated as unlimited). This
+figure is always live, not a cached snapshot — it's refreshed every time
+products are searched/browsed, whenever the Sale Type changes (which
+re-prices the cart), and whenever a held order is resumed.
+
+Hovering the stock figure shows the breakdown behind it — e.g. Main
+Warehouse: 10, North Warehouse: 5, 3rd Warehouse: 0, Total: 15 — including
+batch/expiry detail for products that track it. It's loaded the moment you
+hover, not upfront, so browsing products never costs an extra wait.
 
 By default, a cashier cannot add more of a product than is currently
 available, and a product already at zero (or negative) stock can't be added
@@ -175,8 +197,11 @@ from — the cashier never has to choose one:
   per business under **Settings → Inventory → Batch Selection Strategy**.
 - If a single sale line needs more than one batch to fully cover the
   quantity, it's automatically split across batches (still FEFO/FIFO order)
+  — possibly across more than one of the branch's linked warehouses too —
   and each batch's contribution is recorded, so a later return can restore
-  the right amount to the right batch.
+  the right amount to the right batch in the right warehouse. The exact
+  warehouse(s)/batch(es) a sale drew from are always visible from the
+  order's **Stock Consumption** detail.
 - **Settings → Inventory → Block Selling Expired Batches** (on by default)
   stops a sale from being fulfilled out of a batch whose expiry date has
   passed. If enough non-expired stock exists across other batches, the sale

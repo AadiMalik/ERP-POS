@@ -930,6 +930,14 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\PaymentMethodController::class, 'status']);
     });
 
+    //bank
+    Route::resource('bank', App\Http\Controllers\Admin\BankController::class)->except(['show']);
+    Route::group(['prefix' => 'bank'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\BankController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\BankController::class, 'status']);
+        Route::get('for-branch', [App\Http\Controllers\Admin\BankController::class, 'forBranch']);
+    });
+
     //order source
     Route::resource('order-source', App\Http\Controllers\Admin\OrderSourceController::class);
     Route::group(['prefix' => 'order-source'], function () {
@@ -1039,6 +1047,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('search-products', [App\Http\Controllers\Admin\OrderController::class, 'searchProducts']);
             Route::get('search-vouchers', [App\Http\Controllers\Admin\OrderController::class, 'searchVouchers']);
             Route::get('available-serials', [App\Http\Controllers\Admin\OrderController::class, 'availableSerials']);
+            Route::get('stock-breakdown', [App\Http\Controllers\Admin\OrderController::class, 'stockBreakdown']);
             Route::get('eligible-vouchers', [App\Http\Controllers\Admin\OrderController::class, 'eligibleVouchers']);
             Route::post('preview-voucher', [App\Http\Controllers\Admin\OrderController::class, 'previewVoucher']);
             Route::get('products-by-category', [App\Http\Controllers\Admin\OrderController::class, 'productsByCategory']);

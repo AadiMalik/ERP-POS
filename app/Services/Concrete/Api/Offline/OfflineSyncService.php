@@ -3,6 +3,7 @@
 namespace App\Services\Concrete\Api\Offline;
 
 use App\Enums\Status;
+use App\Models\Bank;
 use App\Models\Branch;
 use App\Models\BusinessSetting;
 use App\Models\Category;
@@ -61,6 +62,7 @@ class OfflineSyncService
             'order_types' => $this->exportOrderTypes($business_id),
             'order_sources' => $this->exportOrderSources($business_id),
             'payment_methods' => $this->exportPaymentMethods($business_id),
+            'banks' => $this->exportBanks($business_id),
             'sale_types' => $this->exportSaleTypes($business_id),
             'discounts' => $this->exportDiscounts($business_id),
             'categories' => $this->exportCategories($business_id),
@@ -179,13 +181,28 @@ class OfflineSyncService
      * that. Filtering by branch_id here excluded every warehouse with a null
      * branch_id - i.e. the common case - leaving the desktop's warehouse
      * dropdown empty even though registers/orders already reference one.
+     *
+     * `branch_links` (from the branch_warehouses pivot) tells the desktop app
+     * which of its locally-cached warehouses feed the device's current
+     * branch (and in what priority order), so it can combine their stock -
+     * including after an offline branch switch - without a server round-trip.
      */
     protected function exportWarehouses(string $business_id)
     {
         return Warehouse::where('business_id', $business_id)
             ->where('is_deleted', 0)
             ->where('status', Status::ACTIVE)
+            ->with('branches:branch_id')
             ->get()
+            ->map(function (Warehouse $warehouse) {
+                $row = $warehouse->toArray();
+                $row['branch_links'] = $warehouse->branches->map(fn ($b) => [
+                    'branch_id' => $b->branch_id,
+                    'priority' => (int) $b->pivot->priority,
+                ])->values()->all();
+
+                return $row;
+            })
             ->toArray();
     }
 
@@ -264,6 +281,17 @@ class OfflineSyncService
     protected function exportPaymentMethods(string $business_id)
     {
         return PaymentMethod::where('business_id', $business_id)->where('is_deleted', 0)->where('status', Status::ACTIVE)->get()->toArray();
+    }
+
+    /**
+     * Business-wide, like exportPaymentMethods() - a bank's branch_id is
+     * nullable (shared across branches, same convention as warehouses), so
+     * the desktop client filters to the current branch (+ shared) itself,
+     * mirroring BankService::getForBranch() used by the web POS.
+     */
+    protected function exportBanks(string $business_id)
+    {
+        return Bank::where('business_id', $business_id)->where('is_deleted', 0)->where('status', Status::ACTIVE)->get()->toArray();
     }
 
     protected function exportSaleTypes(string $business_id)

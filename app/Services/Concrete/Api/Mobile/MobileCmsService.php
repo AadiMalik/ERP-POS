@@ -58,9 +58,9 @@ class MobileCmsService
         $this->review_service = $review_service;
     }
 
-    public function home(string $business_id)
+    public function home(string $business_id, ?string $branch_id = null)
     {
-        return $this->home_service->build($business_id);
+        return $this->home_service->build($business_id, $branch_id);
     }
 
     public function section(string $business_id, string $type)

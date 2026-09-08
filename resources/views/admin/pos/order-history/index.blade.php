@@ -3,7 +3,7 @@
 @endphp
 @extends('layouts.pos')
 @section('css')
-    <link rel="stylesheet" href="{{ asset('public/assets/css/admin/pos-screen.css') }}">
+    <link rel="stylesheet" href="{{ asset('public/assets/css/admin/pos-screen.css') }}?v={{ @filemtime(public_path('assets/css/admin/pos-screen.css')) }}">
     <style>
         /* Order History is a scrolling page inside the POS's fixed-height
            content wrapper (see layouts/pos.blade.php) - this wrapper owns

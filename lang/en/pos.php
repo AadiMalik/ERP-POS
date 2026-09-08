@@ -130,6 +130,9 @@ return [
     'out_of_stock' => 'Out of stock',
     'product_out_of_stock' => '":name" is out of stock.',
     'only_n_available' => 'Only :qty of ":name" available in stock.',
+    'stock_detail_unavailable' => 'Stock detail is not available right now.',
+    'select_bank' => '-- Select Bank --',
+    'bank_required_for_payment' => 'Please select a bank for the ":method" payment.',
 
     // Session / register toasts
     'unable_check_session' => 'Unable to check register session.',

@@ -189,22 +189,34 @@ resolves the batch to decrement via the return line's linked
 (a return never picks its own batch, it reverses whichever one the original
 receipt used).
 
-**POS Sale → FEFO/FIFO draw-down:** `ProductVariationStockService::pickBatchesForSale()`
-locks and returns the ordered list of batches (with quantity to draw from
-each) needed to cover a line's `base_quantity`, honoring
+**POS Sale → FEFO/FIFO draw-down (branch-wide, not one warehouse):**
+`ProductVariationStockService::pickBatchesForSale()` takes the branch's
+*entire* linked-warehouse list (see "Branch ↔ Multi-Warehouse Stock" below)
+and locks/returns the ordered list of batches (with quantity to draw from
+each, and which of those warehouses each batch lives in) needed to cover a
+line's `base_quantity` — expiry date wins across every linked warehouse
+first, warehouse priority is only a tie-breaker, honoring
 `batch_selection_strategy` and `block_expired_sale`; returns `null` (never a
-partial list) if the tracked batches on hand can't cover it, which
-`OrderService::post()` treats as "insufficient stock" the same as an
-untracked product (unless `allowsNegativeStock()` is on, in which case it
-falls back to a plain aggregate decrement with no batch attributed — a
+partial list) if the tracked batches on hand across all linked warehouses
+can't cover it, which `OrderService::post()` treats as "insufficient stock"
+the same as an untracked product (unless `allowsNegativeStock()` is on, in
+which case it falls back to a plain aggregate decrement against the
+branch's primary warehouse with no batch attributed — a
 `ponytail:`-flagged simplification for a rare edge case). A line drawn from
 a single batch stamps `order_details.product_variation_batch_id` and the
 matching `ProductVariationStockTransaction` directly; a line split across
-multiple batches instead writes one `order_detail_batches` row per batch
-consumed (`order_detail_id`, `product_variation_batch_id`, `quantity`,
+multiple batches (now possibly across warehouses too, since a batch is
+warehouse-scoped 1:1) instead writes one `order_detail_batches` row per
+batch consumed (`order_detail_id`, `product_variation_batch_id`, `quantity`,
 `base_quantity`) and one stock transaction per batch, each carrying its own
-`product_variation_batch_id` — `order_details.product_variation_batch_id`
-stays `null` in that case.
+`warehouse_id`/`product_variation_batch_id` — `order_details.product_variation_batch_id`
+stays `null` in that case. A non-batch-tracked line that spans more than one
+linked warehouse uses the analogous `pickWarehousesForSale()` (priority
+order only, no expiry) and records its split in `order_detail_warehouses`
+instead. Either way, `StockConsumptionViewController` (the order screen's
+"Stock Consumption" button) needs no changes to show the per-warehouse
+breakdown — it already renders one row per `ProductVariationStockTransaction`,
+and each pick now writes its own row with its own `warehouse_id`.
 
 **Sale Return → batch:** `OrderReturnService::applyOrderReturnPosting()`
 restores into `orderDetail.product_variation_batch_id` directly for a
@@ -226,6 +238,99 @@ populates.
 **Not covered (documented gap, not silently dropped):** Transfer Note and
 Stock Taking remain aggregate-only — see the Business docs
 (`resources/docs/business/05-inventory.md`).
+
+### Branch ↔ Multi-Warehouse Stock
+
+A branch is no longer limited to one warehouse. `branch_warehouses` is the
+many-to-many pivot (`branch_id`, `warehouse_id`, `priority`) — `Branch::warehouses()`
+/ `Warehouse::branches()`, managed on the Branch create/edit screen
+(`BranchController` passes `warehouse_ids[]`, `BranchService::syncWarehouses()`
+delete-then-recreates the pivot rows, `priority` = the order the admin picked
+them in). `warehouses.branch_id` (the old one-warehouse-one-branch column,
+`NULL` meaning "shared across every branch") is left in place untouched as a
+legacy/home-branch display field only — it is never read for stock scoping
+any more. A one-time backfill migration
+(`2026_09_08_090001_backfill_branch_warehouses_table.php`) seeded the pivot
+from that old column so no branch lost access to stock it could already
+sell: a warehouse with a branch_id got exactly that link, a `NULL`-branch
+("shared") warehouse got linked to every branch of its business.
+
+`ProductVariationStockService` is the single source of truth every surface
+(admin, POS, website/mobile API, desktop POS sync) must call instead of
+querying `ProductVariationStock`/`ProductVariationBatch` directly:
+
+- `getLinkedWarehouseIds($business_id, $branch_id)` — active, non-deleted
+  warehouse ids linked to a branch, priority-ordered.
+- `getAvailableStockForBranch(...)` / `getAvailableStockForBranchBulk(...)` —
+  combined available stock (non-expired batches only, respecting
+  `block_expired_sale`, and `quantity - reserved_quantity` for non-batch
+  variations) across every linked warehouse. The bulk form takes many
+  variation ids at once (one pair of grouped queries) for listing pages.
+- `getStockBreakdownForBranch(...)` — per-warehouse (and per-batch, when
+  batch-tracked) breakdown, for the "Stock: N" click/hover detail UI. Exposed
+  at `GET /api/v1/products/{business_id}/stock/{product_variation_id}` and
+  the mobile equivalent under `/api/mobile/...`, both `?branch_id=` scoped.
+  The admin/POS equivalent is `OrderService::getStockBreakdown()` (mirrors
+  `resolveBranchContext()` instead of a customer-selected `branch_id`),
+  exposed at `GET admin/order/stock-breakdown` and consumed by
+  `pos-screen.js`'s `wireStockHintHover()` — every "N in stock" hint in the
+  POS product grid/variation picker is hoverable and lazy-fetches this on
+  first hover, cached per variation for the page's lifetime (the branch
+  context can't change without a full reload).
+- `pickBatchesForSale(...)` / `pickWarehousesForSale(...)` — see the FEFO/FIFO
+  section above.
+
+`App\Traits\ValidatesWarehouse::assertBranchHasLinkedWarehouses($business_id, $branch_id)`
+replaces per-order validation of one explicit `warehouse_id` — it just
+asserts the branch has at least one active linked warehouse and returns the
+list. `OrderService::save()`/`post()` use it instead of the old
+`assertValidWarehouse()` (that method and its single-warehouse contract are
+untouched and still used as-is by `ManufacturingPlanService`/`ProductionService`,
+which are a separate, still single-warehouse feature). `order.warehouse_id`
+is kept as a display-only "primary warehouse" field (the branch's
+highest-priority link, or whichever single warehouse a sale actually
+settled into) — the authoritative per-line consumption detail is always
+`order_details.product_variation_batch_id` / `order_detail_batches` /
+`order_detail_warehouses` (new table: `order_detail_id`, `warehouse_id`,
+`quantity`, `base_quantity` — the non-batch-tracked counterpart to
+`order_detail_batches`, populated only when a line spans more than one
+warehouse).
+
+**POS** (`PosScreenController`): the manual warehouse picker is gone
+entirely. Order Taker / POS Manager / Branch Admin still resolve a fixed
+branch from their own user row; a Business Admin (or other business-level
+role) still picks a business+branch via the context picker/session
+(`pos_context_business_id`/`pos_context_branch_id` — `pos_context_warehouse_id`
+no longer exists), but no longer a warehouse. `attachAvailableStock()` /
+`resolveBranchContext()` (renamed from `resolveWarehouseContext()`) resolve
+the branch and call `getAvailableStockForBranchBulk()` for the POS product
+grid's stock figures. `PosRegister.warehouse_id` is kept as a legacy/reporting
+column only — it no longer scopes sellable stock.
+
+**Website/Mobile**: `Api\ProductController` / `Api\Mobile\ProductController`
+listing and detail endpoints already accepted `branch_id`; the detail
+endpoint previously silently ignored it (a pre-existing gap, now fixed) and
+`ProductService::resolveVariationStockSums()` previously summed raw
+`ProductVariationStock.quantity` with a branch-matching bug (excluded
+"shared", `NULL`-branch warehouses instead of including them) — both now
+delegate to `getAvailableStockForBranchBulk()`. `WebsiteCartService` (and its
+`MobileCartService` subclass) resolve a branch the same way, then validate
+every cart line against `getAvailableStockForBranch()` at add/update time
+and again inside `OrderService::post()` at checkout — a cart line that was
+valid when added but went out of stock before checkout is rejected there
+with a clear message, not silently oversold.
+
+**Desktop POS** (`erp-desktop-pos`, a separate Electron app): `Api\Offline\StockController::levels()`
+now returns rows for every warehouse linked to the syncing device's branch
+(`PosDevice.branch_id`) instead of just the register's one warehouse, unless
+the request explicitly passes `?warehouse_id=`. The Electron app's own local
+SQLite/sync-engine/UI side of this (combining those rows into one branch-wide
+figure, dropping its local warehouse selector) is implemented too — see the
+"Desktop POS branch↔multi-warehouse stock (Phase 4)" note further below for
+how it resolves its branch's linked warehouses entirely offline. Full local
+FEFO/batch replication for true offline accuracy (vs. today's simple
+priority-order local draw, corrected authoritatively server-side at sync) is
+still a later phase.
 
 ### Waste / Damage / Expiry
 
@@ -314,6 +419,55 @@ column matches by `users.email` unscoped by business (a customer's
 `business_id` is only the first business that created them), relying on
 `CustomerPaymentService::save()`'s own "no profile for this business" guard
 to reject an email that has no `CustomerProfile` here.
+
+### Banks (`BankController` / `BankService`, module key `bank`)
+
+A branch-scoped Chart-of-Accounts-linked bank master, used to record exactly
+which bank a Card/Bank POS payment landed in. `banks` mirrors Warehouse's
+pre-`branch_warehouses` shape: `business_id`, nullable `branch_id` (`null` =
+shared across every branch of the business, same convention
+`ValidatesWarehouse` uses), `account_id` (FK into `accounts` — reuses
+`AccountService::getChildByBusiness()` for the create/edit form's dropdown,
+the same leaf-account list Customer/Supplier Payment's "Payment Account
+(COA)" field already uses), `name`, `code`, `account_number`. No import/export,
+no `module:*` package-tier gate — registered under the existing `module:pos`
+route group alongside Payment Method.
+
+`BankService::getForBranch($business_id, $branch_id)` (branch-linked OR
+shared, active only) is the single source of truth for "which banks can this
+branch's payments use" — `PosScreenController::index()` calls it once per
+render and bakes the result into `POS_CONFIG.banks`, so POS never needs a
+live AJAX call to populate the dropdown. `BankController::forBranch()` is the
+equivalent AJAX endpoint for the Orders list's Business→Branch→Bank filter
+cascade (Super Admin only; a scoped Business Admin already gets Bank options
+pre-rendered same as every other filter on that page).
+
+**POS payment → Bank flow:** `order_payments.bank_id` and
+`journal_entry_details.bank_id` are additive nullable columns (existing rows
+stay `NULL`). `OrderService::saveLinePayments()` is the authoritative
+enforcement point — any payment whose `PaymentMethod.type` is `card` or
+`bank` must carry a non-empty `bank_id` or the save/post throws
+(`pos-screen.js`'s `findPaymentMissingBank()` mirrors this client-side so the
+Pay button fails fast, but the server check is what actually matters).
+`applyPostedEffects()`'s per-payment debit leg resolves its ledger
+`account_id` from `Bank::find($payment->bank_id)->account_id` when present,
+falling back to the payment method's own `account_id` otherwise (covers
+`cash`/`credit`/`store_credit`/any payment saved before this feature
+existed) — and stamps `bank_id` onto the `JournalEntryDetail` row it creates,
+so the ledger and the Orders list's Bank filter both trace back to the exact
+bank used. The pre-existing "payment method must be mapped to an account"
+guard in `validatePaymentsForPosting()` was loosened to skip a card/bank
+payment that carries a `bank_id` — that payment's account comes from the
+Bank, not the method, so the method itself no longer needs its own
+`account_id` configured.
+
+`pos-screen.js` renders the Bank `<select>` in two places sharing one
+`bankOptionsHtml()`/`requiresBank()` pair: `#singlePaymentBankWrap` (single
+tender, shown/populated in `updateSinglePaymentBankUI()`, called from
+`activatePaymentUI()`) and a `.payment-bank-wrap` row appended per line in
+Multi Pay's `renderPayments()`. Held/draft order resume
+(`loadCartFromDetails()`) round-trips `bank_id` the same way it already did
+`payment_method_id`.
 
 **Register session open — tenant/cashier binding:**
 `PosRegisterSessionService::open()` forces `business_id`, branch-scoped
@@ -460,6 +614,44 @@ thermal-session-summary.blade.php` / `public/assets/css/print-thermal.css`, is
 isolated via `@media print` and sent to the OS print dialog with
 `window.print()` when `paper_width_mm` is synced from the setting above.
 
+**Desktop POS branch↔multi-warehouse stock (Phase 4):** the device no longer
+picks one warehouse — `pos_devices.warehouse_id` / `device_config.warehouse_id`
+are kept only as a legacy "primary warehouse" display value (the branch's
+top-priority linked warehouse), auto-derived server-side via
+`ProductVariationStockService::getLinkedWarehouseIds()` in
+`OfflineDeviceService::register()` when the client omits `warehouse_id`
+(`SetupController::registerDeviceSetup` / `DeviceController::register` both
+accept it as `nullable` now). `OfflineSyncService::exportWarehouses()` and
+`OfflineSetupService::exportLocationOptions()` attach a `branch_links: [{
+branch_id, priority }]` array (from the `branch_warehouses` pivot) to every
+synced warehouse row; the Electron client stores this untouched inside its
+generic `reference_data` JSON-blob cache and resolves "which warehouses feed
+my current branch" entirely offline via
+`electron/sync/localData.js::getLinkedWarehouseIds(branchId)` — this is what
+lets an offline branch switch (`context:switch` IPC handler) immediately
+recompute the linked warehouse set with no server round-trip.
+`pos:search-products` / `pos:get-products-by-category` sum `stock_levels`
+across that warehouse list instead of joining a single `warehouse_id`, and
+`order:complete` decrements them in priority order (simple draw, no local
+batch/expiry data). The server remains authoritative: it re-validates and
+performs the real FEFO/batch allocation (`OrderService::applyPostedEffects()`)
+when the queued sale reaches `/api/offline/orders/complete` during sync, the
+same way `reconcileStockConflicts` already reconciles other drift. Local
+batch/expiry replication for true offline FEFO is a later phase.
+
+**Desktop POS mandatory Bank selection:** `OrderService::saveLinePayments()`
+rejects any card/bank-type payment with no `bank_id` regardless of caller —
+including offline-pushed orders, since `OfflinePushService::pushOrderComplete()`
+runs through the same `OrderService::post()`. Banks are synced to the desktop
+like `payment_methods` (`OfflineSyncService::exportBanks()` → bootstrap-only,
+business-wide since a Bank's `branch_id` is nullable/shared, same convention
+as warehouses) and filtered to "own branch or shared" in the
+`pos:get-bootstrap` IPC handler, mirroring `BankService::getForBranch()`.
+`PosScreen.vue` shows a Bank `<select>` for both single-payment and each
+multi-pay row when the chosen `PaymentMethod.type` is `card`/`bank`
+(`requiresBank()`), blocking `payClicked()` until one is picked — the same
+UX contract as the web POS's `bankOptionsHtml()`/`findPaymentMissingBank()`.
+
 Customer receivable COA:
 `CustomerService::upsertProfile()` (admin Users create/edit and API
 `CustomerAccountService::ensureProfile()` / website signup) attaches
@@ -476,8 +668,10 @@ the same DB transaction — if neither source is valid, posting aborts with
 
 **Stock availability/validation in POS:** `OrderService::searchProducts()`,
 `getProductsByCategory()` and `resolvePrices()` attach `is_track_stock`/
-`available_stock` (current `ProductVariationStock.quantity` at the register's
-warehouse) onto every variation they return, so `pos-screen.js` can show it
+`available_stock` — combined, non-expired stock across every warehouse linked
+to the resolved branch via `ProductVariationStockService::getAvailableStockForBranch()`
+(see the Branch↔Warehouse section above for the `branch_warehouses` pivot and
+FEFO engine) — onto every variation they return, so `pos-screen.js` can show it
 and block a cart quantity beyond it client-side. This is enforced
 server-side in three places, all gated by `allowsNegativeStock()`
 (`InventorySetting.negative_stock` - see

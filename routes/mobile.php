@@ -62,6 +62,7 @@ Route::middleware(['throttle:60,1', 'platform:storefront'])->group(function () {
     Route::get('categories/{business_id}', [CategoryController::class, 'index']);
     Route::get('brands/{business_id}', [BrandController::class, 'index']);
     Route::get('products/{business_id}', [ProductController::class, 'index']);
+    Route::get('products/{business_id}/stock/{product_variation_id}', [ProductController::class, 'stock']);
     Route::get('products/{business_id}/{slug}', [ProductController::class, 'show']);
 
     Route::get('website-home/{business_id}', [WebsiteHomeController::class, 'show']);

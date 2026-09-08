@@ -10,6 +10,7 @@ use App\Enums\SerialStatus;
 use App\Enums\Status;
 use App\Enums\TransactionType;
 use App\Models\AccountingSetting;
+use App\Models\Bank;
 use App\Models\BusinessSetting;
 use App\Models\CustomerPayment;
 use App\Models\CustomerProfile;
@@ -22,6 +23,7 @@ use App\Models\JournalEntryDetail;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\OrderDetailBatch;
+use App\Models\OrderDetailWarehouse;
 use App\Models\OrderPayment;
 use App\Models\OrderReturn;
 use App\Models\OrderSource;
@@ -220,6 +222,12 @@ class OrderService
         if (!empty($obj['payment_method_id'])) {
             $query->whereHas('payments', function ($q) use ($obj) {
                 $q->where('payment_method_id', $obj['payment_method_id']);
+            });
+        }
+
+        if (!empty($obj['bank_id'])) {
+            $query->whereHas('payments', function ($q) use ($obj) {
+                $q->where('bank_id', $obj['bank_id']);
             });
         }
 
@@ -720,9 +728,9 @@ class OrderService
             $available_stock = null;
 
             if ($is_tracked) {
-                $available_stock = $this->getAvailableStock(
+                $available_stock = $this->stock_service->getAvailableStockForBranch(
                     $order->business_id,
-                    $order->warehouse_id,
+                    $order->branch_id,
                     $detail->product_id,
                     $detail->product_variation_id
                 );
@@ -772,6 +780,7 @@ class OrderService
                 'order_payment_id' => $payment->order_payment_id,
                 'payment_method_id' => $payment->payment_method_id,
                 'payment_method_name' => $payment->paymentMethod->name ?? '',
+                'bank_id' => $payment->bank_id,
                 'amount' => $payment->amount,
                 'reference_no' => $payment->reference_no,
             ];
@@ -840,78 +849,59 @@ class OrderService
     }
 
     /**
-     * Current on-hand quantity for one variation at one warehouse - the same
-     * ProductVariationStock.quantity lookup duplicated across this codebase's
-     * stock-consuming services (e.g. TransferNoteService::getAvailableQuantity()).
-     * Unlocked read - callers that need a concurrency-safe value take their
-     * own lockForUpdate() (see post()).
-     */
-    protected function getAvailableStock($business_id, $warehouse_id, $product_id, $product_variation_id): float
-    {
-        if (empty($warehouse_id)) {
-            return 0.0;
-        }
-
-        // Available/free stock excludes whatever Manufacturing Plans have
-        // reserved (reserved_quantity is always 0 for a business that never
-        // enables Manufacturing, so this is a no-op everywhere else).
-        $stock = ProductVariationStock::where('business_id', $business_id)
-            ->where('warehouse_id', $warehouse_id)
-            ->where('product_id', $product_id)
-            ->where('product_variation_id', $product_variation_id)
-            ->first(['quantity', 'reserved_quantity']);
-
-        return (float) ($stock->quantity ?? 0) - (float) ($stock->reserved_quantity ?? 0);
-    }
-
-    /**
-     * Resolves (business_id, warehouse_id) for a POS browse/price request -
+     * Resolves (business_id, branch_id) for a POS browse/price request -
      * mirrors previewVoucher()'s own resolution (register_session_id for the
-     * POS channel, else an explicit warehouse_id/business_id for any other
+     * POS channel, else an explicit branch_id/business_id for any other
      * channel). Lenient by design (never throws): these are read-only
-     * product listing endpoints, so an unresolvable warehouse just means
+     * product listing endpoints, so an unresolvable branch just means
      * available_stock can't be attached, not that the request should fail.
      */
-    protected function resolveWarehouseContext(array $obj): array
+    protected function resolveBranchContext(array $obj): array
     {
         $business_id = $obj['business_id'] ?? Auth::user()->business_id ?? null;
-        $warehouse_id = $obj['warehouse_id'] ?? null;
+        $branch_id = $obj['branch_id'] ?? null;
 
         if (!empty($obj['register_session_id'])) {
             $session = PosRegisterSession::find($obj['register_session_id']);
 
             if ($session) {
                 $business_id = $session->business_id ?? $business_id;
-                $warehouse_id = $session->register->warehouse_id ?? $warehouse_id;
+                $branch_id = $session->branch_id ?? $branch_id;
             }
         }
 
-        return [$business_id, $warehouse_id];
+        return [$business_id, $branch_id];
     }
 
     /**
      * Attaches is_track_stock/available_stock onto each ProductVariation in
-     * the given collection. Tracked-ness comes from `$variation->product`
-     * (already eager-loaded by every caller) by default, or from the
-     * optional $is_tracked_by_product_id map for getProductsByCategory()'s
-     * flattened list - that caller can't set a `product` relation back onto
-     * each variation without creating a circular reference when the
-     * product->productVariations tree is JSON-encoded (variation.product
-     * would re-embed product.product_variations, including itself).
-     * available_stock is left null for a non-tracked product (unlimited, not
-     * a real number) so the POS UI can tell "not tracked" apart from "zero
-     * in stock".
+     * the given collection, where available_stock is the COMBINED
+     * non-expired stock across every warehouse linked to the branch (see
+     * ProductVariationStockService::getAvailableStockForBranchBulk()) - the
+     * same figure the branch's website/mobile/POS storefronts all show.
+     * Tracked-ness comes from `$variation->product` (already eager-loaded by
+     * every caller) by default, or from the optional $is_tracked_by_product_id
+     * map for getProductsByCategory()'s flattened list - that caller can't
+     * set a `product` relation back onto each variation without creating a
+     * circular reference when the product->productVariations tree is
+     * JSON-encoded (variation.product would re-embed product.product_variations,
+     * including itself). available_stock is left null for a non-tracked
+     * product (unlimited, not a real number) so the POS UI can tell "not
+     * tracked" apart from "zero in stock".
      */
-    protected function attachAvailableStock($variations, ?string $business_id, ?string $warehouse_id, ?array $is_tracked_by_product_id = null): void
+    protected function attachAvailableStock($variations, ?string $business_id, ?string $branch_id, ?array $is_tracked_by_product_id = null): void
     {
         if ($variations->isEmpty()) {
             return;
         }
 
-        $stocks = empty($warehouse_id) ? collect() : ProductVariationStock::where('business_id', $business_id)
-            ->where('warehouse_id', $warehouse_id)
-            ->whereIn('product_variation_id', $variations->pluck('product_variation_id'))
-            ->pluck('quantity', 'product_variation_id');
+        $stocks = empty($business_id) || empty($branch_id)
+            ? []
+            : $this->stock_service->getAvailableStockForBranchBulk(
+                $business_id,
+                $branch_id,
+                $variations->pluck('product_variation_id')->all()
+            );
 
         foreach ($variations as $variation) {
             $is_tracked = $is_tracked_by_product_id !== null
@@ -941,24 +931,27 @@ class OrderService
 
                 $business_id = $session->business_id;
                 $branch_id = $session->branch_id;
-                $warehouse_id = $session->register->warehouse_id ?? null;
                 $register_id = $session->pos_register_id;
                 $cashier_id = $session->cashier_id;
-
-                if (empty($warehouse_id)) {
-                    throw new Exception('The selected register is not linked to a warehouse.');
-                }
             } else {
                 $business_id = $obj['business_id'] ?? Auth::user()->business_id ?? null;
                 $branch_id = $obj['branch_id'] ?? null;
-                $warehouse_id = $obj['warehouse_id'] ?? null;
+                $register_id = null;
+                $cashier_id = null;
 
-                if (empty($business_id) || empty($branch_id) || empty($warehouse_id)) {
-                    throw new Exception('business_id, branch_id and warehouse_id are required to create an order for this channel.');
+                if (empty($business_id) || empty($branch_id)) {
+                    throw new Exception('business_id and branch_id are required to create an order for this channel.');
                 }
             }
 
-            $this->assertValidWarehouse($business_id, $branch_id, $warehouse_id);
+            // A sale no longer targets one manually-chosen warehouse - it
+            // draws combined stock from every warehouse linked to the
+            // branch (see applyPostedEffects()). warehouse_id on the order
+            // itself becomes a display-only "primary warehouse" field, set
+            // to the branch's highest-priority link and never trusted from
+            // the client (Website/Mobile/POS all only ever send branch_id).
+            $warehouse_ids = $this->assertBranchHasLinkedWarehouses($business_id, $branch_id);
+            $warehouse_id = $warehouse_ids[0];
 
             // firstOrCreate (not first()) so a business that has never touched
             // POS Settings still gets a sane default row instead of every ??
@@ -1319,7 +1312,7 @@ class OrderService
             $base_quantity = $quantity * $conversion_factor;
 
             if (!$skip_stock_check && $variation->product && $variation->product->is_track_stock) {
-                $available = $this->getAvailableStock($order->business_id, $order->warehouse_id, $variation->product_id, $variation->product_variation_id);
+                $available = $this->stock_service->getAvailableStockForBranch($order->business_id, $order->branch_id, $variation->product_id, $variation->product_variation_id);
 
                 if ($base_quantity > $available) {
                     throw new Exception(sprintf(
@@ -1686,10 +1679,20 @@ class OrderService
                 continue;
             }
 
+            $method = PaymentMethod::find($payment['payment_method_id']);
+
+            // Card/Bank payments must be tied to a specific Bank - the
+            // cashier can't complete the sale without picking one (POS UI
+            // enforces this too, this is the authoritative backend check).
+            if ($method && in_array($method->type, ['card', 'bank'], true) && empty($payment['bank_id'])) {
+                throw new Exception('Please select a bank for the "' . $method->name . '" payment.');
+            }
+
             $this->model_order_payment->create([
                 'order_payment_id' => generateUuid(),
                 'order_id' => $order_id,
                 'payment_method_id' => $payment['payment_method_id'],
+                'bank_id' => $payment['bank_id'] ?? null,
                 'amount' => $payment['amount'],
                 'reference_no' => $payment['reference_no'] ?? null,
                 'is_deleted' => 0,
@@ -1769,7 +1772,7 @@ class OrderService
     {
         $warnings = [];
 
-        if (empty($order->warehouse_id) || $this->allowsNegativeStock($order->business_id)) {
+        if (empty($order->branch_id) || $this->allowsNegativeStock($order->business_id)) {
             return $warnings;
         }
 
@@ -1786,7 +1789,7 @@ class OrderService
                 continue;
             }
 
-            $available = $this->getAvailableStock($order->business_id, $order->warehouse_id, $detail->product_id, $detail->product_variation_id);
+            $available = $this->stock_service->getAvailableStockForBranch($order->business_id, $order->branch_id, $detail->product_id, $detail->product_variation_id);
 
             if ($available <= 0) {
                 $warnings[] = 'Removed "' . ($product->name ?? 'item') . '" - it is no longer in stock.';
@@ -2299,7 +2302,12 @@ class OrderService
                 continue;
             }
 
-            if ($method->type !== 'cash' && empty($method->account_id)) {
+            // A card/bank payment tied to a specific Bank (see
+            // saveLinePayments()'s mandatory-bank check) gets its account
+            // from that Bank instead of the payment method's own - so a
+            // method with no account_id of its own is fine as long as
+            // every such payment carries a bank_id.
+            if ($method->type !== 'cash' && empty($method->account_id) && empty($payment->bank_id)) {
                 throw new Exception('Payment method "' . $method->name . '" is not mapped to an account.');
             }
         }
@@ -2412,8 +2420,17 @@ class OrderService
                 $debit = (float) $payment->amount;
                 $account_id = $accounting_setting->default_store_credit_account_id;
             } else {
+                // Card/Bank (and any other non-cash, non-credit type):
+                // posts to the specific Bank the cashier selected (see
+                // saveLinePayments()'s mandatory-bank-for-card/bank-payments
+                // check) rather than the payment method's own single fixed
+                // account, so the ledger - and the Bank column on the
+                // Orders list - reflects exactly which bank the money went
+                // into. Falls back to the payment method's account for any
+                // payment saved before this feature existed (bank_id null).
                 $debit = (float) $payment->amount;
-                $account_id = $method->account_id;
+                $bank = $payment->bank_id ? Bank::find($payment->bank_id) : null;
+                $account_id = $bank->account_id ?? $method->account_id;
             }
 
             if ($debit <= 0) {
@@ -2424,6 +2441,7 @@ class OrderService
                 'journal_entry_detail_id' => generateUuid(),
                 'journal_entry_id' => $journal_entry->journal_entry_id,
                 'account_id' => $account_id,
+                'bank_id' => $payment->bank_id ?? null,
                 'debit' => $debit,
                 'credit' => 0,
                 'user_id' => in_array($method->type, ['credit', 'store_credit', 'cod'], true) ? $order->user_id : null,
@@ -2519,6 +2537,13 @@ class OrderService
         // overselling when two sales race for the same stock.
         $allow_negative_stock = $this->allowsNegativeStock($order->business_id);
 
+        // The branch's linked warehouses (branch_warehouses pivot),
+        // priority-ordered - combined, non-expired stock across ALL of them
+        // is what this order draws from, not just $order->warehouse_id
+        // (which is now a display-only "primary warehouse" set in save()).
+        $warehouse_ids = $this->assertBranchHasLinkedWarehouses($order->business_id, $order->branch_id);
+        $primary_warehouse_id = $warehouse_ids[0];
+
         if (!$allow_negative_stock) {
             foreach ($order->details as $detail) {
                 $product = $detail->product;
@@ -2527,7 +2552,7 @@ class OrderService
                     continue;
                 }
 
-                $available_qty = $this->getAvailableStock($order->business_id, $order->warehouse_id, $detail->product_id, $detail->product_variation_id);
+                $available_qty = $this->stock_service->getAvailableStockForBranch($order->business_id, $order->branch_id, $detail->product_id, $detail->product_variation_id);
 
                 if ((float) $detail->base_quantity > $available_qty) {
                     throw new Exception('Insufficient stock for "' . ($product->name ?? 'product') . '". Available: ' . $available_qty . ', required: ' . $detail->base_quantity . '.');
@@ -2535,158 +2560,124 @@ class OrderService
             }
         }
 
-        // Per line: snapshot cost, decrement stock, write the stock
+        // Per line: snapshot cost, decrement stock (possibly split across
+        // several of the branch's linked warehouses), write the stock
         // transaction(s), and accumulate the COGS total.
         $total_cost = 0;
         $inventory_setting = InventorySetting::where('business_id', $order->business_id)->first();
+        $order_touched_warehouse_ids = [];
 
         foreach ($order->details as $detail) {
             $variation = $detail->productVariation;
             $is_batch_tracked = $variation && $detail->product && $detail->product->is_track_stock
                 && ($variation->track_batch || $variation->track_expiry);
 
-            $picks = null;
+            $picks = null; // each: ['warehouse_id' => .., 'base_quantity' => .., 'batch' => ProductVariationBatch|null]
 
             if ($is_batch_tracked) {
-                $picks = $this->stock_service->pickBatchesForSale(
+                $batch_picks = $this->stock_service->pickBatchesForSale(
                     $order->business_id,
-                    $order->warehouse_id,
+                    $warehouse_ids,
                     $detail->product_id,
                     $detail->product_variation_id,
                     $detail->base_quantity,
                     $inventory_setting
                 );
 
-                if ($picks === null && !$allow_negative_stock) {
+                if ($batch_picks === null && !$allow_negative_stock) {
                     throw new Exception('Insufficient available (non-expired) batch stock for "' . ($detail->product->name ?? 'product') . '".');
                 }
 
-                // ponytail: negative stock is allowed but no batch combination
-                // covers the line - fall back to the plain aggregate
-                // decrement below rather than picking a batch to force
-                // negative, so the sale still goes through unattributed to
-                // any batch. Revisit if batch-accurate negative-stock sales
-                // are ever needed.
-            }
+                if ($batch_picks !== null) {
+                    $picks = array_map(fn ($p) => ['warehouse_id' => $p['warehouse_id'], 'base_quantity' => $p['base_quantity'], 'batch' => $p['batch']], $batch_picks);
+                }
+            } elseif ($detail->product && $detail->product->is_track_stock) {
+                $picks = $this->stock_service->pickWarehousesForSale(
+                    $order->business_id,
+                    $warehouse_ids,
+                    $detail->product_id,
+                    $detail->product_variation_id,
+                    $detail->base_quantity
+                );
 
-            $stock = ProductVariationStock::where('business_id', $order->business_id)
-                ->where('warehouse_id', $order->warehouse_id)
-                ->where('product_id', $detail->product_id)
-                ->where('product_variation_id', $detail->product_variation_id)
-                ->lockForUpdate()
-                ->first();
-
-            $existing_qty = $stock->quantity ?? 0;
-            $existing_avg = $stock->avg_price ?? 0;
-            $existing_reserved = $stock->reserved_quantity ?? 0;
-            $existing_available = $existing_qty - $existing_reserved;
-
-            // Authoritative check, now that the row is locked - the
-            // earlier pre-check above is only a fast-fail optimization
-            // and can be stale under concurrent checkouts. Still
-            // skipped entirely when this business allows negative
-            // stock, same as the pre-check. Excludes whatever a
-            // Manufacturing Plan has reserved, same as getAvailableStock().
-            if (!$allow_negative_stock && $detail->product && $detail->product->is_track_stock && (float) $detail->base_quantity > (float) $existing_available) {
-                throw new Exception('Insufficient stock for "' . ($detail->product->name ?? 'product') . '". Available: ' . $existing_available . ', required: ' . $detail->base_quantity . '.');
-            }
-
-            $new_qty = $existing_qty - $detail->base_quantity;
-            $line_cost = round($detail->base_quantity * $existing_avg, 3);
-            $total_cost += $line_cost;
-
-            $detail->update(['cost_price' => $existing_avg]);
-
-            if ($variation && $variation->track_serial_number) {
-                $serial_numbers = $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [];
-                $serial_ids = ProductVariationSerialNumber::where('product_variation_id', $detail->product_variation_id)
-                    ->where('warehouse_id', $order->warehouse_id)
-                    ->where('status', SerialStatus::AVAILABLE)
-                    ->whereIn('serial_no', $serial_numbers)
-                    ->pluck('product_variation_serial_number_id')
-                    ->toArray();
-
-                if (count($serial_ids) != count($serial_numbers)) {
-                    throw new Exception('One or more selected serial numbers for "' . ($detail->product->name ?? 'product') . '" are no longer available.');
+                if ($picks === null && !$allow_negative_stock) {
+                    throw new Exception('Insufficient stock for "' . ($detail->product->name ?? 'product') . '".');
                 }
 
-                app(ProductVariationSerialService::class)->allocateForSale(
-                    $serial_ids,
-                    $detail->product_variation_id,
-                    $order->warehouse_id,
-                    $order->order_id,
-                    $detail->order_detail_id,
-                    $order->user_id
-                );
+                if ($picks !== null) {
+                    $picks = array_map(fn ($p) => ['warehouse_id' => $p['warehouse_id'], 'base_quantity' => $p['base_quantity'], 'batch' => null], $picks);
+                }
             }
 
-            if ($stock) {
-                $stock->update(['quantity' => $new_qty]);
-            } else {
-                $stock = ProductVariationStock::create([
-                    'product_variation_stock_id' => generateUuid(),
-                    'business_id' => $order->business_id,
-                    'warehouse_id' => $order->warehouse_id,
-                    'product_id' => $detail->product_id,
-                    'product_variation_id' => $detail->product_variation_id,
-                    'quantity' => $new_qty,
-                    'avg_price' => 0,
-                    'status' => 'active',
-                    'createdby_id' => Auth::id(),
-                    'date_created' => now(),
-                ]);
+            if ($picks === null) {
+                // Untracked product, OR negative stock is allowed and no
+                // combination of linked warehouses/batches covers the line -
+                // draw the whole quantity against the primary warehouse
+                // unattributed to any batch, so the sale still goes through.
+                // ponytail: this is the same "force the primary warehouse
+                // negative" fallback the single-warehouse code always used;
+                // revisit if branch-aware negative-stock sales ever need to
+                // spread the negative across warehouses too.
+                $picks = [['warehouse_id' => $primary_warehouse_id, 'base_quantity' => (float) $detail->base_quantity, 'batch' => null]];
             }
 
-            if (empty($picks)) {
-                ProductVariationStockTransaction::create([
-                    'product_variation_stock_transaction_id' => generateUuid(),
-                    'transaction_date' => now(),
-                    'transaction_type' => TransactionType::SALE,
-                    'business_id' => $order->business_id,
-                    'product_id' => $detail->product_id,
-                    'product_variation_id' => $detail->product_variation_id,
-                    'warehouse_id' => $order->warehouse_id,
-                    'unit_id' => $detail->unit_id,
-                    'product_variation_unit_conversion_id' => $detail->product_variation_unit_conversion_id,
-                    'conversion_factor' => $detail->conversion_factor,
-                    'quantity' => $detail->quantity,
-                    'base_quantity' => $detail->base_quantity,
-                    'unit_price' => $detail->unit_price,
-                    'total_price' => $line_cost,
-                    'quantity_after' => $new_qty,
-                    'avg_price_after' => $existing_avg,
-                    'reference_id' => $order->order_id,
-                    'reference_type' => ReferenceType::SALE,
-                    'remarks' => 'Auto-created on posting of order #' . $order->daily_order_id,
-                    'createdby_id' => Auth::id(),
-                    'date_created' => now(),
-                ]);
+            $line_cost = 0.0;
+            $pick_results = [];
 
-                continue;
-            }
-
-            // FEFO/FIFO draw-down: one stock transaction per batch drawn
-            // from, each stamped with its own batch id. A single-batch
-            // line stamps the batch straight onto order_details; a line
-            // split across batches records the breakdown in
-            // order_detail_batches instead (needed so a later return can
-            // restore the right quantity into the right batch(es)).
-            $single_batch_id = count($picks) === 1 ? $picks[0]['batch']->product_variation_batch_id : null;
-
-            if ($single_batch_id) {
-                $detail->update(['product_variation_batch_id' => $single_batch_id]);
-            }
-
-            $picked_cost_remaining = $line_cost;
-
-            foreach ($picks as $index => $pick) {
+            foreach ($picks as $pick) {
+                $warehouse_id = $pick['warehouse_id'];
                 $pick_base_quantity = (float) $pick['base_quantity'];
-                $pick_quantity = $detail->conversion_factor > 0 ? $pick_base_quantity / $detail->conversion_factor : $pick_base_quantity;
-                $is_last_pick = $index === array_key_last($picks);
-                $pick_cost = $is_last_pick ? $picked_cost_remaining : round($pick_base_quantity * $existing_avg, 3);
-                $picked_cost_remaining -= $pick_cost;
+                $order_touched_warehouse_ids[$warehouse_id] = true;
 
-                $pick['batch']->decrement('quantity', $pick_base_quantity);
+                $stock = ProductVariationStock::where('business_id', $order->business_id)
+                    ->where('warehouse_id', $warehouse_id)
+                    ->where('product_id', $detail->product_id)
+                    ->where('product_variation_id', $detail->product_variation_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                $existing_qty = $stock->quantity ?? 0;
+                $existing_avg = $stock->avg_price ?? 0;
+                $existing_reserved = $stock->reserved_quantity ?? 0;
+                $existing_available = $existing_qty - $existing_reserved;
+
+                // Authoritative check, now that the row is locked - the
+                // earlier pre-check above is only a fast-fail optimization
+                // and can be stale under concurrent checkouts. Still
+                // skipped entirely when this business allows negative
+                // stock, same as the pre-check. Excludes whatever a
+                // Manufacturing Plan has reserved, same as
+                // getAvailableStockForBranch().
+                if (!$allow_negative_stock && $detail->product && $detail->product->is_track_stock && $pick_base_quantity > (float) $existing_available) {
+                    throw new Exception('Insufficient stock for "' . ($detail->product->name ?? 'product') . '" in warehouse "' . ($stock->warehouse->name ?? $warehouse_id) . '".');
+                }
+
+                $new_qty = $existing_qty - $pick_base_quantity;
+                $pick_cost = round($pick_base_quantity * $existing_avg, 3);
+                $line_cost += $pick_cost;
+
+                if ($stock) {
+                    $stock->update(['quantity' => $new_qty]);
+                } else {
+                    $stock = ProductVariationStock::create([
+                        'product_variation_stock_id' => generateUuid(),
+                        'business_id' => $order->business_id,
+                        'warehouse_id' => $warehouse_id,
+                        'product_id' => $detail->product_id,
+                        'product_variation_id' => $detail->product_variation_id,
+                        'quantity' => $new_qty,
+                        'avg_price' => 0,
+                        'status' => 'active',
+                        'createdby_id' => Auth::id(),
+                        'date_created' => now(),
+                    ]);
+                }
+
+                if ($pick['batch']) {
+                    $pick['batch']->decrement('quantity', $pick_base_quantity);
+                }
+
+                $pick_quantity = $detail->conversion_factor > 0 ? $pick_base_quantity / $detail->conversion_factor : $pick_base_quantity;
 
                 ProductVariationStockTransaction::create([
                     'product_variation_stock_transaction_id' => generateUuid(),
@@ -2695,7 +2686,7 @@ class OrderService
                     'business_id' => $order->business_id,
                     'product_id' => $detail->product_id,
                     'product_variation_id' => $detail->product_variation_id,
-                    'warehouse_id' => $order->warehouse_id,
+                    'warehouse_id' => $warehouse_id,
                     'unit_id' => $detail->unit_id,
                     'product_variation_unit_conversion_id' => $detail->product_variation_unit_conversion_id,
                     'conversion_factor' => $detail->conversion_factor,
@@ -2708,23 +2699,99 @@ class OrderService
                     'reference_id' => $order->order_id,
                     'reference_type' => ReferenceType::SALE,
                     'remarks' => 'Auto-created on posting of order #' . $order->daily_order_id,
-                    'product_variation_batch_id' => $pick['batch']->product_variation_batch_id,
+                    'product_variation_batch_id' => $pick['batch']->product_variation_batch_id ?? null,
                     'createdby_id' => Auth::id(),
                     'date_created' => now(),
                 ]);
 
-                if (!$single_batch_id) {
+                $pick_results[] = ['warehouse_id' => $warehouse_id, 'batch' => $pick['batch'], 'quantity' => $pick_quantity, 'base_quantity' => $pick_base_quantity];
+            }
+
+            $total_cost += $line_cost;
+            $detail->update([
+                // Weighted-average cost across every warehouse/batch this
+                // line drew from, so margin reporting stays accurate even
+                // when a line spans more than one avg_price.
+                'cost_price' => (float) $detail->base_quantity > 0 ? round($line_cost / (float) $detail->base_quantity, 4) : 0,
+            ]);
+
+            if ($variation && $variation->track_serial_number) {
+                // Serial-number allocation isn't branch/multi-warehouse
+                // split (a serial is a single physical unit, not a
+                // quantity) - it's allocated from whichever warehouse this
+                // line's first pick drew from.
+                $serial_warehouse_id = $pick_results[0]['warehouse_id'];
+                $serial_numbers = $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [];
+                $serial_ids = ProductVariationSerialNumber::where('product_variation_id', $detail->product_variation_id)
+                    ->where('warehouse_id', $serial_warehouse_id)
+                    ->where('status', SerialStatus::AVAILABLE)
+                    ->whereIn('serial_no', $serial_numbers)
+                    ->pluck('product_variation_serial_number_id')
+                    ->toArray();
+
+                if (count($serial_ids) != count($serial_numbers)) {
+                    throw new Exception('One or more selected serial numbers for "' . ($detail->product->name ?? 'product') . '" are no longer available.');
+                }
+
+                app(ProductVariationSerialService::class)->allocateForSale(
+                    $serial_ids,
+                    $detail->product_variation_id,
+                    $serial_warehouse_id,
+                    $order->order_id,
+                    $detail->order_detail_id,
+                    $order->user_id
+                );
+            }
+
+            // Batch-tracked: a single pick stamps the batch straight onto
+            // order_details (unchanged fast path); a line split across
+            // batches - now possibly across warehouses too, since a batch is
+            // warehouse-scoped 1:1 - records the breakdown in
+            // order_detail_batches instead, which a return already knows how
+            // to restore into the correct warehouse+batch.
+            if ($is_batch_tracked && count($pick_results) === 1 && $pick_results[0]['batch']) {
+                $detail->update(['product_variation_batch_id' => $pick_results[0]['batch']->product_variation_batch_id]);
+            } elseif ($is_batch_tracked) {
+                foreach ($pick_results as $result) {
+                    if (!$result['batch']) {
+                        continue;
+                    }
+
                     OrderDetailBatch::create([
                         'order_detail_batch_id' => generateUuid(),
                         'order_detail_id' => $detail->order_detail_id,
-                        'product_variation_batch_id' => $pick['batch']->product_variation_batch_id,
-                        'quantity' => $pick_quantity,
-                        'base_quantity' => $pick_base_quantity,
+                        'product_variation_batch_id' => $result['batch']->product_variation_batch_id,
+                        'quantity' => $result['quantity'],
+                        'base_quantity' => $result['base_quantity'],
+                        'createdby_id' => Auth::id(),
+                        'date_created' => now(),
+                    ]);
+                }
+            } elseif (count($pick_results) > 1) {
+                // Non-batch line split across more than one linked warehouse.
+                foreach ($pick_results as $result) {
+                    OrderDetailWarehouse::create([
+                        'order_detail_warehouse_id' => generateUuid(),
+                        'order_detail_id' => $detail->order_detail_id,
+                        'warehouse_id' => $result['warehouse_id'],
+                        'quantity' => $result['quantity'],
+                        'base_quantity' => $result['base_quantity'],
                         'createdby_id' => Auth::id(),
                         'date_created' => now(),
                     ]);
                 }
             }
+        }
+
+        // order.warehouse_id stays a display-only "primary warehouse" field
+        // for legacy reports - the authoritative per-line detail lives in
+        // order_details.product_variation_batch_id / order_detail_batches /
+        // order_detail_warehouses. Only rewrite it when the sale actually
+        // settled into a single warehouse different from the one save()
+        // guessed at draft time.
+        if (count($order_touched_warehouse_ids) === 1) {
+            $order->warehouse_id = array_key_first($order_touched_warehouse_ids);
+            $order->save();
         }
 
         if ($total_cost > 0) {
@@ -2832,10 +2899,12 @@ class OrderService
                 }
             }
 
-            // Re-assert the warehouse is still valid at the moment of
-            // completion, not just when the draft was first saved - catches
-            // a warehouse deactivated between hold and checkout.
-            $this->assertValidWarehouse($order->business_id, $order->branch_id, $order->warehouse_id);
+            // Re-assert the branch still has at least one active linked
+            // warehouse at the moment of completion, not just when the draft
+            // was first saved - catches a warehouse unlinked/deactivated
+            // between hold and checkout. The authoritative per-line
+            // stock/batch re-check happens inside applyPostedEffects().
+            $this->assertBranchHasLinkedWarehouses($order->business_id, $order->branch_id);
 
             if (!empty($obj['payments'])) {
                 $this->saveLinePayments($order->order_id, $obj['payments']);
@@ -3389,7 +3458,7 @@ class OrderService
 
     public function searchProducts($obj)
     {
-        [$business_id, $warehouse_id] = $this->resolveWarehouseContext($obj);
+        [$business_id, $branch_id] = $this->resolveBranchContext($obj);
         $term = $obj['term'] ?? '';
 
         $query = ProductVariation::with(['product', 'unit', 'saleUnit', 'productVariationUnitConversion.toUnit'])
@@ -3411,23 +3480,52 @@ class OrderService
         $variations = $query->limit(30)->get();
 
         $this->applyResolvedPricing($variations, $obj);
-        $this->attachAvailableStock($variations, $business_id, $warehouse_id);
+        $this->attachAvailableStock($variations, $business_id, $branch_id);
 
         return $variations;
     }
 
     /**
-     * Available serials for a serial-tracked variation at the register's
-     * resolved warehouse - feeds the POS serial picker.
+     * Available serials for a serial-tracked variation - feeds the POS
+     * serial picker. Serial-number allocation isn't (yet) branch/multi-
+     * warehouse aware (see applyPostedEffects()'s serial handling), so this
+     * still resolves a single warehouse: the branch's highest-priority
+     * linked one.
      */
     public function getAvailableSerials($obj)
     {
-        [$business_id, $warehouse_id] = $this->resolveWarehouseContext($obj);
+        [$business_id, $branch_id] = $this->resolveBranchContext($obj);
+        $warehouse_id = $this->stock_service->getLinkedWarehouseIds($business_id, $branch_id)[0] ?? null;
 
         return app(ProductVariationSerialService::class)
             ->availableSerialsFor($obj['product_variation_id'] ?? null, $warehouse_id, $obj['term'] ?? null, $business_id)
             ->map(fn($s) => ['product_variation_serial_number_id' => $s->product_variation_serial_number_id, 'serial_no' => $s->serial_no])
             ->values();
+    }
+
+    /**
+     * Per-warehouse (and, for batch-tracked variations, per-batch) stock
+     * breakdown for the POS product grid's "N in stock" hover detail -
+     * mirrors Api\ProductController::stock()'s storefront endpoint but
+     * resolves the branch the same way the rest of POS does
+     * (resolveBranchContext()) instead of a customer-selected branch_id.
+     */
+    public function getStockBreakdown($obj)
+    {
+        [$business_id, $branch_id] = $this->resolveBranchContext($obj);
+        $product_variation_id = $obj['product_variation_id'] ?? null;
+
+        if (empty($business_id) || empty($branch_id) || empty($product_variation_id)) {
+            return [];
+        }
+
+        $product_id = ProductVariation::where('product_variation_id', $product_variation_id)->value('product_id');
+
+        if (empty($product_id)) {
+            return [];
+        }
+
+        return $this->stock_service->getStockBreakdownForBranch($business_id, $branch_id, $product_id, $product_variation_id);
     }
 
     /**
@@ -3448,10 +3546,10 @@ class OrderService
             return $resolved;
         }
 
-        [$business_id, $warehouse_id] = $this->resolveWarehouseContext($obj);
+        [$business_id, $branch_id] = $this->resolveBranchContext($obj);
 
         $variations = ProductVariation::with('product')->whereIn('product_variation_id', $ids)->get();
-        $this->attachAvailableStock($variations, $business_id, $warehouse_id);
+        $this->attachAvailableStock($variations, $business_id, $branch_id);
 
         foreach ($variations as $variation) {
             if (!isset($resolved[$variation->product_variation_id])) {
@@ -3499,7 +3597,7 @@ class OrderService
      */
     public function getProductsByCategory($obj)
     {
-        [$business_id, $warehouse_id] = $this->resolveWarehouseContext($obj);
+        [$business_id, $branch_id] = $this->resolveBranchContext($obj);
         $category_id = $obj['category_id'] ?? null;
 
         $query = Product::with([
@@ -3523,7 +3621,7 @@ class OrderService
 
         $all_variations = $products->flatMap(fn ($product) => $product->productVariations);
         $this->applyResolvedPricing($all_variations, $obj);
-        $this->attachAvailableStock($all_variations, $business_id, $warehouse_id, $products->pluck('is_track_stock', 'product_id')->all());
+        $this->attachAvailableStock($all_variations, $business_id, $branch_id, $products->pluck('is_track_stock', 'product_id')->all());
 
         return $products;
     }

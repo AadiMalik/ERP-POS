@@ -38,6 +38,6 @@ class WebsiteHomeController extends Controller
             return $this->error($validate->errors()->first(), 404);
         }
 
-        return $this->success(Message::FETCH, $this->home_service->build($business_id));
+        return $this->success(Message::FETCH, $this->home_service->build($business_id, $request->query('branch_id')));
     }
 }

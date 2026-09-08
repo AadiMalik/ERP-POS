@@ -1,6 +1,6 @@
 @extends('layouts.pos')
 @section('css')
-    <link rel="stylesheet" href="{{ asset('public/assets/css/admin/pos-screen.css') }}">
+    <link rel="stylesheet" href="{{ asset('public/assets/css/admin/pos-screen.css') }}?v={{ @filemtime(public_path('assets/css/admin/pos-screen.css')) }}">
 @endsection
 @section('content')
     <div class="pos-screen-wrapper" id="posScreen">
@@ -71,10 +71,7 @@
                         </div>
 
                         <div class="pos-field pos-field-ordertype pos-pill-group" data-select-target="order_type_id">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <span class="pos-field-label">{{ __('common.order_type') }}</span>
-                                @include('admin.partials.quick-add-btn', ['permission' => 'order-type.create', 'modal' => 'quickAddOrderTypeModal', 'label' => 'Order Type'])
-                            </div>
+                            <span class="pos-field-label">{{ __('common.order_type') }}</span>
                             <div class="pos-pill-buttons">
                                 @foreach ($order_types as $item)
                                     <button type="button" class="pos-pill {{ $item->is_default ? 'active' : '' }}"
@@ -87,13 +84,13 @@
                             <span class="pos-field-label">{{ __('common.branch') }}</span>
                             @if (!$is_fixed_context)
                                 <div class="pos-branch-switch">
-                                    <span class="pos-branch-current"><i class="fa fa-code-branch"></i> {{ $branch_name ?? 'Branch' }}</span>
+                                    <span class="pos-branch-current" title="{{ $branch_name ?? 'Branch' }}"><i class="fa fa-code-branch"></i> {{ $branch_name ?? 'Branch' }}</span>
                                     <button type="button" class="btn pos-header-btn js-change-branch-btn" id="changeBranchBtn" title="{{ __('pos.change_branch') }}">
                                         <i class="fa fa-exchange-alt"></i>
                                     </button>
                                 </div>
                             @else
-                                <div class="pos-branch-static"><i class="fa fa-code-branch"></i> {{ $branch_name ?? 'Branch' }}</div>
+                                <div class="pos-branch-static" title="{{ $branch_name ?? 'Branch' }}"><i class="fa fa-code-branch"></i> {{ $branch_name ?? 'Branch' }}</div>
                             @endif
                         </div>
                     </div>
@@ -165,6 +162,12 @@
                                                     </div>
 
                                                     <div id="singlePaymentBlock">
+                                                        <div class="d-none mb-2" id="singlePaymentBankWrap">
+                                                            <label class="pos-field-label" for="singlePaymentBankSelect">{{ __('common.bank') }} <span class="text-danger">*</span></label>
+                                                            <select class="form-select form-select-sm" id="singlePaymentBankSelect">
+                                                                <option value="">{{ __('pos.select_bank') }}</option>
+                                                            </select>
+                                                        </div>
                                                         <div class="d-none" id="creditCustomerSummary">
                                                             <div class="d-flex justify-content-between align-items-center pos-credit-summary">
                                                                 <span id="creditCustomerText"></span>
@@ -379,9 +382,11 @@
         </div>
     </div>
 
-    {{-- ================= {{ __('pos.change_branch') }} Modal (switches business/branch/warehouse
+    {{-- ================= {{ __('pos.change_branch') }} Modal (switches business/branch
          context without leaving the POS screen - submits to the same
-         pos-screen.context route the original full-page picker used) ================= --}}
+         pos-screen.context route the original full-page picker used; the
+         branch's linked warehouses' combined stock is used automatically,
+         there is no warehouse to pick) ================= --}}
     @if (!$is_fixed_context)
         <div class="modal fade" id="changeBranchModal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
@@ -412,16 +417,6 @@
                                         <option value="{{ $item->branch_id }}" {{ $item->branch_id == $branch_id ? 'selected' : '' }}>{{ $item->name }}</option>
                                     @endforeach
                                 </select>
-                            </div>
-                            <div class="mb-1">
-                                <label class="form-label">{{ __('common.warehouse') }}</label>
-                                <select class="form-select select2" name="warehouse_id" id="changeBranchWarehouseId">
-                                    <option value="">--Select Warehouse--</option>
-                                    @foreach ($context_warehouses as $item)
-                                        <option value="{{ $item->warehouse_id }}" {{ $item->warehouse_id == $warehouse_id ? 'selected' : '' }}>{{ $item->name }}</option>
-                                    @endforeach
-                                </select>
-                                <small class="text-muted">{{ __('pos.warehouse_context_hint') }}</small>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -461,12 +456,6 @@
             </div>
         </div>
     </div>
-
-    {{-- $business here is POS's own single current-context Business model, not
-         the collection admin.order-type.model.quick-create needs for its
-         Super-Admin business picker - pass $context_businesses explicitly so
-         the two don't collide (see PosScreenController::index()). --}}
-    @include('admin.order-type.model.quick-create', ['business' => $context_businesses])
 
     {{-- ================= Credit Payment Modal ================= --}}
     {{-- Shown after a Credit-type sale completes (see completeSale() in
@@ -730,6 +719,7 @@
             ],
             'allow_negative_stock' => (bool) $inventory_setting->negative_stock,
             'payment_methods' => $payment_methods,
+            'banks' => $banks,
             'sale_types' => $sale_types,
             'tax_rates_setting' => [
                 'overall_tax_rate' => $business_setting->overall_tax_rate,
@@ -749,6 +739,7 @@
                 'search_products' => url('admin/order/search-products'),
                 'search_vouchers' => url('admin/order/search-vouchers'),
                 'available_serials' => url('admin/order/available-serials'),
+                'stock_breakdown' => url('admin/order/stock-breakdown'),
                 'eligible_vouchers' => url('admin/order/eligible-vouchers'),
                 'preview_voucher' => url('admin/order/preview-voucher'),
                 'products_by_category' => url('admin/order/products-by-category'),
@@ -777,9 +768,9 @@
             'amount' => __('common.amount'),
             'unit' => __('common.unit'),
             'loading' => __('common.loading'),
+            'total' => __('common.total'),
             'cart_empty' => __('common.cart_empty'),
             'select_branch' => __('common.select_branch'),
-            'select_warehouse' => __('common.select_warehouse'),
             'register' => __('common.register'),
             'manual' => __('common.manual'),
         ]);
@@ -788,5 +779,5 @@
         window.POS_CONFIG = @json($posConfig);
         window.i18n_pos = @json($__i18nPos);
     </script>
-    <script src="{{ asset('public/assets/js/admin/pos-screen.js') }}"></script>
+    <script src="{{ asset('public/assets/js/admin/pos-screen.js') }}?v={{ @filemtime(public_path('assets/js/admin/pos-screen.js')) }}"></script>
 @endsection

@@ -23,6 +23,35 @@ transaction — a sale, a purchase receipt (GRN), a return, a transfer, a manual
 adjustment — writes an entry to the **stock ledger**, so you can always trace
 exactly why your stock level is what it is and who/what changed it.
 
+### Branch Stock: One Branch, Multiple Warehouses
+
+A branch can be linked to more than one warehouse — including your Main
+Warehouse, which is just a normal warehouse that can be linked to a branch
+like any other. Open the branch's Edit screen and choose which warehouses
+feed it under **Linked Warehouses**. If a business only has one branch and
+all its stock sits in the Main Warehouse, simply link that Main Warehouse to
+the branch.
+
+Once linked, that branch's website, mobile app, and POS all show and sell
+against the **combined stock of every linked warehouse** — a product with 2
+units in one warehouse, 0 in a second, and 5 in a third shows as 7 available
+for that branch. Clicking/hovering the stock number shows the breakdown per
+warehouse (and, for batch-tracked products, per batch with its expiry date).
+Only valid, non-expired stock counts toward that number — an expired batch
+never makes a product look available.
+
+When a sale needs to draw stock, the system always takes the **earliest-expiring
+valid batch first (FEFO)**, wherever among the branch's linked warehouses it
+happens to be — not warehouse-by-warehouse. If one warehouse doesn't have
+enough on its own, the system automatically pulls the rest from the branch's
+other linked warehouses; staff never have to pick a warehouse manually.
+Order Takers, POS Managers, and Branch Admins always operate against their
+own assigned branch automatically; a Business Admin picks which branch to
+work in, and everything else (stock shown, stock sold) follows from that
+choice. The exact warehouse(s)/batch(es) a sale drew from are always
+recorded and shown on the order's **Stock Consumption** detail, so a
+cancellation or return restores stock to the right place.
+
 - **Opening Stock** sets the starting balance when a warehouse or product is first
   set up.
 - **Stock Taking** lets you record a physical count and reconcile it against what

@@ -48,6 +48,19 @@ class Branch extends Model
         return $this->hasMany(Employee::class, 'branch_id', 'branch_id');
     }
 
+    /**
+     * Warehouses linked to this branch (branch_warehouses pivot) - a
+     * branch's sellable stock is the combined stock of every warehouse
+     * here, priority-ordered for FEFO tie-breaking. See
+     * ProductVariationStockService::getLinkedWarehouseIds().
+     */
+    public function warehouses()
+    {
+        return $this->belongsToMany(Warehouse::class, 'branch_warehouses', 'branch_id', 'warehouse_id')
+            ->withPivot('priority')
+            ->orderBy('branch_warehouses.priority');
+    }
+
     public function createdby()
     {
         return $this->belongsTo(User::class, 'createdby_id');

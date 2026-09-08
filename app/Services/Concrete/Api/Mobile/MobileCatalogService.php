@@ -50,8 +50,16 @@ class MobileCatalogService
         return $this->product_service->getWebsiteListing($business_id, $params);
     }
 
-    public function product(string $business_id, string $slug, ?int $user_id = null)
+    public function product(string $business_id, string $slug, ?int $user_id = null, ?string $branch_id = null)
     {
-        return $this->product_service->getWebsiteDetail($business_id, $slug, $user_id);
+        return $this->product_service->getWebsiteDetail($business_id, $slug, $user_id, $branch_id);
+    }
+
+    public function stock(string $business_id, string $branch_id, string $product_variation_id): array
+    {
+        $product_id = \App\Models\ProductVariation::where('product_variation_id', $product_variation_id)->value('product_id');
+
+        return app(\App\Services\Concrete\Admin\ProductVariationStockService::class)
+            ->getStockBreakdownForBranch($business_id, $branch_id, $product_id, $product_variation_id);
     }
 }

@@ -13,6 +13,7 @@ use App\Models\PosRegister;
 use App\Models\PosRegisterSession;
 use App\Models\PosSetting;
 use App\Models\Role;
+use App\Services\Concrete\Admin\BankService;
 use App\Services\Concrete\Admin\BranchService;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CategoryService;
@@ -27,7 +28,6 @@ use App\Services\Concrete\Admin\NotificationService;
 use App\Services\Concrete\Admin\PosRegisterSessionService;
 use App\Services\Concrete\Admin\SaleTypeService;
 use App\Services\Concrete\Admin\UserService;
-use App\Services\Concrete\Admin\WarehouseService;
 use App\Traits\ResponseAPI;
 use Exception;
 use Illuminate\Http\Request;
@@ -69,8 +69,10 @@ class PosScreenController extends Controller
 
     // OT/POSM users are fixed to their own business/branch and go straight to
     // the screen. Every other role that can reach POS (Admins, managers, ...)
-    // is treated as an "Admin entry" and must pick a Business/Branch/Warehouse
-    // first, since they may be authorized for more than one.
+    // is treated as an "Admin entry" and must pick a Business/Branch first,
+    // since they may be authorized for more than one - the chosen branch's
+    // linked warehouses' combined stock is used automatically, there is no
+    // separate warehouse to pick.
     protected $fixed_context_roles = [
         RoleNames::ORDERTAKER,
         RoleNames::POSMANAGER,
@@ -80,11 +82,11 @@ class PosScreenController extends Controller
     protected $order_type_service;
     protected $order_source_service;
     protected $payment_method_service;
+    protected $bank_service;
     protected $discount_service;
     protected $category_service;
     protected $business_service;
     protected $branch_service;
-    protected $warehouse_service;
     protected $user_service;
     protected $expense_category_service;
     protected $expense_service;
@@ -97,11 +99,11 @@ class PosScreenController extends Controller
         OrderTypeService $order_type_service,
         OrderSourceService $order_source_service,
         PaymentMethodService $payment_method_service,
+        BankService $bank_service,
         DiscountService $discount_service,
         CategoryService $category_service,
         BusinessService $business_service,
         BranchService $branch_service,
-        WarehouseService $warehouse_service,
         UserService $user_service,
         ExpenseCategoryService $expense_category_service,
         ExpenseService $expense_service,
@@ -115,11 +117,11 @@ class PosScreenController extends Controller
         $this->order_type_service = $order_type_service;
         $this->order_source_service = $order_source_service;
         $this->payment_method_service = $payment_method_service;
+        $this->bank_service = $bank_service;
         $this->discount_service = $discount_service;
         $this->category_service = $category_service;
         $this->business_service = $business_service;
         $this->branch_service = $branch_service;
-        $this->warehouse_service = $warehouse_service;
         $this->user_service = $user_service;
         $this->expense_category_service = $expense_category_service;
         $this->expense_service = $expense_service;
@@ -136,9 +138,9 @@ class PosScreenController extends Controller
      * see public/assets/js/admin/pos-screen.js.
      *
      * Admin-type users (anyone other than Order Taker/POS Manager) must pick
-     * a Business/Branch/Warehouse before the screen renders, since they may
-     * be authorized for more than one - resolveContext() returns null and
-     * this shows the picker instead when that choice hasn't been made yet.
+     * a Business/Branch before the screen renders, since they may be
+     * authorized for more than one - resolveContext() returns null and this
+     * shows the picker instead when that choice hasn't been made yet.
      */
     public function index()
     {
@@ -150,7 +152,7 @@ class PosScreenController extends Controller
             return $this->showContextPicker($user);
         }
 
-        [$business_id, $branch_id, $warehouse_id] = $context;
+        [$business_id, $branch_id] = $context;
 
         $pos_setting = PosSetting::firstOrCreate(['business_id' => $business_id]);
         $business_setting = BusinessSetting::firstOrCreate(['business_id' => $business_id]);
@@ -163,6 +165,11 @@ class PosScreenController extends Controller
         $order_types = $this->order_type_service->getAllActive($business_id);
         $order_sources = $this->order_source_service->getAllActive($business_id);
         $payment_methods = $this->payment_method_service->getAllActive($business_id);
+        // Card/Bank payments require picking one of these (see pos-screen.js's
+        // renderPaymentAccountOptions()) - scoped to the resolved branch the
+        // same way linked warehouses are, so a branch never offers a bank
+        // that belongs only to another branch.
+        $banks = $this->bank_service->getForBranch($business_id, $branch_id);
         $customers = $this->customer_service->getAllActive($business_id);
         $discounts = $this->discount_service->getAllActive($business_id);
         $sale_types = $this->sale_type_service->getAllActive($business_id);
@@ -186,11 +193,6 @@ class PosScreenController extends Controller
         $pos_order_source_id = $this->resolvePosOrderSourceId($order_sources);
         $business = $this->business_service->getById($business_id);
         $branch_name = optional($this->branch_service->getById($branch_id))->name;
-        // Warehouse is optional on the context picker (a manual-mode register
-        // already fixes its own warehouse) - Repository::find() uses
-        // findOrFail(), so an empty $warehouse_id must be short-circuited here
-        // rather than passed through and turning into a 404.
-        $warehouse_name = $warehouse_id ? optional($this->warehouse_service->getById($warehouse_id))->name : null;
 
         // Reorder entry point - order.show's Reorder button links here with
         // this query param; pos-screen.js reads it from POS_CONFIG on load
@@ -206,13 +208,17 @@ class PosScreenController extends Controller
         $is_superadmin = RoleNames::SUPERADMIN == getRoleName();
         $context_businesses = collect();
         $context_branches = collect();
-        $context_warehouses = collect();
 
         if (!$is_fixed_context) {
             $context_businesses = $is_superadmin ? $this->business_service->getAllActive() : collect();
             $context_branches = $this->branch_service->getByBusiness($business_id);
-            $context_warehouses = $this->warehouse_service->getByBusiness($business_id);
         }
+
+        // The POS screen is a fixed-height, non-scrolling terminal UI - the
+        // shared "© year Business POS" layout footer just eats vertical
+        // space here without adding anything a cashier needs; every other
+        // page using layouts.pos keeps it.
+        $hide_pos_footer = true;
 
         return view('admin.pos.screen.index', compact(
             'pos_setting',
@@ -221,9 +227,9 @@ class PosScreenController extends Controller
             'customer_setting',
             'business_id',
             'branch_id',
-            'warehouse_id',
             'order_types',
             'payment_methods',
+            'banks',
             'customers',
             'discounts',
             'sale_types',
@@ -236,13 +242,12 @@ class PosScreenController extends Controller
             'pos_order_source_id',
             'business',
             'branch_name',
-            'warehouse_name',
             'is_superadmin',
             'context_businesses',
             'context_branches',
-            'context_warehouses',
             'reorder_from',
-            'correct_order_id'
+            'correct_order_id',
+            'hide_pos_footer'
         ));
     }
 
@@ -267,25 +272,24 @@ class PosScreenController extends Controller
     }
 
     /**
-     * @return array{0: string, 1: string, 2: ?string}|null [business_id, branch_id, warehouse_id]
+     * @return array{0: string, 1: string}|null [business_id, branch_id]
      */
     protected function resolveContext($user)
     {
         if (in_array(getRoleName(), $this->fixed_context_roles, true)) {
-            return [$user->business_id, $user->branch_id, null];
+            return [$user->business_id, $user->branch_id];
         }
 
         $business_id = session('pos_context_business_id') ?? (
             RoleNames::SUPERADMIN == getRoleName() ? null : $user->business_id
         );
         $branch_id = session('pos_context_branch_id');
-        $warehouse_id = session('pos_context_warehouse_id');
 
         if (empty($business_id) || empty($branch_id)) {
             return null;
         }
 
-        return [$business_id, $branch_id, $warehouse_id];
+        return [$business_id, $branch_id];
     }
 
     protected function showContextPicker($user)
@@ -296,37 +300,34 @@ class PosScreenController extends Controller
         $branches = $is_superadmin
             ? collect()
             : $this->branch_service->getAllActive();
-        $warehouses = $is_superadmin
-            ? collect()
-            : $this->warehouse_service->getByBusiness($user->business_id);
 
         // Header chrome - mirrors OrderController::history() so the shared
         // layouts/pos-header partial renders identically here (real business
-        // logo/name, user menu, Switch to Admin Panel). No branch/warehouse is
-        // chosen yet, so those chips stay null; show_pos_actions is false
-        // because there is no POS session yet.
+        // logo/name, user menu, Switch to Admin Panel). No branch is chosen
+        // yet, so that chip stays null; show_pos_actions is false because
+        // there is no POS session yet.
         $is_fixed_context = in_array(getRoleName(), $this->fixed_context_roles, true);
         $show_pos_actions = false;
         $business = $is_superadmin ? null : $this->business_service->getById($user->business_id);
         $branch_name = null;
-        $warehouse_name = null;
 
         return view('admin.pos.screen.select-context', compact(
-            'businesses', 'branches', 'warehouses', 'is_superadmin',
-            'business', 'branch_name', 'warehouse_name', 'is_fixed_context', 'show_pos_actions'
+            'businesses', 'branches', 'is_superadmin',
+            'business', 'branch_name', 'is_fixed_context', 'show_pos_actions'
         ));
     }
 
     /**
-     * Cascading branch/warehouse options for a chosen business - used by the
-     * context picker when a superadmin selects a business.
+     * Cascading branch options for a chosen business - used by the context
+     * picker when a superadmin selects a business. The chosen branch's
+     * linked warehouses' combined stock is used automatically, so there is
+     * no warehouse list to return here any more.
      */
     public function contextOptions($business_id)
     {
         try {
             return $this->success(Message::FETCH, [
                 'branches' => $this->branch_service->getByBusiness($business_id),
-                'warehouses' => $this->warehouse_service->getByBusiness($business_id),
             ]);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
@@ -339,7 +340,6 @@ class PosScreenController extends Controller
 
         $rules = [
             'branch_id' => ['required', 'string'],
-            'warehouse_id' => ['nullable', 'string'],
         ];
 
         if ($is_superadmin) {
@@ -355,20 +355,19 @@ class PosScreenController extends Controller
         session([
             'pos_context_business_id' => $is_superadmin ? $request->business_id : Auth::user()->business_id,
             'pos_context_branch_id' => $request->branch_id,
-            'pos_context_warehouse_id' => $request->warehouse_id,
         ]);
 
         return redirect()->route('pos-screen');
     }
 
     /**
-     * Lets an Admin-type user switch to a different Business/Branch/Warehouse
-     * without logging out - clears the stored context so index() shows the
-     * picker again.
+     * Lets an Admin-type user switch to a different Business/Branch without
+     * logging out - clears the stored context so index() shows the picker
+     * again.
      */
     public function changeContext()
     {
-        session()->forget(['pos_context_business_id', 'pos_context_branch_id', 'pos_context_warehouse_id']);
+        session()->forget(['pos_context_business_id', 'pos_context_branch_id']);
 
         return redirect()->route('pos-screen');
     }

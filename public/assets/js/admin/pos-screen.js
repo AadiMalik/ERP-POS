@@ -93,14 +93,100 @@
 
     // Small "N in stock" / "Out of stock" hint - null/undefined
     // available_stock means the product isn't stock-tracked (unlimited),
-    // so no hint is shown at all.
-    function stockHint(available_stock) {
+    // so no hint is shown at all. When variationId is given, the hint is
+    // also hoverable - see wireStockHintHover() - showing the branch's
+    // per-warehouse (and per-batch) breakdown behind that combined figure.
+    function stockHint(available_stock, variationId) {
         if (available_stock === null || available_stock === undefined) {
             return '';
         }
+        var hoverAttr = variationId ? ' data-stock-variation-id="' + escapeHtml(String(variationId)) + '"' : '';
+        var hoverClass = variationId ? ' pos-stock-hint-hoverable' : '';
         return available_stock > 0
-            ? '<span class="pos-stock-hint">' + tr('in_stock', ':qty in stock', {qty: available_stock}) + '</span>'
-            : '<span class="pos-stock-hint pos-stock-hint-out">' + t('out_of_stock', 'Out of stock') + '</span>';
+            ? '<span class="pos-stock-hint' + hoverClass + '"' + hoverAttr + '>' + tr('in_stock', ':qty in stock', {qty: available_stock}) + '</span>'
+            : '<span class="pos-stock-hint pos-stock-hint-out' + hoverClass + '"' + hoverAttr + '>' + t('out_of_stock', 'Out of stock') + '</span>';
+    }
+
+    // Warehouse-wise stock breakdown behind a "N in stock" hint, fetched
+    // lazily on hover (never pre-loaded) and cached per variation for the
+    // life of this page load - the branch context can't change without a
+    // full page reload (see PosScreenController::changeContext()), so a
+    // cached breakdown never goes stale mid-session.
+    var stockBreakdownCache = {};
+    var $stockTooltip = null;
+
+    function stockBreakdownTooltipHtml(rows) {
+        if (!rows || !rows.length) {
+            return '<div class="text-muted">' + t('stock_detail_unavailable', 'Stock detail is not available right now.') + '</div>';
+        }
+        var total = 0;
+        var lines = rows.map(function (row) {
+            total += parseFloat(row.quantity) || 0;
+            var batchSuffix = '';
+            if (row.batches && row.batches.length) {
+                batchSuffix = ' (' + row.batches.map(function (b) {
+                    return escapeHtml(b.batch_no || '') + ': ' + b.quantity + (b.expiry_date ? ' exp ' + escapeHtml(b.expiry_date) : '');
+                }).join(', ') + ')';
+            }
+            return '<div class="pos-stock-tooltip-row"><span>' + escapeHtml(row.warehouse_name) + '</span><strong>' + row.quantity + '</strong>' + batchSuffix + '</div>';
+        });
+        lines.push('<div class="pos-stock-tooltip-row pos-stock-tooltip-total"><span>' + t('total', 'Total') + '</span><strong>' + total + '</strong></div>');
+        return lines.join('');
+    }
+
+    function positionStockTooltip($target) {
+        var offset = $target.offset();
+        var targetHeight = $target.outerHeight();
+        $stockTooltip.css({
+            top: offset.top + targetHeight + 6,
+            left: Math.max(8, offset.left),
+        });
+    }
+
+    function wireStockHintHover() {
+        $stockTooltip = $('<div class="pos-stock-tooltip"></div>').appendTo('body').hide();
+
+        $(document).on('mouseenter', '.pos-stock-hint-hoverable', function () {
+            var $target = $(this);
+            var variationId = $target.data('stock-variation-id');
+            if (!variationId) return;
+
+            positionStockTooltip($target);
+
+            if (stockBreakdownCache[variationId]) {
+                $stockTooltip.html(stockBreakdownTooltipHtml(stockBreakdownCache[variationId])).show();
+                return;
+            }
+
+            $stockTooltip.html('<div class="text-muted">' + t('loading', 'Loading…') + '</div>').show();
+
+            ajaxRequest({
+                url: URLS.stock_breakdown,
+                data: {
+                    product_variation_id: variationId,
+                    business_id: CFG.business_id,
+                    branch_id: CFG.branch_id,
+                    register_session_id: state.session ? state.session.pos_register_session_id : null,
+                },
+            }).then(function (response) {
+                var rows = response.Data || [];
+                stockBreakdownCache[variationId] = rows;
+                // The cashier may have moved off (or onto a different
+                // product) before this resolved - only paint if still
+                // hovering the same element that triggered the request.
+                if ($target.is(':hover')) {
+                    $stockTooltip.html(stockBreakdownTooltipHtml(rows)).show();
+                }
+            }).catch(function () {
+                if ($target.is(':hover')) {
+                    $stockTooltip.html(stockBreakdownTooltipHtml([])).show();
+                }
+            });
+        });
+
+        $(document).on('mouseleave', '.pos-stock-hint-hoverable', function () {
+            $stockTooltip.hide();
+        });
     }
 
     // Registers the qty (existing cart quantity + any quantity about to be
@@ -151,7 +237,7 @@
     // INIT
     // ==============================
     $(document).ready(function () {
-        $('.select2').not('#open_pos_register_id, #customer_id, #changeBranchBusinessId, #changeBranchBranchId, #changeBranchWarehouseId, #expense_category_id').select2();
+        $('.select2').not('#open_pos_register_id, #customer_id, #changeBranchBusinessId, #changeBranchBranchId, #expense_category_id').select2();
 
         // Same reasoning as #open_pos_register_id below - scope this dropdown
         // to the Add Expense modal so it opens correctly.
@@ -163,7 +249,7 @@
 
         // Same reasoning as #open_pos_register_id above - scope this dropdown
         // to the Change Branch modal so it opens correctly.
-        $('#changeBranchBusinessId, #changeBranchBranchId, #changeBranchWarehouseId').select2({
+        $('#changeBranchBusinessId, #changeBranchBranchId').select2({
             dropdownParent: $('#changeBranchModal'),
         });
 
@@ -176,6 +262,7 @@
         });
 
         initCustomerSelect();
+        wireStockHintHover();
 
         state.open_session_modal = new bootstrap.Modal(document.getElementById('openSessionModal'));
         state.close_session_modal = new bootstrap.Modal(document.getElementById('closeSessionModal'));
@@ -446,7 +533,7 @@
         });
 
         $('#addPaymentRowBtn').on('click', function () {
-            state.payments.push({ payment_method_id: '', amount: 0, reference_no: '' });
+            state.payments.push({ payment_method_id: '', amount: 0, reference_no: '', bank_id: null });
             renderPayments();
         });
 
@@ -518,7 +605,6 @@
             $('#changeBranchBusinessId').on('change', function () {
                 var business_id = $(this).val();
                 $('#changeBranchBranchId').html('<option value="">' + t('select_branch', '--Select Branch--') + '</option>');
-                $('#changeBranchWarehouseId').html('<option value="">' + t('select_warehouse', '--Select Warehouse--') + '</option>');
                 if (!business_id) return;
 
                 ajaxRequest({ url: url_local + '/admin/pos-screen/context-options/' + business_id })
@@ -529,12 +615,6 @@
                             branchOptions += '<option value="' + item.branch_id + '">' + escapeHtml(item.name) + '</option>';
                         });
                         $('#changeBranchBranchId').html(branchOptions);
-
-                        var warehouseOptions = '<option value="">--Select Warehouse--</option>';
-                        (data.warehouses || []).forEach(function (item) {
-                            warehouseOptions += '<option value="' + item.warehouse_id + '">' + escapeHtml(item.name) + '</option>';
-                        });
-                        $('#changeBranchWarehouseId').html(warehouseOptions);
                     })
                     .catch(function (err) {
                         errorMessage(err.Message || t('unable_load_branches', 'Unable to load branches.'));
@@ -548,32 +628,6 @@
             state.add_customer_modal.show();
         });
         $('#addCustomerSubmitBtn').on('click', submitAddCustomer);
-
-        // ---- Add Order Type modal (quick-add, mirrors #addCustomerModal) ----
-        // The visible UI is the pill-button row, not the hidden #order_type_id
-        // select directly, so on success a new pill is appended alongside the
-        // option (mirrors how a new payment method pill is added in
-        // renderPaymentMethodOptions()) and then selected via the same
-        // #order_type_id change -> syncPillsFromSelect() path every other
-        // order-type change already goes through.
-        initQuickAdd({
-            modalId: '#quickAddOrderTypeModal',
-            formId: '#quickAddOrderTypeForm',
-            url: url_local + '/admin/order-type',
-            valueField: 'order_type_id',
-            labelField: 'name',
-            targetSelectIds: ['order_type_id'],
-            onSuccess: function (data) {
-                $('.pos-field-ordertype .pos-pill-buttons').append(
-                    '<button type="button" class="pos-pill" data-value="' + data.order_type_id + '" data-code="' +
-                        (data.code || '') + '">' + escapeHtml(data.name || '') + '</button>'
-                );
-                // The pill didn't exist yet when the select's own change
-                // event ran syncPillsFromSelect() a moment ago, so re-run it
-                // now that the pill is in the DOM to mark it active.
-                syncPillsFromSelect();
-            },
-        });
 
         // ---- Credit Payment modal (shown after a Credit-type sale completes) ----
         $('#creditPaymentSaveBtn').on('click', function () { submitCreditInfo(true); });
@@ -599,6 +653,12 @@
             selectPaymentTile(value === MULTI_PAY_VALUE ? null : value, value === MULTI_PAY_VALUE);
         });
 
+        $('#singlePaymentBankSelect').on('change', function () {
+            if (state.payments[0]) {
+                state.payments[0].bank_id = $(this).val() || null;
+            }
+        });
+
         $('#paidAmountInput').on('input', function () {
             var amount = parseFloat($(this).val()) || 0;
 
@@ -609,7 +669,7 @@
             // silently dropped, otherwise completeSale()'s total check sees
             // 0 entered even though this field shows the full amount.
             if (!state.payments.length) {
-                state.payments = [{ payment_method_id: state.selected_payment_method_id || '', amount: amount, reference_no: '' }];
+                state.payments = [{ payment_method_id: state.selected_payment_method_id || '', amount: amount, reference_no: '', bank_id: null }];
             } else {
                 state.payments[0].amount = amount;
             }
@@ -970,9 +1030,10 @@
                 branch_id: CFG.branch_id,
                 sale_type_id: $('#sale_type_id').val(),
                 term: term,
-                // Lets the server resolve the register's warehouse so
-                // available_stock is scoped to it - see
-                // OrderService::resolveWarehouseContext().
+                // Lets the server resolve the register's branch when
+                // branch_id above isn't set yet - see
+                // OrderService::resolveBranchContext(). available_stock is
+                // the branch's linked warehouses combined.
                 register_session_id: state.session ? state.session.pos_register_session_id : null,
             },
         })
@@ -1595,7 +1656,7 @@
             // the grid card - a multi-variation product's stock differs per
             // variation, so it's shown per-card in the picker modal instead
             // (see renderVariationPickerGrid()).
-            var stockHtml = variations.length === 1 ? stockHint(firstVariation.available_stock) : '';
+            var stockHtml = variations.length === 1 ? stockHint(firstVariation.available_stock, firstVariation.product_variation_id) : '';
             var outOfStock = variations.length === 1
                 && !!stockBlockMessage(product.name, firstVariation.is_track_stock, firstVariation.available_stock, 1);
 
@@ -1728,7 +1789,7 @@
                         '<span class="product-card-price">' + money(pv.resolved_price !== undefined ? pv.resolved_price : pv.sale_price) + '</span>' +
                         '<span class="product-card-unit">' + escapeHtml(unitName) + '</span>' +
                     '</div>' +
-                    stockHint(pv.available_stock) +
+                    stockHint(pv.available_stock, pv.product_variation_id) +
                 '</div>'
             );
 
@@ -2112,10 +2173,10 @@
     // cash/card/bank/credit sale).
     function selectPaymentTile(methodId, isMulti) {
         if (isMulti) {
-            state.payments = state.payments.length ? state.payments : [{ payment_method_id: '', amount: 0, reference_no: '' }];
+            state.payments = state.payments.length ? state.payments : [{ payment_method_id: '', amount: 0, reference_no: '', bank_id: null }];
         } else {
             var total = parseFloat($('#sumTotal').text()) || 0;
-            state.payments = [{ payment_method_id: methodId, amount: total, reference_no: '' }];
+            state.payments = [{ payment_method_id: methodId, amount: total, reference_no: '', bank_id: null }];
         }
 
         activatePaymentUI(isMulti ? null : methodId, isMulti);
@@ -2143,8 +2204,24 @@
         $('#multiPaymentBlock').toggleClass('d-none', !isMulti);
         $('#singlePaymentBlock').toggleClass('d-none', !!isMulti);
         updateCreditCustomerSummary();
+        updateSinglePaymentBankUI();
         syncPillsFromSelect();
         updateCheckoutSummary();
+    }
+
+    // Shows/populates the single-payment Bank select when the selected
+    // method is card/bank - mirrors the multi-pay row's per-row bank select
+    // (see renderPayments()) for the far more common single-tender case.
+    function updateSinglePaymentBankUI() {
+        var methods = CFG.payment_methods || [];
+        var selected = methods.find(function (m) { return m.payment_method_id === state.selected_payment_method_id; });
+        var needsBank = !!(selected && requiresBank(selected.type));
+
+        $('#singlePaymentBankWrap').toggleClass('d-none', !needsBank);
+        if (!needsBank) return;
+
+        var currentBankId = state.payments[0] ? state.payments[0].bank_id : null;
+        $('#singlePaymentBankSelect').html(bankOptionsHtml(currentBankId));
     }
 
     function resetPaymentSelection() {
@@ -2198,6 +2275,21 @@
             var m = (CFG.payment_methods || []).find(function (x) { return x.payment_method_id === p.payment_method_id; });
             return m && m.type === 'credit';
         });
+    }
+
+    // Returns the name of the first tendered Card/Bank payment missing a
+    // bank_id, or null when every such payment has one chosen.
+    function findPaymentMissingBank() {
+        for (var i = 0; i < state.payments.length; i++) {
+            var p = state.payments[i];
+            if ((parseFloat(p.amount) || 0) <= 0) continue;
+
+            var m = (CFG.payment_methods || []).find(function (x) { return x.payment_method_id === p.payment_method_id; });
+            if (m && requiresBank(m.type) && !p.bank_id) {
+                return m.name;
+            }
+        }
+        return null;
     }
 
     // Mirrors hasCreditPayment() for the store_credit type.
@@ -2277,6 +2369,23 @@
             });
     }
 
+    // Bank <select> options for a card/bank payment row - CFG.banks is
+    // already scoped to the resolved branch server-side (see
+    // PosScreenController::index()/BankService::getForBranch()), so no
+    // further filtering is needed here.
+    function bankOptionsHtml(selectedBankId) {
+        var banks = CFG.banks || [];
+        return '<option value="">' + t('select_bank', '-- Select Bank --') + '</option>' +
+            banks.map(function (b) {
+                return '<option value="' + b.bank_id + '"' + (b.bank_id === selectedBankId ? ' selected' : '') + '>' +
+                    escapeHtml(b.name) + '</option>';
+            }).join('');
+    }
+
+    function requiresBank(type) {
+        return type === 'card' || type === 'bank';
+    }
+
     function renderPayments() {
         var $wrap = $('#paymentRows');
         $wrap.empty();
@@ -2292,6 +2401,7 @@
 
             var selectedMethod = methods.find(function (m) { return m.payment_method_id === payment.payment_method_id; });
             var showRef = selectedMethod && ['card', 'bank'].includes(selectedMethod.type);
+            var showBank = selectedMethod && requiresBank(selectedMethod.type);
 
             var $row = $(
                 '<div class="row g-2 mb-2 payment-row" data-idx="' + idx + '">' +
@@ -2301,6 +2411,9 @@
                     '<div class="col-2 payment-ref-wrap" style="display:' + (showRef ? 'block' : 'none') + '">' +
                         '<input type="text" class="form-control form-control-sm payment-ref" value="' + (payment.reference_no || '') + '" placeholder="' + t('ref_placeholder', 'Ref #') + '"></div>' +
                     '<div class="col-1"><button type="button" class="btn btn-sm btn-outline-danger payment-remove"><i class="fa fa-times"></i></button></div>' +
+                    '<div class="col-12 payment-bank-wrap" style="display:' + (showBank ? 'block' : 'none') + '">' +
+                        '<select class="form-select form-select-sm payment-bank">' + bankOptionsHtml(payment.bank_id) + '</select>' +
+                    '</div>' +
                 '</div>'
             );
 
@@ -2318,8 +2431,17 @@
             var type = $(this).find(':selected').data('type');
 
             state.payments[idx].payment_method_id = method_id;
+            state.payments[idx].bank_id = null;
             $(this).closest('.payment-row').find('.payment-ref-wrap').toggle(['card', 'bank'].includes(type));
+            var $bankWrap = $(this).closest('.payment-row').find('.payment-bank-wrap');
+            $bankWrap.toggle(requiresBank(type));
+            $bankWrap.find('.payment-bank').html(bankOptionsHtml(null));
             recalcLocal();
+        });
+
+        $('#paymentRows').off('change', '.payment-bank').on('change', '.payment-bank', function () {
+            var idx = $(this).closest('.payment-row').data('idx');
+            state.payments[idx].bank_id = $(this).val() || null;
         });
 
         $('#paymentRows').off('input', '.payment-amount').on('input', '.payment-amount', function () {
@@ -2874,6 +2996,7 @@
                 payment_method_id: p.payment_method_id,
                 amount: p.amount,
                 reference_no: p.reference_no,
+                bank_id: p.bank_id || null,
             };
         });
 
@@ -2939,6 +3062,15 @@
                 errorMessage(tr('insufficient_store_credit', 'This customer only has :amount in store credit available.', {amount: money(storeCreditBalance)}));
                 return;
             }
+        }
+
+        // Hard gate: a Card/Bank payment must have a bank chosen before the
+        // sale can be completed - OrderService::saveLinePayments() enforces
+        // this authoritatively too, this just saves a round trip.
+        var missingBankMethod = findPaymentMissingBank();
+        if (missingBankMethod) {
+            errorMessage(tr('bank_required_for_payment', 'Please select a bank for the ":method" payment.', {method: missingBankMethod}));
+            return;
         }
 
         if (state.correction_mode) {

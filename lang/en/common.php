@@ -171,6 +171,8 @@ return [
     'source_warehouse' => 'Source Warehouse',
     'destination_warehouse' => 'Destination Warehouse',
     'account' => 'Account',
+    'account_number' => 'Account Number',
+    'bank' => 'Bank',
     'enter_code' => 'Enter Code',
     'enter_description' => 'Enter Description',
     'please_enter_code' => 'Please Enter Code',

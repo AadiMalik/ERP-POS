@@ -37,7 +37,9 @@
         @yield('content')
     </div>
 
-    @include('layouts/pos-footer')
+    @unless(!empty($hide_pos_footer))
+        @include('layouts/pos-footer')
+    @endunless
 
     @include('layouts/js')
     @yield('js')

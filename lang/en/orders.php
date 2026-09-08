@@ -18,6 +18,7 @@ return [
     'all_order_types' => '--All Order Types--',
     'all_order_sources' => '--All Order Sources--',
     'all_payment_methods' => '--All Payment Methods--',
+    'all_banks' => '--All Banks--',
     'cancel_order' => 'Cancel Order',
     'cancel_order_hint' => 'This order will be marked as Cancelled. This action is recorded in the order\'s status history.',
     'cancellation_reason' => 'Cancellation Reason',

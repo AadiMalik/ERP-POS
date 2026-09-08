@@ -31,6 +31,6 @@ class WebsiteHomeController extends Controller
             return $this->error($validate->errors()->first(), 404);
         }
 
-        return $this->success(Message::FETCH, $this->cms_service->home($business_id));
+        return $this->success(Message::FETCH, $this->cms_service->home($business_id, $request->query('branch_id')));
     }
 }

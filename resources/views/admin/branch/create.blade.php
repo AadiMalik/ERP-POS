@@ -99,6 +99,29 @@
                             </div>
                         </div>
 
+                        <!-- Linked Warehouses Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">{{ __('branches.linked_warehouses') }}</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <label class="fw-semibold">{{ __('branches.linked_warehouses') }}</label>
+                                        <select class="form-select" name="warehouse_ids[]" id="warehouse_ids" multiple>
+                                            @foreach (($warehouses ?? []) as $warehouse)
+                                            <option value="{{ $warehouse->warehouse_id }}"
+                                                {{ in_array($warehouse->warehouse_id, old('warehouse_ids', $linked_warehouse_ids ?? [])) ? 'selected' : '' }}>
+                                                {{ $warehouse->name }}
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                        <small class="text-muted">{{ __('branches.linked_warehouses_hint') }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- POS Register Mode Section -->
                         <div class="card mb-4">
                             <div class="card-header bg-light">
@@ -195,6 +218,10 @@
 <script>
     $(document).ready(function() {
         $('#business_id').select2();
+        $('#warehouse_ids').select2({
+            placeholder: '{{ __('branches.linked_warehouses') }}',
+            allowClear: true
+        });
     });
     (function() {
         const logoInput = document.getElementById('logoInput');

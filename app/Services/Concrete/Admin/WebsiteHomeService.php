@@ -58,7 +58,7 @@ class WebsiteHomeService
         return collect($sections)->where('type', $type)->values()->all();
     }
 
-    public function build(string $business_id): array
+    public function build(string $business_id, ?string $branch_id = null): array
     {
         $public_settings = $this->setting_service->getWebsitePublicSettings($business_id);
         $website_theme_setting = $this->setting_service->getWebsiteThemeSetting($business_id);
@@ -68,7 +68,11 @@ class WebsiteHomeService
 
         $all_sections = $this->section_service->getActivePublicByBusiness($business_id)->all();
 
-        $product_data = $this->product_service->getWebsiteListing($business_id, ['per_page' => 1, 'page' => 1]);
+        // branch_id scopes each product group's `stock` to the branch's
+        // linked warehouses (falls back to the business's first active
+        // branch when not given - see ProductService::resolveDefaultBranchId()),
+        // same as the storefront listing endpoint.
+        $product_data = $this->product_service->getWebsiteListing($business_id, ['per_page' => 1, 'page' => 1, 'branch_id' => $branch_id]);
         $product_groups = $product_data['sections'] ?? [];
 
         $group_config = function (string $type) use ($all_sections, $product_groups) {

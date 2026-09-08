@@ -5,22 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Warehouse extends Model
+class Bank extends Model
 {
     use HasFactory;
     public $timestamps = false;
-    protected $primaryKey = 'warehouse_id';
+    protected $primaryKey = 'bank_id';
     protected $keyType = 'string';
     public $incrementing = false;
 
     protected $fillable = [
-        'warehouse_id',
-        'name',
-        'code',
-        'phone',
-        'address',
+        'bank_id',
         'business_id',
         'branch_id',
+        'account_id',
+        'name',
+        'code',
+        'account_number',
         'status',
         'is_deleted',
         'createdby_id',
@@ -41,14 +41,9 @@ class Warehouse extends Model
         return $this->belongsTo(Branch::class, 'branch_id');
     }
 
-    /**
-     * Branches this warehouse is linked to (branch_warehouses pivot). See
-     * Branch::warehouses() and ProductVariationStockService::getLinkedWarehouseIds().
-     */
-    public function branches()
+    public function account()
     {
-        return $this->belongsToMany(Branch::class, 'branch_warehouses', 'warehouse_id', 'branch_id')
-            ->withPivot('priority');
+        return $this->belongsTo(Account::class, 'account_id');
     }
 
     public function createdby()

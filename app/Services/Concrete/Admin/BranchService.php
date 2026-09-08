@@ -11,6 +11,7 @@ use App\Repository\Repository;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
 class BranchService
@@ -93,6 +94,7 @@ class BranchService
             $obj['updatedby_id'] = Auth::user()->id;
             $obj['date_updated'] = now();
             $this->model_branch->update($obj, $obj['branch_id']);
+            $this->syncWarehouses($obj['branch_id'], $obj['warehouse_ids'] ?? []);
             return $this->model_branch->find($obj['branch_id']);
         }
         //check limit
@@ -106,7 +108,37 @@ class BranchService
         $obj['createdby_id'] = Auth::user()->id;
         $obj['date_created'] = now();
         $saved_obj = $this->model_branch->create($obj);
+        $this->syncWarehouses($obj['branch_id'], $obj['warehouse_ids'] ?? []);
         return $saved_obj;
+    }
+
+    /**
+     * Replaces this branch's branch_warehouses links with $warehouse_ids, in
+     * the order given (that order becomes each link's priority - the tie-
+     * breaker pickBatchesForSale()/pickWarehousesForSale() fall back to when
+     * FEFO/date can't decide between warehouses). Delete-then-recreate,
+     * same pattern VoucherService::syncScopePivots() uses for its own
+     * pivot tables.
+     */
+    protected function syncWarehouses($branch_id, array $warehouse_ids): void
+    {
+        DB::table('branch_warehouses')->where('branch_id', $branch_id)->delete();
+
+        $ids = array_values(array_filter($warehouse_ids, fn ($id) => !empty($id)));
+
+        if (empty($ids)) {
+            return;
+        }
+
+        $now = now();
+        $rows = array_map(fn ($warehouse_id, $priority) => [
+            'branch_id' => $branch_id,
+            'warehouse_id' => $warehouse_id,
+            'priority' => $priority,
+            'date_created' => $now,
+        ], $ids, array_keys($ids));
+
+        DB::table('branch_warehouses')->insert($rows);
     }
 
     public function getById($branch_id)

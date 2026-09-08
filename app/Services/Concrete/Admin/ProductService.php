@@ -12,9 +12,7 @@ use App\Models\ProductVariation;
 use App\Models\ProductVariationAttribute;
 use App\Models\ProductVariationPrice;
 use App\Models\ProductVariationPriceHistory;
-use App\Models\ProductVariationStock;
 use App\Models\SaleType;
-use App\Models\Warehouse;
 use App\Repository\Repository;
 use App\Services\Concrete\Api\WishlistService;
 use App\Traits\Auditable;
@@ -54,7 +52,9 @@ class ProductService
         'productFeatures'
     ];
 
-    public function __construct(BarcodeService $barcode_service, VariationPricingService $pricing_service)
+    protected $stock_service;
+
+    public function __construct(BarcodeService $barcode_service, VariationPricingService $pricing_service, \App\Services\Concrete\Admin\ProductVariationStockService $stock_service)
     {
         $this->model_product = new Repository(new Product());
         $this->model_product_image = new Repository(new ProductImage());
@@ -63,6 +63,7 @@ class ProductService
         $this->model_product_variation_attribute = new Repository(new ProductVariationAttribute());
         $this->barcode_service = $barcode_service;
         $this->pricing_service = $pricing_service;
+        $this->stock_service = $stock_service;
     }
 
     public function getData($obj)
@@ -916,7 +917,7 @@ class ProductService
      * Storefront single-product detail by slug. Returns null when not found
      * (caller/controller turns that into a 404).
      */
-    public function getWebsiteDetail(string $business_id, string $slug, $user_id = null): ?array
+    public function getWebsiteDetail(string $business_id, string $slug, $user_id = null, ?string $branch_id = null): ?array
     {
         $with = array_merge($this->websiteWith(), ['productFeatures']);
 
@@ -931,7 +932,7 @@ class ProductService
 
         $sale_type_id = $this->resolveDefaultSaleTypeId($business_id);
 
-        [$price_map, $stock_map] = $this->resolvePricingAndStock(collect([$product]), $business_id, null, $sale_type_id);
+        [$price_map, $stock_map] = $this->resolvePricingAndStock(collect([$product]), $business_id, $branch_id, $sale_type_id);
 
         $wishlist_flags = $this->resolveWishlistFlags($business_id, $user_id, [$product->product_id]);
 
@@ -969,7 +970,7 @@ class ProductService
             ->limit(8)
             ->get();
 
-        [$related_price_map, $related_stock_map] = $this->resolvePricingAndStock($related_products, $business_id, null, $sale_type_id);
+        [$related_price_map, $related_stock_map] = $this->resolvePricingAndStock($related_products, $business_id, $branch_id, $sale_type_id);
 
         $related_flags = $this->resolveWishlistFlags(
             $business_id,
@@ -1086,7 +1087,7 @@ class ProductService
         })->filter()->unique()->values()->all();
 
         $price_map = $this->resolveVariationPriceMap($variation_ids, $sale_type_id);
-        $stock_sums = $this->resolveVariationStockSums($variation_ids, $business_id, $branch_id);
+        $stock_sums = $this->resolveVariationStockSums($variation_ids, $business_id, $branch_id ?? $this->resolveDefaultBranchId($business_id));
 
         $stock_map = [];
         foreach ($products as $product) {
@@ -1132,36 +1133,36 @@ class ProductService
     }
 
     /**
-     * Sums ProductVariationStock.quantity per variation across the relevant
-     * warehouses - a single branch's warehouse(s) when $branch_id is given,
-     * else every warehouse belonging to the business. Mirrors
-     * OrderService::attachAvailableStock()'s pattern, generalized to
-     * multiple warehouses.
+     * Combined available (non-expired, unreserved) stock per variation
+     * across a branch's linked warehouses - delegates to
+     * ProductVariationStockService::getAvailableStockForBranchBulk() so the
+     * storefront listing/detail pages use the exact same figure (and the
+     * same expired-batch exclusion) as POS/checkout instead of a second,
+     * divergent stock query.
      */
     private function resolveVariationStockSums(array $variation_ids, string $business_id, ?string $branch_id)
     {
-        if (empty($variation_ids)) {
+        if (empty($variation_ids) || empty($branch_id)) {
             return collect();
         }
 
-        $warehouse_query = Warehouse::where('business_id', $business_id)->where('is_deleted', 0);
+        return collect($this->stock_service->getAvailableStockForBranchBulk($business_id, $branch_id, $variation_ids));
+    }
 
-        if (!empty($branch_id)) {
-            $warehouse_query->where('branch_id', $branch_id);
-        }
-
-        $warehouse_ids = $warehouse_query->pluck('warehouse_id');
-
-        if ($warehouse_ids->isEmpty()) {
-            return collect();
-        }
-
-        return ProductVariationStock::where('business_id', $business_id)
-            ->whereIn('warehouse_id', $warehouse_ids)
-            ->whereIn('product_variation_id', $variation_ids)
-            ->selectRaw('product_variation_id, SUM(quantity) as qty')
-            ->groupBy('product_variation_id')
-            ->pluck('qty', 'product_variation_id');
+    /**
+     * First active branch of a business - the same "no branch chosen yet"
+     * fallback WebsiteCartService::resolveFulfillmentContext() uses, so a
+     * listing/detail request made before a customer has picked a branch
+     * (or a caller that never passes branch_id) still shows real stock
+     * instead of an all-zero storefront.
+     */
+    private function resolveDefaultBranchId(string $business_id): ?string
+    {
+        return \App\Models\Branch::where('business_id', $business_id)
+            ->where('status', Status::ACTIVE)
+            ->where('is_deleted', 0)
+            ->orderBy('name')
+            ->value('branch_id');
     }
 
     /**

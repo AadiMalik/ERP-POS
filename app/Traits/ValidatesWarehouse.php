@@ -42,4 +42,27 @@ trait ValidatesWarehouse
             throw new Exception('The selected warehouse "' . $warehouse->name . '" is inactive and cannot be used.');
         }
     }
+
+    /**
+     * A branch-scoped sale/order no longer picks one warehouse - it draws
+     * combined stock from every warehouse the branch is linked to (see
+     * Branch::warehouses(), branch_warehouses pivot). This just asserts that
+     * link exists before a transaction proceeds, and returns the linked
+     * warehouse ids (priority-ordered) for the caller to consume.
+     */
+    protected function assertBranchHasLinkedWarehouses(?string $businessId, ?string $branchId): array
+    {
+        if (empty($businessId) || empty($branchId)) {
+            throw new Exception('A valid branch could not be determined for this transaction.');
+        }
+
+        $warehouseIds = app(\App\Services\Concrete\Admin\ProductVariationStockService::class)
+            ->getLinkedWarehouseIds($businessId, $branchId);
+
+        if (empty($warehouseIds)) {
+            throw new Exception('No active warehouse is linked to this branch. Link at least one warehouse to it before selling.');
+        }
+
+        return $warehouseIds;
+    }
 }

@@ -16,6 +16,7 @@ class JournalEntryDetail extends Model
         'journal_entry_detail_id',
         'journal_entry_id',
         'account_id',
+        'bank_id',
         'debit',
         'credit',
         'user_id',
@@ -43,6 +44,11 @@ class JournalEntryDetail extends Model
     public function account()
     {
         return $this->belongsTo(Account::class, 'account_id');
+    }
+
+    public function bank()
+    {
+        return $this->belongsTo(Bank::class, 'bank_id');
     }
 
     public function user()

@@ -10,6 +10,8 @@ return [
     'branch_email' => 'Branch Email',
     'branch_phone' => 'Branch Phone',
     'state' => 'State',
+    'linked_warehouses' => 'Linked Warehouses',
+    'linked_warehouses_hint' => 'Stock from every linked warehouse is combined and shown/sold as this branch\'s available stock on the website, mobile app, and POS.',
     'pos_register_hours' => 'POS Automatic Register Hours',
     'open_time' => 'Open Time',
     'close_time' => 'Close Time',

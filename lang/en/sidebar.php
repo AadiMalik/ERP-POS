@@ -162,6 +162,7 @@ return [
     'payment_gateways' => 'Payment Gateways',
     'payment_method_sales' => 'Payment Method Sales',
     'payment_methods' => 'Payment Methods',
+    'banks' => 'Banks',
     'payroll' => 'Payroll',
     'payroll_cost_report' => 'Payroll Cost Report',
     'payroll_payment_disbursement_report' => 'Payroll Payment/Disbursement Report',

@@ -133,7 +133,17 @@ class OfflineSetupService
             ->where('is_deleted', 0)
             ->where('status', Status::ACTIVE)
             ->orderBy('name')
-            ->get(['warehouse_id', 'business_id', 'branch_id', 'code', 'name', 'status']);
+            ->with('branches:branch_id')
+            ->get(['warehouse_id', 'business_id', 'branch_id', 'code', 'name', 'status'])
+            ->map(function (Warehouse $warehouse) {
+                $row = $warehouse->toArray();
+                $row['branch_links'] = $warehouse->branches->map(fn ($b) => [
+                    'branch_id' => $b->branch_id,
+                    'priority' => (int) $b->pivot->priority,
+                ])->values()->all();
+
+                return $row;
+            });
 
         $registers = PosRegister::where('business_id', $business_id)
             ->where('is_deleted', 0)

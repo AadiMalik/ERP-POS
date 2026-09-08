@@ -7,6 +7,7 @@ use App\Enums\RoleNames;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Admin\BranchService;
 use App\Services\Concrete\Admin\BusinessService;
+use App\Services\Concrete\Admin\WarehouseService;
 use App\Traits\ResponseAPI;
 use Exception;
 use Illuminate\Http\Request;
@@ -20,8 +21,9 @@ class BranchController extends Controller
 
     protected $business_service;
     protected $branch_service;
+    protected $warehouse_service;
 
-    public function __construct(BusinessService $business_service, BranchService $branch_service)
+    public function __construct(BusinessService $business_service, BranchService $branch_service, WarehouseService $warehouse_service)
     {
         $this->middleware('permission:branch.view')->only(['index', 'getData', 'byBusiness']);
         $this->middleware('permission:branch.create')->only(['create']);
@@ -32,6 +34,7 @@ class BranchController extends Controller
 
         $this->business_service = $business_service;
         $this->branch_service = $branch_service;
+        $this->warehouse_service = $warehouse_service;
     }
 
     public function index()
@@ -47,7 +50,8 @@ class BranchController extends Controller
     public function create()
     {
         $business = (getRoleName() == RoleNames::SUPERADMIN) ? $this->business_service->getAll() : [];
-        return view('admin.branch.create', compact('business'));
+        $warehouses = $this->warehouse_service->getByBusiness(Auth::user()->business_id);
+        return view('admin.branch.create', compact('business', 'warehouses'));
     }
 
 
@@ -87,6 +91,7 @@ class BranchController extends Controller
             'country',
             'open_time',
             'close_time',
+            'warehouse_ids',
         ]);
         if ($request->hasFile('logo')) {
 
@@ -110,7 +115,9 @@ class BranchController extends Controller
     {
         $branch = $this->branch_service->getById($branch_id);
         $business = $this->business_service->getAll();
-        return view('admin.branch.create', compact('branch', 'business'));
+        $warehouses = $this->warehouse_service->getByBusiness($branch->business_id);
+        $linked_warehouse_ids = $branch->warehouses()->pluck('warehouses.warehouse_id')->all();
+        return view('admin.branch.create', compact('branch', 'business', 'warehouses', 'linked_warehouse_ids'));
     }
 
     public function status($branch_id)

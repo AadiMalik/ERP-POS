@@ -67,7 +67,7 @@ class SetupController extends Controller
             'name' => ['required', 'string', 'max:191'],
             'business_id' => ['required', 'string'],
             'branch_id' => ['required', 'string'],
-            'warehouse_id' => ['required', 'string'],
+            'warehouse_id' => ['nullable', 'string'],
             'pos_register_id' => ['nullable', 'string'],
             'device_fingerprint' => ['nullable', 'string', 'max:128'],
         ]);

@@ -121,6 +121,15 @@
                             </select>
                         </div>
                         <div class="col-md-3">
+                            <label class="form-label">{{ __('common.bank') }}</label>
+                            <select id="bank_id" class="form-select">
+                                <option value="">{{ __('orders.all_banks') }}</option>
+                                @foreach ($banks as $item)
+                                    <option value="{{ $item->bank_id }}">{{ $item->name ?? '' }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label">{{ __('common.status') }}</label>
                             <select id="status" class="form-select">
                                 <option value="">{{ __('common.all_statuses') }}</option>
@@ -235,6 +244,6 @@
         'detail' => true,
         'order' => "[[1, 'asc']]",
         'params' =>
-            "order_id:$('#order_id').val(),daily_order_id:$('#daily_order_id').val(),business_id:$('#business_id').val(),branch_id:$('#branch_id').val(),warehouse_id:$('#warehouse_id').val(),register_id:$('#register_id').val(),cashier_id:$('#cashier_id').val(),customer_id:$('#customer_id').val(),order_type_id:$('#order_type_id').val(),order_source_id:$('#order_source_id').val(),payment_method_id:$('#payment_method_id').val(),status:$('#status').val(),sale_date_start:$('#sale_date_start').val(),sale_date_end:$('#sale_date_end').val()",
+            "order_id:$('#order_id').val(),daily_order_id:$('#daily_order_id').val(),business_id:$('#business_id').val(),branch_id:$('#branch_id').val(),warehouse_id:$('#warehouse_id').val(),register_id:$('#register_id').val(),cashier_id:$('#cashier_id').val(),customer_id:$('#customer_id').val(),order_type_id:$('#order_type_id').val(),order_source_id:$('#order_source_id').val(),payment_method_id:$('#payment_method_id').val(),bank_id:$('#bank_id').val(),status:$('#status').val(),sale_date_start:$('#sale_date_start').val(),sale_date_end:$('#sale_date_end').val()",
     ])
 @endsection

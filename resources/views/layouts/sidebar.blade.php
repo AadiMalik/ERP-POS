@@ -1852,7 +1852,7 @@
         @endcanAccessAny
 
         {{-- Orders (centralized - shared by POS, Website, Mobile App, API) --}}
-        @canAccessAny(['pos.access', 'order-return.view', 'order-type.view', 'order-source.view', 'payment-method.view', 'payment-gateway.view', 'payment-transaction.view', 'discount.view', 'voucher.view',
+        @canAccessAny(['pos.access', 'order-return.view', 'order-type.view', 'order-source.view', 'payment-method.view', 'bank.view', 'payment-gateway.view', 'payment-transaction.view', 'discount.view', 'voucher.view',
             'reports.order-detail.view', 'reports.product-sales.view', 'reports.variation-sales.view', 'reports.customer-sales.view',
             'reports.branch-sales.view', 'reports.order-source-sales.view', 'reports.payment-method-sales.view',
             'reports.order-status-report.view', 'reports.cancelled-orders.view', 'reports.due-credit-sales.view',
@@ -1897,6 +1897,13 @@
                         <li class="menu-item">
                             <a href="{{ url('/admin/payment-method') }}" class="menu-link">
                                 <div data-i18n="Payment Methods">{{ __('sidebar.payment_methods') }}</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('bank.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/bank') }}" class="menu-link">
+                                <div data-i18n="Banks">{{ __('sidebar.banks') }}</div>
                             </a>
                         </li>
                     @endcanAccess

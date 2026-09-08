@@ -204,6 +204,14 @@ class PermissionRegistry
                 'export' => ['name' => 'warehouse.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
+            'bank' => ['label' => 'Banks', 'actions' => [
+                'view'   => ['name' => 'bank.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'bank.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'bank.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'bank.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'bank.status', 'label' => 'Change Status', 'is_system' => false],
+            ]],
+
             'brand' => ['label' => 'Brands', 'actions' => [
                 'view'   => ['name' => 'brand.view', 'label' => 'View', 'is_system' => false],
                 'create' => ['name' => 'brand.create', 'label' => 'Create', 'is_system' => false],
@@ -1822,7 +1830,7 @@ class PermissionRegistry
         return [
             'dashboard', 'warehouse', 'brand', 'category', 'sub-category', 'unit', 'product',
             'barcode', 'unit-conversion', 'batch', 'serial-number', 'stock', 'stock-transaction',
-            'account-type', 'account-sub-type', 'account', 'journal', 'journal-entry', 'bank-reconciliation', 'recurring-transaction',
+            'account-type', 'account-sub-type', 'account', 'bank', 'journal', 'journal-entry', 'bank-reconciliation', 'recurring-transaction',
             'fixed-asset-category', 'fixed-asset', 'fixed-asset-depreciation',
             'supplier', 'customer', 'loyalty', 'order-type', 'payment-method', 'payment-gateway', 'payment-transaction', 'order-source', 'sale-type', 'discount', 'voucher',
             'purchase-request', 'purchase-request-quotation', 'purchase', 'good-receipt-note',

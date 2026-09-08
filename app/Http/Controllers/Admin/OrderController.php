@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\PosRegister;
 use App\Models\User;
+use App\Services\Concrete\Admin\BankService;
 use App\Services\Concrete\Admin\BranchService;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CustomerService;
@@ -46,6 +47,7 @@ class OrderController extends Controller
     protected $thermal_print_setting_resolver;
     protected $voucher_service;
     protected $checkout_service;
+    protected $bank_service;
 
     public function __construct(
         OrderService $order_service,
@@ -59,7 +61,8 @@ class OrderController extends Controller
         DocumentSendLogService $document_send_log_service,
         ThermalPrintSettingResolverService $thermal_print_setting_resolver,
         VoucherService $voucher_service,
-        WebsiteCheckoutService $checkout_service
+        WebsiteCheckoutService $checkout_service,
+        BankService $bank_service
     ) {
         $this->middleware('module:order');
         $this->middleware('permission:order.export')->only(['export']);
@@ -77,6 +80,7 @@ class OrderController extends Controller
         $this->thermal_print_setting_resolver = $thermal_print_setting_resolver;
         $this->voucher_service = $voucher_service;
         $this->checkout_service = $checkout_service;
+        $this->bank_service = $bank_service;
     }
 
     protected function importExportModuleKey(): string
@@ -103,6 +107,7 @@ class OrderController extends Controller
         $order_types = $this->order_type_service->getAllActive($is_superadmin ? null : $business_id);
         $order_sources = $this->order_source_service->getAllActive($is_superadmin ? null : $business_id);
         $payment_methods = $this->payment_method_service->getAllActive($is_superadmin ? null : $business_id);
+        $banks = $is_superadmin ? collect() : $this->bank_service->getByBusiness($business_id);
 
         $statuses = [
             'draft' => 'Draft',
@@ -126,6 +131,7 @@ class OrderController extends Controller
             'order_types',
             'order_sources',
             'payment_methods',
+            'banks',
             'statuses'
         ));
     }
@@ -153,6 +159,7 @@ class OrderController extends Controller
                 'order_types' => $this->order_type_service->getAllActive($business_id),
                 'order_sources' => $this->order_source_service->getAllActive($business_id),
                 'payment_methods' => $this->payment_method_service->getAllActive($business_id),
+                'banks' => $this->bank_service->getByBusiness($business_id),
             ];
 
             return $this->success(Message::FETCH, $data);
@@ -660,6 +667,16 @@ class OrderController extends Controller
         }
     }
 
+    public function stockBreakdown(Request $request)
+    {
+        try {
+            $breakdown = $this->order_service->getStockBreakdown($request->all());
+            return $this->success(Message::FETCH, $breakdown);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
     public function searchVouchers(Request $request)
     {
         $term = trim((string) $request->input('term'));
@@ -841,19 +858,19 @@ class OrderController extends Controller
         $is_fixed_context = in_array($role, [RoleNames::ORDERTAKER, RoleNames::POSMANAGER], true);
         $is_order_taker = $role === RoleNames::ORDERTAKER;
 
-        // Header Branch/Warehouse chips - mirrors PosScreenController::resolveContext()
+        // Header Branch chip - mirrors PosScreenController::resolveContext()
         // so the shared POS header (layouts/pos-header.blade.php) shows the same
         // context here as on the POS screen itself. Purely for display; this page's
-        // own Branch filter dropdown above is unaffected.
+        // own Branch filter dropdown above is unaffected. There is no warehouse
+        // context any more - a branch's linked warehouses' combined stock is
+        // used automatically.
         $branch_name = null;
         $warehouse_name = null;
         if ($is_fixed_context) {
             $branch_name = optional($this->branch_service->getById(Auth::user()->branch_id))->name;
         } else {
             $context_branch_id = session('pos_context_branch_id');
-            $context_warehouse_id = session('pos_context_warehouse_id');
             $branch_name = $context_branch_id ? optional($this->branch_service->getById($context_branch_id))->name : null;
-            $warehouse_name = $context_warehouse_id ? optional($this->warehouse_service->getById($context_warehouse_id))->name : null;
         }
 
         // The POS header's live register-session actions (Cash In/Out, Close

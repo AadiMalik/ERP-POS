@@ -34,17 +34,6 @@
                                 </select>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">{{ __('common.warehouse') }}</label>
-                                <select class="form-select select2" name="warehouse_id" id="warehouse_id">
-                                    <option value="">{{ __('common.select_warehouse') }}</option>
-                                    @foreach ($warehouses as $item)
-                                        <option value="{{ $item->warehouse_id }}">{{ $item->name ?? '' }}</option>
-                                    @endforeach
-                                </select>
-                                <small class="text-muted">{{ __('pos.warehouse_context_hint') }}</small>
-                            </div>
-
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary">{{ __('pos.continue_to_pos') }}</button>
                             </div>
@@ -59,7 +48,6 @@
 @php
     $__i18nPos = [
         'select_branch' => __('common.select_branch'),
-        'select_warehouse' => __('common.select_warehouse'),
     ];
 @endphp
 <script>window.i18n_pos = @json($__i18nPos);</script>
@@ -73,7 +61,6 @@
             let business_id = $(this).val();
 
             $('#branch_id').html('<option value="">{{ __('common.select_branch') }}</option>');
-            $('#warehouse_id').html('<option value="">{{ __('common.select_warehouse') }}</option>');
 
             if (!business_id) {
                 return;
@@ -90,12 +77,6 @@
                     branchOptions += `<option value="${item.branch_id}">${item.name}</option>`;
                 });
                 $('#branch_id').html(branchOptions);
-
-                let warehouseOptions = '<option value="">{{ __('common.select_warehouse') }}</option>';
-                $.each(data.warehouses, function(_, item) {
-                    warehouseOptions += `<option value="${item.warehouse_id}">${item.name}</option>`;
-                });
-                $('#warehouse_id').html(warehouseOptions);
             }).catch(function(err) {
                 errorMessage(err.Message ?? window.i18n?.something_went_wrong || 'Something went wrong');
             });

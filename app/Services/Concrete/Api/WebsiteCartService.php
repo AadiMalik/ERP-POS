@@ -8,11 +8,10 @@ use App\Models\BusinessSetting;
 use App\Models\InventorySetting;
 use App\Models\Product;
 use App\Models\ProductVariation;
-use App\Models\ProductVariationStock;
 use App\Models\SaleType;
-use App\Models\Warehouse;
 use App\Models\WebsiteCart;
 use App\Models\WebsiteCartItem;
+use App\Services\Concrete\Admin\ProductVariationStockService;
 use App\Services\Concrete\Admin\VariationPricingService;
 use App\Services\Concrete\Api\WebsiteCartVoucherService;
 use Exception;
@@ -26,13 +25,16 @@ class WebsiteCartService
 {
     protected $pricing_engine;
     protected $voucher_service;
+    protected $stock_service;
 
     public function __construct(
         VariationPricingService $pricing_engine,
-        WebsiteCartVoucherService $voucher_service
+        WebsiteCartVoucherService $voucher_service,
+        ProductVariationStockService $stock_service
     ) {
         $this->pricing_engine = $pricing_engine;
         $this->voucher_service = $voucher_service;
+        $this->stock_service = $stock_service;
     }
 
     public function getOrCreateCart(int $user_id, string $business_id, ?string $branch_id = null): WebsiteCart
@@ -82,7 +84,7 @@ class WebsiteCartService
 
         $validated = $this->validateLine(
             $business_id,
-            $context['warehouse_id'],
+            $context['branch_id'],
             $product_id,
             $product_variation_id,
             $quantity,
@@ -100,7 +102,7 @@ class WebsiteCartService
 
         $this->validateLine(
             $business_id,
-            $context['warehouse_id'],
+            $context['branch_id'],
             $product_id,
             $product_variation_id,
             $new_qty,
@@ -158,7 +160,7 @@ class WebsiteCartService
 
         $this->validateLine(
             $business_id,
-            $context['warehouse_id'],
+            $context['branch_id'],
             $item->product_id,
             $item->product_variation_id,
             $quantity,
@@ -297,7 +299,7 @@ class WebsiteCartService
             try {
                 $line = $this->validateLine(
                     $cart->business_id,
-                    $context['warehouse_id'],
+                    $context['branch_id'],
                     $item->product_id,
                     $item->product_variation_id,
                     (float) $item->quantity,
@@ -311,12 +313,17 @@ class WebsiteCartService
             }
 
             $qty = (float) $item->quantity;
-            if ($line['is_track_stock'] && $line['available_stock'] !== null && $qty > $line['available_stock']) {
-                $qty = max(0, (float) $line['available_stock']);
-                if ($qty <= 0) {
-                    $item->delete();
-                    continue;
-                }
+            $in_stock = !$line['is_track_stock'] || ($line['available_stock'] ?? 0) > 0;
+
+            // Partial shortfall only (still some stock left, just less than
+            // requested) - clamp down to what's actually available. A line
+            // that's gone to zero is deliberately NOT deleted or clamped
+            // here any more: it stays in the cart at its last requested
+            // quantity, marked in_stock=false below, so the shopper is
+            // shown exactly which item went out of stock and can choose to
+            // remove or wait for it, instead of it silently vanishing.
+            if ($line['is_track_stock'] && $in_stock && $line['available_stock'] !== null && $qty > $line['available_stock']) {
+                $qty = (float) $line['available_stock'];
                 $item->update(['quantity' => $qty, 'date_updated' => now()]);
             }
 
@@ -325,8 +332,13 @@ class WebsiteCartService
             $line_discount = round($line_subtotal * ($line['discount_percentage'] / 100), 3);
             $line_total = round($line_subtotal - $line_discount, 3);
 
-            $subtotal += $line_subtotal;
-            $discount_total += $line_discount;
+            // An out-of-stock line can't actually be purchased, so it's
+            // excluded from the running totals (the shopper sees a real,
+            // chargeable Total) even though the row itself stays visible.
+            if ($in_stock) {
+                $subtotal += $line_subtotal;
+                $discount_total += $line_discount;
+            }
 
             $items[] = [
                 'cart_item_id' => $item->cart_item_id,
@@ -345,7 +357,7 @@ class WebsiteCartService
                 'line_total' => $line_total,
                 'is_track_stock' => $line['is_track_stock'],
                 'available_stock' => $line['available_stock'],
-                'in_stock' => !$line['is_track_stock'] || ($line['available_stock'] ?? 0) > 0,
+                'in_stock' => $in_stock,
             ];
         }
 
@@ -422,7 +434,7 @@ class WebsiteCartService
      */
     public function validateLine(
         string $business_id,
-        ?string $warehouse_id,
+        ?string $branch_id,
         string $product_id,
         string $product_variation_id,
         float $quantity,
@@ -473,7 +485,7 @@ class WebsiteCartService
         $available = null;
 
         if ($is_tracked) {
-            $available = $this->getAvailableStock($business_id, $warehouse_id, $product_id, $product_variation_id);
+            $available = $this->stock_service->getAvailableStockForBranch($business_id, $branch_id, $product_id, $product_variation_id);
             $allow_negative = (bool) (InventorySetting::where('business_id', $business_id)->value('negative_stock') ?? false);
 
             if ($enforce_stock && !$allow_negative && $quantity > $available) {
@@ -540,23 +552,21 @@ class WebsiteCartService
             throw new Exception('No active branch is configured for this business.');
         }
 
-        $warehouse = Warehouse::where('business_id', $business_id)
-            ->where('is_deleted', 0)
-            ->where('status', Status::ACTIVE)
-            ->where(function ($q) use ($branch) {
-                $q->whereNull('branch_id')->orWhere('branch_id', $branch->branch_id);
-            })
-            ->orderByRaw('CASE WHEN branch_id IS NULL THEN 1 ELSE 0 END')
-            ->orderBy('name')
-            ->first();
+        // warehouse_id is kept only for whatever legacy code still reads
+        // this context's shape (e.g. buildCartPayload()'s response,
+        // WebsiteCartVoucherService's POS pricing preview) - it's the
+        // branch's highest-priority linked warehouse. Actual stock
+        // availability always comes from ProductVariationStockService's
+        // combined-branch figures (see validateLine()), never this single id.
+        $warehouse_id = $this->stock_service->getLinkedWarehouseIds($business_id, $branch->branch_id)[0] ?? null;
 
-        if (!$warehouse) {
-            throw new Exception('No active warehouse is configured for this business/branch.');
+        if (!$warehouse_id) {
+            throw new Exception('No active warehouse is linked to this branch.');
         }
 
         return [
             'branch_id' => $branch->branch_id,
-            'warehouse_id' => $warehouse->warehouse_id,
+            'warehouse_id' => $warehouse_id,
         ];
     }
 
@@ -565,22 +575,5 @@ class WebsiteCartService
         $setting = BusinessSetting::where('business_id', $business_id)->first();
 
         return (float) ($setting->overall_tax_rate ?? 0);
-    }
-
-    protected function getAvailableStock(
-        string $business_id,
-        ?string $warehouse_id,
-        string $product_id,
-        string $product_variation_id
-    ): float {
-        if (empty($warehouse_id)) {
-            return 0.0;
-        }
-
-        return (float) (ProductVariationStock::where('business_id', $business_id)
-            ->where('warehouse_id', $warehouse_id)
-            ->where('product_id', $product_id)
-            ->where('product_variation_id', $product_variation_id)
-            ->value('quantity') ?? 0);
     }
 }
