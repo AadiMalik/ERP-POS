@@ -130,6 +130,9 @@ class WebsiteSectionController extends Controller
 
         $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
         $obj['status'] = $request->status ?? 'active';
+        if (!empty($obj['countdown_end_at'])) {
+            $obj['countdown_end_at'] = utcDateTimeLocal($obj['countdown_end_at']);
+        }
 
         $section = $this->section_service->save($obj);
 

@@ -69,8 +69,8 @@
                     <td>{{ $row->employee?->user?->name }}</td>
                     <td>{{ $row->employee?->department?->name }}</td>
                     <td>{{ ucfirst($row->type) }}</td>
-                    <td>{{ localDate($row->request_date) }}</td>
-                    <td>{{ localDate($row->last_working_date) }}</td>
+                    <td>{{ businessDate($row->request_date) }}</td>
+                    <td>{{ businessDate($row->last_working_date) }}</td>
                     <td>{{ $row->reason }}</td>
                     <td>{{ ucfirst($row->status) }}</td>
                 </tr>

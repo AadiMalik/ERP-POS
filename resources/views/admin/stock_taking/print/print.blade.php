@@ -18,7 +18,7 @@
         'branch' => $stock_taking->branch,
         'title' => 'Stock Taking',
         'doc_no' => $stock_taking->stock_taking_no,
-        'doc_date' => localDate($stock_taking->stock_taking_date),
+        'doc_date' => businessDate($stock_taking->stock_taking_date),
         'reference' => [
             'Warehouse' => $stock_taking->warehouse->name ?? 'N/A',
             'Reference' => $stock_taking->reference ?? 'N/A',

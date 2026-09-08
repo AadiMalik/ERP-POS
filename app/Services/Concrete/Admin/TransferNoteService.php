@@ -97,7 +97,7 @@ class TransferNoteService
         return DataTables::of($datatable)
             ->addColumn('transfer_note_date', function ($item) {
                 return !empty($item->transfer_note_date)
-                    ? localDate($item->transfer_note_date)
+                    ? businessDate($item->transfer_note_date)
                     : 'N/A';
             })
             ->addColumn('source_warehouse', function ($item) {

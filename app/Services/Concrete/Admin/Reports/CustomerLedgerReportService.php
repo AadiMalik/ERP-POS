@@ -47,8 +47,8 @@ class CustomerLedgerReportService
             throw new Exception('The selected customer does not have a linked Chart of Account.');
         }
 
-        $from = !empty($obj['start_date']) ? Carbon::parse($obj['start_date'])->startOfDay() : null;
-        $to = !empty($obj['end_date']) ? Carbon::parse($obj['end_date'])->endOfDay() : null;
+        $from = !empty($obj['start_date']) ? businessStartOfDay($obj['start_date']) : null;
+        $to = !empty($obj['end_date']) ? businessEndOfDay($obj['end_date']) : null;
 
         $opening = $this->ledger_query_service->openingBalance($business_id, $branch_id, $user_id, $account_id, $from, $this->allow_roles);
 
@@ -79,8 +79,8 @@ class CustomerLedgerReportService
         $result = $this->build($obj);
 
         return DataTables::of($result['rows'])
-            ->addColumn('document_date', fn ($row) => localDate($row->entry_date))
-            ->addColumn('voucher_date', fn ($row) => localDate($row->entry_date))
+            ->addColumn('document_date', fn ($row) => businessDate($row->entry_date))
+            ->addColumn('voucher_date', fn ($row) => businessDate($row->entry_date))
             ->addColumn('voucher_type', fn ($row) => $row->voucher_name ?? $row->source_type ?? '')
             ->addColumn('voucher_number', fn ($row) => $row->entry_no)
             ->addColumn('reference_number', fn ($row) => $row->reference_no)

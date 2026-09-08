@@ -46,8 +46,8 @@ class DayBookReportService
             $filters['source_type'] = $obj['source_type'];
         }
 
-        $from = !empty($obj['start_date']) ? Carbon::parse($obj['start_date'])->startOfDay() : Carbon::today()->startOfDay();
-        $to = !empty($obj['end_date']) ? Carbon::parse($obj['end_date'])->endOfDay() : Carbon::today()->endOfDay();
+        $from = !empty($obj['start_date']) ? businessStartOfDay($obj['start_date']) : businessStartOfDay();
+        $to = !empty($obj['end_date']) ? businessEndOfDay($obj['end_date']) : businessEndOfDay();
 
         $rows = $this->ledger_query_service->transactions($filters, $from, $to);
 
@@ -73,7 +73,7 @@ class DayBookReportService
         $result = $this->build($obj);
 
         return DataTables::of($result['rows'])
-            ->addColumn('voucher_date', fn ($row) => localDate($row->entry_date))
+            ->addColumn('voucher_date', fn ($row) => businessDate($row->entry_date))
             ->addColumn('voucher_type', fn ($row) => $row->voucher_name ?? $row->source_type ?? '')
             ->addColumn('voucher_number', fn ($row) => $row->entry_no)
             ->addColumn('account', fn ($row) => trim(($row->account_code ?? '') . ' ' . ($row->account_name ?? '')))

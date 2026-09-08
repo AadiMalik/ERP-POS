@@ -13,7 +13,6 @@ use App\Models\ProductVariationStock;
 use App\Repository\Repository;
 use App\Traits\Auditable;
 use App\Traits\ValidatesWarehouse;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -61,10 +60,10 @@ class ManufacturingPlanService
             $wh[] = ['status', $obj['status']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['date_created', '>=', businessStartOfDay($obj['start_date'])];
         }
         if (!empty($obj['end_date'])) {
-            $wh[] = ['date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['date_created', '<=', businessEndOfDay($obj['end_date'])];
         }
 
         $allow_roles = [
@@ -85,7 +84,7 @@ class ManufacturingPlanService
             ->addColumn('business', fn ($item) => $item->business?->name ?? '-')
             ->addColumn('branch', fn ($item) => $item->branch?->name ?? '-')
             ->addColumn('product', fn ($item) => $item->productVariation?->name ?? $item->product?->name ?? '-')
-            ->addColumn('plan_date', fn ($item) => $item->plan_date ? localDate($item->plan_date) : '-')
+            ->addColumn('plan_date', fn ($item) => $item->plan_date ? businessDate($item->plan_date) : '-')
             ->addColumn('planned_quantity', fn ($item) => decimal($item->planned_quantity))
             ->addColumn('produced_quantity', fn ($item) => decimal($item->produced_quantity))
             ->addColumn('progress', fn ($item) => $item->progress_percentage . '%')
@@ -183,7 +182,7 @@ class ManufacturingPlanService
         } else {
             $obj['manufacturing_plan_id'] = generateUuid();
             $obj['plan_no'] = $obj['plan_no'] ?? ('MP-' . strtoupper(substr($obj['manufacturing_plan_id'], 0, 8)));
-            $obj['plan_date'] = $obj['plan_date'] ?? now()->toDateString();
+            $obj['plan_date'] = $obj['plan_date'] ?? businessToday();
             $obj['status'] = ManufacturingPlanStatus::DRAFT;
             $obj['is_complete'] = false;
             $obj['produced_quantity'] = 0;

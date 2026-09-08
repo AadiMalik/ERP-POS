@@ -72,7 +72,7 @@
                     <td>{{ $row->employee?->employee_code }}</td>
                     <td>{{ $row->employee?->user?->name }}</td>
                     <td>{{ $row->employee?->department?->name }}</td>
-                    <td>{{ localDate($row->effective_from) }}</td>
+                    <td>{{ businessDate($row->effective_from) }}</td>
                     <td class="text-right">{{ currency($row->basic_salary) }}</td>
                     <td class="text-right">{{ currency($row->overtime_rate_per_hour) }}</td>
                     <td>{{ $row->components_summary }}</td>

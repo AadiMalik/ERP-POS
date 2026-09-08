@@ -18,13 +18,12 @@ class OvertimeReportService extends BaseAttendanceReportService
     public function build(array $filters): Collection
     {
         $business_id = $this->resolveBusinessId($filters);
-        $start = !empty($filters['start_date']) ? Carbon::parse($filters['start_date'])->startOfDay() : Carbon::now()->startOfMonth();
-        $end = !empty($filters['end_date']) ? Carbon::parse($filters['end_date'])->endOfDay() : Carbon::now()->endOfDay();
+        [$start, $end] = $this->calendarRange($filters);
 
         $query = Attendance::with(['employee.user', 'employee.department', 'employee.shift', 'employee.activeSalaryStructure'])
             ->where('is_deleted', 0)
             ->whereNotNull('working_hours')
-            ->whereBetween('date', [$start->toDateString(), $end->toDateString()]);
+            ->whereBetween('date', [$start, $end]);
 
         if (!empty($business_id)) {
             $query->where('business_id', $business_id);
@@ -76,7 +75,7 @@ class OvertimeReportService extends BaseAttendanceReportService
             ->addColumn('employee_code', fn ($row) => $row->employee?->employee_code ?? '-')
             ->addColumn('name', fn ($row) => $row->employee?->user?->name ?? '-')
             ->addColumn('department', fn ($row) => $row->employee?->department?->name ?? '-')
-            ->addColumn('date', fn ($row) => localDate($row->date))
+            ->addColumn('date', fn ($row) => businessDate($row->date))
             ->addColumn('ot_amount', fn ($row) => currency($row->ot_amount))
             ->with($totals)
             ->make(true);

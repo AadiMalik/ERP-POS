@@ -85,7 +85,9 @@ class BlogService
 
     public function getById($id)
     {
-        return $this->repo->find($id)->load(['category', 'tags', 'author']);
+        $blog = $this->repo->find($id)->load(['category', 'tags', 'author']);
+        $blog->published_at_local = localDateTimeLocal($blog->published_at);
+        return $blog;
     }
 
     public function delete($id)

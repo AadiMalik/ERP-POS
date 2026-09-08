@@ -47,8 +47,8 @@ class CashFlowReportService
         $business_id = $obj['business_id'] ?? Auth::user()->business_id;
         $branch_id = $obj['branch_id'] ?? null;
 
-        $from = !empty($obj['start_date']) ? Carbon::parse($obj['start_date'])->startOfDay() : $this->fiscalYearStart();
-        $to = !empty($obj['end_date']) ? Carbon::parse($obj['end_date'])->endOfDay() : Carbon::today()->endOfDay();
+        $from = !empty($obj['start_date']) ? businessStartOfDay($obj['start_date']) : $this->fiscalYearStart();
+        $to = !empty($obj['end_date']) ? businessEndOfDay($obj['end_date']) : businessEndOfDay();
 
         $cashAccounts = $this->resolveCashAccounts($business_id);
 
@@ -308,10 +308,9 @@ class CashFlowReportService
      */
     protected function fiscalYearStart(): Carbon
     {
-        $today = Carbon::today();
+        $today = Carbon::now(businessTimezone());
+        $year = $today->month >= 7 ? $today->year : $today->year - 1;
 
-        return $today->month >= 7
-            ? Carbon::create($today->year, 7, 1)->startOfDay()
-            : Carbon::create($today->year - 1, 7, 1)->startOfDay();
+        return businessStartOfDay(sprintf('%04d-07-01', $year));
     }
 }

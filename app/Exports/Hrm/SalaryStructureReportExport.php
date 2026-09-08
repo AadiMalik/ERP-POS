@@ -30,7 +30,7 @@ class SalaryStructureReportExport implements FromCollection, WithHeadings, WithM
             $row->employee?->employee_code,
             $row->employee?->user?->name,
             $row->employee?->department?->name,
-            localDate($row->effective_from),
+            businessDate($row->effective_from),
             decimal($row->basic_salary),
             decimal($row->overtime_rate_per_hour),
             $row->components_summary,

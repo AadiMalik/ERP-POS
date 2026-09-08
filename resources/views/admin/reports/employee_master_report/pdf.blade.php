@@ -75,7 +75,7 @@
                     <td>{{ $row->department?->name }}</td>
                     <td>{{ $row->designation?->name }}</td>
                     <td>{{ $row->branch?->name }}</td>
-                    <td>{{ localDate($row->joining_date) }}</td>
+                    <td>{{ businessDate($row->joining_date) }}</td>
                     <td>{{ ucfirst(str_replace('_', ' ', (string) $row->employment_type)) }}</td>
                     <td>{{ $row->user?->phone }}</td>
                     <td>{{ ucfirst(str_replace('_', ' ', $row->status)) }}</td>

@@ -46,8 +46,8 @@ class CustomerSegmentService
         $in_range = Order::query()
             ->where('is_deleted', 0)
             ->where('status', 'posted')
-            ->where('sale_date', '>=', Carbon::parse($obj['start_date'])->startOfDay())
-            ->where('sale_date', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            ->where('sale_date', '>=', businessStartOfDay($obj['start_date']))
+            ->where('sale_date', '<=', businessEndOfDay($obj['end_date']));
 
         if (!empty($business_id)) {
             $in_range->where('orders.business_id', $business_id);

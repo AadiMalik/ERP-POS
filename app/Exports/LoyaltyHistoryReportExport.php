@@ -35,7 +35,7 @@ class LoyaltyHistoryReportExport implements FromCollection, WithHeadings, WithMa
             ucfirst($row->transaction_type),
             round($row->points, 3),
             $row->monetary_value !== null ? round($row->monetary_value, 2) : '',
-            optional($row->date_created)->format('d-m-Y H:i'),
+            localDateTime($row->date_created),
             round($row->available_balance_after, 3),
         ];
     }

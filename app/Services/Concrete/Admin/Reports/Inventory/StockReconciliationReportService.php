@@ -93,7 +93,7 @@ class StockReconciliationReportService
         ])->map(function ($row) {
             return (object) [
                 'doc_no' => $row->stock_taking_no,
-                'doc_date' => $row->stock_taking_date,
+                'doc_date' => businessDate($row->stock_taking_date),
                 'warehouse_name' => $row->warehouse_name,
                 'product_name' => $row->product_name,
                 'variation_name' => $row->variation_name,
@@ -135,7 +135,7 @@ class StockReconciliationReportService
 
             return (object) [
                 'doc_no' => $this->reference_resolver->resolveDocNo($row->reference_type, $row->reference_id),
-                'doc_date' => $row->transaction_date,
+                'doc_date' => localDate($row->transaction_date),
                 'warehouse_name' => $row->warehouse_name,
                 'product_name' => $row->product_name,
                 'variation_name' => $row->variation_name,
@@ -170,7 +170,7 @@ class StockReconciliationReportService
             ->addColumn('doc_no', fn ($row) => $row->edit_url && $row->edit_url !== '#'
                 ? '<a href="' . e($row->edit_url) . '">' . e($row->doc_no) . '</a>'
                 : e($row->doc_no))
-            ->addColumn('doc_date', fn ($row) => localDate($row->doc_date))
+            ->addColumn('doc_date', fn ($row) => $row->doc_date)
             ->addColumn('movement_type', fn ($row) => e($row->movement_type))
             ->addColumn('warehouse_name', fn ($row) => e($row->warehouse_name))
             ->addColumn('product_name', fn ($row) => '<a href="' . e($row->ledger_url) . '">' . e($row->product_name) . '</a>')

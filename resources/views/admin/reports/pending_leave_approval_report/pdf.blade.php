@@ -73,8 +73,8 @@
                     <td>{{ $row->employee?->user?->name }}</td>
                     <td>{{ $row->employee?->department?->name }}</td>
                     <td>{{ $row->leaveType?->name }}</td>
-                    <td>{{ localDate($row->start_date) }}</td>
-                    <td>{{ localDate($row->end_date) }}</td>
+                    <td>{{ businessDate($row->start_date) }}</td>
+                    <td>{{ businessDate($row->end_date) }}</td>
                     <td class="text-right">{{ $row->days_count }}</td>
                     <td>{{ localDate($row->date_created) }}</td>
                 </tr>

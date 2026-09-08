@@ -16,6 +16,7 @@ use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CommonService;
 use App\Services\Concrete\Admin\CustomerService;
 use App\Models\Order;
+use App\Models\Timezone;
 use App\Services\Concrete\Admin\PrintSettingResolverService;
 use App\Services\Concrete\Admin\SaleTypeService;
 use App\Services\Concrete\Admin\SettingService;
@@ -210,7 +211,7 @@ $this->middleware('permission:setting.manage');
     public function updateBusinessSetting(Request $request)
     {
         $rules = [
-            'timezone'         => 'required',
+            'timezone'         => ['required', Rule::in(Timezone::pluck('name'))],
             'overall_tax_rate' => 'nullable|numeric|min:0|max:100',
             'card_tax_rate'    => 'nullable|numeric|min:0|max:100',
             'date_format'      => 'required',

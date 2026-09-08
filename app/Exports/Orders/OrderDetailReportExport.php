@@ -34,7 +34,7 @@ class OrderDetailReportExport implements FromCollection, WithHeadings, WithMappi
     {
         return [
             $row->daily_order_id,
-            optional($row->order_date)->format('d-m-Y H:i'),
+            localDateTime($row->order_date),
             $row->customer_name ?? 'Walk-in',
             $row->branch_name ?? '',
             $row->order_source_name ?? '',

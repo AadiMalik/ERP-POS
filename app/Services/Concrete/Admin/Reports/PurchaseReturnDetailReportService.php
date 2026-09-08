@@ -126,7 +126,7 @@ class PurchaseReturnDetailReportService
         ];
 
         return DataTables::of($rows)
-            ->addColumn('purchase_return_date', fn ($row) => localDate($row->purchase_return_date))
+            ->addColumn('purchase_return_date', fn ($row) => businessDate($row->purchase_return_date))
             ->addColumn('purchase_return_no', fn ($row) => $row->purchase_return_no)
             ->addColumn('source_no', fn ($row) => ($row->return_type === 'grn' ? 'GRN: ' : 'Purchase: ') . ($row->source_no ?? ''))
             ->addColumn('supplier_name', fn ($row) => $row->supplier_name)

@@ -31,7 +31,7 @@ class CancelledOrdersReportExport implements FromCollection, WithHeadings, WithM
 
         return [
             $row->daily_order_id,
-            optional($row->order_date)->format('d-m-Y H:i'),
+            localDateTime($row->order_date),
             $row->user->name ?? 'Walk-in',
             $row->branch->name ?? '',
             $row->orderSource->name ?? '',

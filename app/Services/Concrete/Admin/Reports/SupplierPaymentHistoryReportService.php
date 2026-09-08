@@ -74,11 +74,11 @@ class SupplierPaymentHistoryReportService
         }
 
         if (!empty($obj['start_date'])) {
-            $query->where('supplier_payments.payment_date', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $query->where('supplier_payments.payment_date', '>=', businessStartOfDay($obj['start_date']));
         }
 
         if (!empty($obj['end_date'])) {
-            $query->where('supplier_payments.payment_date', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $query->where('supplier_payments.payment_date', '<=', businessEndOfDay($obj['end_date']));
         }
 
         return applyRoleScope($query, $this->allow_roles, 'supplier_payments.business_id', 'supplier_payments.branch_id');
@@ -128,7 +128,7 @@ class SupplierPaymentHistoryReportService
         $totals = $this->totals($obj);
 
         return DataTables::of($query)
-            ->addColumn('payment_date', fn ($row) => localDate($row->payment_date))
+            ->addColumn('payment_date', fn ($row) => businessDate($row->payment_date))
             ->addColumn('supplier', fn ($row) => $row->supplier->name ?? '')
             ->addColumn('payment_method', fn ($row) => ucwords(str_replace('_', ' ', $row->payment_method)))
             ->addColumn('purchase_no', fn ($row) => $row->purchase->purchase_no ?? '')

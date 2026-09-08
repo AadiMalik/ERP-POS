@@ -96,7 +96,7 @@ class WasteDamageExpiryService
 
         return DataTables::of($datatable)
             ->addColumn('transaction_date', function ($item) {
-                return !empty($item->transaction_date) ? localDate($item->transaction_date) : 'N/A';
+                return !empty($item->transaction_date) ? businessDate($item->transaction_date) : 'N/A';
             })
             ->addColumn('warehouse', function ($item) {
                 return $item->warehouse->name ?? '';

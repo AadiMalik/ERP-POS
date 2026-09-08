@@ -143,7 +143,7 @@ class PurchaseReturnService
         return DataTables::of($datatable)
             ->addColumn('purchase_return_date', function ($item) {
                 return !empty($item->purchase_return_date)
-                    ? localDate($item->purchase_return_date)
+                    ? businessDate($item->purchase_return_date)
                     : 'N/A';
             })
             ->addColumn('return_type', function ($item) {
@@ -336,7 +336,7 @@ class PurchaseReturnService
                 'discount'                               => $detail->discount ?? 0,
                 'tax'                                    => $detail->tax ?? 0,
                 'batch_no'                               => $detail->batch_no,
-                'expiry_date'                            => localDate($detail->expiry_date),
+                'expiry_date'                            => businessDate($detail->expiry_date),
                 'track_serial_number'                    => (bool) ($detail->productVariation->track_serial_number ?? false),
             ];
         }
@@ -411,7 +411,7 @@ class PurchaseReturnService
                 'discount'                               => $purchase_detail->discount ?? 0,
                 'tax'                                    => $purchase_detail->tax ?? 0,
                 'batch_no'                               => $detail->batch_no,
-                'expiry_date'                            => localDate($detail->expiry_date),
+                'expiry_date'                            => businessDate($detail->expiry_date),
                 'track_serial_number'                    => (bool) ($detail->productVariation->track_serial_number ?? false),
             ];
         }
@@ -735,7 +735,7 @@ class PurchaseReturnService
                     'total'                       => $detail->total,
                     'reason'                      => $detail->reason,
                     'batch_no'                    => $detail->purchaseDetail->batch_no ?? $detail->goodReceiptNoteDetail->batch_no ?? null,
-                    'expiry_date'                 => localDate($detail->purchaseDetail->expiry_date ?? $detail->goodReceiptNoteDetail->expiry_date ?? null),
+                    'expiry_date'                 => businessDate($detail->purchaseDetail->expiry_date ?? $detail->goodReceiptNoteDetail->expiry_date ?? null),
                     'track_serial_number'         => (bool) ($detail->productVariation->track_serial_number ?? false),
                     'serial_numbers'              => $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [],
                 ];

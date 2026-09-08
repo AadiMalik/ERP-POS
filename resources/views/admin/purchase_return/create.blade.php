@@ -98,7 +98,7 @@
                         <div class="col-md-3 mb-3">
                             <label>{{ __('purchase_returns.return_date') }}</label>
                             <input type="text" class="form-control datepicker" name="purchase_return_date"
-                                value="{{ old('purchase_return_date', isset($purchase_return) ? localDate($purchase_return->purchase_return_date) : localDate(date('Y-m-d'))) }}">
+                                value="{{ old('purchase_return_date', isset($purchase_return) ? businessDate($purchase_return->purchase_return_date) : businessDate(businessToday())) }}">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>{{ __('common.reason') }}</label>

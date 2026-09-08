@@ -52,7 +52,7 @@
                         <div class="col-md-3 mb-3">
                             <label>Sale Date <span class="text-danger">*</span></label>
                             <input type="text" class="form-control datepicker" name="service_sale_date"
-                                value="{{ old('service_sale_date', isset($service_sale) ? localDate($service_sale->service_sale_date) : localDate(date('Y-m-d'))) }}">
+                                value="{{ old('service_sale_date', isset($service_sale) ? businessDate($service_sale->service_sale_date) : businessDate(businessToday())) }}">
                         </div>
                         <div class="col-md-12 mb-3">
                             <label>Description</label>

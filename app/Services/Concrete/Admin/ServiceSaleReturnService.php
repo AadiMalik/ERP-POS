@@ -87,10 +87,10 @@ class ServiceSaleReturnService
             $wh[] = ['status', $obj['status']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['service_sale_return_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['service_sale_return_date', '>=', businessStartOfDay($obj['start_date'])];
         }
         if (!empty($obj['end_date'])) {
-            $wh[] = ['service_sale_return_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['service_sale_return_date', '<=', businessEndOfDay($obj['end_date'])];
         }
 
         $allow_roles = [
@@ -108,7 +108,7 @@ class ServiceSaleReturnService
         return DataTables::of($datatable)
             ->addColumn('service_sale_return_date', function ($item) {
                 return !empty($item->service_sale_return_date)
-                    ? localDate($item->service_sale_return_date)
+                    ? businessDate($item->service_sale_return_date)
                     : 'N/A';
             })
             ->addColumn('source_no', function ($item) {

@@ -77,11 +77,11 @@ class VoucherService
             $wh[] = ['business_id', $obj['business_id']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['date_created', '>=', businessStartOfDay($obj['start_date'])];
         }
 
         if (!empty($obj['end_date'])) {
-            $wh[] = ['date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['date_created', '<=', businessEndOfDay($obj['end_date'])];
         }
         $allow_roles = [
             RoleNames::SUPERADMIN,
@@ -295,7 +295,9 @@ class VoucherService
      */
     public function searchActive(string $term, string $business_id, int $limit = 20)
     {
-        $now = Carbon::now();
+        // Business-local "now" - valid_from/valid_to are pure calendar dates
+        // representing the business's own day, not a UTC instant.
+        $now = Carbon::now(businessTimezone());
 
         return $this->model_voucher->getModel()::where('business_id', $business_id)
             ->where('status', Status::ACTIVE)
@@ -339,13 +341,16 @@ class VoucherService
      * $context keys: product_id, category_id, brand_id, variation_id, user_id,
      * order_type_id, branch_id, sale_type_id, order_source_id, payment_method_ids
      * (array, checked only when present - unknowable pre-payment), order_amount,
-     * now (optional Carbon, defaults to now()).
+     * now (optional Carbon, defaults to the business-local now()).
      *
      * @return array{eligible: bool, reason: string|null}
      */
     public function isApplicable(Voucher $voucher, array $context): array
     {
-        $now = $context['now'] ?? Carbon::now();
+        // Business-local "now" - valid_from/valid_to/days_of_week/time_start/
+        // time_end are all business-local calendar/clock concepts (a voucher
+        // valid "Mon-Fri 9am-5pm" means the business's own timezone), not UTC.
+        $now = $context['now'] ?? Carbon::now(businessTimezone());
 
         if ($voucher->status != Status::ACTIVE || $voucher->is_deleted) {
             return ['eligible' => false, 'reason' => 'This voucher is not active.'];
@@ -767,7 +772,7 @@ class VoucherService
                     'customer' => optional($row->user)->name,
                     'customer_email' => optional($row->user)->email,
                     'discount_amount' => (float) $row->discount_amount,
-                    'used_at' => optional($row->date_created)->format('d-m-Y H:i'),
+                    'used_at' => localDateTime($row->date_created),
                 ];
             });
     }

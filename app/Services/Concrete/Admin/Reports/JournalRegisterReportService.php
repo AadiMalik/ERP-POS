@@ -62,10 +62,10 @@ class JournalRegisterReportService
         applyRoleScope($query, $this->allow_roles, 'journal_entries.business_id', 'journal_entries.branch_id');
 
         if (!empty($obj['start_date'])) {
-            $query->where('journal_entries.entry_date', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $query->where('journal_entries.entry_date', '>=', businessStartOfDay($obj['start_date']));
         }
         if (!empty($obj['end_date'])) {
-            $query->where('journal_entries.entry_date', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $query->where('journal_entries.entry_date', '<=', businessEndOfDay($obj['end_date']));
         }
 
         return $query->groupBy(
@@ -111,7 +111,7 @@ class JournalRegisterReportService
         ];
 
         return DataTables::of($rows)
-            ->addColumn('entry_date', fn ($row) => localDate($row->entry_date))
+            ->addColumn('entry_date', fn ($row) => businessDate($row->entry_date))
             ->addColumn('journal_type', fn ($row) => $row->journal_name ?? $row->journal_short)
             ->addColumn('entry_no', fn ($row) => $row->entry_no)
             ->addColumn('source_type', fn ($row) => $row->source_type)

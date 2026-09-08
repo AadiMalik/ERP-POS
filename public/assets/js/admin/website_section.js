@@ -44,7 +44,7 @@ editRecord({
         $("#secondary_button_link").val(data.secondary_button_link);
         $("#secondary_link_type").val(data.secondary_link_type);
         $("#secondary_link_target_id").val(data.secondary_link_target_id);
-        $("#countdown_end_at").val(data.countdown_end_at ? data.countdown_end_at.replace(' ', 'T').substring(0, 16) : '');
+        $("#countdown_end_at").val(data.countdown_end_at_local || '');
         $("#sort_order").val(data.sort_order);
         if (data.image_url) { $("#image_preview").attr("src", data.image_url).show(); } else { $("#image_preview").hide(); }
         if (data.image_mobile_url) { $("#image_mobile_preview").attr("src", data.image_mobile_url).show(); } else { $("#image_mobile_preview").hide(); }

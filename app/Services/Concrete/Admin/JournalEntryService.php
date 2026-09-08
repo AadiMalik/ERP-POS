@@ -50,11 +50,11 @@ class JournalEntryService
                   $wh[] = ['brand_id', $obj['brand_id']];
             }
             if (!empty($obj['start_date'])) {
-                  $wh[] = ['entry_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+                  $wh[] = ['entry_date', '>=', businessStartOfDay($obj['start_date'])];
             }
 
             if (!empty($obj['end_date'])) {
-                  $wh[] = ['entry_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+                  $wh[] = ['entry_date', '<=', businessEndOfDay($obj['end_date'])];
             }
             $allow_roles = [
                   RoleNames::SUPERADMIN,
@@ -70,7 +70,7 @@ class JournalEntryService
             return DataTables::of($datatable)
                   ->addColumn('entry_date', function ($item) {
                         return !empty($item->entry_date)
-                              ? Carbon::parse($item->entry_date)->format('d-m-Y')
+                              ? localDate($item->entry_date)
                               : 'N/A';
                   })
                   ->addColumn('journal', function ($item) {

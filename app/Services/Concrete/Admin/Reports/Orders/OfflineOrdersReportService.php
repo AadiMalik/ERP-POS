@@ -36,7 +36,7 @@ class OfflineOrdersReportService extends BaseOrderReportService
 
         return DataTables::of($rows)
             ->addColumn('order_no', fn ($row) => $row->daily_order_id)
-            ->addColumn('order_date', fn ($row) => optional($row->order_date)->format('d-m-Y H:i'))
+            ->addColumn('order_date', fn ($row) => localDateTime($row->order_date))
             ->addColumn('branch', fn ($row) => $row->branch->name ?? '')
             ->addColumn('device_name', fn ($row) => $row->posDevice->name ?? '-')
             ->addColumn('customer', fn ($row) => $row->user->name ?? 'Walk-in')

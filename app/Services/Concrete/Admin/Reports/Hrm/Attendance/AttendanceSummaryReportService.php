@@ -3,7 +3,6 @@
 namespace App\Services\Concrete\Admin\Reports\Hrm\Attendance;
 
 use App\Models\Employee;
-use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Collection;
 use Yajra\DataTables\DataTables;
@@ -14,11 +13,10 @@ class AttendanceSummaryReportService extends BaseAttendanceReportService
     {
         $business_id = $this->resolveBusinessId($filters);
 
-        $start = !empty($filters['start_date']) ? Carbon::parse($filters['start_date'])->startOfDay() : Carbon::now()->startOfMonth();
-        $end = !empty($filters['end_date']) ? Carbon::parse($filters['end_date'])->endOfDay() : Carbon::now()->endOfDay();
+        [$start, $end] = $this->calendarRange($filters);
 
         $query = Employee::with(['user', 'department', 'designation', 'shift', 'attendances' => function ($q) use ($start, $end) {
-            $q->whereBetween('date', [$start->toDateString(), $end->toDateString()])->where('is_deleted', 0);
+            $q->whereBetween('date', [$start, $end])->where('is_deleted', 0);
         }])->where('is_deleted', 0);
 
         if (!empty($business_id)) {

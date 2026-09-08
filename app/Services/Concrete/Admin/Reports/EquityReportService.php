@@ -64,8 +64,8 @@ class EquityReportService
             'allow_roles' => $this->allow_roles,
         ];
 
-        $from = !empty($obj['start_date']) ? Carbon::parse($obj['start_date'])->startOfDay() : null;
-        $to = !empty($obj['end_date']) ? Carbon::parse($obj['end_date'])->endOfDay() : null;
+        $from = !empty($obj['start_date']) ? businessStartOfDay($obj['start_date']) : null;
+        $to = !empty($obj['end_date']) ? businessEndOfDay($obj['end_date']) : null;
 
         $openingMap = $this->ledger_query_service->openingBalances($filters, $from);
         $periodMap = $this->ledger_query_service->periodMovements($filters, $from, $to);

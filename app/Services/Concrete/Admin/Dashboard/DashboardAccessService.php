@@ -197,19 +197,21 @@ class DashboardAccessService
      */
     protected function resolveDateRange(string $role, Request $request): array
     {
-        if ($role === RoleNames::ORDERTAKER) {
-            $today = Carbon::today();
+        $tz = businessTimezone();
 
-            return [$today->copy()->startOfDay(), $today->copy()->endOfDay(), false];
+        if ($role === RoleNames::ORDERTAKER) {
+            $today = Carbon::now($tz)->startOfDay();
+
+            return [$today->copy(), $today->copy()->endOfDay(), false];
         }
 
         $start = $request->filled('start_date')
-            ? Carbon::parse($request->input('start_date'))->startOfDay()
-            : Carbon::now()->startOfMonth();
+            ? Carbon::parse($request->input('start_date'), $tz)->startOfDay()
+            : Carbon::now($tz)->startOfMonth();
 
         $end = $request->filled('end_date')
-            ? Carbon::parse($request->input('end_date'))->endOfDay()
-            : Carbon::now()->endOfMonth();
+            ? Carbon::parse($request->input('end_date'), $tz)->endOfDay()
+            : Carbon::now($tz)->endOfMonth()->endOfDay();
 
         return [$start, $end, true];
     }

@@ -60,10 +60,10 @@ class ProductionReportService
             $q->where('batch_no', 'like', '%' . $filters['batch_no'] . '%');
         }
         if (!empty($filters['start_date'])) {
-            $q->where('date_created', '>=', Carbon::parse($filters['start_date'])->startOfDay());
+            $q->where('date_created', '>=', businessStartOfDay($filters['start_date']));
         }
         if (!empty($filters['end_date'])) {
-            $q->where('date_created', '<=', Carbon::parse($filters['end_date'])->endOfDay());
+            $q->where('date_created', '<=', businessEndOfDay($filters['end_date']));
         }
 
         return applyRoleScope($q, $this->allow_roles);

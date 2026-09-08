@@ -38,7 +38,7 @@ class EmployeeMasterReportExport implements FromCollection, WithHeadings, WithMa
             $row->designation?->name,
             $row->shift?->name,
             $row->branch?->name,
-            localDate($row->joining_date),
+            businessDate($row->joining_date),
             ucfirst(str_replace('_', ' ', (string) $row->employment_type)),
             $row->gender,
             $row->marital_status,

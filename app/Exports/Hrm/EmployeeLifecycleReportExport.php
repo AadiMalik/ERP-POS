@@ -37,7 +37,7 @@ class EmployeeLifecycleReportExport implements FromCollection, WithHeadings, Wit
             $employee->user?->name,
             $employee->department?->name,
             $employee->designation?->name,
-            localDate($employee->joining_date),
+            businessDate($employee->joining_date),
             ucfirst(str_replace('_', ' ', $employee->status)),
             $row->attendance_present,
             $row->attendance_absent,

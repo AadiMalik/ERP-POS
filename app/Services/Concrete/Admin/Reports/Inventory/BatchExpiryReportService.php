@@ -23,7 +23,7 @@ class BatchExpiryReportService
             ? (int) $obj['expiry_within_days']
             : null;
         $expired_only = !empty($obj['expired_only']);
-        $now = Carbon::now()->startOfDay();
+        $now = Carbon::parse(businessToday());
 
         $q = ProductVariationBatch::query()
             ->join('warehouses', 'warehouses.warehouse_id', '=', 'product_variation_batches.warehouse_id')
@@ -131,8 +131,8 @@ class BatchExpiryReportService
             ->addColumn('quantity', fn ($row) => decimal($row->quantity))
             ->addColumn('avg_price', fn ($row) => currency($row->avg_price))
             ->addColumn('stock_value', fn ($row) => currency($row->stock_value))
-            ->addColumn('manufacturing_date', fn ($row) => $row->manufacturing_date ? localDate($row->manufacturing_date) : '-')
-            ->addColumn('expiry_date', fn ($row) => $row->expiry_date ? localDate($row->expiry_date) : '-')
+            ->addColumn('manufacturing_date', fn ($row) => $row->manufacturing_date ? businessDate($row->manufacturing_date) : '-')
+            ->addColumn('expiry_date', fn ($row) => $row->expiry_date ? businessDate($row->expiry_date) : '-')
             ->addColumn('days_to_expiry', function ($row) {
                 if ($row->days_to_expiry === null) {
                     return '-';

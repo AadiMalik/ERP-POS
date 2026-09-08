@@ -18,7 +18,7 @@
         'branch' => $grn->branch,
         'title' => 'Goods Receipt Note',
         'doc_no' => $grn->good_receipt_note_no,
-        'doc_date' => localDate($grn->good_receipt_note_date),
+        'doc_date' => businessDate($grn->good_receipt_note_date),
         'reference' => [
             'Supplier' => $grn->supplier->name ?? 'N/A',
             'Warehouse' => $grn->warehouse->name ?? 'N/A',

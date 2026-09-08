@@ -39,7 +39,7 @@ class SalesReportExport implements FromCollection, WithHeadings, WithMapping, Sh
     {
         return [
             $row->daily_order_id,
-            optional($row->order_date)->format('d-m-Y H:i'),
+            localDateTime($row->order_date),
             optional($row->user)->name ?? 'Walk-in',
             optional($row->warehouse)->name ?? '',
             decimal($row->subtotal),

@@ -13,14 +13,6 @@ function previewImage(inputId, previewId) {
 previewImage("featured_image", "featured_image_preview");
 previewImage("og_image", "og_image_preview");
 
-function toLocalInput(dt) {
-    if (!dt) return '';
-    let d = new Date(dt);
-    if (isNaN(d.getTime())) return String(dt).slice(0, 16);
-    let pad = n => String(n).padStart(2, '0');
-    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-}
-
 $("#createIntroBlog").click(function () {
     $("#intro_blog_form")[0].reset();
     $("#intro_blog_id").val('');
@@ -47,7 +39,7 @@ editRecord({
         let tags = (data.tags || []).map(t => t.intro_blog_tag_id || t.id);
         $("#tag_ids").val(tags).trigger('change');
         $("#reading_time").val(data.reading_time);
-        $("#published_at").val(toLocalInput(data.published_at));
+        $("#published_at").val(data.published_at_local || '');
         $("#seo_title").val(data.seo_title);
         $("#meta_description").val(data.meta_description);
         $("#meta_keywords").val(data.meta_keywords);

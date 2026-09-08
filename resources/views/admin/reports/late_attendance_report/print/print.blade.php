@@ -39,7 +39,7 @@
                     <td>{{ $row->employee?->employee_code }}</td>
                     <td>{{ $row->employee?->user?->name }}</td>
                     <td>{{ $row->employee?->department?->name }}</td>
-                    <td>{{ localDate($row->date) }}</td>
+                    <td>{{ businessDate($row->date) }}</td>
                     <td>{{ $row->check_in_time }}</td>
                     <td class="text-right">{{ $row->late_minutes }}</td>
                 </tr>

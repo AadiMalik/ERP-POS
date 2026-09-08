@@ -32,7 +32,7 @@ class EmployeeDirectoryReportExport implements FromCollection, WithHeadings, Wit
             $row->department?->name,
             $row->designation?->name,
             $row->branch?->name,
-            localDate($row->joining_date),
+            businessDate($row->joining_date),
             $row->user?->email,
             $row->user?->phone,
             ucfirst(str_replace('_', ' ', $row->status)),

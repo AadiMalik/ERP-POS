@@ -68,10 +68,10 @@ class CustomerPaymentService
             $wh[] = ['status', $obj['status']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['payment_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['payment_date', '>=', businessStartOfDay($obj['start_date'])];
         }
         if (!empty($obj['end_date'])) {
-            $wh[] = ['payment_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['payment_date', '<=', businessEndOfDay($obj['end_date'])];
         }
 
         $allow_roles = [
@@ -87,7 +87,7 @@ class CustomerPaymentService
 
         return DataTables::of($datatable)
             ->addColumn('payment_date', function ($item) {
-                return !empty($item->payment_date) ? localDate($item->payment_date) : 'N/A';
+                return !empty($item->payment_date) ? businessDate($item->payment_date) : 'N/A';
             })
             ->addColumn('customer', function ($item) {
                 return $item->user->name ?? '';

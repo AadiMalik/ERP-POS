@@ -70,7 +70,7 @@
             @forelse ($rows as $row)
                 <tr>
                     <td>{{ $row->daily_order_id }}</td>
-                    <td>{{ optional($row->order_date)->format('d-m-Y H:i') }}</td>
+                    <td>{{ localDateTime($row->order_date) }}</td>
                     <td>{{ $row->customer_name ?? 'Walk-in' }}</td>
                     <td class="text-right">{{ currency($row->total) }}</td>
                     <td class="text-right">{{ decimal($row->loyalty_points_used) }}</td>

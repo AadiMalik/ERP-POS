@@ -93,7 +93,7 @@ class StockTakingService
         return DataTables::of($datatable)
             ->addColumn('stock_taking_date', function ($item) {
                 return !empty($item->stock_taking_date)
-                    ? localDate($item->stock_taking_date)
+                    ? businessDate($item->stock_taking_date)
                     : 'N/A';
             })
             ->addColumn('warehouse', function ($item) {

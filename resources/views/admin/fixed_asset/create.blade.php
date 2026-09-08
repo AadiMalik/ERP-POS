@@ -95,7 +95,7 @@
                     <div class="col-md-4">
                         <label class="fw-semibold">Purchase Date <span class="text-danger">*</span></label>
                         <input type="text" class="form-control datepicker" name="purchase_date"
-                            value="{{ old('purchase_date', isset($fixed_asset) ? localDate($fixed_asset->purchase_date) : localDate(date('Y-m-d'))) }}" required>
+                            value="{{ old('purchase_date', isset($fixed_asset) ? businessDate($fixed_asset->purchase_date) : businessDate(businessToday())) }}" required>
                     </div>
 
                     <div class="col-md-4">

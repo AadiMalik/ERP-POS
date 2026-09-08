@@ -40,8 +40,8 @@ class PendingLeaveApprovalReportService extends BaseLeaveReportService
             ->addColumn('name', fn ($row) => $row->employee?->user?->name ?? '-')
             ->addColumn('department', fn ($row) => $row->employee?->department?->name ?? '-')
             ->addColumn('leave_type', fn ($row) => $row->leaveType?->name ?? '-')
-            ->addColumn('start_date', fn ($row) => localDate($row->start_date))
-            ->addColumn('end_date', fn ($row) => localDate($row->end_date))
+            ->addColumn('start_date', fn ($row) => businessDate($row->start_date))
+            ->addColumn('end_date', fn ($row) => businessDate($row->end_date))
             ->addColumn('requested_on', fn ($row) => localDate($row->date_created))
             ->make(true);
     }

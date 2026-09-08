@@ -61,7 +61,7 @@ class OrderTaxReportService extends BaseOrderReportService
 
         return DataTables::of($rows)
             ->addColumn('order_no', fn ($row) => $row->daily_order_id)
-            ->addColumn('order_date', fn ($row) => optional($row->order_date)->format('d-m-Y H:i'))
+            ->addColumn('order_date', fn ($row) => localDateTime($row->order_date))
             ->editColumn('tax_rate', fn ($row) => decimal($row->tax_rate) . '%')
             ->editColumn('taxable_amount', fn ($row) => currency($row->taxable_amount))
             ->editColumn('tax_amount', fn ($row) => currency($row->tax_amount))

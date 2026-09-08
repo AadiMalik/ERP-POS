@@ -57,11 +57,11 @@ class BrandService
                   $wh[] = ['business_id', $obj['business_id']];
             }
             if (!empty($obj['start_date'])) {
-                  $wh[] = ['date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+                  $wh[] = ['date_created', '>=', businessStartOfDay($obj['start_date'])];
             }
 
             if (!empty($obj['end_date'])) {
-                  $wh[] = ['date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+                  $wh[] = ['date_created', '<=', businessEndOfDay($obj['end_date'])];
             }
             $with = ['business'];
             $allow_roles = [

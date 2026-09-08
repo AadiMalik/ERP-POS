@@ -129,12 +129,12 @@ class WasteDamageExpiryReportService
             ->addColumn('reference_no', function ($row) {
                 return '<a href="' . url('/admin/waste-damage-expiry/' . $row->waste_damage_expiry_id . '/edit') . '">' . e($row->reference_no) . '</a>';
             })
-            ->addColumn('transaction_date', fn ($row) => localDate($row->transaction_date))
+            ->addColumn('transaction_date', fn ($row) => businessDate($row->transaction_date))
             ->addColumn('warehouse_name', fn ($row) => e($row->warehouse_name))
             ->addColumn('product_name', fn ($row) => e($row->product_name))
             ->addColumn('variation_name', fn ($row) => e($row->variation_name))
             ->addColumn('batch_no', fn ($row) => e($row->batch_no))
-            ->addColumn('expiry_date', fn ($row) => $row->expiry_date ? localDate($row->expiry_date) : '-')
+            ->addColumn('expiry_date', fn ($row) => $row->expiry_date ? businessDate($row->expiry_date) : '-')
             ->addColumn('quantity', fn ($row) => decimal($row->quantity))
             ->addColumn('unit_name', fn ($row) => e($row->unit_name))
             ->addColumn('unit_cost', fn ($row) => currency($row->unit_cost))

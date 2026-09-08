@@ -5,7 +5,6 @@ namespace App\Services\Concrete\Admin\Reports\Hrm\PayrollFinance;
 use App\Models\Employee;
 use App\Models\EmployeeAdvance;
 use App\Models\Payslip;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Yajra\DataTables\DataTables;
 
@@ -21,8 +20,9 @@ class EmployeeCostReportService extends BasePayrollFinanceReportService
     public function build(array $filters): Collection
     {
         $business_id = $this->resolveBusinessId($filters);
-        $start = !empty($filters['start_date']) ? Carbon::parse($filters['start_date'])->startOfDay() : Carbon::now()->startOfYear();
-        $end = !empty($filters['end_date']) ? Carbon::parse($filters['end_date'])->endOfDay() : Carbon::now()->endOfDay();
+        [$startDate, $endDate] = $this->calendarRange($filters);
+        $start = businessStartOfDay($startDate);
+        $end = businessEndOfDay($endDate);
 
         $employeeQuery = Employee::with(['user', 'department'])->where('is_deleted', 0);
         if (!empty($business_id)) {
@@ -46,7 +46,7 @@ class EmployeeCostReportService extends BasePayrollFinanceReportService
         $advances = EmployeeAdvance::whereIn('employee_id', $employeeIds)
             ->where('is_deleted', 0)
             ->whereIn('status', ['repaying', 'completed'])
-            ->whereBetween('request_date', [$start->toDateString(), $end->toDateString()])
+            ->whereBetween('request_date', [$startDate, $endDate])
             ->get()
             ->groupBy('employee_id');
 

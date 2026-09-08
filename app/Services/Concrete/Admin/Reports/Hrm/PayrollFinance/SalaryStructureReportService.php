@@ -47,7 +47,7 @@ class SalaryStructureReportService extends BasePayrollFinanceReportService
             ->addColumn('employee_code', fn ($row) => $row->employee?->employee_code ?? '-')
             ->addColumn('name', fn ($row) => $row->employee?->user?->name ?? '-')
             ->addColumn('department', fn ($row) => $row->employee?->department?->name ?? '-')
-            ->addColumn('effective_from', fn ($row) => localDate($row->effective_from))
+            ->addColumn('effective_from', fn ($row) => businessDate($row->effective_from))
             ->addColumn('basic_salary', fn ($row) => currency($row->basic_salary))
             ->addColumn('overtime_rate_per_hour', fn ($row) => currency($row->overtime_rate_per_hour))
             ->addColumn('components_summary', fn ($row) => $row->components_summary)

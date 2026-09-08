@@ -17,6 +17,67 @@ Repository layer.
   and **always filter by it explicitly in every query**; there is no global scope
   doing this for you. See [Architecture & Overview](00-architecture.md).
 
+## UTC Storage / Business Timezone Display
+
+The database always stores UTC. The Business's configured timezone
+(`business_settings.timezone`, edited via Settings → Business, backed by the
+`timezones` table seeded from PHP's IANA identifier list — DST is handled
+correctly because conversion always goes through a real timezone identifier,
+never a fixed offset) is the single source of truth for how dates/datetimes are
+shown to and entered by users. Never write ad-hoc `Carbon::parse(...)->setTimezone(...)`
+or manual offset math in a controller/view — always go through the global helpers in
+`app/Helpers/CommonFunctions.php`:
+
+- **Genuine timestamps** (a real time-of-day: `date_created`, `date_updated`,
+  `order_date`, `payment_confirmed_at`, any workflow `*_at` column) —
+  `utcDateTime($input)` to convert a business-local input to UTC before saving,
+  `localDateTime($stored)` to convert a UTC value back to business-local for
+  display/edit-form population. `businessStartOfDay($date = null)` /
+  `businessEndOfDay($date = null)` give the UTC instant bounding a business-local
+  calendar day — use these (not `Carbon::parse($x)->startOfDay()`/`Carbon::today()`)
+  for any "from/to date" range filter or "today" quick-filter compared against a
+  timestamp column.
+- **Pure calendar-date fields** (no time-of-day is ever entered — a date-only
+  picker: `purchase_date`, `expense_date`, `sale_date`, `expiry_date`, `due_date`,
+  etc.) are **not timezone-dependent** and must not be converted through a
+  timezone-instant shift — use `utcDate($input)` / `businessDate($stored)`
+  instead, which just reformat between the business's `date_format` and the DB's
+  `Y-m-d`. (A previous bug here — fixed — ran these through a full UTC-instant
+  conversion, which silently shifted the stored/displayed date backward by one
+  day for any positive-UTC-offset business timezone, depending on what time of
+  day the save happened; `businessToday()` — a `'Y-m-d'` string in the business
+  timezone — replaces `Carbon::today()` as the "what day is it" default/comparison
+  for these fields.)
+- **Native `<input type="datetime-local">` fields** (fixed `Y-m-d\TH:i` wire
+  format regardless of the business's configured `date_format`/`time_format`) use
+  the separate `utcDateTimeLocal($value)` / `localDateTimeLocal($stored)` pair.
+- `businessTimezone($override = null)` is the resolver every helper above uses
+  internally (session, for the admin web session → the authenticated user's own
+  business → app default) — pass `$override` explicitly wherever there's no HTTP
+  session to read from (a console command iterating multiple businesses, for
+  example — see `CheckNotificationAlertsCommand`).
+
+API/mobile JSON responses return raw UTC (ISO-8601 where explicitly formatted,
+e.g. `CustomerOrderService`); see [Routes & APIs](04-routes-apis.md).
+
+**MySQL gotcha - always give a TIMESTAMP column an explicit default.** This
+server has `explicit_defaults_for_timestamp` OFF (MySQL/MariaDB's legacy
+default), so the *first* non-nullable `TIMESTAMP` column in a table silently
+gets `DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP` attached by the
+server itself, regardless of what the migration asked for - and then MySQL
+rewrites that column to "now" (in the *server's* local system timezone, not
+this app's UTC contract) on every subsequent update to the row, silently
+corrupting a value the application already explicitly manages. Found and
+fixed in `2026_09_09_000000_fix_implicit_on_update_current_timestamp_columns.php`
+(`orders.order_date`, `otps.expires_at`,
+`payment_gateway_webhook_logs.received_at`,
+`pos_register_sessions.opening_datetime` - all previously silently rewritten
+on unrelated updates to their row). When adding a `$table->timestamp(...)`
+column that isn't a Laravel-managed `created_at`-style column, either make it
+`->nullable()` (matching `date_created`/`date_updated`) or give it an
+explicit `->default(null)`/raw `DEFAULT CURRENT_TIMESTAMP` (no `ON UPDATE`) -
+never leave a business-meaning timestamp column with no explicit default.
+
 ## Adding a New Module — Checklist
 
 1. Migration(s) + Model, following the data conventions above.

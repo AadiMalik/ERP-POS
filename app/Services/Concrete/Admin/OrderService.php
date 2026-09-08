@@ -199,15 +199,15 @@ class OrderService
         // Order History page, its Sales Summary, and the full Admin Order
         // List alike.
         if (getRoleName() === RoleNames::ORDERTAKER) {
-            $today = Carbon::today()->format('Y-m-d');
+            $today = businessToday();
             $wh[] = ['sale_date', '>=', $today];
             $wh[] = ['sale_date', '<=', $today];
         } else {
             if (!empty($obj['start_date'])) {
-                $wh[] = ['order_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+                $wh[] = ['order_date', '>=', businessStartOfDay($obj['start_date'])];
             }
             if (!empty($obj['end_date'])) {
-                $wh[] = ['order_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+                $wh[] = ['order_date', '<=', businessEndOfDay($obj['end_date'])];
             }
             if (!empty($obj['sale_date_start'])) {
                 $wh[] = ['sale_date', '>=', Carbon::parse($obj['sale_date_start'])->format('Y-m-d')];
@@ -279,7 +279,7 @@ class OrderService
                 return $item->order_date ? localDateTime($item->order_date) : '-';
             })
             ->addColumn('sale_date', function ($item) {
-                return $item->sale_date ? localDate($item->sale_date) : '-';
+                return $item->sale_date ? businessDate($item->sale_date) : '-';
             })
             ->addColumn('business', function ($item) {
                 return $item->business->name ?? '-';
@@ -370,7 +370,7 @@ class OrderService
             // History), which simply ignore this extra field.
             ->addColumn('row_detail', function ($item) {
                 $rows = [
-                    'Sale Date' => $item->sale_date ? localDate($item->sale_date) : '-',
+                    'Sale Date' => $item->sale_date ? businessDate($item->sale_date) : '-',
                     'Business' => $item->business->name ?? '-',
                     'Branch' => $item->branch->name ?? '-',
                     'Warehouse' => $item->warehouse->name ?? '-',
@@ -958,7 +958,7 @@ class OrderService
             // fallback below silently degrading on a null object.
             $pos_setting = PosSetting::firstOrCreate(['business_id' => $business_id]);
 
-            $sale_date = !empty($obj['sale_date']) ? Carbon::parse($obj['sale_date']) : Carbon::today();
+            $sale_date = Carbon::parse(!empty($obj['sale_date']) ? $obj['sale_date'] : businessToday());
             $this->validateSaleDate($sale_date, $pos_setting);
 
             $user_id = $obj['customer_id'] ?? $pos_setting->default_customer_user_id ?? null;
@@ -1140,7 +1140,7 @@ class OrderService
 
     protected function validateSaleDate(Carbon $sale_date, ?PosSetting $pos_setting)
     {
-        $today = Carbon::today();
+        $today = Carbon::parse(businessToday());
 
         if ($sale_date->gt($today)) {
             throw new Exception('Sale date cannot be in the future.');
@@ -3159,7 +3159,7 @@ class OrderService
         }
 
         $sale_date = Carbon::parse($order->sale_date)->toDateString();
-        $today = Carbon::today()->toDateString();
+        $today = businessToday();
 
         if ($sale_date !== $today) {
             throw new Exception('Orders can only be corrected on the same business day as the sale date.');

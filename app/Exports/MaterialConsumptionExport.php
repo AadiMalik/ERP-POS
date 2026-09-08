@@ -30,7 +30,7 @@ class MaterialConsumptionExport implements FromCollection, WithHeadings, WithMap
     public function map($row): array
     {
         return [
-            $row->date_created ? localDate($row->date_created) : '',
+            $row->date_created ?? '',
             $row->group_label ?? '',
             $row->raw_material_name,
             $row->finished_product ?? '',

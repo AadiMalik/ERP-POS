@@ -4,7 +4,6 @@ namespace App\Services\Concrete\Admin\Reports;
 
 use App\Enums\RoleNames;
 use App\Models\VoucherRedemption;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
@@ -43,10 +42,10 @@ class VoucherUsageReportService
             $query->where('user_id', $user_id);
         }
         if (!empty($obj['start_date'])) {
-            $query->where('voucher_redemptions.date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $query->where('voucher_redemptions.date_created', '>=', businessStartOfDay($obj['start_date']));
         }
         if (!empty($obj['end_date'])) {
-            $query->where('voucher_redemptions.date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $query->where('voucher_redemptions.date_created', '<=', businessEndOfDay($obj['end_date']));
         }
 
         return applyRoleScope($query, $this->allow_roles, 'vouchers.business_id');
@@ -63,7 +62,7 @@ class VoucherUsageReportService
             ->addColumn('customer_email', fn ($row) => optional($row->user)->email ?? '-')
             ->addColumn('order_no', fn ($row) => optional($row->order)->daily_order_id ?? '-')
             ->addColumn('order_status', fn ($row) => optional($row->order)->status ?? '-')
-            ->addColumn('used_at', fn ($row) => optional($row->date_created)->format('d-m-Y H:i'))
+            ->addColumn('used_at', fn ($row) => localDateTime($row->date_created))
             ->editColumn('discount_amount', fn ($row) => currency($row->discount_amount))
             ->rawColumns(['voucher_code', 'customer', 'order_no'])
             ->make(true);

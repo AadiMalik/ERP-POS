@@ -18,8 +18,8 @@ class MonthlyAttendanceReportService extends BaseAttendanceReportService
     public function build(array $filters): Collection
     {
         $business_id = $this->resolveBusinessId($filters);
-        $month = (int) ($filters['month'] ?? now()->month);
-        $year = (int) ($filters['year'] ?? now()->year);
+        $month = (int) ($filters['month'] ?? Carbon::parse(businessToday())->month);
+        $year = (int) ($filters['year'] ?? Carbon::parse(businessToday())->year);
 
         $start = Carbon::create($year, $month, 1)->startOfMonth();
         $end = $start->copy()->endOfMonth();
@@ -75,8 +75,8 @@ class MonthlyAttendanceReportService extends BaseAttendanceReportService
 
     public function daysInMonth(array $filters): int
     {
-        $month = (int) ($filters['month'] ?? now()->month);
-        $year = (int) ($filters['year'] ?? now()->year);
+        $month = (int) ($filters['month'] ?? Carbon::parse(businessToday())->month);
+        $year = (int) ($filters['year'] ?? Carbon::parse(businessToday())->year);
 
         return Carbon::create($year, $month, 1)->daysInMonth;
     }

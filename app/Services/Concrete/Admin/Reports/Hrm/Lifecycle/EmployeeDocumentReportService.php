@@ -33,7 +33,7 @@ class EmployeeDocumentReportService extends BaseLifecycleReportService
                 $document->expiry_status = 'No Expiry';
             } elseif (Carbon::parse($document->expiry_date)->isPast()) {
                 $document->expiry_status = 'Expired';
-            } elseif (Carbon::parse($document->expiry_date)->lte(Carbon::today()->addDays(30))) {
+            } elseif (Carbon::parse($document->expiry_date)->lte(Carbon::parse(businessToday())->addDays(30))) {
                 $document->expiry_status = 'Expiring Soon';
             } else {
                 $document->expiry_status = 'Valid';
@@ -51,7 +51,7 @@ class EmployeeDocumentReportService extends BaseLifecycleReportService
             ->addColumn('employee_code', fn ($row) => $row->employee?->employee_code ?? '-')
             ->addColumn('name', fn ($row) => $row->employee?->user?->name ?? '-')
             ->addColumn('department', fn ($row) => $row->employee?->department?->name ?? '-')
-            ->addColumn('expiry_date', fn ($row) => $row->expiry_date ? localDate($row->expiry_date) : '-')
+            ->addColumn('expiry_date', fn ($row) => $row->expiry_date ? businessDate($row->expiry_date) : '-')
             ->addColumn('uploaded_on', fn ($row) => localDate($row->date_created))
             ->make(true);
     }

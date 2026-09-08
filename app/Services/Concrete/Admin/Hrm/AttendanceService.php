@@ -125,7 +125,7 @@ class AttendanceService
     public function today($employee_id)
     {
         return $this->model_attendance->getModel()::where('employee_id', $employee_id)
-            ->where('date', Carbon::today()->toDateString())
+            ->where('date', businessToday())
             ->where('is_deleted', 0)
             ->first();
     }
@@ -133,7 +133,7 @@ class AttendanceService
     public function checkIn($employee_id)
     {
         $employee = Employee::with('shift')->findOrFail($employee_id);
-        $today = Carbon::today()->toDateString();
+        $today = businessToday();
         $existing = $this->today($employee_id);
 
         if ($existing && $existing->check_in_time) {
@@ -180,7 +180,7 @@ class AttendanceService
     public function checkOut($employee_id)
     {
         $employee = Employee::with('shift')->findOrFail($employee_id);
-        $today = Carbon::today()->toDateString();
+        $today = businessToday();
         $existing = $this->today($employee_id);
 
         if (!$existing || !$existing->check_in_time) {

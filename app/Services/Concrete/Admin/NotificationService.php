@@ -29,11 +29,11 @@ class NotificationService
         }
 
         if (!empty($obj['start_date'])) {
-            $datatable->where('date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $datatable->where('date_created', '>=', businessStartOfDay($obj['start_date']));
         }
 
         if (!empty($obj['end_date'])) {
-            $datatable->where('date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $datatable->where('date_created', '<=', businessEndOfDay($obj['end_date']));
         }
 
         $datatable->orderBy('date_created', 'desc');

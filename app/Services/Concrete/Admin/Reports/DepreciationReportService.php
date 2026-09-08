@@ -35,10 +35,10 @@ class DepreciationReportService
             $query->where('fixed_asset_id', $obj['fixed_asset_id']);
         }
         if (!empty($obj['start_date'])) {
-            $query->where('depreciation_date', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $query->where('depreciation_date', '>=', businessStartOfDay($obj['start_date']));
         }
         if (!empty($obj['end_date'])) {
-            $query->where('depreciation_date', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $query->where('depreciation_date', '<=', businessEndOfDay($obj['end_date']));
         }
 
         $query = applyRoleScope($query, $this->allow_roles);
@@ -69,7 +69,7 @@ class DepreciationReportService
         ];
 
         return DataTables::of($rows)
-            ->addColumn('depreciation_date', fn ($row) => $row->depreciation_date ? localDate($row->depreciation_date) : '')
+            ->addColumn('depreciation_date', fn ($row) => $row->depreciation_date ? businessDate($row->depreciation_date) : '')
             ->addColumn('previous_value', fn ($row) => currency($row->previous_value))
             ->addColumn('depreciation_amount', fn ($row) => currency($row->depreciation_amount))
             ->addColumn('new_value', fn ($row) => currency($row->new_value))

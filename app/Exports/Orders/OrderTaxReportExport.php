@@ -31,7 +31,7 @@ class OrderTaxReportExport implements FromCollection, WithHeadings, WithMapping,
     {
         return [
             $row->daily_order_id,
-            optional($row->order_date)->format('d-m-Y H:i'),
+            localDateTime($row->order_date),
             $row->product_name,
             $row->variation_name,
             $row->sku,

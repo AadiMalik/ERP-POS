@@ -40,10 +40,10 @@ class FixedAssetRegisterReportService
             $query->where('depreciation_status', $obj['depreciation_status']);
         }
         if (!empty($obj['start_date'])) {
-            $query->where('purchase_date', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $query->where('purchase_date', '>=', businessStartOfDay($obj['start_date']));
         }
         if (!empty($obj['end_date'])) {
-            $query->where('purchase_date', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $query->where('purchase_date', '<=', businessEndOfDay($obj['end_date']));
         }
 
         $query = applyRoleScope($query, $this->allow_roles);
@@ -74,12 +74,12 @@ class FixedAssetRegisterReportService
         $rows = $this->build($obj);
 
         return DataTables::of($rows)
-            ->addColumn('purchase_date', fn ($row) => $row->purchase_date ? localDate($row->purchase_date) : '')
+            ->addColumn('purchase_date', fn ($row) => $row->purchase_date ? businessDate($row->purchase_date) : '')
             ->addColumn('purchase_cost', fn ($row) => currency($row->purchase_cost))
             ->addColumn('current_book_value', fn ($row) => currency($row->current_book_value))
             ->addColumn('accumulated_depreciation', fn ($row) => currency($row->accumulated_depreciation))
             ->addColumn('residual_value', fn ($row) => currency($row->residual_value))
-            ->addColumn('next_depreciation_date', fn ($row) => $row->next_depreciation_date ? localDate($row->next_depreciation_date) : '')
+            ->addColumn('next_depreciation_date', fn ($row) => $row->next_depreciation_date ? businessDate($row->next_depreciation_date) : '')
             ->make(true);
     }
 }

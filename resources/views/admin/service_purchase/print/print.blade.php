@@ -18,7 +18,7 @@
         'branch' => $service_purchase->branch,
         'title' => 'Service Purchase',
         'doc_no' => $service_purchase->service_purchase_no,
-        'doc_date' => localDate($service_purchase->service_purchase_date),
+        'doc_date' => businessDate($service_purchase->service_purchase_date),
         'reference' => [
             'Supplier' => $service_purchase->supplier->name ?? 'N/A',
         ],

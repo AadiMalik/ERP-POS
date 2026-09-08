@@ -52,7 +52,7 @@ class EmployeeDirectoryReportService extends BaseEmployeeReportService
             ->addColumn('department', fn ($row) => $row->department?->name ?? '-')
             ->addColumn('designation', fn ($row) => $row->designation?->name ?? '-')
             ->addColumn('branch', fn ($row) => $row->branch?->name ?? '-')
-            ->addColumn('joining_date', fn ($row) => localDate($row->joining_date))
+            ->addColumn('joining_date', fn ($row) => businessDate($row->joining_date))
             ->addColumn('email', fn ($row) => $row->user?->email ?? '-')
             ->addColumn('phone', fn ($row) => $row->user?->phone ?? '-')
             ->addColumn('status', fn ($row) => ucfirst(str_replace('_', ' ', $row->status)))

@@ -30,7 +30,7 @@ class EarlyCheckoutReportExport implements FromCollection, WithHeadings, WithMap
             $row->employee?->employee_code,
             $row->employee?->user?->name,
             $row->employee?->department?->name,
-            localDate($row->date),
+            businessDate($row->date),
             $row->check_out_time,
             $row->early_leave_minutes,
         ];

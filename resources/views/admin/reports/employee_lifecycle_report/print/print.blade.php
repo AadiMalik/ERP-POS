@@ -31,7 +31,7 @@
         <table class="print-table">
             <tr><th>{{ __('reports.col_department') }}</th><td>{{ $employee->department?->name ?? '-' }}</td>
                 <th>{{ __('reports.col_designation') }}</th><td>{{ $employee->designation?->name ?? '-' }}</td></tr>
-            <tr><th>{{ __('reports.col_joining_date') }}</th><td>{{ localDate($employee->joining_date) }}</td>
+            <tr><th>{{ __('reports.col_joining_date') }}</th><td>{{ businessDate($employee->joining_date) }}</td>
                 <th>{{ __('reports.col_status') }}</th><td>{{ ucfirst(str_replace('_', ' ', $employee->status)) }}</td></tr>
         </table>
 
@@ -49,7 +49,7 @@
             <tbody>
                 @forelse ($lifecycle->salary_history as $structure)
                     <tr>
-                        <td>{{ localDate($structure->effective_from) }}</td>
+                        <td>{{ businessDate($structure->effective_from) }}</td>
                         <td>{{ currency($structure->basic_salary) }}</td>
                         <td>{{ ucfirst($structure->status) }}</td>
                     </tr>
@@ -66,8 +66,8 @@
                 @forelse ($lifecycle->leave_requests as $leave)
                     <tr>
                         <td>{{ $leave->leaveType?->name }}</td>
-                        <td>{{ localDate($leave->start_date) }}</td>
-                        <td>{{ localDate($leave->end_date) }}</td>
+                        <td>{{ businessDate($leave->start_date) }}</td>
+                        <td>{{ businessDate($leave->end_date) }}</td>
                         <td>{{ $leave->days_count }}</td>
                         <td>{{ ucfirst($leave->status) }}</td>
                     </tr>
@@ -83,7 +83,7 @@
             <tbody>
                 @forelse ($lifecycle->advances as $advance)
                     <tr>
-                        <td>{{ localDate($advance->request_date) }}</td>
+                        <td>{{ businessDate($advance->request_date) }}</td>
                         <td>{{ currency($advance->amount) }}</td>
                         <td>{{ currency($advance->remaining_balance) }}</td>
                         <td>{{ ucfirst($advance->status) }}</td>
@@ -98,7 +98,7 @@
         @if ($lifecycle->exit)
             <table class="print-table">
                 <tr><th>{{ __('reports.col_type') }}</th><td>{{ ucfirst($lifecycle->exit->type) }}</td>
-                    <th>{{ __('reports.col_last_working_date') }}</th><td>{{ localDate($lifecycle->exit->last_working_date) }}</td>
+                    <th>{{ __('reports.col_last_working_date') }}</th><td>{{ businessDate($lifecycle->exit->last_working_date) }}</td>
                     <th>{{ __('reports.col_status') }}</th><td>{{ ucfirst($lifecycle->exit->status) }}</td></tr>
             </table>
         @else

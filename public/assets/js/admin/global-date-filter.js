@@ -21,9 +21,25 @@ function initGlobalDateFilter() {
     });
 }
 
+/**
+ * "Today" in the configured Business timezone (not the browser's), as a
+ * moment() wrapping the same wall-clock date - so the .clone()/.startOf()/
+ * .endOf() range math below lands on the business's own calendar day
+ * instead of silently drifting to whatever timezone the viewer's browser
+ * happens to be in.
+ */
+function businessToday() {
+    let parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: typeof BUSINESS_TIMEZONE !== 'undefined' ? BUSINESS_TIMEZONE : undefined,
+        year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date());
+
+    return moment(parts, 'YYYY-MM-DD');
+}
+
 function calculateDateRange(type) {
 
-    let today = moment();
+    let today = businessToday();
 
     switch (type) {
 

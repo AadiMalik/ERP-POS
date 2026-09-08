@@ -74,7 +74,7 @@
                     <td>{{ $row->employee?->user?->name }}</td>
                     <td>{{ $row->employee?->department?->name }}</td>
                     <td class="text-right">{{ currency($row->amount) }}</td>
-                    <td>{{ localDate($row->request_date) }}</td>
+                    <td>{{ businessDate($row->request_date) }}</td>
                     <td class="text-right">{{ currency($row->installment_amount) }}</td>
                     <td class="text-right">{{ currency($row->remaining_balance) }}</td>
                     <td>{{ $row->approver?->name }}</td>

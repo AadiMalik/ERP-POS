@@ -4,7 +4,6 @@ namespace App\Services\Concrete\Admin\Reports;
 
 use App\Enums\RoleNames;
 use App\Models\CustomerLoyaltyTransaction;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
@@ -58,10 +57,10 @@ class LoyaltyHistoryReportService
             $query->where('customer_loyalty_transactions.customer_id', $obj['user_id']);
         }
         if (!empty($obj['start_date'])) {
-            $query->where('customer_loyalty_transactions.date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $query->where('customer_loyalty_transactions.date_created', '>=', businessStartOfDay($obj['start_date']));
         }
         if (!empty($obj['end_date'])) {
-            $query->where('customer_loyalty_transactions.date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $query->where('customer_loyalty_transactions.date_created', '<=', businessEndOfDay($obj['end_date']));
         }
 
         applyRoleScope($query, $this->allow_roles, 'customer_loyalty_transactions.business_id', 'customer_profiles.branch_id');
@@ -93,7 +92,7 @@ class LoyaltyHistoryReportService
             ->editColumn('points', fn ($row) => decimal($row->points))
             ->editColumn('monetary_value', fn ($row) => $row->monetary_value !== null ? currency($row->monetary_value) : '-')
             ->addColumn('reference', fn ($row) => $this->referenceLabel($row))
-            ->addColumn('date_created', fn ($row) => optional($row->date_created)->format('d-m-Y H:i'))
+            ->addColumn('date_created', fn ($row) => localDateTime($row->date_created))
             ->editColumn('available_balance_after', fn ($row) => decimal($row->available_balance_after))
             ->rawColumns(['transaction_type', 'reference', 'date_created'])
             ->make(true);

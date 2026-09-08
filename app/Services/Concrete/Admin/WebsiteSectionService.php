@@ -7,6 +7,7 @@ use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\WebsiteSection;
 use App\Repository\Repository;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
@@ -79,7 +80,9 @@ class WebsiteSectionService
 
     public function getById($section_id)
     {
-        return $this->model_section->find($section_id);
+        $section = $this->model_section->find($section_id);
+        $section->countdown_end_at_local = localDateTimeLocal($section->countdown_end_at);
+        return $section;
     }
 
     public function status($section_id)
@@ -134,7 +137,7 @@ class WebsiteSectionService
                 'secondary_button_link' => $s->secondary_button_link,
                 'secondary_link_type' => $s->secondary_link_type,
                 'secondary_link_target_id' => $s->secondary_link_target_id,
-                'countdown_end_at' => $s->countdown_end_at,
+                'countdown_end_at' => $s->countdown_end_at ? Carbon::parse($s->countdown_end_at, 'UTC')->toIso8601String() : null,
                 'sort_order' => $s->sort_order,
             ];
         })->values();

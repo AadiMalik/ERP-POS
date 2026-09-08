@@ -80,10 +80,10 @@ class ExpenseService
             $wh[] = ['pos_register_session_id', null];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['expense_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['expense_date', '>=', businessStartOfDay($obj['start_date'])];
         }
         if (!empty($obj['end_date'])) {
-            $wh[] = ['expense_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['expense_date', '<=', businessEndOfDay($obj['end_date'])];
         }
 
         $allow_roles = [
@@ -104,7 +104,7 @@ class ExpenseService
 
         return DataTables::of($datatable)
             ->addColumn('expense_date', function ($item) {
-                return !empty($item->expense_date) ? localDate($item->expense_date) : 'N/A';
+                return !empty($item->expense_date) ? businessDate($item->expense_date) : 'N/A';
             })
             ->addColumn('category', function ($item) {
                 return $item->category->name ?? '';

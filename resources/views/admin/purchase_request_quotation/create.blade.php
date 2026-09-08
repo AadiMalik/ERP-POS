@@ -62,7 +62,7 @@ use Carbon\Carbon;
                     <div class="col-md-3">
                         <label class="fw-semibold">{{ __('purchase_request_quotations.received_date') }}</label>
                         <input type="text" class="form-control datepicker" name="received_date"
-                            value="{{ old('received_date', isset($purchase_request_quotation) ? localDate($purchase_request_quotation->received_date) : localDate(date('Y-m-d'))) }}">
+                            value="{{ old('received_date', isset($purchase_request_quotation) ? businessDate($purchase_request_quotation->received_date) : businessDate(businessToday())) }}">
                     </div>
                     <div class="col-md-3" style="margin-top: 3.5rem !important;">
                         <input type="checkbox" class="form-check-input" name="send_email" id="send_email" value="">

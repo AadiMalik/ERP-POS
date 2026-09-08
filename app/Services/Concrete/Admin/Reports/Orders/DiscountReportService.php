@@ -65,7 +65,7 @@ class DiscountReportService extends BaseOrderReportService
 
         return DataTables::of($rows)
             ->addColumn('order_no', fn ($row) => $row->daily_order_id)
-            ->addColumn('order_date', fn ($row) => optional($row->order_date)->format('d-m-Y H:i'))
+            ->addColumn('order_date', fn ($row) => localDateTime($row->order_date))
             ->addColumn('customer_name', fn ($row) => $row->customer_name ?? 'Walk-in')
             ->addColumn('discount_type', fn ($row) => $row->discount_type ? ucfirst($row->discount_type) : 'N/A')
             ->editColumn('discount_amount', fn ($row) => currency($row->discount_amount))

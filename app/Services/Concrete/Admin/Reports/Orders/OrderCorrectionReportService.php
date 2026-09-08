@@ -7,7 +7,6 @@ use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\ProductVariation;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Yajra\DataTables\DataTables;
 
@@ -41,10 +40,10 @@ class OrderCorrectionReportService extends BaseOrderReportService
             $query->where('causer_id', $obj['causer_id']);
         }
         if (!empty($obj['start_date'])) {
-            $query->where('date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $query->where('date_created', '>=', businessStartOfDay($obj['start_date']));
         }
         if (!empty($obj['end_date'])) {
-            $query->where('date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $query->where('date_created', '<=', businessEndOfDay($obj['end_date']));
         }
 
         applyRoleScope($query, $this->allow_roles, 'business_id', 'branch_id');

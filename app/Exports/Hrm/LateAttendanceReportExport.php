@@ -30,7 +30,7 @@ class LateAttendanceReportExport implements FromCollection, WithHeadings, WithMa
             $row->employee?->employee_code,
             $row->employee?->user?->name,
             $row->employee?->department?->name,
-            localDate($row->date),
+            businessDate($row->date),
             $row->check_in_time,
             $row->late_minutes,
         ];

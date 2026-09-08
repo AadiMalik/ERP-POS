@@ -77,7 +77,7 @@ class StockTransferReportService
 
         return DataTables::of($rows)
             ->addColumn('transfer_note_no', fn ($row) => '<a href="' . e($row->edit_url) . '">' . e($row->transfer_note_no) . '</a>')
-            ->addColumn('transfer_note_date', fn ($row) => localDate($row->transfer_note_date))
+            ->addColumn('transfer_note_date', fn ($row) => businessDate($row->transfer_note_date))
             ->addColumn('source_warehouse', fn ($row) => e($row->source_warehouse))
             ->addColumn('destination_warehouse', fn ($row) => e($row->destination_warehouse))
             ->addColumn('source_branch', fn ($row) => e($row->source_branch))

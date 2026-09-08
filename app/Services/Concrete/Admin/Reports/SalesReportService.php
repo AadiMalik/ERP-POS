@@ -7,7 +7,6 @@ use App\Enums\RoleNames;
 use App\Models\AccountingSetting;
 use App\Models\Order;
 use App\Services\Concrete\Admin\Reports\Accounting\AccountingLedgerQueryService;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
@@ -57,10 +56,10 @@ class SalesReportService
             $query->where('warehouse_id', $obj['warehouse_id']);
         }
         if (!empty($obj['start_date'])) {
-            $query->where('order_date', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $query->where('order_date', '>=', businessStartOfDay($obj['start_date']));
         }
         if (!empty($obj['end_date'])) {
-            $query->where('order_date', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $query->where('order_date', '<=', businessEndOfDay($obj['end_date']));
         }
 
         return applyRoleScope($query, $this->allow_roles);
@@ -80,7 +79,7 @@ class SalesReportService
 
         return DataTables::of($rows)
             ->addColumn('order_no', fn ($row) => $row->daily_order_id)
-            ->addColumn('order_date', fn ($row) => optional($row->order_date)->format('d-m-Y H:i'))
+            ->addColumn('order_date', fn ($row) => localDateTime($row->order_date))
             ->addColumn('customer', fn ($row) => optional($row->user)->name ?? 'Walk-in')
             ->addColumn('warehouse', fn ($row) => optional($row->warehouse)->name ?? '')
             ->editColumn('subtotal', fn ($row) => currency($row->subtotal))
@@ -125,8 +124,8 @@ class SalesReportService
                 'allow_roles' => $this->allow_roles,
             ];
 
-            $from = !empty($obj['start_date']) ? Carbon::parse($obj['start_date'])->startOfDay() : null;
-            $to = !empty($obj['end_date']) ? Carbon::parse($obj['end_date'])->endOfDay() : null;
+            $from = !empty($obj['start_date']) ? businessStartOfDay($obj['start_date']) : null;
+            $to = !empty($obj['end_date']) ? businessEndOfDay($obj['end_date']) : null;
 
             $totals = $this->ledger_query_service->periodMovements($filters, $from, $to);
             $ledger_revenue = array_sum(array_column($totals, 'credit')) - array_sum(array_column($totals, 'debit'));

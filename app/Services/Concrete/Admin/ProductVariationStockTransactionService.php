@@ -61,10 +61,10 @@ class ProductVariationStockTransactionService
             $wh[] = ['product_variation_batch_id', $obj['product_variation_batch_id']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['transaction_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['transaction_date', '>=', businessStartOfDay($obj['start_date'])];
         }
         if (!empty($obj['end_date'])) {
-            $wh[] = ['transaction_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['transaction_date', '<=', businessEndOfDay($obj['end_date'])];
         }
         $allow_roles = [
             RoleNames::SUPERADMIN,

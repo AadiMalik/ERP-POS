@@ -33,7 +33,7 @@ class DailyAttendanceReportExport implements FromCollection, WithHeadings, WithM
             $row->employee?->employee_code,
             $row->employee?->user?->name,
             $row->employee?->department?->name,
-            localDate($row->date),
+            businessDate($row->date),
             $row->check_in_time,
             $row->check_out_time,
             $row->working_hours,

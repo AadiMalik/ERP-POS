@@ -34,7 +34,7 @@ class EmployeeAdvanceReportExport implements FromCollection, WithHeadings, WithM
             $row->employee?->user?->name,
             $row->employee?->department?->name,
             decimal($row->amount),
-            localDate($row->request_date),
+            businessDate($row->request_date),
             $row->installments_count,
             decimal($row->installment_amount),
             decimal($row->remaining_balance),

@@ -32,7 +32,7 @@ class EmployeeJoiningReportExport implements FromCollection, WithHeadings, WithM
             $row->department?->name,
             $row->designation?->name,
             $row->branch?->name,
-            localDate($row->joining_date),
+            businessDate($row->joining_date),
             ucfirst(str_replace('_', ' ', (string) $row->employment_type)),
             ucfirst(str_replace('_', ' ', $row->status)),
         ];

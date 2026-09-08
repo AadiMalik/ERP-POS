@@ -18,12 +18,12 @@
         'branch' => $purchase->branch,
         'title' => 'Purchase Order',
         'doc_no' => $purchase->purchase_no,
-        'doc_date' => localDate($purchase->purchase_date),
+        'doc_date' => businessDate($purchase->purchase_date),
         'reference' => [
             'Supplier' => $purchase->supplier->name ?? 'N/A',
             'Warehouse' => $purchase->warehouse->name ?? 'N/A',
             'Purchase Request No.' => $purchase->purchaseRequest->purchase_request_no ?? 'N/A',
-            'Expected Delivery Date' => !empty($purchase->expected_delivery_date) ? localDate($purchase->expected_delivery_date) : 'N/A',
+            'Expected Delivery Date' => !empty($purchase->expected_delivery_date) ? businessDate($purchase->expected_delivery_date) : 'N/A',
         ],
         'print_config' => $print_config,
     ])

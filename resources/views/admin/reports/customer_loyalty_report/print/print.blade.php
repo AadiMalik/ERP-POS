@@ -50,7 +50,7 @@
                     <td>{{ ucfirst($row->transaction_type) }}</td>
                     <td class="text-right">{{ decimal($row->points) }}</td>
                     <td class="text-right">{{ $row->monetary_value !== null ? currency($row->monetary_value) : '-' }}</td>
-                    <td>{{ optional($row->date_created)->format('d-m-Y H:i') }}</td>
+                    <td>{{ localDateTime($row->date_created) }}</td>
                     <td class="text-right">{{ decimal($row->available_balance_after) }}</td>
                 </tr>
             @empty

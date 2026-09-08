@@ -70,10 +70,10 @@ class ServiceTransactionSummaryReportService
             $query->where("$table.status", $filters['status']);
         }
         if (!empty($filters['start_date'])) {
-            $query->where("$table.$dateColumn", '>=', Carbon::parse($filters['start_date'])->startOfDay());
+            $query->where("$table.$dateColumn", '>=', businessStartOfDay($filters['start_date']));
         }
         if (!empty($filters['end_date'])) {
-            $query->where("$table.$dateColumn", '<=', Carbon::parse($filters['end_date'])->endOfDay());
+            $query->where("$table.$dateColumn", '<=', businessEndOfDay($filters['end_date']));
         }
 
         return applyRoleScope($query, $this->allow_roles, "$table.business_id", "$table.branch_id")
@@ -119,7 +119,7 @@ class ServiceTransactionSummaryReportService
 
         $groupLabel = function ($row) use ($group_by) {
             return match ($group_by) {
-                'date'   => localDate($row->transaction_date),
+                'date'   => businessDate($row->transaction_date),
                 'branch' => $row->branch_name ?? 'Unassigned',
                 default  => 'All Transactions',
             };

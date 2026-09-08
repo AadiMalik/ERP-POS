@@ -18,7 +18,7 @@
         'branch' => $waste_damage_expiry->branch,
         'title' => 'Waste / Damage / Expiry',
         'doc_no' => $waste_damage_expiry->reference_no,
-        'doc_date' => localDate($waste_damage_expiry->transaction_date),
+        'doc_date' => businessDate($waste_damage_expiry->transaction_date),
         'reference' => [
             'Warehouse' => $waste_damage_expiry->warehouse->name ?? 'N/A',
             'Reference' => $waste_damage_expiry->reference ?? 'N/A',
@@ -50,7 +50,7 @@
                     <td>{{ $detail->productVariation->name ?? 'N/A' }}</td>
                     <td>{{ $detail->unit->name ?? 'N/A' }}</td>
                     <td>{{ $detail->batch_no ?? '-' }}</td>
-                    <td>{{ $detail->expiry_date ? localDate($detail->expiry_date) : '-' }}</td>
+                    <td>{{ $detail->expiry_date ? businessDate($detail->expiry_date) : '-' }}</td>
                     <td class="text-right">{{ decimal($detail->quantity) }}</td>
                     <td class="text-right">{{ currency($detail->unit_cost) }}</td>
                     <td class="text-right">{{ currency($detail->value) }}</td>

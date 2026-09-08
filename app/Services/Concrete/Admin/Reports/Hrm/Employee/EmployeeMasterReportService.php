@@ -51,7 +51,7 @@ class EmployeeMasterReportService extends BaseEmployeeReportService
             ->addColumn('designation', fn ($row) => $row->designation?->name ?? '-')
             ->addColumn('shift', fn ($row) => $row->shift?->name ?? '-')
             ->addColumn('branch', fn ($row) => $row->branch?->name ?? '-')
-            ->addColumn('joining_date', fn ($row) => localDate($row->joining_date))
+            ->addColumn('joining_date', fn ($row) => businessDate($row->joining_date))
             ->addColumn('status', fn ($row) => ucfirst(str_replace('_', ' ', $row->status)))
             ->make(true);
     }

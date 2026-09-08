@@ -93,7 +93,7 @@ class OpeningStockService
         return DataTables::of($datatable)
             ->addColumn('opening_stock_date', function ($item) {
                 return !empty($item->opening_stock_date)
-                    ? localDate($item->opening_stock_date)
+                    ? businessDate($item->opening_stock_date)
                     : 'N/A';
             })
             ->addColumn('warehouse', function ($item) {
@@ -335,7 +335,7 @@ class OpeningStockService
                     'unit_cost'                               => $detail->unit_cost,
                     'total_value'                             => $detail->total_value,
                     'batch_no'                                => $detail->batch_no,
-                    'expiry_date'                             => !empty($detail->expiry_date) ? localDate($detail->expiry_date) : '',
+                    'expiry_date'                             => !empty($detail->expiry_date) ? businessDate($detail->expiry_date) : '',
                     'track_batch'                             => $detail->productVariation->track_batch ?? 0,
                     'track_expiry'                            => $detail->productVariation->track_expiry ?? 0,
                     'track_serial_number'                     => $detail->productVariation->track_serial_number ?? 0,

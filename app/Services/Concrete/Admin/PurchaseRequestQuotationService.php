@@ -67,11 +67,11 @@ class PurchaseRequestQuotationService
             $wh[] = ['status', $obj['status']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['sent_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['sent_date', '>=', businessStartOfDay($obj['start_date'])];
         }
 
         if (!empty($obj['end_date'])) {
-            $wh[] = ['sent_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['sent_date', '<=', businessEndOfDay($obj['end_date'])];
         }
         $allow_roles = [
             RoleNames::SUPERADMIN,
@@ -91,7 +91,7 @@ class PurchaseRequestQuotationService
             })
             ->addColumn('received_date', function ($item) {
                 return !empty($item->received_date)
-                    ? localDate($item->received_date)
+                    ? businessDate($item->received_date)
                     : 'N/A';
             })
             ->addColumn('purchase_request', function ($item) {
@@ -351,7 +351,7 @@ class PurchaseRequestQuotationService
                     'branch_id' => $purchase_request_quotation->branch_id,
                     'purchase_request_quotation_no' => $purchase_request_quotation->purchase_request_quotation_no,
                     'sent_date' => localDate($purchase_request_quotation->sent_date),
-                    'received_date' => localDate($purchase_request_quotation->received_date),
+                    'received_date' => businessDate($purchase_request_quotation->received_date),
                     'description' => $purchase_request_quotation->description,
                     'subtotal' => decimal($purchase_request_quotation->subtotal),
                     'discount' => decimal($purchase_request_quotation->discount),
@@ -425,7 +425,7 @@ class PurchaseRequestQuotationService
                     'branch_id' => $purchase_request_quotation->branch_id,
                     'purchase_request_quotation_no' => $purchase_request_quotation->purchase_request_quotation_no,
                     'sent_date' => localDate($purchase_request_quotation->sent_date),
-                    'received_date' => localDate($purchase_request_quotation->received_date),
+                    'received_date' => businessDate($purchase_request_quotation->received_date),
                     'description' => $purchase_request_quotation->description,
                     'subtotal' => decimal($purchase_request_quotation->subtotal),
                     'discount' => decimal($purchase_request_quotation->discount),

@@ -31,7 +31,7 @@ class LoyaltyReportExport implements FromCollection, WithHeadings, WithMapping, 
     {
         return [
             $row->daily_order_id,
-            optional($row->order_date)->format('d-m-Y H:i'),
+            localDateTime($row->order_date),
             $row->customer_name ?? 'Walk-in',
             round($row->total, 2),
             round($row->loyalty_points_used, 3),

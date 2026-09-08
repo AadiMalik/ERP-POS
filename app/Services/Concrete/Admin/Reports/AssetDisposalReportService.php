@@ -43,10 +43,10 @@ class AssetDisposalReportService
             $query->where('disposal_type', $obj['disposal_type']);
         }
         if (!empty($obj['start_date'])) {
-            $query->where('disposal_date', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $query->where('disposal_date', '>=', businessStartOfDay($obj['start_date']));
         }
         if (!empty($obj['end_date'])) {
-            $query->where('disposal_date', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $query->where('disposal_date', '<=', businessEndOfDay($obj['end_date']));
         }
 
         $query = applyRoleScope($query, $this->allow_roles);
@@ -82,7 +82,7 @@ class AssetDisposalReportService
         ];
 
         return DataTables::of($rows)
-            ->addColumn('disposal_date', fn ($row) => $row->disposal_date ? localDate($row->disposal_date) : '')
+            ->addColumn('disposal_date', fn ($row) => $row->disposal_date ? businessDate($row->disposal_date) : '')
             ->addColumn('sale_price', fn ($row) => currency($row->sale_price))
             ->addColumn('current_book_value', fn ($row) => currency($row->current_book_value))
             ->addColumn('purchase_cost', fn ($row) => currency($row->purchase_cost))

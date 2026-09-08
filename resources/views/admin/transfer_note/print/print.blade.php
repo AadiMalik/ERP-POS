@@ -18,7 +18,7 @@
         'branch' => $transfer_note->branch,
         'title' => 'Transfer Note',
         'doc_no' => $transfer_note->transfer_note_no,
-        'doc_date' => localDate($transfer_note->transfer_note_date),
+        'doc_date' => businessDate($transfer_note->transfer_note_date),
         'reference' => [
             __('transfer_notes.source_warehouse') => $transfer_note->sourceWarehouse->name ?? 'N/A',
             __('transfer_notes.destination_warehouse') => $transfer_note->destinationWarehouse->name ?? 'N/A',

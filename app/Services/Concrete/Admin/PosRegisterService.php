@@ -40,11 +40,11 @@ class PosRegisterService
             $wh[] = ['business_id', $obj['business_id']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['date_created', '>=', businessStartOfDay($obj['start_date'])];
         }
 
         if (!empty($obj['end_date'])) {
-            $wh[] = ['date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['date_created', '<=', businessEndOfDay($obj['end_date'])];
         }
         $allow_roles = [
             RoleNames::SUPERADMIN,
@@ -309,7 +309,9 @@ class PosRegisterService
             return true;
         }
 
-        $now = $now ?? Carbon::now();
+        // Business-local "now" - open_time/close_time are wall-clock times
+        // for the business's own physical/operating timezone, not UTC.
+        $now = $now ?? Carbon::now(businessTimezone());
         $open = Carbon::parse($now->toDateString() . ' ' . $open_time);
         $close = Carbon::parse($now->toDateString() . ' ' . $close_time);
 
@@ -334,7 +336,7 @@ class PosRegisterService
      */
     public function currentWindowStart($open_time, $close_time, ?Carbon $now = null)
     {
-        $now = $now ?? Carbon::now();
+        $now = $now ?? Carbon::now(businessTimezone());
 
         if (empty($open_time)) {
             return $now->copy()->startOfDay();

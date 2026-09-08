@@ -58,10 +58,10 @@ class FixedAssetDepreciationService
             $wh[] = ['status', $obj['status']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['depreciation_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['depreciation_date', '>=', businessStartOfDay($obj['start_date'])];
         }
         if (!empty($obj['end_date'])) {
-            $wh[] = ['depreciation_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['depreciation_date', '<=', businessEndOfDay($obj['end_date'])];
         }
 
         $allow_roles = [
@@ -83,7 +83,7 @@ class FixedAssetDepreciationService
             ->addColumn('branch', fn ($item) => $item->branch->name ?? '')
             ->addColumn('asset_code', fn ($item) => $item->fixedAsset->asset_code ?? '')
             ->addColumn('asset_name', fn ($item) => $item->fixedAsset->name ?? '')
-            ->addColumn('depreciation_date', fn ($item) => $item->depreciation_date ? localDate($item->depreciation_date) : '')
+            ->addColumn('depreciation_date', fn ($item) => $item->depreciation_date ? businessDate($item->depreciation_date) : '')
             ->addColumn('previous_value', fn ($item) => currency($item->previous_value))
             ->addColumn('depreciation_amount', fn ($item) => currency($item->depreciation_amount))
             ->addColumn('new_value', fn ($item) => currency($item->new_value))
@@ -142,7 +142,7 @@ class FixedAssetDepreciationService
             ? Carbon::parse($obj['depreciation_date'])->startOfDay()
             : ($asset->next_depreciation_date
                 ? Carbon::parse($asset->next_depreciation_date)->startOfDay()
-                : Carbon::today());
+                : Carbon::parse(businessToday()));
 
         $dep = $this->fixed_asset_service->postDepreciationForAsset($asset->fresh(), $asOf, 'manual');
         if (!$dep) {

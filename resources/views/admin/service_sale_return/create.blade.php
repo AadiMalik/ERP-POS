@@ -62,7 +62,7 @@
                         <div class="col-md-3 mb-3">
                             <label>Return Date</label>
                             <input type="text" class="form-control datepicker" name="service_sale_return_date"
-                                value="{{ old('service_sale_return_date', isset($service_sale_return) ? localDate($service_sale_return->service_sale_return_date) : localDate(date('Y-m-d'))) }}">
+                                value="{{ old('service_sale_return_date', isset($service_sale_return) ? businessDate($service_sale_return->service_sale_return_date) : businessDate(businessToday())) }}">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>Reason</label>

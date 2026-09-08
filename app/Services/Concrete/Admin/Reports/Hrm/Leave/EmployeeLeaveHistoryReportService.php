@@ -48,8 +48,8 @@ class EmployeeLeaveHistoryReportService extends BaseLeaveReportService
             ->addColumn('employee_code', fn ($row) => $row->employee?->employee_code ?? '-')
             ->addColumn('name', fn ($row) => $row->employee?->user?->name ?? '-')
             ->addColumn('leave_type', fn ($row) => $row->leaveType?->name ?? '-')
-            ->addColumn('start_date', fn ($row) => localDate($row->start_date))
-            ->addColumn('end_date', fn ($row) => localDate($row->end_date))
+            ->addColumn('start_date', fn ($row) => businessDate($row->start_date))
+            ->addColumn('end_date', fn ($row) => businessDate($row->end_date))
             ->addColumn('approver', fn ($row) => $row->approver?->name ?? '-')
             ->addColumn('status', fn ($row) => ucfirst($row->status))
             ->make(true);

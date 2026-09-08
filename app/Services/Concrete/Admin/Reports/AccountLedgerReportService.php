@@ -63,8 +63,8 @@ class AccountLedgerReportService
             'allow_roles' => $this->allow_roles,
         ];
 
-        $from = !empty($obj['start_date']) ? Carbon::parse($obj['start_date'])->startOfDay() : null;
-        $to = !empty($obj['end_date']) ? Carbon::parse($obj['end_date'])->endOfDay() : null;
+        $from = !empty($obj['start_date']) ? businessStartOfDay($obj['start_date']) : null;
+        $to = !empty($obj['end_date']) ? businessEndOfDay($obj['end_date']) : null;
 
         $openingTotals = $this->ledger_query_service->openingBalances($filters, $from)[$account_id] ?? ['debit' => 0, 'credit' => 0];
         $opening = $this->classifier->toBalance($openingTotals['debit'], $openingTotals['credit'], $debitNormal);
@@ -99,7 +99,7 @@ class AccountLedgerReportService
         $result = $this->build($obj);
 
         return DataTables::of($result['rows'])
-            ->addColumn('voucher_date', fn ($row) => localDate($row->entry_date))
+            ->addColumn('voucher_date', fn ($row) => businessDate($row->entry_date))
             ->addColumn('voucher_type', fn ($row) => $row->voucher_name ?? $row->source_type ?? '')
             ->addColumn('voucher_number', fn ($row) => $row->entry_no)
             ->addColumn('reference_number', fn ($row) => $row->reference_no)

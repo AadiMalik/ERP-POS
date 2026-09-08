@@ -145,7 +145,7 @@
             <div class="card h-100">
                 <div class="card-body">
                     <div class="text-muted small">Next Depreciation Date</div>
-                    <div class="fs-5 fw-semibold">{{ $fixed_asset->next_depreciation_date ? localDate($fixed_asset->next_depreciation_date) : '—' }}</div>
+                    <div class="fs-5 fw-semibold">{{ $fixed_asset->next_depreciation_date ? businessDate($fixed_asset->next_depreciation_date) : '—' }}</div>
                 </div>
             </div>
         </div>
@@ -161,7 +161,7 @@
                 <div class="col-md-4"><strong>Branch:</strong> {{ $fixed_asset->branch->name ?? '—' }}</div>
                 <div class="col-md-4"><strong>Location:</strong> {{ $fixed_asset->location ?: '—' }}</div>
                 <div class="col-md-4"><strong>Serial:</strong> {{ $fixed_asset->serial_number ?: '—' }}</div>
-                <div class="col-md-4"><strong>Purchase Date:</strong> {{ $fixed_asset->purchase_date ? localDate($fixed_asset->purchase_date) : '—' }}</div>
+                <div class="col-md-4"><strong>Purchase Date:</strong> {{ $fixed_asset->purchase_date ? businessDate($fixed_asset->purchase_date) : '—' }}</div>
                 <div class="col-md-4"><strong>Useful Life:</strong> {{ $fixed_asset->useful_life_years }} years</div>
                 <div class="col-md-4"><strong>Method:</strong> Straight Line</div>
                 <div class="col-md-4"><strong>Adjustment:</strong> {{ $adjLabels[$fixed_asset->depreciation_adjustment_mode] ?? $fixed_asset->depreciation_adjustment_mode }}</div>
@@ -192,7 +192,7 @@
                 <tbody>
                     @forelse ($fixed_asset->depreciations as $dep)
                     <tr>
-                        <td>{{ $dep->depreciation_date ? localDate($dep->depreciation_date) : '' }}</td>
+                        <td>{{ $dep->depreciation_date ? businessDate($dep->depreciation_date) : '' }}</td>
                         <td>{{ $dep->period_key }}</td>
                         <td class="text-end">{{ currency($dep->previous_value) }}</td>
                         <td class="text-end">{{ currency($dep->depreciation_amount) }}</td>
@@ -237,7 +237,7 @@
                 <tbody>
                     @forelse ($fixed_asset->transactions as $tx)
                     <tr>
-                        <td>{{ $tx->transaction_date ? localDate($tx->transaction_date) : '' }}</td>
+                        <td>{{ $tx->transaction_date ? businessDate($tx->transaction_date) : '' }}</td>
                         <td>{{ $txLabels[$tx->transaction_type] ?? $tx->transaction_type }}</td>
                         <td>{{ $tx->description }}</td>
                         <td class="text-end">{{ $tx->amount !== null ? currency($tx->amount) : '—' }}</td>
@@ -380,7 +380,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Disposal Date <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control datepicker" id="disposal_date" value="{{ localDate(date('Y-m-d')) }}">
+                    <input type="text" class="form-control datepicker" id="disposal_date" value="{{ businessDate(businessToday()) }}">
                 </div>
                 <div class="mb-3" id="sale_price_wrap" style="display:none;">
                     <label class="form-label">Sale Price <span class="text-danger">*</span></label>

@@ -70,10 +70,10 @@ class MaterialConsumptionReportService
             $q->whereHas('product', fn ($p) => $p->where('category_id', $filters['category_id']));
         }
         if (!empty($filters['start_date'])) {
-            $q->where('date_created', '>=', Carbon::parse($filters['start_date'])->startOfDay());
+            $q->where('date_created', '>=', businessStartOfDay($filters['start_date']));
         }
         if (!empty($filters['end_date'])) {
-            $q->where('date_created', '<=', Carbon::parse($filters['end_date'])->endOfDay());
+            $q->where('date_created', '<=', businessEndOfDay($filters['end_date']));
         }
 
         return $q;
@@ -94,7 +94,7 @@ class MaterialConsumptionReportService
 
         return $this->detailQuery($filters)->orderByDesc('date_created')->get()->map(function ($item) {
             return (object) [
-                'date_created' => $item->date_created,
+                'date_created' => $item->date_created ? localDate($item->date_created) : null,
                 'group_label' => $item->productVariation?->name ?? '-',
                 'raw_material_name' => $item->productVariation?->name ?? '-',
                 'finished_product' => $item->production?->plan?->productVariation?->name ?? '-',
@@ -154,8 +154,10 @@ class MaterialConsumptionReportService
                 default => (string) $key,
             };
 
+            $lastDate = $items->max('date_created');
+
             return (object) [
-                'date_created' => $items->max('date_created'),
+                'date_created' => $lastDate ? localDate($lastDate) : null,
                 'group_label' => $label,
                 'raw_material_name' => $group_by === 'material' ? $label : ($first->productVariation?->name ?? '-'),
                 'finished_product' => $first->production?->plan?->productVariation?->name ?? '-',
@@ -227,7 +229,7 @@ class MaterialConsumptionReportService
             })->where('product_variation_id', $item->product_variation_id)->avg('unit_cost');
 
             return (object) [
-                'date_created' => $item->plan?->plan_date,
+                'date_created' => $item->plan?->plan_date ? businessDate($item->plan->plan_date) : null,
                 'group_label' => $item->productVariation?->name ?? '-',
                 'raw_material_name' => $item->productVariation?->name ?? '-',
                 'finished_product' => $item->plan?->productVariation?->name ?? '-',
@@ -263,7 +265,7 @@ class MaterialConsumptionReportService
         ];
 
         return DataTables::of($rows)
-            ->addColumn('date', fn ($item) => $item->date_created ? localDate($item->date_created) : '-')
+            ->addColumn('date', fn ($item) => $item->date_created ?? '-')
             ->addColumn('group_label', fn ($item) => e($item->group_label))
             ->addColumn('raw_material', fn ($item) => e($item->raw_material_name))
             ->addColumn('finished_product', fn ($item) => e($item->finished_product))

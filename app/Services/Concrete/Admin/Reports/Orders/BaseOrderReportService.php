@@ -76,10 +76,10 @@ abstract class BaseOrderReportService
             $query->where($cols['variation'], $obj['product_variation_id']);
         }
         if (!empty($obj['start_date']) && !empty($cols['date'])) {
-            $query->where($cols['date'], '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $query->where($cols['date'], '>=', businessStartOfDay($obj['start_date']));
         }
         if (!empty($obj['end_date']) && !empty($cols['date'])) {
-            $query->where($cols['date'], '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $query->where($cols['date'], '<=', businessEndOfDay($obj['end_date']));
         }
 
         applyRoleScope(

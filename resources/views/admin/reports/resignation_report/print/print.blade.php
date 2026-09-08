@@ -41,9 +41,9 @@
                     <td>{{ $row->employee?->employee_code }}</td>
                     <td>{{ $row->employee?->user?->name }}</td>
                     <td>{{ $row->employee?->department?->name }}</td>
-                    <td>{{ localDate($row->request_date) }}</td>
+                    <td>{{ businessDate($row->request_date) }}</td>
                     <td class="text-right">{{ $row->notice_period_days }}</td>
-                    <td>{{ localDate($row->last_working_date) }}</td>
+                    <td>{{ businessDate($row->last_working_date) }}</td>
                     <td>{{ $row->approver?->name }}</td>
                     <td>{{ ucfirst($row->status) }}</td>
                 </tr>

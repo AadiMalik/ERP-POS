@@ -54,7 +54,7 @@ class EmployeeAdvanceReportService extends BasePayrollFinanceReportService
             ->addColumn('name', fn ($row) => $row->employee?->user?->name ?? '-')
             ->addColumn('department', fn ($row) => $row->employee?->department?->name ?? '-')
             ->addColumn('amount', fn ($row) => currency($row->amount))
-            ->addColumn('request_date', fn ($row) => localDate($row->request_date))
+            ->addColumn('request_date', fn ($row) => businessDate($row->request_date))
             ->addColumn('installment_amount', fn ($row) => currency($row->installment_amount))
             ->addColumn('remaining_balance', fn ($row) => currency($row->remaining_balance))
             ->addColumn('approver', fn ($row) => $row->approver?->name ?? '-')

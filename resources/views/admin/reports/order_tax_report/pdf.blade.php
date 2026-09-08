@@ -71,7 +71,7 @@
             @forelse ($rows as $row)
                 <tr>
                     <td>{{ $row->daily_order_id }}</td>
-                    <td>{{ optional($row->order_date)->format('d-m-Y H:i') }}</td>
+                    <td>{{ localDateTime($row->order_date) }}</td>
                     <td>{{ $row->product_name }}</td>
                     <td>{{ $row->variation_name }}</td>
                     <td>{{ $row->sku }}</td>

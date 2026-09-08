@@ -65,7 +65,7 @@
                         <div class="col-md-3 mb-3">
                             <label>{{ __('good_receipt_notes.grn_date') }}</label>
                             <input type="text" class="form-control datepicker" name="good_receipt_note_date"
-                                value="{{ old('good_receipt_note_date', isset($grn) ? localDate($grn->good_receipt_note_date) : localDate(date('Y-m-d'))) }}">
+                                value="{{ old('good_receipt_note_date', isset($grn) ? businessDate($grn->good_receipt_note_date) : businessDate(businessToday())) }}">
                         </div>
                         <div class="col-md-12">
                             <label>{{ __('common.description') }}</label>

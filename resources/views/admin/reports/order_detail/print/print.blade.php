@@ -51,7 +51,7 @@
                 @endphp
                 <tr>
                     <td>{{ $row->daily_order_id }}</td>
-                    <td>{{ optional($row->order_date)->format('d-m-Y H:i') }}</td>
+                    <td>{{ localDateTime($row->order_date) }}</td>
                     <td>{{ $row->customer_name ?? 'Walk-in' }}</td>
                     <td>{{ $row->branch_name ?? '' }}</td>
                     <td>{{ $row->order_source_name ?? '' }}</td>

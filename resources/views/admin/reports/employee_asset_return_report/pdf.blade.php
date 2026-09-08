@@ -69,9 +69,9 @@
                     <td>{{ $row->asset?->name }}</td>
                     <td>{{ $row->employee?->user?->name }}</td>
                     <td>{{ $row->employee?->department?->name }}</td>
-                    <td>{{ localDate($row->issue_date) }}</td>
-                    <td>{{ $row->expected_return_date ? localDate($row->expected_return_date) : '-' }}</td>
-                    <td>{{ $row->return_date ? localDate($row->return_date) : '-' }}</td>
+                    <td>{{ businessDate($row->issue_date) }}</td>
+                    <td>{{ $row->expected_return_date ? businessDate($row->expected_return_date) : '-' }}</td>
+                    <td>{{ $row->return_date ? businessDate($row->return_date) : '-' }}</td>
                     <td>{{ $row->is_overdue ? 'Overdue' : ucfirst($row->status) }}</td>
                 </tr>
             @empty

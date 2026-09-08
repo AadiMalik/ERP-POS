@@ -51,7 +51,7 @@
                         <div class="col-md-3 mb-3">
                             <label>{{ __('common.date') }}</label>
                             <input type="text" class="form-control datepicker" name="opening_stock_date"
-                                value="{{ old('opening_stock_date', isset($opening_stock) ? localDate($opening_stock->opening_stock_date) : localDate(date('Y-m-d'))) }}">
+                                value="{{ old('opening_stock_date', isset($opening_stock) ? businessDate($opening_stock->opening_stock_date) : businessDate(businessToday())) }}">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>{{ __('common.reference') }}</label>

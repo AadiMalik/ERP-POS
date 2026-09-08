@@ -42,10 +42,10 @@ class AssetValuationReportService
             $query->where('fixed_asset_category_id', $obj['fixed_asset_category_id']);
         }
         if (!empty($obj['start_date'])) {
-            $query->where('purchase_date', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $query->where('purchase_date', '>=', businessStartOfDay($obj['start_date']));
         }
         if (!empty($obj['end_date'])) {
-            $query->where('purchase_date', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $query->where('purchase_date', '<=', businessEndOfDay($obj['end_date']));
         }
 
         $query = applyRoleScope($query, $this->allow_roles);

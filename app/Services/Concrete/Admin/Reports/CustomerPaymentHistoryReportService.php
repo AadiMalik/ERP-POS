@@ -75,11 +75,11 @@ class CustomerPaymentHistoryReportService
         }
 
         if (!empty($obj['start_date'])) {
-            $query->where('customer_payments.payment_date', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $query->where('customer_payments.payment_date', '>=', businessStartOfDay($obj['start_date']));
         }
 
         if (!empty($obj['end_date'])) {
-            $query->where('customer_payments.payment_date', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $query->where('customer_payments.payment_date', '<=', businessEndOfDay($obj['end_date']));
         }
 
         return applyRoleScope($query, $this->allow_roles, 'customer_payments.business_id', 'customer_payments.branch_id');
@@ -129,7 +129,7 @@ class CustomerPaymentHistoryReportService
         $totals = $this->totals($obj);
 
         return DataTables::of($query)
-            ->addColumn('payment_date', fn ($row) => localDate($row->payment_date))
+            ->addColumn('payment_date', fn ($row) => businessDate($row->payment_date))
             ->addColumn('customer', fn ($row) => $row->user->name ?? '')
             ->addColumn('payment_method', fn ($row) => ucwords(str_replace('_', ' ', $row->payment_method)))
             ->addColumn('order_no', fn ($row) => $row->order_id ? ($row->order->daily_order_id ?? $row->order_id) : 'On Account')

@@ -5,7 +5,6 @@ namespace App\Services\Concrete\Admin\Dashboard;
 use App\Enums\Status;
 use App\Models\CustomerProfile;
 use App\Models\Supplier;
-use Carbon\Carbon;
 
 /**
  * Customer/Supplier summary counts for a dashboard scope. Customers are
@@ -33,7 +32,7 @@ class DashboardPartyService
         return [
             'total' => $query()->count(),
             'active' => $query()->where('status', Status::ACTIVE)->count(),
-            'new_this_period' => $query()->where('date_created', '>=', Carbon::now()->startOfMonth())->count(),
+            'new_this_period' => $query()->where('date_created', '>=', businessStartOfDay($scope['start_date']))->count(),
         ];
     }
 
@@ -47,7 +46,7 @@ class DashboardPartyService
         return [
             'total' => $query()->count(),
             'active' => $query()->where('status', Status::ACTIVE)->count(),
-            'new_this_period' => $query()->where('date_created', '>=', Carbon::now()->startOfMonth())->count(),
+            'new_this_period' => $query()->where('date_created', '>=', businessStartOfDay($scope['start_date']))->count(),
         ];
     }
 }

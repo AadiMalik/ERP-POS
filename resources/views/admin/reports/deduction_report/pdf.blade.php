@@ -76,8 +76,8 @@
                     <td>{{ $row->title }}</td>
                     <td class="text-right">{{ currency($row->amount) }}</td>
                     <td>{{ $row->is_recurring ? 'Yes' : 'No' }}</td>
-                    <td>{{ localDate($row->effective_from) }}</td>
-                    <td>{{ $row->effective_to ? localDate($row->effective_to) : '-' }}</td>
+                    <td>{{ businessDate($row->effective_from) }}</td>
+                    <td>{{ $row->effective_to ? businessDate($row->effective_to) : '-' }}</td>
                     <td>{{ ucfirst($row->status) }}</td>
                 </tr>
             @empty

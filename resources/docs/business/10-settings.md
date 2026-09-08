@@ -5,7 +5,13 @@ All configuration lives under one **Settings** screen, organized into sections
 
 - **Business** — company profile, address, logo, and general preferences,
   including **Table pagination position** (show page numbers at the bottom
-  of list tables, the top, or both — bottom is the default).
+  of list tables, the top, or both — bottom is the default), **Timezone**, and
+  **Date/Time Format**. Every date and time shown anywhere in the app — lists,
+  create/edit forms, reports, exports — is displayed in this timezone; records
+  are always saved consistently underneath, so changing the Timezone here
+  immediately re-displays all of your business's existing records (products,
+  orders, purchases, everything with a date) in the new timezone without
+  altering when they actually happened.
 - **Accounting** — default chart of accounts, tax settings, aging basis for
   receivables/payables, and the specific accounts used for inventory,
   cost-of-goods-sold, and service transactions. **Customer Account** and

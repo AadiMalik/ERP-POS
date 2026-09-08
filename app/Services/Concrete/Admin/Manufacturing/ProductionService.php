@@ -81,10 +81,10 @@ class ProductionService
             $wh[] = ['batch_no', 'like', '%' . $obj['batch_no'] . '%'];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['date_created', '>=', businessStartOfDay($obj['start_date'])];
         }
         if (!empty($obj['end_date'])) {
-            $wh[] = ['date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['date_created', '<=', businessEndOfDay($obj['end_date'])];
         }
 
         $allow_roles = [
@@ -108,7 +108,7 @@ class ProductionService
             ->addColumn('warehouse', fn ($item) => $item->warehouse?->name ?? '-')
             ->addColumn('quantity', fn ($item) => decimal($item->quantity))
             ->addColumn('batch_no', fn ($item) => $item->batch_no ?? '-')
-            ->addColumn('expiry_date', fn ($item) => $item->expiry_date ? localDate($item->expiry_date) : '-')
+            ->addColumn('expiry_date', fn ($item) => $item->expiry_date ? businessDate($item->expiry_date) : '-')
             ->addColumn('unit_cost', fn ($item) => currency($item->unit_cost))
             ->addColumn('status', function ($item) use ($labels) {
                 $class = match ($item->status) {

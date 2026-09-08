@@ -33,8 +33,8 @@ class DeductionReportExport implements FromCollection, WithHeadings, WithMapping
             $row->title,
             decimal($row->amount),
             $row->is_recurring ? 'Yes' : 'No',
-            localDate($row->effective_from),
-            $row->effective_to ? localDate($row->effective_to) : '-',
+            businessDate($row->effective_from),
+            $row->effective_to ? businessDate($row->effective_to) : '-',
             ucfirst($row->status),
         ];
     }

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\Business;
+use App\Models\BusinessSetting;
 use App\Models\CustomerProfile;
 use App\Models\CustomerSetting;
 use App\Models\InventorySetting;
@@ -57,6 +58,26 @@ class CheckNotificationAlertsCommand extends Command
         $this->info('Notification alert check complete.');
 
         return 0;
+    }
+
+    /**
+     * This console command has no HTTP session (SettingMiddleware never
+     * runs), and it processes every business in one pass, each of which can
+     * have its own configured timezone - so unlike a web request, "today"
+     * here can't be resolved once for the whole run. Cached per business_id
+     * since several check*() methods hit the same business repeatedly.
+     */
+    protected array $timezoneCache = [];
+
+    protected function businessTimezoneFor(?string $business_id): string
+    {
+        if (empty($business_id)) {
+            return config('app.timezone', 'UTC');
+        }
+
+        return $this->timezoneCache[$business_id] ??= (
+            BusinessSetting::where('business_id', $business_id)->value('timezone') ?? config('app.timezone', 'UTC')
+        );
     }
 
     protected function getNotificationSetting(?string $business_id): NotificationSetting
@@ -125,8 +146,6 @@ class CheckNotificationAlertsCommand extends Command
 
     protected function checkPaymentDue(bool $dry_run): void
     {
-        $today = Carbon::today();
-
         $orders = Order::where('is_deleted', 0)
             ->where('status', Status::POSTED)
             ->whereRaw('(total - paid_amount) > 0')
@@ -146,7 +165,12 @@ class CheckNotificationAlertsCommand extends Command
                 continue;
             }
 
-            $due_date = Carbon::parse($order->order_date)->addDays((int) $customer->credit_days);
+            // Each business can have its own timezone, so "today" and the
+            // day-count arithmetic below must resolve per-order (not once
+            // for the whole run) against that business's own calendar day.
+            $tz = $this->businessTimezoneFor($order->business_id);
+            $today = Carbon::now($tz)->startOfDay();
+            $due_date = Carbon::parse($order->order_date, 'UTC')->setTimezone($tz)->startOfDay()->addDays((int) $customer->credit_days);
             $alert_from = $due_date->copy()->subDays((int) $setting->payment_due_days_before);
 
             if ($today->lt($alert_from)) {
@@ -237,7 +261,7 @@ class CheckNotificationAlertsCommand extends Command
                 $customer->customer_profile_id,
                 route('users.show', $customer->user_id),
                 ['outstanding' => $outstanding, 'credit_limit' => (float) $customer->credit_limit],
-                Carbon::today()->toDateString()
+                Carbon::now($this->businessTimezoneFor($customer->business_id))->toDateString()
             );
         }
     }
@@ -249,13 +273,15 @@ class CheckNotificationAlertsCommand extends Command
             ->unique()
             ->filter();
 
-        $today = Carbon::today();
-
         foreach ($business_ids as $business_id) {
             $setting = $this->getNotificationSetting($business_id);
             if (!$setting->supplier_payment_reminder_enabled) {
                 continue;
             }
+
+            // Each business can have its own timezone, so "today" is
+            // resolved per business rather than once for the whole run.
+            $today = Carbon::now($this->businessTimezoneFor($business_id))->startOfDay();
 
             $invoices = $this->accounts_payable_service->getInvoices(['business_id' => $business_id]);
 

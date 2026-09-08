@@ -53,7 +53,7 @@ class PurchaseReturnDetailExport implements FromCollection, WithHeadings, WithMa
     public function map($row): array
     {
         return [
-            localDate($row->purchase_return_date),
+            businessDate($row->purchase_return_date),
             $row->purchase_return_no,
             $row->return_type === 'grn' ? 'GRN' : 'Direct Purchase',
             $row->source_no,

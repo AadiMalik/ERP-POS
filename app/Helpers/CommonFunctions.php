@@ -45,22 +45,50 @@ function getRoleName()
     return Auth::user()?->getRoleNames()->first();
 }
 
-function localDateTime($date)
+/**
+ * Single source of truth for resolving "the current business's timezone" -
+ * every date helper below routes through this instead of reading
+ * session('business_setting') directly, so it works outside the admin web
+ * session too (API/mobile requests authenticated via Auth::user(), or a
+ * console command iterating multiple businesses via $override).
+ *
+ * Resolution order: explicit $override -> web session (SettingMiddleware,
+ * admin/* routes) -> authenticated user's own business -> app default (UTC).
+ */
+function businessTimezone(?string $override = null): string
+{
+    if (!blank($override)) {
+        return $override;
+    }
+
+    $sessionTimezone = session('business_setting.timezone');
+    if (!blank($sessionTimezone)) {
+        return $sessionTimezone;
+    }
+
+    $authTimezone = Auth::user()?->business?->businessSetting?->timezone;
+    if (!blank($authTimezone)) {
+        return $authTimezone;
+    }
+
+    return config('app.timezone', 'UTC');
+}
+
+function localDateTime($date, ?string $timezoneOverride = null)
 {
     if (blank($date)) {
         return $date;
     }
-    $setting = session('business_setting');
+    $setting = session('business_setting', []);
     $date_format = $setting['date_format'] ?? 'd-m-Y';
     $time_format = $setting['time_format'] ?? 'H:i:s';
-    $timezone = $setting['timezone'] ?? 'UTC';
 
     return Carbon::parse($date, 'UTC')
-        ->setTimezone($timezone)
+        ->setTimezone(businessTimezone($timezoneOverride))
         ->format($date_format . ' ' . $time_format);
 }
 
-function localDate($date)
+function localDate($date, ?string $timezoneOverride = null)
 {
     if (blank($date)) {
         return $date;
@@ -69,14 +97,13 @@ function localDate($date)
     $setting = session('business_setting', []);
 
     $date_format = $setting['date_format'] ?? 'd-m-Y';
-    $timezone   = $setting['timezone'] ?? 'UTC';
 
     return Carbon::parse($date, 'UTC')
-        ->setTimezone($timezone)
+        ->setTimezone(businessTimezone($timezoneOverride))
         ->format($date_format);
 }
 
-function utcDateTime($datetime)
+function utcDateTime($datetime, ?string $timezoneOverride = null)
 {
     if (blank($datetime)) {
         return $datetime;
@@ -84,35 +111,123 @@ function utcDateTime($datetime)
 
     $setting = session('business_setting', []);
 
-    $timezone = $setting['timezone'] ?? 'UTC';
     $dateFormat = $setting['date_format'] ?? 'd-m-Y';
     $timeFormat = $setting['time_format'] ?? 'H:i';
 
     return Carbon::createFromFormat(
         $dateFormat . ' ' . $timeFormat,
         $datetime,
-        $timezone
+        businessTimezone($timezoneOverride)
     )->utc()->format('Y-m-d H:i:s');
 }
 
-function utcDate($datetime, $fromUtc = false)
+/**
+ * Every existing caller of utcDate() feeds it a pure calendar-date business
+ * field (purchase_date, expense_date, manufacturing_date, payment_date,
+ * etc.) picked from a date-only input - never a genuine timestamp. Such a
+ * value has no time-of-day, so it is NOT timezone-dependent (per the "date
+ * only fields must not be unnecessarily converted" rule): this reformats
+ * the business date_format string to the DB's 'Y-m-d', with no Carbon
+ * timezone/instant conversion. (Previously this ran the value through
+ * Carbon::createFromFormat(...)->utc(), which - because createFromFormat
+ * fills any unspecified time part with the current wall-clock time rather
+ * than midnight - silently shifted the stored/redisplayed date backward by
+ * one day for any positive-UTC-offset business timezone, intermittently
+ * depending on what time of day the save happened. Reproduced and fixed;
+ * see businessDate() for the matching display-side helper.)
+ */
+function utcDate($datetime, $fromUtc = false, ?string $timezoneOverride = null)
 {
     if (blank($datetime)) {
         return $datetime;
     }
 
-    $setting = session('business_setting', []);
-
-    $timezone = $setting['timezone'] ?? 'UTC';
-    $dateFormat = $setting['date_format'] ?? 'd-m-Y';
     if ($fromUtc) {
         return Carbon::parse($datetime)->format('Y-m-d');
     }
-    return Carbon::createFromFormat(
-        $dateFormat,
-        $datetime,
-        $timezone
-    )->utc()->format('Y-m-d');
+
+    $setting = session('business_setting', []);
+    $dateFormat = $setting['date_format'] ?? 'd-m-Y';
+
+    return Carbon::createFromFormat($dateFormat, $datetime)->format('Y-m-d');
+}
+
+/**
+ * Display counterpart of utcDate() - formats a stored pure calendar-date
+ * value (purchase_date, expense_date, sale_date, ...) into the business
+ * date_format, with no timezone shift (the stored value already IS the
+ * business-local calendar date, unlike date_created/date_updated which are
+ * genuine UTC instants and must go through localDate() instead).
+ */
+function businessDate($date, ?string $dateFormatOverride = null)
+{
+    if (blank($date)) {
+        return $date;
+    }
+
+    $setting = session('business_setting', []);
+    $dateFormat = $dateFormatOverride ?? ($setting['date_format'] ?? 'd-m-Y');
+
+    return Carbon::parse($date)->format($dateFormat);
+}
+
+/**
+ * "Today" as a plain calendar date in the business timezone - use this
+ * instead of Carbon::today()/Carbon::now()->toDateString() (which resolve
+ * to the app/UTC calendar day) anywhere a default or comparison needs the
+ * business's own current day, e.g. a POS sale_date default.
+ */
+function businessToday(?string $timezoneOverride = null): string
+{
+    return Carbon::now(businessTimezone($timezoneOverride))->format('Y-m-d');
+}
+
+/**
+ * Business-timezone-aware day boundaries, converted to UTC - the correct
+ * building block for any "from/to date" or "today" filter that compares
+ * against UTC-stored timestamps. Replaces the common but wrong
+ * Carbon::parse($date)->startOfDay()/endOfDay() and Carbon::today(), which
+ * compute the boundary in app/UTC time instead of the business's calendar
+ * day. $date = null means "today" in the business timezone.
+ */
+function businessStartOfDay($date = null, ?string $timezoneOverride = null): Carbon
+{
+    $tz = businessTimezone($timezoneOverride);
+    return blank($date) ? Carbon::now($tz)->startOfDay()->utc() : Carbon::parse($date, $tz)->startOfDay()->utc();
+}
+
+function businessEndOfDay($date = null, ?string $timezoneOverride = null): Carbon
+{
+    $tz = businessTimezone($timezoneOverride);
+    return blank($date) ? Carbon::now($tz)->endOfDay()->utc() : Carbon::parse($date, $tz)->endOfDay()->utc();
+}
+
+/**
+ * Round-trip helpers for native <input type="datetime-local"> fields, whose
+ * wire format (Y-m-d\TH:i) is fixed by the HTML spec regardless of the
+ * business's configured date_format/time_format - distinct from
+ * utcDateTime()/localDateTime() which round-trip against those formats for
+ * the flatpickr-driven fields.
+ */
+function utcDateTimeLocal(?string $value, ?string $timezoneOverride = null): ?string
+{
+    if (blank($value)) {
+        return $value;
+    }
+
+    return Carbon::createFromFormat('Y-m-d\TH:i', $value, businessTimezone($timezoneOverride))
+        ->utc()->format('Y-m-d H:i:s');
+}
+
+function localDateTimeLocal($date, ?string $timezoneOverride = null): ?string
+{
+    if (blank($date)) {
+        return null;
+    }
+
+    return Carbon::parse($date, 'UTC')
+        ->setTimezone(businessTimezone($timezoneOverride))
+        ->format('Y-m-d\TH:i');
 }
 
 function currency($amount = 0, $showSymbol = true)

@@ -40,7 +40,7 @@
                 <tr>
                     <td>{{ $row->employee?->employee_code }}</td>
                     <td>{{ $row->employee?->user?->name }}</td>
-                    <td>{{ localDate($row->entry_date) }}</td>
+                    <td>{{ businessDate($row->entry_date) }}</td>
                     <td>{{ ucfirst($row->type) }}</td>
                     <td>{{ $row->description }}</td>
                     <td class="text-right">{{ $row->debit > 0 ? currency($row->debit) : '' }}</td>

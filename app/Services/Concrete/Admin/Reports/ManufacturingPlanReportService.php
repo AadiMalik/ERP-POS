@@ -5,7 +5,6 @@ namespace App\Services\Concrete\Admin\Reports;
 use App\Enums\ManufacturingPlanStatus;
 use App\Enums\RoleNames;
 use App\Models\ManufacturingPlan;
-use Carbon\Carbon;
 use Yajra\DataTables\DataTables;
 
 class ManufacturingPlanReportService
@@ -28,10 +27,10 @@ class ManufacturingPlanReportService
             $q->where('status', $filters['status']);
         }
         if (!empty($filters['start_date'])) {
-            $q->where('date_created', '>=', Carbon::parse($filters['start_date'])->startOfDay());
+            $q->where('date_created', '>=', businessStartOfDay($filters['start_date']));
         }
         if (!empty($filters['end_date'])) {
-            $q->where('date_created', '<=', Carbon::parse($filters['end_date'])->endOfDay());
+            $q->where('date_created', '<=', businessEndOfDay($filters['end_date']));
         }
 
         $allow_roles = [RoleNames::SUPERADMIN, RoleNames::BUSINESSADMIN, RoleNames::INVENTORYMANAGER, RoleNames::BRANCHADMIN];
@@ -46,7 +45,7 @@ class ManufacturingPlanReportService
             ->addColumn('business', fn ($item) => $item->business?->name ?? '-')
             ->addColumn('branch', fn ($item) => $item->branch?->name ?? '-')
             ->addColumn('product', fn ($item) => $item->productVariation?->name ?? $item->product?->name ?? '-')
-            ->addColumn('plan_date', fn ($item) => $item->plan_date ? localDate($item->plan_date) : '-')
+            ->addColumn('plan_date', fn ($item) => $item->plan_date ? businessDate($item->plan_date) : '-')
             ->addColumn('planned_quantity', fn ($item) => decimal($item->planned_quantity))
             ->addColumn('produced_quantity', fn ($item) => decimal($item->produced_quantity))
             ->addColumn('remaining_quantity', fn ($item) => decimal($item->remaining_quantity))

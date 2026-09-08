@@ -54,18 +54,18 @@ class AccountsPayableReportService
         $dateField = (!empty($obj['date_basis']) && $obj['date_basis'] === 'due_date') ? 'due_date' : 'invoice_date';
 
         if (!empty($obj['start_date'])) {
-            $start = Carbon::parse($obj['start_date'])->startOfDay();
+            $start = businessStartOfDay($obj['start_date']);
             $invoices = $invoices->filter(fn ($row) => Carbon::parse($row->$dateField)->gte($start))->values();
         }
 
         if (!empty($obj['end_date'])) {
-            $end = Carbon::parse($obj['end_date'])->endOfDay();
+            $end = businessEndOfDay($obj['end_date']);
             $invoices = $invoices->filter(fn ($row) => Carbon::parse($row->$dateField)->lte($end))->values();
         }
 
         // Aging report drill-down: filter to invoices falling in a specific bucket as-of a date.
         if (!empty($obj['bucket'])) {
-            $asOf = !empty($obj['as_of_date']) ? Carbon::parse($obj['as_of_date']) : Carbon::today();
+            $asOf = !empty($obj['as_of_date']) ? Carbon::parse($obj['as_of_date']) : Carbon::parse(businessToday());
             $basis = $obj['aging_basis'] ?? 'due_date';
 
             $invoices = $invoices->filter(function ($row) use ($obj, $asOf, $basis) {
@@ -122,8 +122,8 @@ class AccountsPayableReportService
             ->addColumn('supplier_name', fn ($row) => $row->supplier_name)
             ->addColumn('purchase_no', fn ($row) => $row->purchase_no)
             ->addColumn('invoice_number', fn ($row) => $row->invoice_number)
-            ->addColumn('invoice_date', fn ($row) => localDate($row->invoice_date))
-            ->addColumn('due_date', fn ($row) => localDate($row->due_date))
+            ->addColumn('invoice_date', fn ($row) => businessDate($row->invoice_date))
+            ->addColumn('due_date', fn ($row) => businessDate($row->due_date))
             ->addColumn('invoiced_amount', fn ($row) => currency($row->invoiced_amount))
             ->addColumn('paid_amount', fn ($row) => currency($row->paid_amount))
             ->addColumn('outstanding_amount', fn ($row) => currency($row->outstanding_amount))

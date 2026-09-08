@@ -68,8 +68,8 @@ class GeneralLedgerReportService
             'allow_roles' => $this->allow_roles,
         ];
 
-        $from = !empty($obj['start_date']) ? Carbon::parse($obj['start_date'])->startOfDay() : null;
-        $to = !empty($obj['end_date']) ? Carbon::parse($obj['end_date'])->endOfDay() : null;
+        $from = !empty($obj['start_date']) ? businessStartOfDay($obj['start_date']) : null;
+        $to = !empty($obj['end_date']) ? businessEndOfDay($obj['end_date']) : null;
         $includeZero = !empty($obj['include_zero']);
 
         $openingMap = $this->ledger_query_service->openingBalances($filters, $from);
@@ -129,7 +129,7 @@ class GeneralLedgerReportService
 
         return DataTables::of($result['rows'])
             ->addColumn('account', fn ($row) => trim(($row->account_code ?? '') . ' ' . ($row->account_name ?? '')))
-            ->addColumn('voucher_date', fn ($row) => $row->entry_date ? localDate($row->entry_date) : '')
+            ->addColumn('voucher_date', fn ($row) => $row->entry_date ? businessDate($row->entry_date) : '')
             ->addColumn('voucher_type', fn ($row) => $row->voucher_name ?? $row->source_type ?? '')
             ->addColumn('voucher_number', fn ($row) => $row->entry_no)
             ->addColumn('reference_number', fn ($row) => $row->reference_no)

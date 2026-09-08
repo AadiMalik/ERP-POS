@@ -96,7 +96,7 @@ class PurchaseService
         return DataTables::of($datatable)
             ->addColumn('purchase_date', function ($item) {
                 return !empty($item->purchase_date)
-                    ? localDate($item->purchase_date)
+                    ? businessDate($item->purchase_date)
                     : 'N/A';
             })
             ->addColumn('purchase_request_no', function ($item) {
@@ -781,8 +781,8 @@ class PurchaseService
                     'track_expiry' => (bool) ($detail->productVariation->track_expiry ?? false),
                     'track_serial_number' => (bool) ($detail->productVariation->track_serial_number ?? false),
                     'batch_no' => $detail->batch_no,
-                    'manufacturing_date' => localDate($detail->manufacturing_date),
-                    'expiry_date' => localDate($detail->expiry_date),
+                    'manufacturing_date' => businessDate($detail->manufacturing_date),
+                    'expiry_date' => businessDate($detail->expiry_date),
                     'serial_numbers' => $detail->serial_numbers ? json_decode($detail->serial_numbers, true) : [],
                 ];
             }

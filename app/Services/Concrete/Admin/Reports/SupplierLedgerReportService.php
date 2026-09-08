@@ -45,8 +45,8 @@ class SupplierLedgerReportService
         $business_id = $obj['business_id'] ?? Auth::user()->business_id;
         $branch_id = $obj['branch_id'] ?? null;
 
-        $from = !empty($obj['start_date']) ? Carbon::parse($obj['start_date'])->startOfDay() : null;
-        $to = !empty($obj['end_date']) ? Carbon::parse($obj['end_date'])->endOfDay() : null;
+        $from = !empty($obj['start_date']) ? businessStartOfDay($obj['start_date']) : null;
+        $to = !empty($obj['end_date']) ? businessEndOfDay($obj['end_date']) : null;
 
         $opening = $this->ledger_query_service->openingBalance($business_id, $branch_id, $supplier_id, $supplier->account_id, $from, $this->allow_roles);
 
@@ -77,8 +77,8 @@ class SupplierLedgerReportService
         $result = $this->build($obj);
 
         return DataTables::of($result['rows'])
-            ->addColumn('document_date', fn ($row) => localDate($row->entry_date))
-            ->addColumn('voucher_date', fn ($row) => localDate($row->entry_date))
+            ->addColumn('document_date', fn ($row) => businessDate($row->entry_date))
+            ->addColumn('voucher_date', fn ($row) => businessDate($row->entry_date))
             ->addColumn('voucher_type', fn ($row) => $row->voucher_name ?? $row->source_type ?? '')
             ->addColumn('voucher_number', fn ($row) => $row->entry_no)
             ->addColumn('reference_number', fn ($row) => $row->reference_no)

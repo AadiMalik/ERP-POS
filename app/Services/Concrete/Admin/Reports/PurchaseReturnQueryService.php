@@ -71,11 +71,11 @@ class PurchaseReturnQueryService
         }
 
         if (!empty($filters['start_date'])) {
-            $query->where('purchase_returns.purchase_return_date', '>=', Carbon::parse($filters['start_date'])->startOfDay());
+            $query->where('purchase_returns.purchase_return_date', '>=', businessStartOfDay($filters['start_date']));
         }
 
         if (!empty($filters['end_date'])) {
-            $query->where('purchase_returns.purchase_return_date', '<=', Carbon::parse($filters['end_date'])->endOfDay());
+            $query->where('purchase_returns.purchase_return_date', '<=', businessEndOfDay($filters['end_date']));
         }
 
         return applyRoleScope($query, $filters['allow_roles'] ?? [], 'purchase_returns.business_id', 'purchase_returns.branch_id');

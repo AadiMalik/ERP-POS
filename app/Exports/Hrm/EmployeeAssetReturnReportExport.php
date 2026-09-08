@@ -31,9 +31,9 @@ class EmployeeAssetReturnReportExport implements FromCollection, WithHeadings, W
             $row->asset?->name,
             $row->employee?->user?->name,
             $row->employee?->department?->name,
-            localDate($row->issue_date),
-            $row->expected_return_date ? localDate($row->expected_return_date) : '-',
-            $row->return_date ? localDate($row->return_date) : '-',
+            businessDate($row->issue_date),
+            $row->expected_return_date ? businessDate($row->expected_return_date) : '-',
+            $row->return_date ? businessDate($row->return_date) : '-',
             $row->is_overdue ? 'Overdue' : ucfirst($row->status),
         ];
     }

@@ -64,10 +64,10 @@ class PaymentTransactionService
         $q = $this->model_payment_transaction->getModel()::where($wh)->with(['order', 'paymentGateway']);
 
         if (!empty($obj['start_date'])) {
-            $q->where('date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $q->where('date_created', '>=', businessStartOfDay($obj['start_date']));
         }
         if (!empty($obj['end_date'])) {
-            $q->where('date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $q->where('date_created', '<=', businessEndOfDay($obj['end_date']));
         }
 
         $allow_roles = [RoleNames::SUPERADMIN, RoleNames::BUSINESSADMIN];

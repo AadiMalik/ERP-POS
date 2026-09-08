@@ -108,7 +108,7 @@ class PurchaseReturnSummaryReportService
                 'product_variation' => $row->variation_name ?? 'N/A',
                 'branch'            => $row->branch_name ?? 'Unassigned',
                 'warehouse'         => $row->warehouse_name,
-                'date'              => localDate($row->purchase_return_date),
+                'date'              => businessDate($row->purchase_return_date),
                 default             => $row->purchase_return_no,
             };
         };

@@ -123,10 +123,10 @@ class ServicePurchaseReportService
             $query->where("$table.status", $filters['status']);
         }
         if (!empty($filters['start_date'])) {
-            $query->where("$table.$dateColumn", '>=', Carbon::parse($filters['start_date'])->startOfDay());
+            $query->where("$table.$dateColumn", '>=', businessStartOfDay($filters['start_date']));
         }
         if (!empty($filters['end_date'])) {
-            $query->where("$table.$dateColumn", '<=', Carbon::parse($filters['end_date'])->endOfDay());
+            $query->where("$table.$dateColumn", '<=', businessEndOfDay($filters['end_date']));
         }
     }
 

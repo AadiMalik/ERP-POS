@@ -29,7 +29,7 @@ class EmployeeLedgerReportExport implements FromCollection, WithHeadings, WithMa
         return [
             $row->employee?->employee_code,
             $row->employee?->user?->name,
-            localDate($row->entry_date),
+            businessDate($row->entry_date),
             ucfirst($row->type),
             $row->description,
             $row->debit > 0 ? decimal($row->debit) : '',

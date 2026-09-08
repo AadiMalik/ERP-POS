@@ -30,7 +30,7 @@ class MissingCheckinCheckoutReportExport implements FromCollection, WithHeadings
             $row->employee?->employee_code,
             $row->employee?->user?->name,
             $row->employee?->department?->name,
-            localDate($row->date),
+            businessDate($row->date),
             $row->check_in_time ?? 'Missing',
             $row->check_out_time ?? 'Missing',
             ucfirst(str_replace('_', ' ', $row->status)),

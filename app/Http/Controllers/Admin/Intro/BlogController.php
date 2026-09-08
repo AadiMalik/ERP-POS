@@ -86,6 +86,9 @@ class BlogController extends Controller
         if (is_array($obj['content'] ?? null)) {
             $obj['content'] = json_encode($obj['content']);
         }
+        if (!empty($obj['published_at'])) {
+            $obj['published_at'] = utcDateTimeLocal($obj['published_at']);
+        }
 
         foreach (['featured_image', 'og_image'] as $field) {
             if ($request->hasFile($field)) {

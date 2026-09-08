@@ -31,7 +31,7 @@ class HrDashboardReportService
     public function build(array $filters): array
     {
         $business_id = $filters['business_id'] ?? Auth::user()->business_id;
-        $today = Carbon::today()->toDateString();
+        $today = businessToday();
 
         $employeeQuery = fn () => applyRoleScope(Employee::where('is_deleted', 0), $this->allow_roles)
             ->when($business_id, fn ($q) => $q->where('business_id', $business_id));

@@ -32,21 +32,28 @@ class ProcessFixedAssetDepreciationCommand extends Command
     {
         $dry_run = (bool) $this->option('dry-run');
         $only_business_id = $this->option('business');
-        $asOf = $this->option('date')
-            ? Carbon::parse($this->option('date'))->startOfDay()
-            : Carbon::today()->startOfDay();
+        $explicitDate = $this->option('date');
 
-        $businesses = Business::whereHas('accountingSetting', function ($q) {
+        $businesses = Business::with('businessSetting')
+            ->whereHas('accountingSetting', function ($q) {
                 $q->where('enable_accounting', 1);
             })
             ->when($only_business_id, fn ($q) => $q->where('business_id', $only_business_id))
             ->get();
 
-        $this->info("Fixed asset depreciation for {$asOf->toDateString()} — {$businesses->count()} business(es).");
+        $this->info(
+            'Fixed asset depreciation'
+            . ($explicitDate ? " for {$explicitDate}" : ' (each business local today)')
+            . " — {$businesses->count()} business(es)."
+        );
 
         $total = ['processed' => 0, 'skipped' => 0, 'errors' => 0];
 
         foreach ($businesses as $business) {
+            $tz = $business->businessSetting->timezone ?? config('app.timezone', 'UTC');
+            $asOf = $explicitDate
+                ? Carbon::parse($explicitDate)->startOfDay()
+                : Carbon::now($tz)->startOfDay();
             try {
                 $setting = AccountingSetting::where('business_id', $business->business_id)->first();
                 if (!$setting

@@ -32,7 +32,7 @@ class EmployeeDocumentReportExport implements FromCollection, WithHeadings, With
             $row->employee?->department?->name,
             $row->document_type,
             $row->file_name,
-            $row->expiry_date ? localDate($row->expiry_date) : '-',
+            $row->expiry_date ? businessDate($row->expiry_date) : '-',
             $row->expiry_status,
             localDate($row->date_created),
         ];

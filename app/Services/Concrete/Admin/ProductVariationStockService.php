@@ -57,11 +57,11 @@ class ProductVariationStockService
             $wh[] = ['warehouse_id', $obj['warehouse_id']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['date_created', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['date_created', '>=', businessStartOfDay($obj['start_date'])];
         }
 
         if (!empty($obj['end_date'])) {
-            $wh[] = ['date_created', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['date_created', '<=', businessEndOfDay($obj['end_date'])];
         }
         $allow_roles = [
             RoleNames::SUPERADMIN,
@@ -517,7 +517,7 @@ class ProductVariationStockService
 
         if ($setting && $setting->enable_expiry_date && $setting->block_expired_sale) {
             $query->where(function ($q) {
-                $q->whereNull('expiry_date')->orWhereDate('expiry_date', '>=', now()->toDateString());
+                $q->whereNull('expiry_date')->orWhereDate('expiry_date', '>=', businessToday());
             });
         }
 
@@ -707,7 +707,7 @@ class ProductVariationStockService
 
             if ($setting && $setting->enable_expiry_date && $setting->block_expired_sale) {
                 $batch_query->where(function ($q) {
-                    $q->whereNull('expiry_date')->orWhereDate('expiry_date', '>=', now()->toDateString());
+                    $q->whereNull('expiry_date')->orWhereDate('expiry_date', '>=', businessToday());
                 });
             }
 
@@ -771,7 +771,7 @@ class ProductVariationStockService
 
         if ($setting && $setting->enable_expiry_date && $setting->block_expired_sale) {
             $batch_query->where(function ($q) {
-                $q->whereNull('expiry_date')->orWhereDate('expiry_date', '>=', now()->toDateString());
+                $q->whereNull('expiry_date')->orWhereDate('expiry_date', '>=', businessToday());
             });
         }
 

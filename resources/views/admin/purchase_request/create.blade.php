@@ -76,14 +76,14 @@
                         <div class="col-md-3">
                             <label class="fw-semibold">{{ __('purchase_requests.pr_date') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control datepicker" name="purchase_request_date"
-                                value="{{ old('purchase_request_date', isset($purchase_request) ? localDate($purchase_request->purchase_request_date) : localDate(date('Y-m-d'))) }}"
+                                value="{{ old('purchase_request_date', isset($purchase_request) ? businessDate($purchase_request->purchase_request_date) : businessDate(businessToday())) }}"
                                 required>
                         </div>
 
                         <div class="col-md-3">
                             <label class="fw-semibold">{{ __('purchase_requests.expected_date') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control datepicker" name="purchase_expected_date"
-                                value="{{ old('purchase_expected_date', isset($purchase_request) ? localDate($purchase_request->purchase_expected_date) : localDate(date('Y-m-d', strtotime('+7 days')))) }}"
+                                value="{{ old('purchase_expected_date', isset($purchase_request) ? businessDate($purchase_request->purchase_expected_date) : businessDate(\Carbon\Carbon::parse(businessToday())->addDays(7)->format('Y-m-d'))) }}"
                                 required>
                         </div>
                         <div class="col-md-9">

@@ -73,10 +73,10 @@ class ExpenseDetailReportService
             ->where('is_deleted', 0);
 
         if (!empty($obj['start_date'])) {
-            $query->where('expense_date', '>=', Carbon::parse($obj['start_date'])->startOfDay());
+            $query->where('expense_date', '>=', businessStartOfDay($obj['start_date']));
         }
         if (!empty($obj['end_date'])) {
-            $query->where('expense_date', '<=', Carbon::parse($obj['end_date'])->endOfDay());
+            $query->where('expense_date', '<=', businessEndOfDay($obj['end_date']));
         }
 
         $query = applyRoleScope($query, $this->allow_roles);
@@ -95,7 +95,7 @@ class ExpenseDetailReportService
         ];
 
         return DataTables::of($rows)
-            ->addColumn('expense_date', fn ($item) => !empty($item->expense_date) ? localDate($item->expense_date) : 'N/A')
+            ->addColumn('expense_date', fn ($item) => !empty($item->expense_date) ? businessDate($item->expense_date) : 'N/A')
             ->addColumn('category', fn ($item) => $item->category->name ?? '')
             ->addColumn('amount', fn ($item) => currency($item->amount ?? 0))
             ->addColumn('branch', fn ($item) => $item->branch->name ?? '')

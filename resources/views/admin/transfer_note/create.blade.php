@@ -74,7 +74,7 @@
                         <div class="col-md-3 mb-3">
                             <label>{{ __('common.date') }}</label>
                             <input type="text" class="form-control datepicker" name="transfer_note_date"
-                                value="{{ old('transfer_note_date', isset($transfer_note) ? localDate($transfer_note->transfer_note_date) : localDate(date('Y-m-d'))) }}">
+                                value="{{ old('transfer_note_date', isset($transfer_note) ? businessDate($transfer_note->transfer_note_date) : businessDate(businessToday())) }}">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>{{ __('common.reference') }}</label>

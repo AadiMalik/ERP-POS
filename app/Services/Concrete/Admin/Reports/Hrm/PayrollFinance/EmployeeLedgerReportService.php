@@ -48,7 +48,7 @@ class EmployeeLedgerReportService extends BasePayrollFinanceReportService
         return DataTables::of($rows)
             ->addColumn('employee_code', fn ($row) => $row->employee?->employee_code ?? '-')
             ->addColumn('name', fn ($row) => $row->employee?->user?->name ?? '-')
-            ->addColumn('entry_date', fn ($row) => localDate($row->entry_date))
+            ->addColumn('entry_date', fn ($row) => businessDate($row->entry_date))
             ->addColumn('type', fn ($row) => ucfirst($row->type))
             ->addColumn('debit', fn ($row) => $row->debit > 0 ? currency($row->debit) : '')
             ->addColumn('credit', fn ($row) => $row->credit > 0 ? currency($row->credit) : '')

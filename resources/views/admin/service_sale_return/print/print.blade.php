@@ -18,7 +18,7 @@
         'branch' => $service_sale_return->branch,
         'title' => 'Service Sale Return',
         'doc_no' => $service_sale_return->service_sale_return_no,
-        'doc_date' => localDate($service_sale_return->service_sale_return_date),
+        'doc_date' => businessDate($service_sale_return->service_sale_return_date),
         'reference' => [
             'Customer' => $service_sale_return->customer->name ?? 'N/A',
             'Service Sale No.' => $service_sale_return->serviceSale->service_sale_no ?? 'N/A',

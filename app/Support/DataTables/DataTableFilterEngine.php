@@ -4,7 +4,6 @@ namespace App\Support\DataTables;
 
 use App\Enums\RoleNames;
 use App\Support\DataTables\Contracts\DataTableDefinition;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -75,10 +74,10 @@ class DataTableFilterEngine
                 $start = is_array($value) ? ($value['start'] ?? $value['start_date'] ?? null) : null;
                 $end = is_array($value) ? ($value['end'] ?? $value['end_date'] ?? null) : null;
                 if ($start) {
-                    $query->where($column, '>=', Carbon::parse($start)->startOfDay());
+                    $query->where($column, '>=', businessStartOfDay($start));
                 }
                 if ($end) {
-                    $query->where($column, '<=', Carbon::parse($end)->endOfDay());
+                    $query->where($column, '<=', businessEndOfDay($end));
                 }
                 break;
 

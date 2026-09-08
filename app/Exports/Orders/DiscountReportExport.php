@@ -31,7 +31,7 @@ class DiscountReportExport implements FromCollection, WithHeadings, WithMapping,
     {
         return [
             $row->daily_order_id,
-            optional($row->order_date)->format('d-m-Y H:i'),
+            localDateTime($row->order_date),
             $row->customer_name ?? 'Walk-in',
             $row->product_name,
             $row->variation_name,

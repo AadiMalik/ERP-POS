@@ -227,3 +227,19 @@ Legacy authenticated endpoints remain: `POST /api/offline/setup/validate-busines
 
 **Local SQLite path (Windows):** `%APPDATA%\ERP Desktop POS\pos.sqlite` — exposed
 in the desktop app via `app:get-database-path` IPC.
+
+## Datetime Convention Across APIs
+
+`routes/api.php`, `routes/mobile.php`, and `routes/offline.php` never run
+`SettingMiddleware` (that only runs on the `admin/*` web group), so they have no
+per-request "Business timezone" session to convert into. API/mobile/offline JSON
+responses therefore return **raw UTC** datetime values — either the plain
+`Y-m-d H:i:s` stored value, or an explicit `->toIso8601String()` where a field is
+purposely formatted for a client (e.g. `CustomerOrderService`'s `placedAt`). This
+matches this project's [UTC storage / Business timezone display](11-coding-conventions.md#utc-storage--business-timezone-display)
+convention: the database and the API boundary both speak UTC; converting to a
+human-readable local time is a display concern the consuming client (mobile app,
+website, desktop POS) owns, the same way the admin web UI's Blade layer does via
+`localDate()`/`localDateTime()`. Do not add per-endpoint business-timezone
+conversion to these responses — it would silently diverge from every existing
+client's current (correct) UTC-parsing behavior.

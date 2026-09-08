@@ -69,10 +69,10 @@ class ServicePurchaseService
             $wh[] = ['status', $obj['status']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['service_purchase_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['service_purchase_date', '>=', businessStartOfDay($obj['start_date'])];
         }
         if (!empty($obj['end_date'])) {
-            $wh[] = ['service_purchase_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['service_purchase_date', '<=', businessEndOfDay($obj['end_date'])];
         }
 
         $allow_roles = [
@@ -90,7 +90,7 @@ class ServicePurchaseService
         return DataTables::of($datatable)
             ->addColumn('service_purchase_date', function ($item) {
                 return !empty($item->service_purchase_date)
-                    ? localDate($item->service_purchase_date)
+                    ? businessDate($item->service_purchase_date)
                     : 'N/A';
             })
             ->addColumn('supplier', function ($item) {

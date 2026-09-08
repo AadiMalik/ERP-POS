@@ -61,7 +61,8 @@
     });
 
     var url_local = "{{ url('/') }}";
-    const CURRENT_YEAR = {{ date('Y') }};
+    const BUSINESS_TIMEZONE = "{{ session('business_setting.timezone', config('app.timezone')) }}";
+    const CURRENT_YEAR = {{ (int) substr(businessToday(), 0, 4) }};
     window.erpDtI18n = @json(__('datatable'));
     window.erpDtPageLengths = @json(config('erp_datatables.page_lengths'));
     window.erpDtPaginationPosition = @json($erpDtPaginationPosition);

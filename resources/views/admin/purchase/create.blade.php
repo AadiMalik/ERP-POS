@@ -116,12 +116,12 @@
                         <div class="col-md-3 mb-3">
                             <label>{{ __('purchases.purchase_date') }}</label>
                             <input type="text" class="form-control datepicker" name="purchase_date"
-                                value="{{ old('purchase_date', isset($purchase) ? localDate($purchase->purchase_date) : localDate(date('Y-m-d'))) }}">
+                                value="{{ old('purchase_date', isset($purchase) ? businessDate($purchase->purchase_date) : businessDate(businessToday())) }}">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>{{ __('purchases.expected_delivery_date') }}</label>
                             <input type="text" class="form-control datepicker" name="expected_delivery_date"
-                                value="{{ old('expected_delivery_date', isset($purchase) ? localDate($purchase->expected_delivery_date) : localDate(date('Y-m-d', strtotime('+7 days')))) }}">
+                                value="{{ old('expected_delivery_date', isset($purchase) ? businessDate($purchase->expected_delivery_date) : businessDate(Carbon::parse(businessToday())->addDays(7)->format('Y-m-d'))) }}">
                         </div>
                         <div class="col-md-12">
                             <label>{{ __('common.description') }}</label>

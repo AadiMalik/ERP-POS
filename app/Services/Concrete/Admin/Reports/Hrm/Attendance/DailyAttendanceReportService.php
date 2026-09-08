@@ -12,7 +12,7 @@ class DailyAttendanceReportService extends BaseAttendanceReportService
     public function build(array $filters): Collection
     {
         $business_id = $this->resolveBusinessId($filters);
-        $date = !empty($filters['date']) ? Carbon::parse($filters['date'])->toDateString() : Carbon::today()->toDateString();
+        $date = !empty($filters['date']) ? Carbon::parse($filters['date'])->toDateString() : businessToday();
 
         $query = Attendance::with(['employee.user', 'employee.department', 'employee.designation'])
             ->where('is_deleted', 0)

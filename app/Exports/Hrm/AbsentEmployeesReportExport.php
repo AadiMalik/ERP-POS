@@ -30,7 +30,7 @@ class AbsentEmployeesReportExport implements FromCollection, WithHeadings, WithM
             $row->employee?->employee_code,
             $row->employee?->user?->name,
             $row->employee?->department?->name,
-            localDate($row->date),
+            businessDate($row->date),
             $row->notes,
         ];
     }

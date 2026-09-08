@@ -163,10 +163,10 @@ class OrderImportExportDefinition extends AbstractImportExportDefinition
             $query->where('status', $filters['status']);
         }
         if (!empty($filters['start_date'])) {
-            $query->where('order_date', '>=', Carbon::parse($filters['start_date'])->startOfDay());
+            $query->where('order_date', '>=', businessStartOfDay($filters['start_date']));
         }
         if (!empty($filters['end_date'])) {
-            $query->where('order_date', '<=', Carbon::parse($filters['end_date'])->endOfDay());
+            $query->where('order_date', '<=', businessEndOfDay($filters['end_date']));
         }
 
         return $query->orderBy('order_date', 'desc');

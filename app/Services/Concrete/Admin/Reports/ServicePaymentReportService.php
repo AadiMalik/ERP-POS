@@ -105,10 +105,10 @@ class ServicePaymentReportService
             $query->where("$table.payment_method", $filters['payment_method']);
         }
         if (!empty($filters['start_date'])) {
-            $query->where("$table.payment_date", '>=', Carbon::parse($filters['start_date'])->startOfDay());
+            $query->where("$table.payment_date", '>=', businessStartOfDay($filters['start_date']));
         }
         if (!empty($filters['end_date'])) {
-            $query->where("$table.payment_date", '<=', Carbon::parse($filters['end_date'])->endOfDay());
+            $query->where("$table.payment_date", '<=', businessEndOfDay($filters['end_date']));
         }
     }
 
@@ -176,7 +176,7 @@ class ServicePaymentReportService
         ];
 
         return DataTables::of($rows)
-            ->addColumn('payment_date', fn ($row) => localDate($row->payment_date))
+            ->addColumn('payment_date', fn ($row) => businessDate($row->payment_date))
             ->addColumn('payment_type', fn ($row) => $row->payment_type)
             ->addColumn('payment_no', fn ($row) => $row->payment_no)
             ->addColumn('party_name', fn ($row) => $row->party_name)

@@ -86,7 +86,7 @@ class PurchaseRequestService
         return DataTables::of($datatable)
             ->addColumn('purchase_request_date', function ($item) {
                 return !empty($item->purchase_request_date)
-                    ? localDate($item->purchase_request_date)
+                    ? businessDate($item->purchase_request_date)
                     : 'N/A';
             })
             ->addColumn('supplier', function ($item) {
@@ -319,8 +319,8 @@ class PurchaseRequestService
                     'warehouse_id' => $purchase_request->warehouse_id,
                     'branch_id' => $purchase_request->branch_id,
                     'purchase_request_no' => $purchase_request->purchase_request_no,
-                    'purchase_request_date' => localDate($purchase_request->purchase_request_date),
-                    'purchase_expected_date' => localDate($purchase_request->purchase_expected_date),
+                    'purchase_request_date' => businessDate($purchase_request->purchase_request_date),
+                    'purchase_expected_date' => businessDate($purchase_request->purchase_expected_date),
                     'description' => $purchase_request->description,
                 ],
                 'details' => []

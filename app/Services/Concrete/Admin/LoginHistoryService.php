@@ -39,10 +39,10 @@ class LoginHistoryService
             $wh[] = ['status', $obj['status']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['login_at', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['login_at', '>=', businessStartOfDay($obj['start_date'])];
         }
         if (!empty($obj['end_date'])) {
-            $wh[] = ['login_at', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['login_at', '<=', businessEndOfDay($obj['end_date'])];
         }
 
         $datatable = $this->model_login_history->getModel()::with($this->with)

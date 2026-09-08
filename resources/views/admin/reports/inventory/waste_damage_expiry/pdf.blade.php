@@ -30,12 +30,12 @@
             @forelse ($rows as $row)
                 <tr>
                     <td>{{ $row->reference_no ?? '-' }}</td>
-                    <td>{{ $row->transaction_date ? localDate($row->transaction_date) : '-' }}</td>
+                    <td>{{ $row->transaction_date ? businessDate($row->transaction_date) : '-' }}</td>
                     <td>{{ $row->warehouse_name ?? '-' }}</td>
                     <td>{{ $row->product_name ?? '-' }}</td>
                     <td>{{ $row->variation_name ?? '-' }}</td>
                     <td>{{ $row->batch_no ?? '-' }}</td>
-                    <td>{{ $row->expiry_date ? localDate($row->expiry_date) : '-' }}</td>
+                    <td>{{ $row->expiry_date ? businessDate($row->expiry_date) : '-' }}</td>
                     <td>{{ $row->quantity ?? '-' }}</td>
                     <td>{{ $row->unit_name ?? '-' }}</td>
                     <td>{{ $row->unit_cost ?? '-' }}</td>

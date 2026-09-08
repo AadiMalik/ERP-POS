@@ -66,11 +66,11 @@ class StockLedgerQueryService
         }
 
         if (!empty($filters['start_date'])) {
-            $query->where('product_variation_stock_transactions.transaction_date', '>=', Carbon::parse($filters['start_date'])->startOfDay());
+            $query->where('product_variation_stock_transactions.transaction_date', '>=', businessStartOfDay($filters['start_date']));
         }
 
         if (!empty($filters['end_date'])) {
-            $query->where('product_variation_stock_transactions.transaction_date', '<=', Carbon::parse($filters['end_date'])->endOfDay());
+            $query->where('product_variation_stock_transactions.transaction_date', '<=', businessEndOfDay($filters['end_date']));
         }
 
         return applyRoleScope($query, $filters['allow_roles'] ?? [], 'product_variation_stock_transactions.business_id', 'warehouses.branch_id');
@@ -135,7 +135,7 @@ class StockLedgerQueryService
 
         if (!empty($filters['start_date'])) {
             $openingQuery = $this->baseQuery(array_merge($filters, ['start_date' => null, 'end_date' => null]))
-                ->where('product_variation_stock_transactions.transaction_date', '<', Carbon::parse($filters['start_date'])->startOfDay());
+                ->where('product_variation_stock_transactions.transaction_date', '<', businessStartOfDay($filters['start_date']));
 
             $opening = (float) ($openingQuery
                 ->orderByDesc('product_variation_stock_transactions.transaction_date')

@@ -158,8 +158,8 @@ class AnalyticsService
             ->where('is_deleted', 0)
             ->where('status', 'approved')
             ->where('business_id', $scope['business_id'])
-            ->where('order_return_date', '>=', $start->copy()->startOfDay())
-            ->where('order_return_date', '<=', $end->copy()->endOfDay());
+            ->where('order_return_date', '>=', businessStartOfDay($start))
+            ->where('order_return_date', '<=', businessEndOfDay($end));
 
         if (!empty($scope['effective_branch_id'])) {
             $query->where('branch_id', $scope['effective_branch_id']);

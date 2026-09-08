@@ -40,7 +40,7 @@
                     <td>{{ $row->employee?->employee_code }}</td>
                     <td>{{ $row->employee?->user?->name }}</td>
                     <td>{{ $row->employee?->department?->name }}</td>
-                    <td>{{ localDate($row->date) }}</td>
+                    <td>{{ businessDate($row->date) }}</td>
                     <td class="text-right">{{ $row->working_hours }}</td>
                     <td class="text-right">{{ $row->ot_hours }}</td>
                     <td class="text-right">{{ currency($row->ot_amount) }}</td>

@@ -3,7 +3,6 @@
 namespace App\Services\Concrete\Admin\Reports\Hrm\Leave;
 
 use App\Models\LeaveRequest;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Yajra\DataTables\DataTables;
 
@@ -27,10 +26,10 @@ class LeaveApprovalStatusReportService extends BaseLeaveReportService
             $query->whereHas('employee', fn ($q) => $q->where('department_id', $filters['department_id']));
         }
         if (!empty($filters['start_date'])) {
-            $query->whereDate('approved_at', '>=', Carbon::parse($filters['start_date'])->toDateString());
+            $query->where('approved_at', '>=', businessStartOfDay($filters['start_date']));
         }
         if (!empty($filters['end_date'])) {
-            $query->whereDate('approved_at', '<=', Carbon::parse($filters['end_date'])->toDateString());
+            $query->where('approved_at', '<=', businessEndOfDay($filters['end_date']));
         }
 
         $query = $this->scope($query);

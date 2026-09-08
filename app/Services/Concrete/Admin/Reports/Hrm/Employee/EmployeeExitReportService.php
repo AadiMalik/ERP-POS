@@ -50,8 +50,8 @@ class EmployeeExitReportService extends BaseEmployeeReportService
             ->addColumn('department', fn ($row) => $row->employee?->department?->name ?? '-')
             ->addColumn('designation', fn ($row) => $row->employee?->designation?->name ?? '-')
             ->addColumn('type', fn ($row) => ucfirst($row->type))
-            ->addColumn('request_date', fn ($row) => localDate($row->request_date))
-            ->addColumn('last_working_date', fn ($row) => localDate($row->last_working_date))
+            ->addColumn('request_date', fn ($row) => businessDate($row->request_date))
+            ->addColumn('last_working_date', fn ($row) => businessDate($row->last_working_date))
             ->addColumn('status', fn ($row) => ucfirst($row->status))
             ->make(true);
     }

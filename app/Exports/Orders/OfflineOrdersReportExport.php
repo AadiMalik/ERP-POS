@@ -30,14 +30,14 @@ class OfflineOrdersReportExport implements FromCollection, WithHeadings, WithMap
     {
         return [
             $row->daily_order_id,
-            optional($row->order_date)->format('d-m-Y H:i'),
+            localDateTime($row->order_date),
             $row->branch->name ?? '',
             $row->posDevice->name ?? '-',
             $row->user->name ?? 'Walk-in',
             ucfirst(str_replace('_', ' ', $row->status)),
             round($row->total, 2),
             $row->offline_local_id ?? '-',
-            optional(optional($row->posDevice)->last_sync_at)->format('d-m-Y H:i') ?? '-',
+            localDateTime(optional($row->posDevice)->last_sync_at) ?? '-',
         ];
     }
 }

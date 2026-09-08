@@ -45,7 +45,7 @@ class CustomerAgingReportService
         $business_id = $obj['business_id'] ?? Auth::user()->business_id;
         $branch_id = $obj['branch_id'] ?? null;
 
-        $asOf = !empty($obj['as_of_date']) ? Carbon::parse($obj['as_of_date'])->endOfDay() : Carbon::now();
+        $asOf = !empty($obj['as_of_date']) ? businessEndOfDay($obj['as_of_date']) : businessEndOfDay();
 
         $basis = $obj['aging_basis']
             ?? AccountingSetting::where('business_id', $business_id)->value('aging_basis')
@@ -118,7 +118,7 @@ class CustomerAgingReportService
         $dt = DataTables::of($rows)
             ->addColumn('customer_name', fn ($row) => $row->customer_name)
             ->addColumn('total_outstanding', fn ($row) => currency($row->total_outstanding))
-            ->addColumn('last_payment_date', fn ($row) => $row->last_payment_date ? localDate($row->last_payment_date) : 'N/A')
+            ->addColumn('last_payment_date', fn ($row) => $row->last_payment_date ? businessDate($row->last_payment_date) : 'N/A')
             ->addColumn('total_balance', function ($row) {
                 $html = currency($row->total_balance) . ' ' . $row->total_balance_type;
 

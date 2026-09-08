@@ -17,11 +17,10 @@ class AttendanceRegisterReportService extends BaseAttendanceReportService
     public function build(array $filters): Collection
     {
         $business_id = $this->resolveBusinessId($filters);
-        $start = !empty($filters['start_date']) ? Carbon::parse($filters['start_date'])->startOfDay() : Carbon::now()->startOfMonth();
-        $end = !empty($filters['end_date']) ? Carbon::parse($filters['end_date'])->endOfDay() : Carbon::now()->endOfDay();
+        [$start, $end] = $this->calendarRange($filters);
 
         $query = Employee::with(['user', 'department', 'attendances' => function ($q) use ($start, $end) {
-            $q->whereBetween('date', [$start->toDateString(), $end->toDateString()])->where('is_deleted', 0);
+            $q->whereBetween('date', [$start, $end])->where('is_deleted', 0);
         }])->where('is_deleted', 0);
 
         if (!empty($business_id)) {
@@ -67,11 +66,10 @@ class AttendanceRegisterReportService extends BaseAttendanceReportService
 
     public function dateRange(array $filters): array
     {
-        $start = !empty($filters['start_date']) ? Carbon::parse($filters['start_date'])->startOfDay() : Carbon::now()->startOfMonth();
-        $end = !empty($filters['end_date']) ? Carbon::parse($filters['end_date'])->endOfDay() : Carbon::now()->endOfDay();
+        [$start, $end] = $this->calendarRange($filters);
 
         $dates = [];
-        for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
+        for ($d = Carbon::parse($start); $d->lte(Carbon::parse($end)); $d->addDay()) {
             $dates[] = $d->copy();
         }
 

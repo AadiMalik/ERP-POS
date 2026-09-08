@@ -18,7 +18,7 @@
         'branch' => $opening_stock->branch,
         'title' => 'Opening Stock',
         'doc_no' => $opening_stock->opening_stock_no,
-        'doc_date' => localDate($opening_stock->opening_stock_date),
+        'doc_date' => businessDate($opening_stock->opening_stock_date),
         'reference' => [
             'Warehouse' => $opening_stock->warehouse->name ?? 'N/A',
             'Reference' => $opening_stock->reference ?? 'N/A',
@@ -50,7 +50,7 @@
                     <td>{{ $detail->unit->name ?? 'N/A' }}</td>
                     <td class="text-right">{{ currency($detail->unit_cost) }}</td>
                     <td>{{ $detail->batch_no ?? '-' }}</td>
-                    <td>{{ !empty($detail->expiry_date) ? localDate($detail->expiry_date) : '-' }}</td>
+                    <td>{{ !empty($detail->expiry_date) ? businessDate($detail->expiry_date) : '-' }}</td>
                     <td class="text-right">{{ currency($detail->total_value) }}</td>
                 </tr>
             @empty

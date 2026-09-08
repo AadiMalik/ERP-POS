@@ -68,7 +68,7 @@
                     <td>{{ $row->employee?->user?->name }}</td>
                     <td>{{ $row->employee?->department?->name }}</td>
                     <td>{{ $row->document_type }}</td>
-                    <td>{{ $row->expiry_date ? localDate($row->expiry_date) : '-' }}</td>
+                    <td>{{ $row->expiry_date ? businessDate($row->expiry_date) : '-' }}</td>
                     <td>{{ $row->expiry_status }}</td>
                     <td>{{ localDate($row->date_created) }}</td>
                 </tr>

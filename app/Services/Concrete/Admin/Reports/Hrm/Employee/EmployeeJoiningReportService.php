@@ -46,7 +46,7 @@ class EmployeeJoiningReportService extends BaseEmployeeReportService
             ->addColumn('department', fn ($row) => $row->department?->name ?? '-')
             ->addColumn('designation', fn ($row) => $row->designation?->name ?? '-')
             ->addColumn('branch', fn ($row) => $row->branch?->name ?? '-')
-            ->addColumn('joining_date', fn ($row) => localDate($row->joining_date))
+            ->addColumn('joining_date', fn ($row) => businessDate($row->joining_date))
             ->addColumn('employment_type', fn ($row) => ucfirst(str_replace('_', ' ', (string) $row->employment_type)))
             ->addColumn('status', fn ($row) => ucfirst(str_replace('_', ' ', $row->status)))
             ->make(true);

@@ -65,10 +65,10 @@ class FixedAssetService
             $wh[] = ['depreciation_status', $obj['depreciation_status']];
         }
         if (!empty($obj['start_date'])) {
-            $wh[] = ['purchase_date', '>=', Carbon::parse($obj['start_date'])->startOfDay()];
+            $wh[] = ['purchase_date', '>=', businessStartOfDay($obj['start_date'])];
         }
         if (!empty($obj['end_date'])) {
-            $wh[] = ['purchase_date', '<=', Carbon::parse($obj['end_date'])->endOfDay()];
+            $wh[] = ['purchase_date', '<=', businessEndOfDay($obj['end_date'])];
         }
 
         $allow_roles = [
@@ -91,7 +91,7 @@ class FixedAssetService
             ->addColumn('category', fn ($item) => $item->category->name ?? '')
             ->addColumn('branch', fn ($item) => $item->branch->name ?? '')
             ->addColumn('business', fn ($item) => $item->business->name ?? '')
-            ->addColumn('purchase_date', fn ($item) => $item->purchase_date ? localDate($item->purchase_date) : '')
+            ->addColumn('purchase_date', fn ($item) => $item->purchase_date ? businessDate($item->purchase_date) : '')
             ->addColumn('purchase_cost', fn ($item) => currency($item->purchase_cost))
             ->addColumn('current_book_value', fn ($item) => currency($item->current_book_value))
             ->addColumn('previous_book_value', fn ($item) => currency($item->previous_book_value))
@@ -99,7 +99,7 @@ class FixedAssetService
             ->addColumn('accumulated_depreciation', fn ($item) => currency($item->accumulated_depreciation))
             ->addColumn('residual_value', fn ($item) => currency($item->residual_value))
             ->addColumn('depreciation_frequency', fn ($item) => DepreciationFrequencies::labels()[$item->depreciation_frequency] ?? $item->depreciation_frequency)
-            ->addColumn('next_depreciation_date', fn ($item) => $item->next_depreciation_date ? localDate($item->next_depreciation_date) : '')
+            ->addColumn('next_depreciation_date', fn ($item) => $item->next_depreciation_date ? businessDate($item->next_depreciation_date) : '')
             ->addColumn('depreciation_status', function ($item) use ($labels) {
                 $label = $labels[$item->depreciation_status] ?? $item->depreciation_status;
                 $class = match ($item->depreciation_status) {
@@ -313,7 +313,7 @@ class FixedAssetService
             }
 
             $old = $asset->toArray();
-            $from = Carbon::today();
+            $from = Carbon::parse(businessToday());
             if ($asset->next_depreciation_date && Carbon::parse($asset->next_depreciation_date)->gt($from)) {
                 // keep future next date
             } else {
@@ -417,7 +417,7 @@ class FixedAssetService
      */
     public function postDepreciationForAsset(FixedAsset $asset, ?Carbon $asOf = null, string $source = 'manual'): ?FixedAssetDepreciation
     {
-        $asOf = ($asOf ?: Carbon::today())->copy()->startOfDay();
+        $asOf = ($asOf ?: Carbon::parse(businessToday()))->copy()->startOfDay();
 
         if ($asset->depreciation_status !== FixedAssetStatuses::ACTIVE) {
             return null;
@@ -538,7 +538,7 @@ class FixedAssetService
         // Allow manual run even if next date is in the future by using next_depreciation_date
         $asOf = $asset->next_depreciation_date
             ? Carbon::parse($asset->next_depreciation_date)
-            : Carbon::today();
+            : Carbon::parse(businessToday());
 
         $dep = $this->postDepreciationForAsset($asset->fresh(), $asOf, 'manual');
         if (!$dep) {
@@ -576,7 +576,7 @@ class FixedAssetService
             }
 
             $old = $asset->toArray();
-            $asset->disposal_date = $obj['disposal_date'] ?? Carbon::today()->toDateString();
+            $asset->disposal_date = $obj['disposal_date'] ?? businessToday();
             $asset->disposal_type = $type;
             $asset->disposal_reason = $obj['disposal_reason'] ?? null;
             $asset->sale_price = $salePrice;
@@ -711,7 +711,7 @@ class FixedAssetService
      */
     public function processDueDepreciations(?Carbon $asOf = null, ?string $businessId = null): array
     {
-        $asOf = ($asOf ?: Carbon::today())->copy()->startOfDay();
+        $asOf = ($asOf ?: Carbon::parse(businessToday()))->copy()->startOfDay();
         $stats = ['processed' => 0, 'skipped' => 0, 'errors' => 0];
 
         $query = FixedAsset::where('is_deleted', 0)
@@ -758,7 +758,7 @@ class FixedAssetService
             'business_id' => $asset->business_id,
             'branch_id' => $asset->branch_id,
             'transaction_type' => $type,
-            'transaction_date' => $data['transaction_date'] ?? Carbon::today()->toDateString(),
+            'transaction_date' => $data['transaction_date'] ?? businessToday(),
             'description' => $data['description'] ?? null,
             'amount' => $data['amount'] ?? null,
             'from_branch_id' => $data['from_branch_id'] ?? null,

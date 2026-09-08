@@ -26,7 +26,7 @@ class EmployeeAssetReturnReportService extends BaseLifecycleReportService
         if ($status == 'returned') {
             $query->where('status', 'returned');
         } elseif ($status == 'overdue') {
-            $query->where('status', 'issued')->whereDate('expected_return_date', '<', Carbon::today()->toDateString());
+            $query->where('status', 'issued')->whereDate('expected_return_date', '<', businessToday());
         } else {
             $query->where('status', 'issued');
         }
@@ -51,9 +51,9 @@ class EmployeeAssetReturnReportService extends BaseLifecycleReportService
             ->addColumn('asset_name', fn ($row) => $row->asset?->name ?? '-')
             ->addColumn('name', fn ($row) => $row->employee?->user?->name ?? '-')
             ->addColumn('department', fn ($row) => $row->employee?->department?->name ?? '-')
-            ->addColumn('issue_date', fn ($row) => localDate($row->issue_date))
-            ->addColumn('expected_return_date', fn ($row) => $row->expected_return_date ? localDate($row->expected_return_date) : '-')
-            ->addColumn('return_date', fn ($row) => $row->return_date ? localDate($row->return_date) : '-')
+            ->addColumn('issue_date', fn ($row) => businessDate($row->issue_date))
+            ->addColumn('expected_return_date', fn ($row) => $row->expected_return_date ? businessDate($row->expected_return_date) : '-')
+            ->addColumn('return_date', fn ($row) => $row->return_date ? businessDate($row->return_date) : '-')
             ->addColumn('status', fn ($row) => $row->is_overdue ? 'Overdue' : ucfirst($row->status))
             ->make(true);
     }

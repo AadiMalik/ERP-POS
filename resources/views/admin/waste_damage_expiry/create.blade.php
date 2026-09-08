@@ -53,7 +53,7 @@
                         <div class="col-md-3 mb-3">
                             <label>{{ __('common.date') }}</label>
                             <input type="text" class="form-control datepicker" name="transaction_date"
-                                value="{{ old('transaction_date', isset($waste_damage_expiry) ? localDate($waste_damage_expiry->transaction_date) : localDate(date('Y-m-d'))) }}">
+                                value="{{ old('transaction_date', isset($waste_damage_expiry) ? businessDate($waste_damage_expiry->transaction_date) : businessDate(businessToday())) }}">
                         </div>
                         <div class="col-md-3 mb-3">
                             <label>{{ __('waste_damage_expiry.reference_optional') }}</label>

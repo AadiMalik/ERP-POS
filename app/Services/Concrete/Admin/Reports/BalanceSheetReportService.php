@@ -42,7 +42,7 @@ class BalanceSheetReportService
         $business_id = $obj['business_id'] ?? Auth::user()->business_id;
         $branch_id = $obj['branch_id'] ?? null;
 
-        $asOf = !empty($obj['as_of_date']) ? Carbon::parse($obj['as_of_date'])->endOfDay() : Carbon::today()->endOfDay();
+        $asOf = !empty($obj['as_of_date']) ? businessEndOfDay($obj['as_of_date']) : businessEndOfDay();
 
         $accountsQuery = Account::with(['accountType', 'accountSubType'])
             ->whereHas('accountType', fn ($q) => $q->whereIn('code', [
@@ -165,8 +165,9 @@ class BalanceSheetReportService
 
     protected function fiscalYearStart(Carbon $asOf): Carbon
     {
-        return $asOf->month >= 7
-            ? Carbon::create($asOf->year, 7, 1)->startOfDay()
-            : Carbon::create($asOf->year - 1, 7, 1)->startOfDay();
+        $local = $asOf->copy()->setTimezone(businessTimezone());
+        $year = $local->month >= 7 ? $local->year : $local->year - 1;
+
+        return businessStartOfDay(sprintf('%04d-07-01', $year));
     }
 }
