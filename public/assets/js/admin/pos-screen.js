@@ -134,13 +134,31 @@
         return lines.join('');
     }
 
+    // $stockTooltip is `position: fixed`, so it must be placed using
+    // viewport-relative coordinates (getBoundingClientRect()), not
+    // $target.offset() (document-relative) - and it must flip above the
+    // target (instead of always below) when the target is near the bottom
+    // of the viewport/modal, otherwise it renders off-screen and never
+    // shows, e.g. for variation cards near the bottom of the scrollable
+    // (max-height: 60vh) product picker grid.
     function positionStockTooltip($target) {
-        var offset = $target.offset();
-        var targetHeight = $target.outerHeight();
-        $stockTooltip.css({
-            top: offset.top + targetHeight + 6,
-            left: Math.max(8, offset.left),
-        });
+        var rect = $target[0].getBoundingClientRect();
+        var tooltipHeight = $stockTooltip.outerHeight();
+        var viewportHeight = window.innerHeight;
+        var viewportWidth = window.innerWidth;
+
+        var top = rect.bottom + 6;
+        if (top + tooltipHeight > viewportHeight - 8 && rect.top - tooltipHeight - 6 >= 0) {
+            top = rect.top - tooltipHeight - 6;
+        }
+
+        var left = Math.max(8, rect.left);
+        var tooltipWidth = $stockTooltip.outerWidth();
+        if (left + tooltipWidth > viewportWidth - 8) {
+            left = Math.max(8, viewportWidth - 8 - tooltipWidth);
+        }
+
+        $stockTooltip.css({ top: top, left: left });
     }
 
     function wireStockHintHover() {
@@ -151,14 +169,19 @@
             var variationId = $target.data('stock-variation-id');
             if (!variationId) return;
 
-            positionStockTooltip($target);
-
+            // Content is painted (and shown) before positioning - the
+            // tooltip is sized to its actual content, and positionStockTooltip()
+            // needs a real outerHeight()/outerWidth() to flip/clamp against
+            // the viewport, which a still-hidden (display:none) element
+            // can't give it.
             if (stockBreakdownCache[variationId]) {
                 $stockTooltip.html(stockBreakdownTooltipHtml(stockBreakdownCache[variationId])).show();
+                positionStockTooltip($target);
                 return;
             }
 
             $stockTooltip.html('<div class="text-muted">' + t('loading', 'Loading…') + '</div>').show();
+            positionStockTooltip($target);
 
             ajaxRequest({
                 url: URLS.stock_breakdown,
@@ -176,10 +199,12 @@
                 // hovering the same element that triggered the request.
                 if ($target.is(':hover')) {
                     $stockTooltip.html(stockBreakdownTooltipHtml(rows)).show();
+                    positionStockTooltip($target);
                 }
             }).catch(function () {
                 if ($target.is(':hover')) {
                     $stockTooltip.html(stockBreakdownTooltipHtml([])).show();
+                    positionStockTooltip($target);
                 }
             });
         });
