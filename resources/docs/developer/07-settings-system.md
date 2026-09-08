@@ -35,6 +35,11 @@ overwrite another tenant's settings by forging `business_id` in the POST body.
 
 Most of these rows are read only by `SettingController`/`SettingService`
 itself, but some are consumed elsewhere as real business-rule gates:
+- `BusinessSetting.datatable_pagination_position` (`bottom` default, or
+  `top` / `both`) is read into `session('business_setting')` and applied by
+  `window.erpDtLayout()` so every list DataTable shows page numbers where
+  the business chose. See
+  [Centralized DataTable System](24-datatable-system.md).
 - `InventorySetting.negative_stock` ("Negative Stock") is read by
   `OrderService::allowsNegativeStock()` and gates every stock check in the
   POS sales flow (`OrderService::saveLinesAndComputeTotals()`,

@@ -32,10 +32,9 @@
             processing: true,
             pageLength: @if(isset($pageLength)) {{$pageLength}} @else 25  @endif,
             serverSide: true,
-            @if(isset($buttons) && $buttons)
-
-                dom: 'l Bfrtip',
-            @endif
+            layout: (typeof window.erpDtLayout === 'function'
+                ? window.erpDtLayout({ buttons: @if(isset($buttons) && $buttons) true @else false @endif })
+                : undefined),
             @isset($notordering)
             "ordering": false,
             @endisset

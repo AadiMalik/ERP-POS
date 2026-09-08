@@ -82,12 +82,6 @@
                 </div>
             @endif
             <div class="table-responsive p-4">
-                <div class="erp-dt-toolbar">
-                    <button type="button" class="btn btn-icon btn-outline-secondary erp-dt-customize-btn"
-                        title="{{ __('datatable.customize_table') }}" aria-label="{{ __('datatable.customize_table') }}">
-                        <i class="fa fa-sliders"></i>
-                    </button>
-                </div>
                 <table id="{{ $erpTableId }}" class="table erp-datatable" style="width:100%">
                     <thead></thead>
                 </table>

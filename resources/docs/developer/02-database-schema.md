@@ -55,7 +55,9 @@ every other listing uses the HTML table id (`warehouse_table`,
 
 ## Settings (one row per business — a table per domain)
 
-`business_settings`, `inventory_settings`, `accounting_settings`, `pos_settings`,
+`business_settings` (includes `datatable_pagination_position`: `bottom` /
+`top` / `both`, default `bottom` — where list DataTables show page numbers),
+`inventory_settings`, `accounting_settings`, `pos_settings`,
 `customer_settings`, `supplier_settings`, `email_settings`, `whatsapp_settings`,
 `sms_settings`, `fbr_settings`, `pra_settings`, `print_settings`, `theme_settings`,
 `barcode_settings`, `thermal_print_settings`, `notification_settings`. See

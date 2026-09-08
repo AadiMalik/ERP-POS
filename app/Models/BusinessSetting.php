@@ -16,6 +16,7 @@ class BusinessSetting extends Model
         'card_tax_rate',
         'date_format',
         'time_format',
+        'datatable_pagination_position',
         'createdby_id',
         'updatedby_id',
         'date_created',

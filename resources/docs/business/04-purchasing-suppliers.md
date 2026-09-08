@@ -35,7 +35,7 @@ linked to their own ledger account so every purchase, GRN, and payment they're
 involved in rolls up into a single running balance (see the Supplier Ledger and
 Supplier Aging reports under [Reports](09-reports.md)).
 
-The list has **Customize Table** (icon at the top-right of the table): each
+The list has **Customize Table** (icon on the same row as the page numbers): each
 user can show or hide columns and reorder them. Tick which columns to include
 in **Export** (this screen has an Export button). Extra financial columns
 (credit limit, opening balance) require **View Financial Fields**. **Export**

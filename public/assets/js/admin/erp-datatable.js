@@ -26,6 +26,62 @@
             .replace(/</g, '&lt;');
     }
 
+    function placeCustomizeToolbar($table, tableId, i18n) {
+        var $wrapper = $table.closest('.dt-container, .dataTables_wrapper');
+        if ($wrapper.find('.erp-dt-toolbar').length) {
+            return;
+        }
+        var html =
+            '<div class="erp-dt-toolbar" data-erp-attach="' + escapeAttr(tableId) + '">' +
+            '<button type="button" class="btn btn-icon btn-outline-secondary erp-dt-customize-btn" title="' +
+            escapeAttr((i18n && i18n.customize_table) || 'Customize Table') + '">' +
+            '<i class="fa fa-sliders"></i></button></div>';
+        var $pagingRow = $wrapper.find('.dt-layout-row:has(nav.dt-paging)').first();
+        var $end = $pagingRow.find('.dt-layout-end').first();
+        if ($end.length) {
+            $end.append(html);
+            return;
+        }
+        if ($pagingRow.length) {
+            $pagingRow.append(html);
+            return;
+        }
+        var $host = $wrapper.length ? $wrapper : $table;
+        $host.before(html);
+    }
+
+    function registerCustomizeFeature() {
+        var feature = $.fn.dataTable && $.fn.dataTable.feature;
+        if (!feature || typeof feature.register !== 'function') {
+            return;
+        }
+        try {
+            feature.register('erpCustomize', function (settings) {
+                var i18n = window.erpDtI18n || {};
+                var table = settings.nTable;
+                var id = table && table.id ? table.id : '';
+                var wrap = document.createElement('div');
+                wrap.className = 'erp-dt-toolbar';
+                if (!id || (table.closest && table.closest('.modal'))) {
+                    wrap.style.display = 'none';
+                    return wrap;
+                }
+                wrap.setAttribute('data-erp-attach', id);
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-icon btn-outline-secondary erp-dt-customize-btn';
+                btn.title = i18n.customize_table || 'Customize Table';
+                btn.setAttribute('aria-label', btn.title);
+                btn.innerHTML = '<i class="fa fa-sliders"></i>';
+                wrap.appendChild(btn);
+                return wrap;
+            });
+        } catch (e) {
+            // Already registered on a second script load.
+        }
+    }
+    registerCustomizeFeature();
+
     function ErpTable(config, opts) {
         this.config = config;
         this.opts = opts || {};
@@ -207,6 +263,7 @@
             pageLength: parseInt(this.state.page_length, 10) || 10,
             order: [[sortIdx, sortDir]],
             erpEngine: true,
+            layout: (typeof window.erpDtLayout === 'function' ? window.erpDtLayout() : undefined),
             columns: dtColumns,
             ajax: {
                 url: this.config.urls.data,
@@ -241,6 +298,7 @@
         }
 
         this.dt = this.$table.DataTable(dtConfig);
+        placeCustomizeToolbar(this.$table, this.tableId, this.i18n);
     };
 
     ErpTable.prototype.reload = function () {
@@ -369,9 +427,6 @@
     ErpTable.prototype.bind = function () {
         var self = this;
 
-        this.$wrap.on('click', '.erp-dt-customize-btn', function () {
-            self.openCustomize();
-        });
         this.$wrap.on('click', '#search_btn', function () {
             self.state.filters = self.collectFilters();
             self.savePreferences();
@@ -603,17 +658,7 @@
     };
 
     AttachTable.prototype.injectToolbar = function () {
-        var $wrapper = this.$table.closest('.dataTables_wrapper');
-        var $host = $wrapper.length ? $wrapper : this.$table;
-        if ($host.prev('.erp-dt-toolbar[data-erp-attach="' + this.tableId + '"]').length) {
-            return;
-        }
-        $host.before(
-            '<div class="erp-dt-toolbar" data-erp-attach="' + escapeAttr(this.tableId) + '">' +
-            '<button type="button" class="btn btn-icon btn-outline-secondary erp-dt-customize-btn" title="' +
-            escapeAttr(this.i18n.customize_table || 'Customize Table') + '">' +
-            '<i class="fa fa-sliders"></i></button></div>'
-        );
+        placeCustomizeToolbar(this.$table, this.tableId, this.i18n);
     };
 
     AttachTable.prototype.wireExportButton = function () {
@@ -825,8 +870,15 @@
         attachFromSettings(settings);
     });
 
-    $(document).on('click', '.erp-dt-toolbar[data-erp-attach] .erp-dt-customize-btn', function () {
-        var id = $(this).closest('[data-erp-attach]').attr('data-erp-attach');
+    $(document).on('click', '.erp-dt-customize-btn', function () {
+        var $btn = $(this);
+        var id = $btn.closest('[data-erp-attach]').attr('data-erp-attach');
+        if (!id) {
+            id = $btn.closest('[data-erp-dt]').attr('data-erp-dt');
+        }
+        if (!id) {
+            id = $btn.closest('.dt-container, .dataTables_wrapper').find('table[id]').first().attr('id');
+        }
         if (instances[id] && typeof instances[id].openCustomize === 'function') {
             instances[id].openCustomize();
         }
@@ -837,8 +889,12 @@
             if (!config || !config.key) {
                 return null;
             }
-            instances[config.key] = new ErpTable(config, opts);
-            return instances[config.key];
+            var table = new ErpTable(config, opts);
+            instances[config.key] = table;
+            if (opts && opts.tableId) {
+                instances[opts.tableId] = table;
+            }
+            return table;
         },
         reload: function (key) {
             if (instances[key] && instances[key].reload) {

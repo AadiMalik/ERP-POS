@@ -215,6 +215,7 @@ $this->middleware('permission:setting.manage');
             'card_tax_rate'    => 'nullable|numeric|min:0|max:100',
             'date_format'      => 'required',
             'time_format'      => 'required',
+            'datatable_pagination_position' => 'required|in:bottom,top,both',
         ];
 
         $validate = Validator::make($request->all(), $rules);

@@ -1,8 +1,8 @@
 .erp-dt-toolbar {
-    display: flex;
+    display: inline-flex;
     justify-content: flex-end;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin: 0;
 }
 
 .erp-dt-customize-btn {
@@ -38,4 +38,24 @@
 .erp-dt-filter-range {
     display: flex;
     gap: 0.5rem;
+}
+
+div.dt-container div.dt-layout-end {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+div.dt-container div.dt-layout-row:has(nav.dt-paging) {
+    margin-top: 0.15rem;
+    margin-bottom: 0.35rem;
+}
+
+div.dt-container div.dt-layout-start nav.dt-paging {
+    justify-content: flex-start;
+}
+
+div.dt-container div.dt-layout-row:has(> .dt-layout-start nav.dt-paging) {
+    margin-bottom: 0.15rem;
 }

@@ -3,7 +3,9 @@
 All configuration lives under one **Settings** screen, organized into sections
 (each independently saved):
 
-- **Business** — company profile, address, logo, and general preferences.
+- **Business** — company profile, address, logo, and general preferences,
+  including **Table pagination position** (show page numbers at the bottom
+  of list tables, the top, or both — bottom is the default).
 - **Accounting** — default chart of accounts, tax settings, aging basis for
   receivables/payables, and the specific accounts used for inventory,
   cost-of-goods-sold, and service transactions. **Customer Account** and

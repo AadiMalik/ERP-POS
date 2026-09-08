@@ -57,6 +57,11 @@ return [
     'card_tax_rate_help' => 'Applied automatically when an order is paid fully by card.',
     'date_format' => 'Date Format',
     'time_format' => 'Time Format',
+    'datatable_pagination_position' => 'Table pagination position',
+    'datatable_pagination_position_help' => 'Choose where page numbers appear on list tables. Default is bottom.',
+    'datatable_pagination_bottom' => 'Bottom',
+    'datatable_pagination_top' => 'Top',
+    'datatable_pagination_both' => 'Top and bottom',
 
     // Accounting tab — COA defaults
     'accounting_title' => 'Accounting Setting',

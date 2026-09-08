@@ -42,6 +42,12 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/{{ app()->getLocale() }}.js"></script>
 @endif
 
+@php
+    $erpDtPaginationPosition = session('business_setting.datatable_pagination_position', 'bottom');
+    if (!in_array($erpDtPaginationPosition, ['bottom', 'top', 'both'], true)) {
+        $erpDtPaginationPosition = config('erp_datatables.pagination_position', 'bottom');
+    }
+@endphp
 <script>
     const CURRENT_LOCALE = "{{ app()->getLocale() }}";
 
@@ -58,6 +64,41 @@
     const CURRENT_YEAR = {{ date('Y') }};
     window.erpDtI18n = @json(__('datatable'));
     window.erpDtPageLengths = @json(config('erp_datatables.page_lengths'));
+    window.erpDtPaginationPosition = @json($erpDtPaginationPosition);
+    window.erpDtLayout = function (opts) {
+        opts = opts || {};
+        var pos = String(window.erpDtPaginationPosition || 'bottom').toLowerCase();
+        if (pos !== 'top' && pos !== 'both') {
+            pos = 'bottom';
+        }
+        var lengthControls = opts.buttons ? ['pageLength', 'buttons'] : 'pageLength';
+        var layout = {
+            top: null,
+            topStart: null,
+            topEnd: null,
+            top2Start: null,
+            top2End: null,
+            bottomStart: 'info',
+            bottomEnd: null
+        };
+        if (pos === 'top' || pos === 'both') {
+            layout.topStart = 'paging';
+            layout.topEnd = 'erpCustomize';
+            layout.top2Start = lengthControls;
+            layout.top2End = 'search';
+            layout.bottomEnd = pos === 'both' ? 'paging' : null;
+        } else {
+            layout.topStart = lengthControls;
+            layout.topEnd = 'search';
+            layout.bottomEnd = ['paging', 'erpCustomize'];
+        }
+        return layout;
+    };
+    if (window.jQuery && jQuery.fn.dataTable) {
+        jQuery.extend(true, jQuery.fn.dataTable.defaults, {
+            layout: window.erpDtLayout()
+        });
+    }
     $('#toggleFilter').on('click', function() {
 
         $('#filterSection').slideToggle(300);

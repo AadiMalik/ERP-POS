@@ -52,10 +52,11 @@ via attach mode. No per-CRUD JS is required.
 
 ## UI
 
-- **Customize Table** is an icon-only button at the top-right of the table
-  (show/hide columns, sort, page length). Engine tables also support column
-  order. Attach mode does not reorder columns (Yajra column indexes would
-  break).
+- **Customize Table** is an icon-only button on the **same row as page
+  numbers** (right side). When pagination is at the top, that row sits above
+  the page-length control; when it is at the bottom, the icon sits beside
+  the bottom pager. Engine tables also support column order. Attach mode
+  does not reorder columns (Yajra column indexes would break).
 - **Export checkboxes** in Customize appear only when that card has an
   **Export** button (`.import-export-export-btn`). Order History has no
   Export, so it has no export ticks. Customers/Suppliers use
@@ -64,6 +65,12 @@ via attach mode. No per-CRUD JS is required.
 - Filters on engine pages use the same listing layout as other CRUD screens
   (`#filterSection`, `admin.partials.date_filter`, `#search_btn`,
   `#reset_filter`).
+- **Pagination position** (page numbers) comes from Business Settings
+  (`business_settings.datatable_pagination_position`): bottom (default), top,
+  or both. When top/both, page numbers sit **above** the page-length control
+  (same side as "Show N entries"), not between the length/search row and the
+  table. `window.erpDtLayout()` in `layouts/js.blade.php` applies it to every
+  DataTable (engine, Yajra partial, and the global DataTables defaults).
 
 ## Preferences
 

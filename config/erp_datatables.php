@@ -16,4 +16,11 @@ return [
     'export_row_limit' => 50000,
 
     'export_chunk_size' => 500,
+
+    /*
+     | Default page-number placement when Business Settings has not been
+     | saved yet. Live value is business_settings.datatable_pagination_position
+     | (bottom | top | both), applied via window.erpDtLayout().
+     */
+    'pagination_position' => 'bottom',
 ];

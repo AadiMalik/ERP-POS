@@ -86,6 +86,27 @@
                 @endforeach
             </select>
         </div>
+        @php
+            $pagination_position = $business_setting->datatable_pagination_position ?? 'bottom';
+            if (!in_array($pagination_position, ['bottom', 'top', 'both'], true)) {
+                $pagination_position = 'bottom';
+            }
+        @endphp
+        <div class="col-md-6 mb-3">
+            <label>{{ __('settings.datatable_pagination_position') }}<span class="text-danger">*</span></label>
+            <select class="form-select" name="datatable_pagination_position">
+                <option value="bottom" {{ $pagination_position === 'bottom' ? 'selected' : '' }}>
+                    {{ __('settings.datatable_pagination_bottom') }}
+                </option>
+                <option value="top" {{ $pagination_position === 'top' ? 'selected' : '' }}>
+                    {{ __('settings.datatable_pagination_top') }}
+                </option>
+                <option value="both" {{ $pagination_position === 'both' ? 'selected' : '' }}>
+                    {{ __('settings.datatable_pagination_both') }}
+                </option>
+            </select>
+            <small class="text-muted">{{ __('settings.datatable_pagination_position_help') }}</small>
+        </div>
         <div class="col-md-12">
             <hr>
             <div class="text-end">
