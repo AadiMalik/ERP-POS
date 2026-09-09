@@ -176,4 +176,9 @@ class Business extends Model
         return $this->hasOne(NotificationSetting::class, 'business_id', 'business_id');
     }
 
+    public function loginSecuritySetting()
+    {
+        return $this->hasOne(LoginSecuritySetting::class, 'business_id', 'business_id');
+    }
+
 }

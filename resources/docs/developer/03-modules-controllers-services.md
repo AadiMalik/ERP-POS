@@ -104,6 +104,56 @@ checks `CustomerAccountService::emailExistsForBusiness()` for the given
 under `/api/mobile/auth/*` via `App\Http\Controllers\Api\Mobile\Auth\AuthController`
 and `MobileCustomerAccountService` (see [Routes & APIs](04-routes-apis.md)).
 
+**Google/Facebook Sign-In, CAPTCHA, and FCM token registration** (storefront
+`/api/v1/auth/*` and mobile `/api/mobile/auth/*` — admin/ERP login is
+unaffected): every business plugs in its **own** Google/Facebook/reCAPTCHA
+project and switches each on independently, via Settings > **Social Login &
+Security** (`App\Models\LoginSecuritySetting`, one row per `business_id` —
+see [Settings System](07-settings-system.md#social-login--security)). There
+is no platform-wide `.env` fallback — a business that hasn't configured/
+enabled a provider simply can't use it (the endpoint returns a clean "...is
+not enabled for this business." error; CAPTCHA instead skips silently since
+it's optional protection, not a login method).
+
+`Api\Auth\AuthController::loginWithGoogle()`/`loginWithFacebook()` (mirrored
+on the mobile controller) verify a client-obtained Google `id_token` /
+Facebook `access_token` server-side — no Socialite redirect flow, since both
+callers are JSON APIs, not server-rendered pages. Verification and the
+find-or-create-by-email logic live once in `CustomerAccountService`
+(`verifyGoogleIdToken($idToken, $businessId)` loads that business's
+`LoginSecuritySetting`, requires `is_google_enabled`, then checks Google's
+`tokeninfo` endpoint response against its `google_client_id`/
+`google_android_client_id`/`google_ios_client_id`; `verifyFacebookAccessToken()`
+same shape via the Graph API `/me` endpoint; `findOrCreateSocialUser()` links
+`users.google_id`/`facebook_id` onto an existing email match or creates a new
+passwordless account, same shape as the OTP onboarding path) —
+`MobileCustomerAccountService` inherits it for free. `sendOtp()`/
+`resendOtp()` and `loginWithPassword()` on both controllers accept an
+optional `captcha_token` field, verified server-side by the
+`App\Traits\VerifiesCaptcha` trait (`verifyCaptcha($request, $businessId)`)
+against that business's `recaptcha_secret_key` via Google reCAPTCHA v2's
+`siteverify` endpoint — a business with `is_captcha_enabled = false` (the
+default) skips this check entirely, so existing client builds are unaffected
+until a business turns CAPTCHA on. FCM device-token registration
+(`App\Services\Concrete\Admin\UserFcmTokenService::registerOrUpdate()`,
+upserts by `(business_id, fcm_token)` — see
+[FCM Broadcast Notifications](13-fcm-broadcast-notifications.md)) is wired into every successful
+login/register path (`verifyOtp`, `loginWithPassword`, `loginWithGoogle`,
+`loginWithFacebook`) via optional `fcm_token`/`device_id`/`device_type`
+request fields, plus a standalone authenticated `POST auth/fcm-token` for
+refreshing a token outside of login.
+
+The public, unauthenticated `GET /api/v1/website-settings/{business_id}` (and
+its mobile mirror) exposes only the non-secret half of this configuration —
+`auth.google.{enabled,client_id,android_client_id,ios_client_id}`,
+`auth.facebook.{enabled,app_id}`, `auth.captcha.{enabled,site_key}` — via
+`SettingService::resolveWebsitePublicSettings()`, so the storefront/app know
+which buttons/widgets to render and which public key to initialize each SDK
+with. `google_client_secret` (not collected — the id-token verify flow
+doesn't need it), `facebook_app_secret`, and `recaptcha_secret_key` never
+leave the server (`$hidden` on `LoginSecuritySetting`, `encrypted` cast at
+rest).
+
 ## Mobile App Customer API
 Controllers: `App\Http\Controllers\Api\Mobile\*` (Auth, catalog, cart, checkout,
 wishlist, profile, orders, CMS). Services: `App\Services\Concrete\Api\Mobile\*`

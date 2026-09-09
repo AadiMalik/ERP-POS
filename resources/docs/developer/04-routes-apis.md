@@ -74,8 +74,22 @@ Minimal — not part of the Admin surface. Powers the customer mobile app/websit
 identity flow via `App\Http\Controllers\Api\Auth\AuthController`:
 - `GET /api/user` (Sanctum) — current authenticated user.
 - `POST /api/v1/auth/{check-email, send-otp, resend-otp, verify-otp,
-  login-password, forgot-password, reset-password}` — throttled `20,1`.
-- `POST /api/v1/auth/{set-password, logout}` (Sanctum-protected).
+  login-password, login-google, login-facebook, forgot-password,
+  reset-password}` — throttled `20,1`. `send-otp`/`resend-otp`/`login-password`
+  accept an optional `captcha_token`, required only when that business has
+  CAPTCHA enabled (Google reCAPTCHA v2, verified server-side against that
+  business's own key — `App\Traits\VerifiesCaptcha`). `login-google`/
+  `login-facebook` verify a client-obtained `id_token`/`access_token` against
+  that business's own Google/Facebook project and find-or-create the user by
+  email — both return a clean error if the business hasn't enabled that
+  provider (Settings > Social Login & Security; see
+  [Modules, Controllers & Services](03-modules-controllers-services.md) and
+  [Settings System](07-settings-system.md#social-login--security)).
+- `POST /api/v1/auth/{set-password, change-password, fcm-token, logout}` (Sanctum-protected).
+- `verify-otp`, `login-password`, `login-google`, `login-facebook` all accept
+  optional `fcm_token`/`device_id`/`device_type` and upsert via
+  `UserFcmTokenService::registerOrUpdate()`; `fcm-token` is the standalone
+  authenticated endpoint for refreshing a token outside of login.
 
 This is a shared email+OTP identity API, not a general-purpose REST API over the
 ERP's business data — there is no public `/api/v1/products`, `/api/v1/orders`, etc.

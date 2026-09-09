@@ -52,10 +52,21 @@ Seed with `php artisan db:seed --class=PermissionSeeder`.
 
 Sidebar: **Push Notifications** group for templates/broadcasts; Firebase under **Settings**.
 
-## Future mobile token API
+## Customer mobile/storefront token registration
 
-Use `UserFcmTokenService::registerOrUpdate()` from a Sanctum customer endpoint
-(not implemented in this task).
+`UserFcmTokenService::registerOrUpdate()` (upserts by `(business_id, fcm_token)`,
+reassigning the row to a new `user_id` if the same token re-registers under a
+different login) is called from the customer auth endpoints — see
+[Modules, Controllers & Services](03-modules-controllers-services.md) for the
+full Google/Facebook/CAPTCHA/FCM auth flow:
+
+- Storefront: `Api\Auth\AuthController` (`/api/v1/auth/*`)
+- Mobile app: `Api\Mobile\Auth\AuthController` (`/api/mobile/auth/*`)
+
+Both pass an optional `fcm_token`/`device_id`/`device_type` on `verify-otp`,
+`login-password`, `login-google`, and `login-facebook`, and both expose a
+standalone authenticated `POST auth/fcm-token` for refreshing a token outside
+of login.
 
 ## Future transactional notifications
 

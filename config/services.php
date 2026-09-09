@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Google Sign-In / Facebook Login / reCAPTCHA are per-business, stored in
+    // the login_security_settings table (Settings > Social Login & Security)
+    // via App\Models\LoginSecuritySetting - not here. Each business plugs in
+    // its own project; there is no platform-wide fallback.
+
 ];

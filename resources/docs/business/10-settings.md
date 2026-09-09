@@ -61,6 +61,15 @@ All configuration lives under one **Settings** screen, organized into sections
   quotations, invoices) and notifications to customers/suppliers.
 - **Firebase** — FCM service-account credentials for mobile push / broadcast
   notifications (Settings → Firebase tab).
+- **Social Login & Security** — optional, off by default, for your website
+  and mobile app: let customers sign in with **Google** or **Facebook** in
+  addition to email, and/or turn on **CAPTCHA** to protect sign-in/sign-up
+  from automated bot abuse. Each of the three has its own on/off switch — turn
+  on only the ones you want. Google and Facebook logins need you to register
+  your own app with Google/Facebook first and paste in the IDs they give you
+  (see [The Wider Platform](14-platform-ecosystem.md)); CAPTCHA needs a free
+  Google reCAPTCHA site key/secret key from google.com/recaptcha/admin. These
+  are your own accounts, not shared with other businesses on the platform.
 - **FBR** and **PRA** — Pakistan tax-authority e-invoicing integration settings
   (Federal Board of Revenue and Punjab Revenue Authority).
 - **POS** — point-of-sale behavior, including register open/close time windows and

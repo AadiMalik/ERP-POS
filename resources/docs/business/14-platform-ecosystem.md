@@ -26,6 +26,13 @@ shows entirely from inside this ERP:
 If a customer registers, logs in, adds items to a cart, applies a voucher, or
 places an order on your website, that all happens through this same ERP in
 the background — there is no separate customer database to keep in sync.
+Customers can always sign in with their email (a one-time code, no password
+needed). If you'd also like to offer "Sign in with Google" / "Sign in with
+Facebook", or protect your sign-in/sign-up forms against automated bot abuse,
+turn these on under **Settings > Social Login & Security** — each is
+optional and off by default, and each uses your own Google/Facebook/CAPTCHA
+account, not a shared one. See [Settings](10-settings.md) for how to set
+these up.
 
 ## The Mobile Shopping App
 

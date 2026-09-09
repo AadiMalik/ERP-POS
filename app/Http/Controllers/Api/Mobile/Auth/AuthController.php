@@ -6,9 +6,11 @@ use App\Enums\Message;
 use App\Enums\RoleNames;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Concrete\Admin\UserFcmTokenService;
 use App\Services\Concrete\Api\Mobile\MobileCustomerAccountService;
 use App\Services\Concrete\Auth\OtpService;
 use App\Traits\ResponseAPI;
+use App\Traits\VerifiesCaptcha;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,15 +19,17 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    use ResponseAPI;
+    use ResponseAPI, VerifiesCaptcha;
 
     protected $otp_service;
     protected $account_service;
+    protected $fcm_token_service;
 
-    public function __construct(OtpService $otp_service, MobileCustomerAccountService $account_service)
+    public function __construct(OtpService $otp_service, MobileCustomerAccountService $account_service, UserFcmTokenService $fcm_token_service)
     {
         $this->otp_service = $otp_service;
         $this->account_service = $account_service;
+        $this->fcm_token_service = $fcm_token_service;
     }
 
     public function checkEmail(Request $request)
@@ -54,9 +58,14 @@ class AuthController extends Controller
             'business_id' => 'required|string|exists:businesses,business_id',
             'phone' => 'nullable|string|min:7|max:20',
             'name' => 'nullable|string|min:2|max:255',
+            'captcha_token' => 'nullable|string',
         ]);
         if ($validate->fails()) {
             return $this->validationResponse($validate->errors()->first());
+        }
+
+        if (!$this->verifyCaptcha($request, $request->business_id)) {
+            return $this->error('Captcha verification failed. Please try again.');
         }
 
         try {
@@ -99,6 +108,9 @@ class AuthController extends Controller
             'business_id' => 'required|string|exists:businesses,business_id',
             'name' => 'nullable|string|min:2|max:255',
             'phone' => 'nullable|string|min:7|max:20',
+            'fcm_token' => 'nullable|string',
+            'device_id' => 'nullable|string',
+            'device_type' => 'nullable|string',
         ]);
         if ($validate->fails()) {
             return $this->validationResponse($validate->errors()->first());
@@ -158,6 +170,8 @@ class AuthController extends Controller
 
             $token = $user->createToken('mobile-auth')->plainTextToken;
 
+            $this->maybeRegisterFcmToken($request, $user);
+
             return $this->success(Message::SUCCESS, [
                 'token' => $token,
                 'requires_password' => $purpose === 'onboarding' && empty($user->password),
@@ -212,9 +226,17 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required|string',
             'business_id' => 'required|string|exists:businesses,business_id',
+            'captcha_token' => 'nullable|string',
+            'fcm_token' => 'nullable|string',
+            'device_id' => 'nullable|string',
+            'device_type' => 'nullable|string',
         ]);
         if ($validate->fails()) {
             return $this->validationResponse($validate->errors()->first());
+        }
+
+        if (!$this->verifyCaptcha($request, $request->business_id)) {
+            return $this->error('Captcha verification failed. Please try again.');
         }
 
         $user = $this->findUser($request->email);
@@ -236,10 +258,113 @@ class AuthController extends Controller
         $user->update(['last_login_at' => now()]);
         $token = $user->createToken('mobile-auth')->plainTextToken;
 
+        $this->maybeRegisterFcmToken($request, $user);
+
         return $this->success(Message::SUCCESS, [
             'token' => $token,
             'user' => $this->userPayload($user->fresh(), $request->business_id),
         ]);
+    }
+
+    public function loginWithGoogle(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'id_token' => 'required|string',
+            'business_id' => 'required|string|exists:businesses,business_id',
+            'fcm_token' => 'nullable|string',
+            'device_id' => 'nullable|string',
+            'device_type' => 'nullable|string',
+        ]);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        try {
+            $payload = $this->account_service->verifyGoogleIdToken($request->id_token, $request->business_id);
+            $user = $this->account_service->findOrCreateSocialUser('google', $payload['sub'], $payload['email'], $payload['name'] ?? null);
+
+            if ($user->status !== 'active') {
+                return $this->error('This account is disabled. Please contact support.');
+            }
+
+            $this->account_service->ensureProfile($user, $request->business_id);
+            $user->update(['last_login_at' => now()]);
+
+            $token = $user->createToken('mobile-auth')->plainTextToken;
+
+            $this->maybeRegisterFcmToken($request, $user);
+
+            return $this->success(Message::SUCCESS, [
+                'token' => $token,
+                'user' => $this->userPayload($user->fresh(), $request->business_id),
+            ]);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    public function loginWithFacebook(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'access_token' => 'required|string',
+            'business_id' => 'required|string|exists:businesses,business_id',
+            'fcm_token' => 'nullable|string',
+            'device_id' => 'nullable|string',
+            'device_type' => 'nullable|string',
+        ]);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        try {
+            $payload = $this->account_service->verifyFacebookAccessToken($request->access_token, $request->business_id);
+            $user = $this->account_service->findOrCreateSocialUser('facebook', $payload['id'], $payload['email'], $payload['name'] ?? null);
+
+            if ($user->status !== 'active') {
+                return $this->error('This account is disabled. Please contact support.');
+            }
+
+            $this->account_service->ensureProfile($user, $request->business_id);
+            $user->update(['last_login_at' => now()]);
+
+            $token = $user->createToken('mobile-auth')->plainTextToken;
+
+            $this->maybeRegisterFcmToken($request, $user);
+
+            return $this->success(Message::SUCCESS, [
+                'token' => $token,
+                'user' => $this->userPayload($user->fresh(), $request->business_id),
+            ]);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * Standalone token refresh - the app calls this whenever it detects the
+     * device's FCM token changed, without going through a fresh login.
+     */
+    public function saveFcmToken(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'business_id' => 'required|string|exists:businesses,business_id',
+            'fcm_token' => 'required|string',
+            'device_id' => 'nullable|string',
+            'device_type' => 'nullable|string',
+        ]);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $this->fcm_token_service->registerOrUpdate([
+            'business_id' => $request->business_id,
+            'user_id' => Auth::id(),
+            'fcm_token' => $request->fcm_token,
+            'device_id' => $request->device_id,
+            'device_type' => $request->device_type,
+        ]);
+
+        return $this->success(Message::SUCCESS, []);
     }
 
     public function forgotPassword(Request $request)
@@ -313,6 +438,21 @@ class AuthController extends Controller
     private function findUser(string $email): ?User
     {
         return User::whereRaw('LOWER(email) = ?', [strtolower(trim($email))])->first();
+    }
+
+    private function maybeRegisterFcmToken(Request $request, User $user): void
+    {
+        if (!$request->filled('fcm_token')) {
+            return;
+        }
+
+        $this->fcm_token_service->registerOrUpdate([
+            'business_id' => $request->business_id,
+            'user_id' => $user->id,
+            'fcm_token' => $request->fcm_token,
+            'device_id' => $request->device_id,
+            'device_type' => $request->device_type,
+        ]);
     }
 
     private function userPayload(User $user, ?string $business_id = null): array

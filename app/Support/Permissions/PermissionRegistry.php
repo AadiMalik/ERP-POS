@@ -1384,6 +1384,10 @@ class PermissionRegistry
                 'manage' => ['name' => 'firebase-setting.manage', 'label' => 'Manage Firebase Settings', 'is_system' => false],
             ]],
 
+            'login-security-setting' => ['label' => 'Social Login & Security Settings', 'actions' => [
+                'manage' => ['name' => 'login-security-setting.manage', 'label' => 'Manage Social Login & Security Settings', 'is_system' => false],
+            ]],
+
             'notification-template' => ['label' => 'Notification Templates', 'actions' => [
                 'view'   => ['name' => 'notification-template.view', 'label' => 'View', 'is_system' => false],
                 'create' => ['name' => 'notification-template.create', 'label' => 'Create', 'is_system' => false],
@@ -1884,7 +1888,7 @@ class PermissionRegistry
             'purchase-return', 'opening-stock', 'stock-taking', 'loss-reason', 'waste-damage-expiry', 'transfer-note', 'supplier-payment', 'customer-payment',
             'service-purchase', 'service-purchase-return', 'service-sale', 'service-sale-return',
             'pos', 'pos-register', 'order', 'order-return', 'order-reports', 'expense', 'expense-category', 'admin-expense',
-            'activity-log', 'login-history', 'notification', 'firebase-setting',
+            'activity-log', 'login-history', 'notification', 'firebase-setting', 'login-security-setting',
             'notification-template', 'broadcast-notification', 'documentation', 'reports', 'branch', 'user',
             'department', 'designation', 'shift', 'employee', 'attendance', 'leave-type',
             'leave-request', 'salary-component', 'salary-structure', 'payroll', 'payslip',

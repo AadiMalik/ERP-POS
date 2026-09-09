@@ -59,6 +59,7 @@ class SettingController extends Controller
     ) {
 $this->middleware('permission:setting.manage');
         $this->middleware('permission:firebase-setting.manage|setting.manage')->only(['updateFirebaseSetting']);
+        $this->middleware('permission:login-security-setting.manage|setting.manage')->only(['updateLoginSecuritySetting']);
 
         $this->business_service = $business_service;
         $this->setting_service = $setting_service;
@@ -133,6 +134,7 @@ $this->middleware('permission:setting.manage');
         $fbr_setting = $this->setting_service->getFbrSetting($target_business_id);
         $whatsapp_setting = $this->setting_service->getWhatsappSetting($target_business_id);
         $firebase_setting = $this->setting_service->getFirebaseSetting($target_business_id);
+        $login_security_setting = $this->setting_service->getLoginSecuritySetting($target_business_id);
         $print_setting = $this->setting_service->getPrintSetting($target_business_id);
         $barcode_setting = $this->setting_service->getBarcodeSetting($target_business_id);
         $theme_setting = $this->setting_service->getThemeSetting($target_business_id);
@@ -169,6 +171,7 @@ $this->middleware('permission:setting.manage');
             'fbr_setting',
             'whatsapp_setting',
             'firebase_setting',
+            'login_security_setting',
             'print_setting',
             'barcode_setting',
             'theme_setting',
@@ -551,6 +554,52 @@ $this->middleware('permission:setting.manage');
         $obj['business_id'] = $businessId;
 
         $setting = $this->setting_service->updateFirebaseSetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateLoginSecuritySetting(Request $request)
+    {
+        $rules = [
+            'is_google_enabled' => 'required|boolean',
+            'google_client_id' => 'required_if:is_google_enabled,1|nullable|string|max:255',
+            'google_android_client_id' => 'nullable|string|max:255',
+            'google_ios_client_id' => 'nullable|string|max:255',
+
+            'is_facebook_enabled' => 'required|boolean',
+            'facebook_app_id' => 'required_if:is_facebook_enabled,1|nullable|string|max:255',
+            'facebook_app_secret' => 'nullable|string',
+
+            'is_captcha_enabled' => 'required|boolean',
+            'recaptcha_site_key' => 'required_if:is_captcha_enabled,1|nullable|string|max:255',
+            'recaptcha_secret_key' => 'nullable|string',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $businessId = $this->resolveTargetBusinessId($request);
+        $existing = $this->setting_service->getLoginSecuritySetting($businessId);
+
+        if ($request->boolean('is_facebook_enabled') && empty($request->facebook_app_secret) && !$existing->hasFacebookAppSecret()) {
+            return $this->validationResponse('Facebook App Secret is required to enable Facebook Login.');
+        }
+        if ($request->boolean('is_captcha_enabled') && empty($request->recaptcha_secret_key) && !$existing->hasRecaptchaSecretKey()) {
+            return $this->validationResponse('reCAPTCHA Secret Key is required to enable CAPTCHA.');
+        }
+
+        $obj = $request->only([
+            'is_google_enabled', 'google_client_id', 'google_android_client_id', 'google_ios_client_id',
+            'is_facebook_enabled', 'facebook_app_id', 'facebook_app_secret',
+            'is_captcha_enabled', 'recaptcha_site_key', 'recaptcha_secret_key',
+        ]);
+        $obj['business_id'] = $businessId;
+
+        $setting = $this->setting_service->updateLoginSecuritySetting($obj);
 
         return $setting
             ? $this->success(Message::UPDATE, $setting)

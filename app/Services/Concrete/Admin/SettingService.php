@@ -17,6 +17,7 @@ use App\Models\EmailSetting;
 use App\Models\FbrSetting;
 use App\Models\InventorySetting;
 use App\Models\LocalizationSetting;
+use App\Models\LoginSecuritySetting;
 use App\Models\NotificationSetting;
 use App\Models\SmsSetting;
 use App\Models\PosSetting;
@@ -58,6 +59,7 @@ class SettingService
     protected $model_thermal_print_setting;
     protected $model_branch_tax_setting;
     protected $model_notification_setting;
+    protected $model_login_security_setting;
     protected $expense_category_service;
     protected $customer_service;
     protected $supplier_service;
@@ -90,6 +92,7 @@ class SettingService
         $this->model_pra_setting = new Repository(new PraSetting());
         $this->model_thermal_print_setting = new Repository(new ThermalPrintSetting());
         $this->model_branch_tax_setting = new Repository(new BranchTaxSetting());
+        $this->model_login_security_setting = new Repository(new LoginSecuritySetting());
     }
 
     public function getBusinessSetting($business_id)
@@ -221,6 +224,14 @@ class SettingService
     public function getFirebaseSetting($business_id)
     {
         return app(FirebaseSettingService::class)->getByBusiness($business_id);
+    }
+
+    public function getLoginSecuritySetting($business_id)
+    {
+        return $this->model_login_security_setting->getModel()::firstOrCreate(
+            ['business_id' => $business_id],
+            ['login_security_setting_id' => generateUuid(), 'date_created' => now()]
+        );
     }
 
     public function getPrintSetting($business_id, $document_type = 'default')
@@ -671,6 +682,41 @@ class SettingService
         return app(FirebaseSettingService::class)->save($obj);
     }
 
+    /**
+     * Keeps facebook_app_secret / recaptcha_secret_key when the form submits
+     * blank (already-saved secret, not re-entered) - same idiom as
+     * FirebaseSettingService::save() for private_key.
+     */
+    public function updateLoginSecuritySetting(array $obj)
+    {
+        $model = $this->model_login_security_setting->getModel();
+
+        $setting = $model::firstOrNew(['business_id' => $obj['business_id']]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
+
+        if (!$setting->exists) {
+            $setting->login_security_setting_id = generateUuid();
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill(collect($obj)->except(['facebook_app_secret', 'recaptcha_secret_key'])->all());
+
+        if (!empty($obj['facebook_app_secret'])) {
+            $setting->facebook_app_secret = $obj['facebook_app_secret'];
+        }
+        if (!empty($obj['recaptcha_secret_key'])) {
+            $setting->recaptcha_secret_key = $obj['recaptcha_secret_key'];
+        }
+
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+        $this->auditSetting('login_security', $setting, $old_values);
+
+        return $setting;
+    }
+
     public function updatePrintSetting(array $obj)
     {
         $model = $this->model_print_setting->getModel();
@@ -935,11 +981,12 @@ class SettingService
         $business = $this->model_business->getModel()::find($business_id);
         $accounting = $this->getAccountingSetting($business_id);
         $website_setting = $this->getWebsiteThemeSetting($business_id);
+        $login_security = $this->model_login_security_setting->getModel()::where('business_id', $business_id)->first();
 
-        return $this->resolveWebsitePublicSettings($business, $accounting, $website_setting);
+        return $this->resolveWebsitePublicSettings($business, $accounting, $website_setting, $login_security);
     }
 
-    public function resolveWebsitePublicSettings($business, $accounting, $website_setting)
+    public function resolveWebsitePublicSettings($business, $accounting, $website_setting, $login_security = null)
     {
         return [
             'business' => [
@@ -984,6 +1031,27 @@ class SettingService
                 'branch' => $website_setting->bank_branch ?? null,
                 'swift_code' => $website_setting->bank_swift_code ?? null,
                 'instructions' => $website_setting->bank_instructions ?? null,
+            ],
+            // Public, non-secret keys only - google_client_secret/app_secret/
+            // recaptcha_secret_key never leave the server. Each business
+            // plugs in its own Google/Facebook/reCAPTCHA project and toggles
+            // it on independently; a disabled/unconfigured provider is
+            // simply absent from the storefront/app UI.
+            'auth' => [
+                'google' => [
+                    'enabled' => (bool) ($login_security->is_google_enabled ?? false),
+                    'client_id' => $login_security->google_client_id ?? null,
+                    'android_client_id' => $login_security->google_android_client_id ?? null,
+                    'ios_client_id' => $login_security->google_ios_client_id ?? null,
+                ],
+                'facebook' => [
+                    'enabled' => (bool) ($login_security->is_facebook_enabled ?? false),
+                    'app_id' => $login_security->facebook_app_id ?? null,
+                ],
+                'captcha' => [
+                    'enabled' => (bool) ($login_security->is_captcha_enabled ?? false),
+                    'site_key' => $login_security->recaptcha_site_key ?? null,
+                ],
             ],
         ];
     }

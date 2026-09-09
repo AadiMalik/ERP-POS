@@ -54,12 +54,15 @@ Route::prefix('v1/auth')->middleware('throttle:20,1')->group(function () {
     Route::post('resend-otp', [AuthController::class, 'resendOtp']);
     Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
     Route::post('login-password', [AuthController::class, 'loginWithPassword']);
+    Route::post('login-google', [AuthController::class, 'loginWithGoogle']);
+    Route::post('login-facebook', [AuthController::class, 'loginWithFacebook']);
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('set-password', [AuthController::class, 'setPassword']);
         Route::post('change-password', [AuthController::class, 'changePassword']);
+        Route::post('fcm-token', [AuthController::class, 'saveFcmToken']);
         Route::post('logout', [AuthController::class, 'logout']);
     });
 });

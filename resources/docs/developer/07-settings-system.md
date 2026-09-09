@@ -5,7 +5,7 @@
 There is **no single generic `Setting` model/config-in-db table**. Instead, each
 settings domain is its own Eloquent model — `BusinessSetting`, `AccountingSetting`,
 `CustomerSetting`, `SupplierSetting`, `InventorySetting`, `EmailSetting`,
-`SmsSetting`, `WhatsappSetting`, `FirebaseSetting`, `FbrSetting`, `PraSetting`, `PrintSetting`,
+`SmsSetting`, `WhatsappSetting`, `FirebaseSetting`, `LoginSecuritySetting`, `FbrSetting`, `PraSetting`, `PrintSetting`,
 `BarcodeSetting`, `ThemeSetting`, `ThermalPrintSetting`, `NotificationSetting`,
 `PosSetting` — each presumably one row per business. `Business` exposes a `hasOne`
 relation to every one of them.
@@ -38,6 +38,42 @@ reloads with `?business_id=`, and every AJAX save picks the same value back up
 via `currentSettingsBusinessId()`/`buildSettingFormData()`) and the fix for a
 pre-existing IDOR where any authenticated user holding `setting.manage` could
 overwrite another tenant's settings by forging `business_id` in the POST body.
+
+## Social Login & Security
+
+One tab (`resources/views/admin/setting/tabs/login-security.blade.php`,
+nav target `#login_security`) bundles three independently-toggled provider
+configs into a single `LoginSecuritySetting` row per business — Google Login,
+Facebook Login, and CAPTCHA (Google reCAPTCHA v2) — rather than three
+separate tabs/tables/permissions, since all three are small, always edited
+together, and don't need independent lifecycle. Each section has its own
+`is_google_enabled`/`is_facebook_enabled`/`is_captcha_enabled` boolean
+(`required_if:is_*_enabled,1` on its credential fields, enforced in
+`SettingController::updateLoginSecuritySetting()`) and its own
+show/hide-on-toggle JS (`.google-config-field`/`.facebook-config-field`/
+`.captcha-config-field`, same idiom as the FBR/PRA/WhatsApp tabs).
+
+`facebook_app_secret` and `recaptcha_secret_key` use Laravel's `encrypted`
+cast and are `$hidden` on the model (mirrors `FirebaseSetting::private_key`)
+— blank on save means "keep the existing value"
+(`SettingController::updateLoginSecuritySetting()` rejects enabling
+Facebook/CAPTCHA with neither a new secret submitted nor one already stored).
+`google_client_id`/`google_android_client_id`/`google_ios_client_id`,
+`facebook_app_id`, and `recaptcha_site_key` are not secret — they're also
+returned by the public `website-settings` endpoint (see
+[Modules, Controllers & Services](03-modules-controllers-services.md) for how
+the storefront/mobile auth endpoints and public config payload consume this).
+
+Permission: `login-security-setting.manage` (OR'd with the blanket
+`setting.manage` on the controller, same pattern as `firebase-setting.manage`
+— see [Permissions & Access Control](05-permissions-access-control.md)).
+
+There is deliberately **no platform-wide `.env`/`config('services.*')`
+fallback** for any of the three — every business must configure its own
+Google Cloud / Facebook Developer / reCAPTCHA project. A business that
+hasn't enabled a provider gets a clean "not enabled for this business" error
+from the login endpoint (CAPTCHA instead just isn't required for that
+business, since it's protection, not a login method).
 
 ## Settings Consumed Outside the Settings Screen
 

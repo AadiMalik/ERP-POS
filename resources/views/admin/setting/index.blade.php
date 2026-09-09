@@ -92,6 +92,10 @@
                                 {{ __('settings.tab_firebase') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
+                                data-bs-target="#login_security">
+                                {{ __('settings.tab_login_security') }}
+                            </button>
+                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#fbr">
                                 {{ __('settings.tab_fbr') }}
                             </button>
@@ -166,6 +170,9 @@
                             </div>
                             <div class="tab-pane fade" id="firebase">
                                 @include('admin.setting.tabs.firebase')
+                            </div>
+                            <div class="tab-pane fade" id="login_security">
+                                @include('admin.setting.tabs.login-security')
                             </div>
                             <div class="tab-pane fade" id="fbr">
                                 @include('admin.setting.tabs.fbr')
@@ -386,6 +393,29 @@
 
         $(document).ready(function() {
             toggleFbrSettings();
+        });
+    </script>
+
+    {{-- Social Login & Security setting js --}}
+    <script>
+        function toggleLoginSecuritySettings() {
+            let google = $('[name="is_google_enabled"]').val();
+            $('.google-config-field').prop('disabled', google != 1);
+
+            let facebook = $('[name="is_facebook_enabled"]').val();
+            $('.facebook-config-field').prop('disabled', facebook != 1);
+
+            let captcha = $('[name="is_captcha_enabled"]').val();
+            $('.captcha-config-field').prop('disabled', captcha != 1);
+        }
+
+        $(document).on('change',
+            '[name="is_google_enabled"], [name="is_facebook_enabled"], [name="is_captcha_enabled"]',
+            toggleLoginSecuritySettings
+        );
+
+        $(document).ready(function() {
+            toggleLoginSecuritySettings();
         });
     </script>
 

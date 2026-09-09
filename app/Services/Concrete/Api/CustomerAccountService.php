@@ -2,14 +2,17 @@
 
 namespace App\Services\Concrete\Api;
 
+use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\CustomerAddress;
 use App\Models\CustomerProfile;
+use App\Models\LoginSecuritySetting;
 use App\Models\User;
 use App\Services\Concrete\Admin\CustomerService;
 use App\Services\Concrete\Admin\LoyaltyPointService;
 use Exception;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rules\Password;
 
 /**
@@ -35,6 +38,109 @@ class CustomerAccountService
             'confirmed',
             Password::min(8)->mixedCase()->numbers(),
         ];
+    }
+
+    /**
+     * Each business plugs in its own Google/Facebook/reCAPTCHA project via
+     * Settings > Social Login & Security - there is no platform-wide
+     * fallback, so a business that hasn't configured/enabled a provider
+     * simply can't use it.
+     */
+    public function getLoginSecuritySetting(string $businessId): ?LoginSecuritySetting
+    {
+        return LoginSecuritySetting::where('business_id', $businessId)->first();
+    }
+
+    /**
+     * Verify a Google Sign-In id_token and return its decoded claims
+     * (email, name, sub, ...). Uses Google's tokeninfo endpoint, which
+     * validates signature/expiry for us - no JWKS handling needed.
+     * ponytail: tokeninfo is rate-limited by Google; switch to local JWKS
+     * verification (e.g. firebase/php-jwt) if login volume ever needs it.
+     */
+    public function verifyGoogleIdToken(string $idToken, string $businessId): array
+    {
+        $setting = $this->getLoginSecuritySetting($businessId);
+        if (!$setting || !$setting->is_google_enabled) {
+            throw new Exception('Google login is not enabled for this business.');
+        }
+
+        $response = Http::get('https://oauth2.googleapis.com/tokeninfo', ['id_token' => $idToken]);
+
+        if (!$response->ok()) {
+            throw new Exception('Invalid Google token.');
+        }
+
+        $payload = $response->json();
+        $allowed_client_ids = array_filter([
+            $setting->google_client_id,
+            $setting->google_android_client_id,
+            $setting->google_ios_client_id,
+        ]);
+
+        if (empty($payload['email']) || !in_array($payload['aud'] ?? null, $allowed_client_ids, true)) {
+            throw new Exception('Invalid Google token.');
+        }
+
+        return $payload;
+    }
+
+    /**
+     * Verify a Facebook access token by asking the Graph API who it belongs
+     * to - a failed/expired/forged token comes back as an error payload.
+     */
+    public function verifyFacebookAccessToken(string $accessToken, string $businessId): array
+    {
+        $setting = $this->getLoginSecuritySetting($businessId);
+        if (!$setting || !$setting->is_facebook_enabled) {
+            throw new Exception('Facebook login is not enabled for this business.');
+        }
+
+        $response = Http::get('https://graph.facebook.com/me', [
+            'fields' => 'id,name,email',
+            'access_token' => $accessToken,
+        ]);
+
+        $payload = $response->json();
+
+        if (!$response->ok() || !empty($payload['error']) || empty($payload['email'])) {
+            throw new Exception('Invalid Facebook token.');
+        }
+
+        return $payload;
+    }
+
+    /**
+     * Find the user by email (linking the provider id if missing) or create
+     * a new passwordless customer account, mirroring the OTP onboarding
+     * User::create() shape in AuthController::verifyOtp().
+     */
+    public function findOrCreateSocialUser(string $provider, string $providerId, string $email, ?string $name): User
+    {
+        $column = $provider === 'google' ? 'google_id' : 'facebook_id';
+        $email = strtolower(trim($email));
+
+        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+
+        if ($user) {
+            if (empty($user->{$column})) {
+                $user->update([$column => $providerId]);
+            }
+
+            return $user;
+        }
+
+        $user = User::create([
+            'name' => $name ?: explode('@', $email)[0],
+            'email' => $email,
+            'password' => null,
+            'status' => 'active',
+            'email_verified_at' => now(),
+            $column => $providerId,
+        ]);
+        $user->assignRole(RoleNames::USER);
+
+        return $user;
     }
 
     /**
