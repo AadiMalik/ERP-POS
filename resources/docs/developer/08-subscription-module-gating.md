@@ -27,6 +27,42 @@ $business->loadMissing('package.modules');
 max 5 warehouses on a given plan) at the record level, separate from the route-group
 gate.
 
+### Limit Types & Monthly Usage Periods
+
+Every `limited` registry entry also carries a `limit_type`
+(`package_modules.limit_type`), which decides **how** `FeatureLimitService::resolveCount()`
+counts usage:
+
+- **`active_count`** / **`configuration_count`** — a plain live-row count
+  (`is_deleted = 0`), unaffected by billing period. Used for
+  operational/master resources: `branch`, `user`, `warehouse`, `employee`,
+  `department`, `designation`, `shift` (active_count); `account`,
+  `payment-method`, `discount`, `voucher`, `order-type`, `payment-gateway`,
+  `category`, `brand`, etc. (configuration_count).
+- **`monthly_creation`** / **`monthly_transaction`** — every row whose
+  `date_created` falls inside the business's **current billing period**
+  counts, **including soft-deleted, cancelled, void, and returned rows** —
+  status changes and soft-deletes never free up quota. Used for
+  `customer`, `supplier`, `product`, `order`, `order-return`, `purchase`,
+  `journal-entry`, `expense`, `supplier-payment`, `customer-payment`, and
+  similar transactional/creation resources. A Super Admin hard-deleting a
+  record (see [Permissions & Access Control](05-permissions-access-control.md))
+  never reduces this count either, since it only ever counts rows created in
+  the window, not current live state.
+
+`FeatureLimitService::currentUsagePeriod(Business $business)` computes that
+window: it anchors on the business's active `BusinessSubscription.start_at`
+and rolls forward in whole-month increments. This means a **yearly**
+subscription still resets its monthly counters every month on its own
+anniversary day — it is never granted 12 months of usage at once, and never
+resets on the calendar month boundary. Nothing is persisted for this; it's
+derived on every call from `start_at` (already tracked).
+
+`check()` returns a response enriched with `resource`, `used`, `limit`,
+`period`, and `upgrade_required` alongside `status`/`message`, e.g.:
+*"You have reached your monthly Customers limit of 2,000 for the Starter
+package. Please upgrade your package to continue."*
+
 `FeatureLimitService::compareToPackage(Business $business, Package $target)`
 compares current usage (`resolveCount` / `usageByLimitedKey`) against a
 **target** package's `package_modules` rows. For every `limited` registry key:
@@ -45,23 +81,56 @@ until usage fits.
 ## Catalog packages
 
 Public plans are seeded by `database/seeders/IntroPackageCatalogSeeder`:
-**Starter**, **Growth**, **Business**, and **Enterprise**, each as a separate
-**monthly** and **yearly** row (`duration_type`). Unique key is
-`name + duration_type` among non-deleted packages.
+**Free Trial**, **Starter**, **Business**, **Professional**, and
+**Enterprise** — Free Trial is monthly-only (never sold, see below); the four
+paid tiers are each seeded as a separate **monthly** and **yearly** row
+(`duration_type`). Unique key is `name + duration_type` among non-deleted
+packages, so re-running the seeder updates the existing rows in place
+(idempotent — safe to run any number of times, never creates duplicates).
 
 - **List price** (`packages.price`): monthly amount, or yearly annual total
   (`monthly × 12` for yearly rows).
 - **Discount %** (`packages.discount`): applied to list price when charging /
   displaying the effective amount. Yearly catalog rows seed with **10%**;
-  monthly rows seed with **0%** (discount can still be set later for monthly).
+  monthly rows seed with **0%**. Current PKR pricing: Starter 5,000/mo
+  (54,000/yr), Business 10,000/mo (108,000/yr), Professional 20,000/mo
+  (216,000/yr), Enterprise 65,000/mo (702,000/yr).
 - **Effective charge**: `price × (1 − discount/100)` via `Package::effectivePrice()`
   / `priceForCycle()`.
+- **Setup fee** (`packages.setup_fee`): a one-time onboarding charge, stored
+  entirely separately from `price`/`price_yearly` and never read into pricing
+  or usage calculations. Free Trial: 0; Starter: 3,000; Business: 5,000;
+  Professional: 10,000; Enterprise: 20,000 (framed as "starting from" — custom
+  development/data migration/integrations remain separate billable services,
+  never bundled into this fee).
 - Module access and numeric caps live in `package_modules` (not marketing
   features / limitations / compare JSON — those admin fields were removed).
+  Enterprise has `is_unlimited = true` on every `limited` module key with no
+  exceptions — only technical infrastructure limits (storage, SMS/WhatsApp/
+  payment-provider) apply beyond that, and those are outside this catalog.
+- Exposed to the public pricing page via `IntroPublicService::packages()` /
+  `mapPackage()`, which already derives monthly/yearly toggle data, the 10%
+  yearly-saving (`discount`), and the recommended/unlimited badges
+  (`packages.badge`: "Most Popular" on Business, "Unlimited" on Enterprise)
+  straight from the catalog — no separate marketing data model needed.
 
-`PackageSeeder` only deactivates legacy **Professional** / **Basic Plan** rows.
-Run `php artisan db:seed --class=IntroPackageCatalogSeeder` after migrating
-`discount`.
+### Free Trial — one-time, non-repeatable
+
+Free Trial (`trial_days = 30`) is assigned automatically at business
+registration and is a **complete system-testing package** — every major
+umbrella module (inventory, POS, accounting, HRM, payroll, service
+management, manufacturing, analytics) is enabled, each with small testing
+limits. `businesses.trial_used_at` is set the moment a trial subscription is
+created (`SubscriptionService::createInitial()`) and is checked centrally,
+before ever assigning a `trial_days > 0` package to a business again, in
+both `createInitial()` and `renew()` (the upgrade/downgrade/renewal path) —
+so a business can never get a second trial by upgrading, downgrading, or
+re-registering, regardless of entry point.
+
+`PackageSeeder` only deactivates legacy **Basic Plan** / **Growth** rows
+("Professional" is deliberately excluded from that list — it's now a live
+tier name, not a legacy one). Run
+`php artisan db:seed --class=IntroPackageCatalogSeeder` after migrating.
 
 Business Admin **My Subscription** filters pricing cards by Monthly/Yearly
 toggle; Upgrade/Downgrade/Renewal uses the selected package’s `duration_type`
@@ -176,7 +245,7 @@ PDFs asynchronously. See [Jobs, Commands & Scheduling](09-jobs-commands.md).
    returns `false` when a package has no row for the key, so a business with an
    otherwise-enabled parent umbrella loses the new sub-feature the instant the
    key is registered, until a row exists. `IntroPackageCatalogSeeder` only
-   covers its own 4 named catalog packages; write a small one-off migration
+   covers its own 5 named catalog packages; write a small one-off migration
    (see `2026_09_03_070000_backfill_order_reports_offline_pos_bank_reconciliation_modules.php`
    for the pattern) that upserts a row per existing package, inheriting the
    parent's already-synced `is_enabled` state.

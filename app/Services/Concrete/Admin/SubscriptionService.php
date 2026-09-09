@@ -61,6 +61,10 @@ class SubscriptionService
             $start = now();
             $is_trial = (int) $package->trial_days > 0;
 
+            if ($is_trial && $business->trial_used_at) {
+                throw new Exception('The Free Trial has already been used for this business and is no longer available.');
+            }
+
             $cycle_price = $package->priceForCycle($billing_cycle);
             if (!$is_trial && $cycle_price === null) {
                 throw new Exception('Selected package does not support this billing cycle, or requires a custom quote.');
@@ -127,6 +131,7 @@ class SubscriptionService
                     'subscription_end' => $subscription->end_at,
                     'current_business_subscription_id' => $subscription->business_subscription_id,
                     'status' => $business->status === Status::SUSPENDED ? Status::SUSPENDED : Status::ACTIVE,
+                    'trial_used_at' => $is_trial ? ($business->trial_used_at ?? now()) : $business->trial_used_at,
                 ]);
             } else {
                 // Freeze expiry until payment is confirmed (new = null dates).
@@ -138,6 +143,7 @@ class SubscriptionService
                     'subscription_end' => null,
                     'current_business_subscription_id' => $subscription->business_subscription_id,
                     'status' => Status::PENDING,
+                    'trial_used_at' => $is_trial ? ($business->trial_used_at ?? now()) : $business->trial_used_at,
                 ])->save();
                 $this->invoice_service->notifySuperAdminPending($invoice->loadMissing('business'));
             }
@@ -173,6 +179,10 @@ class SubscriptionService
             $current = $this->getCurrentSubscription($business);
             $package = Package::with('modules')->findOrFail($data['package_id'] ?? $current?->package_id ?? $business->package_id);
             $fromPackageId = $current?->package_id ?? $business->package_id;
+
+            if ((int) $package->trial_days > 0 && $business->trial_used_at) {
+                throw new Exception('The Free Trial has already been used for this business and is no longer available.');
+            }
 
             if ($package->package_id !== $fromPackageId) {
                 $this->feature_limit_service->assertCompatibleWithPackage($business, $package);
@@ -245,6 +255,10 @@ class SubscriptionService
                     'current_business_subscription_id' => $subscription->business_subscription_id,
                     'grace_period_ends_at' => null,
                 ];
+
+                if ((int) $package->trial_days > 0 && !$business->trial_used_at) {
+                    $business_update['trial_used_at'] = now();
+                }
 
                 // A renewal resolves an expired state by definition. Suspension
                 // is a separate, deliberate admin action and is intentionally

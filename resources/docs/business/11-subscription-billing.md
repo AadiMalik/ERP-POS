@@ -5,6 +5,35 @@ Your business's access to the system is governed by a **subscription** to a
 Inventory, Accounting, HRM, Payroll, Service Management) and any usage limits
 (e.g. maximum branches, products, or warehouses).
 
+## Plans & Pricing
+
+Five plans are available: **Free Trial**, **Starter**, **Business**,
+**Professional**, and **Enterprise**.
+
+- **Free Trial** — free for **30 days** from the day your business registers,
+  with small testing limits across every major module so you can try the
+  complete system before buying. It is available **once only**: it cannot be
+  reactivated after it expires, and it stays unavailable even if you later
+  upgrade, downgrade, or change your subscription.
+- **Starter / Business / Professional** — priced monthly, with a **yearly**
+  option that always saves **10%** compared to paying monthly for 12 months.
+  **Business** is our recommended plan for most growing businesses.
+- **Enterprise** — every operational limit is **unlimited** (branches,
+  warehouses, products, orders, customers, and all other modules). Only
+  technical limits (server storage, SMS/WhatsApp/payment-provider limits)
+  may still apply.
+- Each plan (except Free Trial) also has a separate **one-time setup fee**,
+  charged once at signup and shown separately from your recurring
+  subscription price — it is never added into your monthly/yearly charge or
+  counted as part of your usage. Custom development, data migration, and
+  special integrations are separate services and are not included in the
+  setup fee.
+
+**Monthly usage limits reset every billing month** — including on a yearly
+plan. Choosing yearly billing only changes how often you're charged (and
+gives you the 10% saving); it does not grant 12 months of usage at once, and
+does not raise your monthly limits.
+
 ## My Subscription
 
 Under **My Subscription**, a Business Admin can:
@@ -29,7 +58,17 @@ open at a time.
 **Downgrade is blocked if you already use more than the lower plan allows.**
 You will see a message listing each item that is over the new limit, for
 example: products 80 used, plan allows 50 (remove 30). Reduce those records
-first (delete or archive extras), then you can submit the downgrade request.
+first (archive/deactivate extras — business users don't have delete access;
+see [Roles & Permissions](02-roles-permissions.md)), then you can submit the
+downgrade request.
+
+**Monthly limits count every record created that billing month, no matter its
+status.** A cancelled order, a returned purchase, or an archived customer
+still counts toward that month's usage — changing a record's status never
+frees up quota. Quota only resets at the start of your next billing month.
+If you need a record permanently removed instead of archived, contact your
+Super Admin — this never reduces your month's usage count either, since the
+limit is based on what was created, not what currently exists.
 
 The same check applies if a higher-priced plan still has a tighter cap, or if
 the lower plan does not include a module you already use (for example HRM

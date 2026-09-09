@@ -1740,8 +1740,17 @@ class PermissionRegistry
      * module key not in that list is also stripped, so a Business Admin
      * only ever sees permissions for modules their subscription package
      * actually includes.
+     *
+     * $includeDeleteActions must only be true when the role being rendered
+     * IS the true global Super Admin role (business_id === null && name ===
+     * RoleNames::SUPERADMIN) - only the Super Admin retains delete
+     * capability anywhere in the system. Every other role (including a
+     * custom tenant role a Super Admin creates on a business's behalf) must
+     * never see a Delete checkbox at all, per the Permissions & Access
+     * Control rule in CLAUDE.md. This is a UI-hiding measure only - the
+     * actual enforcement backstop is RoleService::syncPermissions().
      */
-    public static function grouped(bool $businessAdminOnly = false, ?array $enabledModuleKeys = null): array
+    public static function grouped(bool $businessAdminOnly = false, ?array $enabledModuleKeys = null, bool $includeDeleteActions = false): array
     {
         $modules = self::modules();
 
@@ -1750,6 +1759,20 @@ class PermissionRegistry
                 $modules[$key]['actions'] = array_filter(
                     $module['actions'],
                     fn ($action) => !$action['is_system']
+                );
+
+                if (empty($modules[$key]['actions'])) {
+                    unset($modules[$key]);
+                }
+            }
+        }
+
+        if (!$includeDeleteActions) {
+            foreach ($modules as $key => $module) {
+                $modules[$key]['actions'] = array_filter(
+                    $module['actions'],
+                    fn ($actionKey) => $actionKey !== 'delete',
+                    ARRAY_FILTER_USE_KEY
                 );
 
                 if (empty($modules[$key]['actions'])) {
@@ -1775,11 +1798,28 @@ class PermissionRegistry
 
     /**
      * All non-system ("is_system=false") permission names, e.g. for Business
-     * Admin's syncPermissions().
+     * Admin's syncPermissions(). Never includes `.delete` permissions - see
+     * withoutDeleteActions() - only the true global Super Admin role may
+     * ever hold delete capability.
      */
     public static function businessNames(): array
     {
-        return array_keys(array_filter(self::flat(), fn ($meta) => !$meta['is_system']));
+        return self::withoutDeleteActions(
+            array_keys(array_filter(self::flat(), fn ($meta) => !$meta['is_system']))
+        );
+    }
+
+    /**
+     * Strips every `*.delete` permission name from the given list. The
+     * single shared filter behind the global delete-permission lockdown -
+     * used by businessNames(), grouped(), and RoleService::syncPermissions()
+     * (the actual enforcement backstop) so a `.delete` name can never reach
+     * a non-Super-Admin role, whether it came from a default template or a
+     * raw request payload.
+     */
+    public static function withoutDeleteActions(array $names): array
+    {
+        return array_values(array_filter($names, fn ($name) => !str_ends_with($name, '.delete')));
     }
 
     /**

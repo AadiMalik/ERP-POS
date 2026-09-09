@@ -19,7 +19,26 @@ use App\Enums\RoleNames;
  */
 class RoleDefaultPermissions
 {
+    /**
+     * Public entry point - strips every `*.delete` permission name for every
+     * role except the true global Super Admin, regardless of what an
+     * individual case in rawDefaultsForRole() below returns. This is the
+     * single guarantee that a future role template can't accidentally
+     * reintroduce delete capability by forgetting to call
+     * namesForModulesExcludingActions() itself.
+     */
     public static function defaultsForRole(string $roleName): array
+    {
+        $names = self::rawDefaultsForRole($roleName);
+
+        if ($roleName === RoleNames::SUPERADMIN) {
+            return $names;
+        }
+
+        return PermissionRegistry::withoutDeleteActions($names);
+    }
+
+    private static function rawDefaultsForRole(string $roleName): array
     {
         switch ($roleName) {
             case RoleNames::SUPERADMIN:
@@ -235,7 +254,6 @@ class RoleDefaultPermissions
                     'order.cancel',
                     'order.void',
                     'order.correct',
-                    'order.delete',
                     'order.refund.process',
                     'order.payment.credit',
                     'order.customer.change',

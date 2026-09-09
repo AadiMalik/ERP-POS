@@ -51,98 +51,101 @@ class SubscriptionModuleRegistry
             'notification'    => ['label' => 'Notifications', 'category' => 'Core', 'type' => 'core'],
             'reports'         => ['label' => 'Reports (Procurement & Accounting)', 'category' => 'Core', 'type' => 'core'],
 
-            // Core, but package-limited (always available, capped)
-            'branch' => ['label' => 'Branches', 'category' => 'Core', 'type' => 'limited', 'parent' => null, 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'user'   => ['label' => 'Admin Users', 'category' => 'Core', 'type' => 'limited', 'parent' => null, 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            // Core, but package-limited (always available, capped). active_count:
+            // limit checked against currently active/non-deleted rows.
+            'branch' => ['label' => 'Branches', 'category' => 'Core', 'type' => 'limited', 'limit_type' => 'active_count', 'parent' => null, 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'user'   => ['label' => 'Admin Users', 'category' => 'Core', 'type' => 'limited', 'limit_type' => 'active_count', 'parent' => null, 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
 
             // ---- Inventory (umbrella: is_inventory_enabled) ----
             'inventory'        => ['label' => 'Inventory Module', 'category' => 'Inventory', 'type' => 'feature', 'parent' => null, 'default_enabled' => false],
-            'warehouse'        => ['label' => 'Warehouses', 'category' => 'Inventory', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'brand'            => ['label' => 'Brands', 'category' => 'Inventory', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'category'         => ['label' => 'Categories', 'category' => 'Inventory', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'sub-category'     => ['label' => 'Sub Categories', 'category' => 'Inventory', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'warehouse'        => ['label' => 'Warehouses', 'category' => 'Inventory', 'type' => 'limited', 'limit_type' => 'active_count', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'brand'            => ['label' => 'Brands', 'category' => 'Inventory', 'type' => 'limited', 'limit_type' => 'configuration_count', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'category'         => ['label' => 'Categories', 'category' => 'Inventory', 'type' => 'limited', 'limit_type' => 'configuration_count', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'sub-category'     => ['label' => 'Sub Categories', 'category' => 'Inventory', 'type' => 'limited', 'limit_type' => 'configuration_count', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             // Units are a global/shared master table (no business_id - see
             // UnitService, restricted to Super Admin management) - a
             // per-business record limit does not apply, so this is a
             // feature toggle only, not a `limited` module.
             'unit'             => ['label' => 'Units', 'category' => 'Inventory', 'type' => 'feature', 'parent' => 'inventory', 'default_enabled' => true],
-            'product'          => ['label' => 'Products', 'category' => 'Inventory', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'product-variation' => ['label' => 'Product Variations', 'category' => 'Inventory', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'product'          => ['label' => 'Products', 'category' => 'Inventory', 'type' => 'limited', 'limit_type' => 'monthly_creation', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'product-variation' => ['label' => 'Product Variations', 'category' => 'Inventory', 'type' => 'limited', 'limit_type' => 'monthly_creation', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'barcode'          => ['label' => 'Barcode / QR Code', 'category' => 'Inventory', 'type' => 'feature', 'parent' => 'inventory', 'default_enabled' => true],
             'unit-conversion'  => ['label' => 'Unit Conversion', 'category' => 'Inventory', 'type' => 'feature', 'parent' => 'inventory', 'default_enabled' => true],
             'batch'            => ['label' => 'Batches', 'category' => 'Inventory', 'type' => 'feature', 'parent' => 'inventory', 'default_enabled' => true],
             'stock'            => ['label' => 'Stock', 'category' => 'Inventory', 'type' => 'feature', 'parent' => 'inventory', 'default_enabled' => true],
             'stock-transaction' => ['label' => 'Stock Transactions', 'category' => 'Inventory', 'type' => 'feature', 'parent' => 'inventory', 'default_enabled' => true],
             'opening-stock'    => ['label' => 'Opening Stock', 'category' => 'Inventory', 'type' => 'feature', 'parent' => 'inventory', 'default_enabled' => true],
-            'stock-taking'     => ['label' => 'Stock Taking', 'category' => 'Inventory', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'transfer-note'    => ['label' => 'Stock Transfer / Transfer Notes', 'category' => 'Inventory', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'stock-taking'     => ['label' => 'Stock Taking', 'category' => 'Inventory', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'transfer-note'    => ['label' => 'Stock Transfer / Transfer Notes', 'category' => 'Inventory', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
 
             // ---- Purchases (routed under module:inventory today) ----
-            'supplier'                   => ['label' => 'Suppliers', 'category' => 'Purchases', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'purchase-request'           => ['label' => 'Purchase Requests', 'category' => 'Purchases', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'purchase-request-quotation' => ['label' => 'Quotations', 'category' => 'Purchases', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'purchase'                   => ['label' => 'Purchases', 'category' => 'Purchases', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'good-receipt-note'          => ['label' => 'Goods Receipt Notes (GRNs)', 'category' => 'Purchases', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'purchase-return'            => ['label' => 'Purchase Returns', 'category' => 'Purchases', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'supplier-payment'           => ['label' => 'Vendor / Supplier Payments', 'category' => 'Purchases', 'type' => 'limited', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'supplier'                   => ['label' => 'Suppliers', 'category' => 'Purchases', 'type' => 'limited', 'limit_type' => 'monthly_creation', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'purchase-request'           => ['label' => 'Purchase Requests', 'category' => 'Purchases', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'purchase-request-quotation' => ['label' => 'Quotations', 'category' => 'Purchases', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'purchase'                   => ['label' => 'Purchases', 'category' => 'Purchases', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'good-receipt-note'          => ['label' => 'Goods Receipt Notes (GRNs)', 'category' => 'Purchases', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'purchase-return'            => ['label' => 'Purchase Returns', 'category' => 'Purchases', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'supplier-payment'           => ['label' => 'Vendor / Supplier Payments', 'category' => 'Purchases', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'inventory', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
 
             // ---- Service Management (non-stock purchase/sale: gas cylinders,
             // decoration, rental/installation/delivery charges, etc). Its own
             // umbrella, independent of inventory/pos, since these transactions
             // never touch stock. ----
             'service-management'      => ['label' => 'Service Management Module', 'category' => 'Service Management', 'type' => 'feature', 'parent' => null, 'default_enabled' => false],
-            'service-purchase'        => ['label' => 'Service Purchases', 'category' => 'Service Management', 'type' => 'limited', 'parent' => 'service-management', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'service-purchase-return' => ['label' => 'Service Purchase Returns', 'category' => 'Service Management', 'type' => 'limited', 'parent' => 'service-management', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'service-sale'            => ['label' => 'Service Sales', 'category' => 'Service Management', 'type' => 'limited', 'parent' => 'service-management', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'service-sale-return'     => ['label' => 'Service Sale Returns', 'category' => 'Service Management', 'type' => 'limited', 'parent' => 'service-management', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'service-purchase'        => ['label' => 'Service Purchases', 'category' => 'Service Management', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'service-management', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'service-purchase-return' => ['label' => 'Service Purchase Returns', 'category' => 'Service Management', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'service-management', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'service-sale'            => ['label' => 'Service Sales', 'category' => 'Service Management', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'service-management', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'service-sale-return'     => ['label' => 'Service Sale Returns', 'category' => 'Service Management', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'service-management', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
 
             // ---- Accounting (umbrella: is_accounting_enabled) ----
             'accounting'         => ['label' => 'Accounting Module', 'category' => 'Accounting', 'type' => 'feature', 'parent' => null, 'default_enabled' => false],
             'account-type'       => ['label' => 'Account Types', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
             'account-sub-type'   => ['label' => 'Account Sub Types', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
-            'account'            => ['label' => 'Chart of Accounts', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'account'            => ['label' => 'Chart of Accounts', 'category' => 'Accounting', 'type' => 'limited', 'limit_type' => 'configuration_count', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'journal'            => ['label' => 'Journals', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
-            'journal-entry'      => ['label' => 'Journal Entries', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'journal-entry'      => ['label' => 'Journal Entries', 'category' => 'Accounting', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'bank-reconciliation' => ['label' => 'Bank Reconciliation', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
-            'recurring-transaction' => ['label' => 'Recurring Transactions', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'voucher'            => ['label' => 'Vouchers', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'recurring-transaction' => ['label' => 'Recurring Transactions', 'category' => 'Accounting', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'voucher'            => ['label' => 'Vouchers', 'category' => 'Accounting', 'type' => 'limited', 'limit_type' => 'configuration_count', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'fiscal-year'        => ['label' => 'Fiscal Years', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
             'accounting-period'  => ['label' => 'Accounting Periods', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
-            'budget'             => ['label' => 'Budgeting', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'budget'             => ['label' => 'Budgeting', 'category' => 'Accounting', 'type' => 'limited', 'limit_type' => 'configuration_count', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'fixed-asset-category' => ['label' => 'Fixed Asset Categories', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
-            'fixed-asset'        => ['label' => 'Fixed Assets', 'category' => 'Accounting', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 50, 'unlimited_allowed' => true],
+            'fixed-asset'        => ['label' => 'Fixed Assets', 'category' => 'Accounting', 'type' => 'limited', 'limit_type' => 'monthly_creation', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 50, 'unlimited_allowed' => true],
             'fixed-asset-depreciation' => ['label' => 'Fixed Asset Depreciation', 'category' => 'Accounting', 'type' => 'feature', 'parent' => 'accounting', 'default_enabled' => true],
 
             // ---- Expenses ----
-            'expense'          => ['label' => 'Expense Details', 'category' => 'Expenses', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'expense-category' => ['label' => 'Expense Categories', 'category' => 'Expenses', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'admin-expense'    => ['label' => 'Admin Expenses', 'category' => 'Expenses', 'type' => 'limited', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'expense'          => ['label' => 'Expense Details', 'category' => 'Expenses', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'expense-category' => ['label' => 'Expense Categories', 'category' => 'Expenses', 'type' => 'limited', 'limit_type' => 'configuration_count', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'admin-expense'    => ['label' => 'Admin Expenses', 'category' => 'Expenses', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'accounting', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
 
             // ---- Sales & POS (umbrella: is_pos_enabled) ----
             'pos'            => ['label' => 'POS Module', 'category' => 'Sales & POS', 'type' => 'feature', 'parent' => null, 'default_enabled' => false],
-            'order-type'     => ['label' => 'Order Types', 'category' => 'Sales & POS', 'type' => 'feature', 'parent' => 'pos', 'default_enabled' => true],
-            'payment-method' => ['label' => 'Payment Types', 'category' => 'Sales & POS', 'type' => 'limited', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'order-type'     => ['label' => 'Order Types', 'category' => 'Sales & POS', 'type' => 'limited', 'limit_type' => 'configuration_count', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'payment-method' => ['label' => 'Payment Types', 'category' => 'Sales & POS', 'type' => 'limited', 'limit_type' => 'configuration_count', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'order-source'   => ['label' => 'Order Sources', 'category' => 'Sales & POS', 'type' => 'feature', 'parent' => 'pos', 'default_enabled' => true],
-            'discount'       => ['label' => 'Discounts', 'category' => 'Sales & POS', 'type' => 'limited', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'customer'       => ['label' => 'Customers', 'category' => 'Sales & POS', 'type' => 'limited', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'discount'       => ['label' => 'Discounts / Vouchers', 'category' => 'Sales & POS', 'type' => 'limited', 'limit_type' => 'configuration_count', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'customer'       => ['label' => 'Customers', 'category' => 'Sales & POS', 'type' => 'limited', 'limit_type' => 'monthly_creation', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'offline-pos'    => ['label' => 'Offline Desktop POS', 'category' => 'Sales & POS', 'type' => 'feature', 'parent' => 'pos', 'default_enabled' => true],
 
             // ---- Orders ----
-            'order' => ['label' => 'Orders', 'category' => 'Orders', 'type' => 'limited', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'order'        => ['label' => 'Orders', 'category' => 'Orders', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'order-return' => ['label' => 'Order Returns', 'category' => 'Orders', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'order-reports' => ['label' => 'Order Reports', 'category' => 'Orders', 'type' => 'feature', 'parent' => 'pos', 'default_enabled' => true],
 
             // ---- Payment Gateways (Website & Mobile App only, never POS -
             // its own umbrella since it must work even for businesses that
             // never enable the POS module) ----
-            'payment-gateway' => ['label' => 'Payment Gateways', 'category' => 'Orders', 'type' => 'feature', 'parent' => null, 'default_enabled' => true],
+            'payment-gateway' => ['label' => 'Payment Gateways', 'category' => 'Orders', 'type' => 'limited', 'limit_type' => 'configuration_count', 'parent' => null, 'default_enabled' => true, 'default_limit' => 1, 'unlimited_allowed' => true],
             'payment-transaction' => ['label' => 'Payment Gateway Transactions', 'category' => 'Orders', 'type' => 'feature', 'parent' => 'payment-gateway', 'default_enabled' => true],
+            'customer-payment' => ['label' => 'Customer Payments (Without Order)', 'category' => 'Orders', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'pos', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
 
             // ---- HRM & Payroll (umbrellas: is_hrm_enabled / is_payroll_enabled) ----
             'hrm'                 => ['label' => 'HRM Module', 'category' => 'HRM & Payroll', 'type' => 'feature', 'parent' => null, 'default_enabled' => false],
-            'department'          => ['label' => 'Departments', 'category' => 'HRM & Payroll', 'type' => 'limited', 'parent' => 'hrm', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'designation'         => ['label' => 'Designations', 'category' => 'HRM & Payroll', 'type' => 'limited', 'parent' => 'hrm', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'shift'               => ['label' => 'Shifts', 'category' => 'HRM & Payroll', 'type' => 'limited', 'parent' => 'hrm', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
-            'employee'            => ['label' => 'Employees', 'category' => 'HRM & Payroll', 'type' => 'limited', 'parent' => 'hrm', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'department'          => ['label' => 'Departments', 'category' => 'HRM & Payroll', 'type' => 'limited', 'limit_type' => 'active_count', 'parent' => 'hrm', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'designation'         => ['label' => 'Designations', 'category' => 'HRM & Payroll', 'type' => 'limited', 'limit_type' => 'active_count', 'parent' => 'hrm', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'shift'               => ['label' => 'Shifts', 'category' => 'HRM & Payroll', 'type' => 'limited', 'limit_type' => 'active_count', 'parent' => 'hrm', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'employee'            => ['label' => 'Employees', 'category' => 'HRM & Payroll', 'type' => 'limited', 'limit_type' => 'active_count', 'parent' => 'hrm', 'default_enabled' => true, 'default_limit' => 5, 'unlimited_allowed' => true],
             'attendance'          => ['label' => 'Attendance', 'category' => 'HRM & Payroll', 'type' => 'feature', 'parent' => 'hrm', 'default_enabled' => true],
             'leave-type'          => ['label' => 'Leave Types', 'category' => 'HRM & Payroll', 'type' => 'feature', 'parent' => 'hrm', 'default_enabled' => true],
             'leave-request'       => ['label' => 'Leave Requests', 'category' => 'HRM & Payroll', 'type' => 'feature', 'parent' => 'hrm', 'default_enabled' => true],
@@ -158,16 +161,16 @@ class SubscriptionModuleRegistry
             'ess'                 => ['label' => 'Employee Self Service', 'category' => 'HRM & Payroll', 'type' => 'feature', 'parent' => 'hrm', 'default_enabled' => true],
             'hrm-reports'         => ['label' => 'HRM Reports', 'category' => 'HRM & Payroll', 'type' => 'feature', 'parent' => 'hrm', 'default_enabled' => true],
 
-            'payroll'         => ['label' => 'Payroll', 'category' => 'HRM & Payroll', 'type' => 'limited', 'parent' => null, 'default_enabled' => false, 'default_limit' => 5, 'unlimited_allowed' => true],
+            'payroll'         => ['label' => 'Payroll', 'category' => 'HRM & Payroll', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => null, 'default_enabled' => false, 'default_limit' => 5, 'unlimited_allowed' => true],
             'payslip'         => ['label' => 'Salary Slips', 'category' => 'HRM & Payroll', 'type' => 'feature', 'parent' => 'payroll', 'default_enabled' => true],
             'payroll-reports' => ['label' => 'Payroll Reports', 'category' => 'HRM & Payroll', 'type' => 'feature', 'parent' => 'payroll', 'default_enabled' => true],
 
             // ---- Manufacturing (umbrella - package-tier gate only, same as
             // hrm/payroll; no separate business-level on/off toggle) ----
             'manufacturing'       => ['label' => 'Manufacturing Module', 'category' => 'Manufacturing', 'type' => 'feature', 'parent' => null, 'default_enabled' => false],
-            'recipe'              => ['label' => 'Recipes / BOM', 'category' => 'Manufacturing', 'type' => 'limited', 'parent' => 'manufacturing', 'default_enabled' => true, 'default_limit' => 20, 'unlimited_allowed' => true],
-            'manufacturing-plan'  => ['label' => 'Manufacturing Plans', 'category' => 'Manufacturing', 'type' => 'limited', 'parent' => 'manufacturing', 'default_enabled' => true, 'default_limit' => 20, 'unlimited_allowed' => true],
-            'production'          => ['label' => 'Productions', 'category' => 'Manufacturing', 'type' => 'limited', 'parent' => 'manufacturing', 'default_enabled' => true, 'default_limit' => 50, 'unlimited_allowed' => true],
+            'recipe'              => ['label' => 'Recipes / BOM', 'category' => 'Manufacturing', 'type' => 'limited', 'limit_type' => 'configuration_count', 'parent' => 'manufacturing', 'default_enabled' => true, 'default_limit' => 20, 'unlimited_allowed' => true],
+            'manufacturing-plan'  => ['label' => 'Manufacturing Plans', 'category' => 'Manufacturing', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'manufacturing', 'default_enabled' => true, 'default_limit' => 20, 'unlimited_allowed' => true],
+            'production'          => ['label' => 'Productions', 'category' => 'Manufacturing', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => 'manufacturing', 'default_enabled' => true, 'default_limit' => 50, 'unlimited_allowed' => true],
             'manufacturing-reports' => ['label' => 'Manufacturing Reports', 'category' => 'Manufacturing', 'type' => 'feature', 'parent' => 'manufacturing', 'default_enabled' => true],
 
             // ---- Advanced Analytics & BI (package-tier gate only, same as
@@ -175,6 +178,10 @@ class SubscriptionModuleRegistry
             // inventory/finance report data, no separate business-level
             // on/off toggle) ----
             'analytics' => ['label' => 'Advanced Analytics & BI', 'category' => 'Analytics', 'type' => 'feature', 'parent' => null, 'default_enabled' => false],
+
+            // ---- Push Notifications (Firebase/FCM) ----
+            'push-notification-config' => ['label' => 'Push Notification Configuration', 'category' => 'Notifications', 'type' => 'limited', 'limit_type' => 'configuration_count', 'parent' => null, 'default_enabled' => true, 'default_limit' => 1, 'unlimited_allowed' => true],
+            'push-notification'        => ['label' => 'Push Notifications Sent', 'category' => 'Notifications', 'type' => 'limited', 'limit_type' => 'monthly_transaction', 'parent' => null, 'default_enabled' => true, 'default_limit' => 20, 'unlimited_allowed' => true],
         ];
     }
 

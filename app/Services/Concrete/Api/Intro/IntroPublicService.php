@@ -80,6 +80,9 @@ class IntroPublicService
             'price_list' => $listPrice,
             'price_effective' => $effective,
             'discount' => $discount,
+            // One-time onboarding fee, separate from recurring subscription
+            // pricing above - never folded into price/price_effective.
+            'setup_fee' => (float) ($p->setup_fee ?? 0),
             'price_monthly' => $duration === 'monthly' ? $effective : $p->monthlyEquivalent(),
             'price_yearly' => $duration === 'yearly' ? $effective : null,
             'price_yearly_monthly' => $duration === 'yearly' ? $p->monthlyEquivalent() : null,

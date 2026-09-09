@@ -109,7 +109,11 @@ class RoleController extends Controller
         $enabledModuleKeys = $isBusinessAdmin
             ? SubscriptionModuleRegistry::enabledPermissionModuleKeysFor(Auth::user()->business)
             : null;
-        $groupedPermissions = PermissionRegistry::grouped($isBusinessAdmin, $enabledModuleKeys);
+        // Delete permissions are only ever selectable when editing the true
+        // global Super Admin role - every other role (including a custom
+        // tenant role) must never show a Delete checkbox.
+        $isGlobalSuperAdminRole = is_null($role->business_id) && $role->name === RoleNames::SUPERADMIN;
+        $groupedPermissions = PermissionRegistry::grouped($isBusinessAdmin, $enabledModuleKeys, $isGlobalSuperAdminRole);
         $business = $this->business_service->getAll();
         return view('admin.roles.create', compact('role', 'groupedPermissions', 'business'));
     }

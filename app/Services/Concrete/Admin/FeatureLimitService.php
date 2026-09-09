@@ -41,7 +41,13 @@ use App\Models\TransferNote;
 use App\Models\User;
 use App\Models\Voucher;
 use App\Models\Warehouse;
+use App\Models\Budget;
+use App\Models\BroadcastNotification;
+use App\Models\BroadcastNotificationRecipient;
+use App\Models\CustomerPayment;
+use App\Models\FirebaseSetting;
 use App\Support\Subscription\SubscriptionModuleRegistry;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 
@@ -79,7 +85,7 @@ class FeatureLimitService
     ];
 
     /**
-     * @return array{status: bool, message: string}
+     * @return array{status: bool, message: string, resource?: string, used?: int, limit?: int, period?: string, upgrade_required?: bool}
      */
     public function check(string $type, ?Business $business = null): array
     {
@@ -119,6 +125,11 @@ class FeatureLimitService
             }
 
             $package = $business->package;
+            $meta = SubscriptionModuleRegistry::find($moduleKey);
+            $label = $meta['label'] ?? ucfirst($type);
+            $isMonthly = in_array($meta['limit_type'] ?? null, ['monthly_creation', 'monthly_transaction'], true);
+            $period = $isMonthly ? $this->currentUsagePeriod($business) : null;
+            $periodLabel = $period ? ('billing period ' . $period['start']->toDateString() . ' to ' . $period['end']->copy()->subDay()->toDateString()) : 'current';
 
             if ($package->moduleIsUnlimited($moduleKey)) {
                 return [
@@ -131,15 +142,27 @@ class FeatureLimitService
             $count = $this->resolveCount($moduleKey, $business);
 
             if ($count >= $limit) {
+                $qualifier = $isMonthly ? 'monthly ' : '';
+
                 return [
                     'status' => false,
-                    'message' => ucfirst($type) . ' limit exceeded',
+                    'message' => "You have reached your {$qualifier}{$label} limit of {$limit} for the {$package->name} package. Please upgrade your package to continue.",
+                    'resource' => $label,
+                    'used' => $count,
+                    'limit' => $limit,
+                    'period' => $periodLabel,
+                    'upgrade_required' => true,
                 ];
             }
 
             return [
                 'status' => true,
                 'message' => ucfirst($type) . ' limit available',
+                'resource' => $label,
+                'used' => $count,
+                'limit' => $limit,
+                'period' => $periodLabel,
+                'upgrade_required' => false,
             ];
         } catch (Exception $e) {
             return [
@@ -147,6 +170,39 @@ class FeatureLimitService
                 'message' => $e->getMessage(),
             ];
         }
+    }
+
+    /**
+     * Current monthly usage window for $business, anchored on its active
+     * subscription's start_at and rolling forward in whole-month increments -
+     * so a yearly subscription still resets its monthly counters every month
+     * on its own anniversary day, rather than granting 12 months of usage at
+     * once or resetting on the calendar month.
+     *
+     * @return array{start: Carbon, end: Carbon}
+     */
+    public function currentUsagePeriod(Business $business): array
+    {
+        $anchor = $business->currentSubscription?->start_at
+            ?? $business->subscription_start
+            ?? $business->date_created
+            ?? now();
+        $anchor = Carbon::parse($anchor);
+
+        $months = $anchor->diffInMonths(now());
+        $start = $anchor->copy()->addMonths($months);
+
+        // diffInMonths can land start slightly after now() due to partial
+        // month rounding - step back one month if so.
+        if ($start->gt(now())) {
+            $months--;
+            $start = $anchor->copy()->addMonths($months);
+        }
+
+        return [
+            'start' => $start,
+            'end' => $start->copy()->addMonth(),
+        ];
     }
 
     public function checkAndAbort(string $type, ?Business $business = null): void
@@ -334,49 +390,87 @@ class FeatureLimitService
         return $counts;
     }
 
+    /**
+     * active_count/configuration_count modules: current live rows
+     * (soft-deleted excluded) - unaffected by billing period.
+     * monthly_creation/monthly_transaction modules: every row created within
+     * the business's current billing period, soft-deleted/cancelled/void
+     * rows included - never excluded by status, so status changes cannot be
+     * used to free up quota. Deletion never reduces this count either way,
+     * since it only ever counts creation dates within the window, not
+     * current live state.
+     */
     protected function resolveCount(string $moduleKey, Business $business): int
     {
         $businessId = $business->business_id;
+        $meta = SubscriptionModuleRegistry::find($moduleKey);
+        $isMonthly = in_array($meta['limit_type'] ?? null, ['monthly_creation', 'monthly_transaction'], true);
 
-        return match ($moduleKey) {
-            'branch' => Branch::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'user' => User::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'customer' => CustomerProfile::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'warehouse' => Warehouse::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'brand' => Brand::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'category' => Category::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'sub-category' => SubCategory::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'product' => Product::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'product-variation' => ProductVariation::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'stock-taking' => StockTaking::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'transfer-note' => TransferNote::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'supplier' => Supplier::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'purchase-request' => PurchaseRequest::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'purchase-request-quotation' => PurchaseRequestQuotation::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'purchase' => Purchase::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'good-receipt-note' => GoodReceiptNote::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'purchase-return' => PurchaseReturn::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'supplier-payment' => SupplierPayment::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'service-purchase' => ServicePurchase::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'service-purchase-return' => ServicePurchaseReturn::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'service-sale' => ServiceSale::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'service-sale-return' => ServiceSaleReturn::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'account' => Account::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'journal-entry' => JournalEntry::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'recurring-transaction' => RecurringTransaction::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'voucher' => Voucher::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'expense' => Expense::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'expense-category' => ExpenseCategory::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'admin-expense' => Expense::where('business_id', $businessId)->where('is_deleted', 0)->where('source', 'admin')->count(),
-            'payment-method' => PaymentMethod::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'discount' => Discount::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'order' => Order::where('business_id', $businessId)->where('status', 'posted')->where('is_deleted', 0)->count(),
-            'department' => Department::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'designation' => Designation::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'shift' => Shift::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'employee' => Employee::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            'payroll' => PayrollRun::where('business_id', $businessId)->where('is_deleted', 0)->count(),
-            default => 0,
+        $query = match ($moduleKey) {
+            'branch' => Branch::where('business_id', $businessId),
+            'user' => User::where('business_id', $businessId),
+            'customer' => CustomerProfile::where('business_id', $businessId),
+            'warehouse' => Warehouse::where('business_id', $businessId),
+            'brand' => Brand::where('business_id', $businessId),
+            'category' => Category::where('business_id', $businessId),
+            'sub-category' => SubCategory::where('business_id', $businessId),
+            'product' => Product::where('business_id', $businessId),
+            'product-variation' => ProductVariation::where('business_id', $businessId),
+            'stock-taking' => StockTaking::where('business_id', $businessId),
+            'transfer-note' => TransferNote::where('business_id', $businessId),
+            'supplier' => Supplier::where('business_id', $businessId),
+            'purchase-request' => PurchaseRequest::where('business_id', $businessId),
+            'purchase-request-quotation' => PurchaseRequestQuotation::where('business_id', $businessId),
+            'purchase' => Purchase::where('business_id', $businessId),
+            'good-receipt-note' => GoodReceiptNote::where('business_id', $businessId),
+            'purchase-return' => PurchaseReturn::where('business_id', $businessId),
+            'supplier-payment' => SupplierPayment::where('business_id', $businessId),
+            'service-purchase' => ServicePurchase::where('business_id', $businessId),
+            'service-purchase-return' => ServicePurchaseReturn::where('business_id', $businessId),
+            'service-sale' => ServiceSale::where('business_id', $businessId),
+            'service-sale-return' => ServiceSaleReturn::where('business_id', $businessId),
+            'account' => Account::where('business_id', $businessId),
+            'journal-entry' => JournalEntry::where('business_id', $businessId),
+            'recurring-transaction' => RecurringTransaction::where('business_id', $businessId),
+            'voucher' => Voucher::where('business_id', $businessId),
+            'expense' => Expense::where('business_id', $businessId),
+            'expense-category' => ExpenseCategory::where('business_id', $businessId),
+            'admin-expense' => Expense::where('business_id', $businessId)->where('source', 'admin'),
+            'payment-method' => PaymentMethod::where('business_id', $businessId),
+            'discount' => Discount::where('business_id', $businessId),
+            'order' => Order::where('business_id', $businessId),
+            'order-return' => Order::where('business_id', $businessId)->where('status', 'returned'),
+            'customer-payment' => CustomerPayment::where('business_id', $businessId),
+            'department' => Department::where('business_id', $businessId),
+            'designation' => Designation::where('business_id', $businessId),
+            'shift' => Shift::where('business_id', $businessId),
+            'employee' => Employee::where('business_id', $businessId),
+            'payroll' => PayrollRun::where('business_id', $businessId),
+            'budget' => Budget::where('business_id', $businessId),
+            'push-notification-config' => FirebaseSetting::where('business_id', $businessId),
+            'push-notification' => BroadcastNotificationRecipient::whereIn(
+                'broadcast_notification_id',
+                BroadcastNotification::where('business_id', $businessId)->pluck('broadcast_notification_id')
+            ),
+            default => null,
         };
+
+        if (!$query) {
+            return 0;
+        }
+
+        if ($isMonthly) {
+            $period = $this->currentUsagePeriod($business);
+
+            return $query->whereBetween('date_created', [$period['start'], $period['end']])->count();
+        }
+
+        // active_count / configuration_count: current live rows only.
+        // FirebaseSetting has no is_deleted column (one row per business).
+        if ($moduleKey !== 'push-notification-config') {
+            $query->where('is_deleted', 0);
+        }
+
+        return $query->count();
     }
 }

@@ -55,6 +55,50 @@ any Registry change:
 php artisan db:seed --class=PermissionSeeder
 ```
 
+## Global Delete-Permission Lockdown
+
+Only the **true global Super Admin role** (`business_id === null && name ===
+RoleNames::SUPERADMIN`) may ever hold a `*.delete` permission. No Business
+Admin, Business Owner, Manager, Employee, or any other business-level role —
+including a custom tenant role a Super Admin creates on a business's behalf —
+may have delete on any module. This is enforced at three layers, not just one:
+
+1. **Data**: `PermissionRegistry::businessNames()` (feeding the global
+   Business Admin template) and every role template in
+   `RoleDefaultPermissions` never include a `.delete` name —
+   `RoleDefaultPermissions::defaultsForRole()` wraps every non-Super-Admin
+   case in `PermissionRegistry::withoutDeleteActions()`, so a future role
+   case can't accidentally reintroduce delete by forgetting to call
+   `namesForModulesExcludingActions([...], ['delete'])` itself.
+2. **UI**: `PermissionRegistry::grouped($businessAdminOnly, $enabledModuleKeys, $includeDeleteActions)`
+   strips every `delete` action key unless `$includeDeleteActions` is true —
+   `RoleController::create()` always passes `false` (a new role is never the
+   global Super Admin role); `edit($id)` computes it from the loaded role
+   (`is_null($role->business_id) && $role->name === RoleNames::SUPERADMIN`).
+   Delete checkboxes are never rendered for any other role, anywhere.
+3. **Backstop (the one that actually matters)**: `RoleService::syncPermissions()`
+   — the single method every permission-assignment path routes through (the
+   Role Create/Edit form, `resetBusinessRoles()`, and any future API) — strips
+   every `.delete` name from the incoming array unless the target role is the
+   true global Super Admin role. A spoofed `permissions[]=branch.delete` in a
+   raw POST, or a `.delete` name manually added to any payload, is silently
+   dropped here regardless of what the UI showed. This is the layer that
+   makes 1 and 2 non-bypassable rather than just cosmetic.
+
+Existing `permission:{module}.delete` middleware on `destroy()` actions
+(93 controllers) is unchanged — no per-controller edits were needed. Once no
+non-Super-Admin role can ever hold that permission, Spatie's own middleware
+check already blocks every one of those routes for everyone except Super
+Admin; the fix is entirely upstream. See
+`tests/Feature/DeletePermissionLockdownTest.php` for the verifying tests.
+
+Deactivate/archive endpoints (where a module has them) are a **separate**
+concept from delete and are untouched by this rule — they remain available to
+whichever role has the relevant `.edit`/`.status` permission. Where a module
+has no deactivate/archive action, the spec's intended fallback is that the
+business contacts the Super Admin for a permanent removal — this rule does
+not add new archive UI to modules that don't already have one.
+
 ## Enforcing at the Controller
 
 Constructor-level middleware, scoped with `->only([...])`:

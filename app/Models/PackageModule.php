@@ -15,6 +15,7 @@ class PackageModule extends Model
         'is_enabled',
         'is_unlimited',
         'limit_value',
+        'limit_type',
     ];
 
     protected $casts = [

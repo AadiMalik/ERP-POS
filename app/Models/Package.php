@@ -25,6 +25,7 @@ class Package extends Model
         'price',
         'discount',
         'price_yearly',
+        'setup_fee',
         'currency',
         'features',
         'limitations',
@@ -72,6 +73,7 @@ class Package extends Model
         'price' => 'float',
         'discount' => 'float',
         'price_yearly' => 'float',
+        'setup_fee' => 'float',
     ];
 
     /**

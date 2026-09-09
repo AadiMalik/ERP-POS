@@ -3,14 +3,23 @@
 ## How Access Control Works
 
 Every screen and every action in the system — viewing a report, creating a purchase,
-deleting a product, downloading a PDF — is protected by a **permission**. A **role**
+updating a product, downloading a PDF — is protected by a **permission**. A **role**
 is simply a named bundle of permissions (e.g. "Accountant" bundles all the
 accounting-related permissions). Every user is assigned exactly one role, and that
 role's permissions decide what they can see and do.
 
 This means access control is precise: you can give someone view-only access to
-Reports without letting them create or delete anything, or let a manager approve
+Reports without letting them create or edit anything, or let a manager approve
 purchase requests without giving them access to Payroll.
+
+**Delete is a platform-level action only.** No role within your business —
+including Business Admin — can delete records; deletion is never shown as an
+option when building or editing a role, and any attempt to grant it is
+rejected automatically. Instead, use **deactivate/archive** where a module
+offers it (this keeps your historical and accounting data intact), or
+contact your Super Admin if a record genuinely needs to be permanently
+removed. See [Subscription & Billing](11-subscription-billing.md) for why
+this also protects your monthly usage counts.
 
 ## Built-in Roles
 
@@ -26,7 +35,8 @@ whenever the system's permission set changes:
   like push notifications or online payment gateways).
 - **Business Admin** — the owner/top administrator of a single business. Has every
   permission available to a business (everything except platform-level actions like
-  managing other businesses or raw permission definitions).
+  managing other businesses or raw permission definitions, and except delete —
+  see below).
 
 Every business also gets a starting set of **role templates** it can freely edit or
 delete, covering common positions: Branch Admin, General Manager, Operation Manager,

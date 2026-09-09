@@ -37,6 +37,7 @@ class Business extends Model
         'storefront_access_enabled',
         'pos_access_enabled',
         'offline_pos_access_enabled',
+        'trial_used_at',
 
         'is_deleted',
         'createdby_id',
@@ -45,6 +46,10 @@ class Business extends Model
         'date_created',
         'date_updated',
         'date_deleted',
+    ];
+
+    protected $casts = [
+        'trial_used_at' => 'datetime',
     ];
 
     public function package()

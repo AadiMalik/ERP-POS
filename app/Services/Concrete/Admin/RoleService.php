@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use App\Enums\RoleNames;
 use App\Models\Role;
+use App\Support\Permissions\PermissionRegistry;
 use App\Support\Permissions\RoleDefaultPermissions;
 use App\Traits\Auditable;
 use Carbon\Carbon;
@@ -163,9 +164,23 @@ class RoleService
      * RoleController::store()) so the change is always logged - see
      * Auditable's docblock on why logging stays explicit at the service
      * layer.
+     *
+     * This is also the single backstop for the global delete-permission
+     * lockdown: only the true global Super Admin role (business_id === null
+     * && name === Super Admin) may ever hold a `*.delete` permission. Every
+     * other caller of this method - the Role Create/Edit form, a spoofed
+     * payload with a `.delete` name manually added, resetBusinessRoles(),
+     * or any future API - has those names silently stripped here, so no
+     * caller needs to remember to filter them itself.
      */
     public function syncPermissions(Role $role, array $permissions): Role
     {
+        $isGlobalSuperAdminRole = is_null($role->business_id) && $role->name === RoleNames::SUPERADMIN;
+
+        if (!$isGlobalSuperAdminRole) {
+            $permissions = PermissionRegistry::withoutDeleteActions($permissions);
+        }
+
         $old_permissions = $role->permissions()->pluck('name')->all();
 
         $role->syncPermissions($permissions);
