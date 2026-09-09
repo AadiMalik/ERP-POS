@@ -7,6 +7,11 @@ use App\Services\Concrete\Admin\Support\AbstractLookupTypeService;
 
 class OrderTypeService extends AbstractLookupTypeService
 {
+    public function isGlobal(): bool
+    {
+        return true;
+    }
+
     protected function newModelInstance()
     {
         return new OrderType();
@@ -25,7 +30,6 @@ class OrderTypeService extends AbstractLookupTypeService
     protected function defaultRows(): array
     {
         return [
-            ['name' => 'Mart', 'code' => 'MART'],
             ['name' => 'Takeaway', 'code' => 'TAKEAWAY'],
             ['name' => 'Delivery', 'code' => 'DELIVERY'],
         ];

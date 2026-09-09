@@ -89,6 +89,7 @@ return [
     'payment' => 'Πληρωμή',
     'discount' => 'Έκπτωση',
     'tax' => 'Φόρος',
+    'tax_discount' => 'Έκπτωση φόρου',
     'subtotal' => 'Μερικό σύνολο',
     'grand_total' => 'Γενικό σύνολο',
     'paid' => 'Πληρώθηκε',

@@ -1,7 +1,6 @@
 $("#createNewOrderSource").click(function () {
       $("#pos_order_source_form")[0].reset();
       $("#order_source_id").val('');
-      $("#business_id").val('').trigger('change.select2');
       $("#status").val('active');
       $("#saveBtn").show();
       $("#modelHeading").html("Create New Order Source");
@@ -14,7 +13,6 @@ editRecord({
       onSuccess: function (response) {
             let data = response.Data;
             $("#order_source_id").val(data.order_source_id);
-            $("#business_id").val(data.business_id).trigger('change.select2');
             $("#name").val(data.name);
             $("#code").val(data.code);
             $("#sort_order").val(data.sort_order);

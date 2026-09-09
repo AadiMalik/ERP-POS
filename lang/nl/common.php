@@ -89,6 +89,7 @@ return [
     'payment' => 'Betaling',
     'discount' => 'Korting',
     'tax' => 'Belasting',
+    'tax_discount' => 'Belastingkorting',
     'subtotal' => 'Subtotaal',
     'grand_total' => 'Totaalbedrag',
     'paid' => 'Betaald',

@@ -89,6 +89,7 @@ return [
     'payment' => 'ಪಾವತಿ',
     'discount' => 'ರಿಯಾಯಿತಿ',
     'tax' => 'ತೆರಿಗೆ',
+    'tax_discount' => 'ತೆರಿಗೆ ರಿಯಾಯಿತಿ',
     'subtotal' => 'ಉಪ ಮೊತ್ತ',
     'grand_total' => 'ಒಟ್ಟು ಮೊತ್ತ',
     'paid' => 'ಪಾವತಿಸಲಾಗಿದೆ',

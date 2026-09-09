@@ -24,6 +24,8 @@ class OrderReturn extends Model
         'subtotal',
         'discount_amount',
         'tax_amount',
+        'tax_discount',
+        'tax_discount_amount',
         'total',
         'refund_payment_method_id',
         'pos_register_session_id',

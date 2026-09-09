@@ -24,12 +24,17 @@ class TaxSettingResolverService
     }
 
     /**
-     * Returns ['rate' => float, 'tax_type' => 'inclusive'|'exclusive'] for a
-     * branch. The Card Tax Rate only applies when $payment_method_ids is
-     * non-empty AND every one of them is a card-type payment method (moved
-     * verbatim from the old OrderService::resolveTaxPercent()); an empty
-     * array (e.g. a website/mobile cart preview, no payment chosen yet)
-     * always resolves to the Overall rate, matching today's behavior.
+     * Returns ['rate' => float, 'tax_type' => 'inclusive'|'exclusive',
+     * 'tax_discount_rate' => float] for a branch. The Card Tax Rate only
+     * applies when $payment_method_ids is non-empty AND every one of them
+     * is a card-type payment method (moved verbatim from the old
+     * OrderService::resolveTaxPercent()); an empty array (e.g. a website/
+     * mobile cart preview, no payment chosen yet) always resolves to the
+     * Overall rate, matching today's behavior.
+     *
+     * tax_discount_rate is inclusive-only: when cash and card rates differ,
+     * the leftover (max(cash, card) - applied) is reported as tax discount
+     * rather than collected tax. Same rates → 0. Exclusive → always 0.
      */
     public function resolve(string $business_id, ?string $branch_id, array $payment_method_ids = []): array
     {
@@ -70,9 +75,19 @@ class TaxSettingResolverService
             return $method && $method->type === 'card';
         });
 
+        $rate = $is_fully_card ? $setting['card_tax_rate'] : $setting['overall_tax_rate'];
+        $tax_type = $setting['tax_type'];
+        $tax_discount_rate = 0.0;
+
+        if ($tax_type === 'inclusive') {
+            $full_rate = max($setting['overall_tax_rate'], $setting['card_tax_rate']);
+            $tax_discount_rate = max(0.0, round($full_rate - $rate, 2));
+        }
+
         return [
-            'rate' => $is_fully_card ? $setting['card_tax_rate'] : $setting['overall_tax_rate'],
-            'tax_type' => $setting['tax_type'],
+            'rate' => $rate,
+            'tax_type' => $tax_type,
+            'tax_discount_rate' => $tax_discount_rate,
         ];
     }
 

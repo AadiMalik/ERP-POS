@@ -7,6 +7,11 @@ use App\Services\Concrete\Admin\Support\AbstractLookupTypeService;
 
 class OrderSourceService extends AbstractLookupTypeService
 {
+    public function isGlobal(): bool
+    {
+        return true;
+    }
+
     protected function newModelInstance()
     {
         return new OrderSource();
@@ -26,6 +31,7 @@ class OrderSourceService extends AbstractLookupTypeService
     {
         return [
             ['name' => 'POS', 'code' => 'POS'],
+            ['name' => 'Offline POS', 'code' => 'OFFLINE_POS'],
             ['name' => 'Website', 'code' => 'WEBSITE'],
             ['name' => 'Mobile App', 'code' => 'MOBILE_APP'],
         ];

@@ -89,6 +89,7 @@ return [
     'payment' => 'পেমেন্ট',
     'discount' => 'ছাড়',
     'tax' => 'কর',
+    'tax_discount' => 'ট্যাক্স ডিসকাউন্ট',
     'subtotal' => 'উপ-মোট',
     'grand_total' => 'সর্বমোট',
     'paid' => 'পরিশোধিত',

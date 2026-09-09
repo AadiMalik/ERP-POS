@@ -304,6 +304,8 @@ class OrderReturnService
                 'unit_price'                             => $detail->unit_price,
                 'discount'                               => $detail->discount ?? 0,
                 'tax'                                    => $detail->tax ?? 0,
+                'tax_discount'                           => $detail->tax_discount ?? $order->tax_discount ?? 0,
+                'tax_type'                               => $order->tax_type ?? 'exclusive',
                 'track_serial_number'                    => (bool) ($detail->productVariation->track_serial_number ?? false),
             ];
         }
@@ -318,6 +320,8 @@ class OrderReturnService
                 'warehouse_name'  => $order->warehouse->name ?? '',
                 'business_id'     => $order->business_id,
                 'branch_id'       => $order->branch_id,
+                'tax_type'        => $order->tax_type ?? 'exclusive',
+                'tax_discount'    => $order->tax_discount ?? 0,
             ],
             'lines' => $lines,
         ];
@@ -404,6 +408,7 @@ class OrderReturnService
             $subtotal = 0;
             $discount_amount_total = 0;
             $tax_amount_total = 0;
+            $tax_discount_amount_total = 0;
             $total = 0;
             $has_quantity = false;
 
@@ -451,8 +456,12 @@ class OrderReturnService
                 $line_subtotal = $base_quantity * $unit_price;
                 $line_discount_amount = round($line_subtotal * $discount_percent / 100, 3);
                 $taxable = $line_subtotal - $line_discount_amount;
-                $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent, $order->tax_type ?? 'exclusive');
-                $line_total = \App\Support\Tax\TaxCalculator::lineTotal($taxable, $line_tax_amount, $order->tax_type ?? 'exclusive');
+                $tax_type = $order->tax_type ?? 'exclusive';
+                $tax_discount_percent = (float) ($detail->tax_discount ?? $order->tax_discount ?? 0);
+                $line_tax = \App\Support\Tax\TaxCalculator::lineBreakdown($taxable, $tax_percent, $tax_type, $tax_discount_percent);
+                $line_tax_amount = $line_tax['tax_amount'];
+                $line_tax_discount_amount = $line_tax['tax_discount_amount'];
+                $line_total = \App\Support\Tax\TaxCalculator::lineTotal($taxable, $line_tax_amount, $tax_type);
 
                 // Prorate this line's own voucher contribution (per-unit rate x
                 // returned base quantity) the same way its % discount is prorated
@@ -472,6 +481,7 @@ class OrderReturnService
                 $subtotal += $line_subtotal;
                 $discount_amount_total += $line_discount_amount + $line_voucher_discount_amount;
                 $tax_amount_total += $line_tax_amount;
+                $tax_discount_amount_total += $line_tax_discount_amount;
                 $total += $line_total;
 
                 $this->model_order_return_details->create([
@@ -495,7 +505,9 @@ class OrderReturnService
                     'voucher_discount_amount'                  => $line_voucher_discount_amount,
                     'free_quantity'                            => $line_free_quantity,
                     'tax'                                      => $tax_percent,
+                    'tax_discount'                             => $tax_discount_percent,
                     'tax_amount'                               => $line_tax_amount,
+                    'tax_discount_amount'                      => $line_tax_discount_amount,
                     'subtotal'                                 => $line_subtotal,
                     'total'                                    => $line_total,
                     'cost_price'                               => $detail->cost_price ?? 0,
@@ -512,10 +524,12 @@ class OrderReturnService
             }
 
             $order_return->update([
-                'subtotal'         => $subtotal,
-                'discount_amount'  => $discount_amount_total,
-                'tax_amount'       => $tax_amount_total,
-                'total'            => $total,
+                'subtotal'             => $subtotal,
+                'discount_amount'      => $discount_amount_total,
+                'tax_amount'           => $tax_amount_total,
+                'tax_discount'         => (float) ($order->tax_discount ?? 0),
+                'tax_discount_amount'  => $tax_discount_amount_total,
+                'total'                => $total,
             ]);
 
             DB::commit();
@@ -555,6 +569,9 @@ class OrderReturnService
                     'subtotal'                 => $order_return->subtotal,
                     'discount_amount'          => $order_return->discount_amount,
                     'tax_amount'               => $order_return->tax_amount,
+                    'tax_discount'             => $order_return->tax_discount,
+                    'tax_discount_amount'      => $order_return->tax_discount_amount,
+                    'tax_type'                 => $order_return->order->tax_type ?? 'exclusive',
                     'total'                    => $order_return->total,
                     'status'                   => $order_return->status,
                 ],
@@ -579,7 +596,9 @@ class OrderReturnService
                     'discount'                 => $detail->discount,
                     'discount_amount'          => $detail->discount_amount,
                     'tax'                      => $detail->tax,
+                    'tax_discount'             => $detail->tax_discount,
                     'tax_amount'               => $detail->tax_amount,
+                    'tax_discount_amount'      => $detail->tax_discount_amount,
                     'subtotal'                 => $detail->subtotal,
                     'total'                    => $detail->total,
                     'reason'                   => $detail->reason,
@@ -870,6 +889,10 @@ class OrderReturnService
             throw new Exception('Tax Account is not configured in Accounting Settings.');
         }
 
+        if ((float) ($order_return->tax_discount_amount ?? 0) > 0 && empty($accounting_setting->default_tax_discount_account_id)) {
+            throw new Exception('Tax Discount Account is not configured in Accounting Settings.');
+        }
+
         if ((float) $order_return->discount_amount > 0 && empty($accounting_setting->default_discount_account_id)) {
             throw new Exception('Discount Account is not configured in Accounting Settings.');
         }
@@ -982,12 +1005,20 @@ class OrderReturnService
         }
 
         // Debit: Sale Return account (contra-revenue) - reverses the
-        // original sale's credit to the Sale Account.
+        // original sale's credit to the Sale Account. Inclusive orders
+        // backed tax (and tax discount) out of revenue, so the return must
+        // too or this JV would double-count those amounts.
+        $is_inclusive = ($order->tax_type ?? 'exclusive') === 'inclusive';
+        $tax_discount_amount = (float) ($order_return->tax_discount_amount ?? 0);
+        $sale_return_amount = $is_inclusive
+            ? round((float) $order_return->subtotal - (float) $order_return->tax_amount - $tax_discount_amount, 3)
+            : (float) $order_return->subtotal;
+
         JournalEntryDetail::create([
             'journal_entry_detail_id' => generateUuid(),
             'journal_entry_id'        => $journal_entry->journal_entry_id,
             'account_id'              => $accounting_setting->default_sale_return_account_id,
-            'debit'                   => $order_return->subtotal,
+            'debit'                   => $sale_return_amount,
             'credit'                  => 0,
             'description'             => 'Order Return - ' . $order_return->order_return_no,
         ]);
@@ -1001,6 +1032,18 @@ class OrderReturnService
                 'debit'                   => $order_return->tax_amount,
                 'credit'                  => 0,
                 'description'             => 'Order Return - ' . $order_return->order_return_no . ' - Tax',
+            ]);
+        }
+
+        // Debit: tax discount reversed - contra to the original tax-discount credit.
+        if ($tax_discount_amount > 0) {
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id'        => $journal_entry->journal_entry_id,
+                'account_id'              => $accounting_setting->default_tax_discount_account_id,
+                'debit'                   => $tax_discount_amount,
+                'credit'                  => 0,
+                'description'             => 'Order Return - ' . $order_return->order_return_no . ' - Tax Discount',
             ]);
         }
 

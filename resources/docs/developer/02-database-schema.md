@@ -67,7 +67,9 @@ every other listing uses the HTML table id (`warehouse_table`,
 than per business — one mandatory row per `branch_id` (unique/NOT NULL):
 `overall_tax_rate`, `card_tax_rate` (decimal(5,2)), `tax_type` (`inclusive` |
 `exclusive`, default `exclusive`). `orders.tax_type` snapshots the resolved
-mode onto each order at save time. See "Per-Branch Tax Configuration" in
+mode onto each order at save time. Inclusive orders whose cash and card
+rates differ also stamp `orders.tax_discount` / `tax_discount_amount` (the
+leftover rate: max(cash, card) − applied). See "Per-Branch Tax Configuration" in
 [Settings System](07-settings-system.md).
 
 ## Inventory / Catalog

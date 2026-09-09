@@ -2027,19 +2027,73 @@
         return allCard ? card : overall;
     }
 
-    // Mirrors TaxCalculator::lineTax() - exclusive adds tax on top of the
-    // taxable amount, inclusive backs it out of a price that already
-    // contains it (the price itself never changes between modes).
-    function effectiveTaxAmount(taxable, percent) {
+    // Mirrors TaxCalculator::lineBreakdown() - exclusive adds tax on top of
+    // the taxable amount; inclusive backs tax (and any leftover cash/card
+    // tax-discount) out of a price that already contains it. The price
+    // itself never changes between modes.
+    function effectiveTaxDiscountPercent() {
+        var rates = CFG.tax_rates_setting || {};
+        var taxType = rates.tax_type || 'exclusive';
+        if (taxType !== 'inclusive') return 0;
+
+        var overall = parseFloat(rates.overall_tax_rate) || 0;
+        var card = parseFloat(rates.card_tax_rate) || 0;
+        var applied = effectiveTaxPercent();
+        var full = Math.max(overall, card);
+
+        return Math.max(0, full - applied);
+    }
+
+    function taxBreakdown(taxable, percent) {
         var taxType = (CFG.tax_rates_setting || {}).tax_type || 'exclusive';
+        var discPct = effectiveTaxDiscountPercent();
 
-        if (percent <= 0) return 0;
-
-        if (taxType === 'inclusive') {
-            return taxable - (taxable / (1 + percent / 100));
+        if (taxType !== 'inclusive') {
+            return { taxAmt: percent > 0 ? taxable * percent / 100 : 0, taxDiscAmt: 0 };
         }
 
-        return taxable * percent / 100;
+        if (discPct <= 0) {
+            return {
+                taxAmt: percent > 0 ? taxable - (taxable / (1 + percent / 100)) : 0,
+                taxDiscAmt: 0
+            };
+        }
+
+        var combined = percent + discPct;
+        if (combined <= 0) return { taxAmt: 0, taxDiscAmt: 0 };
+
+        var base = taxable / (1 + combined / 100);
+        var taxAmt = base * percent / 100;
+        var taxDiscAmt = taxable - base - taxAmt;
+
+        return { taxAmt: taxAmt, taxDiscAmt: Math.max(0, taxDiscAmt) };
+    }
+
+    function formatTaxPercent(percent) {
+        var n = parseFloat(percent);
+        if (isNaN(n)) n = 0;
+        return String(parseFloat(n.toFixed(4)));
+    }
+
+    function taxTypeWord(taxType) {
+        return taxType === 'inclusive'
+            ? t('inclusive', 'Inclusive')
+            : t('exclusive', 'Exclusive');
+    }
+
+    function setPosTaxLabels(percent, taxType, discountPercent) {
+        var taxWord = $('#sumTaxLabel').attr('data-word') || t('tax', 'Tax');
+        var discWord = $('#sumTaxDiscountLabel').attr('data-word') || t('tax_discount', 'Tax Discount');
+        $('#sumTaxLabel').text(
+            taxWord + ' (' + formatTaxPercent(percent) + '%) (' + taxTypeWord(taxType) + ')'
+        );
+        $('#sumTaxDiscountLabel').text(
+            discWord + ' (' + formatTaxPercent(discountPercent) + '%)'
+        );
+    }
+
+    function effectiveTaxAmount(taxable, percent) {
+        return taxBreakdown(taxable, percent).taxAmt;
     }
 
     // Mirrors TaxCalculator::lineTotal().
@@ -2055,13 +2109,14 @@
         var base = qty * price;
         var discAmt = base * (parseFloat(line.discount) || 0) / 100;
         var taxable = base - discAmt;
-        var taxAmt = effectiveTaxAmount(taxable, effectiveTaxPercent());
+        var split = taxBreakdown(taxable, effectiveTaxPercent());
 
         return {
             base: base,
             discAmt: discAmt,
-            taxAmt: taxAmt,
-            total: effectiveLineTotal(taxable, taxAmt),
+            taxAmt: split.taxAmt,
+            taxDiscAmt: split.taxDiscAmt,
+            total: effectiveLineTotal(taxable, split.taxAmt),
         };
     }
 
@@ -2069,7 +2124,7 @@
     // LOCAL PREVIEW TOTALS (client-side only - server always recomputes)
     // ==============================
     function recalcLocal() {
-        var subtotal = 0, lineDiscount = 0, tax = 0;
+        var subtotal = 0, lineDiscount = 0, tax = 0, taxDiscount = 0;
 
         $('#cartRows .cart-line[data-key]').each(function () {
             var key = $(this).data('key');
@@ -2080,6 +2135,7 @@
             subtotal += t.base;
             lineDiscount += t.discAmt;
             tax += t.taxAmt;
+            taxDiscount += t.taxDiscAmt;
 
             $(this).find('.line-total').text(money(t.total));
         });
@@ -2100,7 +2156,10 @@
         // renderFromServerOrder().
         $('#sumLoyaltyDiscountRow').addClass('d-none');
         $('#sumLoyaltyDiscount').text(money(0));
+        setPosTaxLabels(effectiveTaxPercent(), taxType, effectiveTaxDiscountPercent());
         $('#sumTax').text(money(tax));
+        $('#sumTaxDiscountRow').toggleClass('d-none', taxDiscount <= 0);
+        $('#sumTaxDiscount').text(money(taxDiscount));
         $('#sumTotal').text(money(total));
 
         recalcPayments(total);
@@ -2237,6 +2296,7 @@
             recalcPayments();
         }
 
+        recalcLocal();
         updateCheckoutSummary();
     }
 
@@ -2634,7 +2694,11 @@
         $('#sumOrderDiscount').text(money(orderDiscount));
         $('#sumLoyaltyDiscountRow').toggleClass('d-none', loyaltyDiscount <= 0);
         $('#sumLoyaltyDiscount').text(money(loyaltyDiscount));
+        setPosTaxLabels(order.tax, order.tax_type, order.tax_discount);
         $('#sumTax').text(money(order.tax_amount));
+        var taxDiscount = parseFloat(order.tax_discount_amount) || 0;
+        $('#sumTaxDiscountRow').toggleClass('d-none', taxDiscount <= 0);
+        $('#sumTaxDiscount').text(money(taxDiscount));
         $('#sumTotal').text(money(order.total));
         recalcPayments(parseFloat(order.total) || 0);
     }

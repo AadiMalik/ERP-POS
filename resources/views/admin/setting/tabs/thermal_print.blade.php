@@ -173,6 +173,7 @@
         'subtotal' => __('settings.thermal_field_subtotal'),
         'discount' => __('settings.thermal_field_discount'),
         'tax' => __('settings.thermal_field_tax'),
+        'tax_discount' => __('settings.thermal_field_tax_discount'),
         'voucher' => __('settings.thermal_field_voucher'),
         'total' => __('settings.thermal_field_total'),
     ] as $key => $label)

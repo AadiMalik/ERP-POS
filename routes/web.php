@@ -51,6 +51,18 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     Route::group(['prefix' => 'business'], function () {
         Route::post('data', [App\Http\Controllers\Admin\BusinessController::class, 'getData'])->name('business-data');
     });
+    //order type (global platform master data, Super Admin only)
+    Route::resource('order-type', App\Http\Controllers\Admin\OrderTypeController::class);
+    Route::group(['prefix' => 'order-type'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\OrderTypeController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\OrderTypeController::class, 'status']);
+    });
+    //order source (global platform master data, Super Admin only)
+    Route::resource('order-source', App\Http\Controllers\Admin\OrderSourceController::class);
+    Route::group(['prefix' => 'order-source'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\OrderSourceController::class, 'getData']);
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\OrderSourceController::class, 'status']);
+    });
 
     //////////////////// Dukanaz Intro CMS (Super Admin only) ////////////////////
     Route::group(['prefix' => 'intro', 'middleware' => ['superadmin'], 'as' => 'intro.'], function () {
@@ -924,13 +936,6 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
 
     ////////////////////// Orders (centralized) ///////////////////////////
     Route::group(['middleware' => ['module:pos']], function () {
-    //order type
-    Route::resource('order-type', App\Http\Controllers\Admin\OrderTypeController::class);
-    Route::group(['prefix' => 'order-type'], function () {
-        Route::post('data', [App\Http\Controllers\Admin\OrderTypeController::class, 'getData']);
-        Route::post('change-status/{id}', [App\Http\Controllers\Admin\OrderTypeController::class, 'status']);
-    });
-
     //payment method
     Route::resource('payment-method', App\Http\Controllers\Admin\PaymentMethodController::class);
     Route::group(['prefix' => 'payment-method'], function () {
@@ -944,13 +949,6 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('data', [App\Http\Controllers\Admin\BankController::class, 'getData']);
         Route::post('change-status/{id}', [App\Http\Controllers\Admin\BankController::class, 'status']);
         Route::get('for-branch', [App\Http\Controllers\Admin\BankController::class, 'forBranch']);
-    });
-
-    //order source
-    Route::resource('order-source', App\Http\Controllers\Admin\OrderSourceController::class);
-    Route::group(['prefix' => 'order-source'], function () {
-        Route::post('data', [App\Http\Controllers\Admin\OrderSourceController::class, 'getData']);
-        Route::post('change-status/{id}', [App\Http\Controllers\Admin\OrderSourceController::class, 'status']);
     });
 
     //discount
@@ -973,7 +971,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::delete('{sale_type_id}', [App\Http\Controllers\Admin\SaleTypeController::class, 'destroy']);
     });
 
-    }); // end module:pos (order-type/payment-method/order-source/sale-type/discount)
+    }); // end module:pos (payment-method/sale-type/discount)
 
     ////////////////////// Payment Gateways (Website & Mobile App only - never POS) ///////////////////////////
     Route::group(['middleware' => ['module:payment-gateway']], function () {

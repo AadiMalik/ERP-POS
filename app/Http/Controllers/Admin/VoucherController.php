@@ -120,11 +120,11 @@ class VoucherController extends Controller
             'products' => $this->product_service->getByBusiness($business_id),
             'categories' => $this->category_service->getByBusiness($business_id),
             'customers' => $this->customer_service->getAllActive($business_id),
-            'order_types' => $this->order_type_service->getAllActive($business_id),
+            'order_types' => $this->order_type_service->getAllActive(),
             'branches' => $this->branch_service->getByBusiness($business_id),
             'brands' => $this->brand_service->getByBusiness($business_id),
             'sale_types' => $this->sale_type_service->getAllActive($business_id),
-            'order_sources' => $this->order_source_service->getAllActive($business_id),
+            'order_sources' => $this->order_source_service->getAllActive(),
             'payment_methods' => $this->payment_method_service->getAllActive($business_id),
             'variations' => ProductVariation::with('product')->where('business_id', $business_id)->get(),
         ];

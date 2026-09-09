@@ -42,6 +42,7 @@ return [
         'subtotal'              => true,
         'discount'              => true,
         'tax'                   => true,
+        'tax_discount'          => true,
         'voucher'               => true,
         'total'                 => true,
 

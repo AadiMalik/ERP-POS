@@ -89,6 +89,7 @@ return [
     'payment' => 'Platba',
     'discount' => 'Sleva',
     'tax' => 'Daň',
+    'tax_discount' => 'Daňová sleva',
     'subtotal' => 'Mezisoučet',
     'grand_total' => 'Celkový součet',
     'paid' => 'Zaplaceno',

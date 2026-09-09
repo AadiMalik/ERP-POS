@@ -1,6 +1,3 @@
-@php
-use App\Enums\RoleNames;
-@endphp
 <div class="modal fade" id="ajaxModel" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -12,19 +9,6 @@ use App\Enums\RoleNames;
                 <div class="modal-body">
                     <input type="hidden" name="order_type_id" id="order_type_id">
                     <div class="row">
-                        @if (RoleNames::SUPERADMIN == getRoleName())
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">Business <span class="text-danger">*</span></label>
-                            <select id="business_id" name="business_id" class="form-select" required>
-                                <option value="">--Select Business--</option>
-                                @foreach ($business as $item)
-                                <option value="{{ $item->business_id }}">{{ isset($item->code) ? $item->code : '' }}
-                                    {{ $item->name ?? '' }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        @endif
                         <div class="col-md-12 mb-3">
                             <label class="form-label">
                                 Name <span class="text-danger">*</span>

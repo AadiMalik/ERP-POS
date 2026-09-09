@@ -89,6 +89,7 @@ return [
     'payment' => 'Fizetés',
     'discount' => 'Kedvezmény',
     'tax' => 'Adó',
+    'tax_discount' => 'Adókedvezmény',
     'subtotal' => 'Részösszeg',
     'grand_total' => 'Végösszeg',
     'paid' => 'Fizetve',

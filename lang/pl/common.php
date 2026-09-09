@@ -89,6 +89,7 @@ return [
     'payment' => 'Płatność',
     'discount' => 'Rabat',
     'tax' => 'Podatek',
+    'tax_discount' => 'Rabat podatkowy',
     'subtotal' => 'Suma częściowa',
     'grand_total' => 'Suma całkowita',
     'paid' => 'Zapłacone',

@@ -77,11 +77,6 @@
 ])
 
 <script>
-    $(document).ready(function() {
-        $('#business_id').select2({
-            dropdownParent: $('#ajaxModel')
-        });
-    });
     $('#search_btn').click(function() {
         initDataTablepos_order_source_table();
     });

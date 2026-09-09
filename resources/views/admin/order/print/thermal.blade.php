@@ -222,7 +222,7 @@
         </table>
         <hr class="tr-divider">
 
-        @if ($thermal_config->isVisible('subtotal') || $thermal_config->isVisible('discount') || $thermal_config->isVisible('tax') || $thermal_config->isVisible('voucher') || $thermal_config->isVisible('loyalty') || $thermal_config->isVisible('total'))
+        @if ($thermal_config->isVisible('subtotal') || $thermal_config->isVisible('discount') || $thermal_config->isVisible('tax') || $thermal_config->isVisible('tax_discount') || $thermal_config->isVisible('voucher') || $thermal_config->isVisible('loyalty') || $thermal_config->isVisible('total'))
             <div class="tr-totals">
                 @if ($thermal_config->isVisible('subtotal'))
                     <div class="tr-row">
@@ -242,6 +242,13 @@
                     <div class="tr-row">
                         <span class="tr-label">Tax ({{ decimal($order->tax) }}%) {{ $order->tax_type === 'inclusive' ? '(Inclusive)' : '(Exclusive)' }}</span>
                         <span class="tr-value">{{ currency($order->tax_amount) }}</span>
+                    </div>
+                @endif
+
+                @if ($thermal_config->isVisible('tax_discount') && (float) ($order->tax_discount_amount ?? 0) > 0)
+                    <div class="tr-row">
+                        <span class="tr-label">{{ __('common.tax_discount') }} ({{ decimal($order->tax_discount) }}%)</span>
+                        <span class="tr-value">{{ currency($order->tax_discount_amount) }}</span>
                     </div>
                 @endif
 

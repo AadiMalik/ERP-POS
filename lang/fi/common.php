@@ -89,6 +89,7 @@ return [
     'payment' => 'Maksu',
     'discount' => 'Alennus',
     'tax' => 'Vero',
+    'tax_discount' => 'Veroalennus',
     'subtotal' => 'Välisumma',
     'grand_total' => 'Loppusumma',
     'paid' => 'Maksettu',

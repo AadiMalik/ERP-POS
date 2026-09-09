@@ -89,6 +89,7 @@ return [
     'payment' => 'ચુકવણી',
     'discount' => 'છૂટ',
     'tax' => 'કર',
+    'tax_discount' => 'ટેક્સ ડિસ્કાઉન્ટ',
     'subtotal' => 'પેટા સરવાળો',
     'grand_total' => 'કુલ સરવાળો',
     'paid' => 'ચૂકવેલ',

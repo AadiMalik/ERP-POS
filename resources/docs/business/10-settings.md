@@ -22,10 +22,14 @@ All configuration lives under one **Settings** screen, organized into sections
   changes how the receipt and accounting reports break that price down
   between revenue and tax. Whatever rate/type a branch has configured
   applies uniformly to every order placed at that branch, on every channel
-  (POS, POS Desktop, Website, Mobile App). Printed receipts (thermal and
-  normal) show whether tax was Inclusive or Exclusive for that sale, and the
-  accounting Journal Entry posted when an order completes books revenue and
-  tax correctly for either mode.
+  (POS, POS Desktop, Website, Mobile App). Carts, checkouts, order details,
+  POS totals, and printed receipts (thermal and normal) show the applied
+  rate and mode as **Tax (rate%) (Inclusive)** or **Tax (rate%) (Exclusive)**.
+  When tax is Inclusive and the cash vs card rates differ, the leftover
+  (the higher rate minus the applied rate) is shown as
+  **Tax Discount (leftover%)** — the customer’s payable total does not
+  change. The accounting Journal Entry posted when an order completes books
+  revenue, tax, and any tax discount correctly for either mode.
 - **Accounting** — default chart of accounts, tax settings, aging basis for
   receivables/payables, and the specific accounts used for inventory,
   cost-of-goods-sold, and service transactions. **Customer Account** and

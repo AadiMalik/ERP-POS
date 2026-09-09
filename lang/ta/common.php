@@ -89,6 +89,7 @@ return [
     'payment' => 'கட்டணம்',
     'discount' => 'தள்ளுபடி',
     'tax' => 'வரி',
+    'tax_discount' => 'வரி தள்ளுபடி',
     'subtotal' => 'துணை மொத்தம்',
     'grand_total' => 'மொத்த தொகை',
     'paid' => 'செலுத்தப்பட்டது',

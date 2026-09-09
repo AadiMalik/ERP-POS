@@ -9,6 +9,16 @@ function money(v) {
     return v.toFixed(2);
 }
 
+function formatTaxPercent(percent) {
+    var n = parseFloat(percent);
+    if (isNaN(n)) n = 0;
+    return String(parseFloat(n.toFixed(4)));
+}
+
+function taxTypeWord(taxType) {
+    return taxType === 'inclusive' ? 'Inclusive' : 'Exclusive';
+}
+
 function escapeHtml(str) {
     return $('<div>').text(str == null ? '' : str).html();
 }
@@ -188,7 +198,16 @@ function renderOrderDetail(data) {
 
     $('#odSubtotal').text(money(header.subtotal));
     $('#odDiscount').text(money(header.discount_amount));
+    $('#odTaxLabel').text(
+        ($('#odTaxLabel').attr('data-word') || tPos('tax', 'Tax')) + ' (' + formatTaxPercent(header.tax) + '%) (' + taxTypeWord(header.tax_type) + ')'
+    );
     $('#odTax').text(money(header.tax_amount));
+    var taxDiscount = parseFloat(header.tax_discount_amount) || 0;
+    $('#odTaxDiscountLabel').text(
+        ($('#odTaxDiscountLabel').attr('data-word') || tPos('tax_discount', 'Tax Discount')) + ' (' + formatTaxPercent(header.tax_discount) + '%)'
+    );
+    $('#odTaxDiscountRow').toggleClass('d-none', taxDiscount <= 0);
+    $('#odTaxDiscount').text(money(taxDiscount));
     $('#odTotal').text(money(header.total));
     $('#odPaid').text(money(header.paid_amount));
     $('#odDue').text(money(due));

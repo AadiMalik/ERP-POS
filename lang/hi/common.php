@@ -89,6 +89,7 @@ return [
     'payment' => 'भुगतान',
     'discount' => 'छूट',
     'tax' => 'कर',
+    'tax_discount' => 'कर छूट',
     'subtotal' => 'उप-योग',
     'grand_total' => 'कुल योग',
     'paid' => 'भुगतान किया',

@@ -73,9 +73,15 @@
             <td class="text-right">{{ currency($order->discount_amount) }}</td>
         </tr>
         <tr>
-            <td>Tax {{ $order->tax_type === 'inclusive' ? '(Inclusive)' : '(Exclusive)' }}</td>
+            <td>Tax ({{ decimal($order->tax) }}%) {{ $order->tax_type === 'inclusive' ? '(Inclusive)' : '(Exclusive)' }}</td>
             <td class="text-right">{{ currency($order->tax_amount) }}</td>
         </tr>
+        @if ((float) ($order->tax_discount_amount ?? 0) > 0)
+            <tr>
+                <td>{{ __('common.tax_discount') }} ({{ decimal($order->tax_discount) }}%)</td>
+                <td class="text-right">{{ currency($order->tax_discount_amount) }}</td>
+            </tr>
+        @endif
         <tr class="grand-total">
             <td>{{ __('common.total') }}</td>
             <td class="text-right">{{ currency($order->total) }}</td>

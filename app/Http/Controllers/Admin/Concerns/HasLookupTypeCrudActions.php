@@ -35,6 +35,7 @@ trait HasLookupTypeCrudActions
     public function store(Request $request)
     {
         $pk = $this->lookupTypePkField();
+        $isGlobal = $this->lookupTypeService()->isGlobal();
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
@@ -43,9 +44,12 @@ trait HasLookupTypeCrudActions
                 'string',
                 'max:50',
                 Rule::unique($this->lookupTypeTable(), 'code')
-                    ->where(function ($query) use ($request) {
-                        return $query->where('business_id', $request->business_id ?? Auth::user()->business_id)
-                            ->where('is_deleted', 0);
+                    ->where(function ($query) use ($request, $isGlobal) {
+                        $query->where('is_deleted', 0);
+                        if (!$isGlobal) {
+                            $query->where('business_id', $request->business_id ?? Auth::user()->business_id);
+                        }
+                        return $query;
                     })
                     ->ignore($request->{$pk}, $pk),
             ],
@@ -57,7 +61,9 @@ trait HasLookupTypeCrudActions
         }
 
         $obj = $request->only([$pk, 'name', 'code', 'sort_order']);
-        $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        if (!$isGlobal) {
+            $obj['business_id'] = $request->business_id ?? Auth::user()->business_id;
+        }
         $obj['is_default'] = $request->boolean('is_default');
         $obj['status'] = $request->status ?? 'active';
 

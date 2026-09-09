@@ -89,6 +89,7 @@ return [
     'payment' => 'ادائیگی',
     'discount' => 'رعایت',
     'tax' => 'ٹیکس',
+    'tax_discount' => 'ٹیکس ڈسکاؤنٹ',
     'subtotal' => 'ذیلی جوڑ',
     'grand_total' => 'کل جوڑ',
     'paid' => 'ادا شدہ',

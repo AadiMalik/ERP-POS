@@ -14,7 +14,6 @@ class OrderType extends Model
     public $incrementing = false;
     protected $fillable = [
         'order_type_id',
-        'business_id',
         'name',
         'code',
         'is_default',
@@ -28,11 +27,6 @@ class OrderType extends Model
         'date_updated',
         'date_deleted',
     ];
-
-    public function business()
-    {
-        return $this->belongsTo(Business::class, 'business_id');
-    }
 
     public function createdby()
     {

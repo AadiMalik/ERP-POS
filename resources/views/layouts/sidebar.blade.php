@@ -136,7 +136,7 @@
             <span class="menu-header-text">Business</span>
         </li>
         <!-- Business -->
-        @canAccessAny(['package.view', 'business.view', 'branch.view'])
+        @canAccessAny(['package.view', 'business.view', 'branch.view', 'order-type.view', 'order-source.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons fa fa-store"></i>
@@ -162,6 +162,20 @@
                         <li class="menu-item">
                             <a href="{{ url('/admin/branch') }}" class="menu-link">
                                 <div data-i18n="Branch">{{ __('sidebar.branch') }}</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('order-type.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/order-type') }}" class="menu-link">
+                                <div data-i18n="Order Types">{{ __('sidebar.order_types') }}</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('order-source.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/order-source') }}" class="menu-link">
+                                <div data-i18n="Order Sources">{{ __('sidebar.order_sources') }}</div>
                             </a>
                         </li>
                     @endcanAccess
@@ -1852,7 +1866,7 @@
         @endcanAccessAny
 
         {{-- Orders (centralized - shared by POS, Website, Mobile App, API) --}}
-        @canAccessAny(['pos.access', 'order-return.view', 'order-type.view', 'order-source.view', 'payment-method.view', 'bank.view', 'payment-gateway.view', 'payment-transaction.view', 'discount.view', 'voucher.view',
+        @canAccessAny(['pos.access', 'order-return.view', 'payment-method.view', 'bank.view', 'payment-gateway.view', 'payment-transaction.view', 'discount.view', 'voucher.view',
             'reports.order-detail.view', 'reports.product-sales.view', 'reports.variation-sales.view', 'reports.customer-sales.view',
             'reports.branch-sales.view', 'reports.order-source-sales.view', 'reports.payment-method-sales.view',
             'reports.order-status-report.view', 'reports.cancelled-orders.view', 'reports.due-credit-sales.view',
@@ -1876,20 +1890,6 @@
                         <li class="menu-item">
                             <a href="{{ url('/admin/order-return') }}" class="menu-link">
                                 <div data-i18n="Order Returns">{{ __('sidebar.order_returns') }}</div>
-                            </a>
-                        </li>
-                    @endcanAccess
-                    @canAccess('order-type.view')
-                        <li class="menu-item">
-                            <a href="{{ url('/admin/order-type') }}" class="menu-link">
-                                <div data-i18n="Order Types">{{ __('sidebar.order_types') }}</div>
-                            </a>
-                        </li>
-                    @endcanAccess
-                    @canAccess('order-source.view')
-                        <li class="menu-item">
-                            <a href="{{ url('/admin/order-source') }}" class="menu-link">
-                                <div data-i18n="Order Sources">{{ __('sidebar.order_sources') }}</div>
                             </a>
                         </li>
                     @endcanAccess

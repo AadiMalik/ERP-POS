@@ -134,8 +134,8 @@ class DashboardAccessService
             'end_date' => $end_date,
             'can_use_date_filter' => $can_use_date_filter,
             'date_filter' => $request->input('date_filter', 'this_month'),
-            'order_type_id' => $this->resolveLookupId(OrderType::class, 'order_type_id', $user->business_id, $request->input('order_type_id')),
-            'order_source_id' => $this->resolveLookupId(OrderSource::class, 'order_source_id', $user->business_id, $request->input('order_source_id')),
+            'order_type_id' => $this->resolveLookupId(OrderType::class, 'order_type_id', null, $request->input('order_type_id')),
+            'order_source_id' => $this->resolveLookupId(OrderSource::class, 'order_source_id', null, $request->input('order_source_id')),
             'payment_method_id' => $this->resolveLookupId(PaymentMethod::class, 'payment_method_id', $user->business_id, $request->input('payment_method_id')),
         ];
     }
@@ -222,7 +222,8 @@ class DashboardAccessService
      * ids are dropped, falling back to "all" rather than erroring. Public so
      * AnalyticsAccessService can reuse this exact anti-tampering check for
      * its own extra filter dimensions (product/category/brand/customer)
-     * instead of reimplementing it.
+     * instead of reimplementing it. Pass $business_id = null for a global,
+     * non-business-scoped lookup model (e.g. OrderType/OrderSource).
      */
     public function resolveLookupId(string $model, string $key, $business_id, $requested_id): ?string
     {
@@ -230,10 +231,11 @@ class DashboardAccessService
             return null;
         }
 
-        $exists = $model::where($key, $requested_id)
-            ->where('business_id', $business_id)
-            ->exists();
+        $query = $model::where($key, $requested_id);
+        if (!is_null($business_id)) {
+            $query->where('business_id', $business_id);
+        }
 
-        return $exists ? $requested_id : null;
+        return $query->exists() ? $requested_id : null;
     }
 }

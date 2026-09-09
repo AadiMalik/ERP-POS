@@ -339,6 +339,10 @@ class AccountClassifier
             return true;
         }
 
+        if ($settings && $account->account_id === $settings->default_tax_discount_account_id) {
+            return false;
+        }
+
         // Last-resort heuristic for a custom account that was never given a
         // sub-type at all (so the stable code check above can't apply) -
         // deliberately kept as a fallback, not the primary classification

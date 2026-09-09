@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\Concerns\HasLookupTypeCrudActions;
 use App\Http\Controllers\Controller;
-use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\OrderSourceService;
 use App\Traits\ResponseAPI;
 
@@ -14,9 +13,8 @@ class OrderSourceController extends Controller
     use HasLookupTypeCrudActions;
 
     protected $order_source_service;
-    protected $business_service;
 
-    public function __construct(OrderSourceService $order_source_service, BusinessService $business_service)
+    public function __construct(OrderSourceService $order_source_service)
     {
         $this->middleware('permission:order-source.view')->only(['index', 'getData']);
         $this->middleware('permission:order-source.create|order-source.edit')->only(['store']);
@@ -25,7 +23,6 @@ class OrderSourceController extends Controller
         $this->middleware('permission:order-source.status')->only(['status']);
 
         $this->order_source_service = $order_source_service;
-        $this->business_service = $business_service;
     }
 
     protected function lookupTypeService()
@@ -45,7 +42,6 @@ class OrderSourceController extends Controller
 
     public function index()
     {
-        $business = $this->business_service->getAllActive();
-        return view('admin.order-source.index', compact('business'));
+        return view('admin.order-source.index');
     }
 }

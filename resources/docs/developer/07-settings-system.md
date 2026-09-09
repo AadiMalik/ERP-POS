@@ -161,7 +161,8 @@ source and a defensive fallback — the Business tab no longer exposes them.
 container singleton, memo + `Cache::remember` like
 `ThermalPrintSettingResolverService`) is the **single** resolver every sales
 channel calls — `resolve($business_id, $branch_id, $payment_method_ids)`
-returns `['rate' => float, 'tax_type' => 'inclusive'|'exclusive']`. The Card
+returns `['rate' => float, 'tax_type' => 'inclusive'|'exclusive',
+'tax_discount_rate' => float]`. The Card
 Tax Rate applies only when `$payment_method_ids` is non-empty AND every one
 of them is a card-type `PaymentMethod`; an empty array (no payment chosen
 yet, e.g. a cart preview) always resolves to the Overall rate. Call sites:
@@ -180,23 +181,34 @@ yet, e.g. a cart preview) always resolves to the Overall rate. Call sites:
   save/post time regardless of what the client previewed.
 
 **Inclusive vs. exclusive math** (`App\Support\Tax\TaxCalculator`):
-- `lineTax($taxable, $percent, $tax_type = 'exclusive')` — exclusive adds tax
+- `lineTax($taxable, $percent, $tax_type = 'exclusive', $tax_discount_percent = 0)` — exclusive adds tax
   on top (`taxable * percent / 100`); inclusive backs the tax portion out of
   a price that already contains it (`taxable - taxable / (1 + percent/100)`).
+- `lineBreakdown(...)` also returns `tax_discount_amount` when inclusive and
+  cash/card rates differ: the price is treated as inclusive of
+  `max(overall, card)`, applied tax is the resolved rate, and the leftover
+  (`max − applied`) is tax discount. Same rates, or exclusive mode → 0.
+  Example: overall 18%, card 8%, card payment → tax 8% + tax discount 10%.
+  Overall 8% and card 8% → no tax discount. The customer-facing total never
+  changes.
 - `lineTotal($taxable, $tax_amount, $tax_type)` — exclusive is additive
   (`taxable + tax_amount`); inclusive is just `taxable` (the price the
   customer sees/types never changes between modes — only how much of it is
-  reported as tax does).
+  reported as tax vs tax discount does).
 
 The resolved `tax_type` is **stamped onto `orders.tax_type`** at save time
-(alongside `orders.tax`/`tax_amount`) rather than re-resolved live on every
+(alongside `orders.tax`/`tax_amount`/`tax_discount`/`tax_discount_amount`)
+rather than re-resolved live on every
 read, so a reprinted or re-audited historical order always reflects the mode
 that was actually in effect at sale time, even if the branch's setting is
 changed later. `OrderReturnService` carries forward the original order's
-`tax_type` (never re-resolves) for the same reason. Thermal
+`tax_type` and `tax_discount` (never re-resolves) for the same reason. Thermal
 (`admin/order/print/thermal.blade.php`) and normal
-(`admin/order/print/print.blade.php`) receipts print `(Inclusive)` /
-`(Exclusive)` next to the tax line, read from that stamped column.
+(`admin/order/print/print.blade.php`) receipts print `Tax (X%) (Inclusive)` /
+`Tax (X%) (Exclusive)` on the tax line, and `Tax Discount (Y%)` when the stamped
+amount is greater than zero, read from those stamped columns. POS web, POS
+desktop, website cart/checkout/order details, and the mobile app use the same
+label shape.
 
 **Accounting impact**: `OrderService::applyPostedEffects()` credits revenue
 and tax as two separate JV legs. For an exclusive order, `orders.subtotal`
@@ -204,8 +216,10 @@ is already pre-tax, so it's credited to `default_sale_account_id` as-is.
 For an inclusive order, `subtotal` is tax-included — crediting it in full
 **and** separately crediting `tax_amount` to `default_tax_account_id` would
 double-count the tax portion, so the revenue leg backs it out first
-(`revenue_amount = subtotal - tax_amount` when `tax_type === 'inclusive'`).
-Both modes reconcile to `revenue + tax − discounts == orders.total`.
+(`revenue_amount = subtotal - tax_amount - tax_discount_amount` when
+`tax_type === 'inclusive'`). Any tax-discount leftover is credited to
+`default_tax_discount_account_id` (Settings → Accounting). Both modes
+reconcile to `revenue + tax + tax_discount − discounts == orders.total`.
 
 ## Adding a New Settings Domain
 

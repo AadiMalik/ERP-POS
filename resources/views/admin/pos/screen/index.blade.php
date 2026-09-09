@@ -310,7 +310,8 @@
                         <div class="pos-totals-row"><span>{{ __('pos.item_discounts') }}</span><span id="sumItemDiscount">0.00</span></div>
                         <div class="pos-totals-row"><span>{{ __('pos.order_discount') }}</span><span id="sumOrderDiscount">0.00</span></div>
                         <div class="pos-totals-row d-none" id="sumLoyaltyDiscountRow"><span>{{ __('pos.loyalty_discount') }}</span><span id="sumLoyaltyDiscount">0.00</span></div>
-                        <div class="pos-totals-row"><span>{{ __('common.tax') }}</span><span id="sumTax">0.00</span></div>
+                        <div class="pos-totals-row"><span id="sumTaxLabel" data-word="{{ __('common.tax') }}">{{ __('common.tax') }}</span><span id="sumTax">0.00</span></div>
+                        <div class="pos-totals-row d-none" id="sumTaxDiscountRow"><span id="sumTaxDiscountLabel" data-word="{{ __('common.tax_discount') }}">{{ __('common.tax_discount') }}</span><span id="sumTaxDiscount">0.00</span></div>
                         <div class="pos-totals-row pos-grand-total"><span>{{ __('pos.total_with_currency', ['symbol' => session('accounting_setting.currency_symbol', 'Rs')]) }}</span><span id="sumTotal">0.00</span></div>
                     </div>
                 </div>

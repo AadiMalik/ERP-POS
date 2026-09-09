@@ -5,6 +5,7 @@
         'default_discount_account_id' => __('settings.coa_discount_account'),
         'default_loyalty_discount_account_id' => __('settings.coa_loyalty_discount_account'),
         'default_tax_account_id' => __('settings.coa_tax_account'),
+        'default_tax_discount_account_id' => __('settings.coa_tax_discount_account'),
         'default_revenue_account_id' => __('settings.coa_revenue_account'),
         'default_purchase_account_id' => __('settings.coa_purchase_account'),
         'default_expense_account_id' => __('settings.coa_expense_account'),

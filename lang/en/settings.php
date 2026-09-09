@@ -72,7 +72,7 @@ return [
     'tax_type' => 'Tax Type',
     'tax_type_exclusive' => 'Exclusive (tax added on top)',
     'tax_type_inclusive' => 'Inclusive (tax already included)',
-    'tax_type_help' => 'This never changes the price the customer sees or pays - it only changes how the receipt and accounting reports break the price down between revenue and tax.',
+    'tax_type_help' => 'This never changes the price the customer sees or pays - it only changes how the receipt and accounting reports break the price down between revenue and tax. In Inclusive mode, if Overall (cash) and Card rates differ, the leftover rate is shown and posted as Tax Discount.',
 
     // Accounting tab — COA defaults
     'accounting_title' => 'Accounting Setting',
@@ -81,6 +81,7 @@ return [
     'coa_discount_account' => 'Discount Account',
     'coa_loyalty_discount_account' => 'Loyalty Discount Account',
     'coa_tax_account' => 'Tax Account',
+    'coa_tax_discount_account' => 'Tax Discount Account',
     'coa_revenue_account' => 'Revenue Account',
     'coa_purchase_account' => 'Purchase Account',
     'coa_expense_account' => 'Expense Account',
@@ -388,6 +389,7 @@ return [
     'thermal_field_subtotal' => 'Subtotal',
     'thermal_field_discount' => 'Discount (% and Amount)',
     'thermal_field_tax' => 'Tax (% and Amount)',
+    'thermal_field_tax_discount' => 'Tax Discount (% and Amount)',
     'thermal_field_voucher' => 'Voucher Details',
     'thermal_field_total' => 'Total',
     'thermal_field_paid_amount' => 'Paid Amount',

@@ -89,6 +89,7 @@ return [
     'payment' => 'Bayaran',
     'discount' => 'Diskaun',
     'tax' => 'Cukai',
+    'tax_discount' => 'Diskaun Cukai',
     'subtotal' => 'Jumlah Kecil',
     'grand_total' => 'Jumlah Besar',
     'paid' => 'Dibayar',

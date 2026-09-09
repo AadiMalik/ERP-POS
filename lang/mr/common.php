@@ -89,6 +89,7 @@ return [
     'payment' => 'पेमेंट',
     'discount' => 'सवलत',
     'tax' => 'कर',
+    'tax_discount' => 'कर सवलत',
     'subtotal' => 'उप-बेरीज',
     'grand_total' => 'एकूण बेरीज',
     'paid' => 'भरलेले',

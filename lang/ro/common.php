@@ -89,6 +89,7 @@ return [
     'payment' => 'Plată',
     'discount' => 'Reducere',
     'tax' => 'Taxă',
+    'tax_discount' => 'Reducere fiscală',
     'subtotal' => 'Subtotal',
     'grand_total' => 'Total general',
     'paid' => 'Plătit',

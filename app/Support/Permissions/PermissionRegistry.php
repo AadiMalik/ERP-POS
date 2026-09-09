@@ -462,12 +462,14 @@ class PermissionRegistry
                 'history' => ['name' => 'loyalty.history', 'label' => 'View Customer Loyalty History', 'is_system' => false],
             ]],
 
+            // Global platform master data (Super Admin only) - see
+            // resources/docs/developer/03-modules-controllers-services.md.
             'order-type' => ['label' => 'Order Types', 'actions' => [
-                'view'   => ['name' => 'order-type.view', 'label' => 'View', 'is_system' => false],
-                'create' => ['name' => 'order-type.create', 'label' => 'Create', 'is_system' => false],
-                'edit'   => ['name' => 'order-type.edit', 'label' => 'Edit', 'is_system' => false],
-                'delete' => ['name' => 'order-type.delete', 'label' => 'Delete', 'is_system' => false],
-                'status' => ['name' => 'order-type.status', 'label' => 'Change Status', 'is_system' => false],
+                'view'   => ['name' => 'order-type.view', 'label' => 'View', 'is_system' => true],
+                'create' => ['name' => 'order-type.create', 'label' => 'Create', 'is_system' => true],
+                'edit'   => ['name' => 'order-type.edit', 'label' => 'Edit', 'is_system' => true],
+                'delete' => ['name' => 'order-type.delete', 'label' => 'Delete', 'is_system' => true],
+                'status' => ['name' => 'order-type.status', 'label' => 'Change Status', 'is_system' => true],
             ]],
 
             'payment-method' => ['label' => 'Payment Methods', 'actions' => [
@@ -495,12 +497,14 @@ class PermissionRegistry
                 'refund' => ['name' => 'payment-transaction.refund', 'label' => 'Refund', 'is_system' => false],
             ]],
 
+            // Global platform master data (Super Admin only) - see
+            // resources/docs/developer/03-modules-controllers-services.md.
             'order-source' => ['label' => 'Order Sources', 'actions' => [
-                'view'   => ['name' => 'order-source.view', 'label' => 'View', 'is_system' => false],
-                'create' => ['name' => 'order-source.create', 'label' => 'Create', 'is_system' => false],
-                'edit'   => ['name' => 'order-source.edit', 'label' => 'Edit', 'is_system' => false],
-                'delete' => ['name' => 'order-source.delete', 'label' => 'Delete', 'is_system' => false],
-                'status' => ['name' => 'order-source.status', 'label' => 'Change Status', 'is_system' => false],
+                'view'   => ['name' => 'order-source.view', 'label' => 'View', 'is_system' => true],
+                'create' => ['name' => 'order-source.create', 'label' => 'Create', 'is_system' => true],
+                'edit'   => ['name' => 'order-source.edit', 'label' => 'Edit', 'is_system' => true],
+                'delete' => ['name' => 'order-source.delete', 'label' => 'Delete', 'is_system' => true],
+                'status' => ['name' => 'order-source.status', 'label' => 'Change Status', 'is_system' => true],
             ]],
 
             'discount' => ['label' => 'Discounts', 'actions' => [
@@ -1864,8 +1868,9 @@ class PermissionRegistry
 
     /**
      * Business/branch-scoped, non-platform module keys (excludes role,
-     * setting, permission, package, business, subscription, my-subscription).
-     * Used to build broad "manager" defaults without hand-listing every key.
+     * setting, permission, package, business, subscription, my-subscription,
+     * order-type, order-source). Used to build broad "manager" defaults
+     * without hand-listing every key.
      */
     public static function operationalModuleKeys(): array
     {
@@ -1874,7 +1879,7 @@ class PermissionRegistry
             'barcode', 'unit-conversion', 'batch', 'serial-number', 'stock', 'stock-transaction',
             'account-type', 'account-sub-type', 'account', 'bank', 'journal', 'journal-entry', 'bank-reconciliation', 'recurring-transaction',
             'fixed-asset-category', 'fixed-asset', 'fixed-asset-depreciation',
-            'supplier', 'customer', 'loyalty', 'order-type', 'payment-method', 'payment-gateway', 'payment-transaction', 'order-source', 'sale-type', 'discount', 'voucher',
+            'supplier', 'customer', 'loyalty', 'payment-method', 'payment-gateway', 'payment-transaction', 'sale-type', 'discount', 'voucher',
             'purchase-request', 'purchase-request-quotation', 'purchase', 'good-receipt-note',
             'purchase-return', 'opening-stock', 'stock-taking', 'loss-reason', 'waste-damage-expiry', 'transfer-note', 'supplier-payment', 'customer-payment',
             'service-purchase', 'service-purchase-return', 'service-sale', 'service-sale-return',

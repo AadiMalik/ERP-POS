@@ -89,6 +89,7 @@ return [
     'payment' => 'Zahlung',
     'discount' => 'Rabatt',
     'tax' => 'Steuer',
+    'tax_discount' => 'Steuerrabatt',
     'subtotal' => 'Zwischensumme',
     'grand_total' => 'Gesamtsumme',
     'paid' => 'Bezahlt',

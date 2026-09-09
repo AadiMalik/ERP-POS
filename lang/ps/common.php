@@ -89,6 +89,7 @@ return [
     'payment' => 'تادیه',
     'discount' => 'تخفیف',
     'tax' => 'مالیه',
+    'tax_discount' => 'د مالیې تخفیف',
     'subtotal' => 'فرعي مجموعه',
     'grand_total' => 'ټوله مجموعه',
     'paid' => 'تادیه شوی',

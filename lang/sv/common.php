@@ -89,6 +89,7 @@ return [
     'payment' => 'Betalning',
     'discount' => 'Rabatt',
     'tax' => 'Skatt',
+    'tax_discount' => 'Skatterabatt',
     'subtotal' => 'Delsumma',
     'grand_total' => 'Totalsumma',
     'paid' => 'Betald',

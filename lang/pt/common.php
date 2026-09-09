@@ -89,6 +89,7 @@ return [
     'payment' => 'Pagamento',
     'discount' => 'Desconto',
     'tax' => 'Imposto',
+    'tax_discount' => 'Desconto fiscal',
     'subtotal' => 'Subtotal',
     'grand_total' => 'Total geral',
     'paid' => 'Pago',

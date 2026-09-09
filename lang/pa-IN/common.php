@@ -89,6 +89,7 @@ return [
     'payment' => 'ਭੁਗਤਾਨ',
     'discount' => 'ਛੋਟ',
     'tax' => 'ਟੈਕਸ',
+    'tax_discount' => 'ਟੈਕਸ ਛੂਟ',
     'subtotal' => 'ਉਪ-ਜੋੜ',
     'grand_total' => 'ਕੁੱਲ ਜੋੜ',
     'paid' => 'ਭੁਗਤਾਨ ਕੀਤਾ',

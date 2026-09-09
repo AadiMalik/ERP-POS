@@ -150,6 +150,12 @@
                                         <input class="form-control" id="tax_amount" readonly>
                                     </td>
                                 </tr>
+                                <tr id="taxDiscountRow" class="d-none">
+                                    <th>{{ __('common.tax_discount') }}</th>
+                                    <td>
+                                        <input class="form-control" id="tax_discount_amount" readonly>
+                                    </td>
+                                </tr>
                                 <tr>
                                     <th>{{ __('order_returns.total_refund') }}</th>
                                     <td>
@@ -336,6 +342,8 @@
             row.data('conversion_factor', line.conversion_factor || 1);
             row.data('discount_percent', line.discount || 0);
             row.data('tax_percent', line.tax || 0);
+            row.data('tax_discount_percent', line.tax_discount || 0);
+            row.data('tax_type', line.tax_type || 'exclusive');
             row.find('input[name*="[order_detail_id]"]').attr('name',
                 `products[${$('#productRows tr.product-row').length}][order_detail_id]`);
 
@@ -392,18 +400,39 @@
             let conversionFactor = decimal(row.data('conversion_factor')) || 1;
             let discountPercent = decimal(row.data('discount_percent'));
             let taxPercent = decimal(row.data('tax_percent'));
+            let taxDiscountPercent = decimal(row.data('tax_discount_percent'));
+            let taxType = row.data('tax_type') || 'exclusive';
 
             let baseQty = qty * conversionFactor;
             let subtotal = baseQty * unitPrice;
             let discountAmount = round(subtotal * discountPercent / 100, 3);
             let taxable = subtotal - discountAmount;
-            let taxAmount = round(taxable * taxPercent / 100, 3);
-            let total = taxable + taxAmount;
+            let taxAmount = 0;
+            let taxDiscountAmount = 0;
+            let total = taxable;
+
+            if (taxType === 'inclusive') {
+                let combined = taxPercent + taxDiscountPercent;
+                if (combined > 0) {
+                    if (taxDiscountPercent > 0) {
+                        let base = taxable / (1 + combined / 100);
+                        taxAmount = round(base * taxPercent / 100, 3);
+                        taxDiscountAmount = round(taxable - base - taxAmount, 3);
+                    } else if (taxPercent > 0) {
+                        taxAmount = round(taxable - (taxable / (1 + taxPercent / 100)), 3);
+                    }
+                }
+                total = taxable;
+            } else if (taxPercent > 0) {
+                taxAmount = round(taxable * taxPercent / 100, 3);
+                total = round(taxable + taxAmount, 3);
+            }
 
             row.find('.row-total').html(decimal(total));
             row.data('subtotal', subtotal);
             row.data('discount_amount', discountAmount);
             row.data('tax_amount', taxAmount);
+            row.data('tax_discount_amount', taxDiscountAmount);
             row.data('total', total);
         }
 
@@ -499,18 +528,22 @@
             let subtotal = 0;
             let discount_amount = 0;
             let tax_amount = 0;
+            let tax_discount_amount = 0;
             let total = 0;
 
             $('#productRows tr.product-row').each(function() {
                 subtotal += decimal($(this).data('subtotal'));
                 discount_amount += decimal($(this).data('discount_amount'));
                 tax_amount += decimal($(this).data('tax_amount'));
+                tax_discount_amount += decimal($(this).data('tax_discount_amount'));
                 total += decimal($(this).data('total'));
             });
 
             $('#subtotal').val(decimal(subtotal));
             $('#discount_amount').val(decimal(discount_amount));
             $('#tax_amount').val(decimal(tax_amount));
+            $('#taxDiscountRow').toggleClass('d-none', tax_discount_amount <= 0);
+            $('#tax_discount_amount').val(decimal(tax_discount_amount));
             $('#total').val(decimal(total));
         }
 
@@ -544,6 +577,8 @@
                     conversion_factor: item.conversion_factor,
                     discount: item.discount,
                     tax: item.tax,
+                    tax_discount: item.tax_discount,
+                    tax_type: (editOrderReturnData.header && editOrderReturnData.header.tax_type) || item.tax_type || 'exclusive',
                     track_serial_number: item.track_serial_number,
                     serial_numbers: item.serial_numbers || []
                 }, item.return_quantity);

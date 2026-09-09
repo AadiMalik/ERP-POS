@@ -696,6 +696,9 @@ class OrderService
                 'discount_amount' => $order->discount_amount,
                 'tax' => $order->tax,
                 'tax_amount' => $order->tax_amount,
+                'tax_type' => $order->tax_type ?? 'exclusive',
+                'tax_discount' => $order->tax_discount,
+                'tax_discount_amount' => $order->tax_discount_amount,
                 'total' => $order->total,
                 'paid_amount' => $order->paid_amount,
                 'due_amount' => round(max((float) $order->total - (float) $order->paid_amount, 0), 3),
@@ -768,6 +771,8 @@ class OrderService
                 'discount_amount' => $detail->discount_amount,
                 'tax' => $detail->tax,
                 'tax_amount' => $detail->tax_amount,
+                'tax_discount' => $detail->tax_discount,
+                'tax_discount_amount' => $detail->tax_discount_amount,
                 'subtotal' => $detail->subtotal,
                 'total' => $detail->total,
                 'cost_price' => $detail->cost_price,
@@ -1110,6 +1115,8 @@ class OrderService
                 'tax' => $totals['tax_display'],
                 'tax_amount' => $totals['tax_amount'],
                 'tax_type' => $totals['tax_type'],
+                'tax_discount' => $totals['tax_discount'],
+                'tax_discount_amount' => $totals['tax_discount_amount'],
                 'total' => $totals['total'],
                 'discount_id' => $totals['discount_id'],
                 'voucher_id' => $totals['voucher_id'],
@@ -1196,10 +1203,12 @@ class OrderService
         $resolved_tax = $this->tax_resolver->resolve($order->business_id, $order->branch_id, $payment_method_ids);
         $tax_percent = $resolved_tax['rate'];
         $tax_type = $resolved_tax['tax_type'];
+        $tax_discount_percent = $resolved_tax['tax_discount_rate'];
 
         $subtotal = 0;
         $line_discount_total = 0;
         $tax_amount_total = 0;
+        $tax_discount_amount_total = 0;
         $has_line = false;
         $order_lines = [];
 
@@ -1350,12 +1359,15 @@ class OrderService
                 ));
             }
 
-            $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent, $tax_type);
+            $line_tax = \App\Support\Tax\TaxCalculator::lineBreakdown($taxable, $tax_percent, $tax_type, $tax_discount_percent);
+            $line_tax_amount = $line_tax['tax_amount'];
+            $line_tax_discount_amount = $line_tax['tax_discount_amount'];
             $line_total = \App\Support\Tax\TaxCalculator::lineTotal($taxable, $line_tax_amount, $tax_type);
 
             $subtotal += $line_subtotal;
             $line_discount_total += $line_discount_amount;
             $tax_amount_total += $line_tax_amount;
+            $tax_discount_amount_total += $line_tax_discount_amount;
 
             // Row build is deferred to a second pass (below) so the voucher's
             // per-line allocation (product/category/brand/variation matching,
@@ -1380,7 +1392,9 @@ class OrderService
                 'voucher_discount_amount' => 0,
                 'free_quantity' => 0,
                 'tax' => $tax_percent,
+                'tax_discount' => $tax_discount_percent,
                 'tax_amount' => $line_tax_amount,
+                'tax_discount_amount' => $line_tax_discount_amount,
                 'subtotal' => $line_subtotal,
                 'total' => $line_total,
                 'cost_price' => 0,
@@ -1542,6 +1556,8 @@ class OrderService
             'tax_amount' => round($tax_amount_total, 3),
             'tax_display' => $tax_percent,
             'tax_type' => $tax_type,
+            'tax_discount' => $tax_discount_percent,
+            'tax_discount_amount' => round($tax_discount_amount_total, 3),
             'total' => round($total, 3),
             'discount_id' => $discount_id,
             'voucher_id' => $voucher_id,
@@ -1635,27 +1651,39 @@ class OrderService
         $resolved_tax = $this->tax_resolver->resolve($order->business_id, $order->branch_id, $payment_method_ids);
         $tax_percent = $resolved_tax['rate'];
         $tax_type = $resolved_tax['tax_type'];
+        $tax_discount_percent = $resolved_tax['tax_discount_rate'];
 
-        if (abs((float) $order->tax - $tax_percent) < 0.0001 && $order->tax_type === $tax_type) {
+        if (
+            abs((float) $order->tax - $tax_percent) < 0.0001
+            && $order->tax_type === $tax_type
+            && abs((float) ($order->tax_discount ?? 0) - $tax_discount_percent) < 0.0001
+        ) {
             return;
         }
 
         $tax_amount_total = 0;
+        $tax_discount_amount_total = 0;
 
         foreach ($order->details as $detail) {
             $taxable = (float) $detail->subtotal - (float) $detail->discount_amount;
-            $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent, $tax_type);
+            $line_tax = \App\Support\Tax\TaxCalculator::lineBreakdown($taxable, $tax_percent, $tax_type, $tax_discount_percent);
+            $line_tax_amount = $line_tax['tax_amount'];
+            $line_tax_discount_amount = $line_tax['tax_discount_amount'];
 
             $detail->update([
                 'tax' => $tax_percent,
+                'tax_discount' => $tax_discount_percent,
                 'tax_amount' => $line_tax_amount,
+                'tax_discount_amount' => $line_tax_discount_amount,
                 'total' => \App\Support\Tax\TaxCalculator::lineTotal($taxable, $line_tax_amount, $tax_type),
             ]);
 
             $tax_amount_total += $line_tax_amount;
+            $tax_discount_amount_total += $line_tax_discount_amount;
         }
 
         $tax_amount_total = round($tax_amount_total, 3);
+        $tax_discount_amount_total = round($tax_discount_amount_total, 3);
         $new_total = $tax_type === 'inclusive'
             ? round((float) $order->subtotal - (float) $order->discount_amount, 3)
             : round((float) $order->subtotal - (float) $order->discount_amount + $tax_amount_total, 3);
@@ -1664,6 +1692,8 @@ class OrderService
             'tax' => $tax_percent,
             'tax_amount' => $tax_amount_total,
             'tax_type' => $tax_type,
+            'tax_discount' => $tax_discount_percent,
+            'tax_discount_amount' => $tax_discount_amount_total,
             'total' => $new_total,
         ]);
     }
@@ -1777,6 +1807,7 @@ class OrderService
         $subtotal_delta = 0.0;
         $discount_delta = 0.0;
         $tax_delta = 0.0;
+        $tax_discount_delta = 0.0;
         $total_delta = 0.0;
         $removed_ids = [];
 
@@ -1795,6 +1826,7 @@ class OrderService
                 $subtotal_delta -= (float) $detail->subtotal;
                 $discount_delta -= (float) $detail->discount_amount;
                 $tax_delta -= (float) $detail->tax_amount;
+                $tax_discount_delta -= (float) ($detail->tax_discount_amount ?? 0);
                 $total_delta -= (float) $detail->total;
                 $removed_ids[] = $detail->order_detail_id;
                 continue;
@@ -1810,12 +1842,20 @@ class OrderService
             $new_subtotal = round($new_base_quantity * (float) $detail->unit_price, 3);
             $new_discount_amount = round($new_subtotal * (float) $detail->discount / 100, 3);
             $taxable = $new_subtotal - $new_discount_amount;
-            $new_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, (float) $detail->tax, $order->tax_type ?? 'exclusive');
+            $line_tax = \App\Support\Tax\TaxCalculator::lineBreakdown(
+                $taxable,
+                (float) $detail->tax,
+                $order->tax_type ?? 'exclusive',
+                (float) ($detail->tax_discount ?? $order->tax_discount ?? 0)
+            );
+            $new_tax_amount = $line_tax['tax_amount'];
+            $new_tax_discount_amount = $line_tax['tax_discount_amount'];
             $new_total = \App\Support\Tax\TaxCalculator::lineTotal($taxable, $new_tax_amount, $order->tax_type ?? 'exclusive');
 
             $subtotal_delta += $new_subtotal - (float) $detail->subtotal;
             $discount_delta += $new_discount_amount - (float) $detail->discount_amount;
             $tax_delta += $new_tax_amount - (float) $detail->tax_amount;
+            $tax_discount_delta += $new_tax_discount_amount - (float) ($detail->tax_discount_amount ?? 0);
             $total_delta += $new_total - (float) $detail->total;
 
             $detail->update([
@@ -1824,6 +1864,7 @@ class OrderService
                 'subtotal' => $new_subtotal,
                 'discount_amount' => $new_discount_amount,
                 'tax_amount' => $new_tax_amount,
+                'tax_discount_amount' => $new_tax_discount_amount,
                 'total' => $new_total,
             ]);
 
@@ -1839,6 +1880,7 @@ class OrderService
                 'subtotal' => round((float) $order->subtotal + $subtotal_delta, 3),
                 'discount_amount' => round((float) $order->discount_amount + $discount_delta, 3),
                 'tax_amount' => round((float) $order->tax_amount + $tax_delta, 3),
+                'tax_discount_amount' => round((float) ($order->tax_discount_amount ?? 0) + $tax_discount_delta, 3),
                 'total' => round((float) $order->total + $total_delta, 3),
             ]);
         }
@@ -2266,6 +2308,10 @@ class OrderService
             throw new Exception('Tax Account is not configured in Accounting Settings.');
         }
 
+        if ((float) ($order->tax_discount_amount ?? 0) > 0 && empty($accounting_setting->default_tax_discount_account_id)) {
+            throw new Exception('Tax Discount Account is not configured in Accounting Settings.');
+        }
+
         if ((float) $order->discount_amount > 0 && empty($accounting_setting->default_discount_account_id)) {
             throw new Exception('Discount Account is not configured in Accounting Settings.');
         }
@@ -2481,11 +2527,12 @@ class OrderService
 
         // Credit: gross sales revenue (subtotal, before discount). Exclusive:
         // subtotal is already pre-tax, post it as-is. Inclusive: subtotal is
-        // tax-included, so the tax portion must be backed out of revenue
-        // here or it would be double-counted against the Tax account credited
+        // tax-included, so the tax (and any tax-discount leftover between
+        // cash/card rates) must be backed out of revenue here or it would
+        // be double-counted against the Tax / Tax Discount accounts credited
         // right below.
         $revenue_amount = $order->tax_type === 'inclusive'
-            ? round((float) $order->subtotal - (float) $order->tax_amount, 3)
+            ? round((float) $order->subtotal - (float) $order->tax_amount - (float) ($order->tax_discount_amount ?? 0), 3)
             : (float) $order->subtotal;
 
         JournalEntryDetail::create([
@@ -2506,6 +2553,20 @@ class OrderService
                 'debit' => 0,
                 'credit' => $order->tax_amount,
                 'description' => 'Order #' . $order->daily_order_id . ' - Tax',
+            ]);
+        }
+
+        // Credit: inclusive leftover between the full (max cash/card) rate
+        // and the applied rate - customer still paid it (it's inside the
+        // inclusive price) but it is not tax payable.
+        if ((float) ($order->tax_discount_amount ?? 0) > 0) {
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id' => $journal_entry->journal_entry_id,
+                'account_id' => $accounting_setting->default_tax_discount_account_id,
+                'debit' => 0,
+                'credit' => $order->tax_discount_amount,
+                'description' => 'Order #' . $order->daily_order_id . ' - Tax Discount',
             ]);
         }
 
@@ -3343,6 +3404,8 @@ class OrderService
             'tax' => $totals['tax_display'],
             'tax_amount' => $totals['tax_amount'],
             'tax_type' => $totals['tax_type'],
+            'tax_discount' => $totals['tax_discount'],
+            'tax_discount_amount' => $totals['tax_discount_amount'],
             'total' => $totals['total'],
             'discount_id' => $totals['discount_id'],
             'voucher_id' => $totals['voucher_id'],
@@ -3386,6 +3449,8 @@ class OrderService
             'discount_amount' => $order->discount_amount,
             'tax' => $order->tax,
             'tax_amount' => $order->tax_amount,
+            'tax_discount' => $order->tax_discount,
+            'tax_discount_amount' => $order->tax_discount_amount,
             'total' => $order->total,
             'paid_amount' => $order->paid_amount,
             'change_amount' => $order->change_amount,
@@ -3406,6 +3471,8 @@ class OrderService
                     'discount_amount' => $detail->discount_amount,
                     'tax' => $detail->tax,
                     'tax_amount' => $detail->tax_amount,
+                    'tax_discount' => $detail->tax_discount,
+                    'tax_discount_amount' => $detail->tax_discount_amount,
                     'subtotal' => $detail->subtotal,
                     'total' => $detail->total,
                     'sale_type_id' => $detail->sale_type_id,

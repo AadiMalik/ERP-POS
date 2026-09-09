@@ -89,6 +89,7 @@ return [
     'payment' => 'پرداخت',
     'discount' => 'تخفیف',
     'tax' => 'مالیات',
+    'tax_discount' => 'تخفیف مالیات',
     'subtotal' => 'جمع جزء',
     'grand_total' => 'مجموع کل',
     'paid' => 'پرداخت‌شده',

@@ -104,8 +104,8 @@ class OrderController extends Controller
             ->where('is_deleted', 0)
             ->get();
         $customers = $this->customer_service->getAllActive($is_superadmin ? null : $business_id);
-        $order_types = $this->order_type_service->getAllActive($is_superadmin ? null : $business_id);
-        $order_sources = $this->order_source_service->getAllActive($is_superadmin ? null : $business_id);
+        $order_types = $this->order_type_service->getAllActive();
+        $order_sources = $this->order_source_service->getAllActive();
         $payment_methods = $this->payment_method_service->getAllActive($is_superadmin ? null : $business_id);
         $banks = $is_superadmin ? collect() : $this->bank_service->getByBusiness($business_id);
 
@@ -156,8 +156,8 @@ class OrderController extends Controller
                     ->where('is_deleted', 0)
                     ->get(),
                 'customers' => $this->customer_service->getAllActive($business_id),
-                'order_types' => $this->order_type_service->getAllActive($business_id),
-                'order_sources' => $this->order_source_service->getAllActive($business_id),
+                'order_types' => $this->order_type_service->getAllActive(),
+                'order_sources' => $this->order_source_service->getAllActive(),
                 'payment_methods' => $this->payment_method_service->getAllActive($business_id),
                 'banks' => $this->bank_service->getByBusiness($business_id),
             ];
@@ -827,8 +827,8 @@ class OrderController extends Controller
             ->where('is_deleted', 0)
             ->get();
         $customers = $this->customer_service->getAllActive($is_superadmin ? null : $business_id);
-        $order_types = $this->order_type_service->getAllActive($is_superadmin ? null : $business_id);
-        $order_sources = $this->order_source_service->getAllActive($is_superadmin ? null : $business_id);
+        $order_types = $this->order_type_service->getAllActive();
+        $order_sources = $this->order_source_service->getAllActive();
         $payment_methods = $this->payment_method_service->getAllActive($is_superadmin ? null : $business_id);
 
         $statuses = [

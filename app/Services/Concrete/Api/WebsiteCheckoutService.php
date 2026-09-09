@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\File;
 /**
  * Website checkout / place-order orchestration.
  * Creates Hold orders via the shared OrderService::save() path with:
- * - order_source = WEBSITE
+ * - order_source = WEBSITE (MOBILE_APP for MobileCheckoutService - see orderSourceCode())
  * - order_type = DELIVERY
  * - sale_type = business default
  * - paid_amount left at 0 (payment pending) until admin confirms
@@ -52,6 +52,16 @@ class WebsiteCheckoutService
         $this->customer_order_service = $customer_order_service;
         $this->order_type_service = $order_type_service;
         $this->order_source_service = $order_source_service;
+    }
+
+    /**
+     * The order_source code every order placed through this checkout flow is
+     * hardcoded to. Overridden by MobileCheckoutService so mobile-app orders
+     * are tagged MOBILE_APP instead of inheriting WEBSITE.
+     */
+    protected function orderSourceCode(): string
+    {
+        return 'WEBSITE';
     }
 
     /**
@@ -131,25 +141,23 @@ class WebsiteCheckoutService
 
         $delivery_address = $this->formatDeliveryAddress($payload);
 
-        $this->order_type_service->seedDefaults($business_id);
-        $this->order_source_service->seedDefaults($business_id);
+        $this->order_type_service->seedDefaults(null);
+        $this->order_source_service->seedDefaults(null);
 
-        $order_type_id = OrderType::where('business_id', $business_id)
-            ->where('code', 'DELIVERY')
+        $order_type_id = OrderType::where('code', 'DELIVERY')
             ->where('is_deleted', 0)
             ->value('order_type_id');
 
         if (!$order_type_id) {
-            throw new Exception('Delivery order type is not configured for this business.');
+            throw new Exception('Delivery order type is not configured.');
         }
 
-        $order_source_id = OrderSource::where('business_id', $business_id)
-            ->where('code', 'WEBSITE')
+        $order_source_id = OrderSource::where('code', $this->orderSourceCode())
             ->where('is_deleted', 0)
             ->value('order_source_id');
 
         if (!$order_source_id) {
-            throw new Exception('Website order source is not configured for this business.');
+            throw new Exception($this->orderSourceCode() . ' order source is not configured.');
         }
 
         $sale_type_id = $cart_payload['sale_type']['id']
@@ -268,8 +276,8 @@ class WebsiteCheckoutService
     {
         $order = Order::with(['payments.paymentMethod', 'orderSource'])->findOrFail($order_id);
 
-        if (($order->orderSource->code ?? null) !== 'WEBSITE') {
-            throw new Exception('Only website orders can use this payment confirmation action.');
+        if (!in_array($order->orderSource->code ?? null, ['WEBSITE', 'MOBILE_APP'], true)) {
+            throw new Exception('Only website/mobile app orders can use this payment confirmation action.');
         }
 
         $has_bank = $order->payments->contains(function ($p) {

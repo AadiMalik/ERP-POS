@@ -89,6 +89,7 @@ return [
     'payment' => 'การชำระเงิน',
     'discount' => 'ส่วนลด',
     'tax' => 'ภาษี',
+    'tax_discount' => 'ส่วนลดภาษี',
     'subtotal' => 'ยอดรวมย่อย',
     'grand_total' => 'ยอดรวมทั้งหมด',
     'paid' => 'ชำระแล้ว',

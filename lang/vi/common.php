@@ -89,6 +89,7 @@ return [
     'payment' => 'Thanh toán',
     'discount' => 'Chiết khấu',
     'tax' => 'Thuế',
+    'tax_discount' => 'Giảm thuế',
     'subtotal' => 'Tạm tính',
     'grand_total' => 'Tổng cộng',
     'paid' => 'Đã thanh toán',

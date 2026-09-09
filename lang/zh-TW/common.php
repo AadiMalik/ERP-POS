@@ -89,6 +89,7 @@ return [
     'payment' => '付款',
     'discount' => '折扣',
     'tax' => '稅費',
+    'tax_discount' => '稅務折扣',
     'subtotal' => '小計',
     'grand_total' => '總計',
     'paid' => '已付',

@@ -18,13 +18,11 @@ class DashboardFilterOptionsService
         $business_id = $scope['business_id'];
 
         return [
-            'order_types' => OrderType::where('business_id', $business_id)
-                ->where('status', Status::ACTIVE)
+            'order_types' => OrderType::where('status', Status::ACTIVE)
                 ->where('is_deleted', 0)
                 ->orderBy('sort_order')
                 ->get(['order_type_id', 'name']),
-            'order_sources' => OrderSource::where('business_id', $business_id)
-                ->where('status', Status::ACTIVE)
+            'order_sources' => OrderSource::where('status', Status::ACTIVE)
                 ->where('is_deleted', 0)
                 ->orderBy('sort_order')
                 ->get(['order_source_id', 'name']),

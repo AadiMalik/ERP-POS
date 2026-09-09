@@ -89,6 +89,7 @@ return [
     'payment' => 'الدفع',
     'discount' => 'الخصم',
     'tax' => 'الضريبة',
+    'tax_discount' => 'خصم الضريبة',
     'subtotal' => 'المجموع الفرعي',
     'grand_total' => 'الإجمالي الكلي',
     'paid' => 'مدفوع',

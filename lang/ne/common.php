@@ -89,6 +89,7 @@ return [
     'payment' => 'भुक्तानी',
     'discount' => 'छुट',
     'tax' => 'कर',
+    'tax_discount' => 'कर छुट',
     'subtotal' => 'उप-जम्मा',
     'grand_total' => 'कुल जम्मा',
     'paid' => 'भुक्तानी गरिएको',

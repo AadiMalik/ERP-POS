@@ -106,6 +106,7 @@ class ChartOfAccountsTemplateSeeder extends Seeder
             'default_discount_account_id' => '530002-001',
             'default_loyalty_discount_account_id' => '530003-001',
             'default_tax_account_id' => '240001-001',
+            'default_tax_discount_account_id' => '490001-003',
             'default_revenue_account_id' => '420001-001',
             'default_purchase_account_id' => '520001-001',
             'default_expense_account_id' => '530001-001',
@@ -418,6 +419,7 @@ class ChartOfAccountsTemplateSeeder extends Seeder
                 'children' => [
                     ['code' => '490001-001', 'name' => 'Other Income'],
                     ['code' => '490001-002', 'name' => 'Gain on Disposal of Fixed Assets'],
+                    ['code' => '490001-003', 'name' => 'Tax Discount'],
                 ],
             ],
 

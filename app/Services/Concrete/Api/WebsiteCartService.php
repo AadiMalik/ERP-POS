@@ -372,8 +372,11 @@ class WebsiteCartService
         $resolved_tax = $this->tax_resolver->resolve($cart->business_id, $context['branch_id'], []);
         $tax_percent = $resolved_tax['rate'];
         $tax_type = $resolved_tax['tax_type'];
+        $tax_discount_percent = $resolved_tax['tax_discount_rate'];
         $taxable = max(0, $subtotal - $discount_total);
-        $tax_amount = TaxCalculator::lineTax($taxable, $tax_percent, $tax_type);
+        $tax_split = TaxCalculator::lineBreakdown($taxable, $tax_percent, $tax_type, $tax_discount_percent);
+        $tax_amount = $tax_split['tax_amount'];
+        $tax_discount_amount = $tax_split['tax_discount_amount'];
         $total = TaxCalculator::lineTotal($taxable, $tax_amount, $tax_type);
         $voucher_discount = 0.0;
         $voucher_meta = null;
@@ -394,7 +397,9 @@ class WebsiteCartService
                 $preview = $voucher_result['preview'];
                 $voucher_discount = (float) ($preview['voucher_discount_amount'] ?? 0);
                 $taxable = max(0, $subtotal - $discount_total - $voucher_discount);
-                $tax_amount = TaxCalculator::lineTax($taxable, $tax_percent, $tax_type);
+                $tax_split = TaxCalculator::lineBreakdown($taxable, $tax_percent, $tax_type, $tax_discount_percent);
+                $tax_amount = $tax_split['tax_amount'];
+                $tax_discount_amount = $tax_split['tax_discount_amount'];
                 // Not $preview['total']: that comes from the shared POS
                 // previewVoucher(), which re-prices each line via POS pricing
                 // and knows nothing about the storefront's own promotional/
@@ -433,6 +438,8 @@ class WebsiteCartService
                 'tax_percent' => $tax_percent,
                 'tax' => $tax_amount,
                 'tax_type' => $tax_type,
+                'tax_discount_percent' => $tax_discount_percent,
+                'tax_discount' => $tax_discount_amount,
                 'shipping' => 0,
                 'total' => $total,
             ],

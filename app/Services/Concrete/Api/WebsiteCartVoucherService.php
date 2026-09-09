@@ -70,19 +70,29 @@ class WebsiteCartVoucherService
 
 
 
+    /**
+     * The order_source code this voucher context resolves to. Overridden by
+     * MobileCartVoucherService so mobile-app cart/voucher eligibility uses
+     * MOBILE_APP instead of inheriting WEBSITE.
+     */
+    protected function orderSourceCode(): string
+    {
+        return 'WEBSITE';
+    }
+
+
+
     public function resolveWebsiteOrderContext(string $business_id): array
 
     {
 
-        $this->order_type_service->seedDefaults($business_id);
+        $this->order_type_service->seedDefaults(null);
 
-        $this->order_source_service->seedDefaults($business_id);
+        $this->order_source_service->seedDefaults(null);
 
 
 
-        $order_type_id = OrderType::where('business_id', $business_id)
-
-            ->where('code', 'DELIVERY')
+        $order_type_id = OrderType::where('code', 'DELIVERY')
 
             ->where('is_deleted', 0)
 
@@ -90,9 +100,7 @@ class WebsiteCartVoucherService
 
 
 
-        $order_source_id = OrderSource::where('business_id', $business_id)
-
-            ->where('code', 'WEBSITE')
+        $order_source_id = OrderSource::where('code', $this->orderSourceCode())
 
             ->where('is_deleted', 0)
 

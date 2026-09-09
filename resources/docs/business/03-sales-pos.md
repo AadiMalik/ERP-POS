@@ -3,15 +3,19 @@
 ## Setup
 
 Before taking sales, configure the building blocks under **Sales Setup**:
-- **Order Types** — e.g. dine-in, takeaway, delivery.
 - **Payment Methods** — cash, card, bank transfer, store credit, etc.
-- **Order Sources** — POS, website, mobile app.
 - **Sale Types** — pricing tiers (e.g. retail vs. wholesale).
 - **Discounts** — a simple named percentage or fixed-amount rate the cashier
   picks manually from a dropdown at the order level. No code, no conditions —
   just a quick, always-available markdown.
 - **Vouchers** — the full promotional rule engine, entered/selected by code in
   POS. See **Vouchers & Promotions** below for everything a voucher can do.
+
+**Order Types** (e.g. Mart, Takeaway, Delivery) and **Order Sources** (e.g.
+POS, Website, Mobile App) are pre-configured platform-wide and managed by the
+platform administrator, not per business — every business simply picks from
+the same shared list when an order is created; there is nothing to set up
+here for them.
 
 ## Opening a POS Register
 
@@ -91,7 +95,11 @@ Loyalty Points" checkbox showing the selected customer's available points)
 opens from a small bookmark-style clip on the side
 of the product area — collapsed by default so more room is left for browsing
 products. The clip label shows the current payment method (Cash is selected
-automatically on a fresh sale). For **Delivery** order types, opening that
+automatically on a fresh sale). Cart totals show **Tax (rate%) (Inclusive)**
+or **Tax (rate%) (Exclusive)** for the rate that applies to the selected
+payment. If tax is Inclusive and cash vs card rates differ, a
+**Tax Discount (leftover%)** line appears as well — the customer total stays
+the same. For **Delivery** order types, opening that
 panel shows the delivery address and payment method on the same row.
 
 An order can also be:

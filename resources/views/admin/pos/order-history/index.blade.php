@@ -324,7 +324,8 @@
                             <table class="table table-sm table-borderless mb-0">
                                 <tr><td>{{ __('common.subtotal') }}</td><td class="text-end" id="odSubtotal"></td></tr>
                                 <tr><td>{{ __('common.discount') }}</td><td class="text-end" id="odDiscount"></td></tr>
-                                <tr><td>{{ __('common.tax') }}</td><td class="text-end" id="odTax"></td></tr>
+                                <tr><td id="odTaxLabel" data-word="{{ __('common.tax') }}">{{ __('common.tax') }}</td><td class="text-end" id="odTax"></td></tr>
+                                <tr class="d-none" id="odTaxDiscountRow"><td id="odTaxDiscountLabel" data-word="{{ __('common.tax_discount') }}">{{ __('common.tax_discount') }}</td><td class="text-end" id="odTaxDiscount"></td></tr>
                                 <tr class="fw-bold"><td>{{ __('common.total') }}</td><td class="text-end" id="odTotal"></td></tr>
                                 <tr><td>{{ __('common.paid') }}</td><td class="text-end" id="odPaid"></td></tr>
                                 <tr><td>{{ __('common.due') }}</td><td class="text-end" id="odDue"></td></tr>

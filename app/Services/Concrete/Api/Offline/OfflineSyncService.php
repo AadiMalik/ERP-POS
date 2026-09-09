@@ -290,12 +290,14 @@ class OfflineSyncService
 
     protected function exportOrderTypes(string $business_id)
     {
-        return OrderType::where('business_id', $business_id)->where('is_deleted', 0)->where('status', Status::ACTIVE)->get()->toArray();
+        // Order Types are global platform master data - not business-scoped.
+        return OrderType::where('is_deleted', 0)->where('status', Status::ACTIVE)->get()->toArray();
     }
 
     protected function exportOrderSources(string $business_id)
     {
-        return OrderSource::where('business_id', $business_id)->where('is_deleted', 0)->where('status', Status::ACTIVE)->get()->toArray();
+        // Order Sources are global platform master data - not business-scoped.
+        return OrderSource::where('is_deleted', 0)->where('status', Status::ACTIVE)->get()->toArray();
     }
 
     protected function exportPaymentMethods(string $business_id)

@@ -45,29 +45,41 @@ abstract class AbstractLookupTypeService
     }
 
     /**
-     * Lazily seeds this type's default rows for a business the first time
-     * it touches this module - only if it has none yet.
+     * Order Type/Source are global platform master data (Super Admin only,
+     * no business_id column); Sale Type stays per-business. Overridden to
+     * true in OrderTypeService/OrderSourceService only. Public so the
+     * controller-layer HasLookupTypeCrudActions trait can branch on it too.
+     */
+    public function isGlobal(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Lazily seeds this type's default rows - table-wide (once) when global,
+     * otherwise for the given business the first time it touches this module
+     * - only if there are none yet.
      */
     public function seedDefaults($business_id)
     {
-        if (empty($business_id)) {
+        if (!$this->isGlobal() && empty($business_id)) {
             return;
         }
 
-        $exists = $this->model->getModel()::where('business_id', $business_id)
-            ->where('is_deleted', 0)
-            ->exists();
+        $existsQuery = $this->model->getModel()::where('is_deleted', 0);
+        if (!$this->isGlobal()) {
+            $existsQuery->where('business_id', $business_id);
+        }
 
-        if ($exists) {
+        if ($existsQuery->exists()) {
             return;
         }
 
         $pk = $this->pkField();
 
         foreach ($this->defaultRows() as $index => $row) {
-            $this->model->create([
+            $attributes = [
                 $pk => generateUuid(),
-                'business_id' => $business_id,
                 'name' => $row['name'],
                 'code' => $row['code'],
                 'is_default' => $index === 0,
@@ -76,13 +88,18 @@ abstract class AbstractLookupTypeService
                 'is_deleted' => 0,
                 'createdby_id' => Auth::id(),
                 'date_created' => now(),
-            ]);
+            ];
+            if (!$this->isGlobal()) {
+                $attributes['business_id'] = $business_id;
+            }
+
+            $this->model->create($attributes);
         }
     }
 
     public function getData($obj)
     {
-        $this->seedDefaults($obj['business_id'] ?? Auth::user()->business_id);
+        $this->seedDefaults($this->isGlobal() ? null : ($obj['business_id'] ?? Auth::user()->business_id));
 
         $wh = [];
         $orderBy = Filter::ORDERBY;
@@ -90,7 +107,7 @@ abstract class AbstractLookupTypeService
         if (isset($obj['orderBy']) && $obj['orderBy'] != 0 && $obj['orderBy'] != "") {
             $orderBy = $obj['orderBy'];
         }
-        if (isset($obj['business_id']) && $obj['business_id'] != 0 && $obj['business_id'] != "") {
+        if (!$this->isGlobal() && isset($obj['business_id']) && $obj['business_id'] != 0 && $obj['business_id'] != "") {
             $wh[] = ['business_id', $obj['business_id']];
         }
 
@@ -103,17 +120,17 @@ abstract class AbstractLookupTypeService
             }
         }
 
-        $allow_roles = [
-            RoleNames::SUPERADMIN,
-            RoleNames::BUSINESSADMIN,
-        ];
-
         $datatable = $this->model->getModel()::where($wh)
             ->where('is_deleted', 0)
             ->orderBy('sort_order', 'asc')
             ->orderBy('name', $orderBy);
 
-        $datatable = applyRoleScope($datatable, $allow_roles);
+        if (!$this->isGlobal()) {
+            $datatable = applyRoleScope($datatable, [
+                RoleNames::SUPERADMIN,
+                RoleNames::BUSINESSADMIN,
+            ]);
+        }
 
         $pk = $this->pkField();
         $suffix = $this->domIdSuffix();
@@ -199,6 +216,15 @@ abstract class AbstractLookupTypeService
 
     public function getAllActive($business_id = null)
     {
+        if ($this->isGlobal()) {
+            $this->seedDefaults(null);
+
+            return $this->model->getModel()::where('status', Status::ACTIVE)
+                ->where('is_deleted', 0)
+                ->orderBy('sort_order', 'asc')
+                ->get();
+        }
+
         $business_id = $business_id ?? Auth::user()->business_id;
         $this->seedDefaults($business_id);
 

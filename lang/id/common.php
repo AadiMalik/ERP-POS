@@ -89,6 +89,7 @@ return [
     'payment' => 'Pembayaran',
     'discount' => 'Diskon',
     'tax' => 'Pajak',
+    'tax_discount' => 'Diskon Pajak',
     'subtotal' => 'Subtotal',
     'grand_total' => 'Total Keseluruhan',
     'paid' => 'Dibayar',

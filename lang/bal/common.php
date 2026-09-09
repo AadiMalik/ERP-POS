@@ -89,6 +89,7 @@ return [
     'payment' => 'تادیگ',
     'discount' => 'ڈسکاؤنٹ',
     'tax' => 'ٹیکس',
+    'tax_discount' => 'ٹیکس ڈسکاؤنٹ',
     'subtotal' => 'ذیلی جمع',
     'grand_total' => 'کل جمع',
     'paid' => 'تادیگ بوتگ',

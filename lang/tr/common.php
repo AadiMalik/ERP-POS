@@ -89,6 +89,7 @@ return [
     'payment' => 'Ödeme',
     'discount' => 'İndirim',
     'tax' => 'Vergi',
+    'tax_discount' => 'Vergi İndirimi',
     'subtotal' => 'Ara Toplam',
     'grand_total' => 'Genel Toplam',
     'paid' => 'Ödendi',

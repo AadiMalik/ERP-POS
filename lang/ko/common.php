@@ -89,6 +89,7 @@ return [
     'payment' => '결제',
     'discount' => '할인',
     'tax' => '세금',
+    'tax_discount' => '세금 할인',
     'subtotal' => '소계',
     'grand_total' => '총계',
     'paid' => '지불됨',

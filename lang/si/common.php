@@ -89,6 +89,7 @@ return [
     'payment' => 'ගෙවීම',
     'discount' => 'වට්ටම',
     'tax' => 'බදු',
+    'tax_discount' => 'බදු වට්ටම',
     'subtotal' => 'උප එකතුව',
     'grand_total' => 'මුළු එකතුව',
     'paid' => 'ගෙවා ඇත',

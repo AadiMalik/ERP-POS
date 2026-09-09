@@ -89,6 +89,7 @@ return [
     'payment' => 'Paiement',
     'discount' => 'Remise',
     'tax' => 'Taxe',
+    'tax_discount' => 'Réduction fiscale',
     'subtotal' => 'Sous-total',
     'grand_total' => 'Total général',
     'paid' => 'Payé',

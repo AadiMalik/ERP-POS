@@ -69,7 +69,7 @@ class RoleDefaultPermissions
                      'stock-taking', 'transfer-note', 'supplier', 'customer', 'purchase-request',
                      'purchase-request-quotation', 'purchase', 'good-receipt-note', 'purchase-return',
                      'supplier-payment', 'customer-payment', 'service-purchase', 'service-purchase-return',
-                     'service-sale', 'service-sale-return', 'order-type', 'payment-method', 'bank', 'payment-gateway', 'order-source', 'discount',
+                     'service-sale', 'service-sale-return', 'payment-method', 'bank', 'payment-gateway', 'discount',
                      'voucher', 'order', 'order-return', 'pos', 'pos-register', 'expense', 'expense-category', 'admin-expense'],
                     ['delete']
                 );
@@ -141,7 +141,7 @@ class RoleDefaultPermissions
 
             case RoleNames::SALEMANAGER:
                 return array_merge(
-                    PermissionRegistry::namesForModules(['order-type', 'payment-method', 'bank', 'payment-gateway', 'payment-transaction', 'order-source', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment', 'service-sale', 'service-sale-return', 'loyalty']),
+                    PermissionRegistry::namesForModules(['payment-method', 'bank', 'payment-gateway', 'payment-transaction', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment', 'service-sale', 'service-sale-return', 'loyalty']),
                     array_merge(
                         ['dashboard.view'],
                         self::formatVariants([
@@ -173,7 +173,7 @@ class RoleDefaultPermissions
 
             case RoleNames::MARKITINGMANAGER:
                 return array_merge(
-                    PermissionRegistry::namesForModulesExcludingActions(['discount', 'voucher', 'order-source'], ['delete']),
+                    PermissionRegistry::namesForModulesExcludingActions(['discount', 'voucher'], ['delete']),
                     PermissionRegistry::namesForModules([
                         'firebase-setting',
                         'notification-template',

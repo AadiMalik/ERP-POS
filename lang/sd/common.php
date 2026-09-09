@@ -89,6 +89,7 @@ return [
     'payment' => 'ادائيگي',
     'discount' => 'رعايت',
     'tax' => 'ٽيڪس',
+    'tax_discount' => 'ٽيڪس رعايت',
     'subtotal' => 'ذيلي مجموعو',
     'grand_total' => 'ڪل مجموعو',
     'paid' => 'ادا ٿيل',

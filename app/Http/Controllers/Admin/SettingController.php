@@ -258,6 +258,7 @@ $this->middleware('permission:setting.manage');
             'default_discount_account_id'        => 'nullable|exists:accounts,account_id',
             'default_loyalty_discount_account_id' => 'nullable|exists:accounts,account_id',
             'default_tax_account_id'             => 'nullable|exists:accounts,account_id',
+            'default_tax_discount_account_id'    => 'nullable|exists:accounts,account_id',
             'default_revenue_account_id'         => 'nullable|exists:accounts,account_id',
             'default_purchase_account_id'        => 'nullable|exists:accounts,account_id',
             'default_expense_account_id'         => 'nullable|exists:accounts,account_id',

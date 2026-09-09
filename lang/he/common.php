@@ -89,6 +89,7 @@ return [
     'payment' => 'תשלום',
     'discount' => 'הנחה',
     'tax' => 'מס',
+    'tax_discount' => 'הנחת מס',
     'subtotal' => 'סכום ביניים',
     'grand_total' => 'סה"כ כולל',
     'paid' => 'שולם',

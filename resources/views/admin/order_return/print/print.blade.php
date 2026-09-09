@@ -81,6 +81,12 @@
             <td>Tax</td>
             <td class="text-right">{{ currency($order_return->tax_amount) }}</td>
         </tr>
+        @if ((float) ($order_return->tax_discount_amount ?? 0) > 0)
+            <tr>
+                <td>{{ __('common.tax_discount') }} ({{ decimal($order_return->tax_discount) }}%)</td>
+                <td class="text-right">{{ currency($order_return->tax_discount_amount) }}</td>
+            </tr>
+        @endif
         <tr class="grand-total">
             <td>Total (Refund Amount)</td>
             <td class="text-right">{{ currency($order_return->total) }}</td>

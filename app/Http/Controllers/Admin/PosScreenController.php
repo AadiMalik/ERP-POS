@@ -165,8 +165,8 @@ class PosScreenController extends Controller
         // those screens gate their own loyalty UI.
         $customer_setting = CustomerSetting::where('business_id', $business_id)->first();
 
-        $order_types = $this->order_type_service->getAllActive($business_id);
-        $order_sources = $this->order_source_service->getAllActive($business_id);
+        $order_types = $this->order_type_service->getAllActive();
+        $order_sources = $this->order_source_service->getAllActive();
         $payment_methods = $this->payment_method_service->getAllActive($business_id);
         // Card/Bank payments require picking one of these (see pos-screen.js's
         // renderPaymentAccountOptions()) - scoped to the resolved branch the

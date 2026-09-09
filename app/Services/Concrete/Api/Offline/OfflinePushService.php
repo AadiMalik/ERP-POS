@@ -138,7 +138,7 @@ class OfflinePushService
             $device,
             $payload['register_session_id'] ?? $payload['register_session_local_id'] ?? null
         );
-        $payload['order_source_id'] = $payload['order_source_id'] ?? $this->resolvePosOrderSourceId($device->business_id);
+        $payload['order_source_id'] = $payload['order_source_id'] ?? $this->resolvePosOrderSourceId();
 
         try {
             $order = $this->order_service->save($payload);
@@ -168,20 +168,18 @@ class OfflinePushService
     }
 
     /**
-     * Mirrors PosScreenController::resolvePosOrderSourceId() - the web POS
-     * always tags its orders with the business's seeded 'POS' order source
-     * rather than relying on pos_setting->default_order_source_id (which is
-     * commonly left unset), and the desktop client never sends order_source_id
-     * itself, so it needs the same resolution here.
+     * The desktop/offline POS client is its own order source, distinct from
+     * the browser-based web POS (see PosScreenController::resolvePosOrderSourceId(),
+     * which tags 'POS') - it never sends order_source_id itself, so every
+     * synced order is tagged with the global seeded 'OFFLINE_POS' source here.
      */
-    protected function resolvePosOrderSourceId(string $business_id): ?string
+    protected function resolvePosOrderSourceId(): ?string
     {
-        $sources = OrderSource::where('business_id', $business_id)
-            ->where('is_deleted', 0)
+        $sources = OrderSource::where('is_deleted', 0)
             ->where('status', Status::ACTIVE)
             ->get();
 
-        $source = $sources->firstWhere('code', 'POS')
+        $source = $sources->firstWhere('code', 'OFFLINE_POS')
             ?? $sources->firstWhere('is_default', true)
             ?? $sources->first();
 

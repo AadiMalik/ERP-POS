@@ -414,8 +414,15 @@ and `JournalEntry.postedby_id`/`date_posted`.
 `ServiceSaleController`, `ServiceSaleReturnController`.
 
 ## Sales & POS (`module:pos`, + `permission:pos.access` / `permission:order.*`)
-Setup: `OrderTypeController`, `PaymentMethodController`, `OrderSourceController`,
-`DiscountController`, `SaleTypeController`. Operations: `PosRegisterController`,
+Setup: `PaymentMethodController`, `DiscountController`, `SaleTypeController`
+(all per-business). `OrderTypeController`/`OrderSourceController` are **not**
+part of this module-gated group — Order Types and Order Sources are global
+platform master data (like `PackageController`), managed only by Super Admin
+under `permission:order-type.*`/`permission:order-source.*`
+(`is_system => true` in `PermissionRegistry`), with a single shared list every
+business selects from when creating an order; their routes sit in the
+top-level `admin` route group next to `packages`/`business`, not inside
+`module:pos`. Operations: `PosRegisterController`,
 `PosRegisterSessionController`, `PosScreenController`, `OrderController` (service:
 `OrderService`), `OrderReturnController` (service: `OrderReturnService`),
 `CustomerPaymentController` (service: `CustomerPaymentService` — order-targeted
@@ -711,7 +718,10 @@ order discount, voucher, and delivery address sit in a collapsible panel toggled
 by a side bookmark clip (`#posCheckoutToggle` on `#posCheckoutWrap`, collapsed by default — toggling adds/removes `.checkout-open`
 on `#posMainCol` so the product grid flexes). Delivery order types show address +
 payment method on one row inside that panel and auto-expand it
-(`updateDeliveryAddressVisibility()`).
+(`updateDeliveryAddressVisibility()`). Cart totals (`#sumTaxLabel` /
+`#sumTaxDiscountLabel` in `pos-screen.js`) show `Tax (X%) (Inclusive|Exclusive)`
+and, when leftover > 0, `Tax Discount (Y%)` — the same labels Order History,
+admin order show, and receipts use.
 
 **Order status changes:** there is no generic status dropdown. Status moves via
 dedicated actions: POS (`hold`, `resume`, `complete` → `post()`), Admin Order

@@ -1,7 +1,6 @@
 $("#createNewOrderType").click(function () {
       $("#pos_order_type_form")[0].reset();
       $("#order_type_id").val('');
-      $("#business_id").val('').trigger('change.select2');
       $("#status").val('active');
       $("#saveBtn").show();
       $("#modelHeading").html("Create New Order Type");
@@ -14,7 +13,6 @@ editRecord({
       onSuccess: function (response) {
             let data = response.Data;
             $("#order_type_id").val(data.order_type_id);
-            $("#business_id").val(data.business_id).trigger('change.select2');
             $("#name").val(data.name);
             $("#code").val(data.code);
             $("#sort_order").val(data.sort_order);
