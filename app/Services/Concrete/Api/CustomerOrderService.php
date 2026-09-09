@@ -243,6 +243,7 @@ class CustomerOrderService
             'discount' => (float) ($order->discount_amount ?? $order->discount ?? 0),
             'shipping' => 0,
             'tax' => (float) ($order->tax_amount ?? $order->tax ?? 0),
+            'taxType' => $order->tax_type ?? 'exclusive',
             'total' => $total,
             'paymentStatus' => $payment_status,
             'paymentMethod' => $payment_method,

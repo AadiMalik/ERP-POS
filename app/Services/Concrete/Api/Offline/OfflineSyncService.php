@@ -26,6 +26,7 @@ use App\Models\SaleType;
 use App\Models\User;
 use App\Models\Voucher;
 use App\Models\Warehouse;
+use App\Services\Concrete\Admin\SettingService;
 use App\Services\Concrete\Admin\ThermalPrintSettingResolverService;
 use Illuminate\Support\Facades\Schema;
 
@@ -36,10 +37,12 @@ use Illuminate\Support\Facades\Schema;
 class OfflineSyncService
 {
     protected $thermal_resolver;
+    protected $setting_service;
 
-    public function __construct(ThermalPrintSettingResolverService $thermal_resolver)
+    public function __construct(ThermalPrintSettingResolverService $thermal_resolver, SettingService $setting_service)
     {
         $this->thermal_resolver = $thermal_resolver;
+        $this->setting_service = $setting_service;
     }
 
     public function bootstrap(PosDevice $device, ?string $warehouse_id = null): array
@@ -139,9 +142,26 @@ class OfflineSyncService
         $inventory = InventorySetting::firstOrCreate(['business_id' => $business_id]);
         $thermal = $this->thermal_resolver->resolve($business_id, $branch_id);
 
+        // business_setting.overall_tax_rate/card_tax_rate are the old
+        // business-wide fields, kept only for backward compatibility with
+        // any client still reading them - tax_rates_setting (per-branch,
+        // with tax_type) is the current source of truth, same shape as
+        // Api\Offline\SettingsController::context()'s live endpoint.
+        $tax_rates_setting = null;
+
+        if ($branch_id) {
+            $branch_tax_setting = $this->setting_service->getBranchTaxSetting($business_id, $branch_id);
+            $tax_rates_setting = [
+                'overall_tax_rate' => $branch_tax_setting->overall_tax_rate,
+                'card_tax_rate' => $branch_tax_setting->card_tax_rate,
+                'tax_type' => $branch_tax_setting->tax_type,
+            ];
+        }
+
         return [
             'pos_setting' => $pos->toArray(),
             'business_setting' => $business->toArray(),
+            'tax_rates_setting' => $tax_rates_setting,
             'inventory_setting' => $inventory->toArray(),
             // ThermalPrintConfig has no public properties/toArray() of its own
             // (by design - it's a resolved value object, not a model) so it

@@ -18,19 +18,6 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-6 mb-3">
-            <label>{{ __('settings.overall_tax_rate') }}<span class="text-danger">*</span></label>
-            <input type="text" onkeypress="return isNumberKey(event)" class="form-control" name="overall_tax_rate"
-                value="{{ $business_setting->overall_tax_rate }}">
-            <small class="text-muted">{{ __('settings.overall_tax_rate_help') }}</small>
-        </div>
-        <div class="col-md-6 mb-3">
-            <label>{{ __('settings.card_tax_rate') }}<span class="text-danger">*</span></label>
-            <input type="text" onkeypress="return isNumberKey(event)" class="form-control" name="card_tax_rate"
-                value="{{ $business_setting->card_tax_rate }}">
-            <small class="text-muted">{{ __('settings.card_tax_rate_help') }}</small>
-        </div>
-
         @php
             $date_formats = [
                 'd-m-Y' => '30-06-2026',

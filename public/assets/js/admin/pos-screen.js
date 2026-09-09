@@ -2005,7 +2005,7 @@
         recalcLocal();
     }
 
-    // Local preview only - mirrors OrderService::resolveTaxPercent() on the
+    // Local preview only - mirrors TaxSettingResolverService::resolve() on the
     // server (Card Tax Rate only when every payment tendered so far is a
     // card-type method, otherwise Overall Tax Rate). The server always
     // recomputes authoritatively once the final payments are known at
@@ -2027,19 +2027,41 @@
         return allCard ? card : overall;
     }
 
+    // Mirrors TaxCalculator::lineTax() - exclusive adds tax on top of the
+    // taxable amount, inclusive backs it out of a price that already
+    // contains it (the price itself never changes between modes).
+    function effectiveTaxAmount(taxable, percent) {
+        var taxType = (CFG.tax_rates_setting || {}).tax_type || 'exclusive';
+
+        if (percent <= 0) return 0;
+
+        if (taxType === 'inclusive') {
+            return taxable - (taxable / (1 + percent / 100));
+        }
+
+        return taxable * percent / 100;
+    }
+
+    // Mirrors TaxCalculator::lineTotal().
+    function effectiveLineTotal(taxable, taxAmt) {
+        var taxType = (CFG.tax_rates_setting || {}).tax_type || 'exclusive';
+
+        return taxType === 'inclusive' ? taxable : taxable + taxAmt;
+    }
+
     function lineTotal(line) {
         var qty = parseFloat(line.quantity) || 0;
         var price = parseFloat(line.unit_price) || 0;
         var base = qty * price;
         var discAmt = base * (parseFloat(line.discount) || 0) / 100;
         var taxable = base - discAmt;
-        var taxAmt = taxable * effectiveTaxPercent() / 100;
+        var taxAmt = effectiveTaxAmount(taxable, effectiveTaxPercent());
 
         return {
             base: base,
             discAmt: discAmt,
             taxAmt: taxAmt,
-            total: taxable + taxAmt,
+            total: effectiveLineTotal(taxable, taxAmt),
         };
     }
 
@@ -2067,7 +2089,8 @@
         // This local preview shows 0.00 for it until then, same as before.
         var orderDiscount = 0;
         var totalDiscount = lineDiscount + orderDiscount;
-        var total = subtotal - totalDiscount + tax;
+        var taxType = (CFG.tax_rates_setting || {}).tax_type || 'exclusive';
+        var total = taxType === 'inclusive' ? (subtotal - totalDiscount) : (subtotal - totalDiscount + tax);
 
         $('#sumSubtotal').text(money(subtotal));
         $('#sumItemDiscount').text(money(lineDiscount));

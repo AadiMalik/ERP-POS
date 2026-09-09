@@ -20,6 +20,7 @@ use App\Models\Timezone;
 use App\Services\Concrete\Admin\PrintSettingResolverService;
 use App\Services\Concrete\Admin\SaleTypeService;
 use App\Services\Concrete\Admin\SettingService;
+use App\Services\Concrete\Admin\TaxSettingResolverService;
 use App\Services\Concrete\Admin\ThermalPrintSettingResolverService;
 use App\Support\Print\ThermalPrintConfig;
 use App\Traits\ResponseAPI;
@@ -42,6 +43,7 @@ class SettingController extends Controller
     protected $thermal_print_setting_resolver;
     protected $sale_type_service;
     protected $branch_service;
+    protected $tax_setting_resolver;
 
     public function __construct(
         BusinessService $business_service,
@@ -52,7 +54,8 @@ class SettingController extends Controller
         CustomerService $customer_service,
         ThermalPrintSettingResolverService $thermal_print_setting_resolver,
         SaleTypeService $sale_type_service,
-        BranchService $branch_service
+        BranchService $branch_service,
+        TaxSettingResolverService $tax_setting_resolver
     ) {
 $this->middleware('permission:setting.manage');
         $this->middleware('permission:firebase-setting.manage|setting.manage')->only(['updateFirebaseSetting']);
@@ -66,6 +69,7 @@ $this->middleware('permission:setting.manage');
         $this->thermal_print_setting_resolver = $thermal_print_setting_resolver;
         $this->sale_type_service = $sale_type_service;
         $this->branch_service = $branch_service;
+        $this->tax_setting_resolver = $tax_setting_resolver;
     }
 
     /**
@@ -107,6 +111,14 @@ $this->middleware('permission:setting.manage');
         $thermal_print_setting = $thermal_branch_id
             ? $this->setting_service->getBranchThermalPrintSetting($target_business_id, $thermal_branch_id)
             : $this->setting_service->getThermalPrintSetting($target_business_id);
+        // Unlike thermal print, every branch is required to have a tax
+        // config - default-select the first branch so this tab never renders
+        // with nothing to edit.
+        $tax_branches = $thermal_branches;
+        $tax_branch_id = $request->query('tax_branch_id') ?: optional($tax_branches->first())->branch_id;
+        $branch_tax_setting = $tax_branch_id
+            ? $this->setting_service->getBranchTaxSetting($target_business_id, $tax_branch_id)
+            : null;
         $accounts =  $this->account_service->getAllChild();
         $business_setting = $this->setting_service->getBusinessSetting($target_business_id);
         $localization_setting = $this->setting_service->getLocalizationSetting($target_business_id);
@@ -170,6 +182,9 @@ $this->middleware('permission:setting.manage');
             'thermal_print_setting',
             'thermal_branches',
             'thermal_branch_id',
+            'branch_tax_setting',
+            'tax_branches',
+            'tax_branch_id',
             'pos_customers',
             'sale_types',
             'theme_presets',
@@ -212,8 +227,6 @@ $this->middleware('permission:setting.manage');
     {
         $rules = [
             'timezone'         => ['required', Rule::in(Timezone::pluck('name'))],
-            'overall_tax_rate' => 'nullable|numeric|min:0|max:100',
-            'card_tax_rate'    => 'nullable|numeric|min:0|max:100',
             'date_format'      => 'required',
             'time_format'      => 'required',
             'datatable_pagination_position' => 'required|in:bottom,top,both',
@@ -802,6 +815,35 @@ $this->middleware('permission:setting.manage');
 
         if ($setting) {
             $this->thermal_print_setting_resolver->forgetCache($obj['business_id'], $obj['branch_id']);
+        }
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateBranchTaxSetting(Request $request)
+    {
+        $rules = [
+            'branch_id'        => 'required|exists:branches,branch_id',
+            'overall_tax_rate' => 'required|numeric|min:0|max:100',
+            'card_tax_rate'    => 'required|numeric|min:0|max:100',
+            'tax_type'         => 'required|in:inclusive,exclusive',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->only(['branch_id', 'overall_tax_rate', 'card_tax_rate', 'tax_type']);
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
+
+        $setting = $this->setting_service->updateBranchTaxSetting($obj);
+
+        if ($setting) {
+            $this->tax_setting_resolver->forgetCache($obj['business_id'], $obj['branch_id']);
         }
 
         return $setting

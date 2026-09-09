@@ -451,8 +451,8 @@ class OrderReturnService
                 $line_subtotal = $base_quantity * $unit_price;
                 $line_discount_amount = round($line_subtotal * $discount_percent / 100, 3);
                 $taxable = $line_subtotal - $line_discount_amount;
-                $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent);
-                $line_total = $taxable + $line_tax_amount;
+                $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent, $order->tax_type ?? 'exclusive');
+                $line_total = \App\Support\Tax\TaxCalculator::lineTotal($taxable, $line_tax_amount, $order->tax_type ?? 'exclusive');
 
                 // Prorate this line's own voucher contribution (per-unit rate x
                 // returned base quantity) the same way its % discount is prorated

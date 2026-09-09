@@ -9,6 +9,7 @@ use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\AccountingSetting;
 use App\Models\BarcodeSetting;
+use App\Models\BranchTaxSetting;
 use App\Models\Business;
 use App\Models\BusinessSetting;
 use App\Models\CustomerSetting;
@@ -55,6 +56,7 @@ class SettingService
     protected $model_pos_setting;
     protected $model_pra_setting;
     protected $model_thermal_print_setting;
+    protected $model_branch_tax_setting;
     protected $model_notification_setting;
     protected $expense_category_service;
     protected $customer_service;
@@ -87,6 +89,7 @@ class SettingService
         $this->model_pos_setting = new Repository(new PosSetting());
         $this->model_pra_setting = new Repository(new PraSetting());
         $this->model_thermal_print_setting = new Repository(new ThermalPrintSetting());
+        $this->model_branch_tax_setting = new Repository(new BranchTaxSetting());
     }
 
     public function getBusinessSetting($business_id)
@@ -270,6 +273,25 @@ class SettingService
         return $this->model_thermal_print_setting->getModel()::where('business_id', $business_id)
             ->where('branch_id', $branch_id)
             ->first();
+    }
+
+    /**
+     * A branch's tax config - unlike thermal print's optional override, every
+     * branch is expected to have one, so this auto-creates a 0%/exclusive row
+     * the first time a branch is read rather than returning null.
+     */
+    public function getBranchTaxSetting($business_id, $branch_id)
+    {
+        return $this->model_branch_tax_setting->getModel()::firstOrCreate(
+            ['branch_id' => $branch_id],
+            [
+                'business_id' => $business_id,
+                'overall_tax_rate' => 0,
+                'card_tax_rate' => 0,
+                'tax_type' => 'exclusive',
+                'date_created' => now(),
+            ]
+        );
     }
 
     /**
@@ -693,6 +715,29 @@ class SettingService
         $setting->date_updated = now();
         $setting->save();
         $this->auditSetting('thermal_print', $setting, $old_values);
+
+        return $setting;
+    }
+
+    public function updateBranchTaxSetting(array $obj)
+    {
+        $model = $this->model_branch_tax_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'branch_id' => $obj['branch_id'],
+        ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+        $this->auditSetting('branch_tax', $setting, $old_values);
 
         return $setting;
     }

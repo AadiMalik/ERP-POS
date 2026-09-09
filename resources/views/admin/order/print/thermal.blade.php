@@ -240,7 +240,7 @@
 
                 @if ($thermal_config->isVisible('tax') && (float) $order->tax_amount > 0)
                     <div class="tr-row">
-                        <span class="tr-label">Tax ({{ decimal($order->tax) }}%)</span>
+                        <span class="tr-label">Tax ({{ decimal($order->tax) }}%) {{ $order->tax_type === 'inclusive' ? '(Inclusive)' : '(Exclusive)' }}</span>
                         <span class="tr-value">{{ currency($order->tax_amount) }}</span>
                     </div>
                 @endif

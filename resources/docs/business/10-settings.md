@@ -12,6 +12,20 @@ All configuration lives under one **Settings** screen, organized into sections
   immediately re-displays all of your business's existing records (products,
   orders, purchases, everything with a date) in the new timezone without
   altering when they actually happened.
+- **Tax** — tax rate and behavior, configured **per branch** rather than
+  business-wide. For each branch, set an **Overall Tax Rate** (applied to
+  cash and any other non-card payment) and a **Card Tax Rate** (applied
+  automatically when an order is paid fully by card), plus a **Tax Type**
+  of **Exclusive** (tax is added on top of the price) or **Inclusive** (the
+  price already includes tax). Switching Tax Type never changes the price a
+  customer sees or pays on POS, the website, or the mobile app — it only
+  changes how the receipt and accounting reports break that price down
+  between revenue and tax. Whatever rate/type a branch has configured
+  applies uniformly to every order placed at that branch, on every channel
+  (POS, POS Desktop, Website, Mobile App). Printed receipts (thermal and
+  normal) show whether tax was Inclusive or Exclusive for that sale, and the
+  accounting Journal Entry posted when an order completes books revenue and
+  tax correctly for either mode.
 - **Accounting** — default chart of accounts, tax settings, aging basis for
   receivables/payables, and the specific accounts used for inventory,
   cost-of-goods-sold, and service transactions. **Customer Account** and

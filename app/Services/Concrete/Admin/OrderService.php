@@ -11,7 +11,6 @@ use App\Enums\Status;
 use App\Enums\TransactionType;
 use App\Models\AccountingSetting;
 use App\Models\Bank;
-use App\Models\BusinessSetting;
 use App\Models\CustomerPayment;
 use App\Models\CustomerProfile;
 use App\Models\CustomerSetting;
@@ -81,6 +80,8 @@ class OrderService
 
     protected $with = [
         'business',
+        'business.fbrSetting',
+        'business.praSetting',
         'branch',
         'warehouse',
         'register',
@@ -110,13 +111,15 @@ class OrderService
     protected $customer_service;
     protected $stock_service;
     protected $pricing_engine;
+    protected $tax_resolver;
 
     public function __construct(
         DiscountService $discount_service,
         VoucherService $voucher_service,
         CustomerService $customer_service,
         ProductVariationStockService $stock_service,
-        VariationPricingService $pricing_engine
+        VariationPricingService $pricing_engine,
+        TaxSettingResolverService $tax_resolver
     ) {
         $this->model_order = new Repository(new Order());
         $this->model_order_detail = new Repository(new OrderDetail());
@@ -127,6 +130,7 @@ class OrderService
         $this->customer_service = $customer_service;
         $this->stock_service = $stock_service;
         $this->pricing_engine = $pricing_engine;
+        $this->tax_resolver = $tax_resolver;
     }
 
     /**
@@ -1105,6 +1109,7 @@ class OrderService
                 'discount_amount' => $totals['discount_amount'],
                 'tax' => $totals['tax_display'],
                 'tax_amount' => $totals['tax_amount'],
+                'tax_type' => $totals['tax_type'],
                 'total' => $totals['total'],
                 'discount_id' => $totals['discount_id'],
                 'voucher_id' => $totals['voucher_id'],
@@ -1162,43 +1167,23 @@ class OrderService
     }
 
     /**
-     * Resolves the tax percent to apply to an order from Business Settings -
-     * never hard-coded, never picked per line. The Card Tax Rate only applies
-     * when every payment on the order is a card-type payment method; any
-     * cash/other component in the mix falls back to the Overall Tax Rate.
-     */
-    protected function resolveTaxPercent($business_id, array $payment_method_ids): float
-    {
-        $business_setting = BusinessSetting::where('business_id', $business_id)->first();
-
-        if (!$business_setting) {
-            return 0;
-        }
-
-        $is_fully_card = !empty($payment_method_ids) && collect($payment_method_ids)->every(function ($payment_method_id) {
-            $method = PaymentMethod::find($payment_method_id);
-
-            return $method && $method->type === 'card';
-        });
-
-        return (float) ($is_fully_card ? $business_setting->card_tax_rate : $business_setting->overall_tax_rate);
-    }
-
-    /**
      * Rebuilds the order's line items and computes every money figure
      * server-side. Discount stacking is SEQUENTIAL: each line's own discount
      * (if enable_discount + discount_level permits line-level) reduces that
      * line's subtotal first; an order-level discount/voucher (if
      * discount_level permits order-level) is then applied on top of the sum
-     * of the already-line-discounted subtotals. Tax is a single business-wide
-     * percent (Overall or Card, see resolveTaxPercent()) applied uniformly to
-     * every line's post-line-discount (but pre-order-discount) taxable
-     * amount - the order-level discount is booked as a separate contra-
-     * revenue amount at posting time rather than retroactively reducing the
-     * tax basis already established per line. Payments are usually not yet
-     * known when a draft is first saved, so this uses whichever payments are
-     * available now as a working estimate - post() re-resolves the rate from
-     * the final payments and reconciles the order before it is posted.
+     * of the already-line-discounted subtotals. Tax is a single per-branch
+     * percent (Overall or Card, see TaxSettingResolverService::resolve())
+     * applied uniformly to every line's post-line-discount (but pre-order-
+     * discount) taxable amount - the order-level discount is booked as a
+     * separate contra-revenue amount at posting time rather than
+     * retroactively reducing the tax basis already established per line.
+     * Payments are usually not yet known when a draft is first saved, so
+     * this uses whichever payments are available now as a working estimate -
+     * post() re-resolves the rate from the final payments and reconciles the
+     * order before it is posted. The branch's tax type (inclusive/exclusive)
+     * is resolved alongside the rate and stamped onto the order/lines so
+     * later reprints/reports/JV posting never need to re-resolve it live.
      */
     protected function saveLinesAndComputeTotals(Order $order, array $obj, ?PosSetting $pos_setting, bool $persist = true)
     {
@@ -1208,7 +1193,9 @@ class OrderService
         $order_discount_allowed = $enable_discount && in_array($discount_level, ['order', 'both'], true);
 
         $payment_method_ids = collect($obj['payments'] ?? [])->pluck('payment_method_id')->filter()->values()->all();
-        $tax_percent = $this->resolveTaxPercent($order->business_id, $payment_method_ids);
+        $resolved_tax = $this->tax_resolver->resolve($order->business_id, $order->branch_id, $payment_method_ids);
+        $tax_percent = $resolved_tax['rate'];
+        $tax_type = $resolved_tax['tax_type'];
 
         $subtotal = 0;
         $line_discount_total = 0;
@@ -1363,8 +1350,8 @@ class OrderService
                 ));
             }
 
-            $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent);
-            $line_total = $taxable + $line_tax_amount;
+            $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent, $tax_type);
+            $line_total = \App\Support\Tax\TaxCalculator::lineTotal($taxable, $line_tax_amount, $tax_type);
 
             $subtotal += $line_subtotal;
             $line_discount_total += $line_discount_amount;
@@ -1541,7 +1528,12 @@ class OrderService
         unset($line);
 
         $discount_amount = $line_discount_total + $order_discount_amount + $voucher_discount_amount + $loyalty_discount_amount;
-        $total = $subtotal - $discount_amount + $tax_amount_total;
+        // Inclusive tax is already inside subtotal, so it isn't added again
+        // here (only backed out for display/JV purposes) - exclusive tax is
+        // additive on top of the discounted subtotal, as this always was.
+        $total = $tax_type === 'inclusive'
+            ? ($subtotal - $discount_amount)
+            : ($subtotal - $discount_amount + $tax_amount_total);
 
         return [
             'subtotal' => $subtotal,
@@ -1549,6 +1541,7 @@ class OrderService
             'discount_display' => $order_discount_display,
             'tax_amount' => round($tax_amount_total, 3),
             'tax_display' => $tax_percent,
+            'tax_type' => $tax_type,
             'total' => round($total, 3),
             'discount_id' => $discount_id,
             'voucher_id' => $voucher_id,
@@ -1639,9 +1632,11 @@ class OrderService
     protected function recomputeOrderTax(Order $order, $payments)
     {
         $payment_method_ids = $payments->pluck('payment_method_id')->filter()->values()->all();
-        $tax_percent = $this->resolveTaxPercent($order->business_id, $payment_method_ids);
+        $resolved_tax = $this->tax_resolver->resolve($order->business_id, $order->branch_id, $payment_method_ids);
+        $tax_percent = $resolved_tax['rate'];
+        $tax_type = $resolved_tax['tax_type'];
 
-        if (abs((float) $order->tax - $tax_percent) < 0.0001) {
+        if (abs((float) $order->tax - $tax_percent) < 0.0001 && $order->tax_type === $tax_type) {
             return;
         }
 
@@ -1649,23 +1644,26 @@ class OrderService
 
         foreach ($order->details as $detail) {
             $taxable = (float) $detail->subtotal - (float) $detail->discount_amount;
-            $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent);
+            $line_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, $tax_percent, $tax_type);
 
             $detail->update([
                 'tax' => $tax_percent,
                 'tax_amount' => $line_tax_amount,
-                'total' => round($taxable + $line_tax_amount, 3),
+                'total' => \App\Support\Tax\TaxCalculator::lineTotal($taxable, $line_tax_amount, $tax_type),
             ]);
 
             $tax_amount_total += $line_tax_amount;
         }
 
         $tax_amount_total = round($tax_amount_total, 3);
-        $new_total = round((float) $order->subtotal - (float) $order->discount_amount + $tax_amount_total, 3);
+        $new_total = $tax_type === 'inclusive'
+            ? round((float) $order->subtotal - (float) $order->discount_amount, 3)
+            : round((float) $order->subtotal - (float) $order->discount_amount + $tax_amount_total, 3);
 
         $order->update([
             'tax' => $tax_percent,
             'tax_amount' => $tax_amount_total,
+            'tax_type' => $tax_type,
             'total' => $new_total,
         ]);
     }
@@ -1812,8 +1810,8 @@ class OrderService
             $new_subtotal = round($new_base_quantity * (float) $detail->unit_price, 3);
             $new_discount_amount = round($new_subtotal * (float) $detail->discount / 100, 3);
             $taxable = $new_subtotal - $new_discount_amount;
-            $new_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, (float) $detail->tax);
-            $new_total = round($taxable + $new_tax_amount, 3);
+            $new_tax_amount = \App\Support\Tax\TaxCalculator::lineTax($taxable, (float) $detail->tax, $order->tax_type ?? 'exclusive');
+            $new_total = \App\Support\Tax\TaxCalculator::lineTotal($taxable, $new_tax_amount, $order->tax_type ?? 'exclusive');
 
             $subtotal_delta += $new_subtotal - (float) $detail->subtotal;
             $discount_delta += $new_discount_amount - (float) $detail->discount_amount;
@@ -2481,13 +2479,21 @@ class OrderService
             ]);
         }
 
-        // Credit: gross sales revenue (subtotal, before discount).
+        // Credit: gross sales revenue (subtotal, before discount). Exclusive:
+        // subtotal is already pre-tax, post it as-is. Inclusive: subtotal is
+        // tax-included, so the tax portion must be backed out of revenue
+        // here or it would be double-counted against the Tax account credited
+        // right below.
+        $revenue_amount = $order->tax_type === 'inclusive'
+            ? round((float) $order->subtotal - (float) $order->tax_amount, 3)
+            : (float) $order->subtotal;
+
         JournalEntryDetail::create([
             'journal_entry_detail_id' => generateUuid(),
             'journal_entry_id' => $journal_entry->journal_entry_id,
             'account_id' => $accounting_setting->default_sale_account_id,
             'debit' => 0,
-            'credit' => $order->subtotal,
+            'credit' => $revenue_amount,
             'description' => 'Order #' . $order->daily_order_id,
         ]);
 
@@ -3336,6 +3342,7 @@ class OrderService
             'discount_amount' => $totals['discount_amount'],
             'tax' => $totals['tax_display'],
             'tax_amount' => $totals['tax_amount'],
+            'tax_type' => $totals['tax_type'],
             'total' => $totals['total'],
             'discount_id' => $totals['discount_id'],
             'voucher_id' => $totals['voucher_id'],

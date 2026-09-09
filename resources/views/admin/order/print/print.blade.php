@@ -38,7 +38,7 @@
                 <th>{{ __('common.unit') }}</th>
                 <th class="text-right">{{ __('common.unit_price') }}</th>
                 <th class="text-right">Discount</th>
-                <th class="text-right">Tax</th>
+                <th class="text-right">Tax {{ $order->tax_type === 'inclusive' ? '(Incl.)' : '(Excl.)' }}</th>
                 <th class="text-right">{{ __('common.total') }}</th>
             </tr>
         </thead>
@@ -73,7 +73,7 @@
             <td class="text-right">{{ currency($order->discount_amount) }}</td>
         </tr>
         <tr>
-            <td>Tax</td>
+            <td>Tax {{ $order->tax_type === 'inclusive' ? '(Inclusive)' : '(Exclusive)' }}</td>
             <td class="text-right">{{ currency($order->tax_amount) }}</td>
         </tr>
         <tr class="grand-total">

@@ -7,6 +7,7 @@ return [
     // Tab nav (left sidebar)
     'tab_business' => 'Business',
     'tab_localization' => 'Language / Localization',
+    'tab_tax' => 'Tax',
     'tab_accounting' => 'Accounting',
     'tab_inventory' => 'Inventory',
     'tab_notification' => 'Notifications',
@@ -51,10 +52,6 @@ return [
     // Business tab
     'business_title' => 'Business Setting',
     'timezone' => 'Timezone',
-    'overall_tax_rate' => 'Overall Tax Rate (%)',
-    'overall_tax_rate_help' => 'Applied to orders paid by cash or any other non-card method.',
-    'card_tax_rate' => 'Card Tax Rate (%)',
-    'card_tax_rate_help' => 'Applied automatically when an order is paid fully by card.',
     'date_format' => 'Date Format',
     'time_format' => 'Time Format',
     'datatable_pagination_position' => 'Table pagination position',
@@ -62,6 +59,20 @@ return [
     'datatable_pagination_bottom' => 'Bottom',
     'datatable_pagination_top' => 'Top',
     'datatable_pagination_both' => 'Top and bottom',
+
+    // Tax tab
+    'tax_configuring' => 'Configuring Branch',
+    'tax_editing_branch' => 'Editing tax settings for :name.',
+    'tax_title' => 'Tax Settings',
+    'tax_description' => 'Set the cash/card tax rates and whether tax is inclusive or exclusive for each branch. This rate and mode apply uniformly across POS, POS desktop, website, and mobile app orders at that branch.',
+    'overall_tax_rate' => 'Overall Tax Rate (%)',
+    'overall_tax_rate_help' => 'Applied to orders paid by cash or any other non-card method.',
+    'card_tax_rate' => 'Card Tax Rate (%)',
+    'card_tax_rate_help' => 'Applied automatically when an order is paid fully by card.',
+    'tax_type' => 'Tax Type',
+    'tax_type_exclusive' => 'Exclusive (tax added on top)',
+    'tax_type_inclusive' => 'Inclusive (tax already included)',
+    'tax_type_help' => 'This never changes the price the customer sees or pays - it only changes how the receipt and accounting reports break the price down between revenue and tax.',
 
     // Accounting tab — COA defaults
     'accounting_title' => 'Accounting Setting',

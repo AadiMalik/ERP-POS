@@ -6,7 +6,6 @@ use App\Enums\Message;
 use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Http\Controllers\Controller;
-use App\Models\BusinessSetting;
 use App\Models\CustomerSetting;
 use App\Models\InventorySetting;
 use App\Models\PosRegister;
@@ -27,6 +26,7 @@ use App\Services\Concrete\Admin\PaymentMethodService;
 use App\Services\Concrete\Admin\NotificationService;
 use App\Services\Concrete\Admin\PosRegisterSessionService;
 use App\Services\Concrete\Admin\SaleTypeService;
+use App\Services\Concrete\Admin\SettingService;
 use App\Services\Concrete\Admin\UserService;
 use App\Traits\ResponseAPI;
 use Exception;
@@ -93,6 +93,7 @@ class PosScreenController extends Controller
     protected $pos_register_session_service;
     protected $sale_type_service;
     protected $notification_service;
+    protected $setting_service;
 
     public function __construct(
         CustomerService $customer_service,
@@ -109,7 +110,8 @@ class PosScreenController extends Controller
         ExpenseService $expense_service,
         PosRegisterSessionService $pos_register_session_service,
         SaleTypeService $sale_type_service,
-        NotificationService $notification_service
+        NotificationService $notification_service,
+        SettingService $setting_service
     ) {
         $this->middleware('permission:pos.access');
 
@@ -128,6 +130,7 @@ class PosScreenController extends Controller
         $this->pos_register_session_service = $pos_register_session_service;
         $this->sale_type_service = $sale_type_service;
         $this->notification_service = $notification_service;
+        $this->setting_service = $setting_service;
     }
 
     /**
@@ -155,7 +158,7 @@ class PosScreenController extends Controller
         [$business_id, $branch_id] = $context;
 
         $pos_setting = PosSetting::firstOrCreate(['business_id' => $business_id]);
-        $business_setting = BusinessSetting::firstOrCreate(['business_id' => $business_id]);
+        $branch_tax_setting = $this->setting_service->getBranchTaxSetting($business_id, $branch_id);
         $inventory_setting = InventorySetting::firstOrCreate(['business_id' => $business_id]);
         // Mirrors CustomerController::show()/ProductController::create()'s
         // lookup - gates the "Use Loyalty Points" cart control the same way
@@ -222,7 +225,7 @@ class PosScreenController extends Controller
 
         return view('admin.pos.screen.index', compact(
             'pos_setting',
-            'business_setting',
+            'branch_tax_setting',
             'inventory_setting',
             'customer_setting',
             'business_id',

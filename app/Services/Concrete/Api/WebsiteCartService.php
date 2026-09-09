@@ -4,7 +4,6 @@ namespace App\Services\Concrete\Api;
 
 use App\Enums\Status;
 use App\Models\Branch;
-use App\Models\BusinessSetting;
 use App\Models\InventorySetting;
 use App\Models\Product;
 use App\Models\ProductVariation;
@@ -12,8 +11,10 @@ use App\Models\SaleType;
 use App\Models\WebsiteCart;
 use App\Models\WebsiteCartItem;
 use App\Services\Concrete\Admin\ProductVariationStockService;
+use App\Services\Concrete\Admin\TaxSettingResolverService;
 use App\Services\Concrete\Admin\VariationPricingService;
 use App\Services\Concrete\Api\WebsiteCartVoucherService;
+use App\Support\Tax\TaxCalculator;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -26,15 +27,18 @@ class WebsiteCartService
     protected $pricing_engine;
     protected $voucher_service;
     protected $stock_service;
+    protected $tax_resolver;
 
     public function __construct(
         VariationPricingService $pricing_engine,
         WebsiteCartVoucherService $voucher_service,
-        ProductVariationStockService $stock_service
+        ProductVariationStockService $stock_service,
+        TaxSettingResolverService $tax_resolver
     ) {
         $this->pricing_engine = $pricing_engine;
         $this->voucher_service = $voucher_service;
         $this->stock_service = $stock_service;
+        $this->tax_resolver = $tax_resolver;
     }
 
     public function getOrCreateCart(int $user_id, string $business_id, ?string $branch_id = null): WebsiteCart
@@ -361,10 +365,16 @@ class WebsiteCartService
             ];
         }
 
-        $tax_percent = $this->resolveTaxPercent($cart->business_id);
+        // No payment method is known yet at cart-preview time, so this always
+        // resolves the Overall rate (never Card) - matches checkout, which
+        // re-resolves from the actually-chosen payment method via the same
+        // OrderService::save() path this preview is meant to mirror.
+        $resolved_tax = $this->tax_resolver->resolve($cart->business_id, $context['branch_id'], []);
+        $tax_percent = $resolved_tax['rate'];
+        $tax_type = $resolved_tax['tax_type'];
         $taxable = max(0, $subtotal - $discount_total);
-        $tax_amount = round($taxable * $tax_percent / 100, 3);
-        $total = round($taxable + $tax_amount, 3);
+        $tax_amount = TaxCalculator::lineTax($taxable, $tax_percent, $tax_type);
+        $total = TaxCalculator::lineTotal($taxable, $tax_amount, $tax_type);
         $voucher_discount = 0.0;
         $voucher_meta = null;
         $voucher_error = null;
@@ -384,7 +394,7 @@ class WebsiteCartService
                 $preview = $voucher_result['preview'];
                 $voucher_discount = (float) ($preview['voucher_discount_amount'] ?? 0);
                 $taxable = max(0, $subtotal - $discount_total - $voucher_discount);
-                $tax_amount = round($taxable * $tax_percent / 100, 3);
+                $tax_amount = TaxCalculator::lineTax($taxable, $tax_percent, $tax_type);
                 // Not $preview['total']: that comes from the shared POS
                 // previewVoucher(), which re-prices each line via POS pricing
                 // and knows nothing about the storefront's own promotional/
@@ -394,7 +404,7 @@ class WebsiteCartService
                 // of reducing it. Only the voucher_discount_amount delta is
                 // trustworthy from that preview; the total must be rebuilt
                 // from this cart's own already-correct taxable/tax.
-                $total = round($taxable + $tax_amount, 3);
+                $total = TaxCalculator::lineTotal($taxable, $tax_amount, $tax_type);
 
                 if ($voucher_meta) {
                     $voucher_meta['discount_amount'] = $voucher_discount;
@@ -422,6 +432,7 @@ class WebsiteCartService
                 'voucher_discount' => round($voucher_discount, 3),
                 'tax_percent' => $tax_percent,
                 'tax' => $tax_amount,
+                'tax_type' => $tax_type,
                 'shipping' => 0,
                 'total' => $total,
             ],
@@ -568,12 +579,5 @@ class WebsiteCartService
             'branch_id' => $branch->branch_id,
             'warehouse_id' => $warehouse_id,
         ];
-    }
-
-    public function resolveTaxPercent(string $business_id): float
-    {
-        $setting = BusinessSetting::where('business_id', $business_id)->first();
-
-        return (float) ($setting->overall_tax_rate ?? 0);
     }
 }

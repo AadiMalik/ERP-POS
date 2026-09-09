@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\Offline;
 
 use App\Http\Controllers\Controller;
-use App\Models\BusinessSetting;
 use App\Models\InventorySetting;
 use App\Models\PosSetting;
+use App\Services\Concrete\Admin\SettingService;
 use App\Services\Concrete\Admin\ThermalPrintSettingResolverService;
 use App\Services\Concrete\Api\Offline\OfflineAuthService;
 use App\Traits\ResponseAPI;
@@ -18,11 +18,13 @@ class SettingsController extends Controller
 
     protected $auth_service;
     protected $thermal_resolver;
+    protected $setting_service;
 
-    public function __construct(OfflineAuthService $auth_service, ThermalPrintSettingResolverService $thermal_resolver)
+    public function __construct(OfflineAuthService $auth_service, ThermalPrintSettingResolverService $thermal_resolver, SettingService $setting_service)
     {
         $this->auth_service = $auth_service;
         $this->thermal_resolver = $thermal_resolver;
+        $this->setting_service = $setting_service;
     }
 
     /**
@@ -36,8 +38,8 @@ class SettingsController extends Controller
         $branch_id = $device->branch_id;
 
         $pos_setting = PosSetting::firstOrCreate(['business_id' => $business_id]);
-        $business_setting = BusinessSetting::firstOrCreate(['business_id' => $business_id]);
         $inventory_setting = InventorySetting::firstOrCreate(['business_id' => $business_id]);
+        $branch_tax_setting = $this->setting_service->getBranchTaxSetting($business_id, $branch_id);
 
         return $this->success('POS context.', [
             'business_id' => $business_id,
@@ -46,8 +48,9 @@ class SettingsController extends Controller
             'pos_setting' => $pos_setting,
             'allow_negative_stock' => (bool) $inventory_setting->negative_stock,
             'tax_rates_setting' => [
-                'overall_tax_rate' => $business_setting->overall_tax_rate,
-                'card_tax_rate' => $business_setting->card_tax_rate,
+                'overall_tax_rate' => $branch_tax_setting->overall_tax_rate,
+                'card_tax_rate' => $branch_tax_setting->card_tax_rate,
+                'tax_type' => $branch_tax_setting->tax_type,
             ],
             'thermal_print_setting' => $this->thermal_resolver->resolve($business_id, $branch_id),
             'user' => $this->auth_service->formatUser($user),

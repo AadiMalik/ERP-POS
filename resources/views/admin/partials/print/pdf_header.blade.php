@@ -69,25 +69,25 @@
                         @break
 
                         @case('ntn')
-                            @if (!empty($business->ntn))
+                            @if (!empty(optional($business->fbrSetting)->fbr_ntn))
                                 <div style="font-size:{{ $style['font_size'] ?? 10 }}px; color:{{ $style['color'] ?? '#444' }};">
-                                    NTN: {{ $business->ntn }}
+                                    NTN: {{ $business->fbrSetting->fbr_ntn }}
                                 </div>
                             @endif
                         @break
 
                         @case('strn')
-                            @if (!empty($business->strn))
+                            @if (!empty(optional($business->fbrSetting)->fbr_strn))
                                 <div style="font-size:{{ $style['font_size'] ?? 10 }}px; color:{{ $style['color'] ?? '#444' }};">
-                                    STRN: {{ $business->strn }}
+                                    STRN: {{ $business->fbrSetting->fbr_strn }}
                                 </div>
                             @endif
                         @break
 
                         @case('tax_reg_no')
-                            @if (!empty($business->tax_reg_no))
+                            @if (!empty(optional($business->praSetting)->pra_registration_no))
                                 <div style="font-size:{{ $style['font_size'] ?? 10 }}px; color:{{ $style['color'] ?? '#444' }};">
-                                    Tax Reg. No: {{ $business->tax_reg_no }}
+                                    Tax Reg. No: {{ $business->praSetting->pra_registration_no }}
                                 </div>
                             @endif
                         @break

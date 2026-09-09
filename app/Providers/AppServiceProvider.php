@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\Concrete\Admin\AccessControlService;
 use App\Services\Concrete\Admin\PrintSettingResolverService;
+use App\Services\Concrete\Admin\TaxSettingResolverService;
 use App\Services\Concrete\Admin\ThermalPrintSettingResolverService;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
@@ -21,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
         // header/footer/badge partials rendering the same print document.
         $this->app->singleton(PrintSettingResolverService::class);
         $this->app->singleton(ThermalPrintSettingResolverService::class);
+        $this->app->singleton(TaxSettingResolverService::class);
 
         // Singleton so its permission->module map is built once per request,
         // not once per sidebar/dashboard @canAccess call.

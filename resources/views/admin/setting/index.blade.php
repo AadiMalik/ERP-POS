@@ -52,6 +52,10 @@
                                 {{ __('settings.tab_localization') }}
                             </button>
                             <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
+                                data-bs-target="#tax">
+                                {{ __('settings.tab_tax') }}
+                            </button>
+                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
                                 data-bs-target="#accounting">
                                 {{ __('settings.tab_accounting') }}
                             </button>
@@ -132,6 +136,9 @@
                             </div>
                             <div class="tab-pane fade" id="localization">
                                 @include('admin.setting.tabs.localization')
+                            </div>
+                            <div class="tab-pane fade" id="tax">
+                                @include('admin.setting.tabs.tax')
                             </div>
                             <div class="tab-pane fade" id="accounting">
                                 @include('admin.setting.tabs.accounting')

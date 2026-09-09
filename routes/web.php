@@ -1974,6 +1974,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('print', [App\Http\Controllers\Admin\SettingController::class, 'updatePrintSetting'])->name('print.update');
         Route::post('thermal-print', [App\Http\Controllers\Admin\SettingController::class, 'updateThermalPrintSetting'])->name('thermal_print.update');
         Route::post('thermal-print/preview', [App\Http\Controllers\Admin\SettingController::class, 'previewThermalPrintSetting'])->name('thermal_print.preview');
+        Route::post('branch-tax', [App\Http\Controllers\Admin\SettingController::class, 'updateBranchTaxSetting'])->name('branch_tax.update');
         Route::post('barcode', [App\Http\Controllers\Admin\SettingController::class, 'updateBarcodeSetting'])->name('barcode.update');
         Route::post('theme', [App\Http\Controllers\Admin\SettingController::class, 'updateThemeSetting'])->name('theme.update');
         Route::post('theme/preset', [App\Http\Controllers\Admin\SettingController::class, 'applyThemePreset'])->name('theme.preset');

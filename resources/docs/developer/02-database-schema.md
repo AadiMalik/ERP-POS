@@ -63,6 +63,13 @@ every other listing uses the HTML table id (`warehouse_table`,
 `barcode_settings`, `thermal_print_settings`, `notification_settings`. See
 [Settings System](07-settings-system.md).
 
+`branch_tax_settings` is the one settings table scoped **per branch** rather
+than per business — one mandatory row per `branch_id` (unique/NOT NULL):
+`overall_tax_rate`, `card_tax_rate` (decimal(5,2)), `tax_type` (`inclusive` |
+`exclusive`, default `exclusive`). `orders.tax_type` snapshots the resolved
+mode onto each order at save time. See "Per-Branch Tax Configuration" in
+[Settings System](07-settings-system.md).
+
 ## Inventory / Catalog
 
 `warehouses`, `categories`, `sub_categories`, `brands`, `units`, `products` (→

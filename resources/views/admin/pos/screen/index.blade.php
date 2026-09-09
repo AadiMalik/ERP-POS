@@ -722,8 +722,9 @@
             'banks' => $banks,
             'sale_types' => $sale_types,
             'tax_rates_setting' => [
-                'overall_tax_rate' => $business_setting->overall_tax_rate,
-                'card_tax_rate' => $business_setting->card_tax_rate,
+                'overall_tax_rate' => $branch_tax_setting->overall_tax_rate,
+                'card_tax_rate' => $branch_tax_setting->card_tax_rate,
+                'tax_type' => $branch_tax_setting->tax_type,
             ],
             'permissions' => $permissions,
             'reorder_from' => $reorder_from,
