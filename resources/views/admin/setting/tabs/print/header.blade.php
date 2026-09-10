@@ -26,8 +26,80 @@
         'barcode' => ['label' => __('settings.print_field_barcode'), 'align' => 'right'],
     ];
     $watermark = $header['watermark'] ?? [];
+
+    $header_templates = [
+        'classic'   => __('settings.print_template_classic'),
+        'modern'    => __('settings.print_template_modern'),
+        'minimal'   => __('settings.print_template_minimal'),
+        'boxed'     => __('settings.print_template_boxed'),
+        'elegant'   => __('settings.print_template_elegant'),
+        'corporate' => __('settings.print_template_corporate'),
+        'bold'      => __('settings.print_template_bold'),
+        'compact'   => __('settings.print_template_compact'),
+    ];
+    $selected_header_template = $header['template'] ?? 'classic';
+
+    $preview_business = (object) [
+        'logo' => null,
+        'name' => __('settings.print_preview_business_name'),
+        'address' => __('settings.print_preview_address'),
+        'city' => null,
+        'state' => null,
+        'country' => null,
+        'phone' => '+92 300 1234567',
+        'email' => 'info@business.com',
+        'website' => 'www.business.com',
+        'fbrSetting' => null,
+        'praSetting' => null,
+    ];
+    $print_css_url = asset('public/assets/css/print.css') . '?v=' . filemtime(public_path('assets/css/print.css'));
 @endphp
 
+<h6>{{ __('settings.print_template_choose_header') }}</h6>
+<div id="headerTemplateCarousel" class="carousel slide pt-template-carousel mb-4" data-bs-interval="false">
+    <div class="carousel-inner">
+        @foreach ($header_templates as $key => $label)
+            @php
+                $preview_config = new \App\Support\Print\PrintConfig([
+                    'header_config' => array_merge($header, ['template' => $key]),
+                ]);
+                $preview_html = view('admin.partials.print.header', [
+                    'business' => $preview_business,
+                    'branch' => null,
+                    'title' => __('settings.print_preview_document_title'),
+                    'doc_no' => 'INV-00231',
+                    'doc_date' => date('d M, Y'),
+                    'reference' => [],
+                    'print_config' => $preview_config,
+                ])->render();
+                $preview_doc = '<html><head><link rel="stylesheet" href="' . $print_css_url . '">'
+                    . '<style>body{margin:0;background:#fff;}</style></head><body>'
+                    . '<div style="padding:15mm 12mm 6mm 12mm;">' . $preview_html . '</div></body></html>';
+            @endphp
+            <div class="carousel-item {{ $selected_header_template === $key ? 'active' : '' }}">
+                <div class="pt-template-slide">
+                    <iframe class="pt-template-frame-lg" srcdoc="{{ $preview_doc }}"></iframe>
+                    <div class="pt-template-slide-footer">
+                        <label class="pt-template-pick">
+                            <input type="radio" name="header_config[template]" value="{{ $key }}"
+                                {{ $selected_header_template === $key ? 'checked' : '' }}>
+                            <strong>{{ $label }}</strong>
+                        </label>
+                        <span class="pt-template-position">{{ $loop->iteration }} / {{ $loop->count }}</span>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#headerTemplateCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#headerTemplateCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    </button>
+</div>
+
+<h6>{{ __('settings.print_th_field') }}</h6>
 <div class="table-responsive">
     <table class="table pt-field-table">
         <thead>

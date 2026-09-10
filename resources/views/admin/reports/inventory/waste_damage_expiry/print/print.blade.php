@@ -1,8 +1,28 @@
+@php
+    $business = Auth::user()->business;
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve(Auth::user()->business_id);
+@endphp
 @extends('layouts.print')
+
 @section('title', __('reports.waste_damage_expiry_report'))
+
+@section('css')
+    @include('admin.partials.print.page_css', ['print_config' => $print_config])
+@endsection
+
 @section('content')
-    <h3>{{ __('reports.waste_damage_expiry_report') }}</h3>
-    <table class="table table-bordered table-sm">
+    @include('admin.partials.print.header', [
+        'business' => $business,
+        'branch' => null,
+        'title' => __('reports.waste_damage_expiry_report'),
+        'doc_no' => '',
+        'doc_date' => localDate(now()),
+        'reference' => [],
+        'print_config' => $print_config,
+    ])
+
+    <table class="print-table">
         <thead><tr><th>{{ __('reports.col_reference_no_alt') }}</th><th>{{ __('reports.col_date') }}</th><th>{{ __('reports.col_warehouse') }}</th><th>{{ __('reports.col_product') }}</th><th>{{ __('reports.col_variation') }}</th><th>{{ __('reports.col_batch') }}</th><th>{{ __('reports.col_expiry') }}</th><th>{{ __('reports.col_qty') }}</th><th>{{ __('reports.col_unit') }}</th><th>{{ __('reports.col_unit_cost') }}</th><th>{{ __('reports.col_value') }}</th><th>{{ __('reports.col_loss_type') }}</th><th>{{ __('reports.col_reason') }}</th><th>{{ __('reports.col_status') }}</th></tr></thead>
         <tbody>
             @forelse ($rows as $row)
@@ -27,4 +47,8 @@
             @endforelse
         </tbody>
     </table>
+    @include('admin.partials.print.footer', [
+        'signatories' => ['Prepared By', 'Verified By'],
+        'print_config' => $print_config,
+    ])
 @endsection

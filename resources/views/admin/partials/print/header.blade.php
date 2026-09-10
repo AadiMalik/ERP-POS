@@ -19,7 +19,7 @@
     </div>
 @endif
 
-<div class="print-header">
+<div class="print-header print-template-header-{{ $pc->headerTemplate() }}">
     <div class="company-block">
         @if ($pc->isVisible('header', 'logo'))
             <img class="company-logo"
@@ -125,40 +125,48 @@
 
     <div class="doc-block">
         @foreach ($right_fields as $field)
+            @continue($field !== 'document_title' || !$pc->isVisible('header', $field))
             @php $style = $pc->fieldStyle($field); @endphp
-            @if ($pc->isVisible('header', $field))
-                @switch($field)
-                    @case('document_title')
-                        <p class="doc-title"
-                            style="font-size:{{ $style['font_size'] ?? 18 }}px; font-weight:{{ $style['font_weight'] ?? 'bold' }}; color:{{ $style['color'] ?? '#1a1a1a' }};">
-                            {{ $title }}
-                        </p>
-                    @break
-
-                    @case('document_no')
-                        <p class="doc-meta"
-                            style="font-size:{{ $style['font_size'] ?? 11 }}px; color:{{ $style['color'] ?? '#1a1a1a' }};">
-                            <strong>Document No:</strong> {{ $doc_no ?? 'N/A' }}
-                        </p>
-                    @break
-
-                    @case('date')
-                        <p class="doc-meta"
-                            style="font-size:{{ $style['font_size'] ?? 11 }}px; color:{{ $style['color'] ?? '#1a1a1a' }};">
-                            <strong>Date:</strong> {{ $doc_date ?? 'N/A' }}
-                        </p>
-                    @break
-
-                    {{-- 'voucher_no', 'reference_no' and 'time' have no single cross-module data
-                         source today (each module supplies its own $reference array below) -
-                         they are schema-complete toggles reserved for a future data hookup. --}}
-                @endswitch
-            @endif
+            <p class="doc-title"
+                style="font-size:{{ $style['font_size'] ?? 18 }}px; font-weight:{{ $style['font_weight'] ?? 'bold' }}; color:{{ $style['color'] ?? '#1a1a1a' }};">
+                {{ $title }}
+            </p>
         @endforeach
 
-        @foreach ($reference ?? [] as $label => $value)
-            <p class="doc-meta"><strong>{{ $label }}:</strong> {{ $value ?? 'N/A' }}</p>
-        @endforeach
+        {{-- A dedicated table so every "Label:  Value" row lines up in two
+             clean columns no matter how long each label is - a plain
+             text-align:right paragraph per row (the old markup) staggers the
+             values because each row's total width differs. --}}
+        <div class="doc-meta-table">
+            @foreach ($right_fields as $field)
+                @php $style = $pc->fieldStyle($field); @endphp
+                @if ($pc->isVisible('header', $field))
+                    @switch($field)
+                        @case('document_no')
+                            <p class="doc-meta"
+                                style="font-size:{{ $style['font_size'] ?? 11 }}px; color:{{ $style['color'] ?? '#1a1a1a' }};">
+                                <strong>Document No:</strong> <span class="doc-meta-value">{{ $doc_no ?? 'N/A' }}</span>
+                            </p>
+                        @break
+
+                        @case('date')
+                            <p class="doc-meta"
+                                style="font-size:{{ $style['font_size'] ?? 11 }}px; color:{{ $style['color'] ?? '#1a1a1a' }};">
+                                <strong>Date:</strong> <span class="doc-meta-value">{{ $doc_date ?? 'N/A' }}</span>
+                            </p>
+                        @break
+
+                        {{-- 'voucher_no', 'reference_no' and 'time' have no single cross-module data
+                             source today (each module supplies its own $reference array below) -
+                             they are schema-complete toggles reserved for a future data hookup. --}}
+                    @endswitch
+                @endif
+            @endforeach
+
+            @foreach ($reference ?? [] as $label => $value)
+                <p class="doc-meta"><strong>{{ $label }}:</strong> <span class="doc-meta-value">{{ $value ?? 'N/A' }}</span></p>
+            @endforeach
+        </div>
     </div>
 </div>
 

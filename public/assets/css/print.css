@@ -100,10 +100,29 @@ body {
     margin: 0;
 }
 
-.print-header .doc-meta strong {
-    display: inline-block;
-    min-width: 110px;
-    text-align: left;
+/* Real 2-column table: label column and value column each auto-size to their
+   own widest cell, so every row lines up regardless of label length (a plain
+   text-align:right paragraph per row staggers rows of different lengths). */
+.print-header .doc-meta-table {
+    display: table;
+    margin-left: auto;
+}
+
+.print-header .doc-meta-table .doc-meta {
+    display: table-row;
+}
+
+.print-header .doc-meta-table .doc-meta strong {
+    display: table-cell;
+    text-align: right;
+    white-space: nowrap;
+    padding-right: 8px;
+}
+
+.print-header .doc-meta-table .doc-meta .doc-meta-value {
+    display: table-cell;
+    text-align: right;
+    white-space: nowrap;
 }
 
 .printed-by {
@@ -302,6 +321,375 @@ body {
     margin-top: 20px;
     border-top: 1px solid #ddd;
     padding-top: 8px;
+}
+
+/* ===================================================================
+   Header letterhead templates - selected on Settings > Report > Header.
+   Each one changes the actual layout/shape (not just a border tweak) so
+   the 8 read as genuinely different designs, side by side.
+   =================================================================== */
+
+/* classic: the original hardcoded layout above, kept as the explicit default -
+   two-column (company left / document right), thin rule underneath. */
+
+/* modern: solid brand-color band behind the whole header, reversed (white) text. */
+.print-template-header-modern {
+    background: #3833C8;
+    border-bottom: none;
+    padding: 14px 16px;
+    border-radius: 4px;
+}
+
+/* !important: company-name/doc-title/etc. carry an admin-configured inline
+   color style (Settings > Report > Header field table) that otherwise always
+   wins over this class - and here it must not, or the text disappears into
+   the colored background. */
+.print-template-header-modern .company-name,
+.print-template-header-modern .doc-title {
+    color: #fff !important;
+}
+
+.print-template-header-modern .company-meta,
+.print-template-header-modern .branch-meta,
+.print-template-header-modern .doc-meta,
+.print-template-header-modern .doc-meta strong {
+    color: #e3e1fb !important;
+}
+
+/* minimal: no rule at all, bottom-aligned, thin uppercase letter-spaced labels. */
+.print-template-header-minimal {
+    border-bottom: none;
+    align-items: flex-end;
+    padding-bottom: 4px;
+}
+
+.print-template-header-minimal .company-name {
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 13px;
+}
+
+.print-template-header-minimal .doc-title {
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 13px;
+}
+
+.print-template-header-minimal .company-meta,
+.print-template-header-minimal .branch-meta,
+.print-template-header-minimal .doc-meta {
+    color: #aaa !important;
+}
+
+/* boxed: the whole letterhead framed, double ruled. */
+.print-template-header-boxed {
+    border: 2px solid #1a1a1a;
+    padding: 10px 14px;
+    box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 4px #1a1a1a;
+}
+
+/* elegant: centered/stacked, with a short decorative rule under the title. */
+.print-template-header-elegant {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border-bottom: none;
+    padding-bottom: 14px;
+    position: relative;
+}
+
+.print-template-header-elegant::after {
+    content: '';
+    display: block;
+    width: 70px;
+    height: 3px;
+    background: #1a1a1a;
+    margin: 10px auto 0;
+}
+
+.print-template-header-elegant .company-block {
+    max-width: 100%;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.print-template-header-elegant .doc-block {
+    text-align: center;
+    margin-top: 6px;
+}
+
+.print-template-header-elegant .doc-title {
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 16px;
+}
+
+/* elegant keeps the plain centered single-line look instead of the 2-column
+   table (a wide label/value grid would fight its centered composition) -
+   these need to match the base rule's selector length to win the cascade. */
+.print-template-header-elegant .doc-meta-table {
+    display: block;
+    margin-left: 0;
+}
+
+.print-template-header-elegant .doc-meta-table .doc-meta {
+    display: block;
+}
+
+.print-template-header-elegant .doc-meta-table .doc-meta strong {
+    display: inline;
+    text-align: center;
+    white-space: normal;
+    padding-right: 4px;
+}
+
+.print-template-header-elegant .doc-meta-table .doc-meta .doc-meta-value {
+    display: inline;
+    text-align: center;
+    white-space: normal;
+}
+
+/* corporate: two-tone split panel - dark company block, plain document block. */
+.print-template-header-corporate {
+    border-bottom: none;
+    align-items: stretch;
+    padding: 0;
+}
+
+.print-template-header-corporate .company-block {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 14px 16px;
+    max-width: 55%;
+    border-radius: 4px 0 0 4px;
+}
+
+.print-template-header-corporate .company-name,
+.print-template-header-corporate .company-meta,
+.print-template-header-corporate .branch-meta {
+    color: #fff !important;
+}
+
+.print-template-header-corporate .doc-block {
+    padding: 14px 16px;
+    background: #f4f5fb;
+    flex: 1;
+    border-radius: 0 4px 4px 0;
+}
+
+/* bold: heavy double rule, document title set as a solid stamp/chip. */
+.print-template-header-bold {
+    border-bottom: 6px double #1a1a1a;
+    padding-bottom: 14px;
+}
+
+.print-template-header-bold .company-name {
+    text-transform: uppercase;
+    font-size: 20px;
+    letter-spacing: 1px;
+}
+
+.print-template-header-bold .doc-title {
+    display: inline-block;
+    background: #1a1a1a;
+    color: #fff !important;
+    padding: 4px 14px;
+    font-size: 18px;
+    letter-spacing: 1px;
+}
+
+/* compact: every company field folded onto one dense horizontal line. */
+.print-template-header-compact {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+    align-items: center;
+}
+
+.print-template-header-compact .company-block {
+    align-items: center;
+}
+
+.print-template-header-compact .company-block > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 8px;
+}
+
+.print-template-header-compact .company-block > div p {
+    margin: 0;
+}
+
+.print-template-header-compact .company-name {
+    font-size: 13px;
+}
+
+.print-template-header-compact .company-meta,
+.print-template-header-compact .branch-meta {
+    font-size: 10px;
+}
+
+.print-template-header-compact .doc-title {
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+/* compact folds the meta rows onto one dense inline line too, instead of a
+   2-column table - these need to match the base rule's selector length to
+   win the cascade. */
+.print-template-header-compact .doc-meta-table {
+    display: block;
+}
+
+.print-template-header-compact .doc-meta-table .doc-meta {
+    display: inline-block;
+    font-size: 9px;
+    margin: 0 0 0 8px;
+}
+
+.print-template-header-compact .doc-meta-table .doc-meta strong {
+    display: inline;
+    text-align: left;
+    white-space: nowrap;
+    padding-right: 3px;
+}
+
+.print-template-header-compact .doc-meta-table .doc-meta .doc-meta-value {
+    display: inline;
+    white-space: nowrap;
+}
+
+/* ===================================================================
+   Footer templates - selected on Settings > Report > Footer.
+   Same principle: each changes the actual shape, not just a rule.
+   =================================================================== */
+
+/* classic: the original hardcoded layout above - plain sections, signatures
+   spaced evenly, a thin rule above the generated-on line. */
+
+/* minimal: no solid rules anywhere, dotted sign line, muted throughout. */
+.print-template-footer-minimal .print-footer-section,
+.print-template-footer-minimal .generated-at,
+.print-template-footer-minimal .signature-box {
+    color: #999;
+}
+
+.print-template-footer-minimal .generated-at {
+    border-top: none;
+}
+
+.print-template-footer-minimal .signature-line {
+    border-top: 1px dotted #ccc;
+}
+
+/* boxed: whole footer framed to match the boxed header. */
+.print-template-footer-boxed {
+    border: 1px solid #333;
+    padding: 14px;
+    margin-top: 20px;
+}
+
+/* bold: heavy rule, section labels rendered as solid chips, thick sign lines. */
+.print-template-footer-bold .print-footer {
+    border-top: 4px solid #1a1a1a;
+    padding-top: 12px;
+}
+
+.print-template-footer-bold .print-footer-section strong {
+    display: inline-block;
+    background: #1a1a1a;
+    color: #fff;
+    padding: 2px 8px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    font-size: 10px;
+}
+
+.print-template-footer-bold .signature-line {
+    border-top: 2px solid #1a1a1a;
+}
+
+/* centered: every line and the signature row centered as one column. */
+.print-template-footer-centered .print-footer-section {
+    text-align: center;
+}
+
+.print-template-footer-centered .print-signatures {
+    justify-content: center;
+    gap: 40px;
+}
+
+.print-template-footer-centered .signature-box {
+    flex: none;
+    width: 160px;
+}
+
+.print-template-footer-centered .generated-at {
+    text-align: center;
+}
+
+/* corporate: solid dark band across the whole footer, reversed text. */
+.print-template-footer-corporate {
+    background: #1a1a2e;
+    color: #f0f0f5;
+    padding: 14px 16px;
+    border-radius: 4px;
+}
+
+.print-template-footer-corporate .print-footer-section,
+.print-template-footer-corporate .signature-box,
+.print-template-footer-corporate .generated-at {
+    color: #f0f0f5;
+}
+
+.print-template-footer-corporate .signature-line {
+    border-top-color: #fff;
+}
+
+/* divided: ledger-style - each text section and each signature column ruled off. */
+.print-template-footer-divided .print-footer-section {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+}
+
+.print-template-footer-divided .signature-box {
+    border-left: 1px solid #ddd;
+    padding-left: 12px;
+}
+
+.print-template-footer-divided .signature-box:first-child {
+    border-left: none;
+    padding-left: 0;
+}
+
+/* compact: everything folded tight into the smallest vertical space. */
+.print-template-footer-compact .print-footer-section {
+    font-size: 10px;
+    margin-bottom: 4px;
+}
+
+.print-template-footer-compact .print-signatures {
+    margin-top: 15px;
+    gap: 10px;
+}
+
+.print-template-footer-compact .signature-box {
+    font-size: 9px;
+}
+
+.print-template-footer-compact .signature-line {
+    height: 18px;
+    margin-bottom: 3px;
+}
+
+.print-template-footer-compact .generated-at {
+    margin-top: 6px;
+    padding-top: 4px;
+    font-size: 9px;
 }
 
 @media print {

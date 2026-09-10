@@ -1,11 +1,29 @@
 @php
     $platforms = \App\Services\Concrete\Api\ProductShareService::PLATFORMS;
+    $business = Auth::user()->business;
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve(Auth::user()->business_id);
 @endphp
 @extends('layouts.print')
+
 @section('title', __('reports.product_shares'))
+
+@section('css')
+    @include('admin.partials.print.page_css', ['print_config' => $print_config])
+@endsection
+
 @section('content')
-    <h3>{{ __('reports.product_shares') }}</h3>
-    <table class="table table-bordered table-sm">
+    @include('admin.partials.print.header', [
+        'business' => $business,
+        'branch' => null,
+        'title' => __('reports.product_shares'),
+        'doc_no' => '',
+        'doc_date' => localDate(now()),
+        'reference' => [],
+        'print_config' => $print_config,
+    ])
+
+    <table class="print-table">
         <thead>
             <tr>
                 <th>{{ __('reports.col_product') }}</th>
@@ -35,4 +53,9 @@
             @endforelse
         </tbody>
     </table>
+
+    @include('admin.partials.print.footer', [
+        'signatories' => ['Prepared By', 'Verified By'],
+        'print_config' => $print_config,
+    ])
 @endsection

@@ -79,6 +79,16 @@ class PrintConfig
         return $this->header['watermark'] ?? ['visible' => false];
     }
 
+    public function headerTemplate(): string
+    {
+        return $this->header['template'] ?? 'classic';
+    }
+
+    public function footerTemplate(): string
+    {
+        return $this->footer['template'] ?? 'classic';
+    }
+
     public function signatureLabels(array $moduleDefault): array
     {
         $configured = data_get($this->footer, 'signature_lines.labels', []);

@@ -167,6 +167,78 @@ every report's `pdf()` action and by the shared
 `resources/views/admin/partials/print/pdf_header.blade.php` partial. See
 [Reports Infrastructure](06-reports-infrastructure.md).
 
+The Settings tab that drives this is now labelled **Report** (was "Print" —
+`settings.tab_print` / `settings.print_title`, renamed in-place across every
+locale; the underlying route/controller/permission names are unchanged).
+
+**Header/footer letterhead templates.** Alongside the existing per-field
+visibility/order/font/color controls, the Header and Footer sub-tabs
+(`resources/views/admin/setting/tabs/print/header.blade.php` and
+`footer.blade.php`) now open with an 8-design template carousel (8 header
+designs: `classic`, `modern`, `minimal`, `boxed`, `elegant`, `corporate`,
+`bold`, `compact` — each a genuinely different layout, e.g. `modern`/`corporate`
+are solid/two-tone color panels, `elegant` re-flows to a centered stacked
+layout, `compact` folds every field onto one line, not just a border/line
+variation; 8 footer designs: the same set minus `elegant`, plus `centered` and
+`divided`). Each slide is a live, real preview — server-rendered by calling the
+actual `admin.partials.print.header` / `.footer` partials with the business's
+current field settings and a dummy sample business, wrapped in a full-width
+`<iframe srcdoc="…">` (loads the real `public/assets/css/print.css`, at natural
+size, no scale-down) so the preview is pixel-identical to production output,
+not a mockup — the admin can judge each design without having to open an
+actual report. It's a Bootstrap 5 `.carousel` (`data-bs-interval="false"`, no
+new dependency), opening on whichever design is currently selected. Picking a
+slide just checks its radio input (`header_config[template]` /
+`footer_config[template]`, one per slide, submitted with the form regardless
+of which slide is currently showing since Bootstrap only `display:none`s the
+inactive ones); the existing field-customization controls stay visible
+underneath so the admin can still fine-tune after picking a template.
+
+Several of the templates (`modern`, `corporate`, the `bold` header's title
+chip) reverse the text to white on a colored background. Because each header
+field already carries its own admin-configured inline `color` style (from the
+field table above), that inline style would otherwise always win over the
+template's CSS class — those specific color rules in `print.css` are marked
+`!important` deliberately, scoped to that one template class, to keep the
+reversed text legible. Footer fields have no per-field inline styling, so no
+footer rule needs it.
+
+The selected key is stored as `header_config.template` /
+`footer_config.template` inside the existing JSON columns (no migration —
+`PrintConfig::headerTemplate()` / `footerTemplate()` default to `'classic'`
+when absent, so old rows keep rendering exactly as before). It reaches actual
+output two ways:
+- **Browser print** (`admin.partials.print.header` / `.footer`): the template
+  key becomes a `print-template-header-{key}` / `print-template-footer-{key}`
+  wrapper class; the visual differences live entirely in
+  `public/assets/css/print.css` (appended block after the base `.print-header`
+  / `.print-footer` rules). `layouts/print.blade.php` links that stylesheet
+  with a `?v={{ filemtime(...) }}` cache-busting query so a browser that
+  already cached the old `print.css` (e.g. from before this template feature
+  shipped) picks up new/changed template CSS immediately instead of needing a
+  hard refresh.
+- **PDF (dompdf)** (`pdf_header.blade.php`): dompdf can't load the external
+  stylesheet, so the same header designs are reproduced as a small inline-style
+  lookup keyed by template name directly in that partial. There's no PDF
+  footer partial today (PDF reports have never rendered a footer), so footer
+  templates only affect browser/print output.
+
+**Right-side document meta alignment.** The header's right column (Document
+No / Date / each module's own `$reference` array — e.g. Purchase's Supplier,
+Warehouse, Purchase Request No., Expected Delivery Date) used to render as one
+plain `text-align:right` paragraph per row, which staggers the values out of
+line the moment two rows have differently-long labels (a long label pushes
+its whole row wider, so the row's right-aligned edge no longer matches shorter
+rows). Both `header.blade.php` (a CSS `display:table`/`table-row`/`table-cell`
+grid, via a `.doc-meta-table` wrapper — the value is now wrapped in
+`<span class="doc-meta-value">` specifically so it's a distinct table-cell)
+and `pdf_header.blade.php` (a real nested `<table>`, since dompdf needs actual
+table markup rather than `display:table`) now render this as a proper
+2-column grid, so every row's label and value line up regardless of label
+length. `elegant` (centered single-line composition) and `compact` (folds
+everything onto one dense line) opt back out of the grid with their own
+`.doc-meta-table` overrides — see the comments in `print.css` next to each.
+
 ## Website Theme & Public Storefront Settings
 
 `WebsiteThemeSetting` (one row per business) powers both the **Website Theme**

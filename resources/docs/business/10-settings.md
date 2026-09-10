@@ -52,7 +52,7 @@ All configuration lives under one **Settings** screen, organized into sections
   aligns to the right, tables and menus mirror accordingly. **40+ languages** are
   available (including English, Urdu, Hindi, Arabic, Persian, French, Spanish,
   Punjabi India/Pakistan, Pashto, Sindhi, Balochi, and major world languages). **Settings
-  screen labels** (every tab — Business, Accounting, Inventory, POS, Print, Theme,
+  screen labels** (every tab — Business, Accounting, Inventory, POS, Report, Theme,
   Website, Email/SMS/WhatsApp, and the rest) follow the Display Language along with the
   sidebar, shared buttons/toasts, Products and most business modules (purchases, sales,
   inventory, accounting lists, HRM including payroll/ESS/advances/assets, reports indexes
@@ -79,9 +79,19 @@ All configuration lives under one **Settings** screen, organized into sections
 - **POS** — point-of-sale behavior, including register open/close time windows and
   what's allowed at the register (e.g. whether cashiers can change prices or mix
   sale types in one order).
-- **Print** and **Thermal Print** — document layout (paper size, orientation, which
-  header fields appear) for standard printing and for thermal receipt printers,
-  with a live preview for thermal settings.
+- **Report** (formerly "Print") and **Thermal Print** — document layout (paper
+  size, orientation, which header fields appear) for standard printing and for
+  thermal receipt printers, with a live preview for thermal settings. The
+  Report tab's Header and Footer sections each open with a full-width slider
+  of 8 distinctly different, ready-made designs (Classic, Modern, Minimal,
+  Boxed, Elegant, Corporate, Bold, Compact for the header; a matching set for
+  the footer) — each slide is a real, full-size preview of that exact design
+  (not a small thumbnail), so it's clear how it will look before saving.
+  Browse with the arrows, pick one, then fine-tune the fields below (which
+  company details show, their order, font, color) exactly as before. Every
+  printed document and report for this business (invoices,
+  purchase orders, all reports, etc.) uses whichever header/footer design is
+  selected here.
 - **Barcode** — default label size/format for printed barcodes.
 - **Theme** — visual appearance; choose from built-in presets (each a complete
   look — colors, sidebar style, card style, table style) or fine-tune individual

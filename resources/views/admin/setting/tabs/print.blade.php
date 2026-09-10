@@ -23,6 +23,61 @@
     .pt-field-table select {
         min-width: 90px;
     }
+
+    .pt-template-carousel {
+        background: #fff;
+        border: 1px solid #e3e6ef;
+        border-radius: 8px;
+        padding: 18px 54px;
+    }
+
+    .pt-template-frame-lg {
+        display: block;
+        width: 100%;
+        height: 270px;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        background: #fff;
+        pointer-events: none;
+    }
+
+    .pt-template-frame-footer {
+        height: 290px;
+    }
+
+    .pt-template-slide-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 12px;
+    }
+
+    .pt-template-pick {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .pt-template-position {
+        font-size: 12px;
+        color: #888;
+    }
+
+    .pt-template-carousel .carousel-control-prev,
+    .pt-template-carousel .carousel-control-next {
+        width: 40px;
+        opacity: 1;
+    }
+
+    .pt-template-carousel .carousel-control-prev-icon,
+    .pt-template-carousel .carousel-control-next-icon {
+        background-color: #3833C8;
+        border-radius: 50%;
+        padding: 15px;
+    }
 </style>
 
 <form id="printSettingForm">

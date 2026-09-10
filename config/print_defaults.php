@@ -13,6 +13,7 @@
 return [
 
     'header' => [
+        'template' => 'classic',
         'fields' => [
             'logo'                  => ['visible' => true,  'order' => 1,  'align' => 'left',  'font_size' => null, 'font_weight' => null,   'color' => null],
             'company_name'          => ['visible' => true,  'order' => 2,  'align' => 'left',  'font_size' => 16,   'font_weight' => 'bold', 'color' => '#1a1a1a'],
@@ -54,6 +55,7 @@ return [
     ],
 
     'footer' => [
+        'template' => 'classic',
         'sections' => [
             'footer_notes'         => ['visible' => false, 'text' => null],
             'thank_you_message'    => ['visible' => false, 'text' => null],

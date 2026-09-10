@@ -63,6 +63,63 @@ public function pdf(Request $request)
 browser-`print()` action (has a Print/Close toolbar, skippable via `?auto=1` for
 silent POS receipt printing) — it is not used by the dompdf PDF views.
 
+**The browser `print()` view must resolve its own `$print_config` and include
+the letterhead itself** — unlike `pdf()` above, the shared
+`Base*ReportController::print()` action (every `Base{Order,Inventory,
+Attendance,Employee,Leave,Lifecycle,PayrollFinance}ReportController`) only
+passes `compact('rows', 'request')` to the view; it does not resolve or pass
+`print_config`. Every correctly-wired `print.blade.php` therefore starts with:
+
+```php
+@php
+    $business = Auth::user()->business;
+    $print_config = app(\App\Services\Concrete\Admin\PrintSettingResolverService::class)
+        ->resolve(Auth::user()->business_id);
+@endphp
+@extends('layouts.print')
+
+@section('css')
+    @include('admin.partials.print.page_css', ['print_config' => $print_config])
+@endsection
+
+@section('content')
+    @include('admin.partials.print.header', [..., 'print_config' => $print_config])
+    {{-- report table --}}
+    @include('admin.partials.print.footer', ['signatories' => [...], 'print_config' => $print_config])
+@endsection
+```
+
+All 15 Inventory report `print.blade.php` views (Stock Summary/Valuation/
+Aging/Loss/Reconciliation/Transfer, Batch Expiry, Recipe/BOM, all 5 Serial
+Number reports, Waste/Damage/Expiry, Product Shares) were missing this
+entirely — no letterhead, no footer, not even `page_css` — until this was
+added; their table also used the dead Bootstrap `table table-bordered
+table-sm` classes (bootstrap isn't loaded in `layouts.print`, only
+`print.css`), now `print-table` like every other report. Their `pdf.blade.php`
+counterparts were already correct (they resolve their own `$print_config`
+too, same as the `print()` example above). Manufacturing Plan, Material
+Consumption and Production reports had the header wired but not the footer
+(no signature block) — added.
+
+Audited every `print.blade.php` and `pdf.blade.php` under `resources/views`
+(142 + 125 files) for this exact gap (missing header include, missing footer
+include, missing `$print_config` resolution, or the dead bootstrap table
+classes) — as of this pass every **report** print/PDF view is fully wired.
+Three non-report document PDFs (`admin/bank_reconciliation/pdf.blade.php`,
+`admin/hrm/payslip/pdf.blade.php`, `admin/purchase_request_quotation/pdf/
+pdf.blade.php`) still render as standalone documents with no company
+letterhead at all — a separate, pre-existing gap outside the reports system,
+noted here rather than silently fixed since it's a different scope (individual
+transactional documents, not the reports list) and needs a product decision on
+whether a payslip especially should carry the same customizable letterhead.
+(`admin/documentation/pdf.blade.php` is the in-app documentation portal's own
+PDF export, unrelated to business documents, and is correctly excluded.)
+When adding a new report to any of these Base controller families, copy the
+`@php` + header/footer include block from an existing correct one (e.g.
+`admin.reports.due_credit_sales.print.print` or any
+`admin.reports.inventory.*.print.print` now) — the controller alone does not
+wire this up.
+
 ## Audit Trail
 
 Every report action (`print`, `pdf`, `export`, `export-csv`) calls a small

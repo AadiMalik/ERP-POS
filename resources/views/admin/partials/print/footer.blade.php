@@ -23,6 +23,7 @@
     $labels = $pc->signatureLabels($signatories ?? []);
 @endphp
 
+<div class="print-template-footer-{{ $pc->footerTemplate() }}">
 @foreach ($sections as $key => $heading)
     @if ($pc->isVisible('footer', $key) && !empty($pc->footerText($key)))
         <div class="print-footer-section">
@@ -67,4 +68,5 @@
     @if ($pc->footerMeta('page_numbers.visible', false))
         <p class="generated-at print-page-number"></p>
     @endif
+</div>
 </div>

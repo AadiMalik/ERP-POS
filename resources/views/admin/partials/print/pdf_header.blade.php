@@ -8,8 +8,24 @@
 
     $left_fields = $pc->orderedHeaderFields('left');
     $right_fields = $pc->orderedHeaderFields('right');
+
+    // dompdf can't load the external print.css templates (and can't safely invert
+    // per-field text colors that admins configure independently), so each of the
+    // 8 designs is reproduced here as a distinct dompdf-safe border/background
+    // treatment on the wrapping table - same idea as the browser templates, just
+    // without the flexbox re-layout (elegant/compact) or dark reversed panels
+    // (modern/corporate) that dompdf's table model can't reliably reproduce.
+    $template_table_style = [
+        'modern'    => 'border:none; border-top:3px solid #3833C8; border-bottom:3px solid #3833C8; padding:8px 0;',
+        'minimal'   => 'border-bottom:none;',
+        'boxed'     => 'border:2px solid #1a1a1a; padding:10px;',
+        'elegant'   => 'border-bottom:1px solid #999; padding-bottom:10px;',
+        'corporate' => 'background:#f4f5fb; border:none; border-left:4px solid #1a1a2e; padding:10px;',
+        'bold'      => 'border:none; border-bottom:5px double #1a1a1a; padding-bottom:8px;',
+        'compact'   => 'border-bottom:1px solid #ccc; padding-bottom:4px;',
+    ][$pc->headerTemplate()] ?? '';
 @endphp
-<table style="width:100%; border-bottom:2px solid #333; margin-bottom:12px;">
+<table style="width:100%; border-bottom:2px solid #333; margin-bottom:12px; {{ $template_table_style }}">
     <tr>
         <td style="width:60%; vertical-align:top;">
             @foreach ($left_fields as $field)
@@ -103,34 +119,46 @@
         </td>
         <td style="width:40%; vertical-align:top; text-align:right;">
             @foreach ($right_fields as $field)
+                @continue($field !== 'document_title' || !$pc->isVisible('header', $field))
                 @php $style = $pc->fieldStyle($field); @endphp
-                @if ($pc->isVisible('header', $field))
-                    @switch($field)
-                        @case('document_title')
-                            <div
-                                style="font-size:{{ $style['font_size'] ?? 14 }}px; font-weight:{{ $style['font_weight'] ?? 'bold' }}; color:{{ $style['color'] ?? '#1a1a1a' }};">
-                                {{ $title }}
-                            </div>
-                        @break
-
-                        @case('document_no')
-                            <div style="font-size:{{ $style['font_size'] ?? 10 }}px; color:{{ $style['color'] ?? '#1a1a1a' }};">
-                                <strong>Document No:</strong> {{ $doc_no ?? 'N/A' }}
-                            </div>
-                        @break
-
-                        @case('date')
-                            <div style="font-size:{{ $style['font_size'] ?? 10 }}px; color:{{ $style['color'] ?? '#1a1a1a' }};">
-                                <strong>Date:</strong> {{ $doc_date ?? 'N/A' }}
-                            </div>
-                        @break
-                    @endswitch
-                @endif
+                <div
+                    style="font-size:{{ $style['font_size'] ?? 14 }}px; font-weight:{{ $style['font_weight'] ?? 'bold' }}; color:{{ $style['color'] ?? '#1a1a1a' }};">
+                    {{ $title }}
+                </div>
             @endforeach
 
-            @foreach ($reference ?? [] as $label => $value)
-                <div style="font-size:10px;"><strong>{{ $label }}:</strong> {{ $value ?? 'N/A' }}</div>
-            @endforeach
+            {{-- A real nested table so label/value columns line up regardless of
+                 label length - dompdf doesn't get the browser version's CSS
+                 display:table treatment, so this uses actual <table> markup. --}}
+            <table style="margin-left:auto; border-collapse:collapse;">
+                @foreach ($right_fields as $field)
+                    @php $style = $pc->fieldStyle($field); @endphp
+                    @if ($pc->isVisible('header', $field))
+                        @switch($field)
+                            @case('document_no')
+                                <tr>
+                                    <td style="font-size:{{ $style['font_size'] ?? 10 }}px; color:{{ $style['color'] ?? '#1a1a1a' }}; white-space:nowrap; text-align:right; padding-right:6px;"><strong>Document No:</strong></td>
+                                    <td style="font-size:{{ $style['font_size'] ?? 10 }}px; color:{{ $style['color'] ?? '#1a1a1a' }}; white-space:nowrap; text-align:right;">{{ $doc_no ?? 'N/A' }}</td>
+                                </tr>
+                            @break
+
+                            @case('date')
+                                <tr>
+                                    <td style="font-size:{{ $style['font_size'] ?? 10 }}px; color:{{ $style['color'] ?? '#1a1a1a' }}; white-space:nowrap; text-align:right; padding-right:6px;"><strong>Date:</strong></td>
+                                    <td style="font-size:{{ $style['font_size'] ?? 10 }}px; color:{{ $style['color'] ?? '#1a1a1a' }}; white-space:nowrap; text-align:right;">{{ $doc_date ?? 'N/A' }}</td>
+                                </tr>
+                            @break
+                        @endswitch
+                    @endif
+                @endforeach
+
+                @foreach ($reference ?? [] as $label => $value)
+                    <tr>
+                        <td style="font-size:10px; white-space:nowrap; text-align:right; padding-right:6px;"><strong>{{ $label }}:</strong></td>
+                        <td style="font-size:10px; white-space:nowrap; text-align:right;">{{ $value ?? 'N/A' }}</td>
+                    </tr>
+                @endforeach
+            </table>
         </td>
     </tr>
 </table>

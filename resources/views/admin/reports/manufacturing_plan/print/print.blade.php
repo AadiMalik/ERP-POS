@@ -40,4 +40,8 @@
             @endforelse
         </tbody>
     </table>
+    @include('admin.partials.print.footer', [
+        'signatories' => ['Prepared By', 'Approved By'],
+        'print_config' => $print_config,
+    ])
 @endsection
