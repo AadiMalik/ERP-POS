@@ -36,14 +36,9 @@
             '<button type="button" class="btn btn-icon btn-outline-secondary erp-dt-customize-btn" title="' +
             escapeAttr((i18n && i18n.customize_table) || 'Customize Table') + '">' +
             '<i class="fa fa-sliders"></i></button></div>';
-        var $pagingRow = $wrapper.find('.dt-layout-row:has(nav.dt-paging)').first();
-        var $end = $pagingRow.find('.dt-layout-end').first();
-        if ($end.length) {
-            $end.append(html);
-            return;
-        }
-        if ($pagingRow.length) {
-            $pagingRow.append(html);
+        var $searchEnd = $wrapper.find('.dt-search').closest('.dt-layout-end').first();
+        if ($searchEnd.length) {
+            $searchEnd.append(html);
             return;
         }
         var $host = $wrapper.length ? $wrapper : $table;

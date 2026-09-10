@@ -79,19 +79,22 @@
             topEnd: null,
             top2Start: null,
             top2End: null,
+            top3Start: null,
+            top3End: null,
             bottomStart: 'info',
             bottomEnd: null
         };
         if (pos === 'top' || pos === 'both') {
             layout.topStart = 'paging';
-            layout.topEnd = 'erpCustomize';
             layout.top2Start = lengthControls;
             layout.top2End = 'search';
+            layout.top3End = 'erpCustomize';
             layout.bottomEnd = pos === 'both' ? 'paging' : null;
         } else {
             layout.topStart = lengthControls;
             layout.topEnd = 'search';
-            layout.bottomEnd = ['paging', 'erpCustomize'];
+            layout.top2End = 'erpCustomize';
+            layout.bottomEnd = 'paging';
         }
         return layout;
     };
