@@ -16,7 +16,9 @@ in `package_modules`) → `businesses` (root tenant)
 `subscription_reminder_logs`, `subscription_settings`. `package_modules` holds the
 module/feature gating matrix per package (see
 [Subscription & Module Gating](08-subscription-module-gating.md)). `branches`
-belong to a business.
+belong to a business, and carry optional `latitude`/`longitude` (decimal(10,7),
+nullable) picked on an OpenStreetMap/Leaflet map on the Branch create/edit
+screen — no map API key involved.
 
 **Core models:** `Business` (`belongsTo Package`; `hasMany BusinessSubscription`;
 `hasOne` relation to all 16 per-business Setting models — see
@@ -115,7 +117,12 @@ storefront onboarding/login **and** admin/web password reset; purposes
 non-stock family). `orders.status` is an ENUM:
 `draft`, `hold`, `posted`, `cancelled`, `void`, `returned`, plus delivery
 fulfilment values `shipped`, `out_for_delivery`, `delivered` (see migration
-`2026_08_26_181500_add_delivery_statuses_to_orders_table`).
+`2026_08_26_181500_add_delivery_statuses_to_orders_table`). `orders` also carries
+`delivery_latitude`/`delivery_longitude` (decimal(10,7), nullable) — a snapshot of
+the pin the customer dropped on the storefront/mobile checkout map at the time the
+order was placed. It is deliberately **not** a foreign key into `customer_addresses`
+so a later change to the customer's saved address never rewrites a past order's
+delivery location.
 
 **Core models:** `Order` (`belongsTo Business, Branch, Warehouse, PosRegister,
 PosRegisterSession, User (cashier), User (customer), OrderType, OrderSource,

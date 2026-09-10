@@ -27,7 +27,9 @@ dashboard, since they manage tenant businesses rather than day-to-day operations
 - **Business** — your company/tenant account. Everything you do happens inside your
   business; other businesses on the same platform can never see your data.
 - **Branches** — physical locations or outlets under your business. Warehouses,
-  POS registers, and staff are usually tied to a specific branch.
+  POS registers, and staff are usually tied to a specific branch. When creating or
+  editing a branch, pin its exact location on the map (click the map or drag the
+  pin) — this is used to measure delivery distance from the branch.
 - **Package/Subscription** — the plan your business is subscribed to determines
   which modules are available (POS, Inventory, Accounting, HRM, Payroll, Service
   Management) and any usage limits (e.g. maximum branches or products). See

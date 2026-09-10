@@ -47,6 +47,8 @@ class Order extends Model
         'notes',
         'due_date',
         'delivery_address',
+        'delivery_latitude',
+        'delivery_longitude',
         'payment_proof',
         'payment_confirmed_at',
         'payment_confirmed_by_id',

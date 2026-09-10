@@ -69,6 +69,8 @@ class BranchController extends Controller
             ],
             'email' => 'required|email',
             'phone' => 'required',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ];
 
@@ -89,6 +91,8 @@ class BranchController extends Controller
             'city',
             'state',
             'country',
+            'latitude',
+            'longitude',
             'open_time',
             'close_time',
             'warehouse_ids',

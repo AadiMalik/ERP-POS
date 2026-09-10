@@ -95,6 +95,24 @@
                                         <label class="fw-semibold">{{ __('common.address') }} <span class="text-danger">*</span></label>
                                         <textarea class="form-control" name="address" rows="2">{{ $branch->address ?? '' }}</textarea>
                                     </div>
+                                    <div class="col-md-12">
+                                        <label class="fw-semibold">{{ __('branches.map_location') }}</label>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">{{ __('branches.map_location_hint') }}</small>
+                                            <button type="button" id="useMyLocationBtn" class="btn btn-sm btn-outline-secondary">
+                                                <i class="fa fa-location-arrow"></i> {{ __('branches.use_my_location') }}
+                                            </button>
+                                        </div>
+                                        <div class="position-relative mb-2">
+                                            <input type="text" id="branchAddressSearch" class="form-control"
+                                                placeholder="{{ __('branches.search_address') }}" autocomplete="off">
+                                            <div id="branchAddressSearchResults" class="list-group position-absolute w-100 shadow-sm"
+                                                style="z-index: 1000; max-height: 220px; overflow-y: auto; display: none; background-color: var(--bs-body-bg); border: 1px solid var(--bs-border-color);"></div>
+                                        </div>
+                                        <div id="branchLocationMap" style="height: 320px; border-radius: 8px;"></div>
+                                        <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $branch->latitude ?? '') }}">
+                                        <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $branch->longitude ?? '') }}">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -200,9 +218,14 @@
 @php
     $__i18nBranches = [
         'please_select_valid_image' => __('branches.please_select_valid_image'),
+        'location_not_supported' => __('branches.location_not_supported'),
+        'location_permission_denied' => __('branches.location_permission_denied'),
+        'search_address_no_results' => __('branches.search_address_no_results'),
     ];
 @endphp
 <script>window.i18n_branches = @json($__i18nBranches);</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 @if ($errors->any())
 <script>
     errorMessage("{{ $errors->first() }}");
@@ -243,6 +266,127 @@
                 }
             });
         }
+    })();
+
+    // Branch location picker - Leaflet + OpenStreetMap (no API key required).
+    (function() {
+        const latInput = document.getElementById('latitude');
+        const lngInput = document.getElementById('longitude');
+        const hasSavedLocation = !!(latInput.value && lngInput.value);
+        const startLat = hasSavedLocation ? parseFloat(latInput.value) : 24.8607; // Karachi fallback center
+        const startLng = hasSavedLocation ? parseFloat(lngInput.value) : 67.0011;
+
+        const map = L.map('branchLocationMap').setView([startLat, startLng], hasSavedLocation ? 15 : 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19,
+        }).addTo(map);
+
+        let marker = hasSavedLocation ? L.marker([startLat, startLng], { draggable: true }).addTo(map) : null;
+
+        function setMarker(lat, lng) {
+            latInput.value = lat.toFixed(7);
+            lngInput.value = lng.toFixed(7);
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                marker.on('dragend', function() {
+                    const pos = marker.getLatLng();
+                    setMarker(pos.lat, pos.lng);
+                });
+            }
+        }
+
+        map.on('click', function(e) {
+            setMarker(e.latlng.lat, e.latlng.lng);
+        });
+
+        if (marker) {
+            marker.on('dragend', function() {
+                const pos = marker.getLatLng();
+                setMarker(pos.lat, pos.lng);
+            });
+        }
+
+        document.getElementById('useMyLocationBtn').addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                errorMessage(window.i18n_branches.location_not_supported);
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+                setMarker(pos.coords.latitude, pos.coords.longitude);
+            }, function() {
+                errorMessage(window.i18n_branches.location_permission_denied);
+            });
+        });
+
+        // Address search - Nominatim (OpenStreetMap) geocoding, no API key required.
+        const searchInput = document.getElementById('branchAddressSearch');
+        const searchResults = document.getElementById('branchAddressSearchResults');
+        let searchDebounce = null;
+        let searchAbort = null;
+
+        function hideSearchResults() {
+            searchResults.style.display = 'none';
+            searchResults.innerHTML = '';
+        }
+
+        function renderSearchResults(places) {
+            searchResults.innerHTML = '';
+            if (!places.length) {
+                const empty = document.createElement('div');
+                empty.className = 'list-group-item text-muted small';
+                empty.textContent = window.i18n_branches.search_address_no_results;
+                searchResults.appendChild(empty);
+            } else {
+                places.forEach(function(place) {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'list-group-item list-group-item-action small';
+                    item.textContent = place.display_name;
+                    item.addEventListener('click', function() {
+                        const lat = parseFloat(place.lat);
+                        const lng = parseFloat(place.lon);
+                        map.setView([lat, lng], 16);
+                        setMarker(lat, lng);
+                        searchInput.value = place.display_name;
+                        hideSearchResults();
+                    });
+                    searchResults.appendChild(item);
+                });
+            }
+            searchResults.style.display = 'block';
+        }
+
+        searchInput.addEventListener('input', function() {
+            const query = searchInput.value.trim();
+            clearTimeout(searchDebounce);
+            if (query.length < 3) {
+                hideSearchResults();
+                return;
+            }
+            searchDebounce = setTimeout(function() {
+                if (searchAbort) searchAbort.abort();
+                searchAbort = new AbortController();
+                fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&q=' + encodeURIComponent(query), {
+                    signal: searchAbort.signal,
+                    headers: { 'Accept-Language': document.documentElement.lang || 'en' },
+                })
+                    .then(res => res.json())
+                    .then(renderSearchResults)
+                    .catch(function(err) {
+                        if (err.name !== 'AbortError') hideSearchResults();
+                    });
+            }, 400);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                hideSearchResults();
+            }
+        });
     })();
 </script>
 @endsection

@@ -193,6 +193,8 @@ class WebsiteCheckoutService
                 'sale_type_id' => $sale_type_id,
                 'status' => 'hold',
                 'delivery_address' => $delivery_address,
+                'delivery_latitude' => $payload['latitude'] ?? null,
+                'delivery_longitude' => $payload['longitude'] ?? null,
                 'notes' => $payload['notes'] ?? null,
                 'products' => $products,
                 'payments' => [

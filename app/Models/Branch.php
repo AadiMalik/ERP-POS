@@ -23,6 +23,8 @@ class Branch extends Model
         'city',
         'state',
         'country',
+        'latitude',
+        'longitude',
         'logo',
         // Automatic register mode's open/close window override for this branch -
         // falls back to pos_settings.open_time/close_time when null.

@@ -260,6 +260,8 @@ class CustomerOrderService
             'statusHistory' => $history,
             'placedAt' => optional($order->date_created ?? $order->order_date)->toIso8601String(),
             'deliveryAddress' => $order->delivery_address,
+            'deliveryLatitude' => $order->delivery_latitude !== null ? (float) $order->delivery_latitude : null,
+            'deliveryLongitude' => $order->delivery_longitude !== null ? (float) $order->delivery_longitude : null,
             'hasPaymentProof' => !empty($order->payment_proof),
             'paymentConfirmedAt' => optional($order->payment_confirmed_at)->toIso8601String(),
         ];

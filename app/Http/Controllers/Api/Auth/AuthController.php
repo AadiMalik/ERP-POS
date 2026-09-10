@@ -35,7 +35,7 @@ class AuthController extends Controller
     public function checkEmail(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'email' => 'required|email:rfc,dns',
             'business_id' => 'nullable|string|exists:businesses,business_id',
         ]);
         if ($validate->fails()) {
@@ -54,7 +54,7 @@ class AuthController extends Controller
     public function sendOtp(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'email' => 'required|email:rfc,dns',
             'business_id' => 'required|string|exists:businesses,business_id',
             'phone' => 'nullable|string|min:7|max:20',
             'name' => 'nullable|string|min:2|max:255',

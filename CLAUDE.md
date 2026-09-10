@@ -125,6 +125,32 @@ You are a Senior Software Engineer.
   never put package-tier checks inline in a controller constructor (it runs
   during CLI route introspection too, before any authenticated user exists).
 
+## Localization (MANDATORY)
+
+- Every user-facing string (label, button, placeholder, help text, validation
+  message, notification, error) must go through `__('file.key')` / `@lang(...)`
+  — never hardcode English text in a Blade view, controller, request, mail, or
+  JS-rendered string.
+- The English source of truth lives in `lang/en/*.php`. The project ships ~44
+  other locales under `lang/<locale>/*.php` (see `lang/` for the full list).
+  **Whenever a key is added, renamed, or its English text is changed, every
+  other locale file for that same file must be updated in the same task** —
+  do not leave new keys English-only "for later". A key added only to
+  `lang/en/...` and left out of the other locale files is an incomplete
+  change, the same way an unmigrated schema change or an unregistered
+  permission would be.
+- Keep key order/position identical across all locale files for the same
+  filename (insert new keys at the same spot in every locale file, right
+  after the same neighboring key) — this keeps diffs reviewable and lets
+  future edits find the right insertion point mechanically.
+- If you cannot produce a reviewed human translation for a language, a
+  machine-translated value is acceptable as a stopgap (better than silently
+  falling back to English), but flag in your summary which locales got
+  machine translation so a native speaker can review them later.
+- This applies to every new/changed screen without exception, including
+  Settings tabs, Branch/Warehouse forms, HRM & Payroll, and any other admin
+  or storefront-facing text.
+
 ## Documentation (MANDATORY)
 
 - This project has two permanent documentation sets, served in-app at
