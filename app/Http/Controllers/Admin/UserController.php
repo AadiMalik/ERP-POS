@@ -46,6 +46,7 @@ class UserController extends Controller
         $this->middleware('permission:user.change-password')->only(['changePassword', 'updatePassword']);
         $this->middleware('permission:user.import')->only(['importSample', 'importPreview', 'importConfirm']);
         $this->middleware('permission:user.export')->only(['export']);
+        $this->middleware('permission:user.login-as')->only(['loginAs']);
 
         $this->user_service = $user_service;
         $this->role_service = $role_service;
@@ -268,5 +269,24 @@ class UserController extends Controller
                 Message::ERROR
             );
         }
+    }
+
+    public function loginAs($id)
+    {
+        try {
+            $this->user_service->loginAs($id);
+            return redirect('/home');
+        } catch (Exception $e) {
+            return redirect('admin/users')->with('error', $e->getMessage());
+        }
+    }
+
+    public function returnToSuperAdmin()
+    {
+        if (!$this->user_service->returnToSuperAdmin()) {
+            return redirect('/home');
+        }
+
+        return redirect('admin/users');
     }
 }

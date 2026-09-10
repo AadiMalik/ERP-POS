@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'Összes értesítés megtekintése',
     'my_profile' => 'Profilom',
     'billing' => 'Számlázás',
+    'back_to_super_admin' => 'Vissza a Szuperadminhoz',
     'all_warehouses' => '--Minden raktár--',
     'all_suppliers' => '--Minden beszállító--',
     'all_customers' => '--Minden ügyfél--',

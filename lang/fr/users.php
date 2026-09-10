@@ -9,6 +9,7 @@ return [
     'select_role' => '--Sélectionner Rôle--',
     'select_branch' => '--Sélectionner Succursale--',
     'last_login' => 'Last Login',
+    'login_as' => 'Se connecter en tant que',
     'new_heading' => 'Nouveau Utilisateur',
     'update_heading' => 'Mettre à jour Utilisateur',
     'save_user' => 'Enregistrer Utilisateur',

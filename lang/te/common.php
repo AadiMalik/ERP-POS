@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'అన్ని నోటిఫికేషన్‌లను వీక్షించండి',
     'my_profile' => 'నా ప్రొఫైల్',
     'billing' => 'బిల్లింగ్',
+    'back_to_super_admin' => 'సూపర్ అడ్మిన్‌కి తిరిగి వెళ్ళండి',
     'all_warehouses' => '--అన్ని గోదాములు--',
     'all_suppliers' => '--అన్ని సరఫరాదారులు--',
     'all_customers' => '--అన్ని కస్టమర్లు--',

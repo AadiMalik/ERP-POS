@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'सभी सूचनाएं देखें',
     'my_profile' => 'मेरी प्रोफ़ाइल',
     'billing' => 'बिलिंग',
+    'back_to_super_admin' => 'सुपर एडमिन पर वापस जाएं',
     'all_warehouses' => '--सभी गोदाम--',
     'all_suppliers' => '--सभी आपूर्तिकर्ता--',
     'all_customers' => '--सभी ग्राहक--',

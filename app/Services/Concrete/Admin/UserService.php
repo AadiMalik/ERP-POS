@@ -10,6 +10,7 @@ use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\Role;
 use App\Models\User;
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +20,7 @@ use Illuminate\Testing\Fluent\Concerns\Has;
 
 class UserService
 {
+    use Auditable;
 
     protected $model_user;
     protected $customer_service;
@@ -107,6 +109,16 @@ class UserService
 
             ->addColumn('action', function ($item) {
 
+                $login_as = '';
+                if (getRoleName() === RoleNames::SUPERADMIN && $item->id !== Auth::id() && Auth::user()->can('user.login-as')) {
+                    $login_as = "
+                    <a class='btn btn-icon btn-outline-info'
+                        title='" . __('users.login_as') . "'
+                        href='" . route('users.login-as', $item->id) . "'>
+                        <i class='fa fa-sign-in'></i>
+                    </a>";
+                }
+
                 return "
 
                 <a class='btn btn-icon btn-outline-primary'
@@ -118,6 +130,8 @@ class UserService
                     href='" . url('admin/users/change-password') . "/" . $item->id . "'>
                     <i class='fa fa-key'></i>
                 </a>
+
+                {$login_as}
 
                 <a class='btn btn-icon btn-outline-danger'
                     id='deleteUser'
@@ -141,6 +155,50 @@ class UserService
     {
         return $this->model_user->find($id);
     }
+
+    /**
+     * Switches the current session to the target user without knowing their
+     * password (Super Admin only, enforced by the user.login-as permission
+     * and the caller check below). The original Super Admin id is stashed in
+     * the session so returnToSuperAdmin() can restore it later.
+     */
+    public function loginAs($id)
+    {
+        $target = $this->model_user->find($id);
+        $impersonator_id = Auth::id();
+
+        if ((int) $target->id === (int) $impersonator_id) {
+            throw new Exception('You cannot login as yourself.');
+        }
+
+        $this->logActivity(
+            'user',
+            (string) $target->id,
+            'login_as',
+            null,
+            ['target_user_id' => $target->id, 'target_email' => $target->email],
+            'Super Admin logged in as user',
+            Auth::user()->business_id
+        );
+
+        Auth::login($target);
+        session(['impersonator_id' => $impersonator_id]);
+    }
+
+    public function returnToSuperAdmin()
+    {
+        $impersonator_id = session()->pull('impersonator_id');
+
+        if (!$impersonator_id) {
+            return false;
+        }
+
+        $super_admin = $this->model_user->find($impersonator_id);
+        Auth::login($super_admin);
+
+        return true;
+    }
+
     public function save($obj)
     {
         DB::beginTransaction();

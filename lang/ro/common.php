@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'Vezi toate notificările',
     'my_profile' => 'Profilul meu',
     'billing' => 'Facturare',
+    'back_to_super_admin' => 'Înapoi la Super Admin',
     'all_warehouses' => '--Toate depozitele--',
     'all_suppliers' => '--Toți furnizorii--',
     'all_customers' => '--Toți clienții--',

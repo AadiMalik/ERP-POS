@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'Näytä kaikki ilmoitukset',
     'my_profile' => 'Oma profiili',
     'billing' => 'Laskutus',
+    'back_to_super_admin' => 'Takaisin pääkäyttäjäksi',
     'all_warehouses' => '--Kaikki varastot--',
     'all_suppliers' => '--Kaikki toimittajat--',
     'all_customers' => '--Kaikki asiakkaat--',

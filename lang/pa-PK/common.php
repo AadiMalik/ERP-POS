@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'ساریاں اطلاعاں ویکھو',
     'my_profile' => 'میری پروفائل',
     'billing' => 'بلنگ',
+    'back_to_super_admin' => 'سپر ایڈمن ول واپس ون',
     'all_warehouses' => '--سبھے گودام--',
     'all_suppliers' => '--سبھے سپلائرز--',
     'all_customers' => '--سبھے گاہک--',

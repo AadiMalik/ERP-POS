@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'Ver todas as notificações',
     'my_profile' => 'Meu perfil',
     'billing' => 'Faturamento',
+    'back_to_super_admin' => 'Voltar ao Super Admin',
     'all_warehouses' => '--Todos os armazéns--',
     'all_suppliers' => '--Todos os fornecedores--',
     'all_customers' => '--Todos os clientes--',

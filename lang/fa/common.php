@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'مشاهده همه اعلان‌ها',
     'my_profile' => 'پروفایل من',
     'billing' => 'صورتحساب',
+    'back_to_super_admin' => 'بازگشت به سوپر ادمین',
     'all_warehouses' => '--همه انبارها--',
     'all_suppliers' => '--همه تأمین‌کنندگان--',
     'all_customers' => '--همه مشتریان--',

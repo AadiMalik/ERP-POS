@@ -192,6 +192,7 @@ class PermissionRegistry
                 'change_password' => ['name' => 'user.change-password', 'label' => 'Change Password', 'is_system' => false],
                 'import' => ['name' => 'user.import', 'label' => 'Import', 'is_system' => false],
                 'export' => ['name' => 'user.export', 'label' => 'Export', 'is_system' => false],
+                'login_as' => ['name' => 'user.login-as', 'label' => 'Login As', 'is_system' => true],
             ]],
 
             'warehouse' => ['label' => 'Warehouse', 'actions' => [

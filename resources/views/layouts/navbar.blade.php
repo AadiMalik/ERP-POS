@@ -109,15 +109,14 @@
                             <span class="align-middle">{{ __('settings.title') }}</span>
                         </a>
                     </li>
-                    <li>
-                        <a class="dropdown-item" href="#">
-                            <span class="d-flex align-items-center align-middle">
-                                <i class="flex-shrink-0 fa fa-credit-card me-2"></i>
-                                <span class="flex-grow-1 align-middle">{{ __('common.billing') }}</span>
-                                <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
-                            </span>
-                        </a>
-                    </li>
+                    @if (session('impersonator_id'))
+                        <li>
+                            <a class="dropdown-item" href="{{ route('login-as.return') }}">
+                                <i class="fa fa-undo me-2"></i>
+                                <span class="align-middle">{{ __('common.back_to_super_admin') }}</span>
+                            </a>
+                        </li>
+                    @endif
                     <li>
                         <div class="dropdown-divider"></div>
                     </li>

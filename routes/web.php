@@ -261,7 +261,9 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('import/preview', [App\Http\Controllers\Admin\UserController::class, 'importPreview'])->name('user-import-preview');
         Route::post('import/confirm', [App\Http\Controllers\Admin\UserController::class, 'importConfirm'])->name('user-import-confirm');
         Route::get('export', [App\Http\Controllers\Admin\UserController::class, 'export'])->name('user-export');
+        Route::get('login-as/{id}', [App\Http\Controllers\Admin\UserController::class, 'loginAs'])->name('users.login-as');
     });
+    Route::get('login-as/return', [App\Http\Controllers\Admin\UserController::class, 'returnToSuperAdmin'])->name('login-as.return');
 
     //customer (ungated by any module: middleware - core CRM data, mirrors 'users')
     // 'update' is excluded (like 'show'): edits are submitted via POST to

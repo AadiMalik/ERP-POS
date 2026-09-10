@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'すべての通知を表示',
     'my_profile' => 'マイプロフィール',
     'billing' => '請求',
+    'back_to_super_admin' => 'スーパー管理者に戻る',
     'all_warehouses' => '--すべての倉庫--',
     'all_suppliers' => '--すべての仕入先--',
     'all_customers' => '--すべての顧客--',

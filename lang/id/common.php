@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'Lihat semua notifikasi',
     'my_profile' => 'Profil Saya',
     'billing' => 'Penagihan',
+    'back_to_super_admin' => 'Kembali ke Super Admin',
     'all_warehouses' => '--Semua Gudang--',
     'all_suppliers' => '--Semua Pemasok--',
     'all_customers' => '--Semua Pelanggan--',

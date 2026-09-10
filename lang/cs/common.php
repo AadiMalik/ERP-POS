@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'Zobrazit všechna oznámení',
     'my_profile' => 'Můj profil',
     'billing' => 'Fakturace',
+    'back_to_super_admin' => 'Zpět na Super Admina',
     'all_warehouses' => '--Všechny sklady--',
     'all_suppliers' => '--Všichni dodavatelé--',
     'all_customers' => '--Všichni zákazníci--',

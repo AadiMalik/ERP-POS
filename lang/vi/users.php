@@ -9,6 +9,7 @@ return [
     'select_role' => '--选择 角色--',
     'select_branch' => '--选择 分支--',
     'last_login' => 'Last Login',
+    'login_as' => 'Đăng nhập với tư cách',
     'new_heading' => '新建 用户',
     'update_heading' => '更新 用户',
     'save_user' => '保存 用户',

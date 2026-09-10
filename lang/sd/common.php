@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'سڀ اطلاعات ڏسو',
     'my_profile' => 'منهنجي پروفائل',
     'billing' => 'بلنگ',
+    'back_to_super_admin' => 'سپر ايڊمن ڏانھن واپس وڃو',
     'all_warehouses' => '--سڀ گودام--',
     'all_suppliers' => '--سڀ سپلائرز--',
     'all_customers' => '--سڀ گراهڪ--',

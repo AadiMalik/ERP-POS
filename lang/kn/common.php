@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ',
     'my_profile' => 'ನನ್ನ ಪ್ರೊಫೈಲ್',
     'billing' => 'ಬಿಲ್ಲಿಂಗ್',
+    'back_to_super_admin' => 'ಸೂಪರ್ ಅಡ್ಮಿನ್‌ಗೆ ಹಿಂತಿರುಗಿ',
     'all_warehouses' => '--ಎಲ್ಲಾ ಗೋದಾಮುಗಳು--',
     'all_suppliers' => '--ಎಲ್ಲಾ ಪೂರೈಕೆದಾರರು--',
     'all_customers' => '--ಎಲ್ಲಾ ಗ್ರಾಹಕರು--',

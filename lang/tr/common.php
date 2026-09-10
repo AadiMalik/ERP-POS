@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'Tüm Bildirimleri Görüntüle',
     'my_profile' => 'Profilim',
     'billing' => 'Faturalandırma',
+    'back_to_super_admin' => 'Süper Yöneticiye Dön',
     'all_warehouses' => '--Tüm Depolar--',
     'all_suppliers' => '--Tüm Tedarikçiler--',
     'all_customers' => '--Tüm Müşteriler--',

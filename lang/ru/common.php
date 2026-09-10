@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'Просмотреть все уведомления',
     'my_profile' => 'Мой профиль',
     'billing' => 'Биллинг',
+    'back_to_super_admin' => 'Вернуться к супер-администратору',
     'all_warehouses' => '--Все склады--',
     'all_suppliers' => '--Все поставщики--',
     'all_customers' => '--Все клиенты--',

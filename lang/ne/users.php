@@ -9,6 +9,7 @@ return [
     'select_role' => '--منتخب کریں کردار--',
     'select_branch' => '--منتخب کریں برانچ--',
     'last_login' => 'Last Login',
+    'login_as' => 'को रूपमा लगइन गर्नुहोस्',
     'new_heading' => 'نیا صارف',
     'update_heading' => 'اپ ڈیٹ صارف',
     'save_user' => 'محفوظ صارف',

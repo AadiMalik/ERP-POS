@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'Alle meldingen bekijken',
     'my_profile' => 'Mijn profiel',
     'billing' => 'Facturering',
+    'back_to_super_admin' => 'Terug naar Super Admin',
     'all_warehouses' => '--Alle magazijnen--',
     'all_suppliers' => '--Alle leveranciers--',
     'all_customers' => '--Alle klanten--',

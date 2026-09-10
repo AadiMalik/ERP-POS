@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'Προβολή όλων των ειδοποιήσεων',
     'my_profile' => 'Το προφίλ μου',
     'billing' => 'Χρέωση',
+    'back_to_super_admin' => 'Επιστροφή στον Υπερδιαχειριστή',
     'all_warehouses' => '--Όλες οι αποθήκες--',
     'all_suppliers' => '--Όλοι οι προμηθευτές--',
     'all_customers' => '--Όλοι οι πελάτες--',

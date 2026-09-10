@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'ټولې خبرتیاوې وګورئ',
     'my_profile' => 'زما پروفایل',
     'billing' => 'بلنګ',
+    'back_to_super_admin' => 'سوپر اېډمین ته بېرته',
     'all_warehouses' => '--ټول ګدامونه--',
     'all_suppliers' => '--ټول عرضه کوونکي--',
     'all_customers' => '--ټول پیرودونکي--',

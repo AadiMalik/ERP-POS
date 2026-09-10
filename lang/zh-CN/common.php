@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => '查看所有通知',
     'my_profile' => '我的资料',
     'billing' => '账单',
+    'back_to_super_admin' => '返回超级管理员',
     'all_warehouses' => '--所有仓库--',
     'all_suppliers' => '--所有供应商--',
     'all_customers' => '--所有客户--',

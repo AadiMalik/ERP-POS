@@ -87,6 +87,30 @@ Customize appear only when that card has an **Export** button. Legacy
 `CustomerService::getData()` remains for the old `POST admin/customer/data`
 route until nothing else calls it.
 
+**Super Admin "Login As" impersonation** — `UserController::loginAs($id)` /
+`returnToSuperAdmin()`, routes `GET admin/users/login-as/{id}` (name
+`users.login-as`) and `GET admin/login-as/return` (name `login-as.return`).
+Gated by the `user.login-as` permission (`PermissionRegistry`, `is_system =
+true`, so only the Super Admin role template can ever hold it — see
+[Permissions & Access Control](05-permissions-access-control.md)).
+`UserService` does the actual work:
+- `loginAs($id)` captures the caller's own id (`Auth::id()`), writes an
+  `activity_log` row (module `user`, action `login_as`) while still
+  authenticated as the Super Admin, then calls `Auth::login($target)` and
+  stashes the original id in `session('impersonator_id')`.
+- `returnToSuperAdmin()` pulls `impersonator_id` back out of the session and
+  calls `Auth::login()` on that original user, restoring the Super Admin
+  session.
+- The "Login As" button (`UserService::getData()`'s `action` column) only
+  renders for a Super Admin viewer, never on their own row, and only when
+  they hold `user.login-as`.
+- `resources/views/layouts/navbar.blade.php` shows a "Back to Super Admin"
+  link in the user dropdown whenever `session('impersonator_id')` is present
+  — it is unrelated to the normal Logout link (which fully invalidates the
+  session, dropping the stashed impersonator id) and carries no permission
+  check of its own, since by definition the acting user during impersonation
+  is the target account, not the Super Admin.
+
 Web login / forgot-password lives outside the admin group:
 `App\Http\Controllers\Auth\LoginController`,
 `ForgotPasswordController` (OTP via `OtpService`, not Laravel's password-reset

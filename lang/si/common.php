@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'සියලු දැනුම්දීම් බලන්න',
     'my_profile' => 'මගේ පැතිකඩ',
     'billing' => 'බිල්පත් කිරීම',
+    'back_to_super_admin' => 'සුපර් පරිපාලකයාට ආපසු යන්න',
     'all_warehouses' => '--සියලුම ගබඩා--',
     'all_suppliers' => '--සියලුම සැපයුම්කරුවන්--',
     'all_customers' => '--සියලුම ගනුදෙනුකරුවන්--',

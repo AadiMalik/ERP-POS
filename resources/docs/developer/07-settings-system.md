@@ -346,6 +346,9 @@ reconcile to `revenue + tax + tax_discount − discounts == orders.total`.
 3. Add an `updateXxxSetting()` method to `SettingService` and a section in
    `SettingController`.
 4. Add a `POST setting/xxx` route in the `setting` route group.
-5. Add the section's form to the Settings Blade view.
+5. Add the section's form to the Settings Blade view: a nav button (with a
+   representative FontAwesome icon, matching the existing tabs) plus its
+   `tab-pane` in `resources/views/admin/setting/index.blade.php`, and the
+   form partial itself in `resources/views/admin/setting/tabs/`.
 6. If it introduces a new permission (uncommon — most settings share
    `setting.manage`), add it to `PermissionRegistry` and re-seed.

@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'Visa alla aviseringar',
     'my_profile' => 'Min profil',
     'billing' => 'Fakturering',
+    'back_to_super_admin' => 'Tillbaka till Superadmin',
     'all_warehouses' => '--Alla lager--',
     'all_suppliers' => '--Alla leverantörer--',
     'all_customers' => '--Alla kunder--',

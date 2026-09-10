@@ -9,6 +9,7 @@ return [
     'select_role' => '--Select Role--',
     'select_branch' => '--Select Branch--',
     'last_login' => 'Last Login',
+    'login_as' => 'Login As',
     'new_heading' => 'New User',
     'update_heading' => 'Update User',
     'save_user' => 'Save User',

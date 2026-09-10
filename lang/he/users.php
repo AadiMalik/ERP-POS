@@ -9,6 +9,7 @@ return [
     'select_role' => '--اختر الدور--',
     'select_branch' => '--اختر الفرع--',
     'last_login' => 'آخر تسجيل دخول',
+    'login_as' => 'התחבר בתור',
     'new_heading' => 'مستخدم جديد',
     'update_heading' => 'تحديث المستخدم',
     'save_user' => 'حفظ المستخدم',

@@ -32,7 +32,12 @@ whenever the system's permission set changes:
   (enabling/disabling a business's access to ERP, Website & Mobile App, POS, or
   Offline POS — see [The Wider Platform](14-platform-ecosystem.md)) and
   **System Feature Controls** (platform-wide on/off switches for integrations
-  like push notifications or online payment gateways).
+  like push notifications or online payment gateways). From **Admin Users**, a
+  Super Admin can also click **Login As** on any account to instantly view the
+  system as that user (for support/troubleshooting) — a **Back to Super Admin**
+  link appears in the account menu (top-right) the whole time, restoring the
+  original Super Admin session with one click without needing to log out and
+  back in.
 - **Business Admin** — the owner/top administrator of a single business. Has every
   permission available to a business (everything except platform-level actions like
   managing other businesses or raw permission definitions, and except delete —

@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'Xem tất cả thông báo',
     'my_profile' => 'Hồ sơ của tôi',
     'billing' => 'Hóa đơn',
+    'back_to_super_admin' => 'Quay lại Super Admin',
     'all_warehouses' => '--Tất cả kho--',
     'all_suppliers' => '--Tất cả nhà cung cấp--',
     'all_customers' => '--Tất cả khách hàng--',

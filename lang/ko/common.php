@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => '모든 알림 보기',
     'my_profile' => '내 프로필',
     'billing' => '청구',
+    'back_to_super_admin' => '슈퍼 관리자로 돌아가기',
     'all_warehouses' => '--모든 창고--',
     'all_suppliers' => '--모든 공급업체--',
     'all_customers' => '--모든 고객--',

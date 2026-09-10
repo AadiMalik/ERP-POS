@@ -2,31 +2,150 @@
 
 @section('css')
     <style>
-        .setting-nav .nav-link {
+        .settings-header-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3833C8, #6f6af0);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            box-shadow: 0 6px 16px rgba(56, 51, 200, .25);
+        }
+
+        .settings-business-card {
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(56, 51, 200, .06), rgba(111, 106, 240, .03));
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .04);
+        }
+
+        .settings-shell {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .06);
+            overflow: hidden;
+        }
+
+        .settings-nav-col {
+            background: rgba(0, 0, 0, .015);
+            border-right: 1px solid rgba(0, 0, 0, .06);
+        }
+
+        .settings-nav {
+            position: sticky;
+            top: 1rem;
+            padding: .75rem;
+            max-height: calc(100vh - 2rem);
+            overflow-y: auto;
+        }
+
+        .settings-nav .nav-link {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
             text-align: left;
             color: #495057;
-            padding: 12px 15px;
+            padding: .65rem .9rem;
+            border-radius: 10px;
+            margin-bottom: 2px;
+            font-size: .89rem;
+            font-weight: 500;
+            border: 1px solid transparent;
+            transition: background-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
         }
 
-        .setting-nav .nav-link.active {
-            background: #3833C8;
+        .settings-nav .nav-link i {
+            width: 18px;
+            text-align: center;
+            font-size: .95rem;
+            opacity: .75;
+            transition: opacity .18s ease;
+        }
+
+        .settings-nav .nav-link:hover {
+            background: rgba(56, 51, 200, .08);
+            color: #3833C8;
+            transform: translateX(2px);
+        }
+
+        .settings-nav .nav-link:hover i {
+            opacity: 1;
+        }
+
+        .settings-nav .nav-link.active {
+            background: linear-gradient(135deg, #3833C8, #4a45d6);
             color: #fff;
+            box-shadow: 0 4px 12px rgba(56, 51, 200, .3);
         }
 
-        .setting-card {
+        .settings-nav .nav-link.active i {
+            opacity: 1;
+        }
+
+        .settings-content-col {
+            padding: 1.75rem;
+        }
+
+        .setting-card,
+        .settings-content-col {
             min-height: 650px;
+        }
+
+        .settings-content-col .tab-pane {
+            animation: settingsFadeIn .25s ease;
+        }
+
+        @keyframes settingsFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .settings-nav {
+                position: static;
+                max-height: none;
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: .4rem;
+            }
+
+            .settings-nav .nav-link {
+                white-space: nowrap;
+            }
+
+            .settings-nav-col {
+                border-right: none;
+                border-bottom: 1px solid rgba(0, 0, 0, .06);
+            }
         }
     </style>
 @endsection
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold mb-4">
-            {{ __('settings.title') }}
-        </h4>
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <span class="settings-header-icon"><i class="fa fa-sliders"></i></span>
+            <div>
+                <h4 class="fw-bold mb-0">{{ __('settings.title') }}</h4>
+            </div>
+        </div>
         @if (getRoleName() === \App\Enums\RoleNames::SUPERADMIN)
-            <div class="card mb-4">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <label class="form-label mb-0" for="settingsBusinessSelect">{{ __('common.business') }}</label>
+            <div class="card settings-business-card mb-4">
+                <div class="card-body d-flex align-items-center gap-3 flex-wrap">
+                    <span class="settings-header-icon" style="width:38px;height:38px;font-size:.95rem;">
+                        <i class="fa fa-building"></i>
+                    </span>
+                    <label class="form-label mb-0 fw-semibold" for="settingsBusinessSelect">{{ __('common.business') }}</label>
                     <select id="settingsBusinessSelect" class="form-select select2" style="max-width:350px;">
                         @foreach ($business as $item)
                             <option value="{{ $item->business_id }}" {{ $target_business_id == $item->business_id ? 'selected' : '' }}>
@@ -34,106 +153,84 @@
                             </option>
                         @endforeach
                     </select>
-                    <small class="text-muted">{{ __('settings.superadmin_business_selector_help') }}</small>
+                    <small class="text-muted mb-0">{{ __('settings.superadmin_business_selector_help') }}</small>
                 </div>
             </div>
         @endif
-        <div class="card settings-card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3" style="padding:0px;">
+        <div class="card settings-card settings-shell">
+            <div class="card-body p-0">
+                <div class="row g-0">
+                    <div class="col-md-3 settings-nav-col">
                         <div class="nav flex-column nav-pills settings-nav" id="settings-tab" role="tablist">
-                            <button class="nav-link active" style="text-align: left; border-radius:0px;"
-                                data-bs-toggle="pill" data-bs-target="#business">
-                                {{ __('settings.tab_business') }}
+                            <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#business">
+                                <i class="fa fa-building"></i> {{ __('settings.tab_business') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#localization">
-                                {{ __('settings.tab_localization') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#localization">
+                                <i class="fa fa-globe"></i> {{ __('settings.tab_localization') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#tax">
-                                {{ __('settings.tab_tax') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tax">
+                                <i class="fa fa-percent"></i> {{ __('settings.tab_tax') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#accounting">
-                                {{ __('settings.tab_accounting') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#accounting">
+                                <i class="fa fa-calculator"></i> {{ __('settings.tab_accounting') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#inventory">
-                                {{ __('settings.tab_inventory') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#inventory">
+                                <i class="fa fa-boxes-stacked"></i> {{ __('settings.tab_inventory') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#notification">
-                                {{ __('settings.tab_notification') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#notification">
+                                <i class="fa fa-bell"></i> {{ __('settings.tab_notification') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#customer">
-                                {{ __('settings.tab_customer') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#customer">
+                                <i class="fa fa-users"></i> {{ __('settings.tab_customer') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#supplier">
-                                {{ __('settings.tab_supplier') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#supplier">
+                                <i class="fa fa-truck"></i> {{ __('settings.tab_supplier') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#email">
-                                {{ __('settings.tab_email') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#email">
+                                <i class="fa fa-envelope"></i> {{ __('settings.tab_email') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#sms">
-                                {{ __('settings.tab_sms') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#sms">
+                                <i class="fa fa-comment-sms"></i> {{ __('settings.tab_sms') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#whatsapp">
-                                {{ __('settings.tab_whatsapp') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#whatsapp">
+                                <i class="fa fa-comments"></i> {{ __('settings.tab_whatsapp') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#firebase">
-                                {{ __('settings.tab_firebase') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#firebase">
+                                <i class="fa fa-fire"></i> {{ __('settings.tab_firebase') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#login_security">
-                                {{ __('settings.tab_login_security') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#login_security">
+                                <i class="fa fa-shield-halved"></i> {{ __('settings.tab_login_security') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#fbr">
-                                {{ __('settings.tab_fbr') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#fbr">
+                                <i class="fa fa-file-invoice"></i> {{ __('settings.tab_fbr') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#pra">
-                                {{ __('settings.tab_pra') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#pra">
+                                <i class="fa fa-file-invoice-dollar"></i> {{ __('settings.tab_pra') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#pos">
-                                {{ __('settings.tab_pos') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#pos">
+                                <i class="fa fa-cash-register"></i> {{ __('settings.tab_pos') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#print">
-                                {{ __('settings.tab_print') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#print">
+                                <i class="fa fa-print"></i> {{ __('settings.tab_print') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#thermal_print">
-                                {{ __('settings.tab_thermal_print') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#thermal_print">
+                                <i class="fa fa-receipt"></i> {{ __('settings.tab_thermal_print') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#barcode">
-                                {{ __('settings.tab_barcode') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#barcode">
+                                <i class="fa fa-barcode"></i> {{ __('settings.tab_barcode') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#theme">
-                                {{ __('settings.tab_theme') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#theme">
+                                <i class="fa fa-paintbrush"></i> {{ __('settings.tab_theme') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#website_theme">
-                                {{ __('settings.tab_website_theme') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#website_theme">
+                                <i class="fa fa-desktop"></i> {{ __('settings.tab_website_theme') }}
                             </button>
-                            <button class="nav-link" style="text-align: left; border-radius:0px;" data-bs-toggle="pill"
-                                data-bs-target="#website_settings">
-                                {{ __('settings.tab_website_settings') }}
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#website_settings">
+                                <i class="fa fa-gears"></i> {{ __('settings.tab_website_settings') }}
                             </button>
                         </div>
                     </div>
-                    <div class="col-md-9">
+                    <div class="col-md-9 settings-content-col">
                         <div class="tab-content">
                             <div class="tab-pane fade show active" id="business">
                                 @include('admin.setting.tabs.business')

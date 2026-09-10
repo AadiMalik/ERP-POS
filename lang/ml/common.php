@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'എല്ലാ അറിയിപ്പുകളും കാണുക',
     'my_profile' => 'എന്റെ പ്രൊഫൈൽ',
     'billing' => 'ബില്ലിംഗ്',
+    'back_to_super_admin' => 'സൂപ്പർ അഡ്മിനിലേക്ക് മടങ്ങുക',
     'all_warehouses' => '--എല്ലാ ഗോഡൗണുകളും--',
     'all_suppliers' => '--എല്ലാ വിതരണക്കാരും--',
     'all_customers' => '--എല്ലാ ഉപഭോക്താക്കളും--',

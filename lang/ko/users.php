@@ -9,6 +9,7 @@ return [
     'select_role' => '--选择 角色--',
     'select_branch' => '--选择 分支--',
     'last_login' => 'Last Login',
+    'login_as' => '이 사용자로 로그인',
     'new_heading' => '新建 用户',
     'update_heading' => '更新 用户',
     'save_user' => '保存 用户',

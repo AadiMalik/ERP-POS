@@ -9,6 +9,7 @@ return [
     'select_role' => '--Auswählen Rolle--',
     'select_branch' => '--Auswählen Filiale--',
     'last_login' => 'Last Login',
+    'login_as' => 'Σύνδεση ως',
     'new_heading' => 'Neu Benutzer',
     'update_heading' => 'Aktualisieren Benutzer',
     'save_user' => 'Speichern Benutzer',

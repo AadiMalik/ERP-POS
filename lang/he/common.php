@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'צפה בכל ההתראות',
     'my_profile' => 'הפרופיל שלי',
     'billing' => 'חיוב',
+    'back_to_super_admin' => 'חזרה למנהל העל',
     'all_warehouses' => '--כל המחסנים--',
     'all_suppliers' => '--כל הספקים--',
     'all_customers' => '--כל הלקוחות--',

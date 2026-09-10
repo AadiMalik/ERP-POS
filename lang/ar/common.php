@@ -125,6 +125,7 @@ return [
     'view_all_notifications' => 'عرض جميع الإشعارات',
     'my_profile' => 'ملفي الشخصي',
     'billing' => 'الفواتير',
+    'back_to_super_admin' => 'العودة إلى المشرف العام',
     'all_warehouses' => '--كل المستودعات--',
     'all_suppliers' => '--كل الموردين--',
     'all_customers' => '--كل العملاء--',
