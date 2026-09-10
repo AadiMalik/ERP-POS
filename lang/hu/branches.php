@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Használja a Saját pozíciót',
     'location_not_supported' => 'Az Ön böngészője nem támogatja a helyérzékelést.',
     'location_permission_denied' => 'Helymeghatározási engedély megtagadva. Kérjük, inkább válassza ki a helyet a térképen.',
+    'free_delivery_min_order_amount' => 'Ingyenes szállítás e összeg felett',
+    'free_delivery_hint' => 'Az ezzel az összeggel egyenlő vagy magasabb rendelések ingyenes szállítást kapnak ebben a fiókban. Hagyja üresen a letiltáshoz.',
     'new_heading' => 'Neu Filiale',
     'update_heading' => 'Aktualisieren Filiale',
     'save_branch' => 'Speichern Filiale',

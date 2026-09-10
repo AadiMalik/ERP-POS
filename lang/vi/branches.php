@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Use My Location',
     'location_not_supported' => 'Your browser does not support location detection.',
     'location_permission_denied' => 'Location permission denied. Please pick the location on the map instead.',
+    'free_delivery_min_order_amount' => 'Miễn phí giao hàng trên số tiền này',
+    'free_delivery_hint' => 'Đơn hàng bằng hoặc lớn hơn số tiền này sẽ được giao hàng miễn phí tại chi nhánh này. Để trống để tắt.',
     'new_heading' => '新建 分支',
     'update_heading' => '更新 分支',
     'save_branch' => '保存 分支',

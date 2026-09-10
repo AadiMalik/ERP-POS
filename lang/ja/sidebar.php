@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => '銀行照合',
     'batches' => 'バッチ',
     'branch' => '支店',
+    'delivery_zone' => '配送エリア',
     'branch_payroll_cost_report' => '支店給与コストレポート',
     'branch_wise_employee_report' => '支店別従業員レポート',
     'branch_wise_payroll_report' => '支店別給与レポート',

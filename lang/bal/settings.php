@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'کسٹمر اکاؤنٹ',
     'coa_store_credit_account' => 'اسٹور کریڈٹ اکاؤنٹ',
     'coa_carriage_account' => 'کیریج اکاؤنٹ',
+    'coa_delivery_charge_account' => 'ڈیلیوری چارج اکاؤنٹ',
     'coa_round_off_account' => 'راؤنڈ آف اکاؤنٹ',
     'coa_purchase_return' => 'واپسی کی خریداری',
     'coa_service_purchase_account' => 'سروس پرچیز اکاؤنٹ',

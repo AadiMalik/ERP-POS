@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'منهنجو مقام استعمال ڪريو',
     'location_not_supported' => 'توھان جو برائوزر جڳھ جي سڃاڻپ کي سپورٽ نٿو ڪري.',
     'location_permission_denied' => 'جڳھ جي اجازت رد ڪئي وئي. مھرباني ڪري ھن جي بدران نقشي تي جڳھ چونڊيو.',
+    'free_delivery_min_order_amount' => 'هن رقم کان مٿي مفت ڊليوري',
+    'free_delivery_hint' => 'هن شاخ ۾ هن رقم يا ان کان وڌيڪ آرڊرن تي مفت ڊليوري ملي ٿي. غير فعال ڪرڻ لاءِ خالي ڇڏيو.',
     'new_heading' => 'نیا برانچ',
     'update_heading' => 'اپ ڈیٹ برانچ',
     'save_branch' => 'محفوظ برانچ',

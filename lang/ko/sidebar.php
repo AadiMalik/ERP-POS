@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => '은행 계정 조정',
     'batches' => '배치',
     'branch' => '지점',
+    'delivery_zone' => '배송 구역',
     'branch_payroll_cost_report' => '지점 급여 비용 보고서',
     'branch_wise_employee_report' => '지점별 직원 보고서',
     'branch_wise_payroll_report' => '지점별 급여 보고서',

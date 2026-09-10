@@ -36,7 +36,11 @@ All configuration lives under one **Settings** screen, organized into sections
   **Supplier Account** here are attached automatically when a customer or
   supplier is created (including website/API customer signup). Saving a change
   to either default also updates existing customers/suppliers for that business
-  so credit sales and payments can post.
+  so credit sales and payments can post. **Delivery Charge Account** is where
+  delivery fees collected from customers are booked when an order is posted —
+  a starter account ("Delivery Charges Income") is already set up for every
+  business, so this only needs attention if you want the income tracked
+  elsewhere. See [Delivery Zones](21-delivery-zones.md).
 - **Language / Localization** — choose the **ERP Display Language** (the language the
   whole system — sidebar, menus, screens, buttons, messages — is shown in for everyone
   at your business), the **Default Input Language** (the default text direction for

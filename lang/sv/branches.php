@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Use My Location',
     'location_not_supported' => 'Your browser does not support location detection.',
     'location_permission_denied' => 'Location permission denied. Please pick the location on the map instead.',
+    'free_delivery_min_order_amount' => 'Fri frakt över detta belopp',
+    'free_delivery_hint' => 'Beställningar som är lika med eller högre än detta belopp får fri frakt på denna filial. Lämna tomt för att inaktivera.',
     'new_heading' => 'Neu Filiale',
     'update_heading' => 'Aktualisieren Filiale',
     'save_branch' => 'Speichern Filiale',

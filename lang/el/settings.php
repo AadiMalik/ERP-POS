@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'Λογαριασμός πελάτη',
     'coa_store_credit_account' => 'Πιστωτικός λογαριασμός καταστήματος',
     'coa_carriage_account' => 'Λογαριασμός μεταφοράς',
+    'coa_delivery_charge_account' => 'Λογαριασμός εξόδων παράδοσης',
     'coa_round_off_account' => 'Στρογγυλοποίηση λογαριασμού',
     'coa_purchase_return' => 'Επιστροφή Αγοράς',
     'coa_service_purchase_account' => 'Λογαριασμός αγοράς υπηρεσιών',

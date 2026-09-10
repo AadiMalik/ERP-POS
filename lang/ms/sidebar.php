@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Penyesuaian Bank',
     'batches' => 'Kelompok',
     'branch' => 'Cawangan',
+    'delivery_zone' => 'Zon Penghantaran',
     'branch_payroll_cost_report' => 'Laporan Kos Gaji Cawangan',
     'branch_wise_employee_report' => 'Laporan Pekerja mengikut Cawangan',
     'branch_wise_payroll_report' => 'Laporan Gaji mengikut Cawangan',

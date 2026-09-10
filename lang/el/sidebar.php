@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Τραπεζική συμφωνία',
     'batches' => 'Παρτίδες',
     'branch' => 'Υποκατάστημα',
+    'delivery_zone' => 'Ζώνες παράδοσης',
     'branch_payroll_cost_report' => 'Αναφορά κόστους μισθοδοσίας υποκαταστήματος',
     'branch_wise_employee_report' => 'Αναφορά υπαλλήλων ανά υποκατάστημα',
     'branch_wise_payroll_report' => 'Αναφορά μισθοδοσίας ανά υποκατάστημα',

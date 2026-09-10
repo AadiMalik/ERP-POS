@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Банковская сверка',
     'batches' => 'Партии',
     'branch' => 'Филиал',
+    'delivery_zone' => 'Зоны доставки',
     'branch_payroll_cost_report' => 'Отчёт затрат на зарплату по филиалу',
     'branch_wise_employee_report' => 'Отчёт сотрудников по филиалу',
     'branch_wise_payroll_report' => 'Отчёт по зарплате по филиалу',

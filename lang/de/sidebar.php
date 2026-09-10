@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Bankabstimmung',
     'batches' => 'Chargen',
     'branch' => 'Filiale',
+    'delivery_zone' => 'Lieferzonen',
     'branch_payroll_cost_report' => 'Filial-Lohnkostenbericht',
     'branch_wise_employee_report' => 'Mitarbeiterbericht nach Filiale',
     'branch_wise_payroll_report' => 'Lohnbericht nach Filiale',

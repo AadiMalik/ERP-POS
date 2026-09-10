@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'મારા સ્થાનનો ઉપયોગ કરો',
     'location_not_supported' => 'તમારું બ્રાઉઝર સ્થાન શોધને સપોર્ટ કરતું નથી.',
     'location_permission_denied' => 'સ્થાનની પરવાનગી નકારી. કૃપા કરીને તેના બદલે નકશા પર સ્થાન પસંદ કરો.',
+    'free_delivery_min_order_amount' => 'આ રકમથી ઉપર મફત ડિલિવરી',
+    'free_delivery_hint' => 'આ રકમ અથવા તેથી વધુના ઓર્ડર આ શાખા પર મફત ડિલિવરી મેળવે છે. બંધ કરવા ખાલી રાખો.',
     'new_heading' => 'نیا برانچ',
     'update_heading' => 'اپ ڈیٹ برانچ',
     'save_branch' => 'محفوظ برانچ',

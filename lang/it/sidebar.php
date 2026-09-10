@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Riconciliazione bancaria',
     'batches' => 'Lotti',
     'branch' => 'Filiale',
+    'delivery_zone' => 'Zone di consegna',
     'branch_payroll_cost_report' => 'Rapporto costo stipendi per filiale',
     'branch_wise_employee_report' => 'Rapporto dipendenti per filiale',
     'branch_wise_payroll_report' => 'Rapporto stipendi per filiale',

@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Bruk Min posisjon',
     'location_not_supported' => 'Nettleseren din støtter ikke stedsgjenkjenning.',
     'location_permission_denied' => 'Plasseringstillatelse nektet. Velg stedet på kartet i stedet.',
+    'free_delivery_min_order_amount' => 'Gratis levering over dette beløpet',
+    'free_delivery_hint' => 'Bestillinger lik eller over dette beløpet får gratis levering på denne filialen. La stå tomt for å deaktivere.',
     'new_heading' => 'Neu Filiale',
     'update_heading' => 'Aktualisieren Filiale',
     'save_branch' => 'Speichern Filiale',

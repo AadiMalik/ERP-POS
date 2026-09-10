@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => '顧客アカウント',
     'coa_store_credit_account' => 'ストアクレジットアカウント',
     'coa_carriage_account' => '運送口座',
+    'coa_delivery_charge_account' => '配送料勘定',
     'coa_round_off_account' => '四捨五入アカウント',
     'coa_purchase_return' => '購入返品',
     'coa_service_purchase_account' => 'サービス購入アカウント',

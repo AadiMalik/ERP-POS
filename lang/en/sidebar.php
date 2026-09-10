@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Bank Reconciliation',
     'batches' => 'Batches',
     'branch' => 'Branch',
+    'delivery_zone' => 'Delivery Zones',
     'branch_payroll_cost_report' => 'Branch Payroll Cost Report',
     'branch_wise_employee_report' => 'Branch-wise Employee Report',
     'branch_wise_payroll_report' => 'Branch-wise Payroll Report',

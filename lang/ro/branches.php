@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Utilizați Locația mea',
     'location_not_supported' => 'Browserul dvs. nu acceptă detectarea locației.',
     'location_permission_denied' => 'Permisiunea pentru locație a fost refuzată. În schimb, alegeți locația de pe hartă.',
+    'free_delivery_min_order_amount' => 'Livrare gratuită peste această sumă',
+    'free_delivery_hint' => 'Comenzile egale sau mai mari decât această sumă beneficiază de livrare gratuită la această filială. Lăsați gol pentru a dezactiva.',
     'new_heading' => 'Nuevo Sucursal',
     'update_heading' => 'Actualizar Sucursal',
     'save_branch' => 'Guardar Sucursal',

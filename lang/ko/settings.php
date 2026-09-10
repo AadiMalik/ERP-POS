@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => '고객 계정',
     'coa_store_credit_account' => '스토어 크레딧 계정',
     'coa_carriage_account' => '운송 계정',
+    'coa_delivery_charge_account' => '배송비 계정',
     'coa_round_off_account' => '반올림 계정',
     'coa_purchase_return' => '구매 반품',
     'coa_service_purchase_account' => '서비스 구매 계정',

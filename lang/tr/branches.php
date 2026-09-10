@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Use My Location',
     'location_not_supported' => 'Your browser does not support location detection.',
     'location_permission_denied' => 'Location permission denied. Please pick the location on the map instead.',
+    'free_delivery_min_order_amount' => 'Bu tutarın üzerinde ücretsiz teslimat',
+    'free_delivery_hint' => 'Bu şubede bu tutara eşit veya daha yüksek siparişler ücretsiz teslimat alır. Devre dışı bırakmak için boş bırakın.',
     'new_heading' => 'Neu Filiale',
     'update_heading' => 'Aktualisieren Filiale',
     'save_branch' => 'Speichern Filiale',

@@ -44,6 +44,7 @@ class DocumentationService
             ['slug' => 'backup-restore', 'title' => 'Backup & Restore', 'file' => '18-backup-restore.md'],
             ['slug' => 'payment-gateways', 'title' => 'Payment Gateways (Website & Mobile App)', 'file' => '19-payment-gateways.md'],
             ['slug' => 'analytics-bi', 'title' => 'Advanced Analytics & Business Intelligence', 'file' => '20-analytics-bi.md'],
+            ['slug' => 'delivery-zones', 'title' => 'Delivery Zones', 'file' => '21-delivery-zones.md'],
         ];
     }
 

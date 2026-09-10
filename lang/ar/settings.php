@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'حساب العميل',
     'coa_store_credit_account' => 'حساب ائتمان المتجر',
     'coa_carriage_account' => 'حساب النقل',
+    'coa_delivery_charge_account' => 'حساب رسوم التوصيل',
     'coa_round_off_account' => 'حساب التقريب',
     'coa_purchase_return' => 'عائد الشراء',
     'coa_service_purchase_account' => 'حساب شراء الخدمة',

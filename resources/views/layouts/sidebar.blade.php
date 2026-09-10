@@ -136,7 +136,7 @@
             <span class="menu-header-text">Business</span>
         </li>
         <!-- Business -->
-        @canAccessAny(['package.view', 'business.view', 'branch.view', 'order-type.view', 'order-source.view'])
+        @canAccessAny(['package.view', 'business.view', 'branch.view', 'delivery-zone.view', 'order-type.view', 'order-source.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons fa fa-store"></i>
@@ -162,6 +162,13 @@
                         <li class="menu-item">
                             <a href="{{ url('/admin/branch') }}" class="menu-link">
                                 <div data-i18n="Branch">{{ __('sidebar.branch') }}</div>
+                            </a>
+                        </li>
+                    @endcanAccess
+                    @canAccess('delivery-zone.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/delivery-zone') }}" class="menu-link">
+                                <div data-i18n="Delivery Zones">{{ __('sidebar.delivery_zone') }}</div>
                             </a>
                         </li>
                     @endcanAccess

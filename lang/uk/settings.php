@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'Обліковий запис клієнта',
     'coa_store_credit_account' => 'Кредитний рахунок магазину',
     'coa_carriage_account' => 'Перевізний рахунок',
+    'coa_delivery_charge_account' => 'Рахунок плати за доставку',
     'coa_round_off_account' => 'Округлити рахунок',
     'coa_purchase_return' => 'Повернення покупки',
     'coa_service_purchase_account' => 'Рахунок для придбання послуги',

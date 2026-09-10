@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'تطبیق بانکی',
     'batches' => 'بچ‌ها',
     'branch' => 'شعبه',
+    'delivery_zone' => 'مناطق تحویل',
     'branch_payroll_cost_report' => 'گزارش هزینه حقوق شعبه',
     'branch_wise_employee_report' => 'گزارش کارمندان بر اساس شعبه',
     'branch_wise_payroll_report' => 'گزارش حقوق بر اساس شعبه',

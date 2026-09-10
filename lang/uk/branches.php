@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Use My Location',
     'location_not_supported' => 'Your browser does not support location detection.',
     'location_permission_denied' => 'Location permission denied. Please pick the location on the map instead.',
+    'free_delivery_min_order_amount' => 'Безкоштовна доставка понад цю суму',
+    'free_delivery_hint' => 'Замовлення на суму, рівну або більшу за цю, отримують безкоштовну доставку в цій філії. Залиште порожнім, щоб вимкнути.',
     'new_heading' => 'Neu Filiale',
     'update_heading' => 'Aktualisieren Filiale',
     'save_branch' => 'Speichern Filiale',

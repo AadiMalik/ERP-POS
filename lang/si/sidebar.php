@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'බැංකු ප්‍රතිසන්ධානය',
     'batches' => 'කණ්ඩායම්',
     'branch' => 'ශාඛාව',
+    'delivery_zone' => 'බෙදාහැරීමේ කලාප',
     'branch_payroll_cost_report' => 'ශාඛා වැටුප් වියදම් වාර්තාව',
     'branch_wise_employee_report' => 'ශාඛා අනුව සේවක වාර්තාව',
     'branch_wise_payroll_report' => 'ශාඛා අනුව වැටුප් වාර්තාව',

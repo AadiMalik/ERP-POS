@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Utilizza La mia posizione',
     'location_not_supported' => 'Il tuo browser non supporta il rilevamento della posizione.',
     'location_permission_denied' => 'Autorizzazione alla posizione negata. Scegli invece la posizione sulla mappa.',
+    'free_delivery_min_order_amount' => 'Consegna gratuita sopra questo importo',
+    'free_delivery_hint' => 'Gli ordini pari o superiori a questo importo ricevono la consegna gratuita in questa filiale. Lascia vuoto per disattivare.',
     'new_heading' => 'Nuevo Sucursal',
     'update_heading' => 'Actualizar Sucursal',
     'save_branch' => 'Guardar Sucursal',

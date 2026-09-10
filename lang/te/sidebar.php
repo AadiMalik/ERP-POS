@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'బ్యాంక్ సమన్వయం',
     'batches' => 'బ్యాచ్‌లు',
     'branch' => 'శాఖ',
+    'delivery_zone' => 'డెలివరీ జోన్లు',
     'branch_payroll_cost_report' => 'శాఖ జీతం ఖర్చు నివేదిక',
     'branch_wise_employee_report' => 'శాఖ వారీగా ఉద్యోగుల నివేదిక',
     'branch_wise_payroll_report' => 'శాఖ వారీగా జీతం నివేదిక',

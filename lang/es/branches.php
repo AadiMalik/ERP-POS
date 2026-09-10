@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Use My Location',
     'location_not_supported' => 'Your browser does not support location detection.',
     'location_permission_denied' => 'Location permission denied. Please pick the location on the map instead.',
+    'free_delivery_min_order_amount' => 'Envío gratis por encima de este monto',
+    'free_delivery_hint' => 'Los pedidos iguales o superiores a este monto obtienen envío gratis en esta sucursal. Deje en blanco para desactivar.',
     'new_heading' => 'Nuevo Sucursal',
     'update_heading' => 'Actualizar Sucursal',
     'save_branch' => 'Guardar Sucursal',

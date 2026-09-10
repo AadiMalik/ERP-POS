@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'ബാങ്ക് പൊരുത്തപ്പെടുത്തൽ',
     'batches' => 'ബാച്ചുകൾ',
     'branch' => 'ശാഖ',
+    'delivery_zone' => 'ഡെലിവറി സോണുകൾ',
     'branch_payroll_cost_report' => 'ശാഖ ശമ്പള ചെലവ് റിപ്പോർട്ട്',
     'branch_wise_employee_report' => 'ശാഖ അടിസ്ഥാനത്തിലുള്ള ജീവനക്കാരുടെ റിപ്പോർട്ട്',
     'branch_wise_payroll_report' => 'ശാഖ അടിസ്ഥാനത്തിലുള്ള ശമ്പള റിപ്പോർട്ട്',

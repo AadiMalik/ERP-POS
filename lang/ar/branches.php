@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'استخدم موقعي',
     'location_not_supported' => 'متصفحك لا يدعم اكتشاف الموقع.',
     'location_permission_denied' => 'تم رفض إذن تحديد الموقع. يرجى اختيار الموقع على الخريطة بدلاً من ذلك.',
+    'free_delivery_min_order_amount' => 'التوصيل مجاني فوق هذا المبلغ',
+    'free_delivery_hint' => 'الطلبات التي تساوي أو تتجاوز هذا المبلغ تحصل على توصيل مجاني في هذا الفرع. اتركه فارغاً للتعطيل.',
     'new_heading' => 'فرع جديد',
     'update_heading' => 'تحديث الفرع',
     'save_branch' => 'حفظ الفرع',

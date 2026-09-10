@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Conciliación bancaria',
     'batches' => 'Lotes',
     'branch' => 'Sucursal',
+    'delivery_zone' => 'Zonas de entrega',
     'branch_payroll_cost_report' => 'Informe de costo de nómina por sucursal',
     'branch_wise_employee_report' => 'Informe de empleados por sucursal',
     'branch_wise_payroll_report' => 'Informe de nómina por sucursal',

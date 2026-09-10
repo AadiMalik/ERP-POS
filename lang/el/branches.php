@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Use My Location',
     'location_not_supported' => 'Your browser does not support location detection.',
     'location_permission_denied' => 'Location permission denied. Please pick the location on the map instead.',
+    'free_delivery_min_order_amount' => 'Δωρεάν παράδοση άνω αυτού του ποσού',
+    'free_delivery_hint' => 'Παραγγελίες ίσες ή μεγαλύτερες από αυτό το ποσό έχουν δωρεάν παράδοση σε αυτό το υποκατάστημα. Αφήστε κενό για απενεργοποίηση.',
     'new_heading' => 'Neu Filiale',
     'update_heading' => 'Aktualisieren Filiale',
     'save_branch' => 'Speichern Filiale',

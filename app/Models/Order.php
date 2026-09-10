@@ -49,6 +49,7 @@ class Order extends Model
         'delivery_address',
         'delivery_latitude',
         'delivery_longitude',
+        'delivery_charge',
         'payment_proof',
         'payment_confirmed_at',
         'payment_confirmed_by_id',

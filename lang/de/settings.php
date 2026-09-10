@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'Kundenkonto',
     'coa_store_credit_account' => 'Guthabenkonto speichern',
     'coa_carriage_account' => 'Beförderungskonto',
+    'coa_delivery_charge_account' => 'Liefergebührkonto',
     'coa_round_off_account' => 'Konto abrunden',
     'coa_purchase_return' => 'Kaufrückgabe',
     'coa_service_purchase_account' => 'Service-Einkaufskonto',

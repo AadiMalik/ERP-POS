@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'ڪسٽمر اڪائونٽ',
     'coa_store_credit_account' => 'اسٽور ڪريڊٽ اڪائونٽ',
     'coa_carriage_account' => 'گاڏي کاتي',
+    'coa_delivery_charge_account' => 'ڊليوري چارج اڪائونٽ',
     'coa_round_off_account' => 'گول بند اڪائونٽ',
     'coa_purchase_return' => 'خريداري جي واپسي',
     'coa_service_purchase_account' => 'خدمت خريداري اڪائونٽ',

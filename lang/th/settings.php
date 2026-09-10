@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'บัญชีลูกค้า',
     'coa_store_credit_account' => 'บัญชีเครดิตร้านค้า',
     'coa_carriage_account' => 'บัญชีขนส่ง',
+    'coa_delivery_charge_account' => 'บัญชีค่าจัดส่ง',
     'coa_round_off_account' => 'ปัดเศษบัญชี',
     'coa_purchase_return' => 'ซื้อคืน',
     'coa_service_purchase_account' => 'บัญชีซื้อบริการ',

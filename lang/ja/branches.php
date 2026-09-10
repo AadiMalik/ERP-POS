@@ -23,6 +23,8 @@ return [
     'use_my_location' => '現在地を使用する',
     'location_not_supported' => 'お使いのブラウザは位置検出をサポートしていません。',
     'location_permission_denied' => '位置情報の許可が拒否されました。代わりに地図上の場所を選択してください。',
+    'free_delivery_min_order_amount' => 'この金額以上で送料無料',
+    'free_delivery_hint' => 'この支店では、この金額以上の注文は送料無料になります。無効にするには空欄のままにしてください。',
     'new_heading' => '新建 分支',
     'update_heading' => '更新 分支',
     'save_branch' => '保存 分支',

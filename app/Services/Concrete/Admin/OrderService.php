@@ -1038,6 +1038,7 @@ class OrderService
                     'delivery_address' => $obj['delivery_address'] ?? null,
                     'delivery_latitude' => $obj['delivery_latitude'] ?? null,
                     'delivery_longitude' => $obj['delivery_longitude'] ?? null,
+                    'delivery_charge' => $obj['delivery_charge'] ?? 0,
                     'status' => $status,
                     'fbr_invoice_number' => $obj['fbr_invoice_number'] ?? $order->fbr_invoice_number,
                     'pra_invoice_number' => $obj['pra_invoice_number'] ?? $order->pra_invoice_number,
@@ -1073,6 +1074,7 @@ class OrderService
                     'delivery_address' => $obj['delivery_address'] ?? null,
                     'delivery_latitude' => $obj['delivery_latitude'] ?? null,
                     'delivery_longitude' => $obj['delivery_longitude'] ?? null,
+                    'delivery_charge' => $obj['delivery_charge'] ?? 0,
                     'status' => $status,
                     'fbr_invoice_number' => $obj['fbr_invoice_number'] ?? null,
                     'pra_invoice_number' => $obj['pra_invoice_number'] ?? null,
@@ -1121,6 +1123,7 @@ class OrderService
                 'tax_type' => $totals['tax_type'],
                 'tax_discount' => $totals['tax_discount'],
                 'tax_discount_amount' => $totals['tax_discount_amount'],
+                'delivery_charge' => $totals['delivery_charge'],
                 'total' => $totals['total'],
                 'discount_id' => $totals['discount_id'],
                 'voucher_id' => $totals['voucher_id'],
@@ -1546,12 +1549,17 @@ class OrderService
         unset($line);
 
         $discount_amount = $line_discount_total + $order_discount_amount + $voucher_discount_amount + $loyalty_discount_amount;
+        // Delivery charge (resolved by WebsiteCheckoutService/DeliveryZoneService
+        // before save() is called, or set directly by an admin-created delivery
+        // order) is a flat addition on top of everything else, regardless of
+        // inclusive/exclusive tax type - it's not part of the taxable sale amount.
+        $delivery_charge = (float) ($obj['delivery_charge'] ?? $order->delivery_charge ?? 0);
         // Inclusive tax is already inside subtotal, so it isn't added again
         // here (only backed out for display/JV purposes) - exclusive tax is
         // additive on top of the discounted subtotal, as this always was.
         $total = $tax_type === 'inclusive'
-            ? ($subtotal - $discount_amount)
-            : ($subtotal - $discount_amount + $tax_amount_total);
+            ? ($subtotal - $discount_amount + $delivery_charge)
+            : ($subtotal - $discount_amount + $tax_amount_total + $delivery_charge);
 
         return [
             'subtotal' => $subtotal,
@@ -1562,6 +1570,7 @@ class OrderService
             'tax_type' => $tax_type,
             'tax_discount' => $tax_discount_percent,
             'tax_discount_amount' => round($tax_discount_amount_total, 3),
+            'delivery_charge' => round($delivery_charge, 3),
             'total' => round($total, 3),
             'discount_id' => $discount_id,
             'voucher_id' => $voucher_id,
@@ -2571,6 +2580,26 @@ class OrderService
                 'debit' => 0,
                 'credit' => $order->tax_discount_amount,
                 'description' => 'Order #' . $order->daily_order_id . ' - Tax Discount',
+            ]);
+        }
+
+        // Credit: delivery charge collected. Requires the COA account to be
+        // configured (same "must be configured before posting" guard as
+        // Round Off below) - a business can't silently post a delivery
+        // charge nowhere. Never reversed on return (see OrderReturnService -
+        // delivery already happened regardless of what items come back).
+        if ((float) $order->delivery_charge > 0) {
+            if (empty($accounting_setting->default_delivery_charge_account_id)) {
+                throw new Exception('Delivery Charge Account is not configured in Accounting Settings, required to post a delivery charge of ' . $order->delivery_charge . '.');
+            }
+
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id' => $journal_entry->journal_entry_id,
+                'account_id' => $accounting_setting->default_delivery_charge_account_id,
+                'debit' => 0,
+                'credit' => $order->delivery_charge,
+                'description' => 'Order #' . $order->daily_order_id . ' - Delivery Charge',
             ]);
         }
 

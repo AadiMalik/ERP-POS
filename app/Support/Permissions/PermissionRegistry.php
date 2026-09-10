@@ -204,6 +204,14 @@ class PermissionRegistry
                 'export' => ['name' => 'warehouse.export', 'label' => 'Export', 'is_system' => false],
             ]],
 
+            'delivery-zone' => ['label' => 'Delivery Zones', 'actions' => [
+                'view'   => ['name' => 'delivery-zone.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'delivery-zone.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'delivery-zone.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'delivery-zone.delete', 'label' => 'Delete', 'is_system' => false],
+                'status' => ['name' => 'delivery-zone.status', 'label' => 'Change Status', 'is_system' => false],
+            ]],
+
             'bank' => ['label' => 'Banks', 'actions' => [
                 'view'   => ['name' => 'bank.view', 'label' => 'View', 'is_system' => false],
                 'create' => ['name' => 'bank.create', 'label' => 'Create', 'is_system' => false],

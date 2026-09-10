@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Use My Location',
     'location_not_supported' => 'Your browser does not support location detection.',
     'location_permission_denied' => 'Location permission denied. Please pick the location on the map instead.',
+    'free_delivery_min_order_amount' => 'ఈ మొత్తానికి పైగా ఉచిత డెలివరీ',
+    'free_delivery_hint' => 'ఈ శాఖలో ఈ మొత్తానికి సమానమైన లేదా అంతకంటే ఎక్కువ ఆర్డర్లకు ఉచిత డెలివరీ లభిస్తుంది. నిలిపివేయడానికి ఖాళీగా ఉంచండి.',
     'new_heading' => 'نیا برانچ',
     'update_heading' => 'اپ ڈیٹ برانچ',
     'save_branch' => 'محفوظ برانچ',

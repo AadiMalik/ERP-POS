@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'חשבון לקוח',
     'coa_store_credit_account' => 'חשבון אשראי בחנות',
     'coa_carriage_account' => 'חשבון רכב',
+    'coa_delivery_charge_account' => 'חשבון דמי משלוח',
     'coa_round_off_account' => 'סגור חשבון',
     'coa_purchase_return' => 'החזרת רכישה',
     'coa_service_purchase_account' => 'חשבון רכישת שירות',

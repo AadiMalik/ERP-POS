@@ -71,6 +71,7 @@ class BranchController extends Controller
             'phone' => 'required',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
+            'free_delivery_min_order_amount' => 'nullable|numeric|min:0',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ];
 
@@ -93,6 +94,7 @@ class BranchController extends Controller
             'country',
             'latitude',
             'longitude',
+            'free_delivery_min_order_amount',
             'open_time',
             'close_time',
             'warehouse_ids',

@@ -25,6 +25,7 @@ class Branch extends Model
         'country',
         'latitude',
         'longitude',
+        'free_delivery_min_order_amount',
         'logo',
         // Automatic register mode's open/close window override for this branch -
         // falls back to pos_settings.open_time/close_time when null.

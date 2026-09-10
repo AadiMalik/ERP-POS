@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Gebruik Mijn locatie',
     'location_not_supported' => 'Uw browser ondersteunt geen locatiedetectie.',
     'location_permission_denied' => 'Locatietoestemming geweigerd. Kies in plaats daarvan de locatie op de kaart.',
+    'free_delivery_min_order_amount' => 'Gratis bezorging boven dit bedrag',
+    'free_delivery_hint' => 'Bestellingen gelijk aan of hoger dan dit bedrag krijgen gratis bezorging bij dit filiaal. Laat leeg om uit te schakelen.',
     'new_heading' => 'Neu Filiale',
     'update_heading' => 'Aktualisieren Filiale',
     'save_branch' => 'Speichern Filiale',

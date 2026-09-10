@@ -13,6 +13,7 @@
         'default_customer_account_id' => __('settings.coa_customer_account'),
         'default_store_credit_account_id' => __('settings.coa_store_credit_account'),
         'default_carriage_account_id' => __('settings.coa_carriage_account'),
+        'default_delivery_charge_account_id' => __('settings.coa_delivery_charge_account'),
         'default_round_off_account_id' => __('settings.coa_round_off_account'),
         'default_purchase_return_account_id' => __('settings.coa_purchase_return'),
         'default_service_purchase_account_id' => __('settings.coa_service_purchase_account'),

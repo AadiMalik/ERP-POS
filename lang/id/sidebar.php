@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Rekonsiliasi Bank',
     'batches' => 'Batch',
     'branch' => 'Cabang',
+    'delivery_zone' => 'Zona Pengiriman',
     'branch_payroll_cost_report' => 'Laporan Biaya Gaji Cabang',
     'branch_wise_employee_report' => 'Laporan Karyawan per Cabang',
     'branch_wise_payroll_report' => 'Laporan Gaji per Cabang',

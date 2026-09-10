@@ -10,6 +10,7 @@ use App\Models\OrderType;
 use App\Models\PaymentMethod;
 use App\Models\PaymentTransaction;
 use App\Models\WebsiteCartItem;
+use App\Services\Concrete\Admin\DeliveryZoneService;
 use App\Services\Concrete\Admin\OrderService;
 use App\Services\Concrete\Admin\OrderSourceService;
 use App\Services\Concrete\Admin\OrderTypeService;
@@ -37,6 +38,7 @@ class WebsiteCheckoutService
     protected $customer_order_service;
     protected $order_type_service;
     protected $order_source_service;
+    protected $delivery_zone_service;
 
     public function __construct(
         WebsiteCartService $cart_service,
@@ -44,7 +46,8 @@ class WebsiteCheckoutService
         PaymentMethodService $payment_method_service,
         CustomerOrderService $customer_order_service,
         OrderTypeService $order_type_service,
-        OrderSourceService $order_source_service
+        OrderSourceService $order_source_service,
+        DeliveryZoneService $delivery_zone_service
     ) {
         $this->cart_service = $cart_service;
         $this->order_service = $order_service;
@@ -52,6 +55,7 @@ class WebsiteCheckoutService
         $this->customer_order_service = $customer_order_service;
         $this->order_type_service = $order_type_service;
         $this->order_source_service = $order_source_service;
+        $this->delivery_zone_service = $delivery_zone_service;
     }
 
     /**
@@ -141,6 +145,28 @@ class WebsiteCheckoutService
 
         $delivery_address = $this->formatDeliveryAddress($payload);
 
+        // Server-side re-validation of delivery distance - the storefront's
+        // earlier verify-delivery-address call (verifyDeliveryAddress()
+        // below) is a UX convenience only and is never trusted alone. No
+        // coordinates given = no zone check, delivery_charge stays 0
+        // (backward-compatible with any non-geo checkout already in use).
+        $delivery_fee = 0.0;
+        if (!empty($payload['latitude']) && !empty($payload['longitude'])) {
+            $resolution = $this->delivery_zone_service->resolve(
+                $business_id,
+                $cart_payload['branch_id'],
+                (float) $payload['latitude'],
+                (float) $payload['longitude'],
+                (float) $cart_payload['totals']['total']
+            );
+
+            if (!$resolution['in_area']) {
+                throw new Exception('Sorry, this address is out of our delivery area.');
+            }
+
+            $delivery_fee = $resolution['fee'];
+        }
+
         $this->order_type_service->seedDefaults(null);
         $this->order_source_service->seedDefaults(null);
 
@@ -195,6 +221,7 @@ class WebsiteCheckoutService
                 'delivery_address' => $delivery_address,
                 'delivery_latitude' => $payload['latitude'] ?? null,
                 'delivery_longitude' => $payload['longitude'] ?? null,
+                'delivery_charge' => $delivery_fee,
                 'notes' => $payload['notes'] ?? null,
                 'products' => $products,
                 'payments' => [
@@ -268,6 +295,38 @@ class WebsiteCheckoutService
 
             throw $e;
         }
+    }
+
+    /**
+     * Checks a candidate delivery address against the resolved branch's
+     * Delivery Zones before the customer submits the order - a UX
+     * convenience for the storefront to show "out of delivery area" or the
+     * expected fee up front. placeOrder() re-runs the same resolve() call
+     * server-side and never trusts this result alone.
+     */
+    public function verifyDeliveryAddress(int $user_id, string $business_id, array $payload): array
+    {
+        $branch_id = $payload['branch_id'] ?? $this->cart_service->resolveFulfillmentContext($business_id)['branch_id'];
+
+        $cart_payload = $this->cart_service->getCart($user_id, $business_id, $branch_id);
+        $cart_total = (float) ($cart_payload['totals']['total'] ?? 0);
+
+        $resolution = $this->delivery_zone_service->resolve(
+            $business_id,
+            $branch_id,
+            (float) $payload['latitude'],
+            (float) $payload['longitude'],
+            $cart_total
+        );
+
+        return [
+            'in_area' => $resolution['in_area'],
+            'delivery_fee' => $resolution['fee'],
+            'free' => $resolution['free'],
+            'message' => $resolution['in_area']
+                ? ($resolution['free'] ? 'Free delivery for this order.' : 'Delivery available for this address.')
+                : 'Sorry, this address is out of our delivery area.',
+        ];
     }
 
     /**

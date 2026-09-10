@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'Cont de client',
     'coa_store_credit_account' => 'Cont de credit magazin',
     'coa_carriage_account' => 'Cont de transport',
+    'coa_delivery_charge_account' => 'Cont taxă de livrare',
     'coa_round_off_account' => 'Rotunjiți contul',
     'coa_purchase_return' => 'Retur de cumpărare',
     'coa_service_purchase_account' => 'Cont de achiziție de servicii',

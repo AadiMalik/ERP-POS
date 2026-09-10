@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'بینک مطابقت',
     'batches' => 'بیچز',
     'branch' => 'برانچ',
+    'delivery_zone' => 'ڈیلیوری زونز',
     'branch_payroll_cost_report' => 'برانچ تنخواہ لاگت رپورٹ',
     'branch_wise_employee_report' => 'برانچ کے لحاظ سے ملازمین کی رپورٹ',
     'branch_wise_payroll_report' => 'برانچ کے لحاظ سے تنخواہ رپورٹ',

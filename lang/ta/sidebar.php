@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'வங்கி சரிசெய்தல்',
     'batches' => 'தொகுதிகள்',
     'branch' => 'கிளை',
+    'delivery_zone' => 'விநியோக மண்டலங்கள்',
     'branch_payroll_cost_report' => 'கிளை சம்பள செலவு அறிக்கை',
     'branch_wise_employee_report' => 'கிளை வாரியான ஊழியர் அறிக்கை',
     'branch_wise_payroll_report' => 'கிளை வாரியான சம்பள அறிக்கை',

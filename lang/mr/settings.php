@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'ग्राहक खाते',
     'coa_store_credit_account' => 'स्टोअर क्रेडिट खाते',
     'coa_carriage_account' => 'कॅरेज खाते',
+    'coa_delivery_charge_account' => 'डिलिव्हरी शुल्क खाते',
     'coa_round_off_account' => 'खाते बंद करा',
     'coa_purchase_return' => 'खरेदी परतावा',
     'coa_service_purchase_account' => 'सेवा खरेदी खाते',

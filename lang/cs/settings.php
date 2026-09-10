@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'Zákaznický účet',
     'coa_store_credit_account' => 'Úvěrový účet obchodu',
     'coa_carriage_account' => 'Přepravní účet',
+    'coa_delivery_charge_account' => 'Účet poplatku za doručení',
     'coa_round_off_account' => 'Zaokrouhlit účet',
     'coa_purchase_return' => 'Vrácení nákupu',
     'coa_service_purchase_account' => 'Účet nákupu služby',

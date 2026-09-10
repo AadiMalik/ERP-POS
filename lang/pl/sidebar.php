@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Uzgodnienie bankowe',
     'batches' => 'Partie',
     'branch' => 'Oddział',
+    'delivery_zone' => 'Strefy dostawy',
     'branch_payroll_cost_report' => 'Raport kosztów wynagrodzeń oddziału',
     'branch_wise_employee_report' => 'Raport pracowników według oddziału',
     'branch_wise_payroll_report' => 'Raport wynagrodzeń według oddziału',

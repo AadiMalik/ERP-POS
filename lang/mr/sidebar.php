@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'बँक मिलाप',
     'batches' => 'बॅचेस',
     'branch' => 'शाखा',
+    'delivery_zone' => 'डिलिव्हरी झोन',
     'branch_payroll_cost_report' => 'शाखा पगार खर्च अहवाल',
     'branch_wise_employee_report' => 'शाखानिहाय कर्मचारी अहवाल',
     'branch_wise_payroll_report' => 'शाखानिहाय पगार अहवाल',

@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'Akun Pelanggan',
     'coa_store_credit_account' => 'Rekening Kredit Toko',
     'coa_carriage_account' => 'Akun Pengangkutan',
+    'coa_delivery_charge_account' => 'Akun Biaya Pengiriman',
     'coa_round_off_account' => 'Pembulatan Akun',
     'coa_purchase_return' => 'Pengembalian Pembelian',
     'coa_service_purchase_account' => 'Akun Pembelian Layanan',

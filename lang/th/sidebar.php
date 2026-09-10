@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'การกระทบยอดธนาคาร',
     'batches' => 'ชุดการผลิต',
     'branch' => 'สาขา',
+    'delivery_zone' => 'โซนจัดส่ง',
     'branch_payroll_cost_report' => 'รายงานต้นทุนเงินเดือนสาขา',
     'branch_wise_employee_report' => 'รายงานพนักงานตามสาขา',
     'branch_wise_payroll_report' => 'รายงานเงินเดือนตามสาขา',

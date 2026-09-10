@@ -543,6 +543,14 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         });
     }); // end module:payroll (Payroll reports)
 
+    //delivery-zone (branch-scoped distance/fee bands - no module gate, permission-only)
+    Route::resource('delivery-zone', App\Http\Controllers\Admin\DeliveryZoneController::class)->except(['show']);
+    Route::group(['prefix' => 'delivery-zone'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\DeliveryZoneController::class, 'getData'])->name('delivery-zone-data');
+        Route::post('change-status/{id}', [App\Http\Controllers\Admin\DeliveryZoneController::class, 'status']);
+        Route::get('by-branch/{branch_id}', [App\Http\Controllers\Admin\DeliveryZoneController::class, 'byBranch'])->name('delivery-zone-by-branch');
+    });
+
     ////////////////////// Inventory ///////////////////////////
     Route::group(['middleware' => ['module:inventory']], function () {
     //warehouse

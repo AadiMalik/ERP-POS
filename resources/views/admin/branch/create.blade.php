@@ -113,6 +113,12 @@
                                         <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $branch->latitude ?? '') }}">
                                         <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $branch->longitude ?? '') }}">
                                     </div>
+                                    <div class="col-md-6">
+                                        <label class="fw-semibold">{{ __('branches.free_delivery_min_order_amount') }}</label>
+                                        <input type="number" step="0.01" min="0" class="form-control" name="free_delivery_min_order_amount"
+                                            value="{{ old('free_delivery_min_order_amount', $branch->free_delivery_min_order_amount ?? '') }}">
+                                        <small class="text-muted">{{ __('branches.free_delivery_hint') }}</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>

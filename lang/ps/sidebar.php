@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'د بانک تطبیق',
     'batches' => 'بېچونه',
     'branch' => 'څانګه',
+    'delivery_zone' => 'د لیږد سیمې',
     'branch_payroll_cost_report' => 'د څانګې د معاش لګښت راپور',
     'branch_wise_employee_report' => 'د څانګې له مخې کارکوونکو راپور',
     'branch_wise_payroll_report' => 'د څانګې له مخې معاش راپور',

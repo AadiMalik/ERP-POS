@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'Customer Account',
     'coa_store_credit_account' => 'Conto di credito del negozio',
     'coa_carriage_account' => 'Conto di trasporto',
+    'coa_delivery_charge_account' => 'Conto spese di consegna',
     'coa_round_off_account' => 'Round Off Account',
     'coa_purchase_return' => 'Purchase Return',
     'coa_service_purchase_account' => 'Conto acquisto servizi',

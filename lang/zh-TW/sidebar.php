@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => '銀行對帳',
     'batches' => '批次',
     'branch' => '分支機構',
+    'delivery_zone' => '配送區域',
     'branch_payroll_cost_report' => '分支機構薪資成本報告',
     'branch_wise_employee_report' => '按分支機構統計員工報告',
     'branch_wise_payroll_report' => '按分支機構統計薪資報告',

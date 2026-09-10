@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'මගේ ස්ථානය භාවිතා කරන්න',
     'location_not_supported' => 'ඔබගේ බ්‍රවුසරය ස්ථාන හඳුනාගැනීමට සහාය නොදක්වයි.',
     'location_permission_denied' => 'Location permission denied. Please pick the location on the map instead.',
+    'free_delivery_min_order_amount' => 'මෙම මුදලට වඩා නොමිලේ බෙදාහැරීම',
+    'free_delivery_hint' => 'මෙම ශාඛාවේ මෙම මුදලට සමාන හෝ වැඩි ඇණවුම්වලට නොමිලේ බෙදාහැරීම ලැබේ. අබල කිරීමට හිස්ව තබන්න.',
     'new_heading' => 'نیا برانچ',
     'update_heading' => 'اپ ڈیٹ برانچ',
     'save_branch' => 'محفوظ برانچ',

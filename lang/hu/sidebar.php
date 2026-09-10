@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Bankegyeztetés',
     'batches' => 'Tételek',
     'branch' => 'Fióktelep',
+    'delivery_zone' => 'Szállítási zónák',
     'branch_payroll_cost_report' => 'Fióktelep bérköltség jelentés',
     'branch_wise_employee_report' => 'Alkalmazotti jelentés fióktelep szerint',
     'branch_wise_payroll_report' => 'Bérjelentés fióktelep szerint',

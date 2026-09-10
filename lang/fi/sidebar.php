@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Pankkitäsmäytys',
     'batches' => 'Erät',
     'branch' => 'Sivukonttori',
+    'delivery_zone' => 'Toimitusalueet',
     'branch_payroll_cost_report' => 'Sivukonttorin palkkakustannusraportti',
     'branch_wise_employee_report' => 'Työntekijäraportti sivukonttoreittain',
     'branch_wise_payroll_report' => 'Palkkaraportti sivukonttoreittain',

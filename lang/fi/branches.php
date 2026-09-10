@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Käytä Oma sijaintia',
     'location_not_supported' => 'Selaimesi ei tue sijainnintunnistusta.',
     'location_permission_denied' => 'Sijaintilupa evätty. Valitse sen sijaan sijainti kartalta.',
+    'free_delivery_min_order_amount' => 'Ilmainen toimitus tämän summan yläpuolella',
+    'free_delivery_hint' => 'Tilaukset, jotka ovat vähintään tämän suuruisia, saavat ilmaisen toimituksen tässä toimipisteessä. Jätä tyhjäksi poistaaksesi käytöstä.',
     'new_heading' => 'Neu Filiale',
     'update_heading' => 'Aktualisieren Filiale',
     'save_branch' => 'Speichern Filiale',

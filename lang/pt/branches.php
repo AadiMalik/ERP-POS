@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Usar minha localização',
     'location_not_supported' => 'Seu navegador não suporta detecção de localização.',
     'location_permission_denied' => 'Permissão de localização negada. Escolha o local no mapa.',
+    'free_delivery_min_order_amount' => 'Entrega grátis acima deste valor',
+    'free_delivery_hint' => 'Pedidos iguais ou superiores a este valor têm entrega grátis nesta filial. Deixe em branco para desativar.',
     'new_heading' => 'Nuevo Sucursal',
     'update_heading' => 'Actualizar Sucursal',
     'save_branch' => 'Guardar Sucursal',

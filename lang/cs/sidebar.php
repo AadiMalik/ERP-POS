@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Bankovní odsouhlasení',
     'batches' => 'Šarže',
     'branch' => 'Pobočka',
+    'delivery_zone' => 'Doručovací zóny',
     'branch_payroll_cost_report' => 'Zpráva o nákladech na mzdy pobočky',
     'branch_wise_employee_report' => 'Zpráva o zaměstnancích podle pobočky',
     'branch_wise_payroll_report' => 'Zpráva o mzdách podle pobočky',

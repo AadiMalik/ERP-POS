@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'Klantaccount',
     'coa_store_credit_account' => 'Winkelkredietrekening',
     'coa_carriage_account' => 'Vervoersrekening',
+    'coa_delivery_charge_account' => 'Bezorgkostenrekening',
     'coa_round_off_account' => 'Rekening afronden',
     'coa_purchase_return' => 'Aankoop retourneren',
     'coa_service_purchase_account' => 'Serviceaankoopaccount',

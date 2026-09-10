@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Gunakan Lokasi Saya',
     'location_not_supported' => 'Browser Anda tidak mendukung deteksi lokasi.',
     'location_permission_denied' => 'Izin lokasi ditolak. Silakan pilih lokasi di peta.',
+    'free_delivery_min_order_amount' => 'Gratis ongkir di atas jumlah ini',
+    'free_delivery_hint' => 'Pesanan sama dengan atau di atas jumlah ini mendapatkan pengiriman gratis di cabang ini. Biarkan kosong untuk menonaktifkan.',
     'new_heading' => '新建 分支',
     'update_heading' => '更新 分支',
     'save_branch' => '保存 分支',

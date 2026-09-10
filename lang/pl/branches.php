@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Użyj Mojej lokalizacji',
     'location_not_supported' => 'Twoja przeglądarka nie obsługuje wykrywania lokalizacji.',
     'location_permission_denied' => 'Odmowa pozwolenia na lokalizację. Zamiast tego wybierz lokalizację na mapie.',
+    'free_delivery_min_order_amount' => 'Darmowa dostawa powyżej tej kwoty',
+    'free_delivery_hint' => 'Zamówienia równe lub wyższe od tej kwoty otrzymują darmową dostawę w tym oddziale. Pozostaw puste, aby wyłączyć.',
     'new_heading' => 'Neu Filiale',
     'update_heading' => 'Aktualisieren Filiale',
     'save_branch' => 'Speichern Filiale',

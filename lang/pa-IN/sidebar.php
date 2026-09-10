@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'ਬੈਂਕ ਮੇਲ-ਮਿਲਾਪ',
     'batches' => 'ਬੈਚ',
     'branch' => 'ਸ਼ਾਖਾ',
+    'delivery_zone' => 'ਡਿਲੀਵਰੀ ਜ਼ੋਨ',
     'branch_payroll_cost_report' => 'ਸ਼ਾਖਾ ਤਨਖਾਹ ਖਰਚ ਰਿਪੋਰਟ',
     'branch_wise_employee_report' => 'ਸ਼ਾਖਾ-ਅਨੁਸਾਰ ਕਰਮਚਾਰੀ ਰਿਪੋਰਟ',
     'branch_wise_payroll_report' => 'ਸ਼ਾਖਾ-ਅਨੁਸਾਰ ਤਨਖਾਹ ਰਿਪੋਰਟ',

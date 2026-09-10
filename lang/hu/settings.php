@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'Ügyfélfiók',
     'coa_store_credit_account' => 'Üzleti hitelszámla',
     'coa_carriage_account' => 'Szállítási számla',
+    'coa_delivery_charge_account' => 'Szállítási díj számla',
     'coa_round_off_account' => 'Számla kerekítése',
     'coa_purchase_return' => 'Vásárlás Vissza',
     'coa_service_purchase_account' => 'Szolgáltatásvásárlási számla',

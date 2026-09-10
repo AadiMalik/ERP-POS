@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Utiliser ma position',
     'location_not_supported' => 'Votre navigateur ne prend pas en charge la détection de localisation.',
     'location_permission_denied' => 'Autorisation de localisation refusée. Veuillez plutôt choisir l\'emplacement sur la carte.',
+    'free_delivery_min_order_amount' => 'Livraison gratuite au-dessus de ce montant',
+    'free_delivery_hint' => 'Les commandes égales ou supérieures à ce montant bénéficient de la livraison gratuite dans cette succursale. Laissez vide pour désactiver.',
     'new_heading' => 'Nouveau Succursale',
     'update_heading' => 'Mettre à jour Succursale',
     'save_branch' => 'Enregistrer Succursale',

@@ -27,6 +27,8 @@ return [
     'location_permission_denied' => 'Location permission denied. Please pick the location on the map instead.',
     'search_address' => 'Search address...',
     'search_address_no_results' => 'No results found',
+    'free_delivery_min_order_amount' => 'Free Delivery Above Amount',
+    'free_delivery_hint' => 'Orders at or above this amount get free delivery at this branch. Leave blank to disable.',
     'new_heading' => 'New Branch',
     'update_heading' => 'Update Branch',
     'save_branch' => 'Save Branch',

@@ -18,7 +18,11 @@ module/feature gating matrix per package (see
 [Subscription & Module Gating](08-subscription-module-gating.md)). `branches`
 belong to a business, and carry optional `latitude`/`longitude` (decimal(10,7),
 nullable) picked on an OpenStreetMap/Leaflet map on the Branch create/edit
-screen — no map API key involved.
+screen — no map API key involved — plus `free_delivery_min_order_amount`
+(nullable decimal): an order at or above this amount gets free delivery at
+that branch, checked before `delivery_zones` distance matching (see
+[Modules, Controllers & Services](03-modules-controllers-services.md) →
+Delivery Zones).
 
 **Core models:** `Business` (`belongsTo Package`; `hasMany BusinessSubscription`;
 `hasOne` relation to all 16 per-business Setting models — see
@@ -122,7 +126,15 @@ fulfilment values `shipped`, `out_for_delivery`, `delivered` (see migration
 the pin the customer dropped on the storefront/mobile checkout map at the time the
 order was placed. It is deliberately **not** a foreign key into `customer_addresses`
 so a later change to the customer's saved address never rewrites a past order's
-delivery location.
+delivery location. `orders.delivery_charge` (decimal, default `0`) is the fee
+resolved from `delivery_zones` (or `0` when free/no coordinates given) — see
+Delivery Zones below.
+
+`delivery_zones`: branch-scoped distance-band delivery fees (`business_id`,
+`branch_id`, `name`, `min_km`, `max_km`, `fee`, `sort_order`, `status`), same
+uuid-PK/manual-soft-delete shape as `warehouses`. See [Modules, Controllers &
+Services](03-modules-controllers-services.md) → Delivery Zones for the
+Haversine resolution logic and checkout integration.
 
 **Core models:** `Order` (`belongsTo Business, Branch, Warehouse, PosRegister,
 PosRegisterSession, User (cashier), User (customer), OrderType, OrderSource,

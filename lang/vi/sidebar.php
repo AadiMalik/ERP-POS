@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Đối chiếu ngân hàng',
     'batches' => 'Lô hàng',
     'branch' => 'Chi nhánh',
+    'delivery_zone' => 'Khu vực giao hàng',
     'branch_payroll_cost_report' => 'Báo cáo chi phí lương chi nhánh',
     'branch_wise_employee_report' => 'Báo cáo nhân viên theo chi nhánh',
     'branch_wise_payroll_report' => 'Báo cáo lương theo chi nhánh',

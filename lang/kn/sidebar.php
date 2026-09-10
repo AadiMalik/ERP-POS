@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'ಬ್ಯಾಂಕ್ ಸಮನ್ವಯ',
     'batches' => 'ಬ್ಯಾಚ್‌ಗಳು',
     'branch' => 'ಶಾಖೆ',
+    'delivery_zone' => 'ವಿತರಣಾ ವಲಯಗಳು',
     'branch_payroll_cost_report' => 'ಶಾಖೆ ಸಂಬಳ ವೆಚ್ಚ ವರದಿ',
     'branch_wise_employee_report' => 'ಶಾಖೆವಾರು ಉದ್ಯೋಗಿ ವರದಿ',
     'branch_wise_payroll_report' => 'ಶಾಖೆವಾರು ಸಂಬಳ ವರದಿ',

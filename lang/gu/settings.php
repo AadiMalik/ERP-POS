@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'ગ્રાહક ખાતું',
     'coa_store_credit_account' => 'સ્ટોર ક્રેડિટ એકાઉન્ટ',
     'coa_carriage_account' => 'કેરેજ એકાઉન્ટ',
+    'coa_delivery_charge_account' => 'ડિલિવરી ચાર્જ ખાતું',
     'coa_round_off_account' => 'રાઉન્ડ ઓફ એકાઉન્ટ',
     'coa_purchase_return' => 'ખરીદી રીટર્ન',
     'coa_service_purchase_account' => 'સેવા ખરીદી ખાતું',

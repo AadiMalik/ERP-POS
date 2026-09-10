@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'بئنڪ ميلاپ',
     'batches' => 'بيچ',
     'branch' => 'شاخ',
+    'delivery_zone' => 'ڊليوري زون',
     'branch_payroll_cost_report' => 'شاخ پگهار خرچ رپورٽ',
     'branch_wise_employee_report' => 'شاخ مطابق ملازمن جي رپورٽ',
     'branch_wise_payroll_report' => 'شاخ مطابق پگهار رپورٽ',

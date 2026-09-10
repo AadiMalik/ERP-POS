@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Gunakan Lokasi Saya',
     'location_not_supported' => 'Penyemak imbas anda tidak menyokong pengesanan lokasi.',
     'location_permission_denied' => 'Kebenaran lokasi ditolak. Sila pilih lokasi pada peta sebaliknya.',
+    'free_delivery_min_order_amount' => 'Penghantaran percuma melebihi jumlah ini',
+    'free_delivery_hint' => 'Pesanan yang sama atau melebihi jumlah ini mendapat penghantaran percuma di cawangan ini. Biarkan kosong untuk melumpuhkan.',
     'new_heading' => '新建 分支',
     'update_heading' => '更新 分支',
     'save_branch' => '保存 分支',

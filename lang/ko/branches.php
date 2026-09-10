@@ -23,6 +23,8 @@ return [
     'use_my_location' => '내 위치 사용',
     'location_not_supported' => '귀하의 브라우저는 위치 감지를 지원하지 않습니다.',
     'location_permission_denied' => '위치 권한이 거부되었습니다. 대신 지도에서 위치를 선택하세요.',
+    'free_delivery_min_order_amount' => '이 금액 이상 무료 배송',
+    'free_delivery_hint' => '이 지점에서는 이 금액 이상의 주문에 대해 무료 배송을 제공합니다. 비활성화하려면 비워 두세요.',
     'new_heading' => '新建 分支',
     'update_heading' => '更新 分支',
     'save_branch' => '保存 分支',

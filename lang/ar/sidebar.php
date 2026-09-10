@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'التسوية البنكية',
     'batches' => 'الدفعات',
     'branch' => 'الفرع',
+    'delivery_zone' => 'مناطق التوصيل',
     'branch_payroll_cost_report' => 'تقرير تكلفة رواتب الفرع',
     'branch_wise_employee_report' => 'تقرير الموظفين حسب الفرع',
     'branch_wise_payroll_report' => 'تقرير الرواتب حسب الفرع',

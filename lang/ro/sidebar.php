@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Reconciliere bancară',
     'batches' => 'Loturi',
     'branch' => 'Sucursală',
+    'delivery_zone' => 'Zone de livrare',
     'branch_payroll_cost_report' => 'Raport cost salarizare sucursală',
     'branch_wise_employee_report' => 'Raport angajați pe sucursală',
     'branch_wise_payroll_report' => 'Raport salarizare pe sucursală',

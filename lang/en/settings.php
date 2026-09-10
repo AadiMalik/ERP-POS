@@ -90,6 +90,7 @@ return [
     'coa_customer_account' => 'Customer Account',
     'coa_store_credit_account' => 'Store Credit Account',
     'coa_carriage_account' => 'Carriage Account',
+    'coa_delivery_charge_account' => 'Delivery Charge Account',
     'coa_round_off_account' => 'Round Off Account',
     'coa_purchase_return' => 'Purchase Return',
     'coa_service_purchase_account' => 'Service Purchase Account',

@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Bankafstemning',
     'batches' => 'Partier',
     'branch' => 'Filial',
+    'delivery_zone' => 'Leveringszoner',
     'branch_payroll_cost_report' => 'Rapport om lønomkostninger for filial',
     'branch_wise_employee_report' => 'Medarbejderrapport pr. filial',
     'branch_wise_payroll_report' => 'Lønrapport pr. filial',

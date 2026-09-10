@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'התאמת בנק',
     'batches' => 'אצוות',
     'branch' => 'סניף',
+    'delivery_zone' => 'אזורי משלוח',
     'branch_payroll_cost_report' => 'דוח עלות שכר לפי סניף',
     'branch_wise_employee_report' => 'דוח עובדים לפי סניף',
     'branch_wise_payroll_report' => 'דוח שכר לפי סניף',

@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Rapprochement bancaire',
     'batches' => 'Lots',
     'branch' => 'Succursale',
+    'delivery_zone' => 'Zones de livraison',
     'branch_payroll_cost_report' => 'Rapport de coût de paie par succursale',
     'branch_wise_employee_report' => 'Rapport des employés par succursale',
     'branch_wise_payroll_report' => 'Rapport de paie par succursale',

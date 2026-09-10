@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'Asiakastili',
     'coa_store_credit_account' => 'Kaupan luottotili',
     'coa_carriage_account' => 'Kuljetustili',
+    'coa_delivery_charge_account' => 'Toimitusmaksutili',
     'coa_round_off_account' => 'Pyöristää tili',
     'coa_purchase_return' => 'Ostoksen palautus',
     'coa_service_purchase_account' => 'Palvelun ostotili',

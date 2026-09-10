@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Use My Location',
     'location_not_supported' => 'Your browser does not support location detection.',
     'location_permission_denied' => 'Location permission denied. Please pick the location on the map instead.',
+    'free_delivery_min_order_amount' => 'จัดส่งฟรีเมื่อยอดเกินจำนวนนี้',
+    'free_delivery_hint' => 'คำสั่งซื้อที่เท่ากับหรือมากกว่าจำนวนนี้จะได้รับการจัดส่งฟรีที่สาขานี้ เว้นว่างไว้เพื่อปิดใช้งาน',
     'new_heading' => '新建 分支',
     'update_heading' => '更新 分支',
     'save_branch' => '保存 分支',

@@ -113,6 +113,7 @@ class ChartOfAccountsTemplateSeeder extends Seeder
             'default_supplier_account_id' => '220001-001',
             'default_customer_account_id' => '112001-001',
             'default_carriage_account_id' => '520003-001',
+            'default_delivery_charge_account_id' => '490001-004',
             'default_round_off_account_id' => '590001-001',
             'default_purchase_return_account_id' => '520002-001',
             'default_sale_account_id' => '420001-001',
@@ -420,6 +421,7 @@ class ChartOfAccountsTemplateSeeder extends Seeder
                     ['code' => '490001-001', 'name' => 'Other Income'],
                     ['code' => '490001-002', 'name' => 'Gain on Disposal of Fixed Assets'],
                     ['code' => '490001-003', 'name' => 'Tax Discount'],
+                    ['code' => '490001-004', 'name' => 'Delivery Charges Income'],
                 ],
             ],
 

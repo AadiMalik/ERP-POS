@@ -115,4 +115,33 @@ class CheckoutController extends Controller
 
         return $this->success(Message::SAVE, $order);
     }
+
+    public function verifyDeliveryAddress(Request $request, $business_id)
+    {
+        $validate = Validator::make(
+            array_merge($request->all(), ['business_id' => $business_id]),
+            [
+                'business_id' => 'required|string|exists:businesses,business_id',
+                'branch_id' => 'nullable|string|exists:branches,branch_id',
+                'latitude' => 'required|numeric|between:-90,90',
+                'longitude' => 'required|numeric|between:-180,180',
+            ]
+        );
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        try {
+            $result = $this->checkout_service->verifyDeliveryAddress(
+                Auth::id(),
+                $business_id,
+                $request->only(['branch_id', 'latitude', 'longitude'])
+            );
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+
+        return $this->success(Message::FETCH, $result);
+    }
 }

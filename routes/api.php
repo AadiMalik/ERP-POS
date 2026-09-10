@@ -145,6 +145,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1', 'platform:storefront'])->pre
     // Website checkout / place order.
     Route::post('checkout/{business_id}', [CheckoutController::class, 'placeOrder']);
 
+    // Verify a delivery address (branch + lat/long) against configured
+    // Delivery Zones before the customer submits the order.
+    Route::post('checkout/{business_id}/verify-delivery-address', [CheckoutController::class, 'verifyDeliveryAddress']);
+
     // Payment Gateway payment lifecycle for an already-created hold order.
     Route::post('orders/{business_id}/{order_id}/pay', [PaymentController::class, 'initiate']);
     Route::get('payments/{business_id}/{payment_transaction_id}', [PaymentController::class, 'status']);

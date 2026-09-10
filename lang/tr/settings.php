@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'Müşteri Hesabı',
     'coa_store_credit_account' => 'Mağaza Kredi Hesabı',
     'coa_carriage_account' => 'Taşıma Hesabı',
+    'coa_delivery_charge_account' => 'Teslimat Ücreti Hesabı',
     'coa_round_off_account' => 'Hesap Yuvarlama',
     'coa_purchase_return' => 'Satın Alma İadesi',
     'coa_service_purchase_account' => 'Hizmet Satın Alma Hesabı',

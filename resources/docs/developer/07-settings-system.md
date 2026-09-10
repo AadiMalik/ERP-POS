@@ -102,6 +102,14 @@ itself, but some are consumed elsewhere as real business-rule gates:
   `FixedAssetAccountingService` for acquisition, depreciation, and disposal JVs.
   Populated automatically for every new business by the Accounting Setup
   Wizard — see below.
+- `AccountingSetting.default_delivery_charge_account_id` (Settings →
+  Accounting) is credited by `OrderService::applyPostedEffects()` for a
+  posted order's `delivery_charge`, guarded the same way as Round Off (throws
+  if unconfigured and the amount is non-zero). Template-seeded to "Delivery
+  Charges Income" (490001-004, under Other Income) and cloned to every new
+  business by the wizard below, same as every other `default_*_account_id`
+  field. See Delivery Zones in
+  [Modules, Controllers & Services](03-modules-controllers-services.md).
 
 ## Accounting Setup Wizard (Automatic Business Provisioning)
 

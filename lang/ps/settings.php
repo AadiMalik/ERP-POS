@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'د پیرودونکي حساب',
     'coa_store_credit_account' => 'د ذخیره کریډیټ حساب',
     'coa_carriage_account' => 'د بار وړلو حساب',
+    'coa_delivery_charge_account' => 'د لیږد لګښت حساب',
     'coa_round_off_account' => 'د حساب بندول',
     'coa_purchase_return' => 'د پیرود بیرته ستنیدل',
     'coa_service_purchase_account' => 'د خدماتو پیرود حساب',

@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Использовать мое местоположение',
     'location_not_supported' => 'Ваш браузер не поддерживает определение местоположения.',
     'location_permission_denied' => 'Разрешение на определение местоположения отклонено. Вместо этого выберите местоположение на карте.',
+    'free_delivery_min_order_amount' => 'Бесплатная доставка выше этой суммы',
+    'free_delivery_hint' => 'Заказы на сумму, равную или превышающую эту, получают бесплатную доставку в этом филиале. Оставьте пустым, чтобы отключить.',
     'new_heading' => 'Neu Filiale',
     'update_heading' => 'Aktualisieren Filiale',
     'save_branch' => 'Speichern Filiale',

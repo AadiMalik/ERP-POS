@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'بینک مطابقت',
     'batches' => 'بیچانی',
     'branch' => 'شاخ',
+    'delivery_zone' => 'ڈیلیوری زون',
     'branch_payroll_cost_report' => 'شاخ ءِ تنخواہ خرچ رپورٹ',
     'branch_wise_employee_report' => 'شاخ ءِ بنیاد ءَ ملازمانی رپورٹ',
     'branch_wise_payroll_report' => 'شاخ ءِ بنیاد ءَ تنخواہ رپورٹ',

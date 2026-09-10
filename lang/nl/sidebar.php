@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Bankreconciliatie',
     'batches' => 'Partijen',
     'branch' => 'Filiaal',
+    'delivery_zone' => 'Bezorgzones',
     'branch_payroll_cost_report' => 'Rapport loonkosten per filiaal',
     'branch_wise_employee_report' => 'Werknemersrapport per filiaal',
     'branch_wise_payroll_report' => 'Loonrapport per filiaal',

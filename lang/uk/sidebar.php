@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Банківська звірка',
     'batches' => 'Партії',
     'branch' => 'Філія',
+    'delivery_zone' => 'Зони доставки',
     'branch_payroll_cost_report' => 'Звіт витрат на зарплату по філії',
     'branch_wise_employee_report' => 'Звіт працівників по філії',
     'branch_wise_payroll_report' => 'Звіт по зарплаті по філії',

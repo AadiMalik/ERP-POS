@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'השתמש במיקום שלי',
     'location_not_supported' => 'הדפדפן שלך אינו תומך בזיהוי מיקום.',
     'location_permission_denied' => 'הרשאת המיקום נדחתה. אנא בחר את המיקום במפה במקום זאת.',
+    'free_delivery_min_order_amount' => 'משלוח חינם מעל סכום זה',
+    'free_delivery_hint' => 'הזמנות בסכום זה ומעלה מקבלות משלוח חינם בסניף זה. השאר ריק כדי להשבית.',
     'new_heading' => 'فرع جديد',
     'update_heading' => 'تحديث الفرع',
     'save_branch' => 'حفظ الفرع',

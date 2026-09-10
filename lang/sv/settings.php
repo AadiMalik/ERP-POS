@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'Kundkonto',
     'coa_store_credit_account' => 'Butikskreditkonto',
     'coa_carriage_account' => 'Transportkonto',
+    'coa_delivery_charge_account' => 'Leveransavgiftskonto',
     'coa_round_off_account' => 'Avrunda konto',
     'coa_purchase_return' => 'Köp retur',
     'coa_service_purchase_account' => 'Konto för tjänsteköp',

@@ -23,6 +23,8 @@ return [
     'use_my_location' => 'Use My Location',
     'location_not_supported' => 'Your browser does not support location detection.',
     'location_permission_denied' => 'Location permission denied. Please pick the location on the map instead.',
+    'free_delivery_min_order_amount' => 'এই পরিমাণের উপরে বিনামূল্যে ডেলিভারি',
+    'free_delivery_hint' => 'এই শাখায় এই পরিমাণ বা তার বেশি অর্ডারে বিনামূল্যে ডেলিভারি পাওয়া যায়। বন্ধ রাখতে খালি রাখুন।',
     'new_heading' => 'نیا برانچ',
     'update_heading' => 'اپ ڈیٹ برانچ',
     'save_branch' => 'محفوظ برانچ',

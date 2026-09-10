@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'Tài khoản khách hàng',
     'coa_store_credit_account' => 'Tài khoản tín dụng lưu trữ',
     'coa_carriage_account' => 'Tài khoản vận chuyển',
+    'coa_delivery_charge_account' => 'Tài khoản phí giao hàng',
     'coa_round_off_account' => 'Làm tròn tài khoản',
     'coa_purchase_return' => 'Hoàn trả mua hàng',
     'coa_service_purchase_account' => 'Tài khoản mua dịch vụ',

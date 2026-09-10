@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'حساب مشتری',
     'coa_store_credit_account' => 'حساب اعتباری فروشگاه',
     'coa_carriage_account' => 'حساب حمل و نقل',
+    'coa_delivery_charge_account' => 'حساب هزینه ارسال',
     'coa_round_off_account' => 'گرد کردن حساب',
     'coa_purchase_return' => 'بازگشت خرید',
     'coa_service_purchase_account' => 'حساب خرید خدمات',

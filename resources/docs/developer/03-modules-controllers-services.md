@@ -546,6 +546,68 @@ Multi Pay's `renderPayments()`. Held/draft order resume
 (`loadCartFromDetails()`) round-trips `bank_id` the same way it already did
 `payment_method_id`.
 
+### Delivery Zones (`DeliveryZoneController` / `DeliveryZoneService`)
+
+Branch-scoped distance-band delivery fees (e.g. 0-5km → 200, 5.1-8km → 350)
+plus a per-branch free-delivery order-amount threshold. `delivery_zones`
+mirrors Warehouse's shape (uuid PK, no Laravel timestamps, manual
+`date_created`/`is_deleted` soft delete): `business_id`, `branch_id`, `name`,
+`min_km`, `max_km`, `fee`, `sort_order`, `status`. CRUD routes
+(`Route::resource('delivery-zone', ...)` + `data`/`change-status`/`by-branch`)
+sit directly under the `admin` middleware group with **no `module:*` gate**
+(unlike Warehouse) — access is permission-only (`delivery-zone.view/create/
+edit/delete/status`), since delivery pricing isn't tied to any existing
+package tier. `min_km`/`max_km` bands are validated not to overlap another
+active zone on the same branch at save time (`DeliveryZoneService::
+assertNoOverlap()`), which is what keeps zone resolution unambiguous instead
+of needing a tie-breaker.
+
+`branches.free_delivery_min_order_amount` (nullable decimal) is a sibling
+per-branch setting, edited on the same Branch create/edit form as
+lat/long — an order whose total is at or above it gets delivery for free at
+that branch, checked before any distance math.
+
+**Distance resolution (`DeliveryZoneService::resolve()`):** pure Haversine
+great-circle distance (`haversineKm()`, plain PHP `sin`/`cos`/`atan2`, no
+external API/package — Branch/Order already carry `latitude`/`longitude`,
+see `2026_09_10_110000_add_lat_long_to_branches_table.php` and the sibling
+Order migration) between the branch's coordinates and the given point,
+matched against the branch's active zones. Free-threshold and zone-matching
+are each split into their own pure predicate (`isFreeDelivery()`,
+`matchDistanceToZones()`) so both are unit-testable without a DB hit — see
+`tests/Unit/DeliveryZoneServiceTest.php`. Returns `in_area: false` both when
+the branch has no lat/long configured and when the point falls outside every
+band; every caller treats the two identically (reject as out of delivery
+area).
+
+**Checkout integration:** `POST /api/v1/checkout/{business_id}/verify-delivery-address`
+(and the `/api/mobile/...` mirror) — both thin `verifyDeliveryAddress()`
+controller actions delegate to `WebsiteCheckoutService::verifyDeliveryAddress()`
+— lets the external storefront show "out of delivery area" or the expected
+fee before the customer submits the order. `WebsiteCheckoutService::placeOrder()`
+(inherited by `MobileCheckoutService` — only `orderSourceCode()` differs, so
+this needed only one edit) re-runs the identical `resolve()` call
+server-side right after `formatDeliveryAddress()` and throws the standard
+`Exception` on `in_area: false`, exactly like the existing stock check — the
+storefront's earlier verify call is a UX convenience only, never trusted
+alone. The resolved fee lands on `orders.delivery_charge` (new column,
+`0` when no coordinates were given — backward-compatible with any non-geo
+checkout).
+
+**Totals + JV:** `OrderService::saveLinesAndComputeTotals()` folds
+`delivery_charge` into `orders.total` for both inclusive and exclusive tax
+types (it's outside the taxable amount either way).
+`OrderService::applyPostedEffects()` credits it to
+`accounting_settings.default_delivery_charge_account_id` (Settings →
+Accounting, cloned schema/UI-wise from the pre-existing but otherwise-unused
+`default_carriage_account_id`, template-seeded to `490001-004` "Delivery
+Charges Income" under Other Income — see `ChartOfAccountsTemplateSeeder` and
+`AccountingSettingCloneService::ACCOUNT_FIELDS`) with the same "throw if a
+non-zero amount has no account configured" guard the Round Off leg already
+uses. Never reversed on `OrderReturnService` — delivery already happened
+regardless of what items come back, so a return's JV has no delivery-charge
+contra-leg (full or partial return).
+
 **Register session open — tenant/cashier binding:**
 `PosRegisterSessionService::open()` forces `business_id`, branch-scoped
 `branch_id`, and `cashier_id` to the authenticated user for every non-Super-Admin

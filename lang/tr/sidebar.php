@@ -30,6 +30,7 @@ return [
     'bank_reconciliation' => 'Banka Mutabakatı',
     'batches' => 'Partiler',
     'branch' => 'Şube',
+    'delivery_zone' => 'Teslimat Bölgeleri',
     'branch_payroll_cost_report' => 'Şube Bordro Maliyet Raporu',
     'branch_wise_employee_report' => 'Şubeye Göre Çalışan Raporu',
     'branch_wise_payroll_report' => 'Şubeye Göre Bordro Raporu',

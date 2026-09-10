@@ -63,6 +63,7 @@ return [
     'coa_customer_account' => 'පාරිභෝගික ගිණුම',
     'coa_store_credit_account' => 'ගබඩා ණය ගිණුම',
     'coa_carriage_account' => 'ප්රවාහන ගිණුම',
+    'coa_delivery_charge_account' => 'බෙදාහැරීමේ ගාස්තු ගිණුම',
     'coa_round_off_account' => 'වටකුරු ගිණුම',
     'coa_purchase_return' => 'මිලදී ගැනීම් ආපසු',
     'coa_service_purchase_account' => 'සේවා මිලදී ගැනීමේ ගිණුම',
