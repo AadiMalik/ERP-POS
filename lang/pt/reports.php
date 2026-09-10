@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Tipo de documento',
     'col_expiry_date' => 'Data de validade',
     'col_mfg_date_dot' => 'Data de fab.',
+    'product_shares' => 'Relatório de compartilhamentos de produtos',
+    'col_total_shares' => 'Total de compartilhamentos',
+    'col_last_shared' => 'Último compartilhamento',
+    'col_share_copy_link' => 'Copiar link',
+    'col_share_native' => 'Outro (compartilhamento nativo)',
 ];

@@ -16,6 +16,11 @@ visible products so the section is not left empty. The Discounted section only
 lists products that currently have a real discount — if none do, that section is
 hidden (no empty heading or “products not found” message).
 
+You can also add free-text **Tags** to a product on its form (type a word and
+press Enter, or pick one you've used before). Tags aren't shown to shoppers as
+a filter — they're keywords that help enrich the text when a shopper shares
+that product on Facebook, WhatsApp, and other social platforms.
+
 ## Warehouses & Stock
 
 Stock is tracked **per warehouse, per product variation**. Every stock-affecting
@@ -198,6 +203,15 @@ silo.
   regardless of status (pending/approved/cancelled), with batch/lot, expiry
   date, loss type, reason, and who created/approved it.
 - **Batch/Lot & Expiry** — batch quantities and near-expiry / expired filters.
+
+### Product Shares
+- **Product Shares** — how many times each product has been shared from the
+  website or mobile app, broken down by platform (WhatsApp, Facebook,
+  LinkedIn, X, Telegram, Pinterest, Email, copied link, or the phone's own
+  share sheet). Filter by date range, category, brand, or a single product.
+  The same total and breakdown, plus a log of who shared it (or "Guest" if
+  they weren't logged in) and when, is also shown right on that product's
+  edit screen.
 
 ### Consumption, Manufacturing & Recipe Reports
 When the Manufacturing package module is enabled, these also appear under

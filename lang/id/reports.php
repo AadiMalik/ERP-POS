@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Jenis dokumen',
     'col_expiry_date' => 'Tanggal kedaluwarsa',
     'col_mfg_date_dot' => 'Tgl. produksi',
+    'product_shares' => 'Laporan Berbagi Produk',
+    'col_total_shares' => 'Total Dibagikan',
+    'col_last_shared' => 'Terakhir Dibagikan',
+    'col_share_copy_link' => 'Salin Tautan',
+    'col_share_native' => 'Lainnya (Berbagi Native)',
 ];

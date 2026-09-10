@@ -171,6 +171,7 @@ return [
     'pos' => 'పిఓఎస్',
     'pos_screen' => 'పిఓఎస్ స్క్రీన్',
     'procurement' => 'సేకరణ',
+    'product_shares' => 'ఉత్పత్తి షేర్లు',
     'product_wise_sales' => 'ఉత్పత్తి వారీగా అమ్మకాలు',
     'productions' => 'ఉత్పత్తులు',
     'products' => 'ఉత్పత్తులు',

@@ -36,6 +36,7 @@ class Product extends Model
         'is_trending',
         'is_best_seller',
         'is_loyalty_enabled',
+        'share_count',
         'status',
         'is_deleted',
         'createdby_id',
@@ -57,6 +58,14 @@ class Product extends Model
 
     public function productFeatures() {
         return $this->hasMany(ProductFeature::class, 'product_id', 'product_id');
+    }
+
+    public function tags() {
+        return $this->belongsToMany(Tag::class, 'product_tag', 'product_id', 'tag_id');
+    }
+
+    public function shares() {
+        return $this->hasMany(ProductShare::class, 'product_id', 'product_id');
     }
 
     public function business() {

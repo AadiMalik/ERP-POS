@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Typ dokumentu',
     'col_expiry_date' => 'Data ważności',
     'col_mfg_date_dot' => 'Data prod.',
+    'product_shares' => 'Raport udostępnień produktów',
+    'col_total_shares' => 'Łączna liczba udostępnień',
+    'col_last_shared' => 'Ostatnio udostępniono',
+    'col_share_copy_link' => 'Kopiuj link',
+    'col_share_native' => 'Inne (udostępnianie natywne)',
 ];

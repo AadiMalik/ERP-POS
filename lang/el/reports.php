@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Τύπος εγγράφου',
     'col_expiry_date' => 'Ημερομηνία λήξης',
     'col_mfg_date_dot' => 'Ημ. παραγωγής',
+    'product_shares' => 'Αναφορά κοινοποιήσεων προϊόντων',
+    'col_total_shares' => 'Σύνολο κοινοποιήσεων',
+    'col_last_shared' => 'Τελευταία κοινοποίηση',
+    'col_share_copy_link' => 'Αντιγραφή συνδέσμου',
+    'col_share_native' => 'Άλλο (εγγενής κοινοποίηση)',
 ];

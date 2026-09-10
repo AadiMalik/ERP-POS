@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Jenis dokumen',
     'col_expiry_date' => 'Tarikh luput',
     'col_mfg_date_dot' => 'Tarikh buat',
+    'product_shares' => 'Laporan Perkongsian Produk',
+    'col_total_shares' => 'Jumlah Perkongsian',
+    'col_last_shared' => 'Terakhir Dikongsi',
+    'col_share_copy_link' => 'Salin Pautan',
+    'col_share_native' => 'Lain-lain (Perkongsian Native)',
 ];

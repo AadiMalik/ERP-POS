@@ -1676,6 +1676,15 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberCustomerReportController::class, 'export'])->name('reports.serial-number-customer.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\SerialNumberCustomerReportController::class, 'exportCsv'])->name('reports.serial-number-customer.export-csv');
         });
+
+        Route::group(['prefix' => 'product-shares'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\ProductShareReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\ProductShareReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\ProductShareReportController::class, 'print'])->name('reports.product-shares.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\ProductShareReportController::class, 'pdf'])->name('reports.product-shares.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\ProductShareReportController::class, 'export'])->name('reports.product-shares.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\ProductShareReportController::class, 'exportCsv'])->name('reports.product-shares.export-csv');
+        });
         }); // end module:inventory (procurement reports)
 
         Route::group(['middleware' => ['module:service-management']], function () {

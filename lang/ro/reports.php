@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Tip document',
     'col_expiry_date' => 'Data expirării',
     'col_mfg_date_dot' => 'Data fab.',
+    'product_shares' => 'Raport distribuiri produse',
+    'col_total_shares' => 'Total distribuiri',
+    'col_last_shared' => 'Ultima distribuire',
+    'col_share_copy_link' => 'Copiază linkul',
+    'col_share_native' => 'Altele (distribuire nativă)',
 ];

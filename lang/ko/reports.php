@@ -366,4 +366,9 @@ return [
     'col_document_type' => '문서 유형',
     'col_expiry_date' => '만료일',
     'col_mfg_date_dot' => '제조일',
+    'product_shares' => '제품 공유 보고서',
+    'col_total_shares' => '총 공유 수',
+    'col_last_shared' => '마지막 공유',
+    'col_share_copy_link' => '링크 복사',
+    'col_share_native' => '기타 (네이티브 공유)',
 ];

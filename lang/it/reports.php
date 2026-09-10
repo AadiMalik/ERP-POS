@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Tipo di documento',
     'col_expiry_date' => 'Data di scadenza',
     'col_mfg_date_dot' => 'Data di prod.',
+    'product_shares' => 'Rapporto condivisioni prodotti',
+    'col_total_shares' => 'Condivisioni totali',
+    'col_last_shared' => 'Ultima condivisione',
+    'col_share_copy_link' => 'Copia link',
+    'col_share_native' => 'Altro (condivisione nativa)',
 ];

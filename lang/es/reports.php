@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Tipo de documento',
     'col_expiry_date' => 'Fecha de vencimiento',
     'col_mfg_date_dot' => 'Fecha de fab.',
+    'product_shares' => 'Informe de veces compartido de productos',
+    'col_total_shares' => 'Total compartido',
+    'col_last_shared' => 'Última vez compartido',
+    'col_share_copy_link' => 'Copiar enlace',
+    'col_share_native' => 'Otro (compartir nativo)',
 ];

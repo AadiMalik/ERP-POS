@@ -171,6 +171,7 @@ return [
     'pos' => 'Kassasysteem',
     'pos_screen' => 'Kassascherm',
     'procurement' => 'Inkoop',
+    'product_shares' => 'Productdelingen',
     'product_wise_sales' => 'Verkoop per product',
     'productions' => 'Producties',
     'products' => 'Producten',

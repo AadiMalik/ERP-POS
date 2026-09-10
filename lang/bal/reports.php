@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'سند ءِ قِسم',
     'col_expiry_date' => 'میعاد ختم ءِ تاریخ',
     'col_mfg_date_dot' => 'تیاری ءِ تاریخ',
+    'product_shares' => 'پراڈکٹ شیئر ریپورٹ',
+    'col_total_shares' => 'ٹول شیئر',
+    'col_last_shared' => 'آخری شیئر',
+    'col_share_copy_link' => 'لنک کاپی کنگ',
+    'col_share_native' => 'دگه (سسٹم شیئر)',
 ];

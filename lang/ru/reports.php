@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Тип документа',
     'col_expiry_date' => 'Срок годности',
     'col_mfg_date_dot' => 'Дата произв.',
+    'product_shares' => 'Отчёт о репостах товаров',
+    'col_total_shares' => 'Всего репостов',
+    'col_last_shared' => 'Последний репост',
+    'col_share_copy_link' => 'Копировать ссылку',
+    'col_share_native' => 'Другое (системный шеринг)',
 ];

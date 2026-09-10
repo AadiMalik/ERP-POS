@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'নথির ধরন',
     'col_expiry_date' => 'মেয়াদোত্তীর্ণ তারিখ',
     'col_mfg_date_dot' => 'উৎপাদন তারিখ',
+    'product_shares' => 'পণ্য শেয়ার রিপোর্ট',
+    'col_total_shares' => 'মোট শেয়ার',
+    'col_last_shared' => 'সর্বশেষ শেয়ার',
+    'col_share_copy_link' => 'লিংক কপি',
+    'col_share_native' => 'অন্যান্য (নেটিভ শেয়ার)',
 ];

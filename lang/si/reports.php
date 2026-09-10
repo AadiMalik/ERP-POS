@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'ලේඛන වර්ගය',
     'col_expiry_date' => 'කල් ඉකුත් දිනය',
     'col_mfg_date_dot' => 'නිෂ්පාදන දිනය',
+    'product_shares' => 'නිෂ්පාදන බෙදාගැනීමේ වාර්තාව',
+    'col_total_shares' => 'මුළු බෙදාගැනීම්',
+    'col_last_shared' => 'අවසන් වරට බෙදාගත්තේ',
+    'col_share_copy_link' => 'සබැඳිය පිටපත් කරන්න',
+    'col_share_native' => 'වෙනත් (ස්වදේශීය බෙදාගැනීම)',
 ];

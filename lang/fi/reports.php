@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Asiakirjatyyppi',
     'col_expiry_date' => 'Vanhentumispäivä',
     'col_mfg_date_dot' => 'Valm.päivä',
+    'product_shares' => 'Tuotteiden jakoraportti',
+    'col_total_shares' => 'Jakoja yhteensä',
+    'col_last_shared' => 'Viimeksi jaettu',
+    'col_share_copy_link' => 'Kopioi linkki',
+    'col_share_native' => 'Muu (natiivijako)',
 ];

@@ -171,6 +171,7 @@ return [
     'pos' => 'پي او ايس',
     'pos_screen' => 'پي او ايس اسڪرين',
     'procurement' => 'خريداري',
+    'product_shares' => 'پراڊڪٽ شيئر',
     'product_wise_sales' => 'پراڊڪٽ مطابق سيلز',
     'productions' => 'پيداوار',
     'products' => 'پراڊڪٽس',

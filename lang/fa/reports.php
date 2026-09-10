@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'نوع سند',
     'col_expiry_date' => 'تاریخ انقضا',
     'col_mfg_date_dot' => 'تاریخ تولید',
+    'product_shares' => 'گزارش اشتراک‌گذاری محصولات',
+    'col_total_shares' => 'مجموع اشتراک‌گذاری‌ها',
+    'col_last_shared' => 'آخرین اشتراک‌گذاری',
+    'col_share_copy_link' => 'کپی لینک',
+    'col_share_native' => 'سایر (اشتراک‌گذاری سیستم)',
 ];

@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Documenttype',
     'col_expiry_date' => 'Vervaldatum',
     'col_mfg_date_dot' => 'Prod.datum',
+    'product_shares' => 'Productdelingsrapport',
+    'col_total_shares' => 'Totaal gedeeld',
+    'col_last_shared' => 'Laatst gedeeld',
+    'col_share_copy_link' => 'Link kopiëren',
+    'col_share_native' => 'Overig (native delen)',
 ];

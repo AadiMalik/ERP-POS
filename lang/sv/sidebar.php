@@ -171,6 +171,7 @@ return [
     'pos' => 'Kassasystem (POS)',
     'pos_screen' => 'Kassaskärm',
     'procurement' => 'Upphandling',
+    'product_shares' => 'Produktdelningar',
     'product_wise_sales' => 'Försäljning per produkt',
     'productions' => 'Produktioner',
     'products' => 'Produkter',

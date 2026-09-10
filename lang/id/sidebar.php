@@ -171,6 +171,7 @@ return [
     'pos' => 'POS',
     'pos_screen' => 'Layar POS',
     'procurement' => 'Pengadaan',
+    'product_shares' => 'Berbagi Produk',
     'product_wise_sales' => 'Penjualan per Produk',
     'productions' => 'Produksi',
     'products' => 'Produk',

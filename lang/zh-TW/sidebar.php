@@ -171,6 +171,7 @@ return [
     'pos' => 'POS 收銀',
     'pos_screen' => 'POS 收銀介面',
     'procurement' => '採購管理',
+    'product_shares' => '產品分享',
     'product_wise_sales' => '按產品統計銷售額',
     'productions' => '生產記錄',
     'products' => '產品',

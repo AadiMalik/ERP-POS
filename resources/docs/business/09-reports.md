@@ -52,11 +52,13 @@ Supplier Ledger, Supplier Aging, Accounts Payable, Supplier Payment History,
 Purchase Return Summary/Detail.
 
 ## Inventory Reporting System
-Under **Inventory → Reports** (four sub-sections):
+Under **Inventory → Reports** (five sub-sections):
 
 - **Stock Reports** — Stock Summary/Availability/Low Stock, Stock Ledger/Product
   Ledger, Valuation, Aging/Slow-Fast-Non-Moving, Transfer, Reconciliation &
   Adjustment, Loss/Wastage/Damage, Batch/Lot & Expiry.
+- **Product Shares** — how many times each product has been shared from the
+  website/app, per platform, with a date/category/brand filter.
 - **Consumption Reports** (Manufacturing module) — Material Consumption Analysis
   with grouping and Expected vs Actual variance.
 - **Manufacturing Reports** — Plan report; Production summary/cost/yield/

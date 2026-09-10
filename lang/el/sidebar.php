@@ -171,6 +171,7 @@ return [
     'pos' => 'Ταμείο (POS)',
     'pos_screen' => 'Οθόνη ταμείου',
     'procurement' => 'Προμήθειες',
+    'product_shares' => 'Κοινοποιήσεις προϊόντων',
     'product_wise_sales' => 'Πωλήσεις ανά προϊόν',
     'productions' => 'Παραγωγές',
     'products' => 'Προϊόντα',

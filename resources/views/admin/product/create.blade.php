@@ -366,6 +366,30 @@ use App\Enums\RoleNames;
                             </div>
                         </div>
 
+                        <!-- TAGS -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light"><i class="fa fa-hashtag me-1"></i>{{ __('products.tags') }}</div>
+                            <div class="card-body">
+                                <select class="form-select" name="tags[]" id="productTags" multiple
+                                    data-placeholder="{{ __('products.tags_placeholder') }}">
+                                    @foreach ($tags ?? [] as $tag)
+                                        <option value="{{ $tag->name }}"
+                                            {{ isset($product) && $product->tags->contains('tag_id', $tag->tag_id) ? 'selected' : '' }}>
+                                            {{ $tag->name }}
+                                        </option>
+                                    @endforeach
+                                    @if (isset($product))
+                                        @foreach ($product->tags as $tag)
+                                            @if (!($tags ?? collect())->contains('tag_id', $tag->tag_id))
+                                                <option value="{{ $tag->name }}" selected>{{ $tag->name }}</option>
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <small class="text-muted"><i class="fa fa-info-circle me-1"></i> {{ __('products.tags_hint') }}</small>
+                            </div>
+                        </div>
+
                         <!-- FEATURES -->
                         <div class="card mb-4" id="featuresCard">
                             <div class="card-header bg-light">
@@ -409,6 +433,50 @@ use App\Enums\RoleNames;
             </div>
         </form>
     </div>
+
+    @if (isset($product) && isset($share_summary))
+    <div class="card mt-4">
+        <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0"><i class="fa fa-share-nodes me-1"></i>{{ __('products.share_activity_heading') }}
+                <span class="badge bg-primary ms-2">{{ __('products.share_total', ['count' => $share_summary['total']]) }}</span>
+            </h5>
+            @if (!empty($share_summary['by_platform']))
+            <div class="d-flex flex-wrap gap-2">
+                @foreach ($share_summary['by_platform'] as $platform => $count)
+                    <span class="badge bg-label-secondary">{{ ucwords(str_replace('_', ' ', $platform)) }}: {{ $count }}</span>
+                @endforeach
+            </div>
+            @endif
+        </div>
+        <div class="card-body">
+            @if ($share_summary['log']->isEmpty())
+                <p class="text-muted mb-0">{{ __('products.share_activity_empty') }}</p>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>{{ __('products.share_col_user') }}</th>
+                                <th>{{ __('products.share_col_platform') }}</th>
+                                <th>{{ __('products.share_col_time') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($share_summary['log'] as $row)
+                            <tr>
+                                <td>{{ $row->customer->name ?? __('products.share_guest') }}</td>
+                                <td>{{ ucwords(str_replace('_', ' ', $row->platform)) }}</td>
+                                <td>{{ $row->date_created ? localDateTime($row->date_created) : '-' }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                {{ $share_summary['log']->links() }}
+            @endif
+        </div>
+    </div>
+    @endif
 </div>
 
 @include('admin.category.model.quick-create', ['business' => $businesses ?? []])
@@ -639,6 +707,15 @@ use App\Enums\RoleNames;
     if (window.loyaltyProductModeEnabled) {
         document.getElementById('modalVariationLoyaltyWrap').style.display = '';
     }
+
+    // Free-text tag input - pick an existing tag or type a new one (created
+    // on save via ProductService::syncTags()).
+    $('#productTags').select2({
+        tags: true,
+        tokenSeparators: [','],
+        placeholder: $('#productTags').data('placeholder'),
+        width: '100%',
+    });
 
     @if(isset($product))
     var selectedCategoryId = "{{ $product->category_id }}";

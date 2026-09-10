@@ -92,6 +92,8 @@ class RoleDefaultPermissions
                         'reports.stock-valuation.export', 'reports.stock-valuation.export-csv',
                         'reports.stock-aging.view', 'reports.stock-aging.print', 'reports.stock-aging.pdf',
                         'reports.stock-aging.export', 'reports.stock-aging.export-csv',
+                        'reports.product-shares.view', 'reports.product-shares.print', 'reports.product-shares.pdf',
+                        'reports.product-shares.export', 'reports.product-shares.export-csv',
                         'reports.stock-transfer-report.view', 'reports.stock-transfer-report.print', 'reports.stock-transfer-report.pdf',
                         'reports.stock-transfer-report.export', 'reports.stock-transfer-report.export-csv',
                         'reports.stock-reconciliation.view', 'reports.stock-reconciliation.print', 'reports.stock-reconciliation.pdf',
@@ -179,6 +181,7 @@ class RoleDefaultPermissions
                         'notification-template',
                         'broadcast-notification',
                     ]),
+                    self::formatVariants(['product-shares']),
                     ['dashboard.view']
                 );
 

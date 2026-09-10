@@ -171,6 +171,7 @@ return [
     'pos' => 'POS',
     'pos_screen' => 'POS Ekranı',
     'procurement' => 'Tedarik',
+    'product_shares' => 'Ürün Paylaşımları',
     'product_wise_sales' => 'Ürüne Göre Satışlar',
     'productions' => 'Üretimler',
     'products' => 'Ürünler',

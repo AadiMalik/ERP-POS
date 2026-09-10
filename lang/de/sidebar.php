@@ -171,6 +171,7 @@ return [
     'pos' => 'Kassensystem',
     'pos_screen' => 'Kassenbildschirm',
     'procurement' => 'Beschaffung',
+    'product_shares' => 'Produktfreigaben',
     'product_wise_sales' => 'Umsatz nach Produkt',
     'productions' => 'Produktionen',
     'products' => 'Produkte',

@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'ประเภทเอกสาร',
     'col_expiry_date' => 'วันหมดอายุ',
     'col_mfg_date_dot' => 'วันผลิต',
+    'product_shares' => 'รายงานการแชร์สินค้า',
+    'col_total_shares' => 'แชร์ทั้งหมด',
+    'col_last_shared' => 'แชร์ล่าสุด',
+    'col_share_copy_link' => 'คัดลอกลิงก์',
+    'col_share_native' => 'อื่นๆ (การแชร์ของระบบ)',
 ];

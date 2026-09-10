@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Typ dokumentu',
     'col_expiry_date' => 'Datum expirace',
     'col_mfg_date_dot' => 'Datum výr.',
+    'product_shares' => 'Zpráva o sdílení produktů',
+    'col_total_shares' => 'Celkem sdílení',
+    'col_last_shared' => 'Naposledy sdíleno',
+    'col_share_copy_link' => 'Kopírovat odkaz',
+    'col_share_native' => 'Jiné (nativní sdílení)',
 ];

@@ -193,6 +193,25 @@ Fillers never duplicate a product inside the same section. Themes hide empty
 product sections (`v-if` on length) so the homepage never shows a blank rail
 or a “Products Not Found” empty state for these groups.
 
+### Product Tags & Share Tracking
+
+Free-text, business-scoped product tags (`tags` + `product_tag` pivot — see
+[Database Schema](02-database-schema.md#inventory--catalog)) managed inline
+on the product form (Select2 `tags: true`) via `ProductService::syncTags()`
+and exposed on the public product payloads as `tags: string[]` — used to
+enrich social-media share text/keywords, not as a customer-facing filter.
+
+Every "share this product" click from the website/mobile storefront (see
+`POST products/{business_id}/{product_id}/share` in
+[Routes & APIs](04-routes-apis.md#public-website-catalog-apis)) is recorded by
+`App\Services\Concrete\Api\ProductShareService::record()` — one
+`product_shares` row per click plus an atomic `products.share_count`
+increment, both in one transaction. `ProductService::getShareSummary()`
+surfaces the total, a per-platform breakdown, and a paginated who/platform/when
+log on the admin Product edit screen; the same data aggregated across products
+is the **Product Shares** report (`ProductShareReportService`, see
+[Reports Infrastructure](06-reports-infrastructure.md#inventory-reporting-system)).
+
 ### Batch & Expiry Tracking
 
 Optional per `product_variations.track_batch` / `track_expiry` (opt-in per

@@ -171,6 +171,7 @@ return [
     'pos' => 'Kassajärjestelmä (POS)',
     'pos_screen' => 'Kassanäyttö',
     'procurement' => 'Hankinta',
+    'product_shares' => 'Tuotejaot',
     'product_wise_sales' => 'Myynti tuotteittain',
     'productions' => 'Tuotannot',
     'products' => 'Tuotteet',

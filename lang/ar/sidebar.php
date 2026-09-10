@@ -171,6 +171,7 @@ return [
     'pos' => 'نقاط البيع',
     'pos_screen' => 'شاشة نقاط البيع',
     'procurement' => 'المشتريات',
+    'product_shares' => 'مشاركات المنتجات',
     'product_wise_sales' => 'المبيعات حسب المنتج',
     'productions' => 'الإنتاج',
     'products' => 'المنتجات',

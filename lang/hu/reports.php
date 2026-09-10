@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Dokumentumtípus',
     'col_expiry_date' => 'Lejárati dátum',
     'col_mfg_date_dot' => 'Gyárt. dátum',
+    'product_shares' => 'Termékmegosztási jelentés',
+    'col_total_shares' => 'Megosztások összesen',
+    'col_last_shared' => 'Utoljára megosztva',
+    'col_share_copy_link' => 'Link másolása',
+    'col_share_native' => 'Egyéb (natív megosztás)',
 ];

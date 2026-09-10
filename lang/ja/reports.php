@@ -366,4 +366,9 @@ return [
     'col_document_type' => '書類種別',
     'col_expiry_date' => '有効期限',
     'col_mfg_date_dot' => '製造日',
+    'product_shares' => '商品シェアレポート',
+    'col_total_shares' => '合計シェア数',
+    'col_last_shared' => '最終シェア日時',
+    'col_share_copy_link' => 'リンクをコピー',
+    'col_share_native' => 'その他（ネイティブ共有）',
 ];

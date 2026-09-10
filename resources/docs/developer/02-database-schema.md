@@ -94,6 +94,35 @@ product_variation_attributes`, `product_variation_unit_conversions`,
 `belongsTo Unit` three ways — base/purchase/sale; `hasMany
 ProductVariationAttribute, ProductVariationPrice, ProductVariationUnitConversion`).
 
+**Tags:** `tags` (business-scoped: `tag_id` uuid pk, `business_id`, `name`,
+`slug`, unique on `(business_id, slug)`) ↔ `product_tag` (pivot,
+`product_id`+`tag_id` composite pk, cascade-deletes both ways) via `Product::tags()`
+/ `Tag::products()` (`belongsToMany`). Admin-managed free-text tags on the
+product form (Select2 `tags: true` — pick existing or type a new one, created
+on save via `ProductService::syncTags()`, matched case-insensitively per
+business so "Organic"/"organic" collapse to one row). Exposed on the public
+storefront/mobile product payloads (`getWebsiteListing`/`getWebsiteDetail`) as
+a flat `tags: string[]` array — primarily so the frontend can enrich
+social-media share text/keywords for a product.
+
+**Product shares:** `product_shares` — append-only log (`product_share_id`
+uuid pk, `business_id`, `product_id`, `customer_id` nullable FK → `users.id`
+`nullOnDelete`, `platform` string, `date_created`; indexed on
+`(product_id, platform)` and `(business_id, date_created)`) of every
+"share this product" click from the website/mobile storefront (WhatsApp,
+Facebook, LinkedIn, X/Twitter, Telegram, Pinterest, Email, Copy Link, or the
+OS-native share sheet — see `App\Services\Concrete\Api\ProductShareService::PLATFORMS`).
+`customer_id` is null for a guest share - the event is still logged, just
+without an identity. `products.share_count` is a denormalized fast-read
+total, incremented in the same transaction as each `product_shares` insert
+(`ProductShareService::record()`); the per-platform breakdown is always a
+live `GROUP BY` on `product_shares` rather than one column per platform, so a
+new platform never needs a schema change. Surfaced on the admin Product edit
+screen (total + per-platform counts + a paginated who/platform/when log via
+`ProductService::getShareSummary()`) and in the **Product Shares** report
+under Inventory → Reports (see
+[Reports Infrastructure](06-reports-infrastructure.md)).
+
 ## Purchasing
 
 `suppliers`, `purchases`/`purchase_details` (tracks

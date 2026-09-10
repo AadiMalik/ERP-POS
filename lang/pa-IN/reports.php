@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'ਦਸਤਾਵੇਜ਼ ਕਿਸਮ',
     'col_expiry_date' => 'ਮਿਆਦ ਤਾਰੀਖ',
     'col_mfg_date_dot' => 'ਨਿਰਮਾਣ ਤਾਰੀਖ',
+    'product_shares' => 'ਉਤਪਾਦ ਸ਼ੇਅਰ ਰਿਪੋਰਟ',
+    'col_total_shares' => 'ਕੁੱਲ ਸ਼ੇਅਰ',
+    'col_last_shared' => 'ਆਖਰੀ ਵਾਰ ਸ਼ੇਅਰ ਕੀਤਾ',
+    'col_share_copy_link' => 'ਲਿੰਕ ਕਾਪੀ ਕਰੋ',
+    'col_share_native' => 'ਹੋਰ (ਨੇਟਿਵ ਸ਼ੇਅਰ)',
 ];

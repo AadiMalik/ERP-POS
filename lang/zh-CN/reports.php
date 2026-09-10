@@ -366,4 +366,9 @@ return [
     'col_document_type' => '证件类型',
     'col_expiry_date' => '过期日期',
     'col_mfg_date_dot' => '生产日期',
+    'product_shares' => '产品分享报告',
+    'col_total_shares' => '分享总数',
+    'col_last_shared' => '最后分享时间',
+    'col_share_copy_link' => '复制链接',
+    'col_share_native' => '其他（原生分享）',
 ];

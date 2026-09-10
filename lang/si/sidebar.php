@@ -171,6 +171,7 @@ return [
     'pos' => 'පීඕඑස්',
     'pos_screen' => 'පීඕඑස් තිරය',
     'procurement' => 'ප්‍රසම්පාදනය',
+    'product_shares' => 'නිෂ්පාදන බෙදාගැනීම්',
     'product_wise_sales' => 'නිෂ්පාදන අනුව විකුණුම්',
     'productions' => 'නිෂ්පාදන',
     'products' => 'නිෂ්පාදන',

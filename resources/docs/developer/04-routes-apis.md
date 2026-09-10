@@ -132,6 +132,17 @@ slots with other website-visible products when the prioritized set is short.
 Discounted Products never fills with non-discounted items — an empty list
 means the Vue themes hide that section entirely.
 
+Also under this prefix (not repeated in the table above — see
+`App\Http\Controllers\Api\ProductController`): `GET products/{business_id}/{slug}`
+(single product detail, now including a flat `tags: string[]`),
+`GET products/{business_id}/stock/{product_variation_id}` (warehouse/batch
+stock breakdown), and `POST products/{business_id}/{product_id}/share`
+(logs a "share this product" click - `platform` one of whatsapp/facebook/
+linkedin/twitter/telegram/pinterest/email/copy_link/native; optional Sanctum
+auth attributes it to a customer when logged in, else logs it as a guest -
+see `App\Services\Concrete\Api\ProductShareService`). All three are mirrored
+under `/api/mobile/...` via `Api\Mobile\ProductController`.
+
 ## Mobile App Customer API (`routes/mobile.php`)
 
 Registered in `RouteServiceProvider` with prefix `/api/mobile` (same pattern as

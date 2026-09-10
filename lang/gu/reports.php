@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'દસ્તાવેજ પ્રકાર',
     'col_expiry_date' => 'સમાપ્તિ તારીખ',
     'col_mfg_date_dot' => 'ઉત્પાદન તારીખ',
+    'product_shares' => 'ઉત્પાદન શેર રિપોર્ટ',
+    'col_total_shares' => 'કુલ શેર',
+    'col_last_shared' => 'છેલ્લે શેર કર્યું',
+    'col_share_copy_link' => 'લિંક કૉપિ કરો',
+    'col_share_native' => 'અન્ય (નેટિવ શેર)',
 ];

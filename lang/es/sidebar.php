@@ -171,6 +171,7 @@ return [
     'pos' => 'Punto de venta',
     'pos_screen' => 'Pantalla de punto de venta',
     'procurement' => 'Adquisiciones',
+    'product_shares' => 'Productos compartidos',
     'product_wise_sales' => 'Ventas por producto',
     'productions' => 'Producciones',
     'products' => 'Productos',

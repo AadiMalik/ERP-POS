@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'دستاویز کی قسم',
     'col_expiry_date' => 'میعاد ختم ہونے کی تاریخ',
     'col_mfg_date_dot' => 'تیاری کی تاریخ',
+    'product_shares' => 'پروڈکٹ شیئر رپورٹ',
+    'col_total_shares' => 'کل شیئرز',
+    'col_last_shared' => 'آخری شیئر',
+    'col_share_copy_link' => 'لنک کاپی کریں',
+    'col_share_native' => 'دیگر (نیٹو شیئر)',
 ];

@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'د سند ډول',
     'col_expiry_date' => 'د پای نیټه',
     'col_mfg_date_dot' => 'د جوړولو نیټه',
+    'product_shares' => 'د محصول شریکولو راپور',
+    'col_total_shares' => 'ټول شریکونه',
+    'col_last_shared' => 'وروستی شریک',
+    'col_share_copy_link' => 'لینک کاپي کول',
+    'col_share_native' => 'نور (اصلي شریکول)',
 ];

@@ -171,6 +171,7 @@ return [
     'pos' => 'Касса (POS)',
     'pos_screen' => 'Экран кассы',
     'procurement' => 'Закупки',
+    'product_shares' => 'Репосты товаров',
     'product_wise_sales' => 'Продажи по товару',
     'productions' => 'Производства',
     'products' => 'Товары',

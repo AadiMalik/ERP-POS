@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'दस्तावेज़ प्रकार',
     'col_expiry_date' => 'समाप्ति तिथि',
     'col_mfg_date_dot' => 'निर्माण तिथि',
+    'product_shares' => 'उत्पाद शेयर रिपोर्ट',
+    'col_total_shares' => 'कुल शेयर',
+    'col_last_shared' => 'अंतिम बार शेयर किया गया',
+    'col_share_copy_link' => 'लिंक कॉपी करें',
+    'col_share_native' => 'अन्य (नेटिव शेयर)',
 ];

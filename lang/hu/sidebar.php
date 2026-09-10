@@ -171,6 +171,7 @@ return [
     'pos' => 'Pénztár (POS)',
     'pos_screen' => 'Pénztár képernyő',
     'procurement' => 'Beszerzés',
+    'product_shares' => 'Termékmegosztások',
     'product_wise_sales' => 'Értékesítés termék szerint',
     'productions' => 'Gyártások',
     'products' => 'Termékek',

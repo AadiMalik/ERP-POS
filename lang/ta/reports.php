@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'ஆவண வகை',
     'col_expiry_date' => 'காலாவதி தேதி',
     'col_mfg_date_dot' => 'தயாரிப்பு தேதி',
+    'product_shares' => 'தயாரிப்பு பகிர்வு அறிக்கை',
+    'col_total_shares' => 'மொத்த பகிர்வுகள்',
+    'col_last_shared' => 'கடைசியாக பகிரப்பட்டது',
+    'col_share_copy_link' => 'இணைப்பை நகலெடு',
+    'col_share_native' => 'மற்றவை (நேட்டிவ் பகிர்வு)',
 ];

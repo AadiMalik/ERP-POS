@@ -174,6 +174,7 @@ return [
     'pos' => 'POS',
     'pos_screen' => 'POS Screen',
     'procurement' => 'Procurement',
+    'product_shares' => 'Product Shares',
     'product_wise_sales' => 'Product-wise Sales',
     'productions' => 'Productions',
     'products' => 'Products',

@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Belge türü',
     'col_expiry_date' => 'Son kullanma tarihi',
     'col_mfg_date_dot' => 'Ürt. tarihi',
+    'product_shares' => 'Ürün Paylaşım Raporu',
+    'col_total_shares' => 'Toplam Paylaşım',
+    'col_last_shared' => 'Son Paylaşım',
+    'col_share_copy_link' => 'Bağlantıyı Kopyala',
+    'col_share_native' => 'Diğer (Yerel Paylaşım)',
 ];

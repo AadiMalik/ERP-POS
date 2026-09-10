@@ -171,6 +171,7 @@ return [
     'pos' => 'POS',
     'pos_screen' => 'Schermata POS',
     'procurement' => 'Approvvigionamento',
+    'product_shares' => 'Condivisioni prodotti',
     'product_wise_sales' => 'Vendite per prodotto',
     'productions' => 'Produzioni',
     'products' => 'Prodotti',

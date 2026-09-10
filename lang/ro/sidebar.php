@@ -171,6 +171,7 @@ return [
     'pos' => 'Punct de vânzare (POS)',
     'pos_screen' => 'Ecran punct de vânzare',
     'procurement' => 'Achiziții',
+    'product_shares' => 'Distribuiri produse',
     'product_wise_sales' => 'Vânzări pe produs',
     'productions' => 'Producții',
     'products' => 'Produse',

@@ -171,6 +171,7 @@ return [
     'pos' => 'Pokladna (POS)',
     'pos_screen' => 'Obrazovka pokladny',
     'procurement' => 'Nákup',
+    'product_shares' => 'Sdílení produktů',
     'product_wise_sales' => 'Prodej podle produktu',
     'productions' => 'Výroby',
     'products' => 'Produkty',

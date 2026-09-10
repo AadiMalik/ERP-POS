@@ -171,6 +171,7 @@ return [
     'pos' => 'Điểm bán hàng (POS)',
     'pos_screen' => 'Màn hình POS',
     'procurement' => 'Mua sắm',
+    'product_shares' => 'Chia sẻ sản phẩm',
     'product_wise_sales' => 'Doanh số theo sản phẩm',
     'productions' => 'Sản xuất',
     'products' => 'Sản phẩm',

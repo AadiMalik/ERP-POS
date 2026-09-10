@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'ದಾಖಲೆ ಪ್ರಕಾರ',
     'col_expiry_date' => 'ಅವಧಿ ದಿನಾಂಕ',
     'col_mfg_date_dot' => 'ತಯಾರಿಕೆ ದಿನಾಂಕ',
+    'product_shares' => 'ಉತ್ಪನ್ನ ಹಂಚಿಕೆ ವರದಿ',
+    'col_total_shares' => 'ಒಟ್ಟು ಹಂಚಿಕೆಗಳು',
+    'col_last_shared' => 'ಕೊನೆಯದಾಗಿ ಹಂಚಿಕೊಂಡಿದ್ದು',
+    'col_share_copy_link' => 'ಲಿಂಕ್ ನಕಲಿಸಿ',
+    'col_share_native' => 'ಇತರೆ (ನೇಟಿವ್ ಹಂಚಿಕೆ)',
 ];

@@ -488,7 +488,7 @@
                         'reports.stock-aging.view', 'reports.stock-transfer-report.view', 'reports.stock-reconciliation.view',
                         'reports.batch-expiry.view', 'reports.stock-loss.view', 'reports.waste-damage-expiry.view', 'reports.material-consumption-report.view',
                         'reports.serial-number-register.view', 'reports.serial-number-available.view', 'reports.serial-number-sold.view',
-                        'reports.serial-number-movement.view', 'reports.serial-number-customer.view',
+                        'reports.serial-number-movement.view', 'reports.serial-number-customer.view', 'reports.product-shares.view',
                         'reports.manufacturing-plan-report.view', 'reports.production-report.view', 'reports.recipe-bom-report.view'])
                         <li class="menu-item">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -534,6 +534,14 @@
                                         </ul>
                                     </li>
                                 @endcanAccessAny
+
+                                @canAccess('reports.product-shares.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/product-shares') }}" class="menu-link">
+                                            <div data-i18n="Product Shares">{{ __('sidebar.product_shares') }}</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
 
                                 {{-- Serial Number Reports --}}
                                 @canAccessAny(['reports.serial-number-register.view', 'reports.serial-number-available.view',

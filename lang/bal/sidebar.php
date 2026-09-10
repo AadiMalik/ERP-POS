@@ -171,6 +171,7 @@ return [
     'pos' => 'پی او ایس',
     'pos_screen' => 'پی او ایس اسکرین',
     'procurement' => 'خریداری',
+    'product_shares' => 'پراڈکٹ شیئر',
     'product_wise_sales' => 'پروڈکٹ ءِ بنیاد ءَ فروختگ',
     'productions' => 'تولیدات',
     'products' => 'پروڈکٹانی',

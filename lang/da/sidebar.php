@@ -171,6 +171,7 @@ return [
     'pos' => 'Kasseapparat (POS)',
     'pos_screen' => 'Kasseskærm',
     'procurement' => 'Indkøb',
+    'product_shares' => 'Produktdelinger',
     'product_wise_sales' => 'Salg pr. produkt',
     'productions' => 'Produktioner',
     'products' => 'Produkter',

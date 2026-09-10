@@ -171,6 +171,7 @@ return [
     'pos' => 'POS',
     'pos_screen' => 'POS画面',
     'procurement' => '調達',
+    'product_shares' => '商品シェア',
     'product_wise_sales' => '製品別売上',
     'productions' => '生産',
     'products' => '製品',

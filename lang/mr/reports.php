@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'दस्तऐवज प्रकार',
     'col_expiry_date' => 'समाप्ती तारीख',
     'col_mfg_date_dot' => 'उत्पादन तारीख',
+    'product_shares' => 'उत्पादन शेअर अहवाल',
+    'col_total_shares' => 'एकूण शेअर्स',
+    'col_last_shared' => 'शेवटचे शेअर केले',
+    'col_share_copy_link' => 'लिंक कॉपी करा',
+    'col_share_native' => 'इतर (नेटिव्ह शेअर)',
 ];

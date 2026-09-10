@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'ഡോക്യുമെന്റ് തരം',
     'col_expiry_date' => 'കാലാവധി തീയതി',
     'col_mfg_date_dot' => 'നിർമ്മാണ തീയതി',
+    'product_shares' => 'ഉൽപ്പന്ന ഷെയർ റിപ്പോർട്ട്',
+    'col_total_shares' => 'ആകെ ഷെയറുകൾ',
+    'col_last_shared' => 'അവസാനം ഷെയർ ചെയ്തത്',
+    'col_share_copy_link' => 'ലിങ്ക് പകർത്തുക',
+    'col_share_native' => 'മറ്റുള്ളവ (നേറ്റീവ് ഷെയർ)',
 ];

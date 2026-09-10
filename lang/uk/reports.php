@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Тип документа',
     'col_expiry_date' => 'Термін придатності',
     'col_mfg_date_dot' => 'Дата вир-ва',
+    'product_shares' => 'Звіт про поширення товарів',
+    'col_total_shares' => 'Усього поширень',
+    'col_last_shared' => 'Останнє поширення',
+    'col_share_copy_link' => 'Копіювати посилання',
+    'col_share_native' => 'Інше (системний шерінг)',
 ];

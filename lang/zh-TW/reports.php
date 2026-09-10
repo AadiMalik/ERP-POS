@@ -366,4 +366,9 @@ return [
     'col_document_type' => '證件類型',
     'col_expiry_date' => '到期日期',
     'col_mfg_date_dot' => '生產日期',
+    'product_shares' => '產品分享報告',
+    'col_total_shares' => '分享總數',
+    'col_last_shared' => '最後分享時間',
+    'col_share_copy_link' => '複製連結',
+    'col_share_native' => '其他（原生分享）',
 ];

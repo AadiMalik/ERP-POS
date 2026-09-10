@@ -124,10 +124,19 @@ manufacturing is reported as inventory flow.
 | Production | Summary, yield, costing, variance, wastage proxy, traceability | `productions` |
 | Manufacturing Plan | Plan progress | `manufacturing_plans` |
 | Recipe/BOM | BOM, cost, material requirement, coverage | `product_recipes` + items |
+| Product Shares | Per-product total + per-platform social-share counts | `product_shares` |
 
 Shared base: `BaseInventoryReportController`, `InventoryReportExport`,
 `AppliesInventoryReportScope`. Drill-down uses `ReferenceResolverService::resolveUrl()`
 and links into ledger / production / plan screens.
+
+`ProductShareReportService` is the one exception to `AppliesInventoryReportScope` -
+`products`/`product_shares` have no branch dimension (unlike stock), so it
+scopes business-level and branch-level roles to their own `business_id` only
+rather than reusing `applyRoleScope()`'s branch-column filtering (which would
+incorrectly compare a `business_id` column against the user's `branch_id` for
+branch-scoped roles). Super Admin still sees all businesses, or one via the
+`business_id` filter.
 
 **Known limits:** no recipe versioning (one recipe per variation); no scrap/rework
 tables — production wastage is expected-vs-actual material proxy; damage/wastage

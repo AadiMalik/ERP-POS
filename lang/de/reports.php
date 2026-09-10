@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Dokumenttyp',
     'col_expiry_date' => 'Ablaufdatum',
     'col_mfg_date_dot' => 'Herstelldatum',
+    'product_shares' => 'Produktfreigabebericht',
+    'col_total_shares' => 'Freigaben insgesamt',
+    'col_last_shared' => 'Zuletzt geteilt',
+    'col_share_copy_link' => 'Link kopieren',
+    'col_share_native' => 'Sonstige (native Freigabe)',
 ];

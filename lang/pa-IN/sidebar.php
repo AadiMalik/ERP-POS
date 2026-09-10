@@ -171,6 +171,7 @@ return [
     'pos' => 'ਪੀਓਐਸ',
     'pos_screen' => 'ਪੀਓਐਸ ਸਕ੍ਰੀਨ',
     'procurement' => 'ਖਰੀਦ',
+    'product_shares' => 'ਉਤਪਾਦ ਸ਼ੇਅਰ',
     'product_wise_sales' => 'ਉਤਪਾਦ-ਅਨੁਸਾਰ ਵਿਕਰੀ',
     'productions' => 'ਉਤਪਾਦਨ',
     'products' => 'ਉਤਪਾਦ',

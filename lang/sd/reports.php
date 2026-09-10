@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'دستاويز جو قسم',
     'col_expiry_date' => 'ختم ٿيڻ جي تاريخ',
     'col_mfg_date_dot' => 'تياري جي تاريخ',
+    'product_shares' => 'پراڊڪٽ شيئر رپورٽ',
+    'col_total_shares' => 'ڪل شيئر',
+    'col_last_shared' => 'آخري شيئر',
+    'col_share_copy_link' => 'لنڪ ڪاپي ڪريو',
+    'col_share_native' => 'ٻيو (نيٽيو شيئر)',
 ];

@@ -88,7 +88,8 @@ class ProductController extends Controller
         $sale_types = $this->sale_type_service->getAllActive();
         $business_id = getRoleName() !== RoleNames::SUPERADMIN ? Auth::user()->business_id : null;
         $customer_setting = $business_id ? CustomerSetting::where('business_id', $business_id)->first() : null;
-        return view('admin.product.create', compact('businesses', 'categories', 'brands', 'units', 'sale_types', 'customer_setting'));
+        $tags = $business_id ? $this->product_service->getTagsForBusiness($business_id) : collect();
+        return view('admin.product.create', compact('businesses', 'categories', 'brands', 'units', 'sale_types', 'customer_setting', 'tags'));
     }
 
     public function store(Request $request)
@@ -172,6 +173,8 @@ class ProductController extends Controller
             'features' => 'nullable|array',
             'features.*.name' => 'required_with:features',
             'features.*.description' => 'required_with:features',
+            'tags' => 'nullable|array',
+            'tags.*' => 'string|max:100',
         ];
 
         foreach ($variations as $index => $variation) {
@@ -214,6 +217,7 @@ class ProductController extends Controller
             'description' => $request->description,
             'features' => $features,
             'variations' => $variations,
+            'tags' => $request->tags ?? [],
             'business_id' => $request->business_id ?? Auth::user()->business_id,
             'status' => $request->status ?? 'active',
         ];
@@ -233,7 +237,9 @@ class ProductController extends Controller
         $units = $this->unit_service->getAllActive();
         $sale_types = $this->sale_type_service->getAllActive();
         $customer_setting = CustomerSetting::where('business_id', $product->business_id)->first();
-        return view('admin.product.create', compact('product', 'businesses', 'categories', 'brands', 'units', 'sale_types', 'customer_setting'));
+        $tags = $this->product_service->getTagsForBusiness($product->business_id);
+        $share_summary = $this->product_service->getShareSummary($product_id);
+        return view('admin.product.create', compact('product', 'businesses', 'categories', 'brands', 'units', 'sale_types', 'customer_setting', 'tags', 'share_summary'));
     }
 
     public function status($product_id)

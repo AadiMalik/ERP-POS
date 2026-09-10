@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api\Mobile;
 use App\Enums\Message;
 use App\Http\Controllers\Controller;
 use App\Services\Concrete\Api\Mobile\MobileCatalogService;
+use App\Services\Concrete\Api\ProductShareService;
 use App\Traits\ResponseAPI;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -15,10 +17,12 @@ class ProductController extends Controller
     use ResponseAPI;
 
     protected $catalog_service;
+    protected $share_service;
 
-    public function __construct(MobileCatalogService $catalog_service)
+    public function __construct(MobileCatalogService $catalog_service, ProductShareService $share_service)
     {
         $this->catalog_service = $catalog_service;
+        $this->share_service = $share_service;
     }
 
     public function index(Request $request, $business_id)
@@ -103,5 +107,38 @@ class ProductController extends Controller
         $breakdown = $this->catalog_service->stock($business_id, $request->query('branch_id'), $product_variation_id);
 
         return $this->success(Message::FETCH, $breakdown);
+    }
+
+    /**
+     * Mobile counterpart of Api\ProductController::share() - same
+     * ProductShareService, same optional-auth (guest shares still log,
+     * just without an identity).
+     */
+    public function share(Request $request, $business_id, $product_id)
+    {
+        $validate = Validator::make(
+            [
+                'business_id' => $business_id,
+                'product_id' => $product_id,
+                'platform' => $request->input('platform'),
+            ],
+            [
+                'business_id' => 'required|string|exists:businesses,business_id',
+                'product_id' => 'required|string|exists:products,product_id',
+                'platform' => 'required|string|in:' . implode(',', ProductShareService::PLATFORMS),
+            ]
+        );
+
+        if ($validate->fails()) {
+            return $this->error($validate->errors()->first(), 422);
+        }
+
+        try {
+            $result = $this->share_service->record($business_id, $product_id, Auth::guard('sanctum')->id(), $request->input('platform'));
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+
+        return $this->success(Message::SAVE, $result);
     }
 }

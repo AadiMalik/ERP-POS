@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'పత్రం రకం',
     'col_expiry_date' => 'గడువు తేదీ',
     'col_mfg_date_dot' => 'తయారీ తేదీ',
+    'product_shares' => 'ఉత్పత్తి షేర్ నివేదిక',
+    'col_total_shares' => 'మొత్తం షేర్లు',
+    'col_last_shared' => 'చివరిసారి షేర్ చేసింది',
+    'col_share_copy_link' => 'లింక్ కాపీ చేయండి',
+    'col_share_native' => 'ఇతర (నేటివ్ షేర్)',
 ];

@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'סוג מסמך',
     'col_expiry_date' => 'תאריך תפוגה',
     'col_mfg_date_dot' => 'תאריך ייצור',
+    'product_shares' => 'דוח שיתופי מוצרים',
+    'col_total_shares' => 'סה"כ שיתופים',
+    'col_last_shared' => 'שותף לאחרונה',
+    'col_share_copy_link' => 'העתק קישור',
+    'col_share_native' => 'אחר (שיתוף מערכת)',
 ];

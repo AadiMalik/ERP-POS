@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Loại tài liệu',
     'col_expiry_date' => 'Ngày hết hạn',
     'col_mfg_date_dot' => 'Ngày SX',
+    'product_shares' => 'Báo cáo chia sẻ sản phẩm',
+    'col_total_shares' => 'Tổng lượt chia sẻ',
+    'col_last_shared' => 'Chia sẻ lần cuối',
+    'col_share_copy_link' => 'Sao chép liên kết',
+    'col_share_native' => 'Khác (chia sẻ gốc)',
 ];

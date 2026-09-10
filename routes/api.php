@@ -78,6 +78,7 @@ Route::prefix('v1')->middleware(['throttle:60,1', 'platform:storefront'])->group
     Route::get('brands/{business_id}', [BrandController::class, 'index']);
     Route::get('products/{business_id}', [ProductController::class, 'index']);
     Route::get('products/{business_id}/stock/{product_variation_id}', [ProductController::class, 'stock']);
+    Route::post('products/{business_id}/{product_id}/share', [ProductController::class, 'share']);
     Route::get('products/{business_id}/{slug}', [ProductController::class, 'show']);
 
     // Website CMS - single optimized homepage payload, plus page-specific

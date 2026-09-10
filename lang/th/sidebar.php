@@ -171,6 +171,7 @@ return [
     'pos' => 'POS',
     'pos_screen' => 'หน้าจอ POS',
     'procurement' => 'การจัดซื้อ',
+    'product_shares' => 'การแชร์สินค้า',
     'product_wise_sales' => 'ยอดขายตามสินค้า',
     'productions' => 'การผลิต',
     'products' => 'สินค้า',

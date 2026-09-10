@@ -171,6 +171,7 @@ return [
     'pos' => 'പിഒഎസ്',
     'pos_screen' => 'പിഒഎസ് സ്ക്രീൻ',
     'procurement' => 'സംഭരണം',
+    'product_shares' => 'ഉൽപ്പന്ന ഷെയറുകൾ',
     'product_wise_sales' => 'ഉൽപ്പന്നം അടിസ്ഥാനത്തിലുള്ള വിൽപ്പന',
     'productions' => 'ഉൽപ്പാദനങ്ങൾ',
     'products' => 'ഉൽപ്പന്നങ്ങൾ',

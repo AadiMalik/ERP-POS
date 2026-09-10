@@ -366,4 +366,17 @@ return [
     'col_document_type' => 'Document Type',
     'col_expiry_date' => 'Expiry Date',
     'col_mfg_date_dot' => 'Mfg. Date',
+
+    'product_shares' => 'Product Shares Report',
+    'col_total_shares' => 'Total Shares',
+    'col_last_shared' => 'Last Shared',
+    'col_share_whatsapp' => 'WhatsApp',
+    'col_share_facebook' => 'Facebook',
+    'col_share_linkedin' => 'LinkedIn',
+    'col_share_twitter' => 'X / Twitter',
+    'col_share_telegram' => 'Telegram',
+    'col_share_pinterest' => 'Pinterest',
+    'col_share_email' => 'Email',
+    'col_share_copy_link' => 'Copy Link',
+    'col_share_native' => 'Other (Native Share)',
 ];

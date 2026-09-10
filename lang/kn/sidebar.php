@@ -171,6 +171,7 @@ return [
     'pos' => 'ಪಿಒಎಸ್',
     'pos_screen' => 'ಪಿಒಎಸ್ ಪರದೆ',
     'procurement' => 'ಸಂಗ್ರಹಣೆ',
+    'product_shares' => 'ಉತ್ಪನ್ನ ಹಂಚಿಕೆಗಳು',
     'product_wise_sales' => 'ಉತ್ಪನ್ನವಾರು ಮಾರಾಟ',
     'productions' => 'ಉತ್ಪಾದನೆಗಳು',
     'products' => 'ಉತ್ಪನ್ನಗಳು',

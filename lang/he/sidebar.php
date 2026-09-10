@@ -171,6 +171,7 @@ return [
     'pos' => 'קופה',
     'pos_screen' => 'מסך קופה',
     'procurement' => 'רכש',
+    'product_shares' => 'שיתופי מוצרים',
     'product_wise_sales' => 'מכירות לפי מוצר',
     'productions' => 'ייצורים',
     'products' => 'מוצרים',

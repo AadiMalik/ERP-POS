@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'Dokumenttyp',
     'col_expiry_date' => 'Utgångsdatum',
     'col_mfg_date_dot' => 'Tillv.datum',
+    'product_shares' => 'Rapport om produktdelningar',
+    'col_total_shares' => 'Totalt antal delningar',
+    'col_last_shared' => 'Senast delad',
+    'col_share_copy_link' => 'Kopiera länk',
+    'col_share_native' => 'Annat (native delning)',
 ];

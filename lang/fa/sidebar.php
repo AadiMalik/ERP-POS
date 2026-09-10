@@ -171,6 +171,7 @@ return [
     'pos' => 'صندوق فروش',
     'pos_screen' => 'صفحه صندوق فروش',
     'procurement' => 'تدارکات',
+    'product_shares' => 'اشتراک‌گذاری محصولات',
     'product_wise_sales' => 'فروش بر اساس کالا',
     'productions' => 'تولیدات',
     'products' => 'کالاها',

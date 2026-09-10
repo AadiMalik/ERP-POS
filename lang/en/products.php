@@ -87,4 +87,16 @@ return [
     'add' => 'Add',
     'cancel' => 'Cancel',
     'update_product_button' => 'Update Product',
+
+    'tags' => 'Tags',
+    'tags_placeholder' => 'Type a tag and press enter',
+    'tags_hint' => 'Keywords for this product - used for search and to enrich social-media share text (Facebook, WhatsApp, etc.).',
+
+    'share_activity_heading' => 'Share Activity',
+    'share_total' => 'Total Shares: :count',
+    'share_activity_empty' => 'This product has not been shared yet.',
+    'share_col_user' => 'Shared By',
+    'share_col_platform' => 'Platform',
+    'share_col_time' => 'Shared At',
+    'share_guest' => 'Guest',
 ];

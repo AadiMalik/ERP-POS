@@ -171,6 +171,7 @@ return [
     'pos' => 'પીઓએસ',
     'pos_screen' => 'પીઓએસ સ્ક્રીન',
     'procurement' => 'ખરીદી',
+    'product_shares' => 'ઉત્પાદન શેર',
     'product_wise_sales' => 'ઉત્પાદન મુજબ વેચાણ',
     'productions' => 'ઉત્પાદનો',
     'products' => 'ઉત્પાદનો',

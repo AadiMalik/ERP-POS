@@ -171,6 +171,7 @@ return [
     'pos' => 'PDV',
     'pos_screen' => 'Tela de PDV',
     'procurement' => 'Aquisição',
+    'product_shares' => 'Compartilhamentos de produtos',
     'product_wise_sales' => 'Vendas por produto',
     'productions' => 'Produções',
     'products' => 'Produtos',

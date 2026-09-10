@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'कागजात प्रकार',
     'col_expiry_date' => 'म्याद सकिने मिति',
     'col_mfg_date_dot' => 'उत्पादन मिति',
+    'product_shares' => 'उत्पादन सेयर प्रतिवेदन',
+    'col_total_shares' => 'कुल सेयर',
+    'col_last_shared' => 'पछिल्लो पटक सेयर गरिएको',
+    'col_share_copy_link' => 'लिंक प्रतिलिपि गर्नुहोस्',
+    'col_share_native' => 'अन्य (नेटिभ सेयर)',
 ];

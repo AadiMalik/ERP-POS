@@ -12,7 +12,9 @@ use App\Models\ProductVariation;
 use App\Models\ProductVariationAttribute;
 use App\Models\ProductVariationPrice;
 use App\Models\ProductVariationPriceHistory;
+use App\Models\ProductShare;
 use App\Models\SaleType;
+use App\Models\Tag;
 use App\Repository\Repository;
 use App\Services\Concrete\Api\WishlistService;
 use App\Traits\Auditable;
@@ -49,7 +51,8 @@ class ProductService
         'productVariations.attributes:product_variation_attribute_id,product_variation_id,name,value',
         'productVariations.prices',
         'productVariations.discountSaleTypes:sale_types.sale_type_id,name',
-        'productFeatures'
+        'productFeatures',
+        'tags',
     ];
 
     protected $stock_service;
@@ -191,9 +194,11 @@ class ProductService
 
                 $features = $obj['features'] ?? [];
                 $variations = $obj['variations'] ?? [];
+                $tags = $obj['tags'] ?? [];
 
                 unset($obj['features']);
                 unset($obj['variations']);
+                unset($obj['tags']);
 
                 $this->model_product->update($obj, $obj['product_id']);
 
@@ -393,7 +398,9 @@ class ProductService
                     ProductVariationPrice::whereIn('product_variation_id', $deletedVariationIds)->delete();
                     DB::table('product_variation_discount_sale_types')->whereIn('product_variation_id', $deletedVariationIds)->delete();
                 }
-                // =========================    
+                // =========================
+
+                $this->syncTags($product, $tags, $product->business_id);
 
                 DB::commit();
 
@@ -412,9 +419,11 @@ class ProductService
 
             $features = $obj['features'] ?? [];
             $variations = $obj['variations'] ?? [];
+            $tags = $obj['tags'] ?? [];
 
             unset($obj['features']);
             unset($obj['variations']);
+            unset($obj['tags']);
 
             $obj['product_id'] = generateUuid();
             $obj['createdby_id'] = Auth::id();
@@ -488,6 +497,8 @@ class ProductService
                 }
             }
 
+            $this->syncTags($product, $tags, $obj['business_id']);
+
             DB::commit();
 
             return $product;
@@ -497,6 +508,84 @@ class ProductService
 
             throw $e;
         }
+    }
+
+    /**
+     * Find-or-create each submitted tag name (business-scoped, matched
+     * case-insensitively so "Organic" and "organic" don't become two rows)
+     * and sync the product's tag set to exactly that list.
+     */
+    protected function syncTags($product, array $tag_names, string $business_id): void
+    {
+        $names = collect($tag_names)
+            ->map(fn ($name) => trim((string) $name))
+            ->filter()
+            ->unique(fn ($name) => Str::lower($name))
+            ->values();
+
+        $tag_ids = [];
+        foreach ($names as $name) {
+            $tag = Tag::where('business_id', $business_id)
+                ->whereRaw('LOWER(name) = ?', [Str::lower($name)])
+                ->first();
+
+            if (!$tag) {
+                $tag = Tag::create([
+                    'tag_id' => generateUuid(),
+                    'business_id' => $business_id,
+                    'name' => $name,
+                    'slug' => Str::slug($name),
+                    'createdby_id' => Auth::id(),
+                    'date_created' => now(),
+                ]);
+            }
+
+            $tag_ids[] = $tag->tag_id;
+        }
+
+        $product->tags()->sync($tag_ids);
+    }
+
+    /**
+     * Active tags for a business - powers the Select2 "tags: true" input's
+     * existing-options list on the product form (typing a new value still
+     * creates one on save via syncTags()).
+     */
+    public function getTagsForBusiness(string $business_id): Collection
+    {
+        return Tag::where('business_id', $business_id)
+            ->where('status', Status::ACTIVE)
+            ->where('is_deleted', 0)
+            ->orderBy('name')
+            ->get(['tag_id', 'name']);
+    }
+
+    /**
+     * Share activity for the admin Product edit screen: total + per-platform
+     * counts plus a paginated log (who/guest, platform, when). See
+     * App\Services\Concrete\Api\ProductShareService::record() for the writer.
+     */
+    public function getShareSummary(string $product_id, int $per_page = 20): array
+    {
+        $total = ProductShare::where('product_id', $product_id)->count();
+
+        $by_platform = ProductShare::where('product_id', $product_id)
+            ->selectRaw('platform, COUNT(*) as total')
+            ->groupBy('platform')
+            ->orderByDesc('total')
+            ->pluck('total', 'platform')
+            ->all();
+
+        $log = ProductShare::where('product_id', $product_id)
+            ->with('customer:id,name,email')
+            ->orderByDesc('date_created')
+            ->paginate($per_page);
+
+        return [
+            'total' => $total,
+            'by_platform' => $by_platform,
+            'log' => $log,
+        ];
     }
 
     /**
@@ -1005,6 +1094,7 @@ class ProductService
             'features' => $product->productFeatures->map(function ($feature) {
                 return ['name' => $feature->name, 'description' => $feature->description];
             })->values()->all(),
+            'tags' => $product->tags->pluck('name')->values()->all(),
             'is_single_variation' => $variations->count() <= 1,
             'is_wishlisted' => $is_product_wishlisted,
             'is_product_wishlisted' => $is_product_wishlisted,
@@ -1051,6 +1141,7 @@ class ProductService
             },
             'productVariations.prices',
             'productVariations.attributes',
+            'tags:tag_id,name',
         ];
     }
 
@@ -1279,6 +1370,7 @@ class ProductService
             'badges' => $badges,
             'images' => $product->productImages->pluck('image_url')->values()->all(),
             'short_description' => $product->short_description,
+            'tags' => $product->tags->pluck('name')->values()->all(),
             'is_wishlisted' => $is_product_wishlisted || $has_wishlisted_variation,
             'is_product_wishlisted' => $is_product_wishlisted,
             'has_wishlisted_variation' => $has_wishlisted_variation,

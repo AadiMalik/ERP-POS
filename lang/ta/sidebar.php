@@ -171,6 +171,7 @@ return [
     'pos' => 'பிஓஎஸ்',
     'pos_screen' => 'பிஓஎஸ் திரை',
     'procurement' => 'கொள்முதல்',
+    'product_shares' => 'தயாரிப்பு பகிர்வுகள்',
     'product_wise_sales' => 'தயாரிப்பு வாரியான விற்பனை',
     'productions' => 'உற்பத்திகள்',
     'products' => 'தயாரிப்புகள்',

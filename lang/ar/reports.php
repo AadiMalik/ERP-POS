@@ -366,4 +366,9 @@ return [
     'col_document_type' => 'نوع المستند',
     'col_expiry_date' => 'تاريخ الانتهاء',
     'col_mfg_date_dot' => 'تاريخ التصنيع',
+    'product_shares' => 'تقرير مشاركات المنتجات',
+    'col_total_shares' => 'إجمالي المشاركات',
+    'col_last_shared' => 'آخر مشاركة',
+    'col_share_copy_link' => 'نسخ الرابط',
+    'col_share_native' => 'أخرى (مشاركة النظام)',
 ];

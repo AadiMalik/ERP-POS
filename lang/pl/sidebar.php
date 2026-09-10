@@ -171,6 +171,7 @@ return [
     'pos' => 'Kasa (POS)',
     'pos_screen' => 'Ekran kasy',
     'procurement' => 'Zaopatrzenie',
+    'product_shares' => 'Udostępnienia produktów',
     'product_wise_sales' => 'Sprzedaż według produktu',
     'productions' => 'Produkcje',
     'products' => 'Produkty',
