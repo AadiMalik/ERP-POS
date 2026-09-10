@@ -82,6 +82,12 @@
                 <td class="text-right">{{ currency($order->tax_discount_amount) }}</td>
             </tr>
         @endif
+        @if ((float) ($order->delivery_charge ?? 0) > 0)
+            <tr>
+                <td>{{ __('orders.delivery_charge') }}</td>
+                <td class="text-right">{{ currency($order->delivery_charge) }}</td>
+            </tr>
+        @endif
         <tr class="grand-total">
             <td>{{ __('common.total') }}</td>
             <td class="text-right">{{ currency($order->total) }}</td>

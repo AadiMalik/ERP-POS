@@ -29,6 +29,7 @@ return [
     'sale_type' => 'نوع البيع',
     'final_unit_price' => 'سعر الوحدة النهائي',
     'item_discounts' => 'خصومات الأصناف',
+    'delivery_charge' => 'דמי משלוח',
     'payments' => 'المدفوعات',
     'payment_history' => 'سجل المدفوعات',
     'method' => 'الطريقة',

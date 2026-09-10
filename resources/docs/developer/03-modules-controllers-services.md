@@ -608,6 +608,12 @@ uses. Never reversed on `OrderReturnService` — delivery already happened
 regardless of what items come back, so a return's JV has no delivery-charge
 contra-leg (full or partial return).
 
+**Display:** shown as a "Delivery Charge" line (only when non-zero) on the
+ERP order detail page (`admin/order/show.blade.php`) and the full-page order
+print (`admin/order/print/print.blade.php`), right before the Total row.
+`CustomerOrderService::mapOrder()` returns it as the API's `shipping` field
+(previously hardcoded to `0`) for the storefront/mobile order detail screens.
+
 **Register session open — tenant/cashier binding:**
 `PosRegisterSessionService::open()` forces `business_id`, branch-scoped
 `branch_id`, and `cashier_id` to the authenticated user for every non-Super-Admin

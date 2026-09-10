@@ -241,7 +241,7 @@ class CustomerOrderService
             'items' => $items,
             'subtotal' => (float) $order->subtotal,
             'discount' => (float) ($order->discount_amount ?? $order->discount ?? 0),
-            'shipping' => 0,
+            'shipping' => (float) ($order->delivery_charge ?? 0),
             'tax' => (float) ($order->tax_amount ?? 0),
             'taxPercent' => (float) ($order->tax ?? 0),
             'taxType' => $order->tax_type ?? 'exclusive',

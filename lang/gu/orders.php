@@ -29,6 +29,7 @@ return [
     'sale_type' => 'Sale Type',
     'final_unit_price' => 'Final Unit Price',
     'item_discounts' => 'Item Discounts',
+    'delivery_charge' => 'ડિલિવરી ચાર્જ',
     'payments' => 'Payments',
     'payment_history' => 'Payment History',
     'method' => 'Method',
