@@ -44,7 +44,7 @@ class ProductController extends Controller
         BarcodeService $barcode_service,
         SaleTypeService $sale_type_service
     ) {
-        $this->middleware('permission:product.view')->only(['index', 'getData', 'byBusiness', 'byBrand', 'byCategory', 'variations', 'byProduct', 'getImages', 'variationPriceHistory']);
+        $this->middleware('permission:product.view')->only(['index', 'getData', 'byBusiness', 'byBrand', 'byCategory', 'variations', 'byProduct', 'getImages', 'variationPriceHistory', 'show']);
         $this->middleware('permission:product.create')->only(['create', 'uploadImages']);
         $this->middleware('permission:product.create|product.edit')->only(['store']);
         $this->middleware('permission:product.edit')->only(['edit', 'variationStatus', 'setDefaultImage', 'saveImageSorting', 'backfillBarcodes']);
@@ -240,6 +240,17 @@ class ProductController extends Controller
         $tags = $this->product_service->getTagsForBusiness($product->business_id);
         $share_summary = $this->product_service->getShareSummary($product_id);
         return view('admin.product.create', compact('product', 'businesses', 'categories', 'brands', 'units', 'sale_types', 'customer_setting', 'tags', 'share_summary'));
+    }
+
+    public function show($product_id)
+    {
+        $detail = $this->product_service->getDetail($product_id);
+
+        if (!$detail) {
+            abort(404);
+        }
+
+        return view('admin.product.show', $detail);
     }
 
     public function status($product_id)

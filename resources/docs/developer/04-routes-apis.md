@@ -5,6 +5,12 @@
 Almost every list screen follows the same shape: `Route::resource(...)` for
 CRUD, plus a sibling `POST .../data` route (feeding a server-side DataTable via the
 Service's `getData()`), and where relevant `status`/`import`/`export` actions.
+Products additionally expose a read-only detail page at
+`GET admin/product/{product_id}/show` (`product.show`, `ProductController::show`,
+permission `product.view`) — this is **not** the storefront
+`GET products/{business_id}/{slug}` API. The admin show route is registered
+beside the product resource (`except(['show'])`) so named paths such as
+`product/export` are not treated as a product id.
 Customers and Suppliers lists use the centralized DataTable engine
 (`POST admin/datatable/{key}/data`). Every listing DataTable (including
 POS Order History) uses `GET`/`POST admin/datatable/{key}/preferences` for

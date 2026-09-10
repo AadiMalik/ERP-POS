@@ -676,6 +676,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
 
     //product
     Route::resource('product', App\Http\Controllers\Admin\ProductController::class)->except(['show']);
+    Route::get('product/{product_id}/show', [App\Http\Controllers\Admin\ProductController::class, 'show'])->name('product.show');
     Route::group(['prefix' => 'product'], function () {
         Route::post('data', [App\Http\Controllers\Admin\ProductController::class, 'getData'])->name('product-data');
         Route::post('change-status/{product_id}', [App\Http\Controllers\Admin\ProductController::class, 'status']);

@@ -176,6 +176,31 @@ See also: [Purchasing & Suppliers](04-purchasing-suppliers.md) (how stock arrive
 [Sales & Point of Sale](03-sales-pos.md) (how stock leaves),
 [Manufacturing & Production](16-manufacturing.md) (how production consumes and creates stock).
 
+## Product detail
+
+On the Products list, **View** opens a read-only page for that product (you do
+not need to open Edit). The page shows what the product is, then everywhere it
+has been used:
+
+- **Overview** — identity, flags, images, and charts of sold vs purchased
+  quantity (last 12 months), stock movements by type, and shares by platform
+  when there is data to plot.
+- **Variations & Stock** — SKU, barcode, prices, and on-hand quantity per
+  warehouse (hidden for services or products that do not track stock).
+- **Orders** — posted sales of this product, plus approved sale returns. Service
+  products also list service sales here. Draft or cancelled orders are not
+  counted as sold.
+- **Purchases** — purchase lines, goods receipts, and purchase returns.
+- **Consumption** — recipes (as a finished good or as a raw material),
+  manufacturing plans, and production consumption.
+- **Shares** — who shared the product from the website or app, and on which
+  platform (the same log that also appears on Edit).
+- **Stock Movements** — the stock ledger rows for this product.
+
+Empty tabs say so in plain language rather than showing a blank table. Use
+**Edit** on that page (if your role allows) to change the product; **Back**
+returns to the list.
+
 ## Inventory Reporting System
 
 Under **Inventory → Reports**, stock, consumption, manufacturing, and recipe/BOM
@@ -210,8 +235,8 @@ silo.
   LinkedIn, X, Telegram, Pinterest, Email, copied link, or the phone's own
   share sheet). Filter by date range, category, brand, or a single product.
   The same total and breakdown, plus a log of who shared it (or "Guest" if
-  they weren't logged in) and when, is also shown right on that product's
-  edit screen.
+  they weren't logged in) and when, is shown on that product's **detail**
+  (View) page and also on the product's edit screen.
 
 ### Consumption, Manufacturing & Recipe Reports
 When the Manufacturing package module is enabled, these also appear under

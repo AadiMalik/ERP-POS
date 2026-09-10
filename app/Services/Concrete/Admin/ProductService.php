@@ -5,15 +5,28 @@ namespace App\Services\Concrete\Admin;
 use App\Enums\Filter;
 use App\Enums\RoleNames;
 use App\Enums\Status;
+use App\Models\GoodReceiptNoteDetail;
+use App\Models\ManufacturingPlan;
+use App\Models\ManufacturingPlanMaterial;
+use App\Models\OrderDetail;
+use App\Models\OrderReturnDetail;
 use App\Models\Product;
 use App\Models\ProductFeature;
 use App\Models\ProductImage;
+use App\Models\ProductRecipe;
+use App\Models\ProductRecipeItem;
+use App\Models\ProductShare;
 use App\Models\ProductVariation;
 use App\Models\ProductVariationAttribute;
 use App\Models\ProductVariationPrice;
 use App\Models\ProductVariationPriceHistory;
-use App\Models\ProductShare;
+use App\Models\ProductVariationStock;
+use App\Models\ProductVariationStockTransaction;
+use App\Models\ProductionConsumption;
+use App\Models\PurchaseDetail;
+use App\Models\PurchaseReturnDetail;
 use App\Models\SaleType;
+use App\Models\ServiceSaleDetail;
 use App\Models\Tag;
 use App\Repository\Repository;
 use App\Services\Concrete\Api\WishlistService;
@@ -150,8 +163,17 @@ class ProductService
             ';
             })
             ->addColumn('action', function ($item) {
+                $view = e(__('common.view'));
 
                 return "
+                    <a class='btn btn-icon btn-outline-info mr-2'
+                     href='" . route('product.show', $item->product_id) . "'
+                    id='viewProduct'
+                    title='{$view}'
+                    aria-label='{$view}'>
+                    <i class='fa fa-eye'></i>
+                    </a>
+
                     <a class='btn btn-icon btn-outline-primary mr-2'
                      href='" . route('product.edit', $item->product_id) . "'
                     id='editProduct'>
@@ -561,9 +583,9 @@ class ProductService
     }
 
     /**
-     * Share activity for the admin Product edit screen: total + per-platform
-     * counts plus a paginated log (who/guest, platform, when). See
-     * App\Services\Concrete\Api\ProductShareService::record() for the writer.
+     * Share activity for the admin Product edit and show screens: total +
+     * per-platform counts plus a paginated log (who/guest, platform, when).
+     * See App\Services\Concrete\Api\ProductShareService::record() for the writer.
      */
     public function getShareSummary(string $product_id, int $per_page = 20): array
     {
@@ -585,6 +607,276 @@ class ProductService
             'total' => $total,
             'by_platform' => $by_platform,
             'log' => $log,
+        ];
+    }
+
+    /**
+     * Read-only usage dossier for the admin Product show page. Related
+     * documents are queried by product_id (Product has no inverse
+     * order/purchase/stock relations). History tables are capped at 50.
+     */
+    public function getDetail(string $product_id): ?array
+    {
+        $product = $this->getById($product_id);
+
+        if (!$product || (int) $product->is_deleted === 1) {
+            return null;
+        }
+
+        if (getRoleName() !== RoleNames::SUPERADMIN) {
+            $user = Auth::user();
+            if (!$user || (string) $product->business_id !== (string) $user->business_id) {
+                return null;
+            }
+        }
+
+        $limit = 50;
+        $track_stock = (int) $product->is_track_stock === 1 && $product->type !== 'service';
+
+        $stocks = $track_stock
+            ? ProductVariationStock::query()
+                ->with('warehouse:warehouse_id,name')
+                ->where('product_id', $product_id)
+                ->where('status', Status::ACTIVE)
+                ->where('is_deleted', 0)
+                ->get()
+            : collect();
+
+        $sold_qty = (float) OrderDetail::query()
+            ->join('orders', 'orders.order_id', '=', 'order_details.order_id')
+            ->where('order_details.product_id', $product_id)
+            ->where('orders.status', Status::POSTED)
+            ->where('orders.is_deleted', 0)
+            ->sum('order_details.quantity');
+
+        $purchased_qty = (float) PurchaseDetail::query()
+            ->join('purchases', 'purchases.purchase_id', '=', 'purchase_details.purchase_id')
+            ->where('purchase_details.product_id', $product_id)
+            ->where('purchases.is_deleted', 0)
+            ->where('purchases.status', '!=', Status::CANCELLED)
+            ->sum('purchase_details.received_quantity');
+
+        $share_summary = $this->getShareSummary($product_id);
+
+        $kpis = [
+            'track_stock' => $track_stock,
+            'on_hand' => $track_stock ? (float) $stocks->sum('quantity') : null,
+            'sold' => $sold_qty,
+            'purchased' => $purchased_qty,
+            'shares' => (int) ($product->share_count ?? $share_summary['total']),
+        ];
+
+        $start = Carbon::now()->startOfMonth()->subMonths(11);
+        $month_keys = [];
+        for ($i = 0; $i < 12; $i++) {
+            $month_keys[] = $start->copy()->addMonths($i)->format('Y-m');
+        }
+
+        $sold_by_month = OrderDetail::query()
+            ->join('orders', 'orders.order_id', '=', 'order_details.order_id')
+            ->where('order_details.product_id', $product_id)
+            ->where('orders.status', Status::POSTED)
+            ->where('orders.is_deleted', 0)
+            ->where('orders.sale_date', '>=', $start->toDateString())
+            ->selectRaw("DATE_FORMAT(orders.sale_date, '%Y-%m') as ym, SUM(order_details.quantity) as qty")
+            ->groupBy('ym')
+            ->pluck('qty', 'ym');
+
+        $purchased_by_month = PurchaseDetail::query()
+            ->join('purchases', 'purchases.purchase_id', '=', 'purchase_details.purchase_id')
+            ->where('purchase_details.product_id', $product_id)
+            ->where('purchases.is_deleted', 0)
+            ->where('purchases.status', '!=', Status::CANCELLED)
+            ->where('purchases.purchase_date', '>=', $start->toDateString())
+            ->selectRaw("DATE_FORMAT(purchases.purchase_date, '%Y-%m') as ym, SUM(purchase_details.received_quantity) as qty")
+            ->groupBy('ym')
+            ->pluck('qty', 'ym');
+
+        $sold_series = [];
+        $purchased_series = [];
+        foreach ($month_keys as $ym) {
+            $sold_series[] = (float) ($sold_by_month[$ym] ?? 0);
+            $purchased_series[] = (float) ($purchased_by_month[$ym] ?? 0);
+        }
+
+        $stock_by_type = [];
+        if ($track_stock) {
+            $stock_by_type = ProductVariationStockTransaction::query()
+                ->where('product_id', $product_id)
+                ->where('is_deleted', 0)
+                ->selectRaw('transaction_type, SUM(ABS(base_quantity)) as qty')
+                ->groupBy('transaction_type')
+                ->pluck('qty', 'transaction_type')
+                ->map(function ($qty) {
+                    return (float) $qty;
+                })
+                ->all();
+        }
+
+        $charts = [
+            'months' => $month_keys,
+            'sold' => $sold_series,
+            'purchased' => $purchased_series,
+            'has_qty_trend' => (collect($sold_series)->sum() > 0 || collect($purchased_series)->sum() > 0),
+            'stock_by_type' => $stock_by_type,
+            'shares_by_platform' => $share_summary['by_platform'],
+        ];
+
+        $sales = OrderDetail::query()
+            ->join('orders', 'orders.order_id', '=', 'order_details.order_id')
+            ->where('order_details.product_id', $product_id)
+            ->where('orders.status', Status::POSTED)
+            ->where('orders.is_deleted', 0)
+            ->orderByDesc('orders.sale_date')
+            ->limit($limit)
+            ->with(['productVariation:product_variation_id,name,sku', 'order.user:id,name'])
+            ->select('order_details.*')
+            ->get();
+
+        $sale_returns = OrderReturnDetail::query()
+            ->join('order_returns', 'order_returns.order_return_id', '=', 'order_return_details.order_return_id')
+            ->where('order_return_details.product_id', $product_id)
+            ->where('order_returns.status', Status::APPROVED)
+            ->where('order_returns.is_deleted', 0)
+            ->orderByDesc('order_returns.order_return_date')
+            ->limit($limit)
+            ->with(['productVariation:product_variation_id,name,sku', 'orderReturn'])
+            ->select('order_return_details.*')
+            ->get();
+
+        $service_sales = collect();
+        if ($product->type === 'service') {
+            $service_sales = ServiceSaleDetail::query()
+                ->join('service_sales', 'service_sales.service_sale_id', '=', 'service_sale_details.service_sale_id')
+                ->where('service_sale_details.product_id', $product_id)
+                ->where('service_sales.is_deleted', 0)
+                ->orderByDesc('service_sales.service_sale_date')
+                ->limit($limit)
+                ->get([
+                    'service_sale_details.*',
+                    'service_sales.service_sale_date',
+                    'service_sales.service_sale_no',
+                    'service_sales.service_sale_id',
+                ]);
+        }
+
+        $purchases = PurchaseDetail::query()
+            ->join('purchases', 'purchases.purchase_id', '=', 'purchase_details.purchase_id')
+            ->leftJoin('suppliers', 'suppliers.supplier_id', '=', 'purchases.supplier_id')
+            ->where('purchase_details.product_id', $product_id)
+            ->where('purchases.is_deleted', 0)
+            ->orderByDesc('purchases.purchase_date')
+            ->limit($limit)
+            ->with(['productVariation:product_variation_id,name,sku'])
+            ->get([
+                'purchase_details.*',
+                'purchases.purchase_date',
+                'purchases.purchase_no',
+                'purchases.purchase_id as purchase_header_id',
+                'purchases.status as purchase_status',
+                'suppliers.name as supplier_name',
+            ]);
+
+        $grns = GoodReceiptNoteDetail::query()
+            ->join('good_receipt_notes', 'good_receipt_notes.good_receipt_note_id', '=', 'good_receipt_note_details.good_receipt_note_id')
+            ->where('good_receipt_note_details.product_id', $product_id)
+            ->where('good_receipt_notes.is_deleted', 0)
+            ->orderByDesc('good_receipt_notes.good_receipt_note_date')
+            ->limit($limit)
+            ->with(['productVariation:product_variation_id,name,sku', 'goodReceiptNote'])
+            ->select('good_receipt_note_details.*')
+            ->get();
+
+        $purchase_returns = PurchaseReturnDetail::query()
+            ->join('purchase_returns', 'purchase_returns.purchase_return_id', '=', 'purchase_return_details.purchase_return_id')
+            ->where('purchase_return_details.product_id', $product_id)
+            ->where('purchase_returns.is_deleted', 0)
+            ->orderByDesc('purchase_returns.purchase_return_date')
+            ->limit($limit)
+            ->with(['productVariation:product_variation_id,name,sku', 'purchaseReturn'])
+            ->select('purchase_return_details.*')
+            ->get();
+
+        $consumptions = collect();
+        $recipes_as_finished = collect();
+        $recipes_as_material = collect();
+        $manufacturing_plans = collect();
+        $plan_materials = collect();
+
+        try {
+            $consumptions = ProductionConsumption::query()
+                ->with([
+                    'production:production_id,production_no',
+                    'productVariation:product_variation_id,name,sku',
+                    'warehouse:warehouse_id,name',
+                ])
+                ->where('product_id', $product_id)
+                ->orderByDesc('date_created')
+                ->limit($limit)
+                ->get();
+
+            $recipes_as_finished = ProductRecipe::query()
+                ->with('productVariation:product_variation_id,name,sku')
+                ->where('product_id', $product_id)
+                ->where('is_deleted', 0)
+                ->limit($limit)
+                ->get();
+
+            $recipes_as_material = ProductRecipeItem::query()
+                ->with(['recipe.product:product_id,name', 'rawMaterialVariation:product_variation_id,name,sku'])
+                ->where('raw_material_product_id', $product_id)
+                ->where('is_deleted', 0)
+                ->limit($limit)
+                ->get();
+
+            $manufacturing_plans = ManufacturingPlan::query()
+                ->with('productVariation:product_variation_id,name,sku')
+                ->where('product_id', $product_id)
+                ->where('is_deleted', 0)
+                ->orderByDesc('plan_date')
+                ->limit($limit)
+                ->get();
+
+            $plan_materials = ManufacturingPlanMaterial::query()
+                ->with(['plan:manufacturing_plan_id,plan_no,plan_date', 'productVariation:product_variation_id,name,sku'])
+                ->where('product_id', $product_id)
+                ->limit($limit)
+                ->get();
+        } catch (Exception $e) {
+            // Manufacturing tables or module data may be absent; keep the tab empty.
+        }
+
+        $movements = $track_stock
+            ? ProductVariationStockTransaction::query()
+                ->with([
+                    'warehouse:warehouse_id,name',
+                    'productVariation:product_variation_id,name,sku',
+                ])
+                ->where('product_id', $product_id)
+                ->where('is_deleted', 0)
+                ->orderByDesc('transaction_date')
+                ->limit($limit)
+                ->get()
+            : collect();
+
+        return [
+            'product' => $product,
+            'kpis' => $kpis,
+            'charts' => $charts,
+            'stocks' => $stocks,
+            'sales' => $sales,
+            'sale_returns' => $sale_returns,
+            'service_sales' => $service_sales,
+            'purchases' => $purchases,
+            'grns' => $grns,
+            'purchase_returns' => $purchase_returns,
+            'consumptions' => $consumptions,
+            'recipes_as_finished' => $recipes_as_finished,
+            'recipes_as_material' => $recipes_as_material,
+            'manufacturing_plans' => $manufacturing_plans,
+            'plan_materials' => $plan_materials,
+            'movements' => $movements,
+            'share_summary' => $share_summary,
         ];
     }
 

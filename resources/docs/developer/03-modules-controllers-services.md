@@ -176,6 +176,21 @@ Consumption / Manufacturing / Recipe-BOM groups): controllers in
 [Reports Infrastructure](06-reports-infrastructure.md#inventory-reporting-system)
 and [Manufacturing](16-manufacturing.md#reports).
 
+**Admin product detail (show).** `GET admin/product/{product_id}/show` (named
+`product.show`) is a read-only usage dossier. It is registered as a custom
+route (same pattern as customer/supplier `{id}/show`) rather than the resource
+`show` action so `GET admin/product/export` is not captured as a product id.
+`ProductController::show` is gated by existing `product.view` (no new permission)
+plus `module:product`. `ProductService::getDetail($product_id)` loads the
+product (existing `$with`), returns null (controller `abort(404)`) when missing,
+deleted, or wrong business for a non-Super-Admin, and queries related documents
+**by `product_id`** (Product has no inverse order/purchase/stock relations).
+Posted sales follow `ProductSalesReportService` (`orders.status = posted`,
+`orders.is_deleted = 0`, date = `sale_date`). History tables are capped at 50.
+Charts (ApexCharts already on the admin layout) render only when series are
+non-empty. The Products DataTable action column links to this page via an
+eye/View button.
+
 Storefront homepage product rails are built by
 `ProductService::buildWebsiteSections()` (attached to
 `GET /api/v1/products/{business_id}` on unfiltered page 1, and reused by
@@ -208,7 +223,7 @@ Every "share this product" click from the website/mobile storefront (see
 `product_shares` row per click plus an atomic `products.share_count`
 increment, both in one transaction. `ProductService::getShareSummary()`
 surfaces the total, a per-platform breakdown, and a paginated who/platform/when
-log on the admin Product edit screen; the same data aggregated across products
+log on the admin Product **show** page and the Product edit screen; the same data aggregated across products
 is the **Product Shares** report (`ProductShareReportService`, see
 [Reports Infrastructure](06-reports-infrastructure.md#inventory-reporting-system)).
 

@@ -117,8 +117,8 @@ without an identity. `products.share_count` is a denormalized fast-read
 total, incremented in the same transaction as each `product_shares` insert
 (`ProductShareService::record()`); the per-platform breakdown is always a
 live `GROUP BY` on `product_shares` rather than one column per platform, so a
-new platform never needs a schema change. Surfaced on the admin Product edit
-screen (total + per-platform counts + a paginated who/platform/when log via
+new platform never needs a schema change. Surfaced on the admin Product show
+page and the Product edit screen (total + per-platform counts + a paginated who/platform/when log via
 `ProductService::getShareSummary()`) and in the **Product Shares** report
 under Inventory → Reports (see
 [Reports Infrastructure](06-reports-infrastructure.md)).
