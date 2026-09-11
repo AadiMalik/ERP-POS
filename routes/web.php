@@ -1196,6 +1196,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('pos-screen/change-context', [App\Http\Controllers\Admin\PosScreenController::class, 'changeContext'])->name('pos-screen.change-context');
         Route::post('pos-screen/quick-customer', [App\Http\Controllers\Admin\PosScreenController::class, 'quickCreateCustomer'])->name('pos-screen.quick-customer');
         Route::post('pos-screen/quick-expense', [App\Http\Controllers\Admin\PosScreenController::class, 'quickCreateExpense'])->name('pos-screen.quick-expense');
+        Route::post('pos-screen/verify-delivery-address', [App\Http\Controllers\Admin\PosScreenController::class, 'verifyDeliveryAddress'])->name('pos-screen.verify-delivery-address');
         Route::get('pos-screen/notifications/unread-count', [App\Http\Controllers\Admin\PosScreenController::class, 'posNotificationsUnreadCount'])->name('pos-screen.notifications.unread-count');
         Route::get('pos-screen/notifications/latest', [App\Http\Controllers\Admin\PosScreenController::class, 'posNotificationsLatest'])->name('pos-screen.notifications.latest');
     });

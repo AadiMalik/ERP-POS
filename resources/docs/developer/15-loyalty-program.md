@@ -55,7 +55,7 @@ Order-lifecycle helpers:
 
 ## Integration: `OrderService`
 
-- **`saveLinesAndComputeTotals()`** — when the request carries `use_loyalty_points` truthy and the order has a customer, computes redemption last, on top of every other discount (line discounts, order discount, voucher), capped at the order's payable total before loyalty. Returns `loyalty_points_used` / `loyalty_discount_amount` alongside the other totals.
+- **`saveLinesAndComputeTotals()`** — when the request carries `use_loyalty_points` truthy and the order has a customer, computes redemption last, on top of every other discount (line discounts, order discount, voucher), capped at the order's payable total before loyalty (goods ± tax + delivery charge). Inclusive tax is already inside `$subtotal`, so it is **not** added again to the cap (that would let the discount exceed the order total). Returns `loyalty_points_used` / `loyalty_discount_amount` alongside the other totals.
 - **`save()`** (draft/hold) — persists those two fields, then calls `LoyaltyPointService::syncReservation()` so the reservation always matches the current cart, even across repeated saves of the same held order.
 - **`cancel()`** (draft/hold only) — calls `releaseReservedForOrder()` inside its own transaction before flipping status, so a cancelled order's reservation is always released.
 - **`applyPostedEffects()`** (called by `post()` and by `correct()`'s repost) — `consume()`s the reserved points (order now paid), then `earn()`s new points and stamps the result onto `$order->loyalty_points_earned`. Earning only ever happens here — never on a draft/held order.
@@ -143,19 +143,22 @@ dedicated `Loyalty` surface, identical shape on both clients (see
   out server-side when the user lacks `order.loyalty.apply`, mirroring the
   existing `order.discount.apply`/`order.coupon.apply` stripping — there is
   no client-side `@can`/`can()` gate either, matching how those two sibling
-  fields are already (not) gated in this Blade file). The cart totals
+  fields are already (not) gated in this Blade file). The hint also shows
+  when the points' cash value exceeds the current payable total
+  (`pts_available_capped`) — redemption is always `min(balance × rate,
+  payable)`. The cart totals
   sidebar gets its own "Loyalty Discount" row (hidden until
   `loyalty_discount_amount > 0`), populated from the `save()`/`hold()`
   response's `loyalty_discount_amount` and broken back out of the combined
   `discount_amount` the same way `Item Discounts` already is; the live
-  voucher/discount preview (`OrderController::previewVoucher()`) still folds
-  loyalty into the combined "Order Discount" figure in real time, since
-  `previewVoucher()`'s return shape wasn't changed to break it out
-  separately. Resuming a held/draft order with `loyalty_points_used > 0`
-  re-checks the box, mirroring `header.voucher_code` restoration — since
-  `OrderService::getDetails()`'s `header` array doesn't carry the loyalty
-  columns, `OrderController::details()` merges them in from the `Order` row
-  itself before returning.
+  voucher/discount preview (`OrderController::previewVoucher()`) returns
+  `loyalty_discount_amount` separately so the POS can show it on its own
+  row instead of folding it into "Order Discount". Resuming a held/draft order with `loyalty_points_used > 0`
+  re-checks the box, mirroring `header.voucher_code` restoration.
+  `OrderService::getDetails()` now includes `loyalty_points_used` /
+  `loyalty_discount_amount` / `delivery_charge` / `delivery_latitude` /
+  `delivery_longitude` on `header`; `OrderController::details()` still merges
+  the loyalty columns as a belt-and-suspenders for older callers.
 - **Order Details** (`resources/views/admin/order/show.blade.php`) — the
   Order Information card shows a "Loyalty Points" block (redeemed points +
   `loyalty_discount_amount`, and points earned) next to the existing Voucher

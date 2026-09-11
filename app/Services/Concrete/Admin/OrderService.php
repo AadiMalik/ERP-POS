@@ -12,6 +12,7 @@ use App\Enums\Status;
 use App\Enums\TransactionType;
 use App\Models\AccountingSetting;
 use App\Models\Bank;
+use App\Models\Branch;
 use App\Models\ComplimentaryReason;
 use App\Models\CustomerPayment;
 use App\Models\CustomerProfile;
@@ -739,6 +740,11 @@ class OrderService
                 'complimentary_cost' => $order->complimentary_cost,
                 'due_date' => $order->due_date,
                 'delivery_address' => $order->delivery_address,
+                'delivery_latitude' => $order->delivery_latitude,
+                'delivery_longitude' => $order->delivery_longitude,
+                'delivery_charge' => $order->delivery_charge,
+                'loyalty_points_used' => $order->loyalty_points_used,
+                'loyalty_discount_amount' => $order->loyalty_discount_amount,
                 'status' => $order->status,
                 'fbr_invoice_number' => $order->fbr_invoice_number,
                 'fbr_status' => $order->fbr_status,
@@ -1608,19 +1614,57 @@ class OrderService
             $voucher_id = $voucher->voucher_id;
         }
 
+        $complimentary_count = count(array_filter($order_lines, fn ($l) => !empty($l['is_complimentary'])));
+        $complimentary_status = ComplimentaryStatus::fromLineFlags($complimentary_count, count($order_lines));
+
+        if ($wants_full_complimentary && $complimentary_status !== ComplimentaryStatus::FULL) {
+            $complimentary_status = ComplimentaryStatus::PARTIAL;
+        }
+
+        // Delivery charge (resolved by WebsiteCheckoutService/DeliveryZoneService
+        // before save() is called, or set directly by POS / an admin-created
+        // delivery order) is a flat addition on top of everything else,
+        // regardless of inclusive/exclusive tax type - it's not part of the
+        // taxable sale amount. Computed before loyalty so redemption can be
+        // capped at the real payable total (goods + tax + delivery).
+        $delivery_charge = (float) ($obj['delivery_charge'] ?? $order->delivery_charge ?? 0);
+
+        if ($complimentary_status === ComplimentaryStatus::FULL) {
+            $delivery_charge = 0;
+        } elseif ($delivery_charge > 0 && !empty($order->branch_id)) {
+            $threshold = Branch::where('branch_id', $order->branch_id)
+                ->where('is_deleted', 0)
+                ->value('free_delivery_min_order_amount');
+
+            $payable_before_delivery = $tax_type === 'inclusive'
+                ? ($subtotal - $line_discount_total - $order_discount_amount - $voucher_discount_amount)
+                : ($subtotal - $line_discount_total - $order_discount_amount - $voucher_discount_amount + $tax_amount_total);
+
+            if ($threshold !== null && (float) $threshold > 0
+                && app(DeliveryZoneService::class)->isFreeDelivery((float) $threshold, $payable_before_delivery)) {
+                $delivery_charge = 0;
+            }
+        }
+
         // Loyalty point redemption - computed last, on top of every other
         // discount, exactly like the voucher block above. Capped at the
         // order's payable total before loyalty (never lets the total go
-        // negative) and at the customer's available balance (the
-        // authoritative check lives in LoyaltyPointService::reserve(),
-        // called by save() right after this method returns - this is only
-        // the calculation, no balance is touched here).
+        // negative, and never redeem more than the customer would pay) and
+        // at the customer's available balance (the authoritative check
+        // lives in LoyaltyPointService::reserve(), called by save() right
+        // after this method returns - this is only the calculation, no
+        // balance is touched here). Inclusive tax is already inside
+        // $subtotal, so it must not be added again (that would let the
+        // discount exceed the order total).
         $loyalty_points_used = 0.0;
         $loyalty_discount_amount = 0.0;
 
         if (!empty($obj['use_loyalty_points']) && !empty($order->user_id)) {
             $pre_loyalty_discount_amount = $line_discount_total + $order_discount_amount + $voucher_discount_amount;
-            $loyalty_cap = $subtotal - $pre_loyalty_discount_amount + $tax_amount_total;
+            $payable_before_loyalty = $tax_type === 'inclusive'
+                ? ($subtotal - $pre_loyalty_discount_amount + $delivery_charge)
+                : ($subtotal - $pre_loyalty_discount_amount + $tax_amount_total + $delivery_charge);
+            $loyalty_cap = max(0, round($payable_before_loyalty, 3));
 
             $redemption = app(LoyaltyPointService::class)->calculateRedemption($order->business_id, $order->user_id, $loyalty_cap);
             $loyalty_points_used = $redemption['points'];
@@ -1637,22 +1681,6 @@ class OrderService
         unset($line);
 
         $discount_amount = $line_discount_total + $order_discount_amount + $voucher_discount_amount + $loyalty_discount_amount;
-        // Delivery charge (resolved by WebsiteCheckoutService/DeliveryZoneService
-        // before save() is called, or set directly by an admin-created delivery
-        // order) is a flat addition on top of everything else, regardless of
-        // inclusive/exclusive tax type - it's not part of the taxable sale amount.
-        $delivery_charge = (float) ($obj['delivery_charge'] ?? $order->delivery_charge ?? 0);
-
-        $complimentary_count = count(array_filter($order_lines, fn ($l) => !empty($l['is_complimentary'])));
-        $complimentary_status = ComplimentaryStatus::fromLineFlags($complimentary_count, count($order_lines));
-
-        if ($wants_full_complimentary && $complimentary_status !== ComplimentaryStatus::FULL) {
-            $complimentary_status = ComplimentaryStatus::PARTIAL;
-        }
-
-        if ($complimentary_status === ComplimentaryStatus::FULL) {
-            $delivery_charge = 0;
-        }
 
         if ($complimentary_status !== ComplimentaryStatus::NONE && empty($order_complimentary_reason_id)) {
             $first_comp = collect($order_lines)->first(fn ($l) => !empty($l['is_complimentary']));
@@ -1750,6 +1778,9 @@ class OrderService
             'discount_amount' => $result['discount_amount'],
             'voucher_discount_amount' => $result['voucher_discount_amount'],
             'voucher_rule' => $voucher_rule,
+            'loyalty_points_used' => $result['loyalty_points_used'],
+            'loyalty_discount_amount' => $result['loyalty_discount_amount'],
+            'delivery_charge' => $result['delivery_charge'],
             'total' => $result['total'],
             'lines' => array_map(function ($line) {
                 return [
@@ -3561,6 +3592,9 @@ class OrderService
             'sale_type_id' => $sale_type_id,
             'notes' => $obj['notes'] ?? $order->notes,
             'delivery_address' => $obj['delivery_address'] ?? $order->delivery_address,
+            'delivery_latitude' => $obj['delivery_latitude'] ?? $order->delivery_latitude,
+            'delivery_longitude' => $obj['delivery_longitude'] ?? $order->delivery_longitude,
+            'delivery_charge' => $obj['delivery_charge'] ?? $order->delivery_charge,
             'updatedby_id' => Auth::id(),
             'date_updated' => now(),
         ]);

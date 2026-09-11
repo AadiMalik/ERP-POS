@@ -27,6 +27,12 @@ that address and matches it against these bands:
   message and cannot place the order for that address. They can pick a
   different address or contact the business directly.
 
+The same distance bands also apply on the **POS** when the cashier selects
+the **Delivery** order type and picks a location on the map. The suggested
+fee is filled in automatically; unlike the website, the cashier can still
+change the charge (or enter one by hand on desktop POS, where the map is
+not available).
+
 Distance bands must not overlap on the same branch (the system rejects a
 zone that overlaps an existing one when you save it), so there is never any
 ambiguity about which fee applies.
@@ -37,7 +43,10 @@ Each branch can also set a **Free Delivery Above Amount** on the Branch
 screen (next to the branch's map location). Any order whose total is equal
 to or above that amount gets free delivery at that branch, regardless of
 distance - the delivery fee shows as **Free** to the customer instead of a
-charge. Leave this blank to turn the feature off for a branch.
+charge. Leave this blank (or 0) to turn the feature off for a branch. On the
+POS screen the same rule locks the Delivery Charge input to **0** and shows a
+red **Free** label next to it once the cart reaches the amount; the cashier
+cannot override the fee until the cart drops below the threshold again.
 
 ## Accounting
 

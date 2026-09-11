@@ -158,7 +158,8 @@ fulfilment values `shipped`, `out_for_delivery`, `delivered` (see migration
 `2026_08_26_181500_add_delivery_statuses_to_orders_table`). `orders` also carries
 `delivery_latitude`/`delivery_longitude` (decimal(10,7), nullable) — a snapshot of
 the pin the customer dropped on the storefront/mobile checkout map at the time the
-order was placed. It is deliberately **not** a foreign key into `customer_addresses`
+order was placed (POS delivery orders snapshot the same columns from the cashier's
+map pin, or leave them null on desktop POS where the map is unavailable). It is deliberately **not** a foreign key into `customer_addresses`
 so a later change to the customer's saved address never rewrites a past order's
 delivery location. `orders.delivery_charge` (decimal, default `0`) is the fee
 resolved from `delivery_zones` (or `0` when free/no coordinates given) — see

@@ -87,4 +87,11 @@ class DeliveryZoneServiceTest extends TestCase
 
         $this->assertFalse($service->isFreeDelivery(null, 999999.0));
     }
+
+    public function test_free_delivery_disabled_when_threshold_is_zero(): void
+    {
+        $service = new DeliveryZoneService();
+
+        $this->assertFalse($service->isFreeDelivery(0.0, 999999.0));
+    }
 }

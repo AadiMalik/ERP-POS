@@ -1,6 +1,7 @@
 @extends('layouts.pos')
 @section('css')
     <link rel="stylesheet" href="{{ asset('public/assets/css/admin/pos-screen.css') }}?v={{ @filemtime(public_path('assets/css/admin/pos-screen.css')) }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 @endsection
 @section('content')
     <div class="pos-screen-wrapper" id="posScreen">
@@ -144,7 +145,15 @@
                                         <div class="pos-meta-row pos-delivery-payment-row">
                                             <div class="pos-field pos-field-delivery d-none" id="deliveryAddressWrap">
                                                 <label class="pos-field-label" for="delivery_address">{{ __('common.delivery_address') }} <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control form-control-sm" id="delivery_address" placeholder="{{ __('common.enter_address') }}">
+                                                <div class="pos-delivery-address-row">
+                                                    <input type="text" class="form-control form-control-sm" id="delivery_address" readonly placeholder="{{ __('pos.select_address_placeholder') }}">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" id="openDeliveryMapBtn" title="{{ __('pos.select_on_map') }}">
+                                                        <i class="fa fa-map-location-dot"></i> <span id="openDeliveryMapBtnLabel">{{ __('pos.select_on_map') }}</span>
+                                                    </button>
+                                                </div>
+                                                <input type="hidden" id="delivery_latitude" value="">
+                                                <input type="hidden" id="delivery_longitude" value="">
+                                                <div id="deliveryChargeHint" class="small mt-1" style="display:none;"></div>
                                             </div>
 
                                             <div class="pos-field pos-field-payment" id="paymentMethodField">
@@ -317,6 +326,10 @@
                         <div class="pos-totals-row d-none" id="sumLoyaltyDiscountRow"><span>{{ __('pos.loyalty_discount') }}</span><span id="sumLoyaltyDiscount">0.00</span></div>
                         <div class="pos-totals-row"><span id="sumTaxLabel" data-word="{{ __('common.tax') }}">{{ __('common.tax') }}</span><span id="sumTax">0.00</span></div>
                         <div class="pos-totals-row d-none" id="sumTaxDiscountRow"><span id="sumTaxDiscountLabel" data-word="{{ __('common.tax_discount') }}">{{ __('common.tax_discount') }}</span><span id="sumTaxDiscount">0.00</span></div>
+                        <div class="pos-totals-row pos-totals-row-input d-none" id="sumDeliveryChargeRow">
+                            <span>{{ __('pos.delivery_charge') }} <small id="deliveryFreeBadge" class="pos-delivery-free-badge d-none">{{ __('pos.delivery_free_short') }}</small></span>
+                            <input type="number" step="0.01" min="0" class="pos-totals-input" id="delivery_charge" value="0" inputmode="decimal" aria-label="{{ __('pos.delivery_charge') }}">
+                        </div>
                         <div class="pos-totals-row pos-grand-total"><span>{{ __('pos.total_with_currency', ['symbol' => session('accounting_setting.currency_symbol', 'Rs')]) }}</span><span id="sumTotal">0.00</span></div>
                     </div>
                 </div>
@@ -360,6 +373,42 @@
                 </div>
                 <div class="modal-body">
                     <div id="productPickerGrid" class="product-grid product-picker-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Delivery location picker - Leaflet + OpenStreetMap, same pattern as
+         the storefront LocationPicker and the Branch create screen. Address
+         is reverse-geocoded for display; lat/lng drive delivery-zone fees. --}}
+    <div class="modal fade" id="posDeliveryMapModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa fa-map-location-dot"></i> {{ __('pos.pick_delivery_location') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="pos-delivery-map-search mb-2">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fa fa-magnifying-glass"></i></span>
+                            <input type="text" class="form-control" id="posDeliveryMapSearch" placeholder="{{ __('pos.search_address_placeholder') }}" autocomplete="off">
+                            <button type="button" class="btn btn-outline-secondary" id="posDeliveryUseMyLocationBtn">
+                                <i class="fa fa-location-arrow"></i> {{ __('pos.use_my_location') }}
+                            </button>
+                        </div>
+                        <div id="posDeliveryMapSearchResults" class="list-group pos-search-results" style="display:none;"></div>
+                    </div>
+                    <p class="small text-danger mb-2 d-none" id="posDeliveryMapLocateError"></p>
+                    <div id="posDeliveryLocationMap" class="pos-delivery-map"></div>
+                    <p class="small mt-2 mb-0" id="posDeliveryMapSelected">
+                        <i class="fa fa-location-dot"></i>
+                        <span id="posDeliveryMapSelectedText">{{ __('pos.map_click_hint') }}</span>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="posDeliveryMapConfirmBtn" disabled>{{ __('pos.confirm_location') }}</button>
                 </div>
             </div>
         </div>
@@ -769,6 +818,11 @@
             'complimentary_reasons' => $complimentary_reasons,
             'reorder_from' => $reorder_from,
             'correct_order_id' => $correct_order_id ?? null,
+            'branch' => [
+                'latitude' => optional($branch)->latitude,
+                'longitude' => optional($branch)->longitude,
+                'free_delivery_min_order_amount' => optional($branch)->free_delivery_min_order_amount,
+            ],
             'urls' => [
                 'session_current' => url('admin/pos-register-session/current'),
                 'session_open' => url('admin/pos-register-session/open'),
@@ -796,6 +850,7 @@
                 'order_print' => url('admin/order'),
                 'quick_customer' => route('pos-screen.quick-customer'),
                 'quick_expense' => route('pos-screen.quick-expense'),
+                'verify_delivery_address' => route('pos-screen.verify-delivery-address'),
             ],
         ];
         // Build i18n in PHP first — Blade's @json() splits on commas, so
@@ -820,5 +875,6 @@
         window.POS_CONFIG = @json($posConfig);
         window.i18n_pos = @json($__i18nPos);
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="{{ asset('public/assets/js/admin/pos-screen.js') }}?v={{ @filemtime(public_path('assets/js/admin/pos-screen.js')) }}"></script>
 @endsection

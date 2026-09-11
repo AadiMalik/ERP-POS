@@ -100,7 +100,24 @@ or **Tax (rate%) (Exclusive)** for the rate that applies to the selected
 payment. If tax is Inclusive and cash vs card rates differ, a
 **Tax Discount (leftover%)** line appears as well — the customer total stays
 the same. For **Delivery** order types, opening that
-panel shows the delivery address and payment method on the same row.
+panel shows the delivery address and a **Select on Map** button next to the
+payment method. The cashier picks the
+drop-off pin in a map popup (same OpenStreetMap picker the website checkout
+uses); the address field only shows the selected address. **Delivery Charge**
+appears as an editable amount in the cart totals (filled from the branch's
+[Delivery Zones](21-delivery-zones.md) based on distance from the branch) and
+can be changed before paying. If the branch has a **Free Delivery Above Amount**
+and the cart reaches that amount (equal or more), the delivery input is set to
+**0**, locked, and labelled **Free** in red next to Delivery Charge. Dropping
+the cart back below that amount unlocks the input and restores the previous
+fee. **Desktop POS**
+has no map (tiles are not available offline), so the cashier types the
+address and enters the delivery charge in that same totals row (the Free lock
+works the same way).
+
+Checking **Use Loyalty Points** never discounts more than the order total
+(points worth more than the payable amount are capped so the bill cannot go
+negative).
 
 An order can also be:
 - **Held** and **resumed** later (e.g. a customer steps away).

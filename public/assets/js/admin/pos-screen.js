@@ -46,7 +46,20 @@
         complimentary_status: 'none',
         complimentary_reason_id: null,
         complimentary_notes: '',
+        last_delivery_fee: 0,
     };
+
+    var deliveryMap = {
+        modal: null,
+        map: null,
+        marker: null,
+        pending: null,
+        searchTimer: null,
+        searchAbort: null,
+        geocodeToken: 0,
+    };
+
+    var DEFAULT_MAP_CENTER = [24.8607, 67.0011];
 
 
     function t(key, fallback) {
@@ -631,6 +644,53 @@
         $('#order_type_id').on('change', updateDeliveryAddressVisibility);
         updateDeliveryAddressVisibility();
 
+        $('#openDeliveryMapBtn').on('click', openDeliveryMap);
+        $('#posDeliveryMapConfirmBtn').on('click', confirmDeliveryMapLocation);
+        $('#posDeliveryUseMyLocationBtn').on('click', function () {
+            if (!navigator.geolocation) {
+                $('#posDeliveryMapLocateError').removeClass('d-none').text(t('location_not_supported', 'Location is not supported in this browser.'));
+                return;
+            }
+            var $btn = $(this);
+            $btn.prop('disabled', true);
+            navigator.geolocation.getCurrentPosition(function (pos) {
+                $btn.prop('disabled', false);
+                if (deliveryMap.map) {
+                    deliveryMap.map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+                    setDeliveryMapMarker(pos.coords.latitude, pos.coords.longitude);
+                }
+            }, function () {
+                $btn.prop('disabled', false);
+                $('#posDeliveryMapLocateError').removeClass('d-none').text(t('location_permission_denied', 'Location permission denied. Pick the point on the map instead.'));
+            });
+        });
+        $('#posDeliveryMapSearch').on('input', function () {
+            var query = $(this).val().trim();
+            clearTimeout(deliveryMap.searchTimer);
+            if (query.length < 3) {
+                $('#posDeliveryMapSearchResults').hide().empty();
+                return;
+            }
+            deliveryMap.searchTimer = setTimeout(function () {
+                searchDeliveryAddress(query);
+            }, 400);
+        });
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('#posDeliveryMapSearch, #posDeliveryMapSearchResults').length) {
+                $('#posDeliveryMapSearchResults').hide();
+            }
+        });
+        $('#delivery_charge').on('input change', function () {
+            if ($(this).prop('disabled')) {
+                return;
+            }
+            var typed = parseFloat($(this).val()) || 0;
+            if (typed > 0) {
+                state.last_delivery_fee = typed;
+            }
+            recalcLocal();
+        });
+
         // ---- Change Branch modal (absent entirely for fixed-context roles).
         // Shared by the Row 1 branch field and the no-session browse screen's
         // fallback button, so branch switching stays reachable even before a
@@ -787,14 +847,314 @@
         return $('#order_type_id').find(':selected').data('code') === 'DELIVERY';
     }
 
+    function currentDeliveryCharge() {
+        if (!isDeliveryOrderType() || state.complimentary_status === 'full' || isFreeDeliveryEligible()) {
+            return 0;
+        }
+        return Math.max(0, parseFloat($('#delivery_charge').val()) || 0);
+    }
+
+    function payableBeforeLoyalty() {
+        var subtotal = parseFloat(String($('#sumSubtotal').text()).replace(/,/g, '')) || 0;
+        var itemDiscount = parseFloat(String($('#sumItemDiscount').text()).replace(/,/g, '')) || 0;
+        var orderDiscount = parseFloat(String($('#sumOrderDiscount').text()).replace(/,/g, '')) || 0;
+        var tax = parseFloat(String($('#sumTax').text()).replace(/,/g, '')) || 0;
+        var delivery = currentDeliveryCharge();
+        var taxType = (CFG.tax_rates_setting || {}).tax_type || 'exclusive';
+        var payable = taxType === 'inclusive'
+            ? (subtotal - itemDiscount - orderDiscount + delivery)
+            : (subtotal - itemDiscount - orderDiscount + tax + delivery);
+        return Math.max(0, payable);
+    }
+
+    function updateDeliveryMapButtonLabel() {
+        var hasAddress = !!$('#delivery_address').val().trim();
+        $('#openDeliveryMapBtnLabel').text(hasAddress
+            ? t('change_location', 'Change Location')
+            : t('select_on_map', 'Select on Map'));
+    }
+
     function updateDeliveryAddressVisibility() {
         var isDelivery = isDeliveryOrderType();
         $('#deliveryAddressWrap').toggleClass('d-none', !isDelivery);
         $('#posCheckoutPanel').toggleClass('is-delivery-order', isDelivery);
+        $('#sumDeliveryChargeRow').toggleClass('d-none', !isDelivery);
 
         if (isDelivery) {
             toggleCheckoutPanel(true);
+        } else {
+            $('#deliveryChargeHint').hide().text('').removeClass('text-danger text-success text-muted');
         }
+
+        updateDeliveryMapButtonLabel();
+        recalcLocal();
+    }
+
+    function applyDeliveryLocation(address, lat, lng, charge) {
+        $('#delivery_address').val(address || '');
+        $('#delivery_latitude').val(lat != null && lat !== '' ? lat : '');
+        $('#delivery_longitude').val(lng != null && lng !== '' ? lng : '');
+        if (charge !== undefined && charge !== null) {
+            var fee = parseFloat(charge) || 0;
+            if (fee > 0) {
+                state.last_delivery_fee = fee;
+            }
+            if (!isFreeDeliveryEligible()) {
+                $('#delivery_charge').val(money(fee));
+            }
+        }
+        updateDeliveryMapButtonLabel();
+    }
+
+    function clearDeliveryLocation() {
+        applyDeliveryLocation('', '', '', 0);
+        deliveryMap.pending = null;
+        state.last_delivery_fee = 0;
+        $('#deliveryChargeHint').hide().text('').removeClass('text-danger text-success text-muted');
+        syncFreeDeliveryUi();
+    }
+
+    function cartTotalForDeliveryCheck() {
+        var subtotal = 0, lineDiscount = 0, tax = 0;
+        state.cart.forEach(function (line) {
+            var t = lineTotal(line);
+            subtotal += t.base;
+            lineDiscount += t.discAmt;
+            tax += t.taxAmt;
+        });
+        var taxType = (CFG.tax_rates_setting || {}).tax_type || 'exclusive';
+        return taxType === 'inclusive' ? (subtotal - lineDiscount) : (subtotal - lineDiscount + tax);
+    }
+
+    function freeDeliveryThreshold() {
+        var value = parseFloat((CFG.branch || {}).free_delivery_min_order_amount);
+        return (!isNaN(value) && value > 0) ? value : null;
+    }
+
+    function isFreeDeliveryEligible() {
+        var threshold = freeDeliveryThreshold();
+        if (threshold === null || !isDeliveryOrderType()) {
+            return false;
+        }
+        return cartTotalForDeliveryCheck() >= threshold;
+    }
+
+    function syncFreeDeliveryUi() {
+        var $input = $('#delivery_charge');
+        var $badge = $('#deliveryFreeBadge');
+        if (!$input.length) {
+            return;
+        }
+
+        var isFree = isDeliveryOrderType() && isFreeDeliveryEligible();
+        if (isFree) {
+            var current = parseFloat($input.val()) || 0;
+            if (!$input.prop('disabled') && current > 0) {
+                state.last_delivery_fee = current;
+            }
+            $input.val(money(0)).prop('disabled', true);
+            $badge.removeClass('d-none');
+        } else {
+            $input.prop('disabled', false);
+            $badge.addClass('d-none');
+            if (isDeliveryOrderType() && (parseFloat($input.val()) || 0) <= 0 && state.last_delivery_fee > 0) {
+                $input.val(money(state.last_delivery_fee));
+            }
+        }
+    }
+
+    function resolveDeliveryFee(lat, lng) {
+        if (!URLS.verify_delivery_address) {
+            return;
+        }
+
+        ajaxRequest({
+            url: URLS.verify_delivery_address,
+            method: 'POST',
+            data: {
+                latitude: lat,
+                longitude: lng,
+                cart_total: cartTotalForDeliveryCheck(),
+            },
+        }).then(function (response) {
+            var data = response.Data || {};
+            var $hint = $('#deliveryChargeHint');
+            $hint.removeClass('text-danger text-success text-muted');
+
+            if (!data.in_area) {
+                $hint.addClass('text-danger').text(data.message || t('delivery_out_of_area', 'This address is out of the delivery area. You can still enter a delivery charge.')).show();
+                if (!isFreeDeliveryEligible()) {
+                    $('#delivery_charge').val(money(0));
+                }
+                recalcLocal();
+                return;
+            }
+
+            var fee = parseFloat(data.delivery_fee) || 0;
+            if (fee > 0) {
+                state.last_delivery_fee = fee;
+            }
+            if (!isFreeDeliveryEligible() && !data.free) {
+                $('#delivery_charge').val(money(fee));
+            } else {
+                $('#delivery_charge').val(money(0));
+            }
+            if (data.free) {
+                $hint.addClass('text-success').text(data.message || t('delivery_free', 'Free delivery for this order.')).show();
+            } else {
+                $hint.addClass('text-muted').text(data.message || t('delivery_available', 'Delivery available for this address.')).show();
+            }
+            recalcLocal();
+        }).catch(function (err) {
+            $('#deliveryChargeHint').removeClass('text-success text-muted').addClass('text-danger')
+                .text(err.Message || t('delivery_fee_lookup_failed', 'Could not calculate delivery charge. Enter it manually.')).show();
+        });
+    }
+
+    function branchMapCenter() {
+        var lat = parseFloat((CFG.branch || {}).latitude);
+        var lng = parseFloat((CFG.branch || {}).longitude);
+        if (!isNaN(lat) && !isNaN(lng)) {
+            return [lat, lng];
+        }
+        return DEFAULT_MAP_CENTER;
+    }
+
+    function setDeliveryMapMarker(lat, lng, address) {
+        if (!deliveryMap.map || typeof L === 'undefined') {
+            return;
+        }
+        deliveryMap.pending = { lat: lat, lng: lng, address: address || '' };
+        if (deliveryMap.marker) {
+            deliveryMap.marker.setLatLng([lat, lng]);
+        } else {
+            deliveryMap.marker = L.marker([lat, lng], { draggable: true }).addTo(deliveryMap.map);
+            deliveryMap.marker.on('dragend', function () {
+                var pos = deliveryMap.marker.getLatLng();
+                setDeliveryMapMarker(pos.lat, pos.lng);
+            });
+        }
+        $('#posDeliveryMapConfirmBtn').prop('disabled', false);
+        if (address) {
+            $('#posDeliveryMapSelectedText').text(address);
+            $('#posDeliveryMapSearch').val(address);
+        } else {
+            reverseGeocodeDelivery(lat, lng);
+        }
+    }
+
+    function reverseGeocodeDelivery(lat, lng) {
+        var token = ++deliveryMap.geocodeToken;
+        $('#posDeliveryMapSelectedText').text(t('finding_address', 'Finding address…'));
+        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng, {
+            headers: { 'Accept-Language': document.documentElement.lang || 'en' },
+        }).then(function (res) { return res.json(); }).then(function (data) {
+            if (token !== deliveryMap.geocodeToken) return;
+            var address = data.display_name || (lat.toFixed(5) + ', ' + lng.toFixed(5));
+            if (deliveryMap.pending) deliveryMap.pending.address = address;
+            $('#posDeliveryMapSelectedText').text(address);
+            $('#posDeliveryMapSearch').val(address);
+        }).catch(function () {
+            if (token !== deliveryMap.geocodeToken) return;
+            var fallback = lat.toFixed(5) + ', ' + lng.toFixed(5);
+            if (deliveryMap.pending) deliveryMap.pending.address = fallback;
+            $('#posDeliveryMapSelectedText').text(fallback);
+        });
+    }
+
+    function initDeliveryMap() {
+        if (typeof L === 'undefined') {
+            errorMessage(t('map_unavailable', 'Map is not available. Enter the delivery charge manually.'));
+            $('#delivery_address').prop('readonly', false);
+            return;
+        }
+        $('#delivery_address').prop('readonly', true);
+        if (deliveryMap.map) {
+            setTimeout(function () { deliveryMap.map.invalidateSize(); }, 300);
+            return;
+        }
+
+        var savedLat = parseFloat($('#delivery_latitude').val());
+        var savedLng = parseFloat($('#delivery_longitude').val());
+        var hasSaved = !isNaN(savedLat) && !isNaN(savedLng);
+        var start = hasSaved ? [savedLat, savedLng] : branchMapCenter();
+
+        deliveryMap.map = L.map('posDeliveryLocationMap').setView(start, hasSaved ? 16 : 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19,
+        }).addTo(deliveryMap.map);
+        deliveryMap.map.on('click', function (e) {
+            setDeliveryMapMarker(e.latlng.lat, e.latlng.lng);
+        });
+
+        if (hasSaved) {
+            setDeliveryMapMarker(savedLat, savedLng, $('#delivery_address').val());
+        }
+
+        setTimeout(function () { deliveryMap.map.invalidateSize(); }, 300);
+    }
+
+    function openDeliveryMap() {
+        $('#posDeliveryMapLocateError').addClass('d-none').text('');
+        $('#posDeliveryMapSearchResults').hide().empty();
+        if (!deliveryMap.pending) {
+            $('#posDeliveryMapSelectedText').text(t('map_click_hint', 'Click on the map, drag the pin, or search above to mark the delivery location.'));
+            $('#posDeliveryMapConfirmBtn').prop('disabled', true);
+        }
+        if (!deliveryMap.modal) {
+            deliveryMap.modal = new bootstrap.Modal(document.getElementById('posDeliveryMapModal'));
+            document.getElementById('posDeliveryMapModal').addEventListener('shown.bs.modal', function () {
+                initDeliveryMap();
+            });
+        }
+        deliveryMap.modal.show();
+    }
+
+    function confirmDeliveryMapLocation() {
+        if (!deliveryMap.pending) {
+            return;
+        }
+        var pending = deliveryMap.pending;
+        applyDeliveryLocation(pending.address || (pending.lat.toFixed(5) + ', ' + pending.lng.toFixed(5)), pending.lat, pending.lng);
+        if (deliveryMap.modal) {
+            deliveryMap.modal.hide();
+        }
+        resolveDeliveryFee(pending.lat, pending.lng);
+    }
+
+    function searchDeliveryAddress(query) {
+        if (deliveryMap.searchAbort) {
+            deliveryMap.searchAbort.abort();
+        }
+        deliveryMap.searchAbort = new AbortController();
+        fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&q=' + encodeURIComponent(query), {
+            signal: deliveryMap.searchAbort.signal,
+            headers: { 'Accept-Language': document.documentElement.lang || 'en' },
+        }).then(function (res) { return res.json(); }).then(function (places) {
+            var $results = $('#posDeliveryMapSearchResults').empty();
+            if (!places.length) {
+                $results.append('<div class="list-group-item text-muted small">' + escapeHtml(t('search_address_no_results', 'No addresses found.')) + '</div>');
+            } else {
+                places.forEach(function (place) {
+                    var $item = $('<button type="button" class="list-group-item list-group-item-action small"></button>').text(place.display_name);
+                    $item.on('click', function () {
+                        var lat = parseFloat(place.lat);
+                        var lng = parseFloat(place.lon);
+                        deliveryMap.map.setView([lat, lng], 16);
+                        setDeliveryMapMarker(lat, lng, place.display_name);
+                        $('#posDeliveryMapSearch').val(place.display_name);
+                        $results.hide().empty();
+                    });
+                    $results.append($item);
+                });
+            }
+            $results.show();
+        }).catch(function (err) {
+            if (err.name !== 'AbortError') {
+                $('#posDeliveryMapSearchResults').hide().empty();
+            }
+        });
     }
 
     function toggleCheckoutPanel(forceOpen) {
@@ -1247,12 +1607,23 @@
                     clearVoucherFeedback();
 
                     var itemDiscount = parseFloat($('#sumItemDiscount').text().replace(/,/g, '')) || 0;
-                    var orderDiscount = Math.max(0, (parseFloat(data.discount_amount) || 0) - itemDiscount);
+                    var loyaltyDiscount = parseFloat(data.loyalty_discount_amount) || 0;
+                    var orderDiscount = Math.max(0, (parseFloat(data.discount_amount) || 0) - itemDiscount - loyaltyDiscount);
 
                     $('#sumSubtotal').text(money(data.subtotal));
                     $('#sumOrderDiscount').text(money(orderDiscount));
-                    $('#sumTotal').text(money(data.total));
-                    recalcPayments(parseFloat(data.total) || 0);
+                    $('#sumLoyaltyDiscountRow').toggleClass('d-none', loyaltyDiscount <= 0);
+                    $('#sumLoyaltyDiscount').text(money(loyaltyDiscount));
+                    $('#sumDeliveryChargeRow').toggleClass('d-none', !isDeliveryOrderType());
+                    syncFreeDeliveryUi();
+                    var serverDelivery = parseFloat(data.delivery_charge) || 0;
+                    var uiDelivery = currentDeliveryCharge();
+                    var previewTotal = parseFloat(data.total) || 0;
+                    if (Math.abs(uiDelivery - serverDelivery) > 0.001) {
+                        previewTotal = previewTotal - serverDelivery + uiDelivery;
+                    }
+                    $('#sumTotal').text(money(previewTotal));
+                    recalcPayments(previewTotal);
 
                     if (parseFloat(data.voucher_discount_amount) > 0) {
                         var msg = tr('voucher_applied', 'Voucher applied: -:amount', {amount: money(data.voucher_discount_amount)});
@@ -2198,7 +2569,11 @@
         var orderDiscount = 0;
         var totalDiscount = lineDiscount + orderDiscount;
         var taxType = (CFG.tax_rates_setting || {}).tax_type || 'exclusive';
-        var total = taxType === 'inclusive' ? (subtotal - totalDiscount) : (subtotal - totalDiscount + tax);
+        syncFreeDeliveryUi();
+        var deliveryCharge = currentDeliveryCharge();
+        var total = taxType === 'inclusive'
+            ? (subtotal - totalDiscount + deliveryCharge)
+            : (subtotal - totalDiscount + tax + deliveryCharge);
 
         $('#sumSubtotal').text(money(subtotal));
         $('#sumItemDiscount').text(money(lineDiscount));
@@ -2212,9 +2587,12 @@
         $('#sumTax').text(money(tax));
         $('#sumTaxDiscountRow').toggleClass('d-none', taxDiscount <= 0);
         $('#sumTaxDiscount').text(money(taxDiscount));
+        $('#sumDeliveryChargeRow').toggleClass('d-none', !isDeliveryOrderType());
         $('#sumTotal').text(money(total));
 
         recalcPayments(total);
+
+        updateLoyaltyPointsHint();
 
         // Cart changed - re-validate any already-applied voucher/discount
         // against the new cart (no-op if neither is set).
@@ -2258,8 +2636,20 @@
         }
 
         var rate = parseFloat(CUSTOMER_SETTING.loyalty_redemption_value || 0);
+        var pointsValue = rate > 0 ? available * rate : 0;
+        var cap = payableBeforeLoyalty();
+        var redeemableValue = rate > 0 ? Math.min(pointsValue, cap) : 0;
+
         if (rate > 0) {
-            $hint.show().text(tr('pts_available_value', ':pts pts available (~:value)', {pts: available, value: money(available * rate)}));
+            if (pointsValue > cap + 0.0009) {
+                $hint.show().text(tr('pts_available_capped', ':pts pts available (~:value, capped at order total :cap)', {
+                    pts: available,
+                    value: money(pointsValue),
+                    cap: money(redeemableValue),
+                }));
+            } else {
+                $hint.show().text(tr('pts_available_value', ':pts pts available (~:value)', {pts: available, value: money(pointsValue)}));
+            }
         } else {
             $hint.show().text(tr('pts_available', ':pts pts available', {pts: available}));
         }
@@ -2694,6 +3084,9 @@
             order_source_id: $('#order_source_id').val(),
             sale_type_id: $('#sale_type_id').val(),
             delivery_address: $('#delivery_address').val(),
+            delivery_latitude: $('#delivery_latitude').val() || null,
+            delivery_longitude: $('#delivery_longitude').val() || null,
+            delivery_charge: isDeliveryOrderType() ? currentDeliveryCharge() : 0,
             products: products,
         };
 
@@ -2762,6 +3155,15 @@
         var taxDiscount = parseFloat(order.tax_discount_amount) || 0;
         $('#sumTaxDiscountRow').toggleClass('d-none', taxDiscount <= 0);
         $('#sumTaxDiscount').text(money(taxDiscount));
+        var deliveryCharge = parseFloat(order.delivery_charge) || 0;
+        $('#sumDeliveryChargeRow').toggleClass('d-none', !isDeliveryOrderType());
+        if (isDeliveryOrderType()) {
+            $('#delivery_charge').val(money(deliveryCharge));
+            if (deliveryCharge > 0) {
+                state.last_delivery_fee = deliveryCharge;
+            }
+            syncFreeDeliveryUi();
+        }
         $('#sumTotal').text(money(order.total));
         recalcPayments(parseFloat(order.total) || 0);
     }
@@ -2873,7 +3275,12 @@
                     });
                 });
 
-                $('#delivery_address').val(header.delivery_address || '');
+                applyDeliveryLocation(
+                    header.delivery_address || '',
+                    header.delivery_latitude,
+                    header.delivery_longitude,
+                    header.delivery_charge
+                );
 
                 if (header.customer_id) {
                     $('#customer_id').val(header.customer_id).trigger('change');
@@ -3147,7 +3554,12 @@
             });
         });
 
-        $('#delivery_address').val(header.delivery_address || '');
+        applyDeliveryLocation(
+            header.delivery_address || '',
+            header.delivery_latitude,
+            header.delivery_longitude,
+            header.delivery_charge
+        );
 
         if (header.customer_id) {
             $('#customer_id').val(header.customer_id).trigger('change');
@@ -3684,7 +4096,16 @@
         $('#use_loyalty_points').prop('checked', false);
         $('#sumLoyaltyDiscountRow').addClass('d-none');
         $('#sumLoyaltyDiscount').text(money(0));
-        $('#delivery_address').val('');
+        $('#sumDeliveryChargeRow').addClass('d-none');
+        $('#delivery_charge').val(money(0)).prop('disabled', false);
+        $('#deliveryFreeBadge').addClass('d-none');
+        state.last_delivery_fee = 0;
+        clearDeliveryLocation();
+        deliveryMap.pending = null;
+        if (deliveryMap.marker && deliveryMap.map) {
+            deliveryMap.map.removeLayer(deliveryMap.marker);
+            deliveryMap.marker = null;
+        }
         $('#sale_type_id').val(state.default_sale_type_id);
         syncPillsFromSelect();
         renderCart();

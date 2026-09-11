@@ -181,7 +181,7 @@ class DeliveryZoneService
      */
     public function isFreeDelivery(?float $threshold, float $cart_total): bool
     {
-        return $threshold !== null && $cart_total >= $threshold;
+        return $threshold !== null && $threshold > 0 && $cart_total >= $threshold;
     }
 
     /**

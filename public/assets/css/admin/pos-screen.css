@@ -672,6 +672,58 @@
     flex: 1.2 1 0;
 }
 
+.pos-delivery-address-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0.35rem;
+}
+
+.pos-delivery-address-row .form-control {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: #f8f9fa;
+}
+
+.pos-delivery-address-row .btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.pos-delivery-map-search {
+    position: relative;
+    z-index: 5;
+}
+
+.pos-delivery-map-search .pos-search-results,
+#posDeliveryMapSearchResults {
+    position: absolute;
+    top: calc(100% - 2px);
+    left: 0;
+    right: 0;
+    z-index: 30;
+    max-height: 220px;
+    overflow-y: auto;
+    background: #fff;
+}
+
+.pos-delivery-map {
+    position: relative;
+    z-index: 1;
+    height: min(360px, 48vh);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #e9ecef;
+}
+
+#posDeliveryMapModal .modal-dialog {
+    max-width: 640px;
+}
+
+#posDeliveryMapModal .modal-content,
+#posDeliveryMapModal .modal-body {
+    overflow: visible;
+}
+
 .pos-main-col.checkout-open .pos-product-panel {
     flex: 1 1 auto;
 }
@@ -1591,6 +1643,64 @@
 
 .pos-totals-row span:last-child {
     font-variant-numeric: tabular-nums;
+}
+
+.pos-totals-row.pos-totals-row-input {
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pos-totals-input {
+    width: 5.6rem;
+    margin: 0;
+    padding: 0.12rem 0.45rem;
+    border: 1px solid var(--pos-border, #e4e6e8);
+    border-radius: 0.4rem;
+    background: #f7f8fa;
+    color: var(--pos-text);
+    font-size: 0.82rem;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    line-height: 1.4;
+    transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+}
+
+.pos-totals-input:hover {
+    background: #fff;
+    border-color: #cfd3d8;
+}
+
+.pos-totals-input:focus {
+    outline: none;
+    background: #fff;
+    border-color: var(--pos-primary, #696cff);
+    box-shadow: 0 0 0 3px rgba(105, 108, 255, .16);
+}
+
+.pos-totals-input::-webkit-outer-spin-button,
+.pos-totals-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.pos-totals-input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.pos-totals-input:disabled {
+    background: #eceef1;
+    color: #8b9098;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+.pos-delivery-free-badge {
+    color: #dc3545;
+    font-weight: 700;
+    margin-inline-start: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
 .pos-totals-row.pos-grand-total {

@@ -663,11 +663,17 @@ server-side right after `formatDeliveryAddress()` and throws the standard
 storefront's earlier verify call is a UX convenience only, never trusted
 alone. The resolved fee lands on `orders.delivery_charge` (new column,
 `0` when no coordinates were given — backward-compatible with any non-geo
-checkout).
+checkout). POS uses the same `resolve()` via
+`POST admin/pos-screen/verify-delivery-address` to suggest a fee after the
+cashier drops a pin; unlike website checkout, an out-of-area pin is a warning
+only and the cashier may still override `delivery_charge` before save.
 
 **Totals + JV:** `OrderService::saveLinesAndComputeTotals()` folds
 `delivery_charge` into `orders.total` for both inclusive and exclusive tax
-types (it's outside the taxable amount either way).
+types (it's outside the taxable amount either way). If the order's branch has
+`free_delivery_min_order_amount` > 0 and the payable goods (after discounts,
+before delivery) meet that amount, the charge is forced to 0 — same lock the
+POS totals row applies in the UI.
 `OrderService::applyPostedEffects()` credits it to
 `accounting_settings.default_delivery_charge_account_id` (Settings →
 Accounting, cloned schema/UI-wise from the pre-existing but otherwise-unused
@@ -907,7 +913,16 @@ order discount, voucher, and delivery address sit in a collapsible panel toggled
 by a side bookmark clip (`#posCheckoutToggle` on `#posCheckoutWrap`, collapsed by default — toggling adds/removes `.checkout-open`
 on `#posMainCol` so the product grid flexes). Delivery order types show address +
 payment method on one row inside that panel and auto-expand it
-(`updateDeliveryAddressVisibility()`). Cart totals (`#sumTaxLabel` /
+(`updateDeliveryAddressVisibility()`). The address field is read-only and only
+shows the pin selected in `#posDeliveryMapModal` (Leaflet + OpenStreetMap +
+Nominatim, same pattern as the storefront `LocationPicker` and Branch create
+screen). Confirming the pin calls `POST admin/pos-screen/verify-delivery-address`
+(`PosScreenController::verifyDeliveryAddress()` → `DeliveryZoneService::resolve()`)
+to fill `#delivery_charge` in the cart totals row, which the cashier may still edit unless the branch `free_delivery_min_order_amount` is set and the cart is at or above it — then the input is forced to 0, disabled, and labelled Free (`#deliveryFreeBadge`). Lat/lng and the
+(possibly overridden) charge go out in `buildStorePayload()`. Desktop POS
+(`erp-desktop-pos` `PosScreen.vue`) has no map — the cashier types the address
+and enters `delivery_charge` directly (same Free lock when the synced branch threshold is met); the same field is included in the
+offline push payload. Cart totals (`#sumTaxLabel` /
 `#sumTaxDiscountLabel` in `pos-screen.js`) show `Tax (X%) (Inclusive|Exclusive)`
 and, when leftover > 0, `Tax Discount (Y%)` — the same labels Order History,
 admin order show, and receipts use.

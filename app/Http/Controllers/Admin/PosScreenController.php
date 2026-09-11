@@ -18,6 +18,7 @@ use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CategoryService;
 use App\Services\Concrete\Admin\ComplimentaryReasonService;
 use App\Services\Concrete\Admin\CustomerService;
+use App\Services\Concrete\Admin\DeliveryZoneService;
 use App\Services\Concrete\Admin\DiscountService;
 use App\Services\Concrete\Admin\ExpenseCategoryService;
 use App\Services\Concrete\Admin\ExpenseService;
@@ -203,7 +204,8 @@ class PosScreenController extends Controller
 
         $pos_order_source_id = $this->resolvePosOrderSourceId($order_sources);
         $business = $this->business_service->getById($business_id);
-        $branch_name = optional($this->branch_service->getById($branch_id))->name;
+        $branch = $this->branch_service->getById($branch_id);
+        $branch_name = optional($branch)->name;
 
         // Reorder entry point - order.show's Reorder button links here with
         // this query param; pos-screen.js reads it from POS_CONFIG on load
@@ -253,6 +255,7 @@ class PosScreenController extends Controller
             'show_pos_actions',
             'pos_order_source_id',
             'business',
+            'branch',
             'branch_name',
             'is_superadmin',
             'context_businesses',
@@ -522,5 +525,55 @@ class PosScreenController extends Controller
     public function posNotificationsLatest()
     {
         return response()->json(['data' => $this->notification_service->latest(Auth::id(), 5, 'order_placed_pos')]);
+    }
+
+    /**
+     * POS-side delivery-fee preview for a pin the cashier dropped on the
+     * map. Same DeliveryZoneService::resolve() the storefront uses, but
+     * authenticated as staff (no customer cart). The cashier may still
+     * override the returned fee before save() - this is a UX convenience
+     * only; OrderService never re-resolves POS delivery_charge.
+     */
+    public function verifyDeliveryAddress(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'cart_total' => 'nullable|numeric|min:0',
+        ]);
+
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        try {
+            $context = $this->resolveContext(Auth::user());
+
+            if (empty($context)) {
+                throw new Exception('POS context is not selected.');
+            }
+
+            [$business_id, $branch_id] = $context;
+
+            $resolution = app(DeliveryZoneService::class)->resolve(
+                $business_id,
+                $branch_id,
+                (float) $request->input('latitude'),
+                (float) $request->input('longitude'),
+                (float) ($request->input('cart_total') ?? 0)
+            );
+
+            return $this->success(Message::FETCH, [
+                'in_area' => $resolution['in_area'],
+                'delivery_fee' => $resolution['fee'],
+                'free' => $resolution['free'],
+                'distance_km' => $resolution['distance_km'],
+                'message' => $resolution['in_area']
+                    ? ($resolution['free'] ? __('pos.delivery_free') : __('pos.delivery_available'))
+                    : __('pos.delivery_out_of_area'),
+            ]);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
     }
 }
