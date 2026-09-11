@@ -26,6 +26,7 @@ return [
     'no' => 'نہ',
     'search' => 'گشتین',
     'reset' => 'ری سیٹ',
+    'refresh' => 'Refresh',
     'export' => 'ایکسپورٹ',
     'import' => 'امپورٹ',
     'back' => 'واپس',

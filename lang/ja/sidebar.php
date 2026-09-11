@@ -206,6 +206,7 @@ return [
     'salary_structures' => '給与体系',
     'sale_service_report' => 'サービス販売レポート',
     'sales_report' => '売上レポート',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'セルフサービス',
     'serial_number_reports' => 'シリアル番号レポート',
     'serial_numbers' => 'シリアル番号',

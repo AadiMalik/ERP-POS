@@ -11,6 +11,7 @@ use App\Models\AccountingSetting;
 use App\Models\BarcodeSetting;
 use App\Models\BranchTaxSetting;
 use App\Models\Business;
+use App\Models\BusinessIntelligenceSetting;
 use App\Models\BusinessSetting;
 use App\Models\CustomerSetting;
 use App\Models\EmailSetting;
@@ -46,6 +47,7 @@ class SettingService
     protected $model_customer_setting;
     protected $model_supplier_setting;
     protected $model_inventory_setting;
+    protected $model_business_intelligence_setting;
     protected $model_email_setting;
     protected $model_sms_setting;
     protected $model_whatsapp_setting;
@@ -80,6 +82,7 @@ class SettingService
         $this->model_customer_setting = new Repository(new CustomerSetting());
         $this->model_supplier_setting = new Repository(new SupplierSetting());
         $this->model_inventory_setting = new Repository(new InventorySetting());
+        $this->model_business_intelligence_setting = new Repository(new BusinessIntelligenceSetting());
         $this->model_email_setting = new Repository(new EmailSetting());
         $this->model_sms_setting = new Repository(new SmsSetting());
         $this->model_whatsapp_setting = new Repository(new WhatsappSetting());
@@ -123,6 +126,52 @@ class SettingService
     public function getInventorySetting($business_id)
     {
         return $this->model_inventory_setting->getModel()::firstOrCreate(['business_id' => $business_id]);
+    }
+
+    public function getBusinessIntelligenceSetting($business_id)
+    {
+        return $this->model_business_intelligence_setting->getModel()::firstOrCreate(
+            ['business_id' => $business_id],
+            [
+                'discount_change_threshold_percent' => 5,
+                'voucher_change_threshold_percent' => 5,
+                'complimentary_sales_percent_threshold' => 5,
+                'high_discount_percent_threshold' => 15,
+                'high_return_rate_percent' => 10,
+                'high_cancellation_rate_percent' => 10,
+                'dead_stock_days' => 90,
+                'slow_moving_days' => 30,
+                'delayed_order_hours' => 24,
+                'offline_sync_stale_hours' => 24,
+                'high_waste_percent_of_stock' => 2,
+                'attendance_repeat_late_count' => 3,
+                'low_margin_percent' => 10,
+                'excellent_sales_growth_percent' => 20,
+            ]
+        );
+    }
+
+    public function updateBusinessIntelligenceSetting(array $obj)
+    {
+        $model = $this->model_business_intelligence_setting->getModel();
+
+        $setting = $model::firstOrNew([
+            'business_id' => $obj['business_id']
+        ]);
+        $old_values = $setting->exists ? $setting->getOriginal() : null;
+
+        if (!$setting->exists) {
+            $setting->createdby_id = Auth::id();
+            $setting->date_created = now();
+        }
+
+        $setting->fill($obj);
+        $setting->updatedby_id = Auth::id();
+        $setting->date_updated = now();
+        $setting->save();
+        $this->auditSetting('business_intelligence', $setting, $old_values);
+
+        return $setting;
     }
 
 

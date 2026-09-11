@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'Loonstructuren',
     'sale_service_report' => 'Rapport dienstverkoop',
     'sales_report' => 'Verkooprapport',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'Zelfbediening',
     'serial_number_reports' => 'Serienummerrapporten',
     'serial_numbers' => 'Serienummers',

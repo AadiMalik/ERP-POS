@@ -116,6 +116,11 @@ class Business extends Model
         return $this->hasOne(InventorySetting::class, 'business_id', 'business_id');
     }
 
+    public function businessIntelligenceSetting()
+    {
+        return $this->hasOne(BusinessIntelligenceSetting::class, 'business_id', 'business_id');
+    }
+
     public function emailSetting()
     {
         return $this->hasOne(EmailSetting::class, 'business_id', 'business_id');

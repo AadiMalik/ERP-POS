@@ -26,6 +26,7 @@ return [
     'no' => 'இல்லை',
     'search' => 'தேடு',
     'reset' => 'மீட்டமை',
+    'refresh' => 'Refresh',
     'export' => 'ஏற்றுமதி',
     'import' => 'இறக்குமதி',
     'back' => 'பின்செல்',

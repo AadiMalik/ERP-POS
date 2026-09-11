@@ -26,6 +26,7 @@ return [
     'no' => 'ಇಲ್ಲ',
     'search' => 'ಹುಡುಕಿ',
     'reset' => 'ಮರುಹೊಂದಿಸಿ',
+    'refresh' => 'Refresh',
     'export' => 'ರಫ್ತು',
     'import' => 'ಆಮದು',
     'back' => 'ಹಿಂದೆ',

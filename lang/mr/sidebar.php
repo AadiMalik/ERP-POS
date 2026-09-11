@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'पगार रचना',
     'sale_service_report' => 'सेवा विक्री अहवाल',
     'sales_report' => 'विक्री अहवाल',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'स्वयं सेवा',
     'serial_number_reports' => 'अनुक्रमांक अहवाल',
     'serial_numbers' => 'अनुक्रमांक',

@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'Δομές μισθού',
     'sale_service_report' => 'Αναφορά πώλησης υπηρεσιών',
     'sales_report' => 'Αναφορά πωλήσεων',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'Αυτοεξυπηρέτηση',
     'serial_number_reports' => 'Αναφορές σειριακών αριθμών',
     'serial_numbers' => 'Σειριακοί αριθμοί',

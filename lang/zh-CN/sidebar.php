@@ -206,6 +206,7 @@ return [
     'salary_structures' => '薪资结构',
     'sale_service_report' => '服务销售报告',
     'sales_report' => '销售报告',
+    'business_summary_report' => 'Business Summary',
     'self_service' => '自助服务',
     'serial_number_reports' => '序列号报告',
     'serial_numbers' => '序列号',

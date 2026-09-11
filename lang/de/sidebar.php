@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'Gehaltsstrukturen',
     'sale_service_report' => 'Dienstleistungsverkaufsbericht',
     'sales_report' => 'Verkaufsbericht',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'Selbstbedienung',
     'serial_number_reports' => 'Seriennummernberichte',
     'serial_numbers' => 'Seriennummern',

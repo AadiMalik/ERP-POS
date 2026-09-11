@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'జీతం నిర్మాణాలు',
     'sale_service_report' => 'సేవా అమ్మకాల నివేదిక',
     'sales_report' => 'అమ్మకాల నివేదిక',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'స్వయం సేవ',
     'serial_number_reports' => 'సీరియల్ నంబర్ నివేదికలు',
     'serial_numbers' => 'సీరియల్ నంబర్‌లు',

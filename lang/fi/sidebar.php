@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'Palkkarakenteet',
     'sale_service_report' => 'Palvelumyyntiraportti',
     'sales_report' => 'Myyntiraportti',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'Itsepalvelu',
     'serial_number_reports' => 'Sarjanumeroraportit',
     'serial_numbers' => 'Sarjanumerot',

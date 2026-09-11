@@ -26,6 +26,7 @@ return [
     'no' => 'नाही',
     'search' => 'शोधा',
     'reset' => 'रीसेट',
+    'refresh' => 'Refresh',
     'export' => 'निर्यात',
     'import' => 'आयात',
     'back' => 'मागे',

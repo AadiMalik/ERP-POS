@@ -1518,6 +1518,15 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
 
     //procurement reports
     Route::group(['prefix' => 'reports'], function () {
+        Route::group(['prefix' => 'business-summary'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\BusinessSummaryReportController::class, 'index']);
+            Route::post('data', [App\Http\Controllers\Admin\Reports\BusinessSummaryReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\BusinessSummaryReportController::class, 'print'])->name('reports.business-summary.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\BusinessSummaryReportController::class, 'pdf'])->name('reports.business-summary.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\BusinessSummaryReportController::class, 'export'])->name('reports.business-summary.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\BusinessSummaryReportController::class, 'exportCsv'])->name('reports.business-summary.export-csv');
+        });
+
         Route::group(['middleware' => ['module:inventory']], function () {
         Route::group(['prefix' => 'supplier-ledger'], function () {
             Route::get('/', [App\Http\Controllers\Admin\Reports\SupplierLedgerReportController::class, 'index']);
@@ -2008,6 +2017,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::post('localization', [App\Http\Controllers\Admin\SettingController::class, 'updateLocalizationSetting'])->name('localization.update');
         Route::post('accounting', [App\Http\Controllers\Admin\SettingController::class, 'updateAccountingSetting'])->name('accounting.update');
         Route::post('inventory', [App\Http\Controllers\Admin\SettingController::class, 'updateInventorySetting'])->name('inventory.update');
+        Route::post('business-intelligence', [App\Http\Controllers\Admin\SettingController::class, 'updateBusinessIntelligenceSetting'])->name('business_intelligence.update');
         Route::post('customer', [App\Http\Controllers\Admin\SettingController::class, 'updateCustomerSetting'])->name('customer.update');
         Route::post('supplier', [App\Http\Controllers\Admin\SettingController::class, 'updateSupplierSetting'])->name('supplier.update');
         Route::post('email', [App\Http\Controllers\Admin\SettingController::class, 'updateEmailSetting'])->name('email.update');

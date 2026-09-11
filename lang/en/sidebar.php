@@ -209,6 +209,7 @@ return [
     'salary_structures' => 'Salary Structures',
     'sale_service_report' => 'Sale Service Report',
     'sales_report' => 'Sales Report',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'Self Service',
     'serial_number_reports' => 'Serial Number Reports',
     'serial_numbers' => 'Serial Numbers',

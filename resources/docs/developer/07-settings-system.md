@@ -7,6 +7,7 @@ settings domain is its own Eloquent model — `BusinessSetting`, `AccountingSett
 `CustomerSetting`, `SupplierSetting`, `InventorySetting`, `EmailSetting`,
 `SmsSetting`, `WhatsappSetting`, `FirebaseSetting`, `LoginSecuritySetting`, `FbrSetting`, `PraSetting`, `PrintSetting`,
 `BarcodeSetting`, `ThemeSetting`, `ThermalPrintSetting`, `NotificationSetting`,
+`BusinessIntelligenceSetting`,
 `PosSetting` — each presumably one row per business. `Business` exposes a `hasOne`
 relation to every one of them.
 
@@ -123,6 +124,15 @@ itself, but some are consumed elsewhere as real business-rule gates:
   revenue). Template-seeded to "Complimentary / Promotional Expense"
   (`540001-002`, under Selling & Distribution) and cloned to every new business.
   Posting a complimentary order/return throws if the mapping is empty.
+- `BusinessIntelligenceSetting` (Settings → Business Intelligence) holds the
+  classification thresholds for
+  [Business Summary](06-reports-infrastructure.md#business-summary--business-health-report)
+  (`discount_change_threshold_percent` default 5, dead-stock days 90, and the
+  rest of the BI tab). The report also reads `InventorySetting.near_expiry_days`
+  / `low_stock_quantity` and `NotificationSetting.credit_limit_threshold_percent`
+  rather than duplicating those knobs. New businesses get a row from
+  `firstOrCreate`; existing businesses are backfilled by
+  `2026_09_12_120002_backfill_business_intelligence_settings_for_existing_businesses`.
 
 ## Accounting Setup Wizard (Automatic Business Provisioning)
 

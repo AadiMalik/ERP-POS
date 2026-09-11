@@ -206,6 +206,7 @@ return [
     'salary_structures' => '급여 구조',
     'sale_service_report' => '서비스 판매 보고서',
     'sales_report' => '매출 보고서',
+    'business_summary_report' => 'Business Summary',
     'self_service' => '셀프 서비스',
     'serial_number_reports' => '일련번호 보고서',
     'serial_numbers' => '일련번호',

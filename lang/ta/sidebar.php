@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'சம்பள கட்டமைப்புகள்',
     'sale_service_report' => 'சேவை விற்பனை அறிக்கை',
     'sales_report' => 'விற்பனை அறிக்கை',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'சுய சேவை',
     'serial_number_reports' => 'வரிசை எண் அறிக்கைகள்',
     'serial_numbers' => 'வரிசை எண்கள்',

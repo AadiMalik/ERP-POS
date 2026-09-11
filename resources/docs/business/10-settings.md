@@ -113,6 +113,13 @@ All configuration lives under one **Settings** screen, organized into sections
   for the due-date alerts, the notification sound on/off, and
   **"Website/Mobile App Order Notification to POS"** (on by default) — see
   [Notifications, Activity Log & Security](12-audit-security.md).
+- **Business Intelligence** — thresholds used by the
+  [Business Summary](09-reports.md#business-summary--business-health) report
+  (discount/voucher change percent, complimentary vs sales, high return or
+  cancellation rate, dead/slow stock days, delayed hold/draft hours, offline
+  POS sync hours, waste vs stock value, repeated late arrivals, low margin,
+  excellent sales growth). Low-stock quantity and near-expiry days stay on
+  the Inventory tab; the credit-limit alert percent stays on Notifications.
 
 Only users with the `Manage Settings` permission can change these — everyone else
 can browse the app but not alter business-wide configuration.

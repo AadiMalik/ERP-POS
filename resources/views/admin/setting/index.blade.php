@@ -180,6 +180,9 @@
                             <button class="nav-link" data-bs-toggle="pill" data-bs-target="#notification">
                                 <i class="fa fa-bell"></i> {{ __('settings.tab_notification') }}
                             </button>
+                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#business_intelligence">
+                                <i class="fa fa-heartbeat"></i> {{ __('settings.tab_business_intelligence') }}
+                            </button>
                             <button class="nav-link" data-bs-toggle="pill" data-bs-target="#customer">
                                 <i class="fa fa-users"></i> {{ __('settings.tab_customer') }}
                             </button>
@@ -249,6 +252,9 @@
                             </div>
                             <div class="tab-pane fade" id="notification">
                                 @include('admin.setting.tabs.notification')
+                            </div>
+                            <div class="tab-pane fade" id="business_intelligence">
+                                @include('admin.setting.tabs.business_intelligence')
                             </div>
                             <div class="tab-pane fade" id="customer">
                                 @include('admin.setting.tabs.customer')

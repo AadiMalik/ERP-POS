@@ -26,6 +26,7 @@ return [
     'no' => 'いいえ',
     'search' => '検索',
     'reset' => 'リセット',
+    'refresh' => 'Refresh',
     'export' => 'エクスポート',
     'import' => 'インポート',
     'back' => '戻る',

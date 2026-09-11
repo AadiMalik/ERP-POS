@@ -11,6 +11,7 @@ use App\Models\AccountType;
 use App\Services\Concrete\Admin\AccountSubTypeService;
 use App\Services\Concrete\Admin\AccountTypeService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class ChartOfAccountsTemplateSeeder extends Seeder
 {
@@ -133,8 +134,13 @@ class ChartOfAccountsTemplateSeeder extends Seeder
         ];
 
         $setting = AccountingSetting::firstOrNew(['business_id' => null]);
+        $existingColumns = array_flip(Schema::getColumnListing($setting->getTable()));
 
         foreach ($accountCodeByField as $field => $code) {
+            if (!isset($existingColumns[$field])) {
+                continue;
+            }
+
             // Don't clobber a value Super Admin has already picked manually.
             if (!empty($setting->$field)) {
                 continue;

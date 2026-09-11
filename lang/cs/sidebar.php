@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'Mzdové struktury',
     'sale_service_report' => 'Zpráva o prodeji služeb',
     'sales_report' => 'Zpráva o prodeji',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'Samoobsluha',
     'serial_number_reports' => 'Zprávy o sériových číslech',
     'serial_numbers' => 'Sériová čísla',

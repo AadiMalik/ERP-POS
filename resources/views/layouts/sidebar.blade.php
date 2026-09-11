@@ -71,6 +71,14 @@
             </li>
         @endcanAccess
         @endif
+        @canAccess('reports.business-summary.view')
+            <li class="menu-item">
+                <a href="{{ url('/admin/reports/business-summary') }}" class="menu-link">
+                    <i class="menu-icon tf-icons fa fa-heartbeat"></i>
+                    <div data-i18n="Business Summary">{{ __('sidebar.business_summary_report') }}</div>
+                </a>
+            </li>
+        @endcanAccess
         <!-- Self Service (Employee) -->
         @canAccessAny(['ess.dashboard.view', 'ess.attendance.manage', 'ess.leave.view', 'ess.payslip.view', 'ess.profile.view', 'ess.advance.apply', 'ess.resignation.apply'])
             <li class="menu-item">
@@ -648,7 +656,7 @@
             'reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
             'reports.journal-register.view', 'reports.account-ledger.view', 'reports.account-balance.view',
             'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view', 'reports.cash-flow.view',
-            'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.sales-report.view', 'reports.voucher-usage.view', 'reports.expense-report.view',
+            'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.sales-report.view', 'reports.business-summary.view', 'reports.voucher-usage.view', 'reports.expense-report.view',
             'reports.tax-report.view', 'reports.equity-report.view', 'reports.budget-vs-actual.view',
             'reports.fixed-asset-register.view', 'reports.depreciation-report.view', 'reports.asset-valuation-report.view', 'reports.asset-disposal-report.view'])
             <li class="menu-item">
@@ -763,7 +771,7 @@
                     @canAccessAny(['reports.accounts-payable.view', 'reports.general-ledger.view', 'reports.trial-balance.view',
                         'reports.journal-register.view', 'reports.account-ledger.view', 'reports.account-balance.view',
                         'reports.day-book.view', 'reports.profit-loss.view', 'reports.balance-sheet.view', 'reports.cash-flow.view',
-                        'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.sales-report.view', 'reports.voucher-usage.view', 'reports.expense-report.view',
+                        'reports.cash-bank-ledger.view', 'reports.income-report.view', 'reports.sales-report.view', 'reports.business-summary.view', 'reports.voucher-usage.view', 'reports.expense-report.view',
                         'reports.tax-report.view', 'reports.equity-report.view', 'reports.budget-vs-actual.view',
                         'reports.fixed-asset-register.view', 'reports.depreciation-report.view', 'reports.asset-valuation-report.view', 'reports.asset-disposal-report.view'])
                         <li class="menu-item">
@@ -887,6 +895,13 @@
                                     <li class="menu-item">
                                         <a href="{{ url('/admin/reports/sales-report') }}" class="menu-link">
                                             <div data-i18n="Sales Report">{{ __('sidebar.sales_report') }}</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.business-summary.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/business-summary') }}" class="menu-link">
+                                            <div data-i18n="Business Summary">{{ __('sidebar.business_summary_report') }}</div>
                                         </a>
                                     </li>
                                 @endcanAccess

@@ -1042,14 +1042,18 @@ Customer/POS (`module:pos`), Orders/POS sales
 (`Reports\Orders\*`, `BaseOrderReportController` /
 `BaseOrderReportService`, also `module:pos`), Service Management
 (`module:service-management`), and Accounting/Financial (`module:accounting` —
-includes statement reports Profit & Loss, Balance Sheet, and Cash Flow). See
-[Reports Infrastructure](06-reports-infrastructure.md).
+includes statement reports Profit & Loss, Balance Sheet, and Cash Flow).
+**Business Summary** (`BusinessSummaryReportController` /
+`BusinessSummaryReportService`, `/admin/reports/business-summary`) is a core
+statement-style health report (not `module:accounting`) that composes those
+same services into Critical / Important / Informational / Good / Excellent
+insights. See [Reports Infrastructure](06-reports-infrastructure.md).
 
 ## Settings (Core)
 `SettingController` (service: `SettingService`) — `admin/setting`, one controller
 with a per-domain update action (business, accounting, inventory, customer,
 supplier, email, SMS, WhatsApp, FBR, POS, PRA, print, thermal-print, barcode,
-theme, notification).
+theme, notification, business-intelligence).
 
 ## Documentation (Core — this system)
 `DocumentationController` (service: `DocumentationService`) — `admin/documentation`.
@@ -1107,6 +1111,9 @@ services; caches widget JSON for 300s). Access/filters:
 `SlowMovingProductService` wrapping `StockAgingReportService` velocity mode.
 Permissions: `analytics.view`, `analytics.export`. Full write-up:
 [Advanced Analytics & Business Intelligence](22-analytics-bi.md).
+The period-filtered **Business Summary** report is a separate, always-on
+reports feature (not the `analytics` package) — see
+[Reports Infrastructure](06-reports-infrastructure.md#business-summary--business-health-report).
 
 ## Shared Concerns
 `App\Http\Controllers\Admin\Concerns\HasLookupTypeCrudActions` — shared trait for

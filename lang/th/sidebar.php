@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'โครงสร้างเงินเดือน',
     'sale_service_report' => 'รายงานการขายบริการ',
     'sales_report' => 'รายงานยอดขาย',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'บริการตนเอง',
     'serial_number_reports' => 'รายงานหมายเลขซีเรียล',
     'serial_numbers' => 'หมายเลขซีเรียล',

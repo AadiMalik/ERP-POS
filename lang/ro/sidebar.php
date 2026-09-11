@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'Structuri salariale',
     'sale_service_report' => 'Raport vânzare servicii',
     'sales_report' => 'Raport vânzări',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'Autoservire',
     'serial_number_reports' => 'Rapoarte numere de serie',
     'serial_numbers' => 'Numere de serie',

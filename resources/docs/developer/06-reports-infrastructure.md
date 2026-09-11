@@ -9,8 +9,42 @@ same `Pdf::loadView(...)->setPaper(...)->stream(...)` pattern described here.
 Every report controller under `App\Http\Controllers\Admin\Reports\**` implements:
 `index` (renders the filter/table screen), `data` (server-side DataTable feed,
 `POST`), `print` (browser `window.print()` view), `pdf`, `export` (Excel), and
-`export-csv`. Three exceptions render as computed statements instead of a DataTable
-(no `data()` action): Profit & Loss, Balance Sheet, and Cash Flow Statement.
+`export-csv`. Three DataTable-less financial statements are Profit & Loss,
+Balance Sheet, and Cash Flow. **Business Summary** is a fourth statement-style
+report: it renders computed insight cards instead of a DataTable, but still
+exposes `POST data` so the screen can refresh the payload.
+
+### Business Summary / Business Health Report
+
+Core reports group (`/admin/reports/business-summary`, **not** wrapped in
+`module:accounting`) so a business without the accounting package still sees
+sales, inventory, purchasing, and HRM slices they are allowed to view.
+
+- Controller: `BusinessSummaryReportController`
+- Orchestrator: `BusinessSummaryReportService::build()`
+- Shared context: `BusinessSummary\BusinessSummaryContext` (period, previous
+  equal-length window, timezone, branch, package modules, BI thresholds,
+  permission map, action-URL helper)
+- Providers: `SalesProvider`, `OperationsProvider` (discounts / vouchers /
+  complimentary), `InventoryProvider`, `PurchasingProvider`, `FinanceProvider`,
+  `HrmProvider`
+- Print/PDF/Excel: same letterhead as every other report
+  (`admin.partials.print.header` / `pdf_header` / `footer`). Export class:
+  `App\Exports\BusinessSummaryExport`
+- Permissions: `reports.business-summary.{view,print,pdf,export,export-csv}`
+- Period filter: shared `@include('admin.partials.date_filter')`. Posted sales
+  use `orders.sale_date` + `businessStartOfDay()` / `businessEndOfDay()`.
+  Comparison is the immediately previous window of equal length — never a
+  forced day-vs-day split.
+- Accounting figures come from `ProfitLossReportService` and
+  `DashboardFinanceService` (not re-derived from orders). Complimentary is
+  never treated as a discount.
+- Thresholds live in `business_intelligence_settings` (Settings → Business
+  Intelligence). Low-stock / near-expiry reuse `InventorySetting`; credit-limit
+  reuse `NotificationSetting.credit_limit_threshold_percent`.
+
+Disabled package modules and missing permissions omit their sections. Empty
+periods show a “no activity” insight instead of a wall of zeros.
 
 ### Cash Flow Statement
 

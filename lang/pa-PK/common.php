@@ -26,6 +26,7 @@ return [
     'no' => 'نئیں',
     'search' => 'لبھو',
     'reset' => 'دوبارہ ترتیب دیو',
+    'refresh' => 'Refresh',
     'export' => 'ایکسپورٹ',
     'import' => 'امپورٹ',
     'back' => 'پچھے',

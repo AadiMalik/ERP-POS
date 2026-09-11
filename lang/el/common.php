@@ -26,6 +26,7 @@ return [
     'no' => 'Όχι',
     'search' => 'Αναζήτηση',
     'reset' => 'Επαναφορά',
+    'refresh' => 'Refresh',
     'export' => 'Εξαγωγή',
     'import' => 'Εισαγωγή',
     'back' => 'Πίσω',

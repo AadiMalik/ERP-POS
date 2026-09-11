@@ -26,6 +26,7 @@ return [
     'no' => 'Ні',
     'search' => 'Пошук',
     'reset' => 'Скинути',
+    'refresh' => 'Refresh',
     'export' => 'Експорт',
     'import' => 'Імпорт',
     'back' => 'Назад',

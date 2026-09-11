@@ -26,6 +26,7 @@ return [
     'no' => 'Không',
     'search' => 'Tìm kiếm',
     'reset' => 'Đặt lại',
+    'refresh' => 'Refresh',
     'export' => 'Xuất',
     'import' => 'Nhập',
     'back' => 'Quay lại',

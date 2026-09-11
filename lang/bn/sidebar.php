@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'বেতন কাঠামো',
     'sale_service_report' => 'সেবা বিক্রয় প্রতিবেদন',
     'sales_report' => 'বিক্রয় প্রতিবেদন',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'স্ব-সেবা',
     'serial_number_reports' => 'সিরিয়াল নম্বর প্রতিবেদন',
     'serial_numbers' => 'সিরিয়াল নম্বর',

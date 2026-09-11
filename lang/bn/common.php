@@ -26,6 +26,7 @@ return [
     'no' => 'না',
     'search' => 'অনুসন্ধান',
     'reset' => 'রিসেট',
+    'refresh' => 'Refresh',
     'export' => 'রপ্তানি',
     'import' => 'আমদানি',
     'back' => 'পিছনে',

@@ -26,6 +26,7 @@ return [
     'no' => 'होइन',
     'search' => 'खोज्नुहोस्',
     'reset' => 'रिसेट गर्नुहोस्',
+    'refresh' => 'Refresh',
     'export' => 'निर्यात',
     'import' => 'आयात',
     'back' => 'पछाडि',

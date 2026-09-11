@@ -26,6 +26,7 @@ return [
     'no' => 'Tidak',
     'search' => 'Cari',
     'reset' => 'Tetapkan Semula',
+    'refresh' => 'Refresh',
     'export' => 'Eksport',
     'import' => 'Import',
     'back' => 'Kembali',

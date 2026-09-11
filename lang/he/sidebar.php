@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'מבני שכר',
     'sale_service_report' => 'דוח מכירת שירותים',
     'sales_report' => 'דוח מכירות',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'שירות עצמי',
     'serial_number_reports' => 'דוחות מספר סידורי',
     'serial_numbers' => 'מספרים סידוריים',

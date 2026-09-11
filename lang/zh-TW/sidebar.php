@@ -206,6 +206,7 @@ return [
     'salary_structures' => '薪資結構',
     'sale_service_report' => '服務銷售報告',
     'sales_report' => '銷售報告',
+    'business_summary_report' => 'Business Summary',
     'self_service' => '自助服務',
     'serial_number_reports' => '序號報告',
     'serial_numbers' => '序號',

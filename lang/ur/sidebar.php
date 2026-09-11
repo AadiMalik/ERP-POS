@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'تنخواہ ڈھانچے',
     'sale_service_report' => 'فروخت خدمت رپورٹ',
     'sales_report' => 'فروخت رپورٹ',
+    'business_summary_report' => 'کاروباری خلاصہ',
     'self_service' => 'سیلف سروس',
     'serial_number_reports' => 'سیریل نمبر رپورٹس',
     'serial_numbers' => 'سیریل نمبرز',

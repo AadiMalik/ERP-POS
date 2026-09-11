@@ -26,6 +26,7 @@ return [
     'no' => '否',
     'search' => '搜尋',
     'reset' => '重設',
+    'refresh' => 'Refresh',
     'export' => '匯出',
     'import' => '匯入',
     'back' => '返回',

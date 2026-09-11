@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'پگهار جوڙجڪون',
     'sale_service_report' => 'سيلز خدمت رپورٽ',
     'sales_report' => 'سيلز رپورٽ',
+    'business_summary_report' => 'ڪاروباري خلاصو',
     'self_service' => 'سيلف سروس',
     'serial_number_reports' => 'سيريل نمبر رپورٽون',
     'serial_numbers' => 'سيريل نمبر',

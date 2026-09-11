@@ -26,6 +26,7 @@ return [
     'no' => 'Nu',
     'search' => 'Căutare',
     'reset' => 'Resetează',
+    'refresh' => 'Refresh',
     'export' => 'Exportă',
     'import' => 'Importă',
     'back' => 'Înapoi',

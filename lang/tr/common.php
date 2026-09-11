@@ -26,6 +26,7 @@ return [
     'no' => 'Hayır',
     'search' => 'Ara',
     'reset' => 'Sıfırla',
+    'refresh' => 'Refresh',
     'export' => 'Dışa Aktar',
     'import' => 'İçe Aktar',
     'back' => 'Geri',

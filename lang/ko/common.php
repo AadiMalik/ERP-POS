@@ -26,6 +26,7 @@ return [
     'no' => '아니오',
     'search' => '검색',
     'reset' => '초기화',
+    'refresh' => 'Refresh',
     'export' => '내보내기',
     'import' => '가져오기',
     'back' => '뒤로',

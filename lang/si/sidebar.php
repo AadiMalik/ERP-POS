@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'වැටුප් ව්‍යුහ',
     'sale_service_report' => 'සේවා විකුණුම් වාර්තාව',
     'sales_report' => 'විකුණුම් වාර්තාව',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'ස්වයං සේවාව',
     'serial_number_reports' => 'අනුක්‍රමික අංක වාර්තා',
     'serial_numbers' => 'අනුක්‍රමික අංක',

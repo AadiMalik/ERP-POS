@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'ಸಂಬಳ ರಚನೆಗಳು',
     'sale_service_report' => 'ಸೇವಾ ಮಾರಾಟ ವರದಿ',
     'sales_report' => 'ಮಾರಾಟ ವರದಿ',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'ಸ್ವಯಂ ಸೇವೆ',
     'serial_number_reports' => 'ಅನುಕ್ರಮ ಸಂಖ್ಯೆ ವರದಿಗಳು',
     'serial_numbers' => 'ಅನುಕ್ರಮ ಸಂಖ್ಯೆಗಳು',

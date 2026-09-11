@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'هياكل الرواتب',
     'sale_service_report' => 'تقرير بيع الخدمات',
     'sales_report' => 'تقرير المبيعات',
+    'business_summary_report' => 'ملخص الأعمال',
     'self_service' => 'الخدمة الذاتية',
     'serial_number_reports' => 'تقارير الأرقام التسلسلية',
     'serial_numbers' => 'الأرقام التسلسلية',

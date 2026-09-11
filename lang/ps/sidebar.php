@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'د معاش جوړښتونه',
     'sale_service_report' => 'د خدماتو پلور راپور',
     'sales_report' => 'د پلورنې راپور',
+    'business_summary_report' => 'د سوداګرۍ لنډیز',
     'self_service' => 'ځان خدمت',
     'serial_number_reports' => 'د سریال شمېرې راپورونه',
     'serial_numbers' => 'سریال شمېرې',

@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'ساختارهای حقوق',
     'sale_service_report' => 'گزارش فروش خدمات',
     'sales_report' => 'گزارش فروش',
+    'business_summary_report' => 'خلاصه کسب‌وکار',
     'self_service' => 'خودخدمتی',
     'serial_number_reports' => 'گزارش‌های شماره سریال',
     'serial_numbers' => 'شماره‌های سریال',

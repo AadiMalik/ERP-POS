@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'Структури зарплати',
     'sale_service_report' => 'Звіт продажу послуг',
     'sales_report' => 'Звіт по продажах',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'Самообслуговування',
     'serial_number_reports' => 'Звіти по серійних номерах',
     'serial_numbers' => 'Серійні номери',

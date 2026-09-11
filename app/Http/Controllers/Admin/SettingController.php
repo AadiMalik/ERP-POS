@@ -128,6 +128,7 @@ $this->middleware('permission:setting.manage');
         $customer_setting = $this->setting_service->getCustomerSetting($target_business_id);
         $supplier_setting = $this->setting_service->getSupplierSetting($target_business_id);
         $inventory_setting = $this->setting_service->getInventorySetting($target_business_id);
+        $business_intelligence_setting = $this->setting_service->getBusinessIntelligenceSetting($target_business_id);
         $notification_setting = $this->setting_service->getNotificationSetting($target_business_id);
         $email_setting = $this->setting_service->getEmailSetting($target_business_id);
         $sms_setting = $this->setting_service->getSmsSetting($target_business_id);
@@ -165,6 +166,7 @@ $this->middleware('permission:setting.manage');
             'customer_setting',
             'supplier_setting',
             'inventory_setting',
+            'business_intelligence_setting',
             'notification_setting',
             'email_setting',
             'sms_setting',
@@ -739,6 +741,55 @@ $this->middleware('permission:setting.manage');
         $obj['business_id'] = $this->resolveTargetBusinessId($request);
 
         $setting = $this->setting_service->updateInventorySetting($obj);
+
+        return $setting
+            ? $this->success(Message::UPDATE, $setting)
+            : $this->error(Message::NOTUPDATE);
+    }
+
+    public function updateBusinessIntelligenceSetting(Request $request)
+    {
+        $rules = [
+            'discount_change_threshold_percent' => 'required|numeric|min:0|max:100',
+            'voucher_change_threshold_percent' => 'required|numeric|min:0|max:100',
+            'complimentary_sales_percent_threshold' => 'required|numeric|min:0|max:100',
+            'high_discount_percent_threshold' => 'required|numeric|min:0|max:100',
+            'high_return_rate_percent' => 'required|numeric|min:0|max:100',
+            'high_cancellation_rate_percent' => 'required|numeric|min:0|max:100',
+            'dead_stock_days' => 'required|integer|min:1',
+            'slow_moving_days' => 'required|integer|min:1',
+            'delayed_order_hours' => 'required|integer|min:1',
+            'offline_sync_stale_hours' => 'required|integer|min:1',
+            'high_waste_percent_of_stock' => 'required|numeric|min:0|max:100',
+            'attendance_repeat_late_count' => 'required|integer|min:1',
+            'low_margin_percent' => 'required|numeric|min:0|max:100',
+            'excellent_sales_growth_percent' => 'required|numeric|min:0|max:100',
+        ];
+
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return $this->validationResponse($validate->errors()->first());
+        }
+
+        $obj = $request->only([
+            'discount_change_threshold_percent',
+            'voucher_change_threshold_percent',
+            'complimentary_sales_percent_threshold',
+            'high_discount_percent_threshold',
+            'high_return_rate_percent',
+            'high_cancellation_rate_percent',
+            'dead_stock_days',
+            'slow_moving_days',
+            'delayed_order_hours',
+            'offline_sync_stale_hours',
+            'high_waste_percent_of_stock',
+            'attendance_repeat_late_count',
+            'low_margin_percent',
+            'excellent_sales_growth_percent',
+        ]);
+        $obj['business_id'] = $this->resolveTargetBusinessId($request);
+
+        $setting = $this->setting_service->updateBusinessIntelligenceSetting($obj);
 
         return $setting
             ? $this->success(Message::UPDATE, $setting)

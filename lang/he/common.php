@@ -26,6 +26,7 @@ return [
     'no' => 'לא',
     'search' => 'חיפוש',
     'reset' => 'איפוס',
+    'refresh' => 'Refresh',
     'export' => 'ייצוא',
     'import' => 'ייבוא',
     'back' => 'חזרה',

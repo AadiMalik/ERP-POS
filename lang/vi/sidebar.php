@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'Cơ cấu lương',
     'sale_service_report' => 'Báo cáo bán dịch vụ',
     'sales_report' => 'Báo cáo bán hàng',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'Tự phục vụ',
     'serial_number_reports' => 'Báo cáo số serial',
     'serial_numbers' => 'Số serial',

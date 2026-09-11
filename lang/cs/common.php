@@ -26,6 +26,7 @@ return [
     'no' => 'Ne',
     'search' => 'Hledat',
     'reset' => 'Obnovit',
+    'refresh' => 'Refresh',
     'export' => 'Export',
     'import' => 'Import',
     'back' => 'Zpět',

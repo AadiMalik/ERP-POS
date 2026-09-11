@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'Bérstruktúrák',
     'sale_service_report' => 'Szolgáltatás értékesítési jelentés',
     'sales_report' => 'Értékesítési jelentés',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'Önkiszolgálás',
     'serial_number_reports' => 'Sorozatszám jelentések',
     'serial_numbers' => 'Sorozatszámok',

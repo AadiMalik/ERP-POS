@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'Struktur Gaji',
     'sale_service_report' => 'Laporan Penjualan Jasa',
     'sales_report' => 'Laporan Penjualan',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'Layanan Mandiri',
     'serial_number_reports' => 'Laporan Nomor Seri',
     'serial_numbers' => 'Nomor Seri',

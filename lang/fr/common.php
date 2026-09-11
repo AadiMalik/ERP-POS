@@ -26,6 +26,7 @@ return [
     'no' => 'Non',
     'search' => 'Rechercher',
     'reset' => 'Réinitialiser',
+    'refresh' => 'Refresh',
     'export' => 'Exporter',
     'import' => 'Importer',
     'back' => 'Retour',

@@ -26,6 +26,7 @@ return [
     'no' => 'Ei',
     'search' => 'Haku',
     'reset' => 'Nollaa',
+    'refresh' => 'Refresh',
     'export' => 'Vie',
     'import' => 'Tuo',
     'back' => 'Takaisin',

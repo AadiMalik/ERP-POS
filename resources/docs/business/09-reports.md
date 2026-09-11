@@ -6,6 +6,44 @@ of your books and stock. Every report screen offers the same set of actions
 (subject to your permissions): filter, **Print**, **PDF**, **Excel**, and **CSV**
 export.
 
+## Business Summary / Business Health
+
+**Business Summary** is the one-screen health report for the selected period
+(Today, Yesterday, This Week, This Month, a custom range, or any other option
+in the shared period dropdown). A single day reads as a Daily Business Summary;
+a longer range reads as a Business Health Summary.
+
+Open it from the sidebar (heartbeat item) or from **Accounting → Reports →
+Business Summary**. It uses the same Print, PDF, Excel, and CSV actions as
+every other report, including your business letterhead on print and PDF.
+
+The top row is a short executive overview (sales, orders, gross profit,
+expenses, receivables, purchases, stock value, cash & bank — only the figures
+your role and package allow). Below that, insights are grouped:
+
+- **Critical** — needs attention now (negative stock, credit-limit breaches,
+  net loss, stale offline POS devices, high complimentary or discount share)
+- **Important** — recommended follow-up (low-stock, pending purchases,
+  late attendance, channel decline, open transfers)
+- **Informational** — what happened in the period (channel mix, order types,
+  purchases, expenses, attendance counts)
+- **Good** / **Excellent** — genuinely strong results versus the previous
+  period of the same length, not decorative badges
+
+Each card that can open an existing screen includes a button (View Orders,
+View Stock, View Attendance, and so on) that keeps the same business, branch,
+and dates. Complimentary giveaways are shown separately from discounts.
+Accounting totals match Profit & Loss / Cash Flow; they are not recalculated
+from POS tickets.
+
+Thresholds (discount change, dead-stock days, late-repeat count, and similar)
+are configured under **Settings → Business Intelligence**. Inventory low-stock
+and near-expiry, and the customer credit-limit alert percent, stay on their
+existing Settings tabs and are reused here.
+
+You only see modules your package includes and your role is allowed to view.
+HR figures stay hidden unless you have HR/attendance permissions.
+
 ## Financial Reports (Accounting)
 General Ledger, Trial Balance, Journal Register, Account Ledger, Account Balance,
 Day Book, Cash & Bank Ledger, Income Report, Expense Report, Expense Detail

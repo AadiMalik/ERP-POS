@@ -26,6 +26,7 @@ return [
     'no' => 'కాదు',
     'search' => 'శోధించండి',
     'reset' => 'రీసెట్',
+    'refresh' => 'Refresh',
     'export' => 'ఎగుమతి',
     'import' => 'దిగుమతి',
     'back' => 'వెనుకకు',

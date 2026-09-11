@@ -26,6 +26,7 @@ return [
     'no' => 'Nem',
     'search' => 'Keresés',
     'reset' => 'Visszaállítás',
+    'refresh' => 'Refresh',
     'export' => 'Exportálás',
     'import' => 'Importálás',
     'back' => 'Vissza',

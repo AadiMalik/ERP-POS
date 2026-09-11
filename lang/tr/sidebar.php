@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'Maaş Yapıları',
     'sale_service_report' => 'Hizmet Satış Raporu',
     'sales_report' => 'Satış Raporu',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'Öz Hizmet',
     'serial_number_reports' => 'Seri Numarası Raporları',
     'serial_numbers' => 'Seri Numaraları',

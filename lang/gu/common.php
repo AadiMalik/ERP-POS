@@ -26,6 +26,7 @@ return [
     'no' => 'ના',
     'search' => 'શોધો',
     'reset' => 'ફરીથી સેટ કરો',
+    'refresh' => 'Refresh',
     'export' => 'નિકાસ',
     'import' => 'આયાત',
     'back' => 'પાછળ',

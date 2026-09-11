@@ -3,6 +3,13 @@
 ## Purpose
 One package-gated Analytics dashboard that **composes** existing Dashboard and Report services so numbers never diverge from Home / Reports. Only two metrics are new (product margin, customer segments); slow-moving is a thin filter over `StockAgingReportService` velocity mode.
 
+This is **not** the Business Summary / Business Health report
+(`/admin/reports/business-summary`). That report is a core `reports.*`
+permission, uses the shared period dropdown, and is documented in
+[Reports Infrastructure](06-reports-infrastructure.md#business-summary--business-health-report).
+Existing notification alerts are unchanged; Business Summary consolidates
+the same period’s facts into one screen instead of emitting extra alerts.
+
 ## Gating
 - **Package:** `SubscriptionModuleRegistry` key `analytics` → route group `middleware: module:analytics` in `routes/web.php`.
 - **RBAC:** `analytics.view` / `analytics.export` in `PermissionRegistry`. Defaults: Business Admin (via `businessNames()`), Reporting Analyst, and operational roles (`operationalModuleKeys()` includes `analytics`).

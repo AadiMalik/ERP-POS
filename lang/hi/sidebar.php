@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'वेतन संरचनाएं',
     'sale_service_report' => 'सेवा बिक्री रिपोर्ट',
     'sales_report' => 'बिक्री रिपोर्ट',
+    'business_summary_report' => 'व्यवसाय सारांश',
     'self_service' => 'स्वयं सेवा',
     'serial_number_reports' => 'सीरियल नंबर रिपोर्ट',
     'serial_numbers' => 'सीरियल नंबर',

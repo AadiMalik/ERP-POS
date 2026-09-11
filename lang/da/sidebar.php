@@ -206,6 +206,7 @@ return [
     'salary_structures' => 'Lønstrukturer',
     'sale_service_report' => 'Rapport om servicesalg',
     'sales_report' => 'Salgsrapport',
+    'business_summary_report' => 'Business Summary',
     'self_service' => 'Selvbetjening',
     'serial_number_reports' => 'Serienummerrapporter',
     'serial_numbers' => 'Serienumre',

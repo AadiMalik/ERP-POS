@@ -4,6 +4,7 @@ namespace App\Services\Concrete\Admin;
 
 use App\Models\AccountingSetting;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class AccountingSettingCloneService
 {
@@ -89,7 +90,17 @@ class AccountingSettingCloneService
             $setting->business_id = $business_id;
         }
 
+        // Backfill migrations re-run this service against a mid-migration
+        // schema (e.g. inventory-cost-adjustment before the complimentary
+        // column exists). Skip fields the table doesn't have yet so save()
+        // never writes a column that hasn't been migrated.
+        $existingColumns = array_flip(Schema::getColumnListing($setting->getTable()));
+
         foreach (self::SETTING_FIELDS as $field) {
+            if (!isset($existingColumns[$field])) {
+                continue;
+            }
+
             if (!$isNew && $setting->$field !== null) {
                 continue;
             }
@@ -100,6 +111,10 @@ class AccountingSettingCloneService
         }
 
         foreach (self::ACCOUNT_FIELDS as $field) {
+            if (!isset($existingColumns[$field])) {
+                continue;
+            }
+
             if (!$isNew && $setting->$field !== null) {
                 continue;
             }
