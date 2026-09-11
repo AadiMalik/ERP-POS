@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'דוחות צריכה',
     'contact_messages' => 'הודעות יצירת קשר',
     'content_cards' => 'כרטיסי תוכן',
+    'cost_price_adjustment' => 'התאמת מחיר עלות',
+    'cost_price_adjustment_report' => 'התאמת מחיר עלות',
     'customer_aging' => 'ותק חוב לקוח',
     'customer_ledger' => 'ספר לקוח',
     'customer_loyalty_history' => 'היסטוריית נאמנות לקוח',

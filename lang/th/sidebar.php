@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'รายงานการใช้',
     'contact_messages' => 'ข้อความติดต่อ',
     'content_cards' => 'การ์ดเนื้อหา',
+    'cost_price_adjustment' => 'ปรับปรุงราคาต้นทุน',
+    'cost_price_adjustment_report' => 'ปรับปรุงราคาต้นทุน',
     'customer_aging' => 'อายุลูกหนี้',
     'customer_ledger' => 'บัญชีแยกประเภทลูกค้า',
     'customer_loyalty_history' => 'ประวัติความภักดีของลูกค้า',

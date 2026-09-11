@@ -34,6 +34,7 @@ class JournalSourceTypes
       const OPENING_STOCK = 'Opening Stock';
       const INVENTORY_COUNT = 'Inventory Count';
       const STOCK_LOSS = 'Stock Loss';
+      const INVENTORY_COST_ADJUSTMENT = 'Inventory Cost Adjustment';
       const PRODUCTION = 'Production';
       const PRODUCTION_CONSUMPTION = 'Production Consumption';
       const PRODUCTION_FINISHED_GOODS = 'Production Finished Goods';

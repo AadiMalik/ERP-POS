@@ -51,6 +51,8 @@ return [
     'consumption_reports' => 'Consumption Reports',
     'contact_messages' => 'Contact Messages',
     'content_cards' => 'Content Cards',
+    'cost_price_adjustment' => 'Cost Price Adjustment',
+    'cost_price_adjustment_report' => 'Cost Price Adjustment',
     'customer_aging' => 'Customer Aging',
     'customer_ledger' => 'Customer Ledger',
     'customer_loyalty_history' => 'Customer Loyalty History',

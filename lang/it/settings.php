@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS Account',
     'coa_opening_stock_account' => 'Apertura conto azionario',
     'coa_stock_adjustment_account' => 'Conto di rettifica delle scorte',
+    'coa_inventory_cost_adjustment_account' => 'Conto rettifica costo inventario',
     'coa_withholding_tax_account' => 'Conto ritenuta d\'acconto',
     'coa_fixed_asset_account' => 'Conto cespiti / cespiti d\'acquisto',
     'coa_accumulated_depreciation_account' => 'Conto ammortamento accumulato',

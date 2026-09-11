@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Отчёты о потреблении',
     'contact_messages' => 'Контактные сообщения',
     'content_cards' => 'Карточки контента',
+    'cost_price_adjustment' => 'Корректировка себестоимости',
+    'cost_price_adjustment_report' => 'Корректировка себестоимости',
     'customer_aging' => 'Дебиторская задолженность по срокам',
     'customer_ledger' => 'Книга клиента',
     'customer_loyalty_history' => 'История лояльности клиента',

@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Rapoarte de consum',
     'contact_messages' => 'Mesaje de contact',
     'content_cards' => 'Carduri de conținut',
+    'cost_price_adjustment' => 'Ajustare preț de cost',
+    'cost_price_adjustment_report' => 'Ajustare preț de cost',
     'customer_aging' => 'Vechime creanțe clienți',
     'customer_ledger' => 'Registru client',
     'customer_loyalty_history' => 'Istoric fidelitate client',

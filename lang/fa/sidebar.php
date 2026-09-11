@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'گزارش‌های مصرف',
     'contact_messages' => 'پیام‌های تماس',
     'content_cards' => 'کارت‌های محتوا',
+    'cost_price_adjustment' => 'تعدیل قیمت تمام‌شده',
+    'cost_price_adjustment_report' => 'تعدیل قیمت تمام‌شده',
     'customer_aging' => 'سن بدهی مشتری',
     'customer_ledger' => 'دفتر مشتری',
     'customer_loyalty_history' => 'تاریخچه وفاداری مشتری',

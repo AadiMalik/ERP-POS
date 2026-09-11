@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Laporan Konsumsi',
     'contact_messages' => 'Pesan Kontak',
     'content_cards' => 'Kartu Konten',
+    'cost_price_adjustment' => 'Penyesuaian Harga Pokok',
+    'cost_price_adjustment_report' => 'Penyesuaian Harga Pokok',
     'customer_aging' => 'Umur Piutang Pelanggan',
     'customer_ledger' => 'Buku Besar Pelanggan',
     'customer_loyalty_history' => 'Riwayat Loyalitas Pelanggan',

@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS-konto',
     'coa_opening_stock_account' => 'Öppna lagerkonto',
     'coa_stock_adjustment_account' => 'Lagerjusteringskonto',
+    'coa_inventory_cost_adjustment_account' => 'Lagerkostnadsjusteringskonto',
     'coa_withholding_tax_account' => 'Källskattekonto',
     'coa_fixed_asset_account' => 'Anläggningstillgång / Köptillgångskonto',
     'coa_accumulated_depreciation_account' => 'Ackumulerad avskrivningskonto',

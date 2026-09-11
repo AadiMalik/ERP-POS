@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Fogyasztási jelentések',
     'contact_messages' => 'Kapcsolati üzenetek',
     'content_cards' => 'Tartalomkártyák',
+    'cost_price_adjustment' => 'Költségár-korrekció',
+    'cost_price_adjustment_report' => 'Költségár-korrekció',
     'customer_aging' => 'Vevő korosítás',
     'customer_ledger' => 'Vevő főkönyv',
     'customer_loyalty_history' => 'Vevőhűség előzmények',

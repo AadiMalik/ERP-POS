@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Informes de consumo',
     'contact_messages' => 'Mensajes de contacto',
     'content_cards' => 'Tarjetas de contenido',
+    'cost_price_adjustment' => 'Ajuste de precio de costo',
+    'cost_price_adjustment_report' => 'Ajuste de precio de costo',
     'customer_aging' => 'Antigüedad de saldos de clientes',
     'customer_ledger' => 'Libro mayor de clientes',
     'customer_loyalty_history' => 'Historial de fidelidad del cliente',

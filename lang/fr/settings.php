@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'Compte COGS',
     'coa_opening_stock_account' => 'Ouverture du compte de stock',
     'coa_stock_adjustment_account' => 'Compte d\'ajustement des stocks',
+    'coa_inventory_cost_adjustment_account' => 'Compte d\'ajustement du coût des stocks',
     'coa_withholding_tax_account' => 'Compte de retenue à la source',
     'coa_fixed_asset_account' => 'Compte d\'immobilisations/achat d\'actifs',
     'coa_accumulated_depreciation_account' => 'Compte d\'amortissement cumulé',

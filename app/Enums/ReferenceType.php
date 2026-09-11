@@ -20,6 +20,7 @@ class  ReferenceType
     const GIFT = 'gift';
     const SAMPLE = 'sample';
     const MANUAL = 'manual';
+    const COST_PRICE_ADJUSTMENT = 'cost_price_adjustment';
 
     public static function getOptions()
     {
@@ -40,6 +41,7 @@ class  ReferenceType
             self::GIFT => 'Gift',
             self::SAMPLE => 'Sample',
             self::MANUAL => 'Manual',
+            self::COST_PRICE_ADJUSTMENT => 'Cost Price Adjustment',
         ];
     }
 }

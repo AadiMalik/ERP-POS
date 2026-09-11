@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'පරිභෝජන වාර්තා',
     'contact_messages' => 'සම්බන්ධතා පණිවිඩ',
     'content_cards' => 'අන්තර්ගත කාඩ්පත්',
+    'cost_price_adjustment' => 'පිරිවැය මිල සීරුමාරුව',
+    'cost_price_adjustment_report' => 'පිරිවැය මිල සීරුමාරුව',
     'customer_aging' => 'පාරිභෝගික වයස්ගත වීම',
     'customer_ledger' => 'පාරිභෝගික ලෙජරය',
     'customer_loyalty_history' => 'පාරිභෝගික විශ්වාසභාවය ඉතිහාසය',

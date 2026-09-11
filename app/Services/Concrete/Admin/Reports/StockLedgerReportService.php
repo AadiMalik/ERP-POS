@@ -68,7 +68,13 @@ class StockLedgerReportService
             $row->direction = $is_inbound ? 'in' : 'out';
             $row->quantity_in = $is_inbound ? $qty : 0;
             $row->quantity_out = $is_inbound ? 0 : $qty;
-            $row->value = round($qty * (float) $row->unit_price, 2);
+            // Cost Price Adjustment is a valuation-only entry (base_quantity
+            // is always 0, never a stock movement) - its value moved is
+            // carried in total_price, not qty * unit_price like every other
+            // transaction type here.
+            $row->value = $row->transaction_type === TransactionType::COST_ADJUSTMENT
+                ? round((float) $row->total_price, 2)
+                : round($qty * (float) $row->unit_price, 2);
             $row->transaction_type_label = $transaction_types[$row->transaction_type] ?? ucfirst($row->transaction_type);
             $row->source_module = $source_modules[$row->reference_type] ?? ucfirst($row->reference_type ?? '-');
             $row->reference_no = $this->reference_resolver->resolveDocNo($row->reference_type, $row->reference_id);

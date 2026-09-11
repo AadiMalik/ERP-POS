@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'د مصرف راپورونه',
     'contact_messages' => 'د تماس پیغامونه',
     'content_cards' => 'د منځپانګې کارتونه',
+    'cost_price_adjustment' => 'د لګښت د نرخ سمون',
+    'cost_price_adjustment_report' => 'د لګښت د نرخ سمون',
     'customer_aging' => 'د مشتري زوړوالی',
     'customer_ledger' => 'د مشتري لیجر',
     'customer_loyalty_history' => 'د مشتري وفادارۍ تاریخچه',

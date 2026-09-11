@@ -22,6 +22,7 @@ use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestQuotation;
 use App\Models\StockTaking;
 use App\Models\WasteDamageExpiry;
+use App\Models\CostPriceAdjustment;
 use App\Models\Supplier;
 use App\Models\Expense;
 use App\Models\SupplierPayment;
@@ -597,6 +598,27 @@ function generateWasteDamageExpiryNo($business_id = null)
 
     return sprintf(
         'WDE-%04d',
+        $next_number
+    );
+}
+
+function generateCostPriceAdjustmentNo($business_id = null)
+{
+    $business_id = $business_id ?? Auth::user()->business_id;
+
+    $cost_price_adjustment = CostPriceAdjustment::where('business_id', $business_id)
+        ->where('is_deleted', 0)
+        ->latest('date_created')
+        ->first();
+
+    $next_number = 1;
+
+    if ($cost_price_adjustment) {
+        $next_number = (int) substr($cost_price_adjustment->reference_no, strrpos($cost_price_adjustment->reference_no, '-') + 1) + 1;
+    }
+
+    return sprintf(
+        'CPA-%04d',
         $next_number
     );
 }

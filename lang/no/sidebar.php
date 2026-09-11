@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Forbruksrapporter',
     'contact_messages' => 'Kontaktmeldinger',
     'content_cards' => 'Innholdskort',
+    'cost_price_adjustment' => 'Kostprisjustering',
+    'cost_price_adjustment_report' => 'Kostprisjustering',
     'customer_aging' => 'Kundefordringers alder',
     'customer_ledger' => 'Kundebok',
     'customer_loyalty_history' => 'Kundelojalitetshistorikk',

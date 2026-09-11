@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Rapports de consommation',
     'contact_messages' => 'Messages de contact',
     'content_cards' => 'Cartes de contenu',
+    'cost_price_adjustment' => 'Ajustement du prix de revient',
+    'cost_price_adjustment_report' => 'Ajustement du prix de revient',
     'customer_aging' => 'Balance âgée client',
     'customer_ledger' => 'Grand livre client',
     'customer_loyalty_history' => 'Historique de fidélité client',

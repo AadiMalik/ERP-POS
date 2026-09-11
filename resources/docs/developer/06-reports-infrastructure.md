@@ -172,6 +172,7 @@ manufacturing is reported as inventory flow.
 | Stock Summary | Summary, availability, warehouse/branch, low stock/reorder | `product_variation_stocks` |
 | Stock Ledger | Ledger, product ledger, movement filters | `product_variation_stock_transactions` |
 | Stock Valuation | Valuation at avg cost | `product_variation_stocks.avg_price` |
+| Cost Price Adjustment | Valuation corrections, increase/decrease/net totals, JV drill-down | `cost_price_adjustments` |
 | Stock Aging | Aging buckets + slow/fast/non-moving | stocks + last txn date |
 | Stock Transfer | Transfer notes | `transfer_notes` |
 | Stock Reconciliation | Stock taking + adjustment movements | `stock_taking_details` / ledger |

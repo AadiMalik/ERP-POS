@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'SMM Hesabı',
     'coa_opening_stock_account' => 'Hisse Hesabı Açma',
     'coa_stock_adjustment_account' => 'Hisse Senedi Düzeltme Hesabı',
+    'coa_inventory_cost_adjustment_account' => 'Stok Maliyet Düzeltme Hesabı',
     'coa_withholding_tax_account' => 'Stopaj Vergisi Hesabı',
     'coa_fixed_asset_account' => 'Duran Varlık / Varlık Hesabı Satın Alma',
     'coa_accumulated_depreciation_account' => 'Birikmiş Amortisman Hesabı',

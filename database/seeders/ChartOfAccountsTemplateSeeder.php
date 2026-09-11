@@ -122,6 +122,7 @@ class ChartOfAccountsTemplateSeeder extends Seeder
             'default_cogs_account_id' => '510001-001',
             'default_opening_stock_account_id' => '113002-001',
             'default_stock_adjustment_account_id' => '520004-001',
+            'default_inventory_cost_adjustment_account_id' => '520004-002',
             'default_withholding_tax_account_id' => '240002-001',
             'default_fixed_asset_account_id' => '170001-001',
             'default_accumulated_depreciation_account_id' => '180001-001',
@@ -469,6 +470,7 @@ class ChartOfAccountsTemplateSeeder extends Seeder
                 'parent_name' => 'Stock Adjustment',
                 'children' => [
                     ['code' => '520004-001', 'name' => 'Stock Adjustment'],
+                    ['code' => '520004-002', 'name' => 'Inventory Cost Adjustment / Revaluation'],
                 ],
             ],
             [

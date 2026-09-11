@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'Λογαριασμός COGS',
     'coa_opening_stock_account' => 'Άνοιγμα λογαριασμού μετοχών',
     'coa_stock_adjustment_account' => 'Λογαριασμός Προσαρμογής Αποθεμάτων',
+    'coa_inventory_cost_adjustment_account' => 'Λογαριασμός προσαρμογής κόστους αποθέματος',
     'coa_withholding_tax_account' => 'Λογαριασμός Παρακράτησης Φόρου',
     'coa_fixed_asset_account' => 'Λογαριασμός πάγιου ενεργητικού / Αγορά λογαριασμού',
     'coa_accumulated_depreciation_account' => 'Λογαριασμός Σωρευμένων Αποσβέσεων',

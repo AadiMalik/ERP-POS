@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS অ্যাকাউন্ট',
     'coa_opening_stock_account' => 'স্টক অ্যাকাউন্ট খোলা',
     'coa_stock_adjustment_account' => 'স্টক অ্যাডজাস্টমেন্ট অ্যাকাউন্ট',
+    'coa_inventory_cost_adjustment_account' => 'ইনভেন্টরি খরচ সমন্বয় হিসাব',
     'coa_withholding_tax_account' => 'উইথহোল্ডিং ট্যাক্স অ্যাকাউন্ট',
     'coa_fixed_asset_account' => 'স্থায়ী সম্পদ / ক্রয় সম্পদ অ্যাকাউন্ট',
     'coa_accumulated_depreciation_account' => 'সঞ্চিত অবচয় হিসাব',

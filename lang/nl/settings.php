@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS-account',
     'coa_opening_stock_account' => 'Aandelenrekening openen',
     'coa_stock_adjustment_account' => 'Voorraadaanpassingsrekening',
+    'coa_inventory_cost_adjustment_account' => 'Voorraadkostenaanpassingsrekening',
     'coa_withholding_tax_account' => 'Rekening voor bronbelasting',
     'coa_fixed_asset_account' => 'Vaste activa/aankoopactivarekening',
     'coa_accumulated_depreciation_account' => 'Geaccumuleerde afschrijvingsrekening',

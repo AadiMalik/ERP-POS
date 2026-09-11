@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'Cuenta COGS',
     'coa_opening_stock_account' => 'Apertura de cuenta de acciones',
     'coa_stock_adjustment_account' => 'Cuenta de ajuste de existencias',
+    'coa_inventory_cost_adjustment_account' => 'Cuenta de ajuste de costo de inventario',
     'coa_withholding_tax_account' => 'Cuenta de retención de impuestos',
     'coa_fixed_asset_account' => 'Cuenta de activo fijo/activo de compra',
     'coa_accumulated_depreciation_account' => 'Cuenta de depreciación acumulada',

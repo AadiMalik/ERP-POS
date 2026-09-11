@@ -49,6 +49,8 @@ return [
     'consumption_reports' => '消費レポート',
     'contact_messages' => 'お問い合わせメッセージ',
     'content_cards' => 'コンテンツカード',
+    'cost_price_adjustment' => '原価調整',
+    'cost_price_adjustment_report' => '原価調整',
     'customer_aging' => '顧客の年齢分析',
     'customer_ledger' => '顧客元帳',
     'customer_loyalty_history' => '顧客ロイヤルティ履歴',

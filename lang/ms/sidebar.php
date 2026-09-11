@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Laporan Penggunaan',
     'contact_messages' => 'Mesej Hubungan',
     'content_cards' => 'Kad Kandungan',
+    'cost_price_adjustment' => 'Pelarasan Harga Kos',
+    'cost_price_adjustment_report' => 'Pelarasan Harga Kos',
     'customer_aging' => 'Penuaan Pelanggan',
     'customer_ledger' => 'Lejar Pelanggan',
     'customer_loyalty_history' => 'Sejarah Kesetiaan Pelanggan',

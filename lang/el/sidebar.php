@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Αναφορές κατανάλωσης',
     'contact_messages' => 'Μηνύματα επικοινωνίας',
     'content_cards' => 'Κάρτες περιεχομένου',
+    'cost_price_adjustment' => 'Προσαρμογή τιμής κόστους',
+    'cost_price_adjustment_report' => 'Προσαρμογή τιμής κόστους',
     'customer_aging' => 'Παλαίωση πελατών',
     'customer_ledger' => 'Καθολικό πελάτη',
     'customer_loyalty_history' => 'Ιστορικό πιστότητας πελάτη',

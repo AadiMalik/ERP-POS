@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Báo cáo tiêu thụ',
     'contact_messages' => 'Tin nhắn liên hệ',
     'content_cards' => 'Thẻ nội dung',
+    'cost_price_adjustment' => 'Điều chỉnh giá vốn',
+    'cost_price_adjustment_report' => 'Điều chỉnh giá vốn',
     'customer_aging' => 'Tuổi nợ khách hàng',
     'customer_ledger' => 'Sổ cái khách hàng',
     'customer_loyalty_history' => 'Lịch sử khách hàng thân thiết',

@@ -102,6 +102,13 @@ itself, but some are consumed elsewhere as real business-rule gates:
   `FixedAssetAccountingService` for acquisition, depreciation, and disposal JVs.
   Populated automatically for every new business by the Accounting Setup
   Wizard — see below.
+- `AccountingSetting.default_inventory_cost_adjustment_account_id` (Settings →
+  Accounting) is the P&L counterpart of a Cost Price Adjustment JV — Dr/Cr
+  Inventory vs this account, never mixed with `default_stock_adjustment_account_id`
+  (physical loss / count variance). Template-seeded to "Inventory Cost
+  Adjustment / Revaluation" (`520004-002`, under Stock Adjustment) and cloned
+  to every new business by the wizard below. See
+  [Cost Price Adjustment](25-cost-price-adjustment.md).
 - `AccountingSetting.default_delivery_charge_account_id` (Settings →
   Accounting) is credited by `OrderService::applyPostedEffects()` for a
   posted order's `delivery_charge`, guarded the same way as Round Off (throws

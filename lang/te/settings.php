@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS ఖాతా',
     'coa_opening_stock_account' => 'స్టాక్ ఖాతాను తెరవడం',
     'coa_stock_adjustment_account' => 'స్టాక్ సర్దుబాటు ఖాతా',
+    'coa_inventory_cost_adjustment_account' => 'ఇన్వెంటరీ ఖర్చు సర్దుబాటు ఖాతా',
     'coa_withholding_tax_account' => 'విత్‌హోల్డింగ్ పన్ను ఖాతా',
     'coa_fixed_asset_account' => 'స్థిర ఆస్తి / కొనుగోలు ఆస్తి ఖాతా',
     'coa_accumulated_depreciation_account' => 'సంచిత తరుగుదల ఖాతా',

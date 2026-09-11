@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS ਖਾਤਾ',
     'coa_opening_stock_account' => 'ਸਟਾਕ ਖਾਤਾ ਖੋਲ੍ਹਣਾ',
     'coa_stock_adjustment_account' => 'ਸਟਾਕ ਐਡਜਸਟਮੈਂਟ ਖਾਤਾ',
+    'coa_inventory_cost_adjustment_account' => 'ਇਨਵੈਂਟਰੀ ਲਾਗਤ ਐਡਜਸਟਮੈਂਟ ਖਾਤਾ',
     'coa_withholding_tax_account' => 'ਵਿਦਹੋਲਡਿੰਗ ਟੈਕਸ ਖਾਤਾ',
     'coa_fixed_asset_account' => 'ਸਥਿਰ ਸੰਪਤੀ / ਖਰੀਦ ਸੰਪਤੀ ਖਾਤਾ',
     'coa_accumulated_depreciation_account' => 'ਸੰਚਤ ਘਾਟਾ ਖਾਤਾ',

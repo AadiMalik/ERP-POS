@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => '销货成本账户',
     'coa_opening_stock_account' => '开设股票账户',
     'coa_stock_adjustment_account' => '库存调整账户',
+    'coa_inventory_cost_adjustment_account' => '存货成本调整科目',
     'coa_withholding_tax_account' => '预扣税账户',
     'coa_fixed_asset_account' => '固定资产/采购资产账户',
     'coa_accumulated_depreciation_account' => '累计折旧账户',

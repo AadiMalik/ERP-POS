@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'Akaun COGS',
     'coa_opening_stock_account' => 'Membuka Akaun Saham',
     'coa_stock_adjustment_account' => 'Akaun Pelarasan Stok',
+    'coa_inventory_cost_adjustment_account' => 'Akaun Pelarasan Kos Inventori',
     'coa_withholding_tax_account' => 'Akaun Cukai Pegangan',
     'coa_fixed_asset_account' => 'Akaun Aset Tetap / Belian Aset',
     'coa_accumulated_depreciation_account' => 'Akaun Susut Nilai Terkumpul',

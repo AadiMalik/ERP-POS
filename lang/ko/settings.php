@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => '매출원가 계정',
     'coa_opening_stock_account' => '주식계좌 개설',
     'coa_stock_adjustment_account' => '재고 조정 계정',
+    'coa_inventory_cost_adjustment_account' => '재고 원가 조정 계정',
     'coa_withholding_tax_account' => '원천징수세 계정',
     'coa_fixed_asset_account' => '고정 자산 / 구매 자산 계정',
     'coa_accumulated_depreciation_account' => '감가상각누계액 계정',

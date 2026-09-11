@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'บัญชี COGS',
     'coa_opening_stock_account' => 'การเปิดบัญชีหุ้น',
     'coa_stock_adjustment_account' => 'บัญชีปรับสต๊อก',
+    'coa_inventory_cost_adjustment_account' => 'บัญชีปรับปรุงต้นทุนสินค้าคงคลัง',
     'coa_withholding_tax_account' => 'บัญชีภาษีหัก ณ ที่จ่าย',
     'coa_fixed_asset_account' => 'บัญชีสินทรัพย์ถาวร / ซื้อสินทรัพย์',
     'coa_accumulated_depreciation_account' => 'บัญชีค่าเสื่อมราคาสะสม',

@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Zprávy o spotřebě',
     'contact_messages' => 'Kontaktní zprávy',
     'content_cards' => 'Karty obsahu',
+    'cost_price_adjustment' => 'Úprava nákladové ceny',
+    'cost_price_adjustment_report' => 'Úprava nákladové ceny',
     'customer_aging' => 'Stárnutí pohledávek zákazníků',
     'customer_ledger' => 'Kniha zákazníka',
     'customer_loyalty_history' => 'Historie věrnosti zákazníka',

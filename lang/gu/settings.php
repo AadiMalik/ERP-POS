@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS એકાઉન્ટ',
     'coa_opening_stock_account' => 'સ્ટોક ખાતું ખોલવું',
     'coa_stock_adjustment_account' => 'સ્ટોક એડજસ્ટમેન્ટ એકાઉન્ટ',
+    'coa_inventory_cost_adjustment_account' => 'ઇન્વેન્ટરી કોસ્ટ એડજસ્ટમેન્ટ એકાઉન્ટ',
     'coa_withholding_tax_account' => 'વિથહોલ્ડિંગ ટેક્સ એકાઉન્ટ',
     'coa_fixed_asset_account' => 'ફિક્સ્ડ એસેટ / પરચેઝ એસેટ એકાઉન્ટ',
     'coa_accumulated_depreciation_account' => 'સંચિત અવમૂલ્યન ખાતું',

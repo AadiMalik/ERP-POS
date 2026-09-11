@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => '銷貨成本帳戶',
     'coa_opening_stock_account' => '開設股票帳戶',
     'coa_stock_adjustment_account' => '庫存調整帳戶',
+    'coa_inventory_cost_adjustment_account' => '存貨成本調整科目',
     'coa_withholding_tax_account' => '預扣稅帳戶',
     'coa_fixed_asset_account' => '固定資產/購買資產帳戶',
     'coa_accumulated_depreciation_account' => '累計折舊帳戶',

@@ -49,6 +49,8 @@ return [
     'consumption_reports' => '消耗报告',
     'contact_messages' => '联系信息',
     'content_cards' => '内容卡片',
+    'cost_price_adjustment' => '成本价调整',
+    'cost_price_adjustment_report' => '成本价调整',
     'customer_aging' => '客户账龄',
     'customer_ledger' => '客户分类账',
     'customer_loyalty_history' => '客户忠诚度历史',

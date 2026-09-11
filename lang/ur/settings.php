@@ -92,6 +92,7 @@ return [
     'coa_cogs_account' => 'COGS اکاؤنٹ',
     'coa_opening_stock_account' => 'اسٹاک اکاؤنٹ کھولنا',
     'coa_stock_adjustment_account' => 'اسٹاک ایڈجسٹمنٹ اکاؤنٹ',
+    'coa_inventory_cost_adjustment_account' => 'انوینٹری لاگت ایڈجسٹمنٹ اکاؤنٹ',
     'coa_withholding_tax_account' => 'ودہولڈنگ ٹیکس اکاؤنٹ',
     'coa_fixed_asset_account' => 'فکسڈ اثاثہ / خریداری اثاثہ اکاؤنٹ',
     'coa_accumulated_depreciation_account' => 'جمع شدہ فرسودگی اکاؤنٹ',

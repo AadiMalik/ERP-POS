@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'ਖਪਤ ਰਿਪੋਰਟਾਂ',
     'contact_messages' => 'ਸੰਪਰਕ ਸੁਨੇਹੇ',
     'content_cards' => 'ਸਮੱਗਰੀ ਕਾਰਡ',
+    'cost_price_adjustment' => 'ਲਾਗਤ ਕੀਮਤ ਐਡਜਸਟਮੈਂਟ',
+    'cost_price_adjustment_report' => 'ਲਾਗਤ ਕੀਮਤ ਐਡਜਸਟਮੈਂਟ',
     'customer_aging' => 'ਗਾਹਕ ਏਜਿੰਗ',
     'customer_ledger' => 'ਗਾਹਕ ਲੇਜਰ',
     'customer_loyalty_history' => 'ਗਾਹਕ ਵਫ਼ਾਦਾਰੀ ਇਤਿਹਾਸ',

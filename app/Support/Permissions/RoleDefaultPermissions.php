@@ -79,7 +79,7 @@ class RoleDefaultPermissions
                     PermissionRegistry::namesForModules([
                         'warehouse', 'brand', 'category', 'sub-category', 'unit', 'product', 'barcode',
                         'unit-conversion', 'batch', 'serial-number', 'stock', 'stock-transaction', 'opening-stock',
-                        'stock-taking', 'loss-reason', 'waste-damage-expiry', 'transfer-note', 'purchase-return',
+                        'stock-taking', 'loss-reason', 'waste-damage-expiry', 'cost-price-adjustment', 'transfer-note', 'purchase-return',
                         'recipe', 'manufacturing-plan', 'production', 'manufacturing-reports',
                     ]),
                     [
@@ -90,6 +90,8 @@ class RoleDefaultPermissions
                         'reports.stock-summary.export', 'reports.stock-summary.export-csv',
                         'reports.stock-valuation.view', 'reports.stock-valuation.print', 'reports.stock-valuation.pdf',
                         'reports.stock-valuation.export', 'reports.stock-valuation.export-csv',
+                        'reports.cost-price-adjustment.view', 'reports.cost-price-adjustment.print', 'reports.cost-price-adjustment.pdf',
+                        'reports.cost-price-adjustment.export', 'reports.cost-price-adjustment.export-csv',
                         'reports.stock-aging.view', 'reports.stock-aging.print', 'reports.stock-aging.pdf',
                         'reports.stock-aging.export', 'reports.stock-aging.export-csv',
                         'reports.product-shares.view', 'reports.product-shares.print', 'reports.product-shares.pdf',

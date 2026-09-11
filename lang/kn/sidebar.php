@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'ಬಳಕೆ ವರದಿಗಳು',
     'contact_messages' => 'ಸಂಪರ್ಕ ಸಂದೇಶಗಳು',
     'content_cards' => 'ವಿಷಯ ಕಾರ್ಡ್‌ಗಳು',
+    'cost_price_adjustment' => 'ವೆಚ್ಚ ಬೆಲೆ ಹೊಂದಾಣಿಕೆ',
+    'cost_price_adjustment_report' => 'ವೆಚ್ಚ ಬೆಲೆ ಹೊಂದಾಣಿಕೆ',
     'customer_aging' => 'ಗ್ರಾಹಕ ಏಜಿಂಗ್',
     'customer_ledger' => 'ಗ್ರಾಹಕ ಲೆಡ್ಜರ್',
     'customer_loyalty_history' => 'ಗ್ರಾಹಕ ನಿಷ್ಠೆ ಇತಿಹಾಸ',

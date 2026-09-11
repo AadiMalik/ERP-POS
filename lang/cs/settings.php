@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'Účet COGS',
     'coa_opening_stock_account' => 'Otevření skladového účtu',
     'coa_stock_adjustment_account' => 'Účet úpravy zásob',
+    'coa_inventory_cost_adjustment_account' => 'Účet úpravy nákladové ceny zásob',
     'coa_withholding_tax_account' => 'Účet srážkové daně',
     'coa_fixed_asset_account' => 'Účet dlouhodobého majetku / nákupu majetku',
     'coa_accumulated_depreciation_account' => 'Účet oprávek',

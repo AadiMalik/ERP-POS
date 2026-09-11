@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Raporty zużycia',
     'contact_messages' => 'Wiadomości kontaktowe',
     'content_cards' => 'Karty treści',
+    'cost_price_adjustment' => 'Korekta ceny kosztu',
+    'cost_price_adjustment_report' => 'Korekta ceny kosztu',
     'customer_aging' => 'Wiekowanie należności klientów',
     'customer_ledger' => 'Księga klienta',
     'customer_loyalty_history' => 'Historia lojalności klienta',

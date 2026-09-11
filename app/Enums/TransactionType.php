@@ -22,6 +22,7 @@ class  TransactionType
     const TRANSFER_OUT = 'transfer_out';
     const PRODUCTION_IN = 'production_in';
     const PRODUCTION_OUT = 'production_out';
+    const COST_ADJUSTMENT = 'cost_price_adjustment';
 
     public static function getOptions()
     {
@@ -44,11 +45,22 @@ class  TransactionType
             self::TRANSFER_OUT => 'Transfer Out',
             self::PRODUCTION_IN => 'Production In',
             self::PRODUCTION_OUT => 'Production Out',
+            self::COST_ADJUSTMENT => 'Cost Price Adjustment',
         ];
     }
 
     /**
      * Transaction types that increase stock (Stock In).
+     *
+     * COST_ADJUSTMENT is included here even though it never moves quantity
+     * (base_quantity is always 0): ProductVariationStockService::recomputeLedger()
+     * replays inbound transactions as
+     * avg_price = ((quantity * avg_price) + total_price) / new_quantity, and
+     * with base_quantity = 0 (new_quantity = quantity, no movement) that
+     * reduces to avg_price + total_price / quantity - exactly the corrected
+     * cost this transaction type carries in total_price. Classifying it as
+     * outbound instead would make a later replay silently drop the
+     * adjustment's effect on avg_price.
      */
     public static function inboundTypes()
     {
@@ -59,6 +71,7 @@ class  TransactionType
             self::STOCK_TAKE_INCREASE,
             self::TRANSFER_IN,
             self::PRODUCTION_IN,
+            self::COST_ADJUSTMENT,
         ];
     }
 

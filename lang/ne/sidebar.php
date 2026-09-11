@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'उपभोग रिपोर्टहरू',
     'contact_messages' => 'सम्पर्क सन्देशहरू',
     'content_cards' => 'सामग्री कार्डहरू',
+    'cost_price_adjustment' => 'लागत मूल्य समायोजन',
+    'cost_price_adjustment_report' => 'लागत मूल्य समायोजन',
     'customer_aging' => 'ग्राहक एजिङ',
     'customer_ledger' => 'ग्राहक लेजर',
     'customer_loyalty_history' => 'ग्राहक वफादारी इतिहास',

@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'सीओजीएस खाता',
     'coa_opening_stock_account' => 'स्टॉक खाता खोलना',
     'coa_stock_adjustment_account' => 'स्टॉक समायोजन खाता',
+    'coa_inventory_cost_adjustment_account' => 'इन्वेंट्री लागत समायोजन खाता',
     'coa_withholding_tax_account' => 'विदहोल्डिंग टैक्स खाता',
     'coa_fixed_asset_account' => 'अचल संपत्ति/खरीद संपत्ति खाता',
     'coa_accumulated_depreciation_account' => 'संचित मूल्यह्रास खाता',

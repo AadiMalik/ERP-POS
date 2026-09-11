@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS اڪائونٽ',
     'coa_opening_stock_account' => 'اسٽاڪ اڪائونٽ کولڻ',
     'coa_stock_adjustment_account' => 'اسٽاڪ ايڊجسٽمينٽ اڪائونٽ',
+    'coa_inventory_cost_adjustment_account' => 'انوینٽري لاڳت ايڊجسٽمينٽ اڪائونٽ',
     'coa_withholding_tax_account' => 'وٿ هولڊنگ ٽيڪس اڪائونٽ',
     'coa_fixed_asset_account' => 'مقرر اثاثو / خريداري اثاثو اڪائونٽ',
     'coa_accumulated_depreciation_account' => 'جمع ٿيل قيمت کاتو',

@@ -49,6 +49,8 @@ return [
     'consumption_reports' => '소비 보고서',
     'contact_messages' => '문의 메시지',
     'content_cards' => '콘텐츠 카드',
+    'cost_price_adjustment' => '원가 조정',
+    'cost_price_adjustment_report' => '원가 조정',
     'customer_aging' => '고객 미수금 연령 분석',
     'customer_ledger' => '고객 원장',
     'customer_loyalty_history' => '고객 충성도 이력',

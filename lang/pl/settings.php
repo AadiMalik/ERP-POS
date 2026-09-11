@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'Konto COGS',
     'coa_opening_stock_account' => 'Otwarcie konta giełdowego',
     'coa_stock_adjustment_account' => 'Konto korekty zapasów',
+    'coa_inventory_cost_adjustment_account' => 'Konto korekty kosztu zapasów',
     'coa_withholding_tax_account' => 'Rachunek podatku u źródła',
     'coa_fixed_asset_account' => 'Konto środków trwałych / zakupów środków trwałych',
     'coa_accumulated_depreciation_account' => 'Konto skumulowanej amortyzacji',

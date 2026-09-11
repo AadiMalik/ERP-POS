@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Tüketim Raporları',
     'contact_messages' => 'İletişim Mesajları',
     'content_cards' => 'İçerik Kartları',
+    'cost_price_adjustment' => 'Maliyet Fiyatı Düzeltmesi',
+    'cost_price_adjustment_report' => 'Maliyet Fiyatı Düzeltmesi',
     'customer_aging' => 'Müşteri Yaşlandırma',
     'customer_ledger' => 'Müşteri Defteri',
     'customer_loyalty_history' => 'Müşteri Sadakat Geçmişi',

@@ -3,6 +3,7 @@
 namespace App\Services\Concrete\Admin;
 
 use App\Enums\ReferenceType;
+use App\Models\CostPriceAdjustment;
 use App\Models\GoodReceiptNote;
 use App\Models\OpeningStock;
 use App\Models\Production;
@@ -60,6 +61,9 @@ class ReferenceResolverService
             case ReferenceType::CONSUMPTION:
                 return Production::where('production_id', $reference_id)->value('production_no') ?? $reference_id;
 
+            case ReferenceType::COST_PRICE_ADJUSTMENT:
+                return CostPriceAdjustment::where('cost_price_adjustment_id', $reference_id)->value('reference_no') ?? $reference_id;
+
             default:
                 return $reference_id;
         }
@@ -95,6 +99,8 @@ class ReferenceResolverService
             case ReferenceType::PRODUCTION:
             case ReferenceType::CONSUMPTION:
                 return url('/admin/production/edit/' . $reference_id);
+            case ReferenceType::COST_PRICE_ADJUSTMENT:
+                return url('/admin/cost-price-adjustment/' . $reference_id . '/edit');
             default:
                 return null;
         }

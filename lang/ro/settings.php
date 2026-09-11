@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'Contul COGS',
     'coa_opening_stock_account' => 'Deschidere cont de stoc',
     'coa_stock_adjustment_account' => 'Cont de ajustare a stocurilor',
+    'coa_inventory_cost_adjustment_account' => 'Cont de ajustare a costului stocului',
     'coa_withholding_tax_account' => 'Cont de reținere la sursă',
     'coa_fixed_asset_account' => 'Cont de active fixe / de cumpărare',
     'coa_accumulated_depreciation_account' => 'Contul de amortizare cumulata',

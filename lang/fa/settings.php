@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'حساب COGS',
     'coa_opening_stock_account' => 'افتتاح حساب سهام',
     'coa_stock_adjustment_account' => 'حساب تعدیل سهام',
+    'coa_inventory_cost_adjustment_account' => 'حساب تعدیل بهای تمام‌شده موجودی',
     'coa_withholding_tax_account' => 'حساب مالیات کسر شده',
     'coa_fixed_asset_account' => 'دارایی ثابت / خرید حساب دارایی',
     'coa_accumulated_depreciation_account' => 'حساب استهلاک انباشته',

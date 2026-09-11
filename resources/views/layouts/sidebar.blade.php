@@ -437,6 +437,13 @@
                             </a>
                         </li>
                     @endcanAccess
+                    @canAccess('cost-price-adjustment.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/cost-price-adjustment') }}" class="menu-link">
+                                <div data-i18n="Cost Price Adjustment">{{ __('sidebar.cost_price_adjustment') }}</div>
+                            </a>
+                        </li>
+                    @endcanAccess
                     @canAccess('loss-reason.view')
                         <li class="menu-item">
                             <a href="{{ url('/admin/loss-reason') }}" class="menu-link">
@@ -486,7 +493,7 @@
                     @endif
                     @canAccessAny(['reports.stock-ledger.view', 'reports.stock-summary.view', 'reports.stock-valuation.view',
                         'reports.stock-aging.view', 'reports.stock-transfer-report.view', 'reports.stock-reconciliation.view',
-                        'reports.batch-expiry.view', 'reports.stock-loss.view', 'reports.waste-damage-expiry.view', 'reports.material-consumption-report.view',
+                        'reports.batch-expiry.view', 'reports.stock-loss.view', 'reports.waste-damage-expiry.view', 'reports.cost-price-adjustment.view', 'reports.material-consumption-report.view',
                         'reports.serial-number-register.view', 'reports.serial-number-available.view', 'reports.serial-number-sold.view',
                         'reports.serial-number-movement.view', 'reports.serial-number-customer.view', 'reports.product-shares.view',
                         'reports.manufacturing-plan-report.view', 'reports.production-report.view', 'reports.recipe-bom-report.view'])
@@ -498,7 +505,7 @@
                                 {{-- Stock Reports --}}
                                 @canAccessAny(['reports.stock-ledger.view', 'reports.stock-summary.view', 'reports.stock-valuation.view',
                                     'reports.stock-aging.view', 'reports.stock-transfer-report.view', 'reports.stock-reconciliation.view',
-                                    'reports.batch-expiry.view', 'reports.stock-loss.view', 'reports.waste-damage-expiry.view'])
+                                    'reports.batch-expiry.view', 'reports.stock-loss.view', 'reports.waste-damage-expiry.view', 'reports.cost-price-adjustment.view'])
                                     <li class="menu-item">
                                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                                             <div data-i18n="Stock Reports">{{ __('sidebar.stock_reports') }}</div>
@@ -530,6 +537,9 @@
                                             @endcanAccess
                                             @canAccess('reports.waste-damage-expiry.view')
                                                 <li class="menu-item"><a href="{{ url('/admin/reports/waste-damage-expiry') }}" class="menu-link"><div>Waste / Damage / Expiry</div></a></li>
+                                            @endcanAccess
+                                            @canAccess('reports.cost-price-adjustment.view')
+                                                <li class="menu-item"><a href="{{ url('/admin/reports/cost-price-adjustment') }}" class="menu-link"><div data-i18n="Cost Price Adjustment">{{ __('sidebar.cost_price_adjustment_report') }}</div></a></li>
                                             @endcanAccess
                                         </ul>
                                     </li>

@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'Обліковий запис COGS',
     'coa_opening_stock_account' => 'Відкриття фондового рахунку',
     'coa_stock_adjustment_account' => 'Рахунок коригування запасів',
+    'coa_inventory_cost_adjustment_account' => 'Рахунок коригування собівартості запасів',
     'coa_withholding_tax_account' => 'Рахунок утриманого податку',
     'coa_fixed_asset_account' => 'Рахунок основних засобів / придбання активів',
     'coa_accumulated_depreciation_account' => 'Рахунок накопиченої амортизації',

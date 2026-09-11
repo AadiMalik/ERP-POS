@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'ഉപഭോഗ റിപ്പോർട്ടുകൾ',
     'contact_messages' => 'ബന്ധപ്പെടൽ സന്ദേശങ്ങൾ',
     'content_cards' => 'ഉള്ളടക്ക കാർഡുകൾ',
+    'cost_price_adjustment' => 'ചെലവ് വില ക്രമീകരണം',
+    'cost_price_adjustment_report' => 'ചെലവ് വില ക്രമീകരണം',
     'customer_aging' => 'ഉപഭോക്തൃ ഏജിംഗ്',
     'customer_ledger' => 'ഉപഭോക്തൃ ലെഡ്ജർ',
     'customer_loyalty_history' => 'ഉപഭോക്തൃ വിശ്വസ്തത ചരിത്രം',

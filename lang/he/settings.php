@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'חשבון COGS',
     'coa_opening_stock_account' => 'פתיחת חשבון מלאי',
     'coa_stock_adjustment_account' => 'חשבון התאמת מלאי',
+    'coa_inventory_cost_adjustment_account' => 'חשבון התאמת עלות מלאי',
     'coa_withholding_tax_account' => 'חשבון ניכוי מס במקור',
     'coa_fixed_asset_account' => 'נכס קבוע / חשבון נכס רכישה',
     'coa_accumulated_depreciation_account' => 'חשבון פחת שנצבר',

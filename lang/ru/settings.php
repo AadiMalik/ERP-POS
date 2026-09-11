@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'Счет COGS',
     'coa_opening_stock_account' => 'Открытие фондового счета',
     'coa_stock_adjustment_account' => 'Счет корректировки запасов',
+    'coa_inventory_cost_adjustment_account' => 'Счёт корректировки себестоимости запасов',
     'coa_withholding_tax_account' => 'Счет подоходного налога',
     'coa_fixed_asset_account' => 'Счет основных средств / приобретенных активов',
     'coa_accumulated_depreciation_account' => 'Счет накопленной амортизации',

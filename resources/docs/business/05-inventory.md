@@ -160,6 +160,48 @@ transport, a branch) without any link to a production run.
   Expired filter, then create a Waste/Damage/Expiry record (loss type
   Expired) to formally write them off once confirmed.
 
+## Cost Price Adjustment
+
+Sometimes the recorded cost of a product needs correcting without anything
+physically moving — a landed-cost true-up, a data-entry mistake, or a
+deliberate revaluation. **Cost Price Adjustment** exists for exactly this: it
+changes the **value** of stock already on hand, never the **quantity**. Use
+Waste/Damage/Expiry when stock is physically lost, and Stock Taking when a
+physical count disagrees with the system; use Cost Price Adjustment only when
+the quantity is correct and it's the cost that's wrong.
+
+- **Create an adjustment** under **Inventory → Cost Price Adjustment**: pick a
+  warehouse, product, and variation — the system shows the **current cost**
+  and **quantity on hand** automatically (you cannot type over the current
+  cost; it's always read from the system). Enter the **new cost**, a
+  **Reason**, and an optional reference note. The Difference/Unit and Total
+  Adjustment Amount are calculated for you as you type.
+- **Nothing changes yet** — a new adjustment stays **Pending** until an
+  authorized user **Approves** it. Only on approval is the stock's cost
+  actually updated; quantity is never touched by this screen.
+- A product variation must have **stock on hand** in the selected warehouse
+  to be adjusted — there is nothing to revalue at zero stock. If the product
+  tracks batches/lots, every batch in that warehouse is revalued to the new
+  cost together, and the adjustment amount is the exact sum of what changed
+  for each batch (shown in the batch breakdown).
+- **Cancelling** an approved adjustment reverses it completely — the cost (and
+  any accounting entry) reverts to exactly what it was before, as if it had
+  never been approved. A cancelled record can never be re-approved; a mistake
+  is corrected with a fresh record instead.
+- If your business tracks inventory value in Accounting, approving an
+  adjustment with a non-zero amount posts an **Inventory Cost Adjustment
+  Voucher** automatically: a cost increase debits Inventory Asset and credits
+  the configured Inventory Cost Adjustment account; a decrease posts the
+  reverse. This account is separate from the Stock Adjustment account used by
+  Waste/Damage/Expiry and Stock Taking, so pure valuation corrections never
+  mix with physical shrinkage in your reports — configure it under
+  **Settings → Accounting → Inventory Cost Adjustment Account**.
+- Every approved adjustment shows up in the **Stock Ledger** clearly marked as
+  a Cost Price Adjustment (never as a quantity movement — its quantity
+  in/out always shows zero), and the current cost immediately reflects in
+  **Stock Valuation** and everywhere else the product's cost is shown.
+  Historical purchases and past sales are never rewritten.
+
 ## Barcodes & Labels
 
 Each product variation can have a barcode/QR code, printable as labels for shelf or
@@ -227,6 +269,10 @@ silo.
 - **Waste / Damage / Expiry** — the dedicated write-off report: every record
   regardless of status (pending/approved/cancelled), with batch/lot, expiry
   date, loss type, reason, and who created/approved it.
+- **Cost Price Adjustment** — every valuation correction regardless of status,
+  with previous/new cost, difference, total adjustment, reason, who
+  created/approved it, and a link to its Journal Voucher; totals for increase,
+  decrease, and net adjustment.
 - **Batch/Lot & Expiry** — batch quantities and near-expiry / expired filters.
 
 ### Product Shares

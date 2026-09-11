@@ -657,6 +657,16 @@ class PermissionRegistry
                 'print'   => ['name' => 'waste-damage-expiry.print', 'label' => 'Print', 'is_system' => false],
             ]],
 
+            'cost-price-adjustment' => ['label' => 'Cost Price Adjustment', 'actions' => [
+                'view'    => ['name' => 'cost-price-adjustment.view', 'label' => 'View', 'is_system' => false],
+                'create'  => ['name' => 'cost-price-adjustment.create', 'label' => 'Create', 'is_system' => false],
+                'edit'    => ['name' => 'cost-price-adjustment.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete'  => ['name' => 'cost-price-adjustment.delete', 'label' => 'Delete', 'is_system' => false],
+                'approve' => ['name' => 'cost-price-adjustment.approve', 'label' => 'Approve', 'is_system' => false],
+                'cancel'  => ['name' => 'cost-price-adjustment.cancel', 'label' => 'Cancel', 'is_system' => false],
+                'print'   => ['name' => 'cost-price-adjustment.print', 'label' => 'Print', 'is_system' => false],
+            ]],
+
             'transfer-note' => ['label' => 'Transfer Note', 'actions' => [
                 'view'   => ['name' => 'transfer-note.view', 'label' => 'View', 'is_system' => false],
                 'create' => ['name' => 'transfer-note.create', 'label' => 'Create', 'is_system' => false],
@@ -1488,6 +1498,11 @@ class PermissionRegistry
                 'stock_valuation_pdf' => ['name' => 'reports.stock-valuation.pdf', 'label' => 'Stock Valuation - PDF', 'is_system' => false],
                 'stock_valuation_export' => ['name' => 'reports.stock-valuation.export', 'label' => 'Stock Valuation - Export (Excel)', 'is_system' => false],
                 'stock_valuation_export_csv' => ['name' => 'reports.stock-valuation.export-csv', 'label' => 'Stock Valuation - Export (CSV)', 'is_system' => false],
+                'cost_price_adjustment' => ['name' => 'reports.cost-price-adjustment.view', 'label' => 'Cost Price Adjustment', 'is_system' => false],
+                'cost_price_adjustment_print' => ['name' => 'reports.cost-price-adjustment.print', 'label' => 'Cost Price Adjustment - Print', 'is_system' => false],
+                'cost_price_adjustment_pdf' => ['name' => 'reports.cost-price-adjustment.pdf', 'label' => 'Cost Price Adjustment - PDF', 'is_system' => false],
+                'cost_price_adjustment_export' => ['name' => 'reports.cost-price-adjustment.export', 'label' => 'Cost Price Adjustment - Export (Excel)', 'is_system' => false],
+                'cost_price_adjustment_export_csv' => ['name' => 'reports.cost-price-adjustment.export-csv', 'label' => 'Cost Price Adjustment - Export (CSV)', 'is_system' => false],
                 'product_shares' => ['name' => 'reports.product-shares.view', 'label' => 'Product Shares', 'is_system' => false],
                 'product_shares_print' => ['name' => 'reports.product-shares.print', 'label' => 'Product Shares - Print', 'is_system' => false],
                 'product_shares_pdf' => ['name' => 'reports.product-shares.pdf', 'label' => 'Product Shares - PDF', 'is_system' => false],
@@ -1899,7 +1914,7 @@ class PermissionRegistry
             'fixed-asset-category', 'fixed-asset', 'fixed-asset-depreciation',
             'supplier', 'customer', 'loyalty', 'payment-method', 'payment-gateway', 'payment-transaction', 'sale-type', 'discount', 'voucher',
             'purchase-request', 'purchase-request-quotation', 'purchase', 'good-receipt-note',
-            'purchase-return', 'opening-stock', 'stock-taking', 'loss-reason', 'waste-damage-expiry', 'transfer-note', 'supplier-payment', 'customer-payment',
+            'purchase-return', 'opening-stock', 'stock-taking', 'loss-reason', 'waste-damage-expiry', 'cost-price-adjustment', 'transfer-note', 'supplier-payment', 'customer-payment',
             'service-purchase', 'service-purchase-return', 'service-sale', 'service-sale-return',
             'pos', 'pos-register', 'order', 'order-return', 'order-reports', 'expense', 'expense-category', 'admin-expense',
             'activity-log', 'login-history', 'notification', 'firebase-setting', 'login-security-setting',

@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS konto',
     'coa_opening_stock_account' => 'Åbning af lagerkonto',
     'coa_stock_adjustment_account' => 'Lagertilpasningskonto',
+    'coa_inventory_cost_adjustment_account' => 'Lageromkostningsjusteringskonto',
     'coa_withholding_tax_account' => 'Kildeskattekonto',
     'coa_fixed_asset_account' => 'Anlægsaktiv / Købsaktivkonto',
     'coa_accumulated_depreciation_account' => 'Akkumuleret afskrivningskonto',

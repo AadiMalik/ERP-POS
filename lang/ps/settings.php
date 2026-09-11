@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'د COGS حساب',
     'coa_opening_stock_account' => 'د سټاک حساب پرانیستل',
     'coa_stock_adjustment_account' => 'د سټاک تنظیم حساب',
+    'coa_inventory_cost_adjustment_account' => 'د موجودۍ د لګښت د سمون حساب',
     'coa_withholding_tax_account' => 'د مالیاتو د مالیاتو حساب',
     'coa_fixed_asset_account' => 'ثابته شتمني / پیرود شتمنۍ حساب',
     'coa_accumulated_depreciation_account' => 'جمع شوي استهالک حساب',

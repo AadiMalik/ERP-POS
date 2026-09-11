@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'వినియోగ నివేదికలు',
     'contact_messages' => 'సంప్రదింపు సందేశాలు',
     'content_cards' => 'కంటెంట్ కార్డులు',
+    'cost_price_adjustment' => 'ఖర్చు ధర సర్దుబాటు',
+    'cost_price_adjustment_report' => 'ఖర్చు ధర సర్దుబాటు',
     'customer_aging' => 'కస్టమర్ ఏజింగ్',
     'customer_ledger' => 'కస్టమర్ లెడ్జర్',
     'customer_loyalty_history' => 'కస్టమర్ లాయల్టీ చరిత్ర',

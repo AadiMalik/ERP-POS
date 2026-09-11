@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'واپرائڻ جون رپورٽون',
     'contact_messages' => 'رابطي پيغام',
     'content_cards' => 'مواد ڪارڊ',
+    'cost_price_adjustment' => 'لاڳت قيمت ايڊجسٽمينٽ',
+    'cost_price_adjustment_report' => 'لاڳت قيمت ايڊجسٽمينٽ',
     'customer_aging' => 'گراهڪ ايجنگ',
     'customer_ledger' => 'گراهڪ ليجر',
     'customer_loyalty_history' => 'گراهڪ لائيلٽي تاريخ',

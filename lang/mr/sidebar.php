@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'वापर अहवाल',
     'contact_messages' => 'संपर्क संदेश',
     'content_cards' => 'सामग्री कार्ड',
+    'cost_price_adjustment' => 'खर्च किंमत समायोजन',
+    'cost_price_adjustment_report' => 'खर्च किंमत समायोजन',
     'customer_aging' => 'ग्राहक एजिंग',
     'customer_ledger' => 'ग्राहक खतावणी',
     'customer_loyalty_history' => 'ग्राहक निष्ठा इतिहास',

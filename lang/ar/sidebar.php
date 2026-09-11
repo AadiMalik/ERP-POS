@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'تقارير الاستهلاك',
     'contact_messages' => 'رسائل الاتصال',
     'content_cards' => 'بطاقات المحتوى',
+    'cost_price_adjustment' => 'تعديل سعر التكلفة',
+    'cost_price_adjustment_report' => 'تعديل سعر التكلفة',
     'customer_aging' => 'أعمار ديون العملاء',
     'customer_ledger' => 'دفتر العميل',
     'customer_loyalty_history' => 'سجل ولاء العميل',

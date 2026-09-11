@@ -87,7 +87,10 @@ product_variation_attributes`, `product_variation_unit_conversions`,
 `product_variation_stocks` (per-warehouse qty), `product_variation_stock_transactions`
 (the stock ledger/audit trail), `product_variation_batches` (batch/expiry),
 `product_variation_prices`, `product_variation_price_histories`), `opening_stocks`/
-`_details`, `stock_takings`/`_details`, `transfer_notes`/`_details`.
+`_details`, `stock_takings`/`_details`, `waste_damage_expiries`/`_details`,
+`cost_price_adjustments`/`cost_price_adjustment_batches` (valuation-only cost
+correction — never a quantity movement; see
+[Cost Price Adjustment](25-cost-price-adjustment.md)), `transfer_notes`/`_details`.
 
 **Core models:** `Product` (`belongsTo Business, Category, SubCategory, Brand`;
 `hasMany ProductVariation`); `ProductVariation` (`belongsTo Product, Business`;

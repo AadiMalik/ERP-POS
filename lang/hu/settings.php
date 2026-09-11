@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS számla',
     'coa_opening_stock_account' => 'Részvényszámla nyitása',
     'coa_stock_adjustment_account' => 'Készletkorrekciós számla',
+    'coa_inventory_cost_adjustment_account' => 'Készletköltség-korrekciós számla',
     'coa_withholding_tax_account' => 'Forrásadó számla',
     'coa_fixed_asset_account' => 'Befektetett eszköz / vásárlási eszköz számla',
     'coa_accumulated_depreciation_account' => 'Felhalmozott értékcsökkenési számla',

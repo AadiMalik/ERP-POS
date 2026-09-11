@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'حساب COGS',
     'coa_opening_stock_account' => 'فتح حساب الأسهم',
     'coa_stock_adjustment_account' => 'حساب تعديل المخزون',
+    'coa_inventory_cost_adjustment_account' => 'حساب تعديل تكلفة المخزون',
     'coa_withholding_tax_account' => 'حساب الضريبة المقتطعة',
     'coa_fixed_asset_account' => 'الأصول الثابتة / حساب أصول الشراء',
     'coa_accumulated_depreciation_account' => 'حساب الاستهلاك المتراكم',

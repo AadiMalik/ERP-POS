@@ -43,6 +43,7 @@ class AccountingSetting extends Model
         'default_cogs_account_id',
         'default_opening_stock_account_id',
         'default_stock_adjustment_account_id',
+        'default_inventory_cost_adjustment_account_id',
         'default_withholding_tax_account_id',
         'default_fixed_asset_account_id',
         'default_accumulated_depreciation_account_id',

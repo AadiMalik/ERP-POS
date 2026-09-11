@@ -458,6 +458,17 @@ still a later phase.
 lookup). Full architecture, schema, and posting/reversal flow:
 [Waste / Damage / Expiry](17-waste-damage-expiry.md).
 
+### Cost Price Adjustment
+
+`CostPriceAdjustmentController` / `CostPriceAdjustmentService` — a
+valuation-only correction to a product variation's current cost in a
+warehouse (create → pending → approve/cancel workflow), never a quantity
+movement. Revalues live stock (and every batch, if batch-tracked) to a new
+unit cost and posts a balanced Inventory Cost Adjustment Voucher JV against a
+dedicated `default_inventory_cost_adjustment_account_id` COA setting. Full
+architecture, schema, the three-cost-surfaces background, and
+posting/reversal flow: [Cost Price Adjustment](25-cost-price-adjustment.md).
+
 ## Purchasing / Procurement (`module:inventory`)
 `SupplierController`, `PurchaseRequestController`,
 `PurchaseRequestQuotationController`, `PurchaseController` (service:

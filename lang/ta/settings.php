@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS கணக்கு',
     'coa_opening_stock_account' => 'பங்கு கணக்கைத் திறக்கிறது',
     'coa_stock_adjustment_account' => 'பங்கு சரிசெய்தல் கணக்கு',
+    'coa_inventory_cost_adjustment_account' => 'சரக்கு செலவு சரிசெய்தல் கணக்கு',
     'coa_withholding_tax_account' => 'வரி கணக்கு நிறுத்தி வைத்தல்',
     'coa_fixed_asset_account' => 'நிலையான சொத்து / கொள்முதல் சொத்து கணக்கு',
     'coa_accumulated_depreciation_account' => 'திரட்டப்பட்ட தேய்மான கணக்கு',

@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS ගිණුම',
     'coa_opening_stock_account' => 'කොටස් ගිණුම විවෘත කිරීම',
     'coa_stock_adjustment_account' => 'කොටස් ගැලපුම් ගිණුම',
+    'coa_inventory_cost_adjustment_account' => 'තොග පිරිවැය සීරුමාරු ගිණුම',
     'coa_withholding_tax_account' => 'රඳවා ගැනීමේ බදු ගිණුම',
     'coa_fixed_asset_account' => 'ස්ථාවර වත්කම් / මිලදී ගැනීමේ වත්කම් ගිණුම',
     'coa_accumulated_depreciation_account' => 'සමුච්චිත ක්ෂයවීම් ගිණුම',

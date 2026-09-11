@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Verbruiksrapporten',
     'contact_messages' => 'Contactberichten',
     'content_cards' => 'Inhoudskaarten',
+    'cost_price_adjustment' => 'Kostprijsaanpassing',
+    'cost_price_adjustment_report' => 'Kostprijsaanpassing',
     'customer_aging' => 'Klant ouderdomsanalyse',
     'customer_ledger' => 'Klantgrootboek',
     'customer_loyalty_history' => 'Klantloyaliteitsgeschiedenis',

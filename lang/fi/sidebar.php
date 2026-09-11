@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Kulutusraportit',
     'contact_messages' => 'Yhteydenottoviestit',
     'content_cards' => 'Sisältökortit',
+    'cost_price_adjustment' => 'Ostohinnan oikaisu',
+    'cost_price_adjustment_report' => 'Ostohinnan oikaisu',
     'customer_aging' => 'Asiakassaatavien ikäjakauma',
     'customer_ledger' => 'Asiakaspääkirja',
     'customer_loyalty_history' => 'Asiakasuskollisuushistoria',

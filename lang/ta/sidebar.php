@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'நுகர்வு அறிக்கைகள்',
     'contact_messages' => 'தொடர்பு செய்திகள்',
     'content_cards' => 'உள்ளடக்க அட்டைகள்',
+    'cost_price_adjustment' => 'செலவு விலை சரிசெய்தல்',
+    'cost_price_adjustment_report' => 'செலவு விலை சரிசெய்தல்',
     'customer_aging' => 'வாடிக்கையாளர் வயதாகுதல்',
     'customer_ledger' => 'வாடிக்கையாளர் லெட்ஜர்',
     'customer_loyalty_history' => 'வாடிக்கையாளர் விசுவாச வரலாறு',

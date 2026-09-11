@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'વપરાશ અહેવાલો',
     'contact_messages' => 'સંપર્ક સંદેશા',
     'content_cards' => 'સામગ્રી કાર્ડ્સ',
+    'cost_price_adjustment' => 'કિંમત ખર્ચ ગોઠવણ',
+    'cost_price_adjustment_report' => 'કિંમત ખર્ચ ગોઠવણ',
     'customer_aging' => 'ગ્રાહક એજિંગ',
     'customer_ledger' => 'ગ્રાહક ખાતાવહી',
     'customer_loyalty_history' => 'ગ્રાહક વફાદારી ઇતિહાસ',

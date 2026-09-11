@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'استعمال رپورٹانی',
     'contact_messages' => 'رابطہ پیغامانی',
     'content_cards' => 'مواد کارڈانی',
+    'cost_price_adjustment' => 'لاگت قیمت ایڈجسٹمنٹ',
+    'cost_price_adjustment_report' => 'لاگت قیمت ایڈجسٹمنٹ',
     'customer_aging' => 'گاہک ایجنگ',
     'customer_ledger' => 'گاہک لیجر',
     'customer_loyalty_history' => 'گاہک وفاداری تاریخ',

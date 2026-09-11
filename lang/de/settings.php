@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS-Konto',
     'coa_opening_stock_account' => 'Eröffnung eines Aktienkontos',
     'coa_stock_adjustment_account' => 'Bestandsanpassungskonto',
+    'coa_inventory_cost_adjustment_account' => 'Bestandskostenanpassungskonto',
     'coa_withholding_tax_account' => 'Quellensteuerkonto',
     'coa_fixed_asset_account' => 'Anlagevermögens-/Einkaufsvermögenskonto',
     'coa_accumulated_depreciation_account' => 'Kumuliertes Abschreibungskonto',

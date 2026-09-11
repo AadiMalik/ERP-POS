@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGSアカウント',
     'coa_opening_stock_account' => '株式口座の開設',
     'coa_stock_adjustment_account' => '在庫調整口座',
+    'coa_inventory_cost_adjustment_account' => '在庫原価調整勘定',
     'coa_withholding_tax_account' => '源泉徴収税口座',
     'coa_fixed_asset_account' => '固定資産/購入資産勘定',
     'coa_accumulated_depreciation_account' => '減価償却累計額勘定',

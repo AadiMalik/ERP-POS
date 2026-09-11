@@ -103,6 +103,7 @@ return [
     'coa_cogs_account' => 'COGS Account',
     'coa_opening_stock_account' => 'Opening Stock Account',
     'coa_stock_adjustment_account' => 'Stock Adjustment Account',
+    'coa_inventory_cost_adjustment_account' => 'Inventory Cost Adjustment Account',
     'coa_withholding_tax_account' => 'Withholding Tax Account',
     'coa_fixed_asset_account' => 'Fixed Asset / Purchase Asset Account',
     'coa_accumulated_depreciation_account' => 'Accumulated Depreciation Account',

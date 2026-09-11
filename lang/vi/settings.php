@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'Tài khoản COGS',
     'coa_opening_stock_account' => 'Mở tài khoản chứng khoán',
     'coa_stock_adjustment_account' => 'Tài khoản điều chỉnh cổ phiếu',
+    'coa_inventory_cost_adjustment_account' => 'Tài khoản điều chỉnh giá vốn hàng tồn kho',
     'coa_withholding_tax_account' => 'Tài khoản thuế khấu trừ',
     'coa_fixed_asset_account' => 'Tài khoản tài sản cố định / tài sản mua hàng',
     'coa_accumulated_depreciation_account' => 'Tài khoản khấu hao lũy kế',

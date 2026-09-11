@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'ব্যবহার প্রতিবেদন',
     'contact_messages' => 'যোগাযোগ বার্তা',
     'content_cards' => 'বিষয়বস্তু কার্ড',
+    'cost_price_adjustment' => 'খরচ মূল্য সমন্বয়',
+    'cost_price_adjustment_report' => 'খরচ মূল্য সমন্বয়',
     'customer_aging' => 'গ্রাহক এজিং',
     'customer_ledger' => 'গ্রাহক লেজার',
     'customer_loyalty_history' => 'গ্রাহক আনুগত্য ইতিহাস',

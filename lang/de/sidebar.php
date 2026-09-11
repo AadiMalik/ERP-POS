@@ -49,6 +49,8 @@ return [
     'consumption_reports' => 'Verbrauchsberichte',
     'contact_messages' => 'Kontaktnachrichten',
     'content_cards' => 'Inhaltskarten',
+    'cost_price_adjustment' => 'Einstandspreisanpassung',
+    'cost_price_adjustment_report' => 'Einstandspreisanpassung',
     'customer_aging' => 'Kunden-Fälligkeitsanalyse',
     'customer_ledger' => 'Kundenkonto',
     'customer_loyalty_history' => 'Kundentreue-Verlauf',

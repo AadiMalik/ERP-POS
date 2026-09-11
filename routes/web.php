@@ -1303,6 +1303,17 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
         Route::get('{waste_damage_expiry_id}/print', [App\Http\Controllers\Admin\WasteDamageExpiryController::class, 'print'])->name('waste-damage-expiry.print');
     });
 
+    //cost price adjustment
+    Route::resource('cost-price-adjustment', App\Http\Controllers\Admin\CostPriceAdjustmentController::class);
+    Route::group(['prefix' => 'cost-price-adjustment'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\CostPriceAdjustmentController::class, 'getData']);
+        Route::post('change-status', [App\Http\Controllers\Admin\CostPriceAdjustmentController::class, 'status']);
+        Route::get('details/{cost_price_adjustment_id}', [App\Http\Controllers\Admin\CostPriceAdjustmentController::class, 'details']);
+        Route::get('stock/{warehouse_id}/{product_variation_id}', [App\Http\Controllers\Admin\CostPriceAdjustmentController::class, 'stock']);
+        Route::get('batches/{warehouse_id}/{product_variation_id}', [App\Http\Controllers\Admin\CostPriceAdjustmentController::class, 'batches']);
+        Route::get('{cost_price_adjustment_id}/print', [App\Http\Controllers\Admin\CostPriceAdjustmentController::class, 'print'])->name('cost-price-adjustment.print');
+    });
+
     //serial numbers
     Route::group(['prefix' => 'serial-number'], function () {
         Route::get('/', [App\Http\Controllers\Admin\SerialNumberController::class, 'index']);
@@ -1579,6 +1590,15 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
             Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\StockValuationReportController::class, 'pdf'])->name('reports.stock-valuation.pdf');
             Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\StockValuationReportController::class, 'export'])->name('reports.stock-valuation.export');
             Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\StockValuationReportController::class, 'exportCsv'])->name('reports.stock-valuation.export-csv');
+        });
+
+        Route::group(['prefix' => 'cost-price-adjustment'], function () {
+            Route::get('/', [App\Http\Controllers\Admin\Reports\Inventory\CostPriceAdjustmentReportController::class, 'index'])->name('reports.cost-price-adjustment');
+            Route::post('data', [App\Http\Controllers\Admin\Reports\Inventory\CostPriceAdjustmentReportController::class, 'data']);
+            Route::get('print', [App\Http\Controllers\Admin\Reports\Inventory\CostPriceAdjustmentReportController::class, 'print'])->name('reports.cost-price-adjustment.print');
+            Route::get('pdf', [App\Http\Controllers\Admin\Reports\Inventory\CostPriceAdjustmentReportController::class, 'pdf'])->name('reports.cost-price-adjustment.pdf');
+            Route::get('export', [App\Http\Controllers\Admin\Reports\Inventory\CostPriceAdjustmentReportController::class, 'export'])->name('reports.cost-price-adjustment.export');
+            Route::get('export-csv', [App\Http\Controllers\Admin\Reports\Inventory\CostPriceAdjustmentReportController::class, 'exportCsv'])->name('reports.cost-price-adjustment.export-csv');
         });
 
         Route::group(['prefix' => 'stock-aging'], function () {

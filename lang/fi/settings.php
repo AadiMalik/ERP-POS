@@ -76,6 +76,7 @@ return [
     'coa_cogs_account' => 'COGS-tili',
     'coa_opening_stock_account' => 'Osaketilin avaaminen',
     'coa_stock_adjustment_account' => 'Osakkeiden oikaisutili',
+    'coa_inventory_cost_adjustment_account' => 'Varaston kustannuskorjaustili',
     'coa_withholding_tax_account' => 'Ennakonpidätystili',
     'coa_fixed_asset_account' => 'Käyttöomaisuus / Ostoomaisuustili',
     'coa_accumulated_depreciation_account' => 'Kertynyt poistotili',
