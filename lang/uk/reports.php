@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Скасовані замовлення',
     'cash_bank_ledger' => 'Книга каси та банку',
     'cash_flow' => 'Звіт про рух грошових коштів',
+    'complimentary_report' => 'Звіт про компліменти',
     'customer_aging' => 'Дебіторська заборгованість за термінами',
     'customer_ledger' => 'Книга клієнта',
     'customer_loyalty_report' => 'Історія лояльності клієнта',

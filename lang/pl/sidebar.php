@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Rachunek przepływów pieniężnych',
     'categories' => 'Kategorie',
     'closing_rules' => 'Zasady zamknięcia',
+    'complimentary_reasons' => 'Powody komplementu',
+    'complimentary_report' => 'Raport komplementów',
     'consumption_reports' => 'Raporty zużycia',
     'contact_messages' => 'Wiadomości kontaktowe',
     'content_cards' => 'Karty treści',

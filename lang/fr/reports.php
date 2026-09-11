@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Commandes annulées',
     'cash_bank_ledger' => 'Grand livre caisse et banque',
     'cash_flow' => 'État des flux de trésorerie',
+    'complimentary_report' => 'Rapport de gracieuseté',
     'customer_aging' => 'Balance âgée client',
     'customer_ledger' => 'Grand livre client',
     'customer_loyalty_report' => 'Historique de fidélité client',

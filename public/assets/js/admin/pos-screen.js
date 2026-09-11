@@ -42,6 +42,10 @@
         cash_movement_submitting: false,
         correction_mode: false,
         correction_reason_modal: null,
+        complimentary_reason_modal: null,
+        complimentary_status: 'none',
+        complimentary_reason_id: null,
+        complimentary_notes: '',
     };
 
 
@@ -299,6 +303,9 @@
         state.credit_payment_modal = new bootstrap.Modal(document.getElementById('creditPaymentModal'), { backdrop: 'static', keyboard: false });
         if ($('#correctionReasonModal').length) {
             state.correction_reason_modal = new bootstrap.Modal(document.getElementById('correctionReasonModal'), { backdrop: 'static' });
+        }
+        if ($('#complimentaryReasonModal').length) {
+            state.complimentary_reason_modal = new bootstrap.Modal(document.getElementById('complimentaryReasonModal'), { backdrop: 'static' });
         }
         if ($('#addExpenseModal').length) {
             state.add_expense_modal = new bootstrap.Modal(document.getElementById('addExpenseModal'));
@@ -586,6 +593,12 @@
         $('#completeSaleBtn').on('click', completeSale);
         $('#correctionReasonSubmitBtn').on('click', submitCorrectionWithReason);
         $('#cancelCorrectionBtn').on('click', cancelCorrectionMode);
+        $('#markOrderComplimentaryBtn').on('click', toggleOrderComplimentary);
+        $('#complimentaryReasonSubmitBtn').on('click', submitComplimentaryReason);
+        $('#cartRows').on('click', '.line-complimentary', function () {
+            var key = $(this).closest('.cart-line').data('key');
+            toggleLineComplimentary(key);
+        });
 
         $('#heldOrdersBtn').on('click', function () {
             loadHeldOrders();
@@ -1377,6 +1390,9 @@
             image: overrides.image || null,
             track_serial_number: !!pv.track_serial_number,
             serial_numbers: [],
+            is_complimentary: false,
+            complimentary_reason_id: null,
+            complimentary_notes: '',
         });
 
         renderCart();
@@ -1526,6 +1542,9 @@
                 image: overrides.image || null,
                 track_serial_number: true,
                 serial_numbers: selected,
+                is_complimentary: false,
+                complimentary_reason_id: null,
+                complimentary_notes: '',
             });
         }
 
@@ -1912,10 +1931,23 @@
                   '</div>';
 
             var $row = $('<div class="cart-line"></div>').attr('data-key', line.line_key);
+            if (line.is_complimentary) {
+                $row.addClass('cart-line-complimentary');
+            }
+
+            var complimentaryBadge = line.is_complimentary
+                ? '<span class="badge bg-label-info ms-1">' + t('complimentary_short', 'Complimentary') + '</span>'
+                : '';
+            var complimentaryBtn = can('order.complimentary.create')
+                ? '<button type="button" class="line-complimentary' + (line.is_complimentary ? ' is-active' : '') + '" title="' +
+                    (line.is_complimentary ? t('unmark_complimentary', 'Unmark complimentary') : t('mark_item_complimentary', 'Mark complimentary')) +
+                  '"><i class="fa fa-gift"></i></button>'
+                : '';
+
             $row.html(
                 imgHtml +
                 '<div class="cart-line-info">' +
-                    '<div class="cart-line-name">' + lineDesc + '</div>' +
+                    '<div class="cart-line-name">' + lineDesc + complimentaryBadge + '</div>' +
                     stockHint(line.available_stock) +
                     saleTypeCell +
                 '</div>' +
@@ -1923,6 +1955,7 @@
                 discountCell +
                 qtyCell +
                 '<div class="line-total">0.00</div>' +
+                complimentaryBtn +
                 '<button type="button" class="line-remove"><i class="fa fa-xmark"></i></button>'
             );
 
@@ -1947,6 +1980,20 @@
         if ($holdBtn.length) {
             var label = state.order_id ? t('update_hold', 'Update Hold') : t('hold', 'Hold');
             $holdBtn.html('<i class="fa fa-pause"></i> ' + label + ' <span class="pos-key-hint">(F6)</span>');
+        }
+
+        syncComplimentaryStateFromCart();
+        var $compBtn = $('#markOrderComplimentaryBtn');
+        if ($compBtn.length) {
+            $compBtn.toggleClass('active', state.complimentary_status === 'full');
+            $compBtn.toggleClass('is-partial', state.complimentary_status === 'partial');
+            var compTitle = t('mark_order_complimentary', 'Mark order complimentary');
+            if (state.complimentary_status === 'full') {
+                compTitle = t('full_complimentary', 'Full Complimentary');
+            } else if (state.complimentary_status === 'partial') {
+                compTitle = t('partial_complimentary', 'Partial Complimentary');
+            }
+            $compBtn.attr('title', compTitle);
         }
     }
 
@@ -2104,6 +2151,11 @@
     }
 
     function lineTotal(line) {
+        if (line && line.is_complimentary) {
+            var originalBase = (parseFloat(line.quantity) || 0) * (parseFloat(line.unit_price) || 0);
+            return { base: 0, discAmt: 0, taxAmt: 0, taxDiscAmt: 0, total: 0, originalBase: originalBase };
+        }
+
         var qty = parseFloat(line.quantity) || 0;
         var price = parseFloat(line.unit_price) || 0;
         var base = qty * price;
@@ -2623,6 +2675,11 @@
             if (line.sale_type_id) {
                 item.sale_type_id = line.sale_type_id;
             }
+            if (can('order.complimentary.create') && line.is_complimentary) {
+                item.is_complimentary = 1;
+                item.complimentary_reason_id = line.complimentary_reason_id || state.complimentary_reason_id;
+                item.complimentary_notes = line.complimentary_notes || state.complimentary_notes || null;
+            }
 
             return item;
         });
@@ -2668,6 +2725,12 @@
         }
         if ($('#use_loyalty_points').is(':checked')) {
             payload.use_loyalty_points = true;
+        }
+
+        if (can('order.complimentary.create') && state.complimentary_status !== 'none') {
+            payload.complimentary_status = state.complimentary_status;
+            payload.complimentary_reason_id = state.complimentary_reason_id;
+            payload.complimentary_notes = state.complimentary_notes || null;
         }
 
         if (state.payments && state.payments.length) {
@@ -2804,6 +2867,9 @@
                         available_stock: d.available_stock !== undefined ? d.available_stock : null,
                         track_serial_number: !!d.track_serial_number,
                         serial_numbers: d.serial_numbers || [],
+                        is_complimentary: !!d.is_complimentary,
+                        complimentary_reason_id: d.complimentary_reason_id || null,
+                        complimentary_notes: d.complimentary_notes || '',
                     });
                 });
 
@@ -2823,6 +2889,9 @@
                 // over - a reorder is a fresh sale and the server always
                 // recomputes totals from scratch on save anyway.
                 state.payments = [];
+                state.complimentary_status = header.complimentary_status || 'none';
+                state.complimentary_reason_id = header.complimentary_reason_id || null;
+                state.complimentary_notes = header.complimentary_notes || '';
                 renderCart();
                 resetPaymentSelection();
                 selectDefaultPaymentMethod();
@@ -3072,6 +3141,9 @@
                 available_stock: d.available_stock !== undefined ? d.available_stock : null,
                 track_serial_number: !!d.track_serial_number,
                 serial_numbers: d.serial_numbers || [],
+                is_complimentary: !!d.is_complimentary,
+                complimentary_reason_id: d.complimentary_reason_id || null,
+                complimentary_notes: d.complimentary_notes || '',
             });
         });
 
@@ -3103,6 +3175,10 @@
             $('#use_loyalty_points').prop('checked', true);
         }
 
+        state.complimentary_status = header.complimentary_status || 'none';
+        state.complimentary_reason_id = header.complimentary_reason_id || null;
+        state.complimentary_notes = header.complimentary_notes || '';
+
         state.payments = payments.map(function (p) {
             return {
                 payment_method_id: p.payment_method_id,
@@ -3130,6 +3206,123 @@
             // toward completeSale()'s total check.
             selectDefaultPaymentMethod();
         }
+    }
+
+    // ==============================
+    // COMPLIMENTARY
+    // ==============================
+    function syncComplimentaryStateFromCart() {
+        if (!state.cart.length) {
+            state.complimentary_status = 'none';
+            return;
+        }
+        var count = state.cart.filter(function (l) { return !!l.is_complimentary; }).length;
+        if (count <= 0) {
+            state.complimentary_status = 'none';
+        } else if (count >= state.cart.length) {
+            state.complimentary_status = 'full';
+        } else {
+            state.complimentary_status = 'partial';
+        }
+    }
+
+    function openComplimentaryReasonModal(scope, lineKey) {
+        if (!can('order.complimentary.create')) {
+            errorMessage(t('no_complimentary_permission', 'You do not have permission to create complimentary orders.'));
+            return;
+        }
+        if (scope === 'order' && !can('order.complimentary.approve')) {
+            errorMessage(t('no_full_complimentary_permission', 'You do not have permission to mark the entire order complimentary.'));
+            return;
+        }
+        if (!(CFG.complimentary_reasons || []).length) {
+            errorMessage(t('no_complimentary_reasons', 'No complimentary reasons are configured. Ask an administrator to add them under Sales → Complimentary Reasons.'));
+            return;
+        }
+
+        $('#complimentary_target_scope').val(scope);
+        $('#complimentary_target_key').val(lineKey || '');
+        $('#complimentary_reason_id').val(state.complimentary_reason_id || '');
+        $('#complimentary_notes').val(state.complimentary_notes || '');
+        $('#complimentaryReasonModalTitle').text(
+            scope === 'order'
+                ? t('mark_order_complimentary', 'Mark order complimentary')
+                : t('mark_item_complimentary', 'Mark complimentary')
+        );
+
+        if (state.complimentary_reason_modal) {
+            state.complimentary_reason_modal.show();
+        }
+    }
+
+    function toggleOrderComplimentary() {
+        if (state.complimentary_status === 'full') {
+            state.cart.forEach(function (line) {
+                line.is_complimentary = false;
+                line.complimentary_reason_id = null;
+                line.complimentary_notes = '';
+            });
+            state.complimentary_status = 'none';
+            state.complimentary_reason_id = null;
+            state.complimentary_notes = '';
+            renderCart();
+            return;
+        }
+        openComplimentaryReasonModal('order');
+    }
+
+    function toggleLineComplimentary(key) {
+        var line = state.cart.find(function (l) { return l.line_key === key; });
+        if (!line) return;
+
+        if (line.is_complimentary) {
+            line.is_complimentary = false;
+            line.complimentary_reason_id = null;
+            line.complimentary_notes = '';
+            renderCart();
+            return;
+        }
+        openComplimentaryReasonModal('line', key);
+    }
+
+    function submitComplimentaryReason() {
+        var reasonId = $('#complimentary_reason_id').val();
+        var notes = ($('#complimentary_notes').val() || '').trim();
+        var scope = $('#complimentary_target_scope').val();
+        var key = $('#complimentary_target_key').val();
+
+        if (!reasonId) {
+            errorMessage(t('complimentary_reason_required', 'A complimentary reason is required.'));
+            return;
+        }
+
+        if (scope === 'order') {
+            if (!confirm(t('confirm_full_complimentary', 'Mark the entire order as complimentary? Customer payable will become zero.'))) {
+                return;
+            }
+            state.complimentary_reason_id = reasonId;
+            state.complimentary_notes = notes;
+            state.cart.forEach(function (line) {
+                line.is_complimentary = true;
+                line.complimentary_reason_id = reasonId;
+                line.complimentary_notes = notes;
+            });
+        } else {
+            var line = state.cart.find(function (l) { return l.line_key === key; });
+            if (!line) return;
+            line.is_complimentary = true;
+            line.complimentary_reason_id = reasonId;
+            line.complimentary_notes = notes;
+            if (!state.complimentary_reason_id) {
+                state.complimentary_reason_id = reasonId;
+                state.complimentary_notes = notes;
+            }
+        }
+
+        if (state.complimentary_reason_modal) {
+            state.complimentary_reason_modal.hide();
+        }
+        renderCart();
     }
 
     // ==============================
@@ -3207,7 +3400,7 @@
                 var total = Math.round((parseFloat(order.total) || 0) * 100) / 100;
                 var entered = Math.round(state.payments.reduce(function (sum, p) { return sum + (parseFloat(p.amount) || 0); }, 0) * 100) / 100;
 
-                if (entered + 0.01 < total) {
+                if (total > 0.01 && entered + 0.01 < total) {
                     errorMessage(t('payment_does_not_cover', 'Payment amount does not cover the total. Please adjust payments.'));
                     return;
                 }
@@ -3217,7 +3410,7 @@
                     method: 'POST',
                     data: {
                         order_id: order.order_id,
-                        payments: state.payments,
+                        payments: total <= 0.01 ? [] : state.payments,
                     },
                 })
                     .then(function (completeResponse) {
@@ -3274,9 +3467,13 @@
         payload.reason = reason;
         payload.payments = state.payments;
 
-        if (!payload.payments || !payload.payments.length) {
+        var correctionTotal = Math.round((parseFloat($('#sumTotal').text()) || 0) * 100) / 100;
+        if (correctionTotal > 0.01 && (!payload.payments || !payload.payments.length)) {
             errorMessage(t('at_least_one_payment', 'At least one payment is required.'));
             return;
+        }
+        if (correctionTotal <= 0.01) {
+            payload.payments = [];
         }
 
         ajaxRequest({ url: URLS.order_correct, method: 'POST', data: payload })
@@ -3472,6 +3669,9 @@
         state.order_id = null;
         state.order_daily_id = null;
         state.correction_mode = false;
+        state.complimentary_status = 'none';
+        state.complimentary_reason_id = null;
+        state.complimentary_notes = '';
         $('#posCorrectionBanner').addClass('d-none').removeClass('d-flex');
         $('#posCorrectionOrderLabel').text('');
         $('#holdOrderBtn').removeClass('d-none');

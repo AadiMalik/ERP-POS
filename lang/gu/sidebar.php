@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'રોકડ પ્રવાહ નિવેદન',
     'categories' => 'શ્રેણીઓ',
     'closing_rules' => 'સમાપન નિયમો',
+    'complimentary_reasons' => 'કમ્પ્લિમેન્ટરી કારણો',
+    'complimentary_report' => 'કમ્પ્લિમેન્ટરી રિપોર્ટ',
     'consumption_reports' => 'વપરાશ અહેવાલો',
     'contact_messages' => 'સંપર્ક સંદેશા',
     'content_cards' => 'સામગ્રી કાર્ડ્સ',

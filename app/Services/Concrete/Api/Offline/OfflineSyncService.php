@@ -68,6 +68,7 @@ class OfflineSyncService
             'banks' => $this->exportBanks($business_id),
             'sale_types' => $this->exportSaleTypes($business_id),
             'discounts' => $this->exportDiscounts($business_id),
+            'complimentary_reasons' => $this->exportComplimentaryReasons($business_id),
             'categories' => $this->exportCategories($business_id),
             'expense_categories' => $this->exportExpenseCategories($business_id),
             'products' => $this->exportProducts($business_id),
@@ -324,6 +325,20 @@ class OfflineSyncService
     protected function exportDiscounts(string $business_id)
     {
         return Discount::where('business_id', $business_id)->where('is_deleted', 0)->where('status', Status::ACTIVE)->get()->toArray();
+    }
+
+    protected function exportComplimentaryReasons(string $business_id)
+    {
+        if (!class_exists(\App\Models\ComplimentaryReason::class) || !Schema::hasTable('complimentary_reasons')) {
+            return [];
+        }
+
+        return \App\Models\ComplimentaryReason::where('business_id', $business_id)
+            ->where('is_deleted', 0)
+            ->where('status', Status::ACTIVE)
+            ->orderBy('name')
+            ->get()
+            ->toArray();
     }
 
     protected function exportCategories(string $business_id)

@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'ರದ್ದುಗೊಂಡ ಆರ್ಡರ್‌ಗಳು',
     'cash_bank_ledger' => 'ನಗದು ಮತ್ತು ಬ್ಯಾಂಕ್ ಲೆಡ್ಜರ್',
     'cash_flow' => 'ನಗದು ಹರಿವಿನ ವರದಿ',
+    'complimentary_report' => 'ಕಾಂಪ್ಲಿಮೆಂಟರಿ ವರದಿ',
     'customer_aging' => 'ಗ್ರಾಹಕ ಏಜಿಂಗ್',
     'customer_ledger' => 'ಗ್ರಾಹಕ ಲೆಡ್ಜರ್',
     'customer_loyalty_report' => 'ಗ್ರಾಹಕ ನಿಷ್ಠೆ ಇತಿಹಾಸ',

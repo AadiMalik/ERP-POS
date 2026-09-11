@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'İptal Edilen Siparişler',
     'cash_bank_ledger' => 'Nakit ve Banka Defteri',
     'cash_flow' => 'Nakit Akış Tablosu',
+    'complimentary_report' => 'İkram raporu',
     'customer_aging' => 'Müşteri Yaşlandırma',
     'customer_ledger' => 'Müşteri Defteri',
     'customer_loyalty_report' => 'Müşteri Sadakat Geçmişi',

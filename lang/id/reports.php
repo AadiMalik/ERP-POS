@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Pesanan Dibatalkan',
     'cash_bank_ledger' => 'Buku Besar Kas dan Bank',
     'cash_flow' => 'Laporan Arus Kas',
+    'complimentary_report' => 'Laporan komplementer',
     'customer_aging' => 'Umur Piutang Pelanggan',
     'customer_ledger' => 'Buku Besar Pelanggan',
     'customer_loyalty_report' => 'Riwayat Loyalitas Pelanggan',

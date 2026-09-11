@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ComplimentaryStatus;
 use App\Enums\RoleNames;
 use App\Enums\Message;
 use App\Enums\Status;
@@ -321,6 +322,11 @@ class OrderController extends Controller
             $obj['override_minimum_price'] = false;
         }
 
+        $complimentary_error = $this->applyComplimentaryAuthorization($obj);
+        if ($complimentary_error) {
+            return $complimentary_error;
+        }
+
         try {
             $order = $this->order_service->save($obj);
             return $this->success($is_update ? Message::UPDATE : Message::SAVE, $order);
@@ -467,7 +473,7 @@ class OrderController extends Controller
             'order_id' => 'required|exists:orders,order_id',
             'reason' => 'required|string|max:1000',
             'products' => 'required|array|min:1',
-            'payments' => 'required|array|min:1',
+            'payments' => 'nullable|array',
         ]);
 
         if ($validator->fails()) {
@@ -503,6 +509,11 @@ class OrderController extends Controller
 
         if (!empty($obj['override_minimum_price']) && !Auth::user()->can('order.price.override-minimum')) {
             $obj['override_minimum_price'] = false;
+        }
+
+        $complimentary_error = $this->applyComplimentaryAuthorization($obj);
+        if ($complimentary_error) {
+            return $complimentary_error;
         }
 
         try {
@@ -933,5 +944,52 @@ class OrderController extends Controller
         $printed_at = now();
 
         return view('admin.order.print.thermal-sales-summary', compact('summary', 'thermal_config', 'business', 'filters', 'printed_at'));
+    }
+
+    /**
+     * Complimentary flags are authorized here, not in OrderService. Without
+     * create permission they are stripped so a crafted payload cannot mark
+     * items free. Full complimentary (every line, or the order-level flag)
+     * additionally requires the approve permission.
+     */
+    protected function applyComplimentaryAuthorization(array &$obj)
+    {
+        $can_create = Auth::user()->can('order.complimentary.create');
+        $can_approve = Auth::user()->can('order.complimentary.approve');
+
+        if (!$can_create) {
+            unset($obj['complimentary_status'], $obj['complimentary_reason_id'], $obj['complimentary_notes']);
+            if (!empty($obj['products']) && is_array($obj['products'])) {
+                foreach ($obj['products'] as $index => $line) {
+                    unset(
+                        $obj['products'][$index]['is_complimentary'],
+                        $obj['products'][$index]['complimentary_reason_id'],
+                        $obj['products'][$index]['complimentary_notes']
+                    );
+                }
+            }
+
+            return null;
+        }
+
+        $requested_full = ($obj['complimentary_status'] ?? '') === ComplimentaryStatus::FULL;
+        $line_count = is_array($obj['products'] ?? null) ? count($obj['products']) : 0;
+        $comp_line_count = 0;
+
+        if (!empty($obj['products']) && is_array($obj['products'])) {
+            foreach ($obj['products'] as $line) {
+                if (!empty($line['is_complimentary'])) {
+                    $comp_line_count++;
+                }
+            }
+        }
+
+        $all_lines_complimentary = $line_count > 0 && $comp_line_count === $line_count;
+
+        if (($requested_full || $all_lines_complimentary) && !$can_approve) {
+            return $this->error(__('complimentary.no_full_permission'), 403);
+        }
+
+        return null;
     }
 }

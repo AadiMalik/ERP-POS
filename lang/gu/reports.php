@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'રદ કરેલા ઓર્ડર',
     'cash_bank_ledger' => 'રોકડ અને બેંક ખાતાવહી',
     'cash_flow' => 'રોકડ પ્રવાહ નિવેદન',
+    'complimentary_report' => 'કમ્પ્લિમેન્ટરી રિપોર્ટ',
     'customer_aging' => 'ગ્રાહક એજિંગ',
     'customer_ledger' => 'ગ્રાહક ખાતાવહી',
     'customer_loyalty_report' => 'ગ્રાહક વફાદારી ઇતિહાસ',

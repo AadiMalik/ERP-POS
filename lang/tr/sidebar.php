@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Nakit Akış Tablosu',
     'categories' => 'Kategoriler',
     'closing_rules' => 'Kapanış Kuralları',
+    'complimentary_reasons' => 'İkram nedenleri',
+    'complimentary_report' => 'İkram raporu',
     'consumption_reports' => 'Tüketim Raporları',
     'contact_messages' => 'İletişim Mesajları',
     'content_cards' => 'İçerik Kartları',

@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'صورت جریان نقدی',
     'categories' => 'دسته‌بندی‌ها',
     'closing_rules' => 'قوانین بستن حساب',
+    'complimentary_reasons' => 'دلایل اهدایی',
+    'complimentary_report' => 'گزارش اهدایی',
     'consumption_reports' => 'گزارش‌های مصرف',
     'contact_messages' => 'پیام‌های تماس',
     'content_cards' => 'کارت‌های محتوا',

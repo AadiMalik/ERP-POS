@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'د خرڅلاو بیرته ستنیدل',
     'coa_inventory_account' => 'د انوینٹری حساب',
     'coa_cogs_account' => 'د COGS حساب',
+    'coa_complimentary_expense_account' => 'د تحفې لګښت حساب',
     'coa_opening_stock_account' => 'د سټاک حساب پرانیستل',
     'coa_stock_adjustment_account' => 'د سټاک تنظیم حساب',
     'coa_inventory_cost_adjustment_account' => 'د موجودۍ د لګښت د سمون حساب',

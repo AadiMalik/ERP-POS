@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'وڪرو واپسي',
     'coa_inventory_account' => 'انوینٽري اڪائونٽ',
     'coa_cogs_account' => 'COGS اڪائونٽ',
+    'coa_complimentary_expense_account' => 'ڪمپليمنٽري خرچ اڪائونٽ',
     'coa_opening_stock_account' => 'اسٽاڪ اڪائونٽ کولڻ',
     'coa_stock_adjustment_account' => 'اسٽاڪ ايڊجسٽمينٽ اڪائونٽ',
     'coa_inventory_cost_adjustment_account' => 'انوینٽري لاڳت ايڊجسٽمينٽ اڪائونٽ',

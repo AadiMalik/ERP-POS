@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'État des flux de trésorerie',
     'categories' => 'Catégories',
     'closing_rules' => 'Règles de clôture',
+    'complimentary_reasons' => 'Motifs de gracieuseté',
+    'complimentary_report' => 'Rapport de gracieuseté',
     'consumption_reports' => 'Rapports de consommation',
     'contact_messages' => 'Messages de contact',
     'content_cards' => 'Cartes de contenu',

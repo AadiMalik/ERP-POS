@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Demonstrativo de fluxo de caixa',
     'categories' => 'Categorias',
     'closing_rules' => 'Regras de fechamento',
+    'complimentary_reasons' => 'Motivos de cortesia',
+    'complimentary_report' => 'Relatório de cortesia',
     'consumption_reports' => 'Relatórios de consumo',
     'contact_messages' => 'Mensagens de contato',
     'content_cards' => 'Cartões de conteúdo',

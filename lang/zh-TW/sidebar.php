@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => '現金流量表',
     'categories' => '分類',
     'closing_rules' => '結帳規則',
+    'complimentary_reasons' => '贈送原因',
+    'complimentary_report' => '贈送報表',
     'consumption_reports' => '消耗報告',
     'contact_messages' => '聯絡訊息',
     'content_cards' => '內容卡片',

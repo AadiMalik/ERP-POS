@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'ਰੱਦ ਕੀਤੇ ਆਰਡਰ',
     'cash_bank_ledger' => 'ਨਕਦ ਅਤੇ ਬੈਂਕ ਲੇਜਰ',
     'cash_flow' => 'ਨਕਦ ਪ੍ਰਵਾਹ ਬਿਆਨ',
+    'complimentary_report' => 'ਕੰਪਲੀਮੈਂਟਰੀ ਰਿਪੋਰਟ',
     'customer_aging' => 'ਗਾਹਕ ਏਜਿੰਗ',
     'customer_ledger' => 'ਗਾਹਕ ਲੇਜਰ',
     'customer_loyalty_report' => 'ਗਾਹਕ ਵਫ਼ਾਦਾਰੀ ਇਤਿਹਾਸ',

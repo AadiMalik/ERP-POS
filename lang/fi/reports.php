@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Peruutetut tilaukset',
     'cash_bank_ledger' => 'Kassa- ja pankkipääkirja',
     'cash_flow' => 'Kassavirtalaskelma',
+    'complimentary_report' => 'Ilmaisjakeluraportti',
     'customer_aging' => 'Asiakassaatavien ikäjakauma',
     'customer_ledger' => 'Asiakaspääkirja',
     'customer_loyalty_report' => 'Asiakasuskollisuushistoria',

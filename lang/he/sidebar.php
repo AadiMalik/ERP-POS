@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'דוח תזרים מזומנים',
     'categories' => 'קטגוריות',
     'closing_rules' => 'כללי סגירה',
+    'complimentary_reasons' => 'סיבות לקומפלימנט',
+    'complimentary_report' => 'דוח קומפלימנט',
     'consumption_reports' => 'דוחות צריכה',
     'contact_messages' => 'הודעות יצירת קשר',
     'content_cards' => 'כרטיסי תוכן',

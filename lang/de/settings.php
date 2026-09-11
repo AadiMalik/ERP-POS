@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Verkauf Rückgabe',
     'coa_inventory_account' => 'Inventarkonto',
     'coa_cogs_account' => 'COGS-Konto',
+    'coa_complimentary_expense_account' => 'Kulanz-Aufwandskonto',
     'coa_opening_stock_account' => 'Eröffnung eines Aktienkontos',
     'coa_stock_adjustment_account' => 'Bestandsanpassungskonto',
     'coa_inventory_cost_adjustment_account' => 'Bestandskostenanpassungskonto',

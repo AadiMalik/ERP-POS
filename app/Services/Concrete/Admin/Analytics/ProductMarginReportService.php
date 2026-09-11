@@ -52,8 +52,8 @@ class ProductMarginReportService extends BaseOrderReportService
                 'products.category_id',
                 'products.brand_id'
             )
-            ->selectRaw('SUM(order_details.total) as revenue')
-            ->selectRaw('SUM(order_details.cost_price * order_details.quantity) as cogs')
+            ->selectRaw('SUM(CASE WHEN order_details.is_complimentary = 1 THEN 0 ELSE order_details.total END) as revenue')
+            ->selectRaw('SUM(CASE WHEN order_details.is_complimentary = 1 THEN 0 ELSE order_details.cost_price * order_details.quantity END) as cogs')
             ->selectRaw('SUM(order_details.quantity) as qty_sold')
             ->groupBy('order_details.product_id', 'products.name', 'products.category_id', 'products.brand_id')
             ->get()
@@ -64,6 +64,7 @@ class ProductMarginReportService extends BaseOrderReportService
         // never inflates both revenue and margin.
         $returns = OrderReturnDetail::query()
             ->join('order_returns', 'order_returns.order_return_id', '=', 'order_return_details.order_return_id')
+            ->leftJoin('order_details', 'order_details.order_detail_id', '=', 'order_return_details.order_detail_id')
             ->where('order_returns.is_deleted', 0)
             ->where('order_returns.status', 'approved');
 
@@ -75,8 +76,8 @@ class ProductMarginReportService extends BaseOrderReportService
         ]);
 
         $return_rows = $returns->select('order_return_details.product_id')
-            ->selectRaw('SUM(order_return_details.total) as returned_revenue')
-            ->selectRaw('SUM(order_return_details.cost_price * order_return_details.return_quantity) as returned_cogs')
+            ->selectRaw('SUM(CASE WHEN COALESCE(order_details.is_complimentary, 0) = 1 THEN 0 ELSE order_return_details.total END) as returned_revenue')
+            ->selectRaw('SUM(CASE WHEN COALESCE(order_details.is_complimentary, 0) = 1 THEN 0 ELSE order_return_details.cost_price * order_return_details.return_quantity END) as returned_cogs')
             ->groupBy('order_return_details.product_id')
             ->get()
             ->keyBy('product_id');

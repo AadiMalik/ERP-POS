@@ -120,6 +120,7 @@ class ChartOfAccountsTemplateSeeder extends Seeder
             'default_sale_return_account_id' => '420002-001',
             'default_inventory_account_id' => '113001-001',
             'default_cogs_account_id' => '510001-001',
+            'default_complimentary_expense_account_id' => '540001-002',
             'default_opening_stock_account_id' => '113002-001',
             'default_stock_adjustment_account_id' => '520004-001',
             'default_inventory_cost_adjustment_account_id' => '520004-002',
@@ -507,6 +508,7 @@ class ChartOfAccountsTemplateSeeder extends Seeder
                 'parent_name' => 'Selling & Distribution Expenses',
                 'children' => [
                     ['code' => '540001-001', 'name' => 'Marketing & Advertising'],
+                    ['code' => '540001-002', 'name' => 'Complimentary / Promotional Expense'],
                 ],
             ],
             [

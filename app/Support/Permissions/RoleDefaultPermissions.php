@@ -145,7 +145,7 @@ class RoleDefaultPermissions
 
             case RoleNames::SALEMANAGER:
                 return array_merge(
-                    PermissionRegistry::namesForModules(['payment-method', 'bank', 'payment-gateway', 'payment-transaction', 'sale-type', 'discount', 'voucher', 'order', 'order-return', 'pos', 'customer', 'customer-payment', 'service-sale', 'service-sale-return', 'loyalty']),
+                    PermissionRegistry::namesForModules(['payment-method', 'bank', 'payment-gateway', 'payment-transaction', 'sale-type', 'discount', 'voucher', 'complimentary-reason', 'order', 'order-return', 'pos', 'customer', 'customer-payment', 'service-sale', 'service-sale-return', 'loyalty']),
                     array_merge(
                         ['dashboard.view'],
                         self::formatVariants([
@@ -153,7 +153,7 @@ class RoleDefaultPermissions
                             'order-detail', 'product-sales', 'variation-sales', 'customer-sales', 'branch-sales',
                             'order-source-sales', 'payment-method-sales', 'order-status-report', 'cancelled-orders',
                             'due-credit-sales', 'discount-report', 'order-tax-report', 'top-selling', 'offline-orders-report',
-                            'order-correction-report', 'loyalty-report', 'customer-loyalty-report',
+                            'order-correction-report', 'loyalty-report', 'customer-loyalty-report', 'complimentary-report',
                         ])
                     )
                 );
@@ -177,7 +177,7 @@ class RoleDefaultPermissions
 
             case RoleNames::MARKITINGMANAGER:
                 return array_merge(
-                    PermissionRegistry::namesForModulesExcludingActions(['discount', 'voucher'], ['delete']),
+                    PermissionRegistry::namesForModulesExcludingActions(['discount', 'voucher', 'complimentary-reason'], ['delete']),
                     PermissionRegistry::namesForModules([
                         'firebase-setting',
                         'notification-template',
@@ -255,6 +255,9 @@ class RoleDefaultPermissions
                     'order.loyalty.apply',
                     'order.price.change',
                     'order.price.override-minimum',
+                    'order.complimentary.create',
+                    'order.complimentary.approve',
+                    'order.complimentary.view-cost',
                     'order.hold',
                     'order.cancel',
                     'order.void',

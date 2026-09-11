@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => '현금흐름표',
     'categories' => '카테고리',
     'closing_rules' => '마감 규칙',
+    'complimentary_reasons' => '무상 제공 사유',
+    'complimentary_report' => '무상 제공 보고서',
     'consumption_reports' => '소비 보고서',
     'contact_messages' => '문의 메시지',
     'content_cards' => '콘텐츠 카드',

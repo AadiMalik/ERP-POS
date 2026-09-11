@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'विक्री परतावा',
     'coa_inventory_account' => 'इन्व्हेंटरी खाते',
     'coa_cogs_account' => 'COGS खाते',
+    'coa_complimentary_expense_account' => 'कंप्लिमेंटरी खर्च खाते',
     'coa_opening_stock_account' => 'स्टॉक खाते उघडत आहे',
     'coa_stock_adjustment_account' => 'स्टॉक समायोजन खाते',
     'coa_inventory_cost_adjustment_account' => 'इन्व्हेंटरी खर्च समायोजन खाते',

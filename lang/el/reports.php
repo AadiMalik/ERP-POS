@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Ακυρωμένες παραγγελίες',
     'cash_bank_ledger' => 'Καθολικό ταμείου και τράπεζας',
     'cash_flow' => 'Κατάσταση ταμειακών ροών',
+    'complimentary_report' => 'Αναφορά προσφορών',
     'customer_aging' => 'Παλαίωση πελατών',
     'customer_ledger' => 'Καθολικό πελάτη',
     'customer_loyalty_report' => 'Ιστορικό πιστότητας πελάτη',

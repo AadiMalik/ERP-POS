@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Звіт про рух грошових коштів',
     'categories' => 'Категорії',
     'closing_rules' => 'Правила закриття',
+    'complimentary_reasons' => 'Причини компліменту',
+    'complimentary_report' => 'Звіт про компліменти',
     'consumption_reports' => 'Звіти про споживання',
     'contact_messages' => 'Контактні повідомлення',
     'content_cards' => 'Картки контенту',

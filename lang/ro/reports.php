@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Comenzi anulate',
     'cash_bank_ledger' => 'Registru casă și bancă',
     'cash_flow' => 'Situația fluxurilor de numerar',
+    'complimentary_report' => 'Raport complemență',
     'customer_aging' => 'Vechime creanțe clienți',
     'customer_ledger' => 'Registru client',
     'customer_loyalty_report' => 'Istoric fidelitate client',

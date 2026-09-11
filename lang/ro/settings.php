@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Retur de vânzare',
     'coa_inventory_account' => 'Cont de inventar',
     'coa_cogs_account' => 'Contul COGS',
+    'coa_complimentary_expense_account' => 'Cont cheltuieli complemență',
     'coa_opening_stock_account' => 'Deschidere cont de stoc',
     'coa_stock_adjustment_account' => 'Cont de ajustare a stocurilor',
     'coa_inventory_cost_adjustment_account' => 'Cont de ajustare a costului stocului',

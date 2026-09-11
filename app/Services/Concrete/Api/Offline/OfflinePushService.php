@@ -2,6 +2,7 @@
 
 namespace App\Services\Concrete\Api\Offline;
 
+use App\Enums\ComplimentaryStatus;
 use App\Enums\RoleNames;
 use App\Enums\Status;
 use App\Models\Expense;
@@ -139,6 +140,7 @@ class OfflinePushService
             $payload['register_session_id'] ?? $payload['register_session_local_id'] ?? null
         );
         $payload['order_source_id'] = $payload['order_source_id'] ?? $this->resolvePosOrderSourceId();
+        $this->stripUnauthorizedComplimentary($payload);
 
         try {
             $order = $this->order_service->save($payload);
@@ -429,5 +431,38 @@ class OfflinePushService
             'server_id' => $session->pos_register_session_id ?? null,
             'status' => $status,
         ];
+    }
+
+    protected function stripUnauthorizedComplimentary(array &$payload): void
+    {
+        $user = Auth::user();
+        if (!$user || !$user->can('order.complimentary.create')) {
+            unset($payload['complimentary_status'], $payload['complimentary_reason_id'], $payload['complimentary_notes']);
+            if (!empty($payload['products']) && is_array($payload['products'])) {
+                foreach ($payload['products'] as $index => $line) {
+                    unset(
+                        $payload['products'][$index]['is_complimentary'],
+                        $payload['products'][$index]['complimentary_reason_id'],
+                        $payload['products'][$index]['complimentary_notes']
+                    );
+                }
+            }
+            return;
+        }
+
+        $requested_full = ($payload['complimentary_status'] ?? '') === ComplimentaryStatus::FULL;
+        $line_count = is_array($payload['products'] ?? null) ? count($payload['products']) : 0;
+        $comp_line_count = 0;
+        if (!empty($payload['products']) && is_array($payload['products'])) {
+            foreach ($payload['products'] as $line) {
+                if (!empty($line['is_complimentary'])) {
+                    $comp_line_count++;
+                }
+            }
+        }
+
+        if (($requested_full || ($line_count > 0 && $comp_line_count === $line_count)) && !$user->can('order.complimentary.approve')) {
+            throw new Exception(__('complimentary.no_full_permission'));
+        }
     }
 }

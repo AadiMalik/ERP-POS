@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Pedidos cancelados',
     'cash_bank_ledger' => 'Libro mayor de caja y banco',
     'cash_flow' => 'Estado de flujo de efectivo',
+    'complimentary_report' => 'Informe de cortesía',
     'customer_aging' => 'Antigüedad de saldos de clientes',
     'customer_ledger' => 'Libro mayor de clientes',
     'customer_loyalty_report' => 'Historial de fidelidad del cliente',

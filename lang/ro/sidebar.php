@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Situația fluxurilor de numerar',
     'categories' => 'Categorii',
     'closing_rules' => 'Reguli de închidere',
+    'complimentary_reasons' => 'Motive de complemență',
+    'complimentary_report' => 'Raport complemență',
     'consumption_reports' => 'Rapoarte de consum',
     'contact_messages' => 'Mesaje de contact',
     'content_cards' => 'Carduri de conținut',

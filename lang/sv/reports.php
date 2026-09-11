@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Avbrutna beställningar',
     'cash_bank_ledger' => 'Kassa- och bankhuvudbok',
     'cash_flow' => 'Kassaflödesanalys',
+    'complimentary_report' => 'Komplimangrapport',
     'customer_aging' => 'Kundfordringars ålder',
     'customer_ledger' => 'Kundhuvudbok',
     'customer_loyalty_report' => 'Kundlojalitetshistorik',

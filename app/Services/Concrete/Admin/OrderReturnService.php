@@ -61,7 +61,7 @@ class OrderReturnService
         'orderReturnDetails',
         'orderReturnDetails.product',
         'orderReturnDetails.productVariation',
-        'orderReturnDetails.unit',
+        'orderReturnDetails.orderDetail',
     ];
 
     public function __construct()
@@ -452,6 +452,7 @@ class OrderReturnService
                 }
 
                 $base_quantity = $return_quantity * $conversion_factor;
+                $is_complimentary = !empty($detail->is_complimentary);
 
                 $line_subtotal = $base_quantity * $unit_price;
                 $line_discount_amount = round($line_subtotal * $discount_percent / 100, 3);
@@ -462,6 +463,16 @@ class OrderReturnService
                 $line_tax_amount = $line_tax['tax_amount'];
                 $line_tax_discount_amount = $line_tax['tax_discount_amount'];
                 $line_total = \App\Support\Tax\TaxCalculator::lineTotal($taxable, $line_tax_amount, $tax_type);
+
+                if ($is_complimentary) {
+                    $line_subtotal = 0;
+                    $line_discount_amount = 0;
+                    $line_tax_amount = 0;
+                    $line_tax_discount_amount = 0;
+                    $line_total = 0;
+                    $discount_percent = 0;
+                    $tax_percent = 0;
+                }
 
                 // Prorate this line's own voucher contribution (per-unit rate x
                 // returned base quantity) the same way its % discount is prorated
@@ -858,8 +869,8 @@ class OrderReturnService
 
     protected function applyOrderReturnPosting(OrderReturn $order_return)
     {
-        $existing = JournalEntry::where('source_type', JournalSourceTypes::SALE_RETURN)
-            ->where('source_id', $order_return->order_return_id)
+        $existing = JournalEntry::where('source_id', $order_return->order_return_id)
+            ->whereIn('source_type', [JournalSourceTypes::SALE_RETURN, JournalSourceTypes::COMPLIMENTARY_RETURN])
             ->where('is_deleted', 0)
             ->exists();
 
@@ -881,7 +892,7 @@ class OrderReturnService
 
         app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($order_return->business_id, now());
 
-        if (empty($accounting_setting->default_sale_return_account_id)) {
+        if ((float) $order_return->subtotal > 0.0001 && empty($accounting_setting->default_sale_return_account_id)) {
             throw new Exception('Sale Return Account is not configured in Accounting Settings. Please configure it before approving order returns.');
         }
 
@@ -901,6 +912,14 @@ class OrderReturnService
             throw new Exception('Inventory and COGS Accounts must be configured in Accounting Settings before approving order returns.');
         }
 
+        $has_complimentary_return = $order_return->orderReturnDetails->contains(function ($detail) {
+            return !empty(optional($detail->orderDetail)->is_complimentary);
+        });
+
+        if ($has_complimentary_return && empty($accounting_setting->default_complimentary_expense_account_id)) {
+            throw new Exception(__('complimentary.expense_account_missing_return'));
+        }
+
         // Resolve the refund/credit account - mirrors how OrderService::post()
         // resolves each payment's account: a Cash refund hits the Cash
         // Account, any other named payment method hits its own mapped
@@ -909,8 +928,9 @@ class OrderReturnService
         // than an actual cash movement).
         $refund_account_id = null;
         $refund_method = null;
+        $needs_refund = round((float) $order_return->total, 2) > 0.01;
 
-        if (!empty($order_return->refund_payment_method_id)) {
+        if ($needs_refund && !empty($order_return->refund_payment_method_id)) {
             $refund_method = PaymentMethod::find($order_return->refund_payment_method_id);
 
             if (!$refund_method) {
@@ -953,7 +973,7 @@ class OrderReturnService
                     throw new Exception('Payment method "' . $refund_method->name . '" is not mapped to an account.');
                 }
             }
-        } else {
+        } elseif ($needs_refund) {
             // No refund method chosen = credit the customer with redeemable
             // Store Credit (a dedicated liability account, never the AR/
             // receivable account - see default_store_credit_account_id's
@@ -974,6 +994,17 @@ class OrderReturnService
 
         $entry_no = generateJVNum($journal->journal_id);
 
+        $all_complimentary_return = $has_complimentary_return
+            && $order_return->orderReturnDetails->every(function ($detail) {
+                return (float) $detail->return_quantity <= 0 || !empty(optional($detail->orderDetail)->is_complimentary);
+            });
+        $return_source_type = $all_complimentary_return
+            ? JournalSourceTypes::COMPLIMENTARY_RETURN
+            : JournalSourceTypes::SALE_RETURN;
+        $return_description = $all_complimentary_return
+            ? 'Complimentary return voucher for ' . $order_return->order_return_no
+            : 'Auto-generated return voucher for approved order return ' . $order_return->order_return_no;
+
         $journal_entry = JournalEntry::create([
             'journal_entry_id' => generateUuid(),
             'journal_id'       => $journal->journal_id,
@@ -982,8 +1013,8 @@ class OrderReturnService
             'entry_no'         => $entry_no,
             'reference_no'     => $order_return->order_return_no,
             'entry_date'       => now(),
-            'description'      => 'Auto-generated return voucher for approved order return ' . $order_return->order_return_no,
-            'source_type'      => JournalSourceTypes::SALE_RETURN,
+            'description'      => $return_description,
+            'source_type'      => $return_source_type,
             'source_id'        => $order_return->order_return_id,
             'status'           => 'posted',
             'postedby_id'      => Auth::id(),
@@ -1014,14 +1045,16 @@ class OrderReturnService
             ? round((float) $order_return->subtotal - (float) $order_return->tax_amount - $tax_discount_amount, 3)
             : (float) $order_return->subtotal;
 
-        JournalEntryDetail::create([
-            'journal_entry_detail_id' => generateUuid(),
-            'journal_entry_id'        => $journal_entry->journal_entry_id,
-            'account_id'              => $accounting_setting->default_sale_return_account_id,
-            'debit'                   => $sale_return_amount,
-            'credit'                  => 0,
-            'description'             => 'Order Return - ' . $order_return->order_return_no,
-        ]);
+        if ($sale_return_amount > 0.0001) {
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id'        => $journal_entry->journal_entry_id,
+                'account_id'              => $accounting_setting->default_sale_return_account_id,
+                'debit'                   => $sale_return_amount,
+                'credit'                  => 0,
+                'description'             => 'Order Return - ' . $order_return->order_return_no,
+            ]);
+        }
 
         // Debit: tax reversed - contra to the original tax credit.
         if ((float) $order_return->tax_amount > 0) {
@@ -1048,17 +1081,19 @@ class OrderReturnService
         }
 
         // Credit: the refund/store-credit account for the total handed back.
-        JournalEntryDetail::create([
-            'journal_entry_detail_id' => generateUuid(),
-            'journal_entry_id'        => $journal_entry->journal_entry_id,
-            'account_id'              => $refund_account_id,
-            'debit'                   => 0,
-            'credit'                  => $order_return->total,
-            'user_id'                 => empty($refund_method) ? $order_return->customer_id : null,
-            'description'             => 'Order Return - ' . $order_return->order_return_no . ($refund_method ? (' - ' . $refund_method->name) : ' - Store Credit'),
-        ]);
+        if ($needs_refund && $refund_account_id) {
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id'        => $journal_entry->journal_entry_id,
+                'account_id'              => $refund_account_id,
+                'debit'                   => 0,
+                'credit'                  => $order_return->total,
+                'user_id'                 => empty($refund_method) ? $order_return->customer_id : null,
+                'description'             => 'Order Return - ' . $order_return->order_return_no . ($refund_method ? (' - ' . $refund_method->name) : ' - Store Credit'),
+            ]);
+        }
 
-        if (empty($refund_method) && !empty($order_return->customer_id)) {
+        if ($needs_refund && empty($refund_method) && !empty($order_return->customer_id)) {
             app(CustomerStoreCreditService::class)->issue(
                 $order_return->business_id,
                 $order_return->customer_id,
@@ -1098,8 +1133,9 @@ class OrderReturnService
 
         // Per line: return stock to inventory at its original cost basis
         // (the order_detail.cost_price snapshot from the original sale) and
-        // accumulate the COGS/Inventory reversal total.
-        $total_cost = 0;
+        // accumulate normal COGS vs complimentary expense reversals.
+        $normal_cogs = 0;
+        $complimentary_cost = 0;
 
         foreach ($order_return->orderReturnDetails as $detail) {
             $base_quantity = $detail->base_quantity;
@@ -1121,7 +1157,12 @@ class OrderReturnService
             $new_qty = $existing_qty + $base_quantity;
             $line_cost = round($base_quantity * $cost_price, 3);
             $new_avg = $new_qty > 0 ? ((($existing_qty * $existing_avg) + $line_cost) / $new_qty) : 0;
-            $total_cost += $line_cost;
+            $is_complimentary = !empty(optional($detail->orderDetail)->is_complimentary);
+            if ($is_complimentary) {
+                $complimentary_cost += $line_cost;
+            } else {
+                $normal_cogs += $line_cost;
+            }
 
             if ($stock) {
                 $stock->update([
@@ -1203,11 +1244,16 @@ class OrderReturnService
                 app(ProductVariationStockService::class)->adjustBatchQuantity($restore['product_variation_batch_id'], $restore['base_quantity']);
 
                 $restore_quantity = $detail->conversion_factor > 0 ? $restore['base_quantity'] / $detail->conversion_factor : $restore['base_quantity'];
+                $stock_tx_type = $is_complimentary ? TransactionType::COMPLIMENTARY_RETURN : TransactionType::SALE_RETURN;
+                $stock_ref_type = $is_complimentary ? ReferenceType::COMPLIMENTARY_RETURN : ReferenceType::SALE_RETURN;
+                $stock_remarks = $is_complimentary
+                    ? 'Complimentary stock in on order return ' . $order_return->order_return_no
+                    : 'Auto-created on approval of order return ' . $order_return->order_return_no;
 
                 ProductVariationStockTransaction::create([
                     'product_variation_stock_transaction_id' => generateUuid(),
                     'transaction_date'                       => now(),
-                    'transaction_type'                        => TransactionType::SALE_RETURN,
+                    'transaction_type'                        => $stock_tx_type,
                     'business_id'                             => $order_return->business_id,
                     'product_id'                              => $detail->product_id,
                     'product_variation_id'                    => $detail->product_variation_id,
@@ -1222,8 +1268,8 @@ class OrderReturnService
                     'quantity_after'                           => $new_qty,
                     'avg_price_after'                          => $new_avg,
                     'reference_id'                              => $order_return->order_return_id,
-                    'reference_type'                            => ReferenceType::SALE_RETURN,
-                    'remarks'                                   => 'Auto-created on approval of order return ' . $order_return->order_return_no,
+                    'reference_type'                            => $stock_ref_type,
+                    'remarks'                                   => $stock_remarks,
                     'product_variation_batch_id'                => $restore['product_variation_batch_id'],
                     'createdby_id'                              => Auth::id(),
                     'date_created'                              => now(),
@@ -1231,14 +1277,14 @@ class OrderReturnService
             }
         }
 
-        if ($total_cost > 0) {
+        if ($normal_cogs > 0) {
             JournalEntryDetail::create([
                 'journal_entry_detail_id' => generateUuid(),
                 'journal_entry_id'        => $journal_entry->journal_entry_id,
                 'account_id'              => $accounting_setting->default_inventory_account_id,
-                'debit'                   => $total_cost,
+                'debit'                   => $normal_cogs,
                 'credit'                  => 0,
-                'description'             => 'Order Return - ' . $order_return->order_return_no . ' - Inventory',
+                'description'             => 'Order Return - ' . $order_return->order_return_no . ' - Inventory (sold)',
             ]);
 
             JournalEntryDetail::create([
@@ -1246,8 +1292,28 @@ class OrderReturnService
                 'journal_entry_id'        => $journal_entry->journal_entry_id,
                 'account_id'              => $accounting_setting->default_cogs_account_id,
                 'debit'                   => 0,
-                'credit'                  => $total_cost,
+                'credit'                  => $normal_cogs,
                 'description'             => 'Order Return - ' . $order_return->order_return_no . ' - COGS',
+            ]);
+        }
+
+        if ($complimentary_cost > 0) {
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id'        => $journal_entry->journal_entry_id,
+                'account_id'              => $accounting_setting->default_inventory_account_id,
+                'debit'                   => $complimentary_cost,
+                'credit'                  => 0,
+                'description'             => 'Order Return - ' . $order_return->order_return_no . ' - Inventory (complimentary)',
+            ]);
+
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id'        => $journal_entry->journal_entry_id,
+                'account_id'              => $accounting_setting->default_complimentary_expense_account_id,
+                'debit'                   => 0,
+                'credit'                  => $complimentary_cost,
+                'description'             => 'Order Return - ' . $order_return->order_return_no . ' - Complimentary Expense',
             ]);
         }
 
@@ -1267,8 +1333,8 @@ class OrderReturnService
      */
     protected function reverseOrderReturnPosting(OrderReturn $order_return)
     {
-        $journal_entry = JournalEntry::where('source_type', JournalSourceTypes::SALE_RETURN)
-            ->where('source_id', $order_return->order_return_id)
+        $journal_entry = JournalEntry::where('source_id', $order_return->order_return_id)
+            ->whereIn('source_type', [JournalSourceTypes::SALE_RETURN, JournalSourceTypes::COMPLIMENTARY_RETURN])
             ->where('is_deleted', 0)
             ->first();
 
@@ -1306,7 +1372,7 @@ class OrderReturnService
             ]);
         }
 
-        $stock_transactions = ProductVariationStockTransaction::where('reference_type', ReferenceType::SALE_RETURN)
+        $stock_transactions = ProductVariationStockTransaction::whereIn('reference_type', [ReferenceType::SALE_RETURN, ReferenceType::COMPLIMENTARY_RETURN])
             ->where('reference_id', $order_return->order_return_id)
             ->where('is_deleted', 0)
             ->get();

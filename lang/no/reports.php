@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Kansellerte bestillinger',
     'cash_bank_ledger' => 'Kasse- og bankbok',
     'cash_flow' => 'Kontantstrømoppstilling',
+    'complimentary_report' => 'Komplimentrapport',
     'customer_aging' => 'Kundefordringers alder',
     'customer_ledger' => 'Kundebok',
     'customer_loyalty_report' => 'Kundelojalitetshistorikk',

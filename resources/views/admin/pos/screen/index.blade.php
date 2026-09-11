@@ -281,6 +281,11 @@
                                 </select>
                             </div>
                             <span class="pos-cart-order-no d-none" id="cartOrderNoBadge"></span>
+                            @can('order.complimentary.create')
+                            <button type="button" class="btn btn-sm pos-cart-icon-btn" id="markOrderComplimentaryBtn" title="{{ __('complimentary.mark_order') }}">
+                                <i class="fa fa-gift"></i>
+                            </button>
+                            @endcan
                             <button type="button" class="btn btn-sm pos-clear-cart-btn d-none" id="clearCartBtn">
                                 <i class="fa fa-trash"></i> Clear
                             </button>
@@ -516,6 +521,39 @@
         </div>
     </div>
 
+    <div class="modal fade" id="complimentaryReasonModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="complimentaryReasonModalTitle">{{ __('complimentary.mark_item') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="complimentary_target_key">
+                    <input type="hidden" id="complimentary_target_scope">
+                    <p class="text-muted small mb-2" id="complimentaryReasonHint">{{ __('complimentary.reason_required_hint') }}</p>
+                    <div class="mb-3">
+                        <label class="form-label">{{ __('complimentary.reason') }} <span class="text-danger">*</span></label>
+                        <select class="form-select" id="complimentary_reason_id">
+                            <option value="">{{ __('complimentary.select_reason') }}</option>
+                            @foreach (($complimentary_reasons ?? []) as $reason)
+                                <option value="{{ $reason->complimentary_reason_id }}">{{ $reason->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label">{{ __('complimentary.notes') }}</label>
+                        <textarea class="form-control" id="complimentary_notes" rows="2" maxlength="500" placeholder="{{ __('complimentary.notes_placeholder') }}"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                    <button type="button" class="btn btn-info" id="complimentaryReasonSubmitBtn">{{ __('complimentary.apply') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ================= Open Register Session Modal ================= --}}
     <div class="modal fade" id="openSessionModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -728,6 +766,7 @@
                 'tax_type' => $branch_tax_setting->tax_type,
             ],
             'permissions' => $permissions,
+            'complimentary_reasons' => $complimentary_reasons,
             'reorder_from' => $reorder_from,
             'correct_order_id' => $correct_order_id ?? null,
             'urls' => [

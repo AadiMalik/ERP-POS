@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Prodej Návrat',
     'coa_inventory_account' => 'Účet zásob',
     'coa_cogs_account' => 'Účet COGS',
+    'coa_complimentary_expense_account' => 'Účet nákladů na kompliment',
     'coa_opening_stock_account' => 'Otevření skladového účtu',
     'coa_stock_adjustment_account' => 'Účet úpravy zásob',
     'coa_inventory_cost_adjustment_account' => 'Účet úpravy nákladové ceny zásob',

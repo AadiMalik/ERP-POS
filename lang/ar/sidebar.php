@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'بيان التدفق النقدي',
     'categories' => 'الفئات',
     'closing_rules' => 'قواعد الإغلاق',
+    'complimentary_reasons' => 'أسباب المجاملة',
+    'complimentary_report' => 'تقرير المجاملة',
     'consumption_reports' => 'تقارير الاستهلاك',
     'contact_messages' => 'رسائل الاتصال',
     'content_cards' => 'بطاقات المحتوى',

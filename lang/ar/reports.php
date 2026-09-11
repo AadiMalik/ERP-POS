@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'الطلبات الملغاة',
     'cash_bank_ledger' => 'دفتر النقدية والبنك',
     'cash_flow' => 'بيان التدفق النقدي',
+    'complimentary_report' => 'تقرير المجاملة',
     'customer_aging' => 'أعمار ديون العملاء',
     'customer_ledger' => 'دفتر العميل',
     'customer_loyalty_report' => 'سجل ولاء العميل',

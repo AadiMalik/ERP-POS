@@ -39,6 +39,12 @@ class OrderDetail extends Model
         'total',
         'cost_price',
         'notes',
+        'is_complimentary',
+        'complimentary_reason_id',
+        'complimentary_notes',
+        'complimentary_value',
+        'complimentary_by_id',
+        'complimentary_at',
         'serial_numbers',
         'createdby_id',
         'date_created',
@@ -77,6 +83,16 @@ class OrderDetail extends Model
     public function voucher()
     {
         return $this->belongsTo(Voucher::class, 'voucher_id', 'voucher_id');
+    }
+
+    public function complimentaryReason()
+    {
+        return $this->belongsTo(ComplimentaryReason::class, 'complimentary_reason_id');
+    }
+
+    public function complimentaryBy()
+    {
+        return $this->belongsTo(User::class, 'complimentary_by_id');
     }
 
     public function productVariationBatch()

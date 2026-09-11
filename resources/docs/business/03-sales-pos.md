@@ -142,6 +142,42 @@ consumed which stock. Orders can also be placed on credit — an unpaid or parti
 paid order is tracked against the customer, and later settled via
 **Customer Payments**.
 
+## Complimentary Orders & Products
+
+Complimentary is **not** a discount. It is a separate giveaway type so the books
+can tell a free item from a marked-down sale.
+
+Two levels:
+- **Full Complimentary** — the whole order is free. Customer payable is zero; no
+  fake payment is needed to close it. A reason is required. This needs the
+  **Approve Full Complimentary Order** permission (in addition to creating
+  complimentary items).
+- **Partial Complimentary** — selected products are free; the rest sell normally.
+  Example: Product A (sale 1,000 / cost 600) and Product C (sale 700 / cost 400)
+  are charged; Product B (sale 500 / cost 300) is complimentary. The customer pays
+  **1,700**. Sales revenue is 1,700. Normal cost of goods sold is 1,000. The free
+  item's **300** inventory cost is booked as Complimentary Expense, not as sales
+  COGS.
+
+On the POS screen (web and desktop), authorized cashiers mark the whole cart or
+individual lines with a gift action, pick a **Complimentary Reason** (Guest,
+Marketing, Promotion, Customer Relationship, Staff Motivation, Management
+Approval, Sample/Demo, Goodwill, Other — administrators can add, edit, or
+deactivate reasons under **Sales → Complimentary Reasons**), and may add notes.
+The original selling price is kept for audit; the charged amount becomes zero.
+Walk-in / guest orders are allowed the same way as a normal POS sale.
+
+Posted orders show a Full or Partial badge on Order Details, lists, thermal and
+A4 receipts (labelled Complimentary / Free for the customer — never internal
+account codes). Internal cost is shown only to users with **View Complimentary
+Cost**. After posting, complimentary status is not silently edited; use the
+existing same-day correction or void/return flow so stock and accounting reverse
+together.
+
+Website and mobile customers cannot mark their own orders complimentary.
+Authorized staff can apply complimentary on a received order before posting,
+using the shared order model.
+
 ## Bank Accounts & Card/Bank Payments
 
 Set up your business's bank accounts once under **Banks** — each one links to a

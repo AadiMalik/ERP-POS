@@ -56,6 +56,15 @@ class OrderController extends Controller
             $payload['pos_device_id'] = $device->pos_device_id;
             $payload['offline_local_id'] = $request->input('local_id');
 
+            if (!Auth::user()?->can('order.complimentary.create')) {
+                unset($payload['complimentary_status'], $payload['complimentary_reason_id'], $payload['complimentary_notes']);
+                if (!empty($payload['products']) && is_array($payload['products'])) {
+                    foreach ($payload['products'] as $index => $line) {
+                        unset($payload['products'][$index]['is_complimentary'], $payload['products'][$index]['complimentary_reason_id'], $payload['products'][$index]['complimentary_notes']);
+                    }
+                }
+            }
+
             $order = $this->order_service->save($payload);
 
             return $this->success('Order saved.', $order);

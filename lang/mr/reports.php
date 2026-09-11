@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'रद्द केलेल्या ऑर्डर',
     'cash_bank_ledger' => 'रोख आणि बँक खतावणी',
     'cash_flow' => 'रोख प्रवाह विवरण',
+    'complimentary_report' => 'कंप्लिमेंटरी अहवाल',
     'customer_aging' => 'ग्राहक एजिंग',
     'customer_ledger' => 'ग्राहक खतावणी',
     'customer_loyalty_report' => 'ग्राहक निष्ठा इतिहास',

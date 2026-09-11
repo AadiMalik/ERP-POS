@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Penyata Aliran Tunai',
     'categories' => 'Kategori',
     'closing_rules' => 'Peraturan Penutupan',
+    'complimentary_reasons' => 'Sebab komplementari',
+    'complimentary_report' => 'Laporan komplementari',
     'consumption_reports' => 'Laporan Penggunaan',
     'contact_messages' => 'Mesej Hubungan',
     'content_cards' => 'Kad Kandungan',

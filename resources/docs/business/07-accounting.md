@@ -13,8 +13,9 @@ setup again never creates duplicate accounts, so it's always safe.
 
 An accountant or admin can review and fine-tune any of these mappings later from
 **Settings > Accounting** — for example, pointing "Sale Account" at a different
-revenue account, or changing which accounts are used for Fixed Asset purchases,
-Accumulated Depreciation, and Depreciation Expense. Everyday users are never
+revenue account, changing which accounts are used for Fixed Asset purchases,
+Accumulated Depreciation, and Depreciation Expense, or pointing **Complimentary
+Expense Account** at a different expense account. Everyday users are never
 required to understand or touch this setup to use the ERP.
 
 ## Chart of Accounts
@@ -40,7 +41,14 @@ nothing is posted to the books.
 Most day-to-day transactions post to the books **automatically** — you don't need
 to manually create a journal entry for a normal sale, purchase receipt, or expense:
 - Completing a **POS sale** posts revenue and (where inventory is tracked)
-  cost-of-goods-sold entries.
+  cost-of-goods-sold entries. **Complimentary** products on that same sale do
+  not post sales revenue. Their actual inventory cost is charged to the
+  **Complimentary Expense Account** mapped in Settings → Accounting (starter
+  account: Complimentary / Promotional Expense) and inventory is credited by
+  the same cost. A fully complimentary order posts as source **Complimentary
+  Order** with payable and revenue of zero. A mixed order stays a POS Sale
+  voucher with separate complimentary-expense lines. Returns reverse the same
+  split. Posting is blocked until the Complimentary Expense account is set.
 - Receiving goods via a **Good Receipt Note** posts the corresponding
   purchase/inventory entry the moment stock is physically received — not when the
   purchase order is merely raised.

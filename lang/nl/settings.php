@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Verkoop retour',
     'coa_inventory_account' => 'Voorraadrekening',
     'coa_cogs_account' => 'COGS-account',
+    'coa_complimentary_expense_account' => 'Rekening complimentaire kosten',
     'coa_opening_stock_account' => 'Aandelenrekening openen',
     'coa_stock_adjustment_account' => 'Voorraadaanpassingsrekening',
     'coa_inventory_cost_adjustment_account' => 'Voorraadkostenaanpassingsrekening',

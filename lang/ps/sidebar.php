@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'د نغدو جریان بیان',
     'categories' => 'کټګورۍ',
     'closing_rules' => 'د تړلو قواعد',
+    'complimentary_reasons' => 'د تحفې لاملونه',
+    'complimentary_report' => 'د تحفې راپور',
     'consumption_reports' => 'د مصرف راپورونه',
     'contact_messages' => 'د تماس پیغامونه',
     'content_cards' => 'د منځپانګې کارتونه',

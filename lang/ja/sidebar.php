@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'キャッシュフロー計算書',
     'categories' => 'カテゴリー',
     'closing_rules' => '締め規則',
+    'complimentary_reasons' => 'サービス提供理由',
+    'complimentary_report' => 'サービス提供レポート',
     'consumption_reports' => '消費レポート',
     'contact_messages' => 'お問い合わせメッセージ',
     'content_cards' => 'コンテンツカード',

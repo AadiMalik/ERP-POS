@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'بازگشت فروش',
     'coa_inventory_account' => 'حساب موجودی',
     'coa_cogs_account' => 'حساب COGS',
+    'coa_complimentary_expense_account' => 'حساب هزینه اهدایی',
     'coa_opening_stock_account' => 'افتتاح حساب سهام',
     'coa_stock_adjustment_account' => 'حساب تعدیل سهام',
     'coa_inventory_cost_adjustment_account' => 'حساب تعدیل بهای تمام‌شده موجودی',

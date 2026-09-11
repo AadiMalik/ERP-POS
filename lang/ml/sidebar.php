@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'പണമൊഴുക്ക് പ്രസ്താവന',
     'categories' => 'വിഭാഗങ്ങൾ',
     'closing_rules' => 'ക്ലോസിംഗ് നിയമങ്ങൾ',
+    'complimentary_reasons' => 'കോംപ്ലിമെന്ററി കാരണങ്ങൾ',
+    'complimentary_report' => 'കോംപ്ലിമെന്ററി റിപ്പോർട്ട്',
     'consumption_reports' => 'ഉപഭോഗ റിപ്പോർട്ടുകൾ',
     'contact_messages' => 'ബന്ധപ്പെടൽ സന്ദേശങ്ങൾ',
     'content_cards' => 'ഉള്ളടക്ക കാർഡുകൾ',

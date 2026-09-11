@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Rendiconto finanziario',
     'categories' => 'Categorie',
     'closing_rules' => 'Regole di chiusura',
+    'complimentary_reasons' => 'Motivi di omaggio',
+    'complimentary_report' => 'Report omaggi',
     'consumption_reports' => 'Rapporti di consumo',
     'contact_messages' => 'Messaggi di contatto',
     'content_cards' => 'Schede contenuto',

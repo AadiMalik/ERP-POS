@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Pengestrømsopgørelse',
     'categories' => 'Kategorier',
     'closing_rules' => 'Afslutningsregler',
+    'complimentary_reasons' => 'Komplimentårsager',
+    'complimentary_report' => 'Komplimentrapport',
     'consumption_reports' => 'Forbrugsrapporter',
     'contact_messages' => 'Kontaktbeskeder',
     'content_cards' => 'Indholdskort',

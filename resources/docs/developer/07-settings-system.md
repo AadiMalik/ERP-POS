@@ -117,6 +117,12 @@ itself, but some are consumed elsewhere as real business-rule gates:
   business by the wizard below, same as every other `default_*_account_id`
   field. See Delivery Zones in
   [Modules, Controllers & Services](03-modules-controllers-services.md).
+- `AccountingSetting.default_complimentary_expense_account_id` (Settings →
+  Accounting) is debited by `OrderService::applyPostedEffects()` for the actual
+  inventory cost of complimentary lines (credited to Inventory; never sales
+  revenue). Template-seeded to "Complimentary / Promotional Expense"
+  (`540001-002`, under Selling & Distribution) and cloned to every new business.
+  Posting a complimentary order/return throws if the mapping is empty.
 
 ## Accounting Setup Wizard (Automatic Business Provisioning)
 

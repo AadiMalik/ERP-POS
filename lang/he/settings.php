@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'החזרת מכירה',
     'coa_inventory_account' => 'חשבון מלאי',
     'coa_cogs_account' => 'חשבון COGS',
+    'coa_complimentary_expense_account' => 'חשבון הוצאות קומפלימנט',
     'coa_opening_stock_account' => 'פתיחת חשבון מלאי',
     'coa_stock_adjustment_account' => 'חשבון התאמת מלאי',
     'coa_inventory_cost_adjustment_account' => 'חשבון התאמת עלות מלאי',

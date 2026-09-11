@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => '已取消订单',
     'cash_bank_ledger' => '现金与银行分类账',
     'cash_flow' => '现金流量表',
+    'complimentary_report' => '赠送报表',
     'customer_aging' => '客户账龄',
     'customer_ledger' => '客户分类账',
     'customer_loyalty_report' => '客户忠诚度历史',

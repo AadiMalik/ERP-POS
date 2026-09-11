@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Myynti Palautus',
     'coa_inventory_account' => 'Varastotili',
     'coa_cogs_account' => 'COGS-tili',
+    'coa_complimentary_expense_account' => 'Ilmaiskulutili',
     'coa_opening_stock_account' => 'Osaketilin avaaminen',
     'coa_stock_adjustment_account' => 'Osakkeiden oikaisutili',
     'coa_inventory_cost_adjustment_account' => 'Varaston kustannuskorjaustili',

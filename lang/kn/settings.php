@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'ಮಾರಾಟ ರಿಟರ್ನ್',
     'coa_inventory_account' => 'ಇನ್ವೆಂಟರಿ ಖಾತೆ',
     'coa_cogs_account' => 'COGS ಖಾತೆ',
+    'coa_complimentary_expense_account' => 'ಕಾಂಪ್ಲಿಮೆಂಟರಿ ಖರ್ಚು ಖಾತೆ',
     'coa_opening_stock_account' => 'ಸ್ಟಾಕ್ ಖಾತೆ ತೆರೆಯಲಾಗುತ್ತಿದೆ',
     'coa_stock_adjustment_account' => 'ಸ್ಟಾಕ್ ಹೊಂದಾಣಿಕೆ ಖಾತೆ',
     'coa_inventory_cost_adjustment_account' => 'ದಾಸ್ತಾನು ವೆಚ್ಚ ಹೊಂದಾಣಿಕೆ ಖಾತೆ',

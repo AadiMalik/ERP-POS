@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'คำสั่งซื้อที่ยกเลิก',
     'cash_bank_ledger' => 'บัญชีแยกประเภทเงินสดและธนาคาร',
     'cash_flow' => 'งบกระแสเงินสด',
+    'complimentary_report' => 'รายงานของแถม',
     'customer_aging' => 'อายุลูกหนี้',
     'customer_ledger' => 'บัญชีแยกประเภทลูกค้า',
     'customer_loyalty_report' => 'ประวัติความภักดีของลูกค้า',

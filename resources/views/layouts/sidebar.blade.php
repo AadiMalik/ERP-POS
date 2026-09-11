@@ -1891,12 +1891,12 @@
         @endcanAccessAny
 
         {{-- Orders (centralized - shared by POS, Website, Mobile App, API) --}}
-        @canAccessAny(['pos.access', 'order-return.view', 'payment-method.view', 'bank.view', 'payment-gateway.view', 'payment-transaction.view', 'discount.view', 'voucher.view',
+        @canAccessAny(['pos.access', 'order-return.view', 'payment-method.view', 'bank.view', 'payment-gateway.view', 'payment-transaction.view', 'discount.view', 'voucher.view', 'complimentary-reason.view',
             'reports.order-detail.view', 'reports.product-sales.view', 'reports.variation-sales.view', 'reports.customer-sales.view',
             'reports.branch-sales.view', 'reports.order-source-sales.view', 'reports.payment-method-sales.view',
             'reports.order-status-report.view', 'reports.cancelled-orders.view', 'reports.due-credit-sales.view',
             'reports.discount-report.view', 'reports.loyalty-report.view', 'reports.order-tax-report.view', 'reports.top-selling.view', 'reports.offline-orders-report.view',
-            'reports.order-correction-report.view'])
+            'reports.order-correction-report.view', 'reports.complimentary-report.view'])
             <li class="menu-item">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons fa fa-receipt"></i>
@@ -1960,11 +1960,18 @@
                             </a>
                         </li>
                     @endcanAccess
+                    @canAccess('complimentary-reason.view')
+                        <li class="menu-item">
+                            <a href="{{ url('/admin/complimentary-reason') }}" class="menu-link">
+                                <div data-i18n="Complimentary Reasons">{{ __('sidebar.complimentary_reasons') }}</div>
+                            </a>
+                        </li>
+                    @endcanAccess
                     @canAccessAny(['reports.order-detail.view', 'reports.product-sales.view', 'reports.variation-sales.view',
                         'reports.customer-sales.view', 'reports.branch-sales.view', 'reports.order-source-sales.view',
                         'reports.payment-method-sales.view', 'reports.order-status-report.view', 'reports.cancelled-orders.view',
                         'reports.due-credit-sales.view', 'reports.discount-report.view', 'reports.loyalty-report.view', 'reports.order-tax-report.view',
-                        'reports.top-selling.view', 'reports.offline-orders-report.view', 'reports.order-correction-report.view'])
+                        'reports.top-selling.view', 'reports.offline-orders-report.view', 'reports.order-correction-report.view', 'reports.complimentary-report.view'])
                         <li class="menu-item">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
                                 <div data-i18n="Order Reports">{{ __('sidebar.reports') }}</div>
@@ -2044,6 +2051,13 @@
                                     <li class="menu-item">
                                         <a href="{{ url('/admin/reports/discount-report') }}" class="menu-link">
                                             <div data-i18n="Discount Report">{{ __('sidebar.discount_report') }}</div>
+                                        </a>
+                                    </li>
+                                @endcanAccess
+                                @canAccess('reports.complimentary-report.view')
+                                    <li class="menu-item">
+                                        <a href="{{ url('/admin/reports/complimentary-report') }}" class="menu-link">
+                                            <div data-i18n="Complimentary Report">{{ __('sidebar.complimentary_report') }}</div>
                                         </a>
                                     </li>
                                 @endcanAccess

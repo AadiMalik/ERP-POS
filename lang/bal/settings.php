@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'فروخت کی واپسی',
     'coa_inventory_account' => 'انوینٹری اکاؤنٹ',
     'coa_cogs_account' => 'COGS اکاؤنٹ',
+    'coa_complimentary_expense_account' => 'کمپلیمنٹری خرچ حساب',
     'coa_opening_stock_account' => 'اسٹاک اکاؤنٹ کھولنا',
     'coa_stock_adjustment_account' => 'اسٹاک ایڈجسٹمنٹ اکاؤنٹ',
     'coa_inventory_cost_adjustment_account' => 'انوینٹری لاگت ایڈجسٹمنٹ اکاؤنٹ',

@@ -139,6 +139,15 @@
                             </select>
                         </div>
                         <div class="col-md-3">
+                            <label class="form-label">{{ __('complimentary.status') }}</label>
+                            <select id="complimentary_status" class="form-select">
+                                <option value="">{{ __('common.all_statuses') }}</option>
+                                @foreach (\App\Enums\ComplimentaryStatus::getOptions() as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label">{{ __('orders.order_date') }}</label>
                             @include('admin.partials.date_filter')
                         </div>
@@ -244,6 +253,6 @@
         'detail' => true,
         'order' => "[[1, 'asc']]",
         'params' =>
-            "order_id:$('#order_id').val(),daily_order_id:$('#daily_order_id').val(),business_id:$('#business_id').val(),branch_id:$('#branch_id').val(),warehouse_id:$('#warehouse_id').val(),register_id:$('#register_id').val(),cashier_id:$('#cashier_id').val(),customer_id:$('#customer_id').val(),order_type_id:$('#order_type_id').val(),order_source_id:$('#order_source_id').val(),payment_method_id:$('#payment_method_id').val(),bank_id:$('#bank_id').val(),status:$('#status').val(),sale_date_start:$('#sale_date_start').val(),sale_date_end:$('#sale_date_end').val()",
+            "order_id:$('#order_id').val(),daily_order_id:$('#daily_order_id').val(),business_id:$('#business_id').val(),branch_id:$('#branch_id').val(),warehouse_id:$('#warehouse_id').val(),register_id:$('#register_id').val(),cashier_id:$('#cashier_id').val(),customer_id:$('#customer_id').val(),order_type_id:$('#order_type_id').val(),order_source_id:$('#order_source_id').val(),payment_method_id:$('#payment_method_id').val(),bank_id:$('#bank_id').val(),status:$('#status').val(),complimentary_status:$('#complimentary_status').val(),sale_date_start:$('#sale_date_start').val(),sale_date_end:$('#sale_date_end').val()",
     ])
 @endsection

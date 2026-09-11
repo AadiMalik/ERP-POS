@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Bán hàng trả lại',
     'coa_inventory_account' => 'Tài khoản tồn kho',
     'coa_cogs_account' => 'Tài khoản COGS',
+    'coa_complimentary_expense_account' => 'Tài khoản chi phí tặng kèm',
     'coa_opening_stock_account' => 'Mở tài khoản chứng khoán',
     'coa_stock_adjustment_account' => 'Tài khoản điều chỉnh cổ phiếu',
     'coa_inventory_cost_adjustment_account' => 'Tài khoản điều chỉnh giá vốn hàng tồn kho',

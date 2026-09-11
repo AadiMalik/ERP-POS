@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Отменённые заказы',
     'cash_bank_ledger' => 'Книга кассы и банка',
     'cash_flow' => 'Отчёт о движении денежных средств',
+    'complimentary_report' => 'Отчёт по комплиментам',
     'customer_aging' => 'Дебиторская задолженность по срокам',
     'customer_ledger' => 'Книга клиента',
     'customer_loyalty_report' => 'История лояльности клиента',

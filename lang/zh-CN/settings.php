@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => '销售退货',
     'coa_inventory_account' => '库存账户',
     'coa_cogs_account' => '销货成本账户',
+    'coa_complimentary_expense_account' => '赠送费用科目',
     'coa_opening_stock_account' => '开设股票账户',
     'coa_stock_adjustment_account' => '库存调整账户',
     'coa_inventory_cost_adjustment_account' => '存货成本调整科目',

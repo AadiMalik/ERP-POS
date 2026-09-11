@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Kassaflödesanalys',
     'categories' => 'Kategorier',
     'closing_rules' => 'Avslutningsregler',
+    'complimentary_reasons' => 'Komplimentorsaker',
+    'complimentary_report' => 'Komplimangrapport',
     'consumption_reports' => 'Förbrukningsrapporter',
     'contact_messages' => 'Kontaktmeddelanden',
     'content_cards' => 'Innehållskort',

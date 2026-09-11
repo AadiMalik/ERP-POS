@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Satış İadesi',
     'coa_inventory_account' => 'Envanter Hesabı',
     'coa_cogs_account' => 'SMM Hesabı',
+    'coa_complimentary_expense_account' => 'İkram gider hesabı',
     'coa_opening_stock_account' => 'Hisse Hesabı Açma',
     'coa_stock_adjustment_account' => 'Hisse Senedi Düzeltme Hesabı',
     'coa_inventory_cost_adjustment_account' => 'Stok Maliyet Düzeltme Hesabı',

@@ -1166,6 +1166,7 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
                 'cancelled-orders' => App\Http\Controllers\Admin\Reports\Orders\CancelledOrdersReportController::class,
                 'due-credit-sales' => App\Http\Controllers\Admin\Reports\Orders\DueCreditSalesReportController::class,
                 'discount-report' => App\Http\Controllers\Admin\Reports\Orders\DiscountReportController::class,
+                'complimentary-report' => App\Http\Controllers\Admin\Reports\Orders\ComplimentaryReportController::class,
                 'loyalty-report' => App\Http\Controllers\Admin\Reports\Orders\LoyaltyReportController::class,
                 'order-tax-report' => App\Http\Controllers\Admin\Reports\Orders\OrderTaxReportController::class,
                 'top-selling' => App\Http\Controllers\Admin\Reports\Orders\TopSellingReportController::class,
@@ -1289,6 +1290,12 @@ Route::group(['middleware' => ['auth', 'check.subscription', 'setting', 'must-ch
     Route::group(['prefix' => 'loss-reason'], function () {
         Route::post('data', [App\Http\Controllers\Admin\LossReasonController::class, 'getData']);
         Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\LossReasonController::class, 'byBusiness']);
+    });
+
+    Route::resource('complimentary-reason', App\Http\Controllers\Admin\ComplimentaryReasonController::class)->except(['show', 'create']);
+    Route::group(['prefix' => 'complimentary-reason'], function () {
+        Route::post('data', [App\Http\Controllers\Admin\ComplimentaryReasonController::class, 'getData']);
+        Route::get('by-business/{business_id}', [App\Http\Controllers\Admin\ComplimentaryReasonController::class, 'byBusiness']);
     });
 
     //waste / damage / expiry

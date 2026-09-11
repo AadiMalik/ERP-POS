@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => '판매 반품',
     'coa_inventory_account' => '재고 계정',
     'coa_cogs_account' => '매출원가 계정',
+    'coa_complimentary_expense_account' => '무상 비용 계정',
     'coa_opening_stock_account' => '주식계좌 개설',
     'coa_stock_adjustment_account' => '재고 조정 계정',
     'coa_inventory_cost_adjustment_account' => '재고 원가 조정 계정',

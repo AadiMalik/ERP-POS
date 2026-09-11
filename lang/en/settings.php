@@ -101,6 +101,7 @@ return [
     'coa_sale_return' => 'Sale Return',
     'coa_inventory_account' => 'Inventory Account',
     'coa_cogs_account' => 'COGS Account',
+    'coa_complimentary_expense_account' => 'Complimentary Expense Account',
     'coa_opening_stock_account' => 'Opening Stock Account',
     'coa_stock_adjustment_account' => 'Stock Adjustment Account',
     'coa_inventory_cost_adjustment_account' => 'Inventory Cost Adjustment Account',

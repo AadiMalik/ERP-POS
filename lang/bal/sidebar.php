@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'نقدی بہاوگ ءِ بیان',
     'categories' => 'دستہ بندیانی',
     'closing_rules' => 'بندگ ءِ قاعدہ',
+    'complimentary_reasons' => 'کمپلیمنٹری وجہاں',
+    'complimentary_report' => 'کمپلیمنٹری رپورٹ',
     'consumption_reports' => 'استعمال رپورٹانی',
     'contact_messages' => 'رابطہ پیغامانی',
     'content_cards' => 'مواد کارڈانی',

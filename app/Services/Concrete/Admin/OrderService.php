@@ -2,6 +2,7 @@
 
 namespace App\Services\Concrete\Admin;
 
+use App\Enums\ComplimentaryStatus;
 use App\Enums\Filter;
 use App\Enums\JournalSourceTypes;
 use App\Enums\ReferenceType;
@@ -11,6 +12,7 @@ use App\Enums\Status;
 use App\Enums\TransactionType;
 use App\Models\AccountingSetting;
 use App\Models\Bank;
+use App\Models\ComplimentaryReason;
 use App\Models\CustomerPayment;
 use App\Models\CustomerProfile;
 use App\Models\CustomerSetting;
@@ -96,11 +98,14 @@ class OrderService
         'voucher.categories',
         'voucher.brands',
         'voucher.variations',
+        'complimentaryReason',
+        'complimentaryBy',
         'details',
         'details.product',
         'details.productVariation',
         'details.unit',
         'details.saleType',
+        'details.complimentaryReason',
         'payments',
         'payments.paymentMethod',
         'customerPayments',
@@ -219,6 +224,10 @@ class OrderService
             if (!empty($obj['sale_date_end'])) {
                 $wh[] = ['sale_date', '<=', Carbon::parse($obj['sale_date_end'])->format('Y-m-d')];
             }
+        }
+
+        if (!empty($obj['complimentary_status']) && $obj['complimentary_status'] !== '0') {
+            $wh[] = ['complimentary_status', $obj['complimentary_status']];
         }
 
         $query->where($wh)->where('is_deleted', 0);
@@ -355,7 +364,15 @@ class OrderService
                     'returned' => 'bg-label-info',
                 ];
                 $badge = $badges[$item->status] ?? 'bg-label-secondary';
-                return '<span class="badge ' . $badge . '">' . ucfirst($item->status) . '</span>';
+                $html = '<span class="badge ' . $badge . '">' . ucfirst($item->status) . '</span>';
+
+                if (ComplimentaryStatus::isComplimentary($item->complimentary_status ?? ComplimentaryStatus::NONE)) {
+                    $comp_badge = ($item->complimentary_status === ComplimentaryStatus::FULL) ? 'bg-label-info' : 'bg-label-warning';
+                    $comp_label = ComplimentaryStatus::getOptions()[$item->complimentary_status] ?? $item->complimentary_status;
+                    $html .= ' <span class="badge ' . $comp_badge . '">' . $comp_label . '</span>';
+                }
+
+                return $html;
             })
             // Raw (non-badge) status value, alongside the HTML-badge 'status'
             // column above - needed by callers like the POS Held Orders list
@@ -385,6 +402,8 @@ class OrderService
                     'Paid' => currency($item->paid_amount ?? 0),
                     'Payment Method' => $this->resolvePaymentMethodLabel($item),
                     'Sale Type' => $this->formatSaleTypeBadge($item->details),
+                    'Complimentary' => ComplimentaryStatus::getOptions()[$item->complimentary_status ?? ComplimentaryStatus::NONE] ?? '-',
+                    'Complimentary Reason' => $item->complimentaryReason->name ?? '-',
                 ];
 
                 $html = '<div class="dt-detail-panel"><div class="dt-detail-grid">';
@@ -433,7 +452,7 @@ class OrderService
 
                 $viewJvButton = in_array($item->status, ['posted', 'returned'])
                     ? "<button type='button' class='btn btn-icon btn-outline-dark mr-2 view-jv-btn'
-                        data-source-type='" . \App\Enums\JournalSourceTypes::POS_SALE . "' data-source-id='{$item->order_id}' title='View JV'>
+                        data-source-type='" . $this->saleJournalSourceType($item) . "' data-source-id='{$item->order_id}' title='View JV'>
                         <i class='fa fa-book'></i>
                         </button>"
                     : '';
@@ -709,6 +728,15 @@ class OrderService
                 'voucher_code' => optional($order->voucher)->code,
                 'voucher_discount_amount' => $order->voucher_discount_amount,
                 'notes' => $order->notes,
+                'complimentary_status' => $order->complimentary_status ?? ComplimentaryStatus::NONE,
+                'complimentary_reason_id' => $order->complimentary_reason_id,
+                'complimentary_reason_name' => optional($order->complimentaryReason)->name,
+                'complimentary_notes' => $order->complimentary_notes,
+                'complimentary_by_id' => $order->complimentary_by_id,
+                'complimentary_by_name' => optional($order->complimentaryBy)->name,
+                'complimentary_at' => $order->complimentary_at,
+                'complimentary_retail_value' => $order->complimentary_retail_value,
+                'complimentary_cost' => $order->complimentary_cost,
                 'due_date' => $order->due_date,
                 'delivery_address' => $order->delivery_address,
                 'status' => $order->status,
@@ -777,6 +805,11 @@ class OrderService
                 'total' => $detail->total,
                 'cost_price' => $detail->cost_price,
                 'notes' => $detail->notes,
+                'is_complimentary' => (bool) $detail->is_complimentary,
+                'complimentary_reason_id' => $detail->complimentary_reason_id,
+                'complimentary_reason_name' => optional($detail->complimentaryReason)->name,
+                'complimentary_notes' => $detail->complimentary_notes,
+                'complimentary_value' => $detail->complimentary_value,
                 'is_track_stock' => $is_tracked,
                 'available_stock' => $available_stock,
                 'track_serial_number' => (bool) ($detail->productVariation->track_serial_number ?? false),
@@ -1048,6 +1081,8 @@ class OrderService
 
                 $this->model_order_detail->getModel()::where('order_id', $order->order_id)->delete();
                 OrderPayment::where('order_id', $order->order_id)->delete();
+                $previous_complimentary_status = $order->complimentary_status;
+                $previous_complimentary_reason_id = $order->complimentary_reason_id;
             }
             //====================================
             // Create
@@ -1094,6 +1129,8 @@ class OrderService
 
                 $this->recordStatusHistory($order->order_id, null, $status, 'Order created');
                 $previous_user_id = null;
+                $previous_complimentary_status = ComplimentaryStatus::NONE;
+                $previous_complimentary_reason_id = null;
             }
 
             // Release any loyalty points already reserved for this order
@@ -1130,7 +1167,24 @@ class OrderService
                 'voucher_discount_amount' => $totals['voucher_discount_amount'],
                 'loyalty_points_used' => $totals['loyalty_points_used'],
                 'loyalty_discount_amount' => $totals['loyalty_discount_amount'],
+                'complimentary_status' => $totals['complimentary_status'],
+                'complimentary_reason_id' => $totals['complimentary_reason_id'],
+                'complimentary_notes' => $totals['complimentary_notes'],
+                'complimentary_by_id' => $totals['complimentary_by_id'],
+                'complimentary_at' => $totals['complimentary_at'],
+                'complimentary_retail_value' => $totals['complimentary_retail_value'],
             ]);
+
+            if (($totals['complimentary_status'] ?? ComplimentaryStatus::NONE) !== ($previous_complimentary_status ?? ComplimentaryStatus::NONE)
+                || ($totals['complimentary_reason_id'] ?? null) !== ($previous_complimentary_reason_id ?? null)
+            ) {
+                $this->recordStatusHistory(
+                    $order->order_id,
+                    $order->status,
+                    $order->status,
+                    'Complimentary: ' . (ComplimentaryStatus::getOptions()[$totals['complimentary_status']] ?? $totals['complimentary_status'])
+                );
+            }
 
             if (!empty($order->user_id) && $totals['loyalty_points_used'] > 0) {
                 app(LoyaltyPointService::class)->reserve(
@@ -1280,7 +1334,12 @@ class OrderService
         // rather than only at final checkout - post() still re-checks
         // authoritatively (locked) regardless, since stock can move between
         // this save and that checkout.
-        $skip_stock_check = !$persist || $this->allowsNegativeStock($order->business_id);
+            $skip_stock_check = !$persist || $this->allowsNegativeStock($order->business_id);
+
+        $wants_full_complimentary = ($obj['complimentary_status'] ?? '') === ComplimentaryStatus::FULL;
+        $order_complimentary_reason_id = $obj['complimentary_reason_id'] ?? null;
+        $order_complimentary_notes = trim($obj['complimentary_notes'] ?? '') ?: null;
+        $reason_service = app(ComplimentaryReasonService::class);
 
         foreach ($products as $line) {
             $quantity = (float) ($line['quantity'] ?? 0);
@@ -1357,7 +1416,18 @@ class OrderService
             $minimum_selling_price = $resolved['minimum_selling_price'] ?? $variation->minimum_selling_price;
             $net_unit_price = $base_quantity > 0 ? $taxable / $base_quantity : $unit_price;
 
-            if (!$allow_below_minimum && $minimum_selling_price !== null && $this->pricing_engine->isBelowFloor((float) $minimum_selling_price, $net_unit_price)) {
+            $is_complimentary = $wants_full_complimentary || !empty($line['is_complimentary']);
+
+            if ($is_complimentary) {
+                $line_reason_id = $line['complimentary_reason_id'] ?? $order_complimentary_reason_id;
+                if (empty($line_reason_id) || !$reason_service->findActiveForBusiness($line_reason_id, $order->business_id)) {
+                    throw new Exception(__('complimentary.reason_required_item'));
+                }
+            } else {
+                $line_reason_id = null;
+            }
+
+            if (!$is_complimentary && !$allow_below_minimum && $minimum_selling_price !== null && $this->pricing_engine->isBelowFloor((float) $minimum_selling_price, $net_unit_price)) {
                 throw new Exception(sprintf(
                     'The price for "%s" (%s) is below its minimum selling price of %s.',
                     $variation->name ?: $variation->sku,
@@ -1370,11 +1440,23 @@ class OrderService
             $line_tax_amount = $line_tax['tax_amount'];
             $line_tax_discount_amount = $line_tax['tax_discount_amount'];
             $line_total = \App\Support\Tax\TaxCalculator::lineTotal($taxable, $line_tax_amount, $tax_type);
+            $complimentary_value = 0;
 
-            $subtotal += $line_subtotal;
-            $line_discount_total += $line_discount_amount;
-            $tax_amount_total += $line_tax_amount;
-            $tax_discount_amount_total += $line_tax_discount_amount;
+            if ($is_complimentary) {
+                $complimentary_value = $line_subtotal;
+                $discount_percent = 0;
+                $line_discount_amount = 0;
+                $line_tax_amount = 0;
+                $line_tax_discount_amount = 0;
+                $line_subtotal = 0;
+                $line_total = 0;
+                $net_unit_price = 0;
+            } else {
+                $subtotal += $line_subtotal;
+                $line_discount_total += $line_discount_amount;
+                $tax_amount_total += $line_tax_amount;
+                $tax_discount_amount_total += $line_tax_discount_amount;
+            }
 
             // Row build is deferred to a second pass (below) so the voucher's
             // per-line allocation (product/category/brand/variation matching,
@@ -1406,6 +1488,12 @@ class OrderService
                 'total' => $line_total,
                 'cost_price' => 0,
                 'notes' => $line['notes'] ?? null,
+                'is_complimentary' => $is_complimentary ? 1 : 0,
+                'complimentary_reason_id' => $line_reason_id,
+                'complimentary_notes' => $is_complimentary ? (trim($line['complimentary_notes'] ?? '') ?: $order_complimentary_notes) : null,
+                'complimentary_value' => $complimentary_value,
+                'complimentary_by_id' => $is_complimentary ? Auth::id() : null,
+                'complimentary_at' => $is_complimentary ? now() : null,
                 'serial_numbers' => !empty($line['serial_numbers']) ? json_encode(array_values($line['serial_numbers'])) : null,
                 'createdby_id' => Auth::id(),
                 'date_created' => now(),
@@ -1489,7 +1577,7 @@ class OrderService
                     'unit_price' => $line['final_unit_price'],
                     'base' => $line['subtotal'] - $line['discount_amount'],
                 ];
-            }, $order_lines);
+            }, array_filter($order_lines, fn ($l) => empty($l['is_complimentary'])));
 
             $result = $this->voucher_service->calculate($voucher, $voucher_calc_lines, $remaining);
 
@@ -1554,12 +1642,32 @@ class OrderService
         // order) is a flat addition on top of everything else, regardless of
         // inclusive/exclusive tax type - it's not part of the taxable sale amount.
         $delivery_charge = (float) ($obj['delivery_charge'] ?? $order->delivery_charge ?? 0);
-        // Inclusive tax is already inside subtotal, so it isn't added again
-        // here (only backed out for display/JV purposes) - exclusive tax is
-        // additive on top of the discounted subtotal, as this always was.
+
+        $complimentary_count = count(array_filter($order_lines, fn ($l) => !empty($l['is_complimentary'])));
+        $complimentary_status = ComplimentaryStatus::fromLineFlags($complimentary_count, count($order_lines));
+
+        if ($wants_full_complimentary && $complimentary_status !== ComplimentaryStatus::FULL) {
+            $complimentary_status = ComplimentaryStatus::PARTIAL;
+        }
+
+        if ($complimentary_status === ComplimentaryStatus::FULL) {
+            $delivery_charge = 0;
+        }
+
+        if ($complimentary_status !== ComplimentaryStatus::NONE && empty($order_complimentary_reason_id)) {
+            $first_comp = collect($order_lines)->first(fn ($l) => !empty($l['is_complimentary']));
+            $order_complimentary_reason_id = $first_comp['complimentary_reason_id'] ?? null;
+        }
+
+        if ($complimentary_status !== ComplimentaryStatus::NONE && empty($order_complimentary_reason_id)) {
+            throw new Exception(__('complimentary.reason_required_order'));
+        }
+
         $total = $tax_type === 'inclusive'
             ? ($subtotal - $discount_amount + $delivery_charge)
             : ($subtotal - $discount_amount + $tax_amount_total + $delivery_charge);
+
+        $complimentary_retail_value = round(array_sum(array_column($order_lines, 'complimentary_value')), 3);
 
         return [
             'subtotal' => $subtotal,
@@ -1577,9 +1685,12 @@ class OrderService
             'voucher_discount_amount' => round($voucher_discount_amount, 3),
             'loyalty_points_used' => round($loyalty_points_used, 3),
             'loyalty_discount_amount' => round($loyalty_discount_amount, 3),
-            // Only populated meaningfully for callers that need the per-line
-            // breakdown without persisting (see previewVoucher()) - always
-            // returned since it costs nothing extra to include.
+            'complimentary_status' => $complimentary_status,
+            'complimentary_reason_id' => $complimentary_status === ComplimentaryStatus::NONE ? null : $order_complimentary_reason_id,
+            'complimentary_notes' => $complimentary_status === ComplimentaryStatus::NONE ? null : $order_complimentary_notes,
+            'complimentary_by_id' => $complimentary_status === ComplimentaryStatus::NONE ? null : Auth::id(),
+            'complimentary_at' => $complimentary_status === ComplimentaryStatus::NONE ? null : now(),
+            'complimentary_retail_value' => $complimentary_retail_value,
             'lines' => $order_lines,
         ];
     }
@@ -2244,6 +2355,9 @@ class OrderService
 
         $order_total = round((float) $order->total, 2);
 
+        $has_complimentary = ComplimentaryStatus::isComplimentary($order->complimentary_status ?? ComplimentaryStatus::NONE)
+            || $order->details->contains(fn ($d) => !empty($d->is_complimentary));
+
         // Cash may be tendered above the order total (change); every other
         // method must exactly cover its allocated portion - so only the cash
         // leg is allowed to carry the surplus that becomes change_amount.
@@ -2276,33 +2390,35 @@ class OrderService
         $change_amount = 0;
         $cash_applied = $cash_tendered;
 
-        if ($cash_required > 0.01) {
-            if (round($cash_tendered, 2) < $cash_required - 0.01) {
-                $payments_total = round($non_cash_total + $cash_tendered, 2);
-                throw new Exception('Payment total (' . $payments_total . ') does not cover the order total (' . $order_total . ').');
+        if ($order_total <= 0.01 && $payments->isEmpty()) {
+            $cash_applied = 0;
+            $change_amount = 0;
+            $paid_amount = 0;
+            $applied_total = 0;
+        } else {
+            if ($cash_required > 0.01) {
+                if (round($cash_tendered, 2) < $cash_required - 0.01) {
+                    $payments_total = round($non_cash_total + $cash_tendered, 2);
+                    throw new Exception('Payment total (' . $payments_total . ') does not cover the order total (' . $order_total . ').');
+                }
+
+                $change_amount = round($cash_tendered - $cash_required, 3);
+                $cash_applied = $cash_required;
+            } elseif ($cash_tendered > 0) {
+                $change_amount = round($cash_tendered, 3);
+                $cash_applied = 0;
             }
 
-            $change_amount = round($cash_tendered - $cash_required, 3);
-            $cash_applied = $cash_required;
-        } elseif ($cash_tendered > 0) {
-            // No cash was actually needed to cover the total (fully paid by
-            // other methods) but a cash line was still submitted - the whole
-            // amount is handed straight back as change.
-            $change_amount = round($cash_tendered, 3);
-            $cash_applied = 0;
-        }
+            if ($change_amount > 0 && !$has_cash) {
+                throw new Exception('Change can only be given against a cash payment.');
+            }
 
-        if ($change_amount > 0 && !$has_cash) {
-            throw new Exception('Change can only be given against a cash payment.');
-        }
+            $paid_amount = round($non_cash_total + $cash_tendered, 3);
+            $applied_total = round($non_cash_total + $cash_applied, 2);
 
-        $paid_amount = round($non_cash_total + $cash_tendered, 3);
-        // Net amount actually applied to the sale (excludes change handed
-        // back) - this is what the JV/order_payments must reconcile to.
-        $applied_total = round($non_cash_total + $cash_applied, 2);
-
-        if (abs($applied_total - $order_total) > 0.01) {
-            throw new Exception('Payment total (' . $applied_total . ') does not match the order total (' . $order_total . ').');
+            if (abs($applied_total - $order_total) > 0.01) {
+                throw new Exception('Payment total (' . $applied_total . ') does not match the order total (' . $order_total . ').');
+            }
         }
 
         $accounting_setting = AccountingSetting::where('business_id', $order->business_id)->first();
@@ -2313,8 +2429,12 @@ class OrderService
 
         app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($order->business_id, now());
 
-        if (empty($accounting_setting->default_sale_account_id)) {
+        if ($order_total > 0.01 && empty($accounting_setting->default_sale_account_id)) {
             throw new Exception('Sale Account is not configured in Accounting Settings.');
+        }
+
+        if ($has_complimentary && empty($accounting_setting->default_complimentary_expense_account_id)) {
+            throw new Exception(__('complimentary.expense_account_missing'));
         }
 
         if ((float) $order->tax_amount > 0 && empty($accounting_setting->default_tax_account_id)) {
@@ -2448,8 +2568,8 @@ class OrderService
             'entry_no' => $entry_no,
             'reference_no' => 'ORD-' . $order->daily_order_id,
             'entry_date' => now(),
-            'description' => 'Auto-generated sale voucher for order #' . $order->daily_order_id,
-            'source_type' => JournalSourceTypes::POS_SALE,
+            'description' => $this->saleJournalDescription($order),
+            'source_type' => $this->saleJournalSourceType($order),
             'source_id' => $order->order_id,
             'status' => Status::POSTED,
             'postedby_id' => Auth::id(),
@@ -2548,14 +2668,16 @@ class OrderService
             ? round((float) $order->subtotal - (float) $order->tax_amount - (float) ($order->tax_discount_amount ?? 0), 3)
             : (float) $order->subtotal;
 
-        JournalEntryDetail::create([
-            'journal_entry_detail_id' => generateUuid(),
-            'journal_entry_id' => $journal_entry->journal_entry_id,
-            'account_id' => $accounting_setting->default_sale_account_id,
-            'debit' => 0,
-            'credit' => $revenue_amount,
-            'description' => 'Order #' . $order->daily_order_id,
-        ]);
+        if ($revenue_amount > 0.0001) {
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id' => $journal_entry->journal_entry_id,
+                'account_id' => $accounting_setting->default_sale_account_id,
+                'debit' => 0,
+                'credit' => $revenue_amount,
+                'description' => 'Order #' . $order->daily_order_id,
+            ]);
+        }
 
         // Credit: tax collected.
         if ((float) $order->tax_amount > 0) {
@@ -2662,8 +2784,10 @@ class OrderService
 
         // Per line: snapshot cost, decrement stock (possibly split across
         // several of the branch's linked warehouses), write the stock
-        // transaction(s), and accumulate the COGS total.
+        // transaction(s), and accumulate normal COGS vs complimentary cost.
         $total_cost = 0;
+        $normal_cogs = 0;
+        $complimentary_cost = 0;
         $inventory_setting = InventorySetting::where('business_id', $order->business_id)->first();
         $order_touched_warehouse_ids = [];
 
@@ -2778,11 +2902,17 @@ class OrderService
                 }
 
                 $pick_quantity = $detail->conversion_factor > 0 ? $pick_base_quantity / $detail->conversion_factor : $pick_base_quantity;
+                $is_line_complimentary = !empty($detail->is_complimentary);
+                $stock_tx_type = $is_line_complimentary ? TransactionType::COMPLIMENTARY : TransactionType::SALE;
+                $stock_ref_type = $is_line_complimentary ? ReferenceType::COMPLIMENTARY : ReferenceType::SALE;
+                $stock_remarks = $is_line_complimentary
+                    ? 'Complimentary stock out on order #' . $order->daily_order_id
+                    : 'Auto-created on posting of order #' . $order->daily_order_id;
 
                 ProductVariationStockTransaction::create([
                     'product_variation_stock_transaction_id' => generateUuid(),
                     'transaction_date' => now(),
-                    'transaction_type' => TransactionType::SALE,
+                    'transaction_type' => $stock_tx_type,
                     'business_id' => $order->business_id,
                     'product_id' => $detail->product_id,
                     'product_variation_id' => $detail->product_variation_id,
@@ -2797,8 +2927,8 @@ class OrderService
                     'quantity_after' => $new_qty,
                     'avg_price_after' => $existing_avg,
                     'reference_id' => $order->order_id,
-                    'reference_type' => ReferenceType::SALE,
-                    'remarks' => 'Auto-created on posting of order #' . $order->daily_order_id,
+                    'reference_type' => $stock_ref_type,
+                    'remarks' => $stock_remarks,
                     'product_variation_batch_id' => $pick['batch']->product_variation_batch_id ?? null,
                     'createdby_id' => Auth::id(),
                     'date_created' => now(),
@@ -2808,6 +2938,11 @@ class OrderService
             }
 
             $total_cost += $line_cost;
+            if (!empty($detail->is_complimentary)) {
+                $complimentary_cost += $line_cost;
+            } else {
+                $normal_cogs += $line_cost;
+            }
             $detail->update([
                 // Weighted-average cost across every warehouse/batch this
                 // line drew from, so margin reporting stays accurate even
@@ -2891,15 +3026,16 @@ class OrderService
         // guessed at draft time.
         if (count($order_touched_warehouse_ids) === 1) {
             $order->warehouse_id = array_key_first($order_touched_warehouse_ids);
-            $order->save();
         }
+        $order->complimentary_cost = round($complimentary_cost, 3);
+        $order->save();
 
-        if ($total_cost > 0) {
+        if ($normal_cogs > 0) {
             JournalEntryDetail::create([
                 'journal_entry_detail_id' => generateUuid(),
                 'journal_entry_id' => $journal_entry->journal_entry_id,
                 'account_id' => $accounting_setting->default_cogs_account_id,
-                'debit' => $total_cost,
+                'debit' => $normal_cogs,
                 'credit' => 0,
                 'description' => 'Order #' . $order->daily_order_id . ' - COGS',
             ]);
@@ -2909,8 +3045,28 @@ class OrderService
                 'journal_entry_id' => $journal_entry->journal_entry_id,
                 'account_id' => $accounting_setting->default_inventory_account_id,
                 'debit' => 0,
-                'credit' => $total_cost,
-                'description' => 'Order #' . $order->daily_order_id . ' - Inventory',
+                'credit' => $normal_cogs,
+                'description' => 'Order #' . $order->daily_order_id . ' - Inventory (sold)',
+            ]);
+        }
+
+        if ($complimentary_cost > 0) {
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id' => $journal_entry->journal_entry_id,
+                'account_id' => $accounting_setting->default_complimentary_expense_account_id,
+                'debit' => $complimentary_cost,
+                'credit' => 0,
+                'description' => 'Order #' . $order->daily_order_id . ' - Complimentary Expense',
+            ]);
+
+            JournalEntryDetail::create([
+                'journal_entry_detail_id' => generateUuid(),
+                'journal_entry_id' => $journal_entry->journal_entry_id,
+                'account_id' => $accounting_setting->default_inventory_account_id,
+                'debit' => 0,
+                'credit' => $complimentary_cost,
+                'description' => 'Order #' . $order->daily_order_id . ' - Inventory (complimentary)',
             ]);
         }
 
@@ -2974,10 +3130,7 @@ class OrderService
         try {
             $order = $this->model_order->getModel()::with(['details.product', 'payments'])->findOrFail($obj['order_id']);
 
-            $existing = JournalEntry::where('source_type', JournalSourceTypes::POS_SALE)
-                ->where('source_id', $order->order_id)
-                ->where('is_deleted', 0)
-                ->exists();
+            $existing = $this->findSaleJournalEntry($order);
 
             if ($existing) {
                 DB::commit();
@@ -3013,7 +3166,7 @@ class OrderService
 
             $payments = OrderPayment::where('order_id', $order->order_id)->where('is_deleted', 0)->get();
 
-            if ($payments->isEmpty()) {
+            if ($payments->isEmpty() && round((float) $order->total, 2) > 0.01) {
                 throw new Exception('At least one payment is required to complete the sale.');
             }
 
@@ -3122,10 +3275,7 @@ class OrderService
      */
     protected function reversePostedEffects(Order $order, string $storeCreditReason = 'Restored - Order posting reversed'): void
     {
-        $journal_entry = JournalEntry::where('source_type', JournalSourceTypes::POS_SALE)
-            ->where('source_id', $order->order_id)
-            ->where('is_deleted', 0)
-            ->first();
+        $journal_entry = $this->findSaleJournalEntry($order);
 
         if ($journal_entry) {
             app(\App\Services\Concrete\Admin\AccountingPeriodService::class)->assertPostable($journal_entry->business_id, $journal_entry->entry_date);
@@ -3137,7 +3287,7 @@ class OrderService
             ]);
         }
 
-        $stock_transactions = ProductVariationStockTransaction::where('reference_type', ReferenceType::SALE)
+        $stock_transactions = ProductVariationStockTransaction::whereIn('reference_type', $this->saleStockReferenceTypes())
             ->where('reference_id', $order->order_id)
             ->where('is_deleted', 0)
             ->get();
@@ -3304,10 +3454,6 @@ class OrderService
                 throw new Exception('At least one product line is required to correct the order.');
             }
 
-            if (empty($obj['payments']) || !is_array($obj['payments'])) {
-                throw new Exception('At least one payment is required to correct the order.');
-            }
-
             $order = $this->model_order->getModel()::with([
                 'details.product',
                 'details.productVariation',
@@ -3331,7 +3477,7 @@ class OrderService
 
             $payments = OrderPayment::where('order_id', $order->order_id)->where('is_deleted', 0)->get();
 
-            if ($payments->isEmpty()) {
+            if ($payments->isEmpty() && round((float) $order->total, 2) > 0.01) {
                 throw new Exception('At least one payment is required to correct the order.');
             }
 
@@ -3464,7 +3610,7 @@ class OrderService
             );
         }
 
-        $this->saveLinePayments($order->order_id, $obj['payments']);
+        $this->saveLinePayments($order->order_id, $obj['payments'] ?? []);
     }
 
     protected function snapshotOrderForAudit(Order $order): array
@@ -3731,5 +3877,47 @@ class OrderService
         $this->attachAvailableStock($all_variations, $business_id, $branch_id, $products->pluck('is_track_stock', 'product_id')->all());
 
         return $products;
+    }
+
+    /**
+     * Full complimentary orders post as a Complimentary Order source so GL
+     * drill-down is distinct from a normal POS Sale. Partial complimentary
+     * stays POS Sale with complimentary expense legs on the same voucher.
+     */
+    public function saleJournalSourceType($order): string
+    {
+        if (($order->complimentary_status ?? ComplimentaryStatus::NONE) === ComplimentaryStatus::FULL) {
+            return JournalSourceTypes::COMPLIMENTARY_ORDER;
+        }
+
+        return JournalSourceTypes::POS_SALE;
+    }
+
+    protected function saleJournalDescription($order): string
+    {
+        $status = $order->complimentary_status ?? ComplimentaryStatus::NONE;
+
+        if ($status === ComplimentaryStatus::FULL) {
+            return 'Complimentary Order #' . $order->daily_order_id;
+        }
+
+        if ($status === ComplimentaryStatus::PARTIAL) {
+            return 'Auto-generated sale voucher for order #' . $order->daily_order_id . ' (partial complimentary)';
+        }
+
+        return 'Auto-generated sale voucher for order #' . $order->daily_order_id;
+    }
+
+    protected function findSaleJournalEntry($order)
+    {
+        return JournalEntry::where('source_id', $order->order_id)
+            ->whereIn('source_type', [JournalSourceTypes::POS_SALE, JournalSourceTypes::COMPLIMENTARY_ORDER])
+            ->where('is_deleted', 0)
+            ->first();
+    }
+
+    protected function saleStockReferenceTypes(): array
+    {
+        return [ReferenceType::SALE, ReferenceType::COMPLIMENTARY];
     }
 }

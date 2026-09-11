@@ -24,6 +24,7 @@
             'Cashier' => $order->cashier->name ?? 'N/A',
             'Customer' => $order->user->name ?? 'N/A',
             'Order Type' => $order->orderType->name ?? 'N/A',
+            'Complimentary' => \App\Enums\ComplimentaryStatus::getOptions()[$order->complimentary_status ?? \App\Enums\ComplimentaryStatus::NONE] ?? 'Normal',
         ],
         'print_config' => $print_config,
     ])
@@ -46,7 +47,7 @@
             @forelse ($order->details as $index => $detail)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $detail->product->name ?? 'N/A' }}</td>
+                    <td>{{ $detail->product->name ?? 'N/A' }}@if (!empty($detail->is_complimentary)) <strong>({{ __('complimentary.short_label') }})</strong>@endif</td>
                     <td>{{ $detail->productVariation->name ?? 'N/A' }}</td>
                     <td class="text-right">{{ decimal($detail->quantity) }}</td>
                     <td>{{ $detail->unit->name ?? 'N/A' }}</td>

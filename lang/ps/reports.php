@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'لغوه شوي امرونه',
     'cash_bank_ledger' => 'د نغدو او بانک لیجر',
     'cash_flow' => 'د نغدو جریان بیان',
+    'complimentary_report' => 'د تحفې راپور',
     'customer_aging' => 'د مشتري زوړوالی',
     'customer_ledger' => 'د مشتري لیجر',
     'customer_loyalty_report' => 'د مشتري وفادارۍ تاریخچه',

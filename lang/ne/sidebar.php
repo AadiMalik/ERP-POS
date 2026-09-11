@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'नगद प्रवाह विवरण',
     'categories' => 'श्रेणीहरू',
     'closing_rules' => 'समापन नियमहरू',
+    'complimentary_reasons' => 'कम्प्लिमेन्टरी कारणहरू',
+    'complimentary_report' => 'कम्प्लिमेन्टरी रिपोर्ट',
     'consumption_reports' => 'उपभोग रिपोर्टहरू',
     'contact_messages' => 'सम्पर्क सन्देशहरू',
     'content_cards' => 'सामग्री कार्डहरू',

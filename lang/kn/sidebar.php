@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'ನಗದು ಹರಿವಿನ ವರದಿ',
     'categories' => 'ವರ್ಗಗಳು',
     'closing_rules' => 'ಮುಕ್ತಾಯ ನಿಯಮಗಳು',
+    'complimentary_reasons' => 'ಕಾಂಪ್ಲಿಮೆಂಟರಿ ಕಾರಣಗಳು',
+    'complimentary_report' => 'ಕಾಂಪ್ಲಿಮೆಂಟರಿ ವರದಿ',
     'consumption_reports' => 'ಬಳಕೆ ವರದಿಗಳು',
     'contact_messages' => 'ಸಂಪರ್ಕ ಸಂದೇಶಗಳು',
     'content_cards' => 'ವಿಷಯ ಕಾರ್ಡ್‌ಗಳು',

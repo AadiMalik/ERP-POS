@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'ਨਕਦ ਪ੍ਰਵਾਹ ਬਿਆਨ',
     'categories' => 'ਸ਼੍ਰੇਣੀਆਂ',
     'closing_rules' => 'ਸਮਾਪਤੀ ਨਿਯਮ',
+    'complimentary_reasons' => 'ਕੰਪਲੀਮੈਂਟਰੀ ਕਾਰਨ',
+    'complimentary_report' => 'ਕੰਪਲੀਮੈਂਟਰੀ ਰਿਪੋਰਟ',
     'consumption_reports' => 'ਖਪਤ ਰਿਪੋਰਟਾਂ',
     'contact_messages' => 'ਸੰਪਰਕ ਸੁਨੇਹੇ',
     'content_cards' => 'ਸਮੱਗਰੀ ਕਾਰਡ',

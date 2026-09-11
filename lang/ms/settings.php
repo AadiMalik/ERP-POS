@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Pulangan Jualan',
     'coa_inventory_account' => 'Akaun Inventori',
     'coa_cogs_account' => 'Akaun COGS',
+    'coa_complimentary_expense_account' => 'Akaun perbelanjaan komplementari',
     'coa_opening_stock_account' => 'Membuka Akaun Saham',
     'coa_stock_adjustment_account' => 'Akaun Pelarasan Stok',
     'coa_inventory_cost_adjustment_account' => 'Akaun Pelarasan Kos Inventori',

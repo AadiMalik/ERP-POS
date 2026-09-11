@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'අවලංගු කළ ඇණවුම්',
     'cash_bank_ledger' => 'මුදල් සහ බැංකු ලෙජරය',
     'cash_flow' => 'මුදල් ප්‍රවාහ ප්‍රකාශය',
+    'complimentary_report' => 'නිර්දාන වාර්තාව',
     'customer_aging' => 'පාරිභෝගික වයස්ගත වීම',
     'customer_ledger' => 'පාරිභෝගික ලෙජරය',
     'customer_loyalty_report' => 'පාරිභෝගික විශ්වාසභාවය ඉතිහාසය',

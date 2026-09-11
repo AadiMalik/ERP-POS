@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'הזמנות שבוטלו',
     'cash_bank_ledger' => 'ספר מזומנים ובנק',
     'cash_flow' => 'דוח תזרים מזומנים',
+    'complimentary_report' => 'דוח קומפלימנט',
     'customer_aging' => 'ותק חוב לקוח',
     'customer_ledger' => 'ספר לקוח',
     'customer_loyalty_report' => 'היסטוריית נאמנות לקוח',

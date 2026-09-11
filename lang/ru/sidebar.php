@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Отчёт о движении денежных средств',
     'categories' => 'Категории',
     'closing_rules' => 'Правила закрытия',
+    'complimentary_reasons' => 'Причины комплимента',
+    'complimentary_report' => 'Отчёт по комплиментам',
     'consumption_reports' => 'Отчёты о потреблении',
     'contact_messages' => 'Контактные сообщения',
     'content_cards' => 'Карточки контента',

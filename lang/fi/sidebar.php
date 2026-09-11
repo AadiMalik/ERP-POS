@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Kassavirtalaskelma',
     'categories' => 'Kategoriat',
     'closing_rules' => 'Sulkemissäännöt',
+    'complimentary_reasons' => 'Ilmaisjakelun syyt',
+    'complimentary_report' => 'Ilmaisjakeluraportti',
     'consumption_reports' => 'Kulutusraportit',
     'contact_messages' => 'Yhteydenottoviestit',
     'content_cards' => 'Sisältökortit',

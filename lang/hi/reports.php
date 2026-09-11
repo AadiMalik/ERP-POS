@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'रद्द किए गए ऑर्डर',
     'cash_bank_ledger' => 'नकद और बैंक लेजर',
     'cash_flow' => 'नकदी प्रवाह विवरण',
+    'complimentary_report' => 'कंपलीमेंटरी रिपोर्ट',
     'customer_aging' => 'ग्राहक एजिंग',
     'customer_ledger' => 'ग्राहक लेजर',
     'customer_loyalty_report' => 'ग्राहक लॉयल्टी इतिहास',

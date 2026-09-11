@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Sprzedaż Zwrotu',
     'coa_inventory_account' => 'Konto zapasów',
     'coa_cogs_account' => 'Konto COGS',
+    'coa_complimentary_expense_account' => 'Konto kosztów komplementu',
     'coa_opening_stock_account' => 'Otwarcie konta giełdowego',
     'coa_stock_adjustment_account' => 'Konto korekty zapasów',
     'coa_inventory_cost_adjustment_account' => 'Konto korekty kosztu zapasów',

@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'വിൽപ്പന റിട്ടേൺ',
     'coa_inventory_account' => 'ഇൻവെൻ്ററി അക്കൗണ്ട്',
     'coa_cogs_account' => 'COGS അക്കൗണ്ട്',
+    'coa_complimentary_expense_account' => 'കോംപ്ലിമെന്ററി ചെലവ് അക്കൗണ്ട്',
     'coa_opening_stock_account' => 'സ്റ്റോക്ക് അക്കൗണ്ട് തുറക്കുന്നു',
     'coa_stock_adjustment_account' => 'സ്റ്റോക്ക് അഡ്ജസ്റ്റ്മെൻ്റ് അക്കൗണ്ട്',
     'coa_inventory_cost_adjustment_account' => 'ഇൻവെന്ററി ചെലവ് ക്രമീകരണ അക്കൗണ്ട്',

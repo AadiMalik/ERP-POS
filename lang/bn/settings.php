@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'বিক্রয় রিটার্ন',
     'coa_inventory_account' => 'ইনভেন্টরি অ্যাকাউন্ট',
     'coa_cogs_account' => 'COGS অ্যাকাউন্ট',
+    'coa_complimentary_expense_account' => 'কমপ্লিমেন্টারি ব্যয় হিসাব',
     'coa_opening_stock_account' => 'স্টক অ্যাকাউন্ট খোলা',
     'coa_stock_adjustment_account' => 'স্টক অ্যাডজাস্টমেন্ট অ্যাকাউন্ট',
     'coa_inventory_cost_adjustment_account' => 'ইনভেন্টরি খরচ সমন্বয় হিসাব',

@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'سفارش‌های لغو شده',
     'cash_bank_ledger' => 'دفتر نقد و بانک',
     'cash_flow' => 'صورت جریان نقدی',
+    'complimentary_report' => 'گزارش اهدایی',
     'customer_aging' => 'سن بدهی مشتری',
     'customer_ledger' => 'دفتر مشتری',
     'customer_loyalty_report' => 'تاریخچه وفاداری مشتری',

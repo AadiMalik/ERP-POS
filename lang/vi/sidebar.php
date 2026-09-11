@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Báo cáo lưu chuyển tiền tệ',
     'categories' => 'Danh mục',
     'closing_rules' => 'Quy tắc đóng sổ',
+    'complimentary_reasons' => 'Lý do tặng kèm',
+    'complimentary_report' => 'Báo cáo tặng kèm',
     'consumption_reports' => 'Báo cáo tiêu thụ',
     'contact_messages' => 'Tin nhắn liên hệ',
     'content_cards' => 'Thẻ nội dung',

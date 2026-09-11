@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Retour de vente',
     'coa_inventory_account' => 'Compte d\'inventaire',
     'coa_cogs_account' => 'Compte COGS',
+    'coa_complimentary_expense_account' => 'Compte de charge de gracieuseté',
     'coa_opening_stock_account' => 'Ouverture du compte de stock',
     'coa_stock_adjustment_account' => 'Compte d\'ajustement des stocks',
     'coa_inventory_cost_adjustment_account' => 'Compte d\'ajustement du coût des stocks',

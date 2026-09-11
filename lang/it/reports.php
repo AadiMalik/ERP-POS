@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Ordini annullati',
     'cash_bank_ledger' => 'Libro mastro cassa e banca',
     'cash_flow' => 'Rendiconto finanziario',
+    'complimentary_report' => 'Report omaggi',
     'customer_aging' => 'Scadenzario clienti',
     'customer_ledger' => 'Libro mastro clienti',
     'customer_loyalty_report' => 'Cronologia fedeltà cliente',

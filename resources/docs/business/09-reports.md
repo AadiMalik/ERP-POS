@@ -32,9 +32,19 @@ Overall sales performance, with the ability to reconcile against payments receiv
 Order Detail, Product-wise Sales, Variation-wise Sales, Customer-wise Sales,
 Branch-wise Sales, Order Source Sales, Payment Method Sales, Order Status,
 Cancelled Orders, Due / Credit Sales, Discount Report, Order Tax Report,
-Top Selling, Offline Orders, and Order Correction Report. These live under
-the Orders menu and respect the same Print / PDF / Excel / CSV permission
-split as every other report.
+Top Selling, Offline Orders, Order Correction Report, and **Complimentary
+Report**. These live under the Orders menu and respect the same Print / PDF /
+Excel / CSV permission split as every other report.
+
+The **Complimentary Report** lists every posted complimentary product line for a
+date range (business/branch, warehouse, customer, product, variation, full vs
+partial, reason, user, order number). Totals cover complimentary orders, units,
+retail value given away, and — for users with View Complimentary Cost — actual
+inventory cost, plus a breakdown by reason. Complimentary activity also appears
+in the General Ledger, Journal listing, Trial Balance, and Profit & Loss through
+the Complimentary Expense account; it is not a second set of books. Stock Ledger
+shows complimentary issues as their own movement type so they are not mixed with
+normal sales, without deducting stock twice.
 
 The **Order Correction Report** shows every same-day manager correction of a
 posted POS sale: which order, who corrected it, their reason, and the order's

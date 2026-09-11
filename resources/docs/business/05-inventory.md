@@ -257,7 +257,9 @@ silo.
   Stock Ledger.
 - **Stock Ledger / Product Ledger** — every posted stock movement with opening/
   closing balance when filtered to one item. Also serves Product Ledger when you
-  narrow to a product/variation/warehouse.
+  narrow to a product/variation/warehouse. Complimentary giveaways reduce
+  physical stock once (same as a sale) but appear as **Complimentary** /
+  **Complimentary Return** movement types, not as a second deduction.
 - **Stock Valuation** — quantity × moving-average cost (`avg_price`).
 - **Stock Aging / Slow-Fast-Non-Moving** — days since last movement, age buckets,
   and velocity class.

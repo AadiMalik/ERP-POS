@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'റദ്ദാക്കിയ ഓർഡറുകൾ',
     'cash_bank_ledger' => 'പണം, ബാങ്ക് ലെഡ്ജർ',
     'cash_flow' => 'പണമൊഴുക്ക് പ്രസ്താവന',
+    'complimentary_report' => 'കോംപ്ലിമെന്ററി റിപ്പോർട്ട്',
     'customer_aging' => 'ഉപഭോക്തൃ ഏജിംഗ്',
     'customer_ledger' => 'ഉപഭോക്തൃ ലെഡ്ജർ',
     'customer_loyalty_report' => 'ഉപഭോക്തൃ വിശ്വസ്തത ചരിത്രം',

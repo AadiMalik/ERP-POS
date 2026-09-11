@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => '銷售退貨',
     'coa_inventory_account' => '庫存帳戶',
     'coa_cogs_account' => '銷貨成本帳戶',
+    'coa_complimentary_expense_account' => '贈送費用科目',
     'coa_opening_stock_account' => '開設股票帳戶',
     'coa_stock_adjustment_account' => '庫存調整帳戶',
     'coa_inventory_cost_adjustment_account' => '存貨成本調整科目',

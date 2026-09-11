@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Kiárusítás Vissza',
     'coa_inventory_account' => 'Készletszámla',
     'coa_cogs_account' => 'COGS számla',
+    'coa_complimentary_expense_account' => 'Szívességi költségszámla',
     'coa_opening_stock_account' => 'Részvényszámla nyitása',
     'coa_stock_adjustment_account' => 'Készletkorrekciós számla',
     'coa_inventory_cost_adjustment_account' => 'Készletköltség-korrekciós számla',

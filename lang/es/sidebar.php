@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Estado de flujo de efectivo',
     'categories' => 'Categorías',
     'closing_rules' => 'Reglas de cierre',
+    'complimentary_reasons' => 'Motivos de cortesía',
+    'complimentary_report' => 'Informe de cortesía',
     'consumption_reports' => 'Informes de consumo',
     'contact_messages' => 'Mensajes de contacto',
     'content_cards' => 'Tarjetas de contenido',

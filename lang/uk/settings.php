@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Повернення продажу',
     'coa_inventory_account' => 'Рахунок запасів',
     'coa_cogs_account' => 'Обліковий запис COGS',
+    'coa_complimentary_expense_account' => 'Рахунок витрат на компліменти',
     'coa_opening_stock_account' => 'Відкриття фондового рахунку',
     'coa_stock_adjustment_account' => 'Рахунок коригування запасів',
     'coa_inventory_cost_adjustment_account' => 'Рахунок коригування собівартості запасів',

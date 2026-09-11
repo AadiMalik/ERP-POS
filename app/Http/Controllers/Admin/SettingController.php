@@ -280,6 +280,7 @@ $this->middleware('permission:setting.manage');
             'default_sale_return_account_id'     => 'nullable|exists:accounts,account_id',
             'default_inventory_account_id'       => 'nullable|exists:accounts,account_id',
             'default_cogs_account_id'            => 'nullable|exists:accounts,account_id',
+            'default_complimentary_expense_account_id' => 'nullable|exists:accounts,account_id',
             'default_opening_stock_account_id'   => 'nullable|exists:accounts,account_id',
             'default_stock_adjustment_account_id' => 'nullable|exists:accounts,account_id',
             'default_inventory_cost_adjustment_account_id' => 'nullable|exists:accounts,account_id',

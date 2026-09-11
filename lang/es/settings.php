@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Devolución de venta',
     'coa_inventory_account' => 'Cuenta de inventario',
     'coa_cogs_account' => 'Cuenta COGS',
+    'coa_complimentary_expense_account' => 'Cuenta de gasto de cortesía',
     'coa_opening_stock_account' => 'Apertura de cuenta de acciones',
     'coa_stock_adjustment_account' => 'Cuenta de ajuste de existencias',
     'coa_inventory_cost_adjustment_account' => 'Cuenta de ajuste de costo de inventario',

@@ -1219,6 +1219,13 @@ class PermissionRegistry
 
             // ---- Already-seeded modules (existing permission names, kept exactly as-is) ----
 
+            'complimentary-reason' => ['label' => 'Complimentary Reasons', 'actions' => [
+                'view'   => ['name' => 'complimentary-reason.view', 'label' => 'View', 'is_system' => false],
+                'create' => ['name' => 'complimentary-reason.create', 'label' => 'Create', 'is_system' => false],
+                'edit'   => ['name' => 'complimentary-reason.edit', 'label' => 'Edit', 'is_system' => false],
+                'delete' => ['name' => 'complimentary-reason.delete', 'label' => 'Delete', 'is_system' => false],
+            ]],
+
             'pos' => ['label' => 'POS', 'actions' => [
                 'access'                => ['name' => 'pos.access', 'label' => 'Access POS', 'is_system' => false],
                 'register_open_any'     => ['name' => 'pos.register.open.any', 'label' => 'Open Register Shift For Any Cashier', 'is_system' => false],
@@ -1243,6 +1250,9 @@ class PermissionRegistry
                 'loyalty_apply'   => ['name' => 'order.loyalty.apply', 'label' => 'Apply Loyalty Points', 'is_system' => false],
                 'price_change'    => ['name' => 'order.price.change', 'label' => 'Change Price', 'is_system' => false],
                 'price_override_minimum' => ['name' => 'order.price.override-minimum', 'label' => 'Override Minimum Selling Price', 'is_system' => false],
+                'complimentary_create' => ['name' => 'order.complimentary.create', 'label' => 'Create Complimentary Order / Item', 'is_system' => false],
+                'complimentary_approve' => ['name' => 'order.complimentary.approve', 'label' => 'Approve Full Complimentary Order', 'is_system' => false],
+                'complimentary_view_cost' => ['name' => 'order.complimentary.view-cost', 'label' => 'View Complimentary Cost', 'is_system' => false],
                 'hold'            => ['name' => 'order.hold', 'label' => 'Hold', 'is_system' => false],
                 'complete'        => ['name' => 'order.complete', 'label' => 'Complete Sale', 'is_system' => false],
                 // 'order.cancel_void' is superseded by the separate 'cancel'/'void'
@@ -1360,6 +1370,11 @@ class PermissionRegistry
                 'order_correction_report_pdf' => ['name' => 'reports.order-correction-report.pdf', 'label' => 'Order Correction Report - PDF', 'is_system' => false],
                 'order_correction_report_export' => ['name' => 'reports.order-correction-report.export', 'label' => 'Order Correction Report - Export (Excel)', 'is_system' => false],
                 'order_correction_report_export_csv' => ['name' => 'reports.order-correction-report.export-csv', 'label' => 'Order Correction Report - Export (CSV)', 'is_system' => false],
+                'complimentary_report' => ['name' => 'reports.complimentary-report.view', 'label' => 'Complimentary Report', 'is_system' => false],
+                'complimentary_report_print' => ['name' => 'reports.complimentary-report.print', 'label' => 'Complimentary Report - Print', 'is_system' => false],
+                'complimentary_report_pdf' => ['name' => 'reports.complimentary-report.pdf', 'label' => 'Complimentary Report - PDF', 'is_system' => false],
+                'complimentary_report_export' => ['name' => 'reports.complimentary-report.export', 'label' => 'Complimentary Report - Export (Excel)', 'is_system' => false],
+                'complimentary_report_export_csv' => ['name' => 'reports.complimentary-report.export-csv', 'label' => 'Complimentary Report - Export (CSV)', 'is_system' => false],
             ]],
 
             'expense' => ['label' => 'Expense (POS)', 'actions' => [
@@ -1916,7 +1931,7 @@ class PermissionRegistry
             'purchase-request', 'purchase-request-quotation', 'purchase', 'good-receipt-note',
             'purchase-return', 'opening-stock', 'stock-taking', 'loss-reason', 'waste-damage-expiry', 'cost-price-adjustment', 'transfer-note', 'supplier-payment', 'customer-payment',
             'service-purchase', 'service-purchase-return', 'service-sale', 'service-sale-return',
-            'pos', 'pos-register', 'order', 'order-return', 'order-reports', 'expense', 'expense-category', 'admin-expense',
+            'pos', 'pos-register', 'order', 'order-return', 'order-reports', 'complimentary-reason', 'expense', 'expense-category', 'admin-expense',
             'activity-log', 'login-history', 'notification', 'firebase-setting', 'login-security-setting',
             'notification-template', 'broadcast-notification', 'documentation', 'reports', 'branch', 'user',
             'department', 'designation', 'shift', 'employee', 'attendance', 'leave-type',

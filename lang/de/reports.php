@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Stornierte Bestellungen',
     'cash_bank_ledger' => 'Kassen- und Bankbuch',
     'cash_flow' => 'Kapitalflussrechnung',
+    'complimentary_report' => 'Kulanzbericht',
     'customer_aging' => 'Kunden-Fälligkeitsanalyse',
     'customer_ledger' => 'Kundenkonto',
     'customer_loyalty_report' => 'Kundentreue-Verlauf',

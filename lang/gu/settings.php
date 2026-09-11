@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'વેચાણ વળતર',
     'coa_inventory_account' => 'ઈન્વેન્ટરી એકાઉન્ટ',
     'coa_cogs_account' => 'COGS એકાઉન્ટ',
+    'coa_complimentary_expense_account' => 'કમ્પ્લિમેન્ટરી ખર્ચ ખાતું',
     'coa_opening_stock_account' => 'સ્ટોક ખાતું ખોલવું',
     'coa_stock_adjustment_account' => 'સ્ટોક એડજસ્ટમેન્ટ એકાઉન્ટ',
     'coa_inventory_cost_adjustment_account' => 'ઇન્વેન્ટરી કોસ્ટ એડજસ્ટમેન્ટ એકાઉન્ટ',

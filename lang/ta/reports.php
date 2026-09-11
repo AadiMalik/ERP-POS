@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'ரத்து செய்யப்பட்ட ஆர்டர்கள்',
     'cash_bank_ledger' => 'பணம் மற்றும் வங்கி லெட்ஜர்',
     'cash_flow' => 'பண ஓட்ட அறிக்கை',
+    'complimentary_report' => 'இலவச அறிக்கை',
     'customer_aging' => 'வாடிக்கையாளர் வயதாகுதல்',
     'customer_ledger' => 'வாடிக்கையாளர் லெட்ஜர்',
     'customer_loyalty_report' => 'வாடிக்கையாளர் விசுவாச வரலாறு',

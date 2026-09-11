@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Törölt rendelések',
     'cash_bank_ledger' => 'Pénztár és bank főkönyv',
     'cash_flow' => 'Cash flow kimutatás',
+    'complimentary_report' => 'Szívességi jelentés',
     'customer_aging' => 'Vevő korosítás',
     'customer_ledger' => 'Vevő főkönyv',
     'customer_loyalty_report' => 'Vevőhűség előzmények',

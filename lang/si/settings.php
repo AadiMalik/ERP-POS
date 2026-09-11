@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'විකුණුම් ආපසු',
     'coa_inventory_account' => 'ඉන්වෙන්ටරි ගිණුම',
     'coa_cogs_account' => 'COGS ගිණුම',
+    'coa_complimentary_expense_account' => 'නිර්දාන වියදම් ගිණුම',
     'coa_opening_stock_account' => 'කොටස් ගිණුම විවෘත කිරීම',
     'coa_stock_adjustment_account' => 'කොටස් ගැලපුම් ගිණුම',
     'coa_inventory_cost_adjustment_account' => 'තොග පිරිවැය සීරුමාරු ගිණුම',

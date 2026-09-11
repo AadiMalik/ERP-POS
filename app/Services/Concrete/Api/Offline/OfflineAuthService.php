@@ -110,6 +110,9 @@ class OfflineAuthService
       'order.refund.process',
       'order.payment.credit',
       'order.customer.change',
+      'order.complimentary.create',
+      'order.complimentary.approve',
+      'order.complimentary.view-cost',
       'expense.access',
     ];
 

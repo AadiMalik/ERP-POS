@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'बिक्री वापसी',
     'coa_inventory_account' => 'इन्वेंटरी खाता',
     'coa_cogs_account' => 'सीओजीएस खाता',
+    'coa_complimentary_expense_account' => 'कंपलीमेंटरी व्यय खाता',
     'coa_opening_stock_account' => 'स्टॉक खाता खोलना',
     'coa_stock_adjustment_account' => 'स्टॉक समायोजन खाता',
     'coa_inventory_cost_adjustment_account' => 'इन्वेंट्री लागत समायोजन खाता',

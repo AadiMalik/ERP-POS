@@ -23,6 +23,8 @@ class  TransactionType
     const PRODUCTION_IN = 'production_in';
     const PRODUCTION_OUT = 'production_out';
     const COST_ADJUSTMENT = 'cost_price_adjustment';
+    const COMPLIMENTARY = 'complimentary';
+    const COMPLIMENTARY_RETURN = 'complimentary_return';
 
     public static function getOptions()
     {
@@ -46,6 +48,8 @@ class  TransactionType
             self::PRODUCTION_IN => 'Production In',
             self::PRODUCTION_OUT => 'Production Out',
             self::COST_ADJUSTMENT => 'Cost Price Adjustment',
+            self::COMPLIMENTARY => 'Complimentary',
+            self::COMPLIMENTARY_RETURN => 'Complimentary Return',
         ];
     }
 
@@ -72,6 +76,7 @@ class  TransactionType
             self::TRANSFER_IN,
             self::PRODUCTION_IN,
             self::COST_ADJUSTMENT,
+            self::COMPLIMENTARY_RETURN,
         ];
     }
 

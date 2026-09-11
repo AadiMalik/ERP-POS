@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => '已取消訂單',
     'cash_bank_ledger' => '現金與銀行分類帳',
     'cash_flow' => '現金流量表',
+    'complimentary_report' => '贈送報表',
     'customer_aging' => '客戶帳齡',
     'customer_ledger' => '客戶分類帳',
     'customer_loyalty_report' => '客戶忠誠度歷史',

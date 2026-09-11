@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Výkaz peněžních toků',
     'categories' => 'Kategorie',
     'closing_rules' => 'Pravidla uzávěrky',
+    'complimentary_reasons' => 'Důvody komplimentu',
+    'complimentary_report' => 'Sestava komplimentů',
     'consumption_reports' => 'Zprávy o spotřebě',
     'contact_messages' => 'Kontaktní zprávy',
     'content_cards' => 'Karty obsahu',

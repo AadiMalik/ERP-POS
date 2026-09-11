@@ -200,6 +200,9 @@
                                 $desc_parts[] = $line_sale_type;
                             }
                         }
+                        if (!empty($detail->is_complimentary)) {
+                            $desc_parts[] = __('complimentary.short_label');
+                        }
                     @endphp
                     <tr>
                         <td class="tr-item-name">{{ implode(' - ', $desc_parts) }}</td>

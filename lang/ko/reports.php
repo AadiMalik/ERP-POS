@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => '취소된 주문',
     'cash_bank_ledger' => '현금 및 은행 원장',
     'cash_flow' => '현금흐름표',
+    'complimentary_report' => '무상 제공 보고서',
     'customer_aging' => '고객 미수금 연령 분석',
     'customer_ledger' => '고객 원장',
     'customer_loyalty_report' => '고객 충성도 이력',

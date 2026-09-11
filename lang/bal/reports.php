@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'منسوخ بوتگیں آرڈرانی',
     'cash_bank_ledger' => 'نقد و بینک لیجر',
     'cash_flow' => 'نقدی بہاوگ ءِ بیان',
+    'complimentary_report' => 'کمپلیمنٹری رپورٹ',
     'customer_aging' => 'گاہک ایجنگ',
     'customer_ledger' => 'گاہک لیجر',
     'customer_loyalty_report' => 'گاہک وفاداری تاریخ',

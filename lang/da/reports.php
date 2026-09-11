@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Annullerede ordrer',
     'cash_bank_ledger' => 'Kasse- og bankbog',
     'cash_flow' => 'Pengestrømsopgørelse',
+    'complimentary_report' => 'Komplimentrapport',
     'customer_aging' => 'Kundealdersfordeling',
     'customer_ledger' => 'Kundebog',
     'customer_loyalty_report' => 'Kundeloyalitetshistorik',

@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'ਵਿਕਰੀ ਵਾਪਸੀ',
     'coa_inventory_account' => 'ਵਸਤੂ ਖਾਤਾ',
     'coa_cogs_account' => 'COGS ਖਾਤਾ',
+    'coa_complimentary_expense_account' => 'ਕੰਪਲੀਮੈਂਟਰੀ ਖਰਚ ਖਾਤਾ',
     'coa_opening_stock_account' => 'ਸਟਾਕ ਖਾਤਾ ਖੋਲ੍ਹਣਾ',
     'coa_stock_adjustment_account' => 'ਸਟਾਕ ਐਡਜਸਟਮੈਂਟ ਖਾਤਾ',
     'coa_inventory_cost_adjustment_account' => 'ਇਨਵੈਂਟਰੀ ਲਾਗਤ ਐਡਜਸਟਮੈਂਟ ਖਾਤਾ',

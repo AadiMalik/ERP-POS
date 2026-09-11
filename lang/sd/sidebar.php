@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'نقد وهڪري بيان',
     'categories' => 'ڪيٽيگريون',
     'closing_rules' => 'بند ڪرڻ جا قاعدا',
+    'complimentary_reasons' => 'ڪمپليمنٽري سبب',
+    'complimentary_report' => 'ڪمپليمنٽري رپورٽ',
     'consumption_reports' => 'واپرائڻ جون رپورٽون',
     'contact_messages' => 'رابطي پيغام',
     'content_cards' => 'مواد ڪارڊ',

@@ -142,7 +142,9 @@ Business, Account` — linked to the chart of accounts for AP).
 ## Sales / POS
 
 `order_types`, `payment_methods`, `order_sources`, `sale_types`, `discounts`,
-`vouchers`/`voucher_redemptions`, `pos_registers`, `pos_register_sessions`,
+`vouchers`/`voucher_redemptions`, `complimentary_reasons` (per-business master
+of giveaway reasons; soft-delete; seeded defaults such as Guest Complimentary,
+Marketing, Promotion), `pos_registers`, `pos_register_sessions`,
 `pos_register_cash_movements`, `order_counters` (daily numbering), `orders`/
 `order_details`, `order_payments`, `order_status_history`, `order_returns`/
 `_details`, `customer_profiles` (the actual "customer" entity, replacing an earlier
@@ -170,9 +172,15 @@ Haversine resolution logic and checkout integration.
 
 **Core models:** `Order` (`belongsTo Business, Branch, Warehouse, PosRegister,
 PosRegisterSession, User (cashier), User (customer), OrderType, OrderSource,
-SaleType, Discount, Voucher`; `hasMany OrderDetail, OrderPayment, CustomerPayment,
-OrderStatusHistory, OrderReturn`); `OrderDetail` (`belongsTo Order, Product,
-ProductVariation, Unit, SaleType, Voucher`).
+SaleType, Discount, Voucher, ComplimentaryReason, User (complimentaryBy)`;
+`hasMany OrderDetail, OrderPayment, CustomerPayment, OrderStatusHistory,
+OrderReturn`). Complimentary columns on `orders`: `complimentary_status`
+(`none`/`partial`/`full`), `complimentary_reason_id`, `complimentary_notes`,
+`complimentary_by_id`, `complimentary_at`, `complimentary_retail_value`,
+`complimentary_cost`. `OrderDetail` (`belongsTo Order, Product, ProductVariation,
+Unit, SaleType, Voucher, ComplimentaryReason`) plus `is_complimentary`,
+line-level reason/notes/value/`complimentary_by_id`/`complimentary_at`. Historical
+orders default to Normal (`none`). `ComplimentaryReason` (`belongsTo Business`).
 
 **Removed in migration history — don't chase these:** a standalone `customers`
 table (replaced by `users` + `customer_profiles`), a `tax_rates` table (tax is now

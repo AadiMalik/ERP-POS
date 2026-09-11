@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'नकदी प्रवाह विवरण',
     'categories' => 'श्रेणियां',
     'closing_rules' => 'समापन नियम',
+    'complimentary_reasons' => 'कंपलीमेंटरी कारण',
+    'complimentary_report' => 'कंपलीमेंटरी रिपोर्ट',
     'consumption_reports' => 'खपत रिपोर्ट',
     'contact_messages' => 'संपर्क संदेश',
     'content_cards' => 'सामग्री कार्ड',

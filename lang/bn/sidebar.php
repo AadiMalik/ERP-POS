@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'নগদ প্রবাহ বিবরণী',
     'categories' => 'বিভাগসমূহ',
     'closing_rules' => 'সমাপনী নিয়ম',
+    'complimentary_reasons' => 'কমপ্লিমেন্টারি কারণ',
+    'complimentary_report' => 'কমপ্লিমেন্টারি রিপোর্ট',
     'consumption_reports' => 'ব্যবহার প্রতিবেদন',
     'contact_messages' => 'যোগাযোগ বার্তা',
     'content_cards' => 'বিষয়বস্তু কার্ড',

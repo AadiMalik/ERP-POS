@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'பண ஓட்ட அறிக்கை',
     'categories' => 'வகைகள்',
     'closing_rules' => 'முடிவு விதிகள்',
+    'complimentary_reasons' => 'இலவசக் காரணங்கள்',
+    'complimentary_report' => 'இலவச அறிக்கை',
     'consumption_reports' => 'நுகர்வு அறிக்கைகள்',
     'contact_messages' => 'தொடர்பு செய்திகள்',
     'content_cards' => 'உள்ளடக்க அட்டைகள்',

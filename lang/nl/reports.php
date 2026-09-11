@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Geannuleerde bestellingen',
     'cash_bank_ledger' => 'Kas- en bankboek',
     'cash_flow' => 'Kasstroomoverzicht',
+    'complimentary_report' => 'Complimentair rapport',
     'customer_aging' => 'Klant ouderdomsanalyse',
     'customer_ledger' => 'Klantgrootboek',
     'customer_loyalty_report' => 'Klantloyaliteitsgeschiedenis',

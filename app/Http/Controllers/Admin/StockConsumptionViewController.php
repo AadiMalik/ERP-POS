@@ -29,9 +29,15 @@ class StockConsumptionViewController extends Controller
         ]);
 
         $query = ProductVariationStockTransaction::with(['product', 'productVariation', 'warehouse', 'unit', 'productVariationBatch'])
-            ->where('reference_type', $request->reference_type)
             ->where('reference_id', $request->reference_id)
             ->where('is_deleted', 0);
+
+        $types = array_filter(array_map('trim', explode(',', (string) $request->reference_type)));
+        if (count($types) > 1) {
+            $query->whereIn('reference_type', $types);
+        } else {
+            $query->where('reference_type', $request->reference_type);
+        }
 
         if (getRoleName() !== RoleNames::SUPERADMIN) {
             $query->where('business_id', Auth::user()->business_id);

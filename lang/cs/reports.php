@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Zrušené objednávky',
     'cash_bank_ledger' => 'Kniha pokladny a banky',
     'cash_flow' => 'Výkaz peněžních toků',
+    'complimentary_report' => 'Sestava komplimentů',
     'customer_aging' => 'Stárnutí pohledávek zákazníků',
     'customer_ledger' => 'Kniha zákazníka',
     'customer_loyalty_report' => 'Historie věrnosti zákazníka',

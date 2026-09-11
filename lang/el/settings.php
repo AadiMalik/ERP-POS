@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Επιστροφή πώλησης',
     'coa_inventory_account' => 'Λογαριασμός αποθέματος',
     'coa_cogs_account' => 'Λογαριασμός COGS',
+    'coa_complimentary_expense_account' => 'Λογαριασμός εξόδων προσφοράς',
     'coa_opening_stock_account' => 'Άνοιγμα λογαριασμού μετοχών',
     'coa_stock_adjustment_account' => 'Λογαριασμός Προσαρμογής Αποθεμάτων',
     'coa_inventory_cost_adjustment_account' => 'Λογαριασμός προσαρμογής κόστους αποθέματος',

@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Reso in vendita',
     'coa_inventory_account' => 'Conto inventario',
     'coa_cogs_account' => 'COGS Account',
+    'coa_complimentary_expense_account' => 'Conto spesa omaggio',
     'coa_opening_stock_account' => 'Apertura conto azionario',
     'coa_stock_adjustment_account' => 'Conto di rettifica delle scorte',
     'coa_inventory_cost_adjustment_account' => 'Conto rettifica costo inventario',

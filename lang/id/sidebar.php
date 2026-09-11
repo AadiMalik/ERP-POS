@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Laporan Arus Kas',
     'categories' => 'Kategori',
     'closing_rules' => 'Aturan Penutupan',
+    'complimentary_reasons' => 'Alasan komplementer',
+    'complimentary_report' => 'Laporan komplementer',
     'consumption_reports' => 'Laporan Konsumsi',
     'contact_messages' => 'Pesan Kontak',
     'content_cards' => 'Kartu Konten',

@@ -24,6 +24,7 @@
         'default_sale_return_account_id' => __('settings.coa_sale_return'),
         'default_inventory_account_id' => __('settings.coa_inventory_account'),
         'default_cogs_account_id' => __('settings.coa_cogs_account'),
+        'default_complimentary_expense_account_id' => __('settings.coa_complimentary_expense_account'),
         'default_opening_stock_account_id' => __('settings.coa_opening_stock_account'),
         'default_stock_adjustment_account_id' => __('settings.coa_stock_adjustment_account'),
         'default_inventory_cost_adjustment_account_id' => __('settings.coa_inventory_cost_adjustment_account'),

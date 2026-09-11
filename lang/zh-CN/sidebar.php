@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => '现金流量表',
     'categories' => '分类',
     'closing_rules' => '结账规则',
+    'complimentary_reasons' => '赠送原因',
+    'complimentary_report' => '赠送报表',
     'consumption_reports' => '消耗报告',
     'contact_messages' => '联系信息',
     'content_cards' => '内容卡片',

@@ -1110,7 +1110,7 @@
 .pos-cart-header {
     flex: 0 0 auto;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto auto auto auto;
+    grid-template-columns: auto minmax(0, 1fr) auto auto auto auto auto;
     align-items: center;
     gap: 0.35rem;
     padding: 0.55rem 0.75rem;
@@ -1199,6 +1199,18 @@
     color: #fff;
 }
 
+#markOrderComplimentaryBtn.active {
+    background: #03c3ec;
+    border-color: #03c3ec;
+    color: #fff;
+}
+
+#markOrderComplimentaryBtn.is-partial {
+    background: rgba(255, 171, 0, .95);
+    border-color: #ffab00;
+    color: #fff;
+}
+
 .pos-cart-credit-hint {
     position: absolute;
     top: calc(100% + 0.25rem);
@@ -1283,7 +1295,7 @@
    their cells regardless of whether the Discount column is present. */
 .pos-cart-columns {
     display: grid;
-    grid-template-columns: 34px 1fr 56px 60px 88px 50px 20px;
+    grid-template-columns: 34px 1fr 56px 60px 88px 50px 20px 20px;
     align-items: center;
     gap: 0.45rem;
     padding: 0.35rem 0.7rem;
@@ -1346,7 +1358,7 @@
    never shifts the columns after it. */
 .cart-line {
     display: grid;
-    grid-template-columns: 34px 1fr 56px 60px 88px 50px 20px;
+    grid-template-columns: 34px 1fr 56px 60px 88px 50px 20px 20px;
     align-items: center;
     gap: 0.45rem;
     padding: 0.45rem 0.3rem;
@@ -1512,8 +1524,31 @@
     font-variant-numeric: tabular-nums;
 }
 
-.line-remove {
+.cart-line-complimentary {
+    background: rgba(3, 195, 236, 0.08);
+}
+.line-complimentary {
     grid-column: 7;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(3, 195, 236, .12);
+    color: #03c3ec;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.64rem;
+    padding: 0;
+    justify-self: end;
+    margin-right: 0.15rem;
+}
+.line-complimentary.is-active {
+    background: #03c3ec;
+    color: #fff;
+}
+.line-remove {
+    grid-column: 8;
     width: 20px;
     height: 20px;
     border-radius: 50%;

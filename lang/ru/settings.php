@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Возврат продажи',
     'coa_inventory_account' => 'Счет инвентаря',
     'coa_cogs_account' => 'Счет COGS',
+    'coa_complimentary_expense_account' => 'Счёт расходов на комплименты',
     'coa_opening_stock_account' => 'Открытие фондового счета',
     'coa_stock_adjustment_account' => 'Счет корректировки запасов',
     'coa_inventory_cost_adjustment_account' => 'Счёт корректировки себестоимости запасов',

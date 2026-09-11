@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'منسوخ ٿيل آرڊر',
     'cash_bank_ledger' => 'نقد ۽ بئنڪ ليجر',
     'cash_flow' => 'نقد وهڪري بيان',
+    'complimentary_report' => 'ڪمپليمنٽري رپورٽ',
     'customer_aging' => 'گراهڪ ايجنگ',
     'customer_ledger' => 'گراهڪ ليجر',
     'customer_loyalty_report' => 'گراهڪ لائيلٽي تاريخ',

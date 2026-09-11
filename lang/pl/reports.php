@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Anulowane zamówienia',
     'cash_bank_ledger' => 'Księga kasowo-bankowa',
     'cash_flow' => 'Rachunek przepływów pieniężnych',
+    'complimentary_report' => 'Raport komplementów',
     'customer_aging' => 'Wiekowanie należności klientów',
     'customer_ledger' => 'Księga klienta',
     'customer_loyalty_report' => 'Historia lojalności klienta',

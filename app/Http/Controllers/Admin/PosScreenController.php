@@ -16,6 +16,7 @@ use App\Services\Concrete\Admin\BankService;
 use App\Services\Concrete\Admin\BranchService;
 use App\Services\Concrete\Admin\BusinessService;
 use App\Services\Concrete\Admin\CategoryService;
+use App\Services\Concrete\Admin\ComplimentaryReasonService;
 use App\Services\Concrete\Admin\CustomerService;
 use App\Services\Concrete\Admin\DiscountService;
 use App\Services\Concrete\Admin\ExpenseCategoryService;
@@ -64,6 +65,9 @@ class PosScreenController extends Controller
         'order.payment.credit',
         'order.customer.change',
         'order.reopen',
+        'order.complimentary.create',
+        'order.complimentary.approve',
+        'order.complimentary.view-cost',
         'expense.access',
     ];
 
@@ -79,6 +83,7 @@ class PosScreenController extends Controller
     ];
 
     protected $customer_service;
+    protected $complimentary_reason_service;
     protected $order_type_service;
     protected $order_source_service;
     protected $payment_method_service;
@@ -97,6 +102,7 @@ class PosScreenController extends Controller
 
     public function __construct(
         CustomerService $customer_service,
+        ComplimentaryReasonService $complimentary_reason_service,
         OrderTypeService $order_type_service,
         OrderSourceService $order_source_service,
         PaymentMethodService $payment_method_service,
@@ -116,6 +122,7 @@ class PosScreenController extends Controller
         $this->middleware('permission:pos.access');
 
         $this->customer_service = $customer_service;
+        $this->complimentary_reason_service = $complimentary_reason_service;
         $this->order_type_service = $order_type_service;
         $this->order_source_service = $order_source_service;
         $this->payment_method_service = $payment_method_service;
@@ -178,6 +185,7 @@ class PosScreenController extends Controller
         $sale_types = $this->sale_type_service->getAllActive($business_id);
         $categories = $this->category_service->getByBusiness($business_id);
         $expense_categories = $this->expense_category_service->getActiveByBusiness($business_id);
+        $complimentary_reasons = $this->complimentary_reason_service->getActiveByBusiness($business_id);
 
         $registers = PosRegister::where('business_id', $business_id)
             ->where('branch_id', $branch_id)
@@ -238,6 +246,7 @@ class PosScreenController extends Controller
             'sale_types',
             'categories',
             'expense_categories',
+            'complimentary_reasons',
             'registers',
             'permissions',
             'is_fixed_context',

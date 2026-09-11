@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'ขายคืน',
     'coa_inventory_account' => 'บัญชีสินค้าคงคลัง',
     'coa_cogs_account' => 'บัญชี COGS',
+    'coa_complimentary_expense_account' => 'บัญชีค่าใช้จ่ายของแถม',
     'coa_opening_stock_account' => 'การเปิดบัญชีหุ้น',
     'coa_stock_adjustment_account' => 'บัญชีปรับสต๊อก',
     'coa_inventory_cost_adjustment_account' => 'บัญชีปรับปรุงต้นทุนสินค้าคงคลัง',

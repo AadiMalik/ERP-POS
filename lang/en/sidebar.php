@@ -48,6 +48,8 @@ return [
     'cash_flow_statement' => 'Cash Flow Statement',
     'categories' => 'Categories',
     'closing_rules' => 'Closing Rules',
+    'complimentary_reasons' => 'Complimentary Reasons',
+    'complimentary_report' => 'Complimentary Report',
     'consumption_reports' => 'Consumption Reports',
     'contact_messages' => 'Contact Messages',
     'content_cards' => 'Content Cards',

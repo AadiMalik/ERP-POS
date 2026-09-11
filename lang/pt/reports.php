@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Pedidos cancelados',
     'cash_bank_ledger' => 'Razão de caixa e banco',
     'cash_flow' => 'Demonstrativo de fluxo de caixa',
+    'complimentary_report' => 'Relatório de cortesia',
     'customer_aging' => 'Aging de clientes',
     'customer_ledger' => 'Razão de clientes',
     'customer_loyalty_report' => 'Histórico de fidelidade do cliente',

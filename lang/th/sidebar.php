@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'งบกระแสเงินสด',
     'categories' => 'หมวดหมู่',
     'closing_rules' => 'กฎการปิดบัญชี',
+    'complimentary_reasons' => 'เหตุผลของแถม',
+    'complimentary_report' => 'รายงานของแถม',
     'consumption_reports' => 'รายงานการใช้',
     'contact_messages' => 'ข้อความติดต่อ',
     'content_cards' => 'การ์ดเนื้อหา',

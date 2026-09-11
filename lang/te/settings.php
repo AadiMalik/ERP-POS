@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'అమ్మకం రిటర్న్',
     'coa_inventory_account' => 'ఇన్వెంటరీ ఖాతా',
     'coa_cogs_account' => 'COGS ఖాతా',
+    'coa_complimentary_expense_account' => 'కాంప్లిమెంటరీ ఖర్చు ఖాతా',
     'coa_opening_stock_account' => 'స్టాక్ ఖాతాను తెరవడం',
     'coa_stock_adjustment_account' => 'స్టాక్ సర్దుబాటు ఖాతా',
     'coa_inventory_cost_adjustment_account' => 'ఇన్వెంటరీ ఖర్చు సర్దుబాటు ఖాతా',

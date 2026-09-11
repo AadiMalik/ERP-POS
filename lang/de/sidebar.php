@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Kapitalflussrechnung',
     'categories' => 'Kategorien',
     'closing_rules' => 'Abschlussregeln',
+    'complimentary_reasons' => 'Kulanzgründe',
+    'complimentary_report' => 'Kulanzbericht',
     'consumption_reports' => 'Verbrauchsberichte',
     'contact_messages' => 'Kontaktnachrichten',
     'content_cards' => 'Inhaltskarten',

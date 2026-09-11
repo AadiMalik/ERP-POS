@@ -23,13 +23,13 @@
                 </a>
                 @if (in_array($order->status, ['posted', 'returned']))
                     <button type="button" class="btn btn-outline-dark view-jv-btn"
-                        data-source-type="{{ \App\Enums\JournalSourceTypes::POS_SALE }}"
+                        data-source-type="{{ ($order->complimentary_status ?? '') === \App\Enums\ComplimentaryStatus::FULL ? \App\Enums\JournalSourceTypes::COMPLIMENTARY_ORDER : \App\Enums\JournalSourceTypes::POS_SALE }}"
                         data-source-id="{{ $order->order_id }}">
                         <i class="fa fa-book"></i>
                         View JV
                     </button>
                     <button type="button" class="btn btn-outline-dark stock-consumption-btn"
-                        data-reference-type="{{ \App\Enums\ReferenceType::SALE }}"
+                        data-reference-type="{{ \App\Enums\ReferenceType::SALE }},{{ \App\Enums\ReferenceType::COMPLIMENTARY }}"
                         data-reference-id="{{ $order->order_id }}">
                         <i class="fa fa-cubes"></i>
                         Stock Consumption
@@ -135,6 +135,14 @@
                     <div class="col-md-3">
                         <strong>{{ __('orders.daily_order_id') }}:</strong><br>
                         {{ $order->daily_order_id ?? '-' }}
+                        @php
+                            $comp_status = $order->complimentary_status ?? \App\Enums\ComplimentaryStatus::NONE;
+                        @endphp
+                        @if ($comp_status === \App\Enums\ComplimentaryStatus::FULL)
+                            <span class="badge bg-label-info ms-1">{{ __('complimentary.status_full') }}</span>
+                        @elseif ($comp_status === \App\Enums\ComplimentaryStatus::PARTIAL)
+                            <span class="badge bg-label-warning ms-1">{{ __('complimentary.status_partial') }}</span>
+                        @endif
                     </div>
                     <div class="col-md-3">
                         <strong>{{ __('orders.order_date') }}:</strong><br>
@@ -245,6 +253,39 @@
                             {{ $order->notes }}
                         </div>
                     @endif
+                    @if (($order->complimentary_status ?? \App\Enums\ComplimentaryStatus::NONE) !== \App\Enums\ComplimentaryStatus::NONE)
+                        <div class="col-md-3">
+                            <strong>{{ __('complimentary.status') }}:</strong><br>
+                            {{ \App\Enums\ComplimentaryStatus::getOptions()[$order->complimentary_status] ?? $order->complimentary_status }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>{{ __('complimentary.reason') }}:</strong><br>
+                            {{ $order->complimentaryReason->name ?? '-' }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>{{ __('complimentary.marked_by') }}:</strong><br>
+                            {{ $order->complimentaryBy->name ?? '-' }}
+                            @if ($order->complimentary_at)
+                                <small class="text-muted d-block">{{ localDateTime($order->complimentary_at) }}</small>
+                            @endif
+                        </div>
+                        <div class="col-md-3">
+                            <strong>{{ __('complimentary.retail_value') }}:</strong><br>
+                            {{ currency($order->complimentary_retail_value) }}
+                        </div>
+                        @can('order.complimentary.view-cost')
+                            <div class="col-md-3">
+                                <strong>{{ __('complimentary.actual_cost') }}:</strong><br>
+                                {{ currency($order->complimentary_cost) }}
+                            </div>
+                        @endcan
+                        @if (!empty($order->complimentary_notes))
+                            <div class="col-md-12">
+                                <strong>{{ __('complimentary.notes') }}:</strong><br>
+                                {{ $order->complimentary_notes }}
+                            </div>
+                        @endif
+                    @endif
                 </div>
             </div>
         </div>
@@ -269,6 +310,7 @@
                             <th class="text-end">{{ __('orders.final_unit_price') }}</th>
                             <th class="text-end">Tax</th>
                             <th class="text-end">{{ __('common.total') }}</th>
+                            <th>{{ __('complimentary.short_label') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -302,10 +344,24 @@
                                 <td class="text-end">{{ currency($detail->final_unit_price) }}</td>
                                 <td class="text-end">{{ currency($detail->tax_amount) }}</td>
                                 <td class="text-end">{{ currency($detail->total) }}</td>
+                                <td>
+                                    @if (!empty($detail->is_complimentary))
+                                        <span class="badge bg-label-info">{{ __('complimentary.short_label') }}</span>
+                                        @if ($detail->complimentaryReason)
+                                            <small class="text-muted d-block">{{ $detail->complimentaryReason->name }}</small>
+                                        @endif
+                                        <small class="text-muted d-block">{{ __('complimentary.retail_value') }}: {{ currency($detail->complimentary_value) }}</small>
+                                        @can('order.complimentary.view-cost')
+                                            <small class="text-muted d-block">{{ __('complimentary.actual_cost') }}: {{ currency(($detail->cost_price ?? 0) * ($detail->base_quantity ?? $detail->quantity ?? 0)) }}</small>
+                                        @endcan
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="12" class="text-center">{{ __('orders.no_items') }} found</td>
+                                <td colspan="13" class="text-center">{{ __('orders.no_items') }} found</td>
                             </tr>
                         @endforelse
                     </tbody>

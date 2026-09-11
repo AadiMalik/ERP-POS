@@ -36,5 +36,6 @@ class AccountingSetupWizardService
     {
         $account_id_map = $this->chart_of_accounts_clone_service->cloneTemplateToBusiness($business_id);
         $this->accounting_setting_clone_service->cloneTemplateToBusiness($business_id, $account_id_map);
+        app(ComplimentaryReasonService::class)->seedDefaults($business_id);
     }
 }

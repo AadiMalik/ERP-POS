@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'نقد بہاؤ بیان',
     'categories' => 'زمرہ جات',
     'closing_rules' => 'اختتامی قواعد',
+    'complimentary_reasons' => 'کمپلیمنٹری وجوہات',
+    'complimentary_report' => 'کمپلیمنٹری رپورٹ',
     'consumption_reports' => 'استعمال دیاں رپورٹاں',
     'contact_messages' => 'رابطہ پیغام',
     'content_cards' => 'مواد کارڈز',

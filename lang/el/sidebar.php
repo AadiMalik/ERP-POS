@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Κατάσταση ταμειακών ροών',
     'categories' => 'Κατηγορίες',
     'closing_rules' => 'Κανόνες κλεισίματος',
+    'complimentary_reasons' => 'Λόγοι προσφοράς',
+    'complimentary_report' => 'Αναφορά προσφορών',
     'consumption_reports' => 'Αναφορές κατανάλωσης',
     'contact_messages' => 'Μηνύματα επικοινωνίας',
     'content_cards' => 'Κάρτες περιεχομένου',

@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Cash flow kimutatás',
     'categories' => 'Kategóriák',
     'closing_rules' => 'Zárási szabályok',
+    'complimentary_reasons' => 'Szívességi indokok',
+    'complimentary_report' => 'Szívességi jelentés',
     'consumption_reports' => 'Fogyasztási jelentések',
     'contact_messages' => 'Kapcsolati üzenetek',
     'content_cards' => 'Tartalomkártyák',

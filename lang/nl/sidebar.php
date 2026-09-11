@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'Kasstroomoverzicht',
     'categories' => "Categorieën",
     'closing_rules' => 'Afsluitregels',
+    'complimentary_reasons' => 'Complimentaire redenen',
+    'complimentary_report' => 'Complimentair rapport',
     'consumption_reports' => 'Verbruiksrapporten',
     'contact_messages' => 'Contactberichten',
     'content_cards' => 'Inhoudskaarten',

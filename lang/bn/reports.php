@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'বাতিল অর্ডার',
     'cash_bank_ledger' => 'নগদ ও ব্যাংক লেজার',
     'cash_flow' => 'নগদ প্রবাহ বিবরণী',
+    'complimentary_report' => 'কমপ্লিমেন্টারি রিপোর্ট',
     'customer_aging' => 'গ্রাহক এজিং',
     'customer_ledger' => 'গ্রাহক লেজার',
     'customer_loyalty_report' => 'গ্রাহক আনুগত্য ইতিহাস',

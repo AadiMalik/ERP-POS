@@ -124,6 +124,10 @@ Modal titles and dynamic JS strings are exposed as `window.i18n_{module}` from t
 - **Accounting / finance**: Chart of Accounts (`accounts`), Account Types,
   Account Sub Types, Journals (+ Journal Entries lang file), POS Vouchers, Expenses,
   Expense Categories, Customer Payments, Supplier Payments, Bank Reconciliation, Budgets.
+  Complimentary Reasons CRUD and Complimentary Report use `lang/{locale}/complimentary.php`
+  (`complimentary.*`) plus `settings.coa_complimentary_expense_account`,
+  `sidebar.complimentary_reasons` / `sidebar.complimentary_report`,
+  `reports.complimentary_report`, and POS JS keys in `lang/{locale}/pos.php`.
 - **Users / settings-adjacent**: Admin Users, Roles, Branches, POS Discounts, POS Payment
   Methods. **Business Settings — all tabs** converted via `lang/{locale}/settings.php`
   (`settings.*`, **633 keys × 46 locales**): page title + left nav, Business, Localization,

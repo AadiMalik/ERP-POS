@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'セール返品',
     'coa_inventory_account' => '在庫アカウント',
     'coa_cogs_account' => 'COGSアカウント',
+    'coa_complimentary_expense_account' => 'サービス費用勘定',
     'coa_opening_stock_account' => '株式口座の開設',
     'coa_stock_adjustment_account' => '在庫調整口座',
     'coa_inventory_cost_adjustment_account' => '在庫原価調整勘定',

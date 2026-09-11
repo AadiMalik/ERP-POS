@@ -40,7 +40,11 @@ All configuration lives under one **Settings** screen, organized into sections
   delivery fees collected from customers are booked when an order is posted —
   a starter account ("Delivery Charges Income") is already set up for every
   business, so this only needs attention if you want the income tracked
-  elsewhere. See [Delivery Zones](21-delivery-zones.md).
+  elsewhere. See [Delivery Zones](21-delivery-zones.md). **Complimentary
+  Expense Account** is where the actual inventory cost of free products is
+  booked (not the selling price, and not normal COGS). A starter account
+  ("Complimentary / Promotional Expense") is set up for every business; posting
+  a complimentary order or return is blocked until this mapping is present.
 - **Language / Localization** — choose the **ERP Display Language** (the language the
   whole system — sidebar, menus, screens, buttons, messages — is shown in for everyone
   at your business), the **Default Input Language** (the default text direction for

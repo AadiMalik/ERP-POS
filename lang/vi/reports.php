@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Đơn hàng đã hủy',
     'cash_bank_ledger' => 'Sổ cái tiền mặt và ngân hàng',
     'cash_flow' => 'Báo cáo lưu chuyển tiền tệ',
+    'complimentary_report' => 'Báo cáo tặng kèm',
     'customer_aging' => 'Tuổi nợ khách hàng',
     'customer_ledger' => 'Sổ cái khách hàng',
     'customer_loyalty_report' => 'Lịch sử khách hàng thân thiết',

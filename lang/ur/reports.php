@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'منسوخ شدہ آرڈرز',
     'cash_bank_ledger' => 'نقدی اور بینک لیجر',
     'cash_flow' => 'نقدی بہاؤ بیان',
+    'complimentary_report' => 'کمپلیمنٹری رپورٹ',
     'customer_aging' => 'کسٹمر ایجنگ',
     'customer_ledger' => 'کسٹمر لیجر',
     'customer_loyalty_report' => 'کسٹمر لائلٹی تاریخ',

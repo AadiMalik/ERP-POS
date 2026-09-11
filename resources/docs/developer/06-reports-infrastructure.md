@@ -220,9 +220,14 @@ use slugs such as `reports.product-sales.*`, `reports.branch-sales.*`,
 Current set: Order Detail, Product Sales, Variation Sales, Customer Sales,
 Branch Sales, Order Source Sales, Payment Method Sales, Order Status, Cancelled
 Orders, Due/Credit Sales, Discount Report, Order Tax Report, Top Selling,
-Offline Orders. Order Correction Report sits alongside these under the same
+Offline Orders, and **Complimentary Report**. Order Correction Report sits alongside these under the same
 Orders → Reports menu and permission-slug convention, but reads `activity_logs`
 rows instead of `orders` — see `03-modules-controllers-services.md`.
+`ComplimentaryReportController` / `ComplimentaryReportService` (route prefix
+`admin/reports/complimentary-report`, permission `reports.complimentary-report.*`)
+reads posted `order_details` where `is_complimentary = 1`, with KPIs on the
+DataTables JSON (`kpi_orders`, `kpi_qty`, `kpi_retail`, `kpi_cost` gated by
+`order.complimentary.view-cost`).
 
 There is no Category-wise Sales report, no dedicated Returned/Refunded Orders
 report (Sales Returns is a full transactional module — see

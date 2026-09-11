@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'キャンセルされた注文',
     'cash_bank_ledger' => '現金・銀行元帳',
     'cash_flow' => 'キャッシュフロー計算書',
+    'complimentary_report' => 'サービス提供レポート',
     'customer_aging' => '顧客の年齢分析',
     'customer_ledger' => '顧客元帳',
     'customer_loyalty_report' => '顧客ロイヤルティ履歴',

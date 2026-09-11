@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'عائد البيع',
     'coa_inventory_account' => 'حساب المخزون',
     'coa_cogs_account' => 'حساب COGS',
+    'coa_complimentary_expense_account' => 'حساب مصروف المجاملة',
     'coa_opening_stock_account' => 'فتح حساب الأسهم',
     'coa_stock_adjustment_account' => 'حساب تعديل المخزون',
     'coa_inventory_cost_adjustment_account' => 'حساب تعديل تكلفة المخزون',

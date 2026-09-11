@@ -233,4 +233,16 @@ return [
     'order_type_heading' => 'Order Type',
     'multi_label' => 'Multi',
     'powered_by_dukanaz' => 'Powered by Dukanaz',
+
+    'complimentary_short' => 'Complimentary',
+    'full_complimentary' => 'Full Complimentary',
+    'partial_complimentary' => 'Partial Complimentary',
+    'mark_item_complimentary' => 'Mark complimentary',
+    'mark_order_complimentary' => 'Mark order complimentary',
+    'unmark_complimentary' => 'Unmark complimentary',
+    'complimentary_reason_required' => 'A complimentary reason is required.',
+    'confirm_full_complimentary' => 'Mark the entire order as complimentary? Customer payable will become zero.',
+    'no_complimentary_permission' => 'You do not have permission to create complimentary orders.',
+    'no_full_complimentary_permission' => 'You do not have permission to mark the entire order complimentary.',
+    'no_complimentary_reasons' => 'No complimentary reasons are configured. Ask an administrator to add them under Sales → Complimentary Reasons.',
 ];

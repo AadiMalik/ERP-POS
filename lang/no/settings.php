@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'Salg Retur',
     'coa_inventory_account' => 'Inventarkonto',
     'coa_cogs_account' => 'COGS-konto',
+    'coa_complimentary_expense_account' => 'Konto for komplimentkostnad',
     'coa_opening_stock_account' => 'Åpning av lagerkonto',
     'coa_stock_adjustment_account' => 'Lagerjusteringskonto',
     'coa_inventory_cost_adjustment_account' => 'Lagerkostnadsjusteringskonto',

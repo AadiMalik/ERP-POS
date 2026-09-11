@@ -21,6 +21,8 @@ class  ReferenceType
     const SAMPLE = 'sample';
     const MANUAL = 'manual';
     const COST_PRICE_ADJUSTMENT = 'cost_price_adjustment';
+    const COMPLIMENTARY = 'complimentary';
+    const COMPLIMENTARY_RETURN = 'complimentary_return';
 
     public static function getOptions()
     {
@@ -42,6 +44,8 @@ class  ReferenceType
             self::SAMPLE => 'Sample',
             self::MANUAL => 'Manual',
             self::COST_PRICE_ADJUSTMENT => 'Cost Price Adjustment',
+            self::COMPLIMENTARY => 'Complimentary',
+            self::COMPLIMENTARY_RETURN => 'Complimentary Return',
         ];
     }
 }

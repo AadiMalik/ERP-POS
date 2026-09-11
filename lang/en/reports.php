@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Cancelled Orders Report',
     'cash_bank_ledger' => 'Cash & Bank Ledger',
     'cash_flow' => 'Cash Flow Statement',
+    'complimentary_report' => 'Complimentary Report',
     'customer_aging' => 'Customer Aging Report',
     'customer_ledger' => 'Customer Ledger Report',
     'customer_loyalty_report' => 'Customer Loyalty History Report',

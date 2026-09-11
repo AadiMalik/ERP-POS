@@ -45,6 +45,13 @@ class Order extends Model
         'loyalty_discount_amount',
         'loyalty_points_earned',
         'notes',
+        'complimentary_status',
+        'complimentary_reason_id',
+        'complimentary_notes',
+        'complimentary_by_id',
+        'complimentary_at',
+        'complimentary_retail_value',
+        'complimentary_cost',
         'due_date',
         'delivery_address',
         'delivery_latitude',
@@ -133,6 +140,16 @@ class Order extends Model
     public function voucher()
     {
         return $this->belongsTo(Voucher::class, 'voucher_id');
+    }
+
+    public function complimentaryReason()
+    {
+        return $this->belongsTo(ComplimentaryReason::class, 'complimentary_reason_id');
+    }
+
+    public function complimentaryBy()
+    {
+        return $this->belongsTo(User::class, 'complimentary_by_id');
     }
 
     public function details()

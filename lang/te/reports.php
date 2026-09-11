@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'రద్దు చేసిన ఆర్డర్‌లు',
     'cash_bank_ledger' => 'నగదు మరియు బ్యాంక్ లెడ్జర్',
     'cash_flow' => 'నగదు ప్రవాహ నివేదిక',
+    'complimentary_report' => 'కాంప్లిమెంటరీ నివేదిక',
     'customer_aging' => 'కస్టమర్ ఏజింగ్',
     'customer_ledger' => 'కస్టమర్ లెడ్జర్',
     'customer_loyalty_report' => 'కస్టమర్ లాయల్టీ చరిత్ర',

@@ -74,6 +74,7 @@ return [
     'coa_sale_return' => 'விற்பனை வருவாய்',
     'coa_inventory_account' => 'சரக்கு கணக்கு',
     'coa_cogs_account' => 'COGS கணக்கு',
+    'coa_complimentary_expense_account' => 'இலவசச் செலவுக் கணக்கு',
     'coa_opening_stock_account' => 'பங்கு கணக்கைத் திறக்கிறது',
     'coa_stock_adjustment_account' => 'பங்கு சரிசெய்தல் கணக்கு',
     'coa_inventory_cost_adjustment_account' => 'சரக்கு செலவு சரிசெய்தல் கணக்கு',

@@ -544,7 +544,9 @@ top-level `admin` route group next to `packages`/`business`, not inside
 `module:pos`. Operations: `PosRegisterController`,
 `PosRegisterSessionController`, `PosScreenController`, `OrderController` (service:
 `OrderService`), `OrderReturnController` (service: `OrderReturnService`),
-`CustomerPaymentController` (service: `CustomerPaymentService` — order-targeted
+`ComplimentaryReasonController` (service: `ComplimentaryReasonService` —
+per-business reasons; `AccountingSetupWizardService` seeds defaults for new
+businesses), `CustomerPaymentController` (service: `CustomerPaymentService` — order-targeted
 payments may not exceed remaining due; due/amount are compared at the
 business `decimal_points` scale so amounts that display as equal, e.g.
 Rs 10.61 vs Rs 10.61, are accepted). POS **Order History**
@@ -928,8 +930,8 @@ mutates a posted POS order in place. It does **not** widen `save()` (draft/hold
 only). Flow: `assertCorrectable()` (posted, POS `register_session_id`,
 `sale_date` = today, no `order_returns`, no `customer_payments`, accounting
 period open) → snapshot for audit → `reversePostedEffects()` (shared with
-`void()`: soft-delete `POS_SALE` JE, reverse SALE stock txs, reverse
-voucher/store-credit) → rebuild lines/payments via
+`void()`: soft-delete `POS_SALE` or `Complimentary Order` JE, reverse SALE **and**
+COMPLIMENTARY stock txs, reverse voucher/store-credit) → rebuild lines/payments via
 `rebuildPostedOrderCart()` / `saveLinesAndComputeTotals()` (identity fields
 immutable) → `validatePaymentsForPosting()` + `applyPostedEffects()` (shared
 with `post()`) → status stays `posted` → `order_status_history` + Activity Log
@@ -945,6 +947,25 @@ UI: Order Show / Order History / `?correct={order_id}` on the POS screen.
 `branch_id`). `old_values`/`new_values` are enriched with product/variation/
 payment-method names for the "View Changes" before/after diff in
 `admin.reports.order_correction.index`.
+
+**Complimentary orders (not a discount):** `ComplimentaryStatus` (`none` /
+`partial` / `full`) plus per-line `is_complimentary`. `OrderService::saveLinesAndComputeTotals()`
+zeros charged amount/tax/discount on complimentary lines while keeping
+`unit_price` and storing `complimentary_value` (original retail giveaway).
+Full-order complimentary also waives delivery charge. `validatePaymentsForPosting()`
+allows empty payments when total is 0 and requires
+`AccountingSetting.default_complimentary_expense_account_id`.
+`applyPostedEffects()` keeps one JV: normal lines still credit sales / debit
+COGS; complimentary lines debit Complimentary Expense and credit Inventory at
+actual avg cost, with stock txs `TransactionType::COMPLIMENTARY` /
+`ReferenceType::COMPLIMENTARY` (no second deduction). Full complimentary JVs use
+`JournalSourceTypes::COMPLIMENTARY_ORDER`; mixed orders stay `POS Sale` with
+complimentary legs. `OrderReturnService` mirrors the split
+(`COMPLIMENTARY_RETURN`). Permissions: `order.complimentary.create` (line or
+partial), `order.complimentary.approve` (full order), `order.complimentary.view-cost`.
+`ComplimentaryReportController` / `ComplimentaryReportService` under
+`admin/reports/complimentary-report`. Desktop/offline POS syncs
+`complimentary_reasons` and strips unauthorized complimentary flags on push.
 
 ## Accounting (`module:accounting`)
 Core: `AccountTypeController`, `AccountSubTypeController`,

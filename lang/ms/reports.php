@@ -57,6 +57,7 @@ return [
     'cancelled_orders' => 'Pesanan Dibatalkan',
     'cash_bank_ledger' => 'Lejar Tunai dan Bank',
     'cash_flow' => 'Penyata Aliran Tunai',
+    'complimentary_report' => 'Laporan komplementari',
     'customer_aging' => 'Penuaan Pelanggan',
     'customer_ledger' => 'Lejar Pelanggan',
     'customer_loyalty_report' => 'Sejarah Kesetiaan Pelanggan',

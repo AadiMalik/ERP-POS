@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'මුදල් ප්‍රවාහ ප්‍රකාශය',
     'categories' => 'කාණ්ඩ',
     'closing_rules' => 'අවසන් කිරීමේ නීති',
+    'complimentary_reasons' => 'නිර්දාන හේතු',
+    'complimentary_report' => 'නිර්දාන වාර්තාව',
     'consumption_reports' => 'පරිභෝජන වාර්තා',
     'contact_messages' => 'සම්බන්ධතා පණිවිඩ',
     'content_cards' => 'අන්තර්ගත කාඩ්පත්',

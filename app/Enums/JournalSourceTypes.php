@@ -14,6 +14,8 @@ class JournalSourceTypes
       const POS_SALE = 'POS Sale';
       const POS_RETURN = 'POS Return';
       const DELIVERY = 'Delivery';
+      const COMPLIMENTARY_ORDER = 'Complimentary Order';
+      const COMPLIMENTARY_RETURN = 'Complimentary Return';
 
       // Purchase
       const PURCHASE = 'Purchase';

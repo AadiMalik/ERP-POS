@@ -46,6 +46,8 @@ return [
     'cash_flow_statement' => 'నగదు ప్రవాహ నివేదిక',
     'categories' => 'వర్గాలు',
     'closing_rules' => 'ముగింపు నియమాలు',
+    'complimentary_reasons' => 'కాంప్లిమెంటరీ కారణాలు',
+    'complimentary_report' => 'కాంప్లిమెంటరీ నివేదిక',
     'consumption_reports' => 'వినియోగ నివేదికలు',
     'contact_messages' => 'సంప్రదింపు సందేశాలు',
     'content_cards' => 'కంటెంట్ కార్డులు',
